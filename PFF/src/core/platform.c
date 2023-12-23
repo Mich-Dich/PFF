@@ -1,19 +1,18 @@
 
 #include <SDL.h>
-#include <linmath.h>
+#pragma warning(disable: 4244)
+#include "linmath.h"
+#pragma warning(default: 4244)
 #include <glad/glad.h>
+#undef APIENTRY
 
-#include "core/logger.h"
-#include "core/util.h"
-#include "core/global.h"
-#include "types.h"
 #include "platform.h"
 
 // 
 SDL_Window* create_window(u32 window_width, u32 window_height) {
 
-    global.render.width = window_width;
-    global.render.height = window_height;
+    global.render.width = (f32)window_width;
+    global.render.height = (f32)window_height;
 
     SDL_GL_SetAttribute(SDL_GL_CONTEXT_PROFILE_MASK, SDL_GL_CONTEXT_PROFILE_CORE);
     SDL_GL_SetAttribute(SDL_GL_CONTEXT_MAJOR_VERSION, 3);

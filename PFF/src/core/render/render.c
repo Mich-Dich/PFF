@@ -1,6 +1,6 @@
 #include <glad/glad.h>
+#undef APIENTRY
 
-#include "core/util.h"
 #include "core/global.h"
 #include "render.h"
 #include "core/platform.h"
@@ -52,7 +52,7 @@ void render_init(void) {
 }
 
 void render_begin(void) {
-    glClearColor(0.08, 0.1, 0.1, 1);
+    glClearColor(0.08f, 0.1f, 0.1f, 1);
     glClear(GL_COLOR_BUFFER_BIT);
 }
 

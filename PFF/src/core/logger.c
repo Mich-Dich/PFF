@@ -19,7 +19,11 @@
 
         const char* lastSlash = strrchr(filePath, '\\');
         char* local = "";
-        strcpy(local, (lastSlash != NULL) ? lastSlash + 1 : filePath);
+        if (lastSlash != NULL)
+            strcpy_s(local, 1, lastSlash + 1);
+        else 
+            strcpy_s(local, 1, filePath);
+        
         return local;
     }
     #define GetBaseName(name) getFileName(name)
@@ -40,18 +44,18 @@
 #define MAX(a, b) ((a) > (b) ? (a) : (b))
 #define MIN(a, b) ((a) < (b) ? (a) : (b))
 
-#define LOGGER_FORMAT_MESSAGE(format, ...)          sprintf(Format_Buffer, format, ##__VA_ARGS__);                  \
-                                                            strcat(message_out, Format_Buffer);
+#define LOGGER_FORMAT_MESSAGE(format, ...)          sprintf_s(Format_Buffer, sizeof(Format_Buffer), format, ##__VA_ARGS__);     \
+                                                    strcat_s(message_out, sizeof(message_out), Format_Buffer);
 
-#define CL_INTERNAL_ERROR_MSG(ErrorMsg, ...) {      fprintf(stderr, ErrorMsg, ##__VA_ARGS__);                       \
+#define CL_INTERNAL_ERROR_MSG(ErrorMsg, ...) {      fprintf(stderr, ErrorMsg, ##__VA_ARGS__);                                   \
                                                     exit(-1); }
 
-#define SETUP_FOR_FORMAT_MACRO                      char message_out[MAX_MESSAGE_SIZE];                             \
-                                                        memset(message_out, 0, sizeof(message_out));                \
-                                                    char message_formatted[MAX_MESSAGE_SIZE];                       \
-                                                        memset(message_formatted, 0, sizeof(message_formatted));    \
-                                                    char Format_Command[2] = "0\0";                                 \
-                                                    char Format_Buffer[MAX_MESSAGE_SIZE];                           \
+#define SETUP_FOR_FORMAT_MACRO                      char message_out[MAX_MESSAGE_SIZE];                                         \
+                                                        memset(message_out, 0, sizeof(message_out));                            \
+                                                    char message_formatted[MAX_MESSAGE_SIZE];                                   \
+                                                        memset(message_formatted, 0, sizeof(message_formatted));                \
+                                                    char Format_Command[2] = "0\0";                                             \
+                                                    char Format_Buffer[MAX_MESSAGE_SIZE];                                       \
 
 
 
@@ -151,9 +155,9 @@ int log_init(const char* LogFileName, const char* directoryName, char* GeneralLo
 
     if (strlen(LogFileName) > MAX_NAME_LENGTH)
         CL_INTERNAL_ERROR_MSG("field [directoryName] in log_init() is to long. Length [%" PRIu64 "/%d]", strlen(LogFileName), MAX_NAME_LENGTH);
-
-    strcpy(MainLogFileName, LogFileName);
-    strcpy(MainLogDirectory, directoryName);
+    
+    strcpy_s(MainLogFileName, sizeof(MainLogFileName), LogFileName);
+    strcpy_s(MainLogDirectory, sizeof(MainLogDirectory), directoryName);
     m_GeneralLogFormat = GeneralLogFormat;
     Loc_Use_separate_Files_for_every_Thread = Use_separate_Files_for_every_Thread == CL_TRUE ? true : false;
 
@@ -195,8 +199,8 @@ int log_init(const char* LogFileName, const char* directoryName, char* GeneralLo
 bool Create_Log_File(const char* FileName) {
     
     // Open File
-    logFile = fopen(FileName, "w");
-    if (logFile == NULL)
+    errno_t err;
+    if ((err = fopen_s(&logFile, FileName, "w")) != 0 || logFile == NULL)
         CL_INTERNAL_ERROR_MSG("Failed to create file: %s\n", FileName)
     
     // print title section to start of file
@@ -222,7 +226,7 @@ bool Create_Log_File(const char* FileName) {
             LogLevelText[0] = '\0';
             for (int x = 0; x < LOG_LEVEL_ENABLED + 2; x++)
                 strcat(LogLevelText, loc_level_str[x]);
-                
+                            
             fprintf(logFile, "    LOG_LEVEL_ENABLED = %d    enabled log macros are: %s\n", LOG_LEVEL_ENABLED, LogLevelText);
             free(LogLevelText);
         }
@@ -267,7 +271,7 @@ void log_output(const enum log_level level, const char* prefix, const char* func
     if (SpecificLogFormatArray[level].isInUse)
         locTargetFormat = SpecificLogFormatArray[level].Format;
 
-    int FormatLen = strlen(locTargetFormat);
+    int FormatLen = (int)strlen(locTargetFormat);
     for (int x = 0; x < FormatLen; x++) {
 
         if (locTargetFormat[x] == '$' && x + 1 < FormatLen) {
@@ -388,7 +392,7 @@ void log_output(const enum log_level level, const char* prefix, const char* func
 
         else {
 
-            strncat(message_out, &locTargetFormat[x], 1);
+            strncat_s(message_out, sizeof(message_out), & locTargetFormat[x], 1);
         }
     }
     
@@ -407,13 +411,13 @@ void output_Message(enum log_level level, const char* message, uintptr_t threadI
 
     CRITICAL_SELECTION_LOCK
     // Save message in Buffer
-    strncpy(Log_Message_Buffer.messages[Log_Message_Buffer.count].text, message, sizeof(Log_Message_Buffer.messages[0].text));
+    strncpy_s(Log_Message_Buffer.messages[Log_Message_Buffer.count].text,sizeof(Log_Message_Buffer.messages[Log_Message_Buffer.count].text), message, sizeof(Log_Message_Buffer.messages[0].text));
     Log_Message_Buffer.messages[Log_Message_Buffer.count].text[sizeof(Log_Message_Buffer.messages[Log_Message_Buffer.count].text) - 1] = '\0';
     Log_Message_Buffer.messages[Log_Message_Buffer.count].thread = threadID;
     Log_Message_Buffer.count++;
 
     // Check if buffer full OR important message
-    if (Log_Message_Buffer.count >= (MAX_BUFFERED_MESSAGES -1) || level < (6 - (unsigned int)log_level_for_buffer)) {
+    if (Log_Message_Buffer.count >= (MAX_BUFFERED_MESSAGES -1) || (unsigned int)level < (6 - (unsigned int)log_level_for_buffer)) {
         
         WriteMessagesToFile();
         Log_Message_Buffer.count = 0;
@@ -500,7 +504,7 @@ ThreadNameMap* add_Thread_Name_Mapping(uintptr_t thread, const char* name) {
     if(loc_Found != NULL) {
 
         //printf("  thread already has an Entry in [ThreadNameMap], [name] was updated");
-        strncpy(loc_Found->name, name, MIN(strlen(name), REGISTERED_THREAD_NAME_LEN_MAX));
+        strncpy_s(loc_Found->name, sizeof(loc_Found->name), name, MIN(strlen(name), REGISTERED_THREAD_NAME_LEN_MAX));
         return loc_Found;
     }
 
@@ -512,7 +516,7 @@ ThreadNameMap* add_Thread_Name_Mapping(uintptr_t thread, const char* name) {
     }
 
     memset(newEntry, 0, sizeof(ThreadNameMap));
-    strncpy(newEntry->name, name, MIN(strlen(name), REGISTERED_THREAD_NAME_LEN_MAX));
+    strncpy_s(newEntry->name, sizeof(newEntry->name), name, MIN(strlen(name), REGISTERED_THREAD_NAME_LEN_MAX));
     newEntry->thread_id = thread;
     
     if (firstEntry == NULL) {   // list is Empty
@@ -644,15 +648,15 @@ int remove_all_Files_In_Directory(const char *dirName) {
     #if defined(_WIN32) || defined(__CYGWIN__)
 
         // Check if the directory exists, and create it if not
-        if (GetFileAttributes(dirName) == INVALID_FILE_ATTRIBUTES) {
-            if (CreateDirectory(dirName, NULL) == 0) {
+        if (GetFileAttributes((LPCWSTR)dirName) == INVALID_FILE_ATTRIBUTES) {
+            if (CreateDirectory((LPCWSTR)dirName, NULL) == 0) {
                 perror("Error creating directory");
                 return -1;
             }
         }
 
         WIN32_FIND_DATA findFileData;
-        HANDLE hFind = FindFirstFile((LPCSTR)dirName, &findFileData);
+        HANDLE hFind = FindFirstFile((LPCWSTR)dirName, &findFileData);
 
         if (hFind == INVALID_HANDLE_VALUE) {
             perror("Error opening directory");
@@ -667,7 +671,7 @@ int remove_all_Files_In_Directory(const char *dirName) {
 
             // It's a regular file, remove it
             char filepath[MAX_PATH];
-            snprintf(filepath, sizeof(filepath), "%s\\%s", dirName, findFileData.cFileName);
+            snprintf(filepath, sizeof(filepath), "%s\\%ws", dirName, findFileData.cFileName);
 
             if (remove(filepath) != 0) {
                 perror("Error removing file");

@@ -1,12 +1,10 @@
-#include <stdio.h>
-#include <stdbool.h>
+
 #include <glad/glad.h>
 #define SDL_MAIN_HANDLED
-#include <SDL.h>
+#undef APIENTRY
+#include <stdio.h>
 
-#include "core/logger.h"
-#include "core/global.h"
-#include "core/platform.h"
+#include "core/pch.h"
 
 int main(int argc, char* argv[]) {
 
@@ -32,7 +30,7 @@ int main(int argc, char* argv[]) {
         render_begin();
 
         render_quad(
-            (vec2) { global.render.width * 0.5, global.render.height * 0.5 },
+            (vec2) { global.render.width * 0.5f, global.render.height * 0.5f },
             (vec2) { 50, 50 },
             (vec4) { 1, 1, 1, 1 });
 

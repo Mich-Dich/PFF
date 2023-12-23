@@ -1,5 +1,6 @@
 #pragma once
 
+#include "core/pch.h"
 #include "render/render.h"
 
 typedef struct global {
