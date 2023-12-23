@@ -1,4 +1,6 @@
 workspace "SDL"
+	kind "StaticLib"
+	staticruntime "off"
 	location         ""
 
 	configurations
@@ -22,7 +24,16 @@ workspace "SDL"
 	filter
 	{}
 
-include "SDL2.lua"
+	include "SDL2.lua"
 
-filter "system:windows"                 -- Only needed on Windows for WinMain().
-	include "SDL2main.lua"
+	filter "system:windows"                 -- Only needed on Windows for WinMain().
+		include "SDL2main.lua"
+
+	filter "configurations:Debug"
+		runtime "Debug"
+		symbols "on"
+
+	filter "configurations:Release"
+		runtime "Release"
+		optimize "on"
+        symbols "off"

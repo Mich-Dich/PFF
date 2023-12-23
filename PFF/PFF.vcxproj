@@ -59,7 +59,7 @@
       <PrecompiledHeader>NotUsing</PrecompiledHeader>
       <WarningLevel>Level3</WarningLevel>
       <PreprocessorDefinitions>_CRT_STDIO_ISO_WIDE_SPECIFIERS;PFF_PLATFORM_WINDOWS;PFF_BUILD_DLL;PFF_DEBUG;%(PreprocessorDefinitions)</PreprocessorDefinitions>
-      <AdditionalIncludeDirectories>src;vendor\SDL2\include;vendor\glad\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>src;vendor;vendor\SDL2\include;vendor\glad\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <DebugInformationFormat>EditAndContinue</DebugInformationFormat>
       <Optimization>Disabled</Optimization>
       <RuntimeLibrary>MultiThreadedDebug</RuntimeLibrary>
@@ -81,7 +81,7 @@
       <PrecompiledHeader>NotUsing</PrecompiledHeader>
       <WarningLevel>Level3</WarningLevel>
       <PreprocessorDefinitions>_CRT_STDIO_ISO_WIDE_SPECIFIERS;PFF_PLATFORM_WINDOWS;PFF_BUILD_DLL;PFF_RELEASE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
-      <AdditionalIncludeDirectories>src;vendor\SDL2\include;vendor\glad\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>src;vendor;vendor\SDL2\include;vendor\glad\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <Optimization>Full</Optimization>
       <FunctionLevelLinking>true</FunctionLevelLinking>
       <IntrinsicFunctions>true</IntrinsicFunctions>
@@ -103,6 +103,15 @@
     </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClInclude Include="src\core\global.h" />
+    <ClInclude Include="src\core\render\render.h" />
+    <ClInclude Include="src\core\types.h" />
+    <ClInclude Include="src\core\util.h" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="src\core\global.c" />
+    <ClCompile Include="src\core\render\render.c" />
+    <ClCompile Include="src\glad.c" />
     <ClCompile Include="src\main.c" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />

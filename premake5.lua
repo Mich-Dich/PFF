@@ -45,6 +45,7 @@ project "PFF"
 	includedirs
 	{
 		"%{prj.name}/src",
+		"%{prj.name}/vendor",
 		"%{IncludeDir.SDL2}",
 		"%{IncludeDir.glad}",
 		-- "%{IncludeDir.GLFW}",
