@@ -21,6 +21,8 @@
     <ClInclude Include="src\core\util.h">
       <Filter>core</Filter>
     </ClInclude>
+    <ClInclude Include="src\core\platform.h" />
+    <ClInclude Include="src\core\logger.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="src\core\global.c">
@@ -31,5 +33,7 @@
     </ClCompile>
     <ClCompile Include="src\glad.c" />
     <ClCompile Include="src\main.c" />
+    <ClCompile Include="src\core\platform.c" />
+    <ClCompile Include="src\core\logger.c" />
   </ItemGroup>
 </Project>

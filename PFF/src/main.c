@@ -4,20 +4,25 @@
 #define SDL_MAIN_HANDLED
 #include <SDL.h>
 
+#include "core/logger.h"
 #include "core/global.h"
+#include "core/platform.h"
 
 int main(int argc, char* argv[]) {
+
+    log_init("main", "logs", "[$B$L$E] [$B$F: $G$E] - $B$C$E$Z", CL_THREAD_ID, CL_FALSE);
+
+    create_window(1200, 800);
     render_init();
 
-    bool should_quit = false;
-
-    while (!should_quit) {
+    bool running = true;
+    while (running) {
         SDL_Event event;
 
         while (SDL_PollEvent(&event)) {
             switch (event.type) {
             case SDL_QUIT:
-                should_quit = true;
+                running = false;
                 break;
             default:
                 break;
