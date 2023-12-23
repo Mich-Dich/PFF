@@ -36,4 +36,8 @@
     <ClCompile Include="src\core\logger.c" />
     <ClCompile Include="src\core\IOCore\IOCore.c" />
   </ItemGroup>
+  <ItemGroup>
+    <Text Include="shaders\default.frag" />
+    <Text Include="shaders\default.vert" />
+  </ItemGroup>
 </Project>

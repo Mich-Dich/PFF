@@ -1,8 +1,11 @@
 #pragma once
 
 
-#include <SDL.h>
+#include <stdlib.h>
 #include <stdbool.h>
+#include <errno.h>
+
+#include <SDL.h>
 
 #include "types.h"
 #include "core/platform.h"

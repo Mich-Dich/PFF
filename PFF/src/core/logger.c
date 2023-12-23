@@ -15,17 +15,27 @@
     #define access _access
     #define VA_LIST va_list
     #define F_OK 0
+
+    const char* CL_Get_Error_String(int errnum) {
+
+        static char buffer[128];
+        strerror_s(buffer, sizeof(buffer), errnum);
+
+        return buffer;
+    }
+
     char* getFileName(const char* filePath) {
 
         const char* lastSlash = strrchr(filePath, '\\');
         char* local = "";
         if (lastSlash != NULL)
             strcpy_s(local, 1, lastSlash + 1);
-        else 
+        else
             strcpy_s(local, 1, filePath);
-        
+
         return local;
     }
+
     #define GetBaseName(name) getFileName(name)
 // APPLE IS NOT SUPORTED
 #else

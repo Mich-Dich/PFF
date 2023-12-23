@@ -120,6 +120,10 @@
     <ClCompile Include="src\glad.c" />
     <ClCompile Include="src\main.c" />
   </ItemGroup>
+  <ItemGroup>
+    <Text Include="shaders\default.frag" />
+    <Text Include="shaders\default.vert" />
+  </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
   </ImportGroup>

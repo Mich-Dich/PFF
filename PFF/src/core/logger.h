@@ -3,15 +3,20 @@
 #include <errno.h>
 #include <stdint.h>
 
+
 #if defined(_WIN32) || defined(__CYGWIN__)
     #include <Windows.h>
     #define CL_THREAD_ID            (uintptr_t)GetCurrentThreadId()
-    #define ERROR_STR               strerror(errno)
+
+    const char* CL_Get_Error_String(int errnum);
+    #define ERROR_STR               CL_Get_Error_String(errno)
+
 #else                                           // APPLE IS NOT SUPORTED
     #include <pthread.h>
     #define CL_THREAD_ID            (uintptr_t)pthread_self()
     #define ERROR_STR               strerror(errno)
 #endif
+
 
 // This enables the compilation of various logging levels (FATAL & ERROR are always on)
 //  0    =>   FATAL + ERROR
