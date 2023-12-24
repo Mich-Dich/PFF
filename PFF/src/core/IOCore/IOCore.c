@@ -7,14 +7,15 @@
 // Check your target platform.
 #define IO_READ_CHUNK_SIZE 2097152
 #define IO_READ_ERROR_GENERAL(var)      "Error reading filie: %s. errno: %d\n", var, ERROR_STR
+#define IO_WRITE_ERROR_GENERAL(var)      "Error writing to filie: %s. errno: %d\n", var, ERROR_STR
 #define IO_READ_ERROR_MEMORY(var)       "Not enough free memory to read file: %s\n", var
 
 // Adapted from https://stackoverflow.com/a/44894946 (not the chosen answer) by Nominal Animal
 File read_from_file(const char* path) {
 
     File file = { .is_valid = false };
-    FILE* fp = fopen(path, "rb");
-    CL_VALIDATE(fp, return file, "", IO_READ_ERROR_GENERAL(path));
+    FILE* file_pointer = fopen(path, "rb");
+    CL_VALIDATE(file_pointer || !ferror(file_pointer), return file, "", IO_READ_ERROR_GENERAL(path));
 
     char* data = NULL;
     char* tmp;
@@ -35,14 +36,14 @@ File read_from_file(const char* path) {
             data = tmp;
         }
 
-        n = fread(data + used, 1, IO_READ_CHUNK_SIZE, fp);
+        n = fread(data + used, 1, IO_READ_CHUNK_SIZE, file_pointer);
         if (n == 0)
             break;
 
         used += n;
     }
 
-    CL_VALIDATE(!ferror(fp), free(data);  return file, "", IO_READ_ERROR_GENERAL(path));
+    CL_VALIDATE(!ferror(file_pointer), free(data);  return file, "", IO_READ_ERROR_GENERAL(path));
 
     tmp = realloc(data, used + 1);
     CL_VALIDATE(tmp, free(data);  return file, "", IO_READ_ERROR_MEMORY(path));
@@ -59,5 +60,13 @@ File read_from_file(const char* path) {
 
 int write_to_file(void* buffer, size_t size, const char* path) {
 
-    return -1;
+    FILE* file_pointer = fopen(path, "wb");
+    CL_VALIDATE(file_pointer || !ferror(file_pointer), return -1, "", IO_WRITE_ERROR_GENERAL(path));
+
+    size_t chunkes_written = fwrite(buffer, size, 1, file_pointer);
+    fclose(file_pointer);
+
+    CL_VALIDATE(chunkes_written == 1, return -1, "", "Failed to write to file [%s]. Expected 1 chunk, but got [%zu]", path, chunkes_written);
+
+    return 0;
 }

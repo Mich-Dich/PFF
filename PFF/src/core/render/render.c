@@ -11,8 +11,64 @@
 static Render_State_Internal state = { 0 };
 
 
+// ------------------------------------------------------------------------------------------ private funcs ------------------------------------------------------------------------------------------
+
+void render_init_color_texture(u32* texture);
+void render_init_quad(u32* vao, u32* vbo, u32* ebo);
+void render_init_shaders(Render_State_Internal* state);
+u32 render_shader_create(const char* path_vert, const char* path_frag);
+
+
+// ========================================================================================== PUBLIC FUNCS ==========================================================================================
+ 
+//
+void render_init(void) {
+
+    render_init_quad(&state.vao_quad, &state.vbo_quad, &state.ebo_quad);
+    render_init_shaders(&state);
+    render_init_color_texture(&state.texture_color);
+}
+
+//
+void render_begin(void) {
+
+    glClearColor(0.05f, 0.05f, 0.05f, 1);
+    glClear(GL_COLOR_BUFFER_BIT);
+}
+
+//
+void render_end(void) {
+
+    SDL_GL_SwapWindow(global.render.window);
+}
+
+//
+void render_quad(vec2 pos, vec2 size, vec4 color) {
+
+    glUseProgram(state.shader_default);
+
+    mat4x4 model;
+    mat4x4_identity(model);
+
+    mat4x4_translate(model, pos[0], pos[1], 0);
+    mat4x4_scale_aniso(model, model, size[0], size[1], 1);
+
+    glUniformMatrix4fv(glGetUniformLocation(state.shader_default, "model"), 1, GL_FALSE, &model[0][0]);
+    glUniform4fv(glad_glGetUniformLocation(state.shader_default, "color"), 1, color);
+
+    glBindVertexArray(state.vao_quad);
+
+    glBindTexture(GL_TEXTURE_2D, state.texture_color);
+    glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, NULL);
+
+    glBindVertexArray(0);
+}
+
+// ========================================================================================== PRIVATE FUNCS ==========================================================================================
+
 //
 void render_init_color_texture(u32* texture) {
+
     glGenTextures(1, texture);
     glBindTexture(GL_TEXTURE_2D, *texture);
 
@@ -62,51 +118,8 @@ void render_init_quad(u32* vao, u32* vbo, u32* ebo) {
 }
 
 //
-void render_init(void) {
-
-    render_init_quad(&state.vao_quad, &state.vbo_quad, &state.ebo_quad);
-    render_init_shaders(&state);
-    render_init_color_texture(&state.texture_color);
-}
-
-//
-void render_begin(void) {
-
-    glClearColor(0.05f, 0.05f, 0.05f, 1);
-    glClear(GL_COLOR_BUFFER_BIT);
-}
-
-//
-void render_end(void) {
-
-    SDL_GL_SwapWindow(global.render.window);
-}
-
-//
-void render_quad(vec2 pos, vec2 size, vec4 color) {
-    glUseProgram(state.shader_default);
-
-    mat4x4 model;
-    mat4x4_identity(model);
-
-    mat4x4_translate(model, pos[0], pos[1], 0);
-    mat4x4_scale_aniso(model, model, size[0], size[1], 1);
-
-    glUniformMatrix4fv(glGetUniformLocation(state.shader_default, "model"), 1, GL_FALSE, &model[0][0]);
-    glUniform4fv(glad_glGetUniformLocation(state.shader_default, "color"), 1, color);
-
-    glBindVertexArray(state.vao_quad);
-
-    glBindTexture(GL_TEXTURE_2D, state.texture_color);
-    glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, NULL);
-
-    glBindVertexArray(0);
-}
-
-// ------------------------------------------------------------------------------------------ Shader ------------------------------------------------------------------------------------------
-
-//
 void render_init_shaders(Render_State_Internal* state) {
+
     state->shader_default = render_shader_create("./shaders/default.vert", "./shaders/default.frag");
 
     mat4x4_ortho(state->projection, 0, global.render.width, 0, global.render.height, -2, 2);
@@ -122,6 +135,7 @@ void render_init_shaders(Render_State_Internal* state) {
 
 //
 u32 render_shader_create(const char* path_vert, const char* path_frag) {
+
     int success;
     char log[512];
 

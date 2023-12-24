@@ -11,10 +11,16 @@ echo ===============================================  Building PFF (Procedurally
 echo.
 
 echo =================================== Clean previous compile result:
-set files_to_delete=.\*.ilk .\*.obj .\*.pdb .\*.exe
+set del_file_ILK=.\*.ilk
+set del_file_OBJ=.\*.obj
+set del_file_PDB=.\*.pdb
+set del_file_EXE=.\*.exe
 
-echo  deleting               %files_to_delete%
-del %files_to_delete%
+echo  deleting               %del_file_ILK% %del_file_OBJ% %del_file_PDB% %del_file_EXE% 
+del %del_file_ILK%
+del %del_file_OBJ%
+del %del_file_PDB%
+del %del_file_EXE%
 echo.
 
 echo =================================== Compile Project:

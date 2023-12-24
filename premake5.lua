@@ -72,10 +72,10 @@ project "PFF"
 			"PFF_BUILD_DLL"
 		}
 
-		postbuildcommands
-		{
-			("{COPY} %{cfg.buildtarget.relpath} ../bin/" .. outputs  .. "/Sandbox")
-		}
+		-- postbuildcommands
+		-- {
+		-- 	("{COPY} %{cfg.buildtarget.relpath} ../bin/" .. outputs  .. "/Sandbox")
+		-- }
 
 	filter "configurations:Debug"
 		defines "PFF_DEBUG"

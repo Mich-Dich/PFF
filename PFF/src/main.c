@@ -6,6 +6,11 @@
 
 #include "core/pch.h"
 
+static bool running = true;
+
+static vec2 PlayerPos;
+
+static void input_handle(void);
 
 int main(int argc, char* argv[]) {
 
@@ -14,7 +19,6 @@ int main(int argc, char* argv[]) {
     create_window(600, 400);
     render_init();
 
-    bool running = true;
     while (running) {
 
         SDL_Event event;

@@ -4,12 +4,30 @@
     <Filter Include="core">
       <UniqueIdentifier>{4E40957C-3A77-960D-E363-7C10CF79120F}</UniqueIdentifier>
     </Filter>
+    <Filter Include="core\IOCore">
+      <UniqueIdentifier>{5E0E3226-CAC3-AA1B-53B8-A4F2BF6CA11F}</UniqueIdentifier>
+    </Filter>
     <Filter Include="core\render">
       <UniqueIdentifier>{1D0F7B87-89C4-F37C-12B9-ED537E6DEA80}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="src\core\IOCore\IOCore.h">
+      <Filter>core\IOCore</Filter>
+    </ClInclude>
     <ClInclude Include="src\core\global.h">
+      <Filter>core</Filter>
+    </ClInclude>
+    <ClInclude Include="src\core\input.h">
+      <Filter>core</Filter>
+    </ClInclude>
+    <ClInclude Include="src\core\logger.h">
+      <Filter>core</Filter>
+    </ClInclude>
+    <ClInclude Include="src\core\pch.h">
+      <Filter>core</Filter>
+    </ClInclude>
+    <ClInclude Include="src\core\utils\platform.h">
       <Filter>core</Filter>
     </ClInclude>
     <ClInclude Include="src\core\render\render.h">
@@ -18,13 +36,20 @@
     <ClInclude Include="src\core\types.h">
       <Filter>core</Filter>
     </ClInclude>
-    <ClInclude Include="src\core\platform.h" />
-    <ClInclude Include="src\core\logger.h" />
-    <ClInclude Include="src\core\IOCore\IOCore.h" />
-    <ClInclude Include="src\core\pch.h" />
+    <ClInclude Include="src\core\config.h" />
+    <ClInclude Include="src\core\utils\pff_time.h" />
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="src\core\IOCore\IOCore.c">
+      <Filter>core\IOCore</Filter>
+    </ClCompile>
     <ClCompile Include="src\core\global.c">
+      <Filter>core</Filter>
+    </ClCompile>
+    <ClCompile Include="src\core\logger.c">
+      <Filter>core</Filter>
+    </ClCompile>
+    <ClCompile Include="src\core\utils\platform.c">
       <Filter>core</Filter>
     </ClCompile>
     <ClCompile Include="src\core\render\render.c">
@@ -32,12 +57,8 @@
     </ClCompile>
     <ClCompile Include="src\glad.c" />
     <ClCompile Include="src\main.c" />
-    <ClCompile Include="src\core\platform.c" />
-    <ClCompile Include="src\core\logger.c" />
-    <ClCompile Include="src\core\IOCore\IOCore.c" />
-  </ItemGroup>
-  <ItemGroup>
-    <Text Include="shaders\default.frag" />
-    <Text Include="shaders\default.vert" />
+    <ClCompile Include="src\core\input.c" />
+    <ClCompile Include="src\core\config.c" />
+    <ClCompile Include="src\core\utils\pff_time.c" />
   </ItemGroup>
 </Project>
