@@ -1,11 +1,19 @@
 #include "core/pch.h"
 #include "pff_time.h"
 
+#include "core/config.h"
+#include "core/input.h"
+#include "core/types.h"
+#include "core/logger.h"
+#include "core/global.h"
+
 //
 void time_init(u32 frame_rate) {
 
+	CL_LOG_FUNC_START("")
 	global.time.frame_rate = frame_rate;
 	global.time.frame_delay = 1000.f / frame_rate;
+	CL_LOG_FUNC_END("")
 }
 
 //
@@ -30,6 +38,6 @@ void time_update_late(void) {
 	global.time.frame_time = (f32)SDL_GetTicks() - global.time.now;
 
 	if (global.time.frame_delay > global.time.frame_time) {
-		SDL_Delay(global.time.frame_delay - global.time.frame_time);
+		SDL_Delay((Uint32)(global.time.frame_delay - global.time.frame_time));
 	}
 }

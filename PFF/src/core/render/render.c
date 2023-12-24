@@ -6,7 +6,7 @@
 #include "core/IOCore/IOCore.h"
 #include "core/global.h"
 #include "render.h"
-#include "core/platform.h"
+#include "core/utils/platform.h"
 
 static Render_State_Internal state = { 0 };
 

@@ -8,6 +8,12 @@
 
 #include "platform.h"
 
+#include "core/config.h"
+#include "core/input.h"
+#include "core/types.h"
+#include "core/logger.h"
+#include "core/global.h"
+
 // 
 SDL_Window* create_window(u32 window_width, u32 window_height) {
 

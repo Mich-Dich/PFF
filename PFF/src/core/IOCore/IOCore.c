@@ -1,21 +1,27 @@
 
 #include "IOCore.h"
 
+#include "core/input.h"
+#include "core/types.h"
+#include "core/logger.h"
+#include "core/global.h"
+
 #include <stdio.h>
 
 // 20 MiB, can probably change this to a higher value without issue.
 // Check your target platform.
 #define IO_READ_CHUNK_SIZE 2097152
-#define IO_READ_ERROR_GENERAL(var)      "Error reading filie: %s. errno: %d\n", var, ERROR_STR
-#define IO_WRITE_ERROR_GENERAL(var)      "Error writing to filie: %s. errno: %d\n", var, ERROR_STR
-#define IO_READ_ERROR_MEMORY(var)       "Not enough free memory to read file: %s\n", var
+#define IO_READ_ERROR_GENERAL(var)      "Error reading filie: %s. errno: %d", var, ERROR_STR
+#define IO_WRITE_ERROR_GENERAL(var)      "Error writing to filie: %s. errno: %d", var, ERROR_STR
+#define IO_READ_ERROR_MEMORY(var)       "Not enough free memory to read file: %s", var
 
 // Adapted from https://stackoverflow.com/a/44894946 (not the chosen answer) by Nominal Animal
 File read_from_file(const char* path) {
 
+    CL_LOG_FUNC_START("")
     File file = { .is_valid = false };
     FILE* file_pointer = fopen(path, "rb");
-    CL_VALIDATE(file_pointer || !ferror(file_pointer), return file, "", IO_READ_ERROR_GENERAL(path));
+    CL_VALIDATE(file_pointer, return file, "", IO_READ_ERROR_GENERAL(path));
 
     char* data = NULL;
     char* tmp;
@@ -55,11 +61,13 @@ File read_from_file(const char* path) {
     file.len = used;
     file.is_valid = true;
 
+    CL_LOG_FUNC_END("")
     return file;
 }
 
 int write_to_file(void* buffer, size_t size, const char* path) {
 
+    CL_LOG_FUNC_START("")
     FILE* file_pointer = fopen(path, "wb");
     CL_VALIDATE(file_pointer || !ferror(file_pointer), return -1, "", IO_WRITE_ERROR_GENERAL(path));
 
@@ -68,5 +76,6 @@ int write_to_file(void* buffer, size_t size, const char* path) {
 
     CL_VALIDATE(chunkes_written == 1, return -1, "", "Failed to write to file [%s]. Expected 1 chunk, but got [%zu]", path, chunkes_written);
 
+    CL_LOG_FUNC_END("")
     return 0;
 }

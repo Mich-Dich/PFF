@@ -220,6 +220,7 @@ static inline const char* ptr_To_String(void* pointer) { return (pointer == NULL
         } else {                                                                            \
             FailureCommand;                                                                 \
             CL_LOG_Fatal(messageFailure, ##__VA_ARGS__)                                     \
+            __debugbreak();                                                         \
             DEBUG_BREAK;                                                                    \
         }
 #else

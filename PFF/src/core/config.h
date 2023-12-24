@@ -3,6 +3,9 @@
 #include "pch.h"
 #include "input.h"
 
+#include "core/input.h"
+#include "core/types.h"
+
 typedef struct {
 	u8 keybinds[5];		//replace with dynamic Array
 } Config_State;
