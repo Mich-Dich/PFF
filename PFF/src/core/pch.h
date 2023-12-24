@@ -10,9 +10,5 @@
 #include "linmath.h"
 #pragma warning(default: 4244)
 
-#include "core/IOCore/IOCore.h"
-#include "core/render/render.h"
-#include "core/utils/pff_time.h"
-#include "core/utils/platform.h"
-
+#include "core/logger.h"
 

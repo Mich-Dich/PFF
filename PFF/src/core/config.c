@@ -1,7 +1,7 @@
 #include "config.h"
 
+#include "core/IOCore/IOCore.h"
 #include "core/config.h"
-#include "core/input.h"
 #include "core/types.h"
 #include "core/logger.h"
 #include "core/global.h"

@@ -99,6 +99,7 @@
   <ItemGroup>
     <ClInclude Include="src\core\IOCore\IOCore.h" />
     <ClInclude Include="src\core\config.h" />
+    <ClInclude Include="src\core\container\darray.h" />
     <ClInclude Include="src\core\global.h" />
     <ClInclude Include="src\core\input.h" />
     <ClInclude Include="src\core\logger.h" />
@@ -109,10 +110,9 @@
     <ClInclude Include="src\core\utils\platform.h" />
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="src\core\container\darray.c" />
-    <ClCompile Include="src\core\container\darray.h" />
     <ClCompile Include="src\core\IOCore\IOCore.c" />
     <ClCompile Include="src\core\config.c" />
+    <ClCompile Include="src\core\container\darray.c" />
     <ClCompile Include="src\core\global.c" />
     <ClCompile Include="src\core\input.c" />
     <ClCompile Include="src\core\logger.c" />

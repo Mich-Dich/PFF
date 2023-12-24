@@ -7,6 +7,9 @@
     <Filter Include="core\IOCore">
       <UniqueIdentifier>{5E0E3226-CAC3-AA1B-53B8-A4F2BF6CA11F}</UniqueIdentifier>
     </Filter>
+    <Filter Include="core\container">
+      <UniqueIdentifier>{C061332E-AC2F-2734-95C3-975A81300399}</UniqueIdentifier>
+    </Filter>
     <Filter Include="core\render">
       <UniqueIdentifier>{1D0F7B87-89C4-F37C-12B9-ED537E6DEA80}</UniqueIdentifier>
     </Filter>
@@ -20,6 +23,9 @@
     </ClInclude>
     <ClInclude Include="src\core\config.h">
       <Filter>core</Filter>
+    </ClInclude>
+    <ClInclude Include="src\core\container\darray.h">
+      <Filter>core\container</Filter>
     </ClInclude>
     <ClInclude Include="src\core\global.h">
       <Filter>core</Filter>
@@ -53,6 +59,9 @@
     <ClCompile Include="src\core\config.c">
       <Filter>core</Filter>
     </ClCompile>
+    <ClCompile Include="src\core\container\darray.c">
+      <Filter>core\container</Filter>
+    </ClCompile>
     <ClCompile Include="src\core\global.c">
       <Filter>core</Filter>
     </ClCompile>
@@ -73,7 +82,5 @@
     </ClCompile>
     <ClCompile Include="src\glad.c" />
     <ClCompile Include="src\main.c" />
-    <ClCompile Include="src\core\container\darray.c" />
-    <ClCompile Include="src\core\container\darray.h" />
   </ItemGroup>
 </Project>

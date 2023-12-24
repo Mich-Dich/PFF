@@ -1,6 +1,8 @@
 #pragma once
 
 #include "core/pch.h"
+#include "core/types.h"
+#include "core/container/darray.h"
 
 // --------------------------------------------------- General Action Structs ---------------------------------------------------
 
@@ -48,12 +50,15 @@ typedef	struct {
 
 typedef	struct {
 	u8 key_code;
-	input_action* action;
+	input_action action;
 	bool override_settings;
 	input_action_settings settings;
 } input_mapping;
 
-void register_key_binding(const char* key, input_action* action);
+
+void input_init(void);
+void register_key_binding(const char* key, const input_action* action);
+void change_key_binding_Settings(input_mapping mapping, const input_action_settings settings);
 
 // --------------------------------------------------- OLD SHITY SYSTEM ---------------------------------------------------
 

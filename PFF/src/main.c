@@ -55,6 +55,8 @@ int main(int argc, char* argv[]) {
     create_window(600, 400);
     render_init();
 
+    input_init();
+
     input_action move_up;
     INPUT_ACTION_REGISTER_NAME(move_up);
     move_up.description = "Move the player up";
@@ -65,17 +67,7 @@ int main(int argc, char* argv[]) {
     move_up.settings.modefiers = IAM_none;
     register_key_binding("W", &move_up);
 
-
-    DArray* test_array = darray_create(input_action);
-    CL_LOG(Info, "test_array data: size: %llu, capacity: %llu, stride: %llu", test_array->size, test_array->capacity, test_array->stride);
-
-    for (u16 x = 0; x < 3; x++) {
-
-        darray_push(test_array, &move_up);
-        CL_LOG(Info, "test_array data: size: %llu, capacity: %llu, stride: %llu", test_array->size, test_array->capacity, test_array->stride);
-    }
-
-
+    CL_LOG(Warn, "size of input bindings [size: %llu]", global.config.key_bindings.size);
 
     PlayerPos[0] = global.render.width * 0.5f;
     PlayerPos[1] = global.render.height * 0.5f;

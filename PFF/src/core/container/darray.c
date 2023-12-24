@@ -5,7 +5,7 @@
 
 // ------------------------------------------------------------------------------------------ private functions ------------------------------------------------------------------------------------------
 
-DArray* __darray_resize(DArray* array);
+void __darray_resize(DArray* array, const bool Scale_up);
 
 
 // ------------------------------------------------------------------------------------------ private functions ------------------------------------------------------------------------------------------
@@ -40,30 +40,28 @@ void darray_clear(DArray* array) {
     array->size = 0;
 }
 
-// 
+// copys [stride] amound of bytes from content of [value_ptr] to end of array
 void darray_push(DArray* array, const void* value_ptr) {
 
+    // CL_LOG_FUNC_START("[size: %llu]  [capcazity: %llu]  [stride: %llu]", array->size, array->capacity, array->stride);
     DArray* loc_buffer = array;
-    CL_LOG_FUNC_START("[size: %llu]  [capcazity: %llu]  [stride: %llu]", loc_buffer->size, loc_buffer->capacity, loc_buffer->stride);
-    if (loc_buffer->size >= loc_buffer->capacity)
-        loc_buffer = __darray_resize(loc_buffer);
+    if (array->size >= array->capacity)
+        __darray_resize(array, true);
 
-    u64 addr = (u64)loc_buffer->array;
-    addr += (loc_buffer->size * loc_buffer->stride);
-    memcpy((void*)addr, value_ptr, loc_buffer->stride);
-    loc_buffer->size++;
+    u64 addr = (u64)array->array;
+    addr += (array->size * array->stride);
+    memcpy((void*)addr, value_ptr, array->stride);
+    array->size++;
 
-    array = loc_buffer;
-
-    CL_LOG_FUNC_END("[size: %llu]  [capcazity: %llu]  [stride: %llu]", array->size, array->capacity, array->stride)
+    // CL_LOG_FUNC_END("[size: %llu]  [capcazity: %llu]  [stride: %llu]", array->size, array->capacity, array->stride)
 }
 
-void __darray_push_at(DArray* array, u64 index, const void* value_ptr) {
+void darray_push_at(DArray* array, const u64 index, const void* value_ptr) {
 
     CL_VALIDATE(index < array->size, return, "", "Index outside the bounds of this array! Index/Length: [%llu/%llu], ", index, array->size);
 
     if (array->size >= array->capacity)
-        array = __darray_resize(array);
+        __darray_resize(array, true);
 
     u64 addr = (u64)array;
 
@@ -80,16 +78,25 @@ void __darray_push_at(DArray* array, u64 index, const void* value_ptr) {
 }
 
 //
-void __darray_pop(DArray* array, void* dest) {
+void darray_pop(DArray* array, void* dest) {
+
+    CL_VALIDATE(array->size > 0, return, "", "Tryed to pop from an empty array");
+
+    // CL_LOG_FUNC_START("[size: %llu]  [capcazity: %llu]  [stride: %llu]", array->size, array->capacity, array->stride);
+    DArray* loc_buffer = array;
+    if (array->capacity - array->size >= GROW_AMOUNT && array->capacity - array->size > MIN_ARRAY_SIZE)
+        __darray_resize(array, false);
 
     u64 addr = (u64)array->array;
     addr += ((array->size - 1) * array->stride);
     memcpy(dest, (void*)addr, array->stride);
     array->size--;
+
+    // CL_LOG_FUNC_END("[size: %llu]  [capcazity: %llu]  [stride: %llu]", array->size, array->capacity, array->stride)
 }
 
 //
-void __darray_pop_at(DArray* array, u64 index, void* dest) {
+void darray_pop_at(DArray* array, const u64 index, void* dest) {
 
     CL_VALIDATE(index < array->size, return, "", "Index outside the bounds of this array! Index/Length: [%llu/%llu], ", index, array->size);
 
@@ -108,19 +115,22 @@ void __darray_pop_at(DArray* array, u64 index, void* dest) {
 // ------------------------------------------------------------------------------------------ private functions ------------------------------------------------------------------------------------------
 
 // 
-DArray* __darray_resize(DArray* array) {
+void __darray_resize(DArray* array, const bool Scale_up) {
+    
+    u64 grow__size = (array->capacity * array->stride) + (GROW_AMOUNT * array->stride);
+    u64 srink_size = (array->capacity * array->stride) - (GROW_AMOUNT * array->stride);
+    u64 new_size = Scale_up ? grow__size : srink_size;
 
-    CL_LOG_FUNC_START("")
-    DArray* loc_array = array;
-    DArray* new_array = __darray_create((DARRAY_RESIZE_FACTOR * loc_array->capacity), loc_array->stride);
-    new_array->size = array->size;
-    memcpy(new_array->array, loc_array->array, loc_array->size * loc_array->stride);
+    void* new_array = (void*)malloc(new_size);
+    CL_ASSERT(new_array != 0, "Allocated memory for [new_array] [size: %llu] [elements: %llu]", "Failed to allocate memory for [new_array] [used size: %llu] [elements: %llu]", new_size, new_size / array->stride);
 
-    CL_LOG(Warn, "New array: [size: %llu, stride: %llu capacity: %llu]", new_array->size, new_array->stride, new_array->capacity);
+    if (Scale_up)
+        array->capacity += GROW_AMOUNT;
+    else
+        array->capacity -= GROW_AMOUNT;
 
-    new_array->size = loc_array->size;
-    darray_destroy(array);
+    memcpy(new_array, array->array, (array->size * array->stride));
+    free(array->array);
 
-    CL_LOG_FUNC_END("")
-    return new_array;
+    array->array = new_array;
 }
