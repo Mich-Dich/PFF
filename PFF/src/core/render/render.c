@@ -5,6 +5,7 @@
 
 #include "core/IOCore/IOCore.h"
 #include "core/global.h"
+#include "core/logger.h"
 #include "render.h"
 #include "core/utils/platform.h"
 

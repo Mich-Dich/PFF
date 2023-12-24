@@ -1,8 +1,6 @@
 #pragma once
 
-#include "pch.h"
-#include "input.h"
-
+#include "core/pch.h"
 #include "core/input.h"
 #include "core/types.h"
 
@@ -11,4 +9,4 @@ typedef struct {
 } Config_State;
 
 void config_init(void);
-void config_key_bind(Input_key Key, const char* Key_Name);
+void config_key_bind(input_key Key, const char* Key_Name);

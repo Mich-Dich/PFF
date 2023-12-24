@@ -1,6 +1,6 @@
 #pragma once
 
-#include "types.h"
+#include "core/types.h"
 
 typedef struct time_state {
 	f32 delta;			// time between frames

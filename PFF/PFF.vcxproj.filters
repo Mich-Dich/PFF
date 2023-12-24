@@ -73,5 +73,7 @@
     </ClCompile>
     <ClCompile Include="src\glad.c" />
     <ClCompile Include="src\main.c" />
+    <ClCompile Include="src\core\container\darray.c" />
+    <ClCompile Include="src\core\container\darray.h" />
   </ItemGroup>
 </Project>

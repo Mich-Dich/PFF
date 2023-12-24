@@ -10,7 +10,7 @@
 static update_key_state(u8 currentState, Key_state* key_state) {
 
 	if (currentState) {
-		if (*key_state > 0)
+		if (*key_state != KS_released)
 			*key_state = KS_held;
 		else
 			*key_state = KS_pressed;
@@ -18,6 +18,20 @@ static update_key_state(u8 currentState, Key_state* key_state) {
 	else
 		*key_state = KS_released;
 }
+
+//
+void register_key_binding(const char* key, input_action* action) {
+
+	input_mapping new_mapping = { 0 };
+
+	// get key_code for [key]
+	SDL_Scancode scan_code = SDL_GetScancodeFromName(key);
+	CL_VALIDATE(scan_code != SDL_SCANCODE_UNKNOWN, return, "", "Invalid scan code when binding key: %s\n", key);
+	new_mapping.key_code = (u8)scan_code;
+
+
+}
+
 //
 void update_input(void) {
 
@@ -29,3 +43,4 @@ void update_input(void) {
 	update_key_state(keybord_state[global.config.keybinds[IK_down]], &global.input.down);
 	update_key_state(keybord_state[global.config.keybinds[IK_escape]], &global.input.escape);
 }
+

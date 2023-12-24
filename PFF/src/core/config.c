@@ -18,7 +18,6 @@ static char tmp_buffer[20] = { 0 };
 
 static char* config_get_value(const char* config_bufer, const char* value) {
 
-	CL_LOG_FUNC_START("")
 	char* line = strstr(config_bufer, value);
 	CL_VALIDATE(line, return "Not found", "", "Could not find config value [%s]", value);
 
@@ -41,19 +40,7 @@ static char* config_get_value(const char* config_bufer, const char* value) {
 
 	*(tmp_ptr + 1) = 0;
 
-	CL_LOG_FUNC_END("")
 	return tmp_buffer;
-}
-
-static void load_controlls(const char* config_buffer) {
-
-	CL_LOG_FUNC_START("")
-	config_key_bind(IK_left, config_get_value(config_buffer, "left"));
-	config_key_bind(IK_right, config_get_value(config_buffer, "right"));
-	config_key_bind(IK_up, config_get_value(config_buffer, "up"));
-	config_key_bind(IK_down, config_get_value(config_buffer, "down"));
-	config_key_bind(IK_escape, config_get_value(config_buffer, "escape"));
-	CL_LOG_FUNC_END("")
 }
 
 
@@ -64,7 +51,11 @@ static int config_load(void) {
 	File file_config = read_from_file("./config.ini");
 	CL_VALIDATE(file_config.is_valid, return 1, "Loaded file [./config.ini]", "Could not read file [./config.ini]");
 
-	load_controlls(file_config.data);
+	config_key_bind(IK_left, "A");
+	config_key_bind(IK_left, config_get_value(file_config.data, "left"));
+	config_key_bind(IK_right, config_get_value(file_config.data, "right"));
+	config_key_bind(IK_down, config_get_value(file_config.data, "down"));
+	config_key_bind(IK_escape, config_get_value(file_config.data, "escape"));
 	free(file_config.data);
 
 	CL_LOG_FUNC_END("")
@@ -86,7 +77,7 @@ void config_init(void) {
 }
 
 //
-void config_key_bind(Input_key key, const char* key_name) {
+void config_key_bind(input_key key, const char* key_name) {
 
 	SDL_Scancode scan_code = SDL_GetScancodeFromName(key_name);
 	CL_VALIDATE(scan_code != SDL_SCANCODE_UNKNOWN, return, "", "Invalid scan code when binding key: %s\n", key_name);

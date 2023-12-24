@@ -76,7 +76,7 @@ typedef struct {
     $A		File Name			C:\Project\main.c C:\Project\foo.c
     $I		shortened File Name	main.c foo.c
     $G		Line				1, 42
-    $P      thread id          b5bff640
+    $P      thread id           b5bff640
 
     $L		LogLevel			[TRACE], [DEBUG] … [FATAL]
     $X		Alignment			add space for "INFO" & "WARN"

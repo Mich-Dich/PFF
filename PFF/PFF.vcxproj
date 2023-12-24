@@ -109,6 +109,8 @@
     <ClInclude Include="src\core\utils\platform.h" />
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="src\core\container\darray.c" />
+    <ClCompile Include="src\core\container\darray.h" />
     <ClCompile Include="src\core\IOCore\IOCore.c" />
     <ClCompile Include="src\core\config.c" />
     <ClCompile Include="src\core\global.c" />
