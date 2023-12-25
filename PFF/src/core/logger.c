@@ -141,7 +141,7 @@ ThreadNameMap* add_Thread_Name_Mapping(uintptr_t thread, const char* name);
 ThreadNameMap* f_find_Entry(uintptr_t threadID);
 void remove_Entry(uintptr_t threadID);
 int remove_all_Files_In_Directory(const char *dirName);
-void getCurrentTime(Time_Info *timeInfo);
+void getCurrentTime(struct CL_Time_Info *timeInfo);
 
 // ------------------------------------------------------------------------------------------ Semi-inline functions ------------------------------------------------------------------------------------------
 // Print a separator "---"
@@ -216,7 +216,7 @@ bool Create_Log_File(const char* FileName) {
     // print title section to start of file
     else {
 
-        Time_Info locTimeInfo;
+        struct CL_Time_Info locTimeInfo;
         getCurrentTime(&locTimeInfo);
         fprintf(logFile, "[%04d/%02d/%02d - %02d:%02d:%02d] Log initialized\n    Output-file: [%s]\n    Starting-format: %s\n",
             locTimeInfo.TI_year + 1900, locTimeInfo.TI_month + 1, locTimeInfo.TI_day, locTimeInfo.TI_hour, locTimeInfo.TI_minute, locTimeInfo.TI_sec, FileName, m_GeneralLogFormat);
@@ -261,7 +261,7 @@ void log_output(const enum log_level level, const char* prefix, const char* func
     if (message[0] == '\0' && prefix[0] == '\0')
         return;
 
-    Time_Info locTimeInfo;
+    struct CL_Time_Info locTimeInfo;
     getCurrentTime(&locTimeInfo);
 
     SETUP_FOR_FORMAT_MACRO
@@ -726,7 +726,7 @@ int remove_all_Files_In_Directory(const char *dirName) {
 // ------------------------------------------------------------------------------------------ Measure Time ------------------------------------------------------------------------------------------
 
 //
-void getCurrentTime(Time_Info *timeInfo) {
+void getCurrentTime(struct CL_Time_Info *timeInfo) {
     // Windows version
 #if defined(_WIN32) || defined(__CYGWIN__)
     SYSTEMTIME systemTime;
@@ -745,7 +745,7 @@ void getCurrentTime(Time_Info *timeInfo) {
 
     struct tm *localTime = localtime(&currentTime.tv_sec);
 
-    timeInfo->TI_year = localTime->tm_year + 1900; // Years since 1900
+    timeInfo->TI_year = localTime->tm_year + 1900;  // Years since 1900
     timeInfo->TI_month = localTime->tm_mon + 1;     // Months are 0-11, so add 1
     timeInfo->TI_day = localTime->tm_mday;
     timeInfo->TI_hour = localTime->tm_hour;
@@ -759,9 +759,9 @@ void getCurrentTime(Time_Info *timeInfo) {
 
 // remembers the exact time at witch this function was called
 // NOT FINISHED
-void Calc_Func_Duration_Start(Time_Info* StartTime) {
+void Calc_Func_Duration_Start(struct CL_Time_Info* StartTime) {
 
-    Time_Info locTimeInfo;
+    struct CL_Time_Info locTimeInfo;
     getCurrentTime(&locTimeInfo);   
 
     CL_LOG(Trace, "Starting Tine measurement")
@@ -769,9 +769,9 @@ void Calc_Func_Duration_Start(Time_Info* StartTime) {
 
 // Calculates the time difference between calling [Calc_Func_Duration_Start] and this function
 // NOT FINISHED
-void Calc_Func_Duration(const Time_Info* StartTime) {
+void Calc_Func_Duration(const struct CL_Time_Info* StartTime) {
 
-    Time_Info endTime;
+    struct CL_Time_Info endTime;
     getCurrentTime(&endTime);
 
     int elapsedYears = endTime.TI_year - StartTime->TI_year;

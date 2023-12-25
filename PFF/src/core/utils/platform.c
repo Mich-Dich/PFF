@@ -38,10 +38,10 @@ SDL_Window* create_window(u32 window_width, u32 window_height) {
     SDL_GL_CreateContext(window);
     CL_ASSERT(gladLoadGLLoader((GLADloadproc)SDL_GL_GetProcAddress), "", "Failed to load GL: %s\n", SDL_GetError());
 
-    CL_LOG(Trace, "OpenGL Loaded");
-    CL_LOG(Trace, "Vendor:   %s", glGetString(GL_VENDOR));
-    CL_LOG(Trace, "Renderer: %s", glGetString(GL_RENDERER));
-    CL_LOG(Trace, "Version:  %s", glGetString(GL_VERSION));
+    CL_LOG(Info, "OpenGL Loaded");
+    CL_LOG(Info, "Vendor:   %s", glGetString(GL_VENDOR));
+    CL_LOG(Info, "Renderer: %s", glGetString(GL_RENDERER));
+    CL_LOG(Info, "Version:  %s", glGetString(GL_VERSION));
 
     global.render.window = window;
     return window;

@@ -51,6 +51,9 @@
     <ClInclude Include="src\core\utils\platform.h">
       <Filter>core\utils</Filter>
     </ClInclude>
+    <ClInclude Include="src\core\utils\util.h">
+      <Filter>core\utils</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="src\core\IOCore\IOCore.c">
@@ -78,6 +81,9 @@
       <Filter>core\utils</Filter>
     </ClCompile>
     <ClCompile Include="src\core\utils\platform.c">
+      <Filter>core\utils</Filter>
+    </ClCompile>
+    <ClCompile Include="src\core\utils\util.c">
       <Filter>core\utils</Filter>
     </ClCompile>
     <ClCompile Include="src\glad.c" />

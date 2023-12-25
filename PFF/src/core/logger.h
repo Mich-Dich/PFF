@@ -41,7 +41,7 @@ enum log_level {
     LL_MAX_NUM = 6
 };
 
-typedef struct {
+struct CL_Time_Info {
     int TI_year;
     int TI_month;
     int TI_day;
@@ -49,7 +49,7 @@ typedef struct {
     int TI_minute;
     int TI_sec;
     int TI_nSec;
-} Time_Info;
+};
 
 #define CL_TRUE 1
 #define CL_FALSE 0
@@ -96,8 +96,8 @@ void print_Separator_Big(uintptr_t threadID);
 int register_thread_log_under_Name(uintptr_t threadID, const char* name);
 void log_shutdown();
 void set_log_level(enum log_level new_level);
-void Calc_Func_Duration_Start(Time_Info* StartTime);
-void Calc_Func_Duration(const Time_Info* StartTime);
+void Calc_Func_Duration_Start(struct CL_Time_Info* StartTime);
+void Calc_Func_Duration(const struct CL_Time_Info* StartTime);
 
 // Define witch log levels should be written to log file directly and witch should be buffered
 //  0    =>   write all logs directly to log file
@@ -234,7 +234,7 @@ static inline const char* ptr_To_String(void* pointer) { return (pointer == NULL
 
 // Remembers the exact time at witch this macro was called
 // CAUTION! only call once in a given scope
-#define CL_FUNC_DURATION_START()                Time_Info Log_Duration_Calc_Struct_Start;       \
+#define CL_FUNC_DURATION_START()                struct CL_Time_Info Log_Duration_Calc_Struct_Start;       \
                                                 Calc_Func_Duration_Start(&Log_Duration_Calc_Struct_Start);
 
 // Calculates the time difference between calling [CL_FUNC_DURATION_START] and this Macro

@@ -108,6 +108,7 @@
     <ClInclude Include="src\core\types.h" />
     <ClInclude Include="src\core\utils\pff_time.h" />
     <ClInclude Include="src\core\utils\platform.h" />
+    <ClInclude Include="src\core\utils\util.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="src\core\IOCore\IOCore.c" />
@@ -119,6 +120,7 @@
     <ClCompile Include="src\core\render\render.c" />
     <ClCompile Include="src\core\utils\pff_time.c" />
     <ClCompile Include="src\core\utils\platform.c" />
+    <ClCompile Include="src\core\utils\util.c" />
     <ClCompile Include="src\glad.c" />
     <ClCompile Include="src\main.c" />
   </ItemGroup>

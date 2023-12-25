@@ -15,6 +15,21 @@ typedef struct time_state {
 	u32 frame_count;	// helps calculate FPS
 } Time_State;
 
+
+typedef struct {
+	int TI_year;
+	int TI_month;
+	int TI_day;
+	int TI_hour;
+	int TI_minute;
+	int TI_sec;
+	int TI_nSec;
+} Time_Info;
+
 void time_init(u32 frame_rate);
 void time_update(void);
 void time_update_late(void);
+
+u64 Get_TimeStamp(void);
+float Calc_Time_Dif_in_Seconds(u64 startTimeStamp, u64 endTimeStamp);
+u64 Subtract_Seconds_From_TimeStamp(u64 originalTimeStamp, float secondsToSubtract);
