@@ -60,6 +60,7 @@ int main(int argc, char* argv[]) {
     input_action move_up;
     INPUT_ACTION_REGISTER_NAME(move_up);
     move_up.description = "Move the player up";
+    move_up.state = KS_released;
     move_up.triger_when_paused = false;
     move_up.value = IV_vec2;
     move_up.settings.duration = 0.5f;
@@ -67,7 +68,60 @@ int main(int argc, char* argv[]) {
     move_up.settings.modefiers = IAM_none;
     register_key_binding("W", &move_up);
 
+    input_action move_down;
+    INPUT_ACTION_REGISTER_NAME(move_down);
+    move_down.description = "Move the player up";
+    move_down.state = KS_released;
+    move_down.triger_when_paused = false;
+    move_down.value = IV_vec2;
+    move_down.settings.duration = 0.5f;
+    move_down.settings.trigger = IAT_key_down;
+    move_down.settings.modefiers = IAM_none;
+    register_key_binding("S", &move_down);
+
+    input_action move_left;
+    INPUT_ACTION_REGISTER_NAME(move_left);
+    move_left.description = "Move the player up";
+    move_left.state = KS_released;
+    move_left.triger_when_paused = false;
+    move_left.value = IV_vec2;
+    move_left.settings.duration = 0.5f;
+    move_left.settings.trigger = IAT_key_down;
+    move_left.settings.modefiers = IAM_none;
+    register_key_binding("A", &move_left);
+
+    input_action move_right;
+    INPUT_ACTION_REGISTER_NAME(move_right);
+    move_right.description = "Move the player up";
+    move_right.state = KS_released;
+    move_right.triger_when_paused = false;
+    move_right.value = IV_vec2;
+    move_right.settings.duration = 0.5f;
+    move_right.settings.trigger = IAT_key_down;
+    move_right.settings.modefiers = IAM_none;
+    register_key_binding("D", &move_right);
+
+    /*
     CL_LOG(Warn, "size of input bindings [size: %llu]", global.config.key_bindings.size);
+
+
+    DArray Type_test = *darray_create(u16);
+    u16 var = 42;
+    for (u16 x = 0; x < 32; x++) {
+        var = (u16)rand();
+        darray_push(&Type_test, &var);
+    }
+
+    u16 dest;
+    for (u16 x = 0; x < 32; x++) {
+
+        u64 addr = (u64)Type_test.array;
+        addr += ((Type_test.size - 1) * Type_test.stride);
+        memcpy(&dest, (void*)addr, Type_test.stride);
+
+        CL_LOG(Trace, "Element: %d", dest);
+    }*/
+
 
     PlayerPos[0] = global.render.width * 0.5f;
     PlayerPos[1] = global.render.height * 0.5f;
@@ -87,8 +141,21 @@ int main(int argc, char* argv[]) {
             }
         }
 
-        update_input();
+        input_update();
+
+
+        if (move_up.state != AS_inactive)
+            PlayerPos[1] += 500 * global.time.delta;
+        if (move_down.state != AS_inactive)
+            PlayerPos[1] -= 500 * global.time.delta;
+        if (move_left.state != AS_inactive)
+            PlayerPos[0] -= 500 * global.time.delta;
+        if (move_right.state != AS_inactive)
+            PlayerPos[0] += 500 * global.time.delta;
+
         input_handle();
+
+
 
         render_begin();
 

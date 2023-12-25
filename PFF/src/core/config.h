@@ -5,8 +5,10 @@
 #include "core/types.h"
 #include "core/container/darray.h"
 
+
 typedef struct {
-	DArray key_bindings;
+	c_vector key_bindings;
+	input_mapping old_style[10];
 	u8 keybinds[5];		//replace with dynamic Array
 } Config_State;
 

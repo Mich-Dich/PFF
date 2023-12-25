@@ -25,6 +25,18 @@ typedef struct {
 	input_action_modefier modefiers;
 } input_action_settings;
 
+typedef enum {
+	AS_inactive,
+	AS_transitioning,
+	AS_active
+} action_state;
+
+typedef enum {
+	KS_released,
+	KS_pressed,
+	KS_held
+} Key_state;
+
 // --------------------------------------------------- Input Action ---------------------------------------------------
 
 typedef enum {
@@ -36,6 +48,7 @@ typedef enum {
 typedef	struct {
 	char* action_name;
 	char* description;
+	action_state state;
 	bool triger_when_paused;
 	input_value value;
 	union value_type {
@@ -50,7 +63,8 @@ typedef	struct {
 
 typedef	struct {
 	u8 key_code;
-	input_action action;
+	Key_state key_state;
+	input_action* action;
 	bool override_settings;
 	input_action_settings settings;
 } input_mapping;
@@ -71,11 +85,6 @@ typedef enum {
 	IK_escape
 } input_key;
 
-typedef enum {
-	KS_released,
-	KS_pressed,
-	KS_held
-} Key_state;
 
 typedef struct {
 	Key_state left;
@@ -85,4 +94,4 @@ typedef struct {
 	Key_state escape;
 } input_State;
 
-void update_input(void);
+void input_update(void);

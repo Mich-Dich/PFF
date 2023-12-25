@@ -151,31 +151,33 @@ static inline const char* ptr_To_String(void* pointer) { return (pointer == NULL
 // define conditional log macro for DEBUG
 #if LOG_LEVEL_ENABLED >= 3
     #define CL_LOG_Debug(message, ...)              { log_output(Debug, "", __func__, __FILE__, __LINE__, CL_THREAD_ID, message, ##__VA_ARGS__); }
-
-    // Logs the end of a function, it would be helpful to has the '$F' in your format
-    #define CL_LOG_FUNC_END(message, ...)           { log_output(Debug, "END ", __func__, __FILE__, __LINE__, CL_THREAD_ID, message, ##__VA_ARGS__); }
-
-    // Logs the start of a function, it would be helpful to has the '$F' in your format
-    #define CL_LOG_FUNC_START(message, ...)         { log_output(Debug, "START ", __func__, __FILE__, __LINE__, CL_THREAD_ID, message, ##__VA_ARGS__); }
 #else
     // Disabled by LogLevel
     #define CL_LOG_Debug(message, ...)              {} while(0);
-    // Disabled by LogLevel
-    #define CL_LOG_FUNC_END(message, ...)           {} while(0);
-    // Disabled by LogLevel
-    #define CL_LOG_FUNC_START(message, ...)         {} while(0);
 #endif
 
 // define conditional log macro for TRACE
 #if LOG_LEVEL_ENABLED >= 4
     #define CL_LOG_Trace(message, ...)              { log_output(Trace, "", __func__, __FILE__, __LINE__, CL_THREAD_ID, message, ##__VA_ARGS__); }
+
+    // Logs the start of a function, it would be helpful to has the '$F' in your format
+    #define CL_LOG_FUNC_START(message, ...)         { log_output(Trace, "START ", __func__, __FILE__, __LINE__, CL_THREAD_ID, message, ##__VA_ARGS__); }
+
+    // Logs the end of a function, it would be helpful to has the '$F' in your format
+    #define CL_LOG_FUNC_END(message, ...)           { log_output(Trace, "END ", __func__, __FILE__, __LINE__, CL_THREAD_ID, message, ##__VA_ARGS__); }
+
     // Insert a separation line in Log output (-------)
     #define CL_SEPARATOR()                          { print_Separator(CL_THREAD_ID); }
+
     // Insert a separation line in Log output (=======)
     #define CL_SEPARATOR_BIG()                      { print_Separator_Big(CL_THREAD_ID); }
 #else
     // Disabled by LogLevel
     #define CL_LOG_Trace(message, ...) ;
+    // Disabled by LogLevel
+    #define CL_LOG_FUNC_END(message, ...)           {} while(0);
+    // Disabled by LogLevel
+    #define CL_LOG_FUNC_START(message, ...)         {} while(0);
     // Disabled by LogLevel
     #define CL_SEPARATOR()                          {} while(0);
     #define CL_SEPARATOR_BIG()                      {} while(0);

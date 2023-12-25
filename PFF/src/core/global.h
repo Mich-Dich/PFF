@@ -12,7 +12,7 @@ typedef struct global {
 	Config_State config;
 	input_State input;
 	Time_State time;
-	DArray Input_Mappings;
+	c_vector Input_Mappings;
 } Global;
 
 extern Global global;
