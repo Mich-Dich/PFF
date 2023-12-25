@@ -63,6 +63,7 @@ typedef	struct {
 
 typedef	struct {
 	u8 key_code;
+	c_vector* key_codes;
 	Key_state key_state;
 	input_action* action;
 	bool override_settings;
@@ -71,7 +72,8 @@ typedef	struct {
 
 
 void input_init(void);
-void register_key_binding(const char* key, const input_action* action);
+void register_key_binding_bool(const char* key, const input_action* action);
+void register_key_binding_vec2(const char* x_plus, const char* x_minus, const char* y_plus, const char* y_minus, const input_action* action);
 void change_key_binding_Settings(input_mapping mapping, const input_action_settings settings);
 
 // --------------------------------------------------- OLD SHITY SYSTEM ---------------------------------------------------

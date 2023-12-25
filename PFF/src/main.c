@@ -58,48 +58,59 @@ int main(int argc, char* argv[]) {
     input_init();
 
     input_action move_up;
+    input_action move_down;
+    input_action move_left;
+    input_action move_right;
+
     INPUT_ACTION_REGISTER_NAME(move_up);
     move_up.description = "Move the player up";
-    move_up.state = KS_released;
     move_up.triger_when_paused = false;
-    move_up.value = IV_vec2;
+    move_up.value = IV_bool;
     move_up.settings.duration = 0.5f;
     move_up.settings.trigger = IAT_key_down;
     move_up.settings.modefiers = IAM_none;
-    register_key_binding("W", &move_up);
+    register_key_binding_bool("W", &move_up);
 
-    input_action move_down;
     INPUT_ACTION_REGISTER_NAME(move_down);
-    move_down.description = "Move the player up";
-    move_down.state = KS_released;
+    move_down.description = "Move the player down";
     move_down.triger_when_paused = false;
-    move_down.value = IV_vec2;
+    move_down.value = IV_bool;
     move_down.settings.duration = 0.5f;
     move_down.settings.trigger = IAT_key_down;
     move_down.settings.modefiers = IAM_none;
-    register_key_binding("S", &move_down);
+    register_key_binding_bool("S", &move_down);
 
-    input_action move_left;
     INPUT_ACTION_REGISTER_NAME(move_left);
-    move_left.description = "Move the player up";
-    move_left.state = KS_released;
+    move_left.description = "Move the player left";
     move_left.triger_when_paused = false;
-    move_left.value = IV_vec2;
+    move_left.value = IV_bool;
     move_left.settings.duration = 0.5f;
     move_left.settings.trigger = IAT_key_down;
     move_left.settings.modefiers = IAM_none;
-    register_key_binding("A", &move_left);
+    register_key_binding_bool("A", &move_left);
 
-    input_action move_right;
     INPUT_ACTION_REGISTER_NAME(move_right);
-    move_right.description = "Move the player up";
-    move_right.state = KS_released;
+    move_right.description = "Move the player right";
     move_right.triger_when_paused = false;
-    move_right.value = IV_vec2;
+    move_right.value = IV_bool;
     move_right.settings.duration = 0.5f;
     move_right.settings.trigger = IAT_key_down;
     move_right.settings.modefiers = IAM_none;
-    register_key_binding("D", &move_right);
+    register_key_binding_bool("D", &move_right);
+
+
+
+
+    input_action movement;
+
+    INPUT_ACTION_REGISTER_NAME(movement);
+    movement.description = "Move the player up";
+    movement.triger_when_paused = false;
+    movement.value = IV_vec2;
+    movement.settings.trigger = IAT_key_down;
+    movement.settings.modefiers = IAM_none;
+    register_key_binding_vec2("W", "S", "A", "D", &movement);
+
 
     /*
     CL_LOG(Warn, "size of input bindings [size: %llu]", global.config.key_bindings.size);
@@ -142,8 +153,6 @@ int main(int argc, char* argv[]) {
         }
 
         input_update();
-
-
         if (move_up.state != AS_inactive)
             PlayerPos[1] += 500 * global.time.delta;
         if (move_down.state != AS_inactive)
