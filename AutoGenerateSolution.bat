@@ -23,7 +23,7 @@ del %del_file_PDB%
 del %del_file_EXE%
 echo.
 
-echo =================================== Compile Project:
+echo =================================== Compile VS 2022 Solution:
 call vendor\premake\premake5.exe vs2022
 echo.
 
