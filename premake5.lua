@@ -13,15 +13,13 @@ workspace "PFF"
 	IncludeDir = {}
 	IncludeDir["SDL2"] = "%{prj.name}/vendor/SDL2/include"
 	IncludeDir["glad"] = "%{prj.name}/vendor/glad/include"
-	-- IncludeDir["GLFW"] = "%{prj.name}/vendor/GLFW/include"
-	-- IncludeDir["ImGui"] = "%{prj.name}/vendor/ImGui"
 
 	Lib_Dir = "lib"
 	-- include "PFF/vendor/glad"
 
 project "PFF"
 	location "PFF"
-	kind "ConsoleApp"
+	kind "SharedLib"
 	language "C"
 
 	targetdir ("bin/" .. outputs  .. "/%{prj.name}")
@@ -69,13 +67,13 @@ project "PFF"
 		defines
 		{
 			"PFF_PLATFORM_WINDOWS",
-			"PFF_BUILD_DLL"
+			"PFF_INSIDE_ENGINE"
 		}
 
-		-- postbuildcommands
-		-- {
-		-- 	("{COPY} %{cfg.buildtarget.relpath} ../bin/" .. outputs  .. "/Sandbox")
-		-- }
+		postbuildcommands
+		{
+			("{COPY} %{cfg.buildtarget.relpath} ../bin/" .. outputs  .. "/Sandbox")
+		}
 
 	filter "configurations:Debug"
 		defines "PFF_DEBUG"
@@ -103,7 +101,8 @@ project "Sandbox"
 
 	includedirs
 	{
-		"PFF/src"
+		"PFF/src",
+		"vendor"
 	}
 
 	links

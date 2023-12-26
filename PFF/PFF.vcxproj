@@ -19,13 +19,13 @@
   </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'" Label="Configuration">
-    <ConfigurationType>Application</ConfigurationType>
+    <ConfigurationType>DynamicLibrary</ConfigurationType>
     <UseDebugLibraries>true</UseDebugLibraries>
     <CharacterSet>Unicode</CharacterSet>
     <PlatformToolset>v143</PlatformToolset>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'" Label="Configuration">
-    <ConfigurationType>Application</ConfigurationType>
+    <ConfigurationType>DynamicLibrary</ConfigurationType>
     <UseDebugLibraries>false</UseDebugLibraries>
     <CharacterSet>Unicode</CharacterSet>
     <PlatformToolset>v143</PlatformToolset>
@@ -45,20 +45,20 @@
     <OutDir>..\bin\Debug-windows-x86_64\PFF\</OutDir>
     <IntDir>..\bin-int\Debug-windows-x86_64\PFF\</IntDir>
     <TargetName>PFF</TargetName>
-    <TargetExt>.exe</TargetExt>
+    <TargetExt>.dll</TargetExt>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
     <LinkIncremental>false</LinkIncremental>
     <OutDir>..\bin\Release-windows-x86_64\PFF\</OutDir>
     <IntDir>..\bin-int\Release-windows-x86_64\PFF\</IntDir>
     <TargetName>PFF</TargetName>
-    <TargetExt>.exe</TargetExt>
+    <TargetExt>.dll</TargetExt>
   </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
     <ClCompile>
       <PrecompiledHeader>NotUsing</PrecompiledHeader>
       <WarningLevel>Level3</WarningLevel>
-      <PreprocessorDefinitions>_CRT_STDIO_ISO_WIDE_SPECIFIERS;PFF_PLATFORM_WINDOWS;PFF_BUILD_DLL;PFF_DEBUG;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions>_CRT_STDIO_ISO_WIDE_SPECIFIERS;PFF_PLATFORM_WINDOWS;PFF_INSIDE_ENGINE;PFF_DEBUG;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <AdditionalIncludeDirectories>src;vendor;vendor\SDL2\include;vendor\glad\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <DebugInformationFormat>EditAndContinue</DebugInformationFormat>
       <Optimization>Disabled</Optimization>
@@ -67,17 +67,21 @@
       <ExternalWarningLevel>Level3</ExternalWarningLevel>
     </ClCompile>
     <Link>
-      <SubSystem>Console</SubSystem>
+      <SubSystem>Windows</SubSystem>
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <AdditionalDependencies>lib\SDL2.lib;lib\SDL2main.lib;lib\SDL2_mixer.lib;lib\SDL2test.lib;lib\freetype.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <AdditionalLibraryDirectories>..\DLL;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <ImportLibrary>..\bin\Debug-windows-x86_64\PFF\PFF.lib</ImportLibrary>
     </Link>
+    <PostBuildEvent>
+      <Command>IF EXIST ..\bin\Debug-windows-x86_64\PFF\PFF.dll\ (xcopy /Q /E /Y /I ..\bin\Debug-windows-x86_64\PFF\PFF.dll ..\bin\Debug-windows-x86_64\Sandbox &gt; nul) ELSE (xcopy /Q /Y /I ..\bin\Debug-windows-x86_64\PFF\PFF.dll ..\bin\Debug-windows-x86_64\Sandbox &gt; nul)</Command>
+    </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
     <ClCompile>
       <PrecompiledHeader>NotUsing</PrecompiledHeader>
       <WarningLevel>Level3</WarningLevel>
-      <PreprocessorDefinitions>_CRT_STDIO_ISO_WIDE_SPECIFIERS;PFF_PLATFORM_WINDOWS;PFF_BUILD_DLL;PFF_RELEASE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions>_CRT_STDIO_ISO_WIDE_SPECIFIERS;PFF_PLATFORM_WINDOWS;PFF_INSIDE_ENGINE;PFF_RELEASE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <AdditionalIncludeDirectories>src;vendor;vendor\SDL2\include;vendor\glad\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <Optimization>Full</Optimization>
       <FunctionLevelLinking>true</FunctionLevelLinking>
@@ -89,40 +93,50 @@
       <ExternalWarningLevel>Level3</ExternalWarningLevel>
     </ClCompile>
     <Link>
-      <SubSystem>Console</SubSystem>
+      <SubSystem>Windows</SubSystem>
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
       <OptimizeReferences>true</OptimizeReferences>
       <AdditionalDependencies>lib\SDL2.lib;lib\SDL2main.lib;lib\SDL2_mixer.lib;lib\SDL2test.lib;lib\freetype.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <AdditionalLibraryDirectories>..\DLL;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <ImportLibrary>..\bin\Release-windows-x86_64\PFF\PFF.lib</ImportLibrary>
     </Link>
+    <PostBuildEvent>
+      <Command>IF EXIST ..\bin\Release-windows-x86_64\PFF\PFF.dll\ (xcopy /Q /E /Y /I ..\bin\Release-windows-x86_64\PFF\PFF.dll ..\bin\Release-windows-x86_64\Sandbox &gt; nul) ELSE (xcopy /Q /Y /I ..\bin\Release-windows-x86_64\PFF\PFF.dll ..\bin\Release-windows-x86_64\Sandbox &gt; nul)</Command>
+    </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <ClInclude Include="src\core\IOCore\IOCore.h" />
-    <ClInclude Include="src\core\config.h" />
-    <ClInclude Include="src\core\container\darray.h" />
-    <ClInclude Include="src\core\global.h" />
-    <ClInclude Include="src\core\input.h" />
-    <ClInclude Include="src\core\logger.h" />
-    <ClInclude Include="src\core\pch.h" />
-    <ClInclude Include="src\core\render\render.h" />
-    <ClInclude Include="src\core\types.h" />
-    <ClInclude Include="src\core\utils\pff_time.h" />
-    <ClInclude Include="src\core\utils\platform.h" />
-    <ClInclude Include="src\core\utils\util.h" />
+    <ClInclude Include="src\PFF.h" />
+    <ClInclude Include="src\application.h" />
+    <ClInclude Include="src\engine\config.h" />
+    <ClInclude Include="src\engine\core.h" />
+    <ClInclude Include="src\engine\global.h" />
+    <ClInclude Include="src\engine\input.h" />
+    <ClInclude Include="src\engine\render\render.h" />
+    <ClInclude Include="src\engine\window\platform.h" />
+    <ClInclude Include="src\entry_point.h" />
+    <ClInclude Include="src\game_types.h" />
+    <ClInclude Include="src\pch.h" />
+    <ClInclude Include="src\util\IOCore\IOCore.h" />
+    <ClInclude Include="src\util\IOCore\logger.h" />
+    <ClInclude Include="src\util\container\c_vec.h" />
+    <ClInclude Include="src\util\pff_math.h" />
+    <ClInclude Include="src\util\pff_time.h" />
+    <ClInclude Include="src\util\types.h" />
+    <ClInclude Include="src\util\util.h" />
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="src\core\IOCore\IOCore.c" />
-    <ClCompile Include="src\core\config.c" />
-    <ClCompile Include="src\core\container\darray.c" />
-    <ClCompile Include="src\core\global.c" />
-    <ClCompile Include="src\core\input.c" />
-    <ClCompile Include="src\core\logger.c" />
-    <ClCompile Include="src\core\render\render.c" />
-    <ClCompile Include="src\core\utils\pff_time.c" />
-    <ClCompile Include="src\core\utils\platform.c" />
-    <ClCompile Include="src\core\utils\util.c" />
+    <ClCompile Include="src\application.c" />
+    <ClCompile Include="src\engine\config.c" />
+    <ClCompile Include="src\engine\global.c" />
+    <ClCompile Include="src\engine\input.c" />
+    <ClCompile Include="src\engine\render\render.c" />
+    <ClCompile Include="src\engine\window\platform.c" />
     <ClCompile Include="src\glad.c" />
-    <ClCompile Include="src\main.c" />
+    <ClCompile Include="src\util\IOCore\IOCore.c" />
+    <ClCompile Include="src\util\IOCore\logger.c" />
+    <ClCompile Include="src\util\container\c_vec.c" />
+    <ClCompile Include="src\util\pff_math.c" />
+    <ClCompile Include="src\util\pff_time.c" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

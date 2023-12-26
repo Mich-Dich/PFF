@@ -1,92 +1,103 @@
 <?xml version="1.0" encoding="utf-8"?>
 <Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <ItemGroup>
-    <Filter Include="core">
-      <UniqueIdentifier>{4E40957C-3A77-960D-E363-7C10CF79120F}</UniqueIdentifier>
+    <Filter Include="engine">
+      <UniqueIdentifier>{FBDB78FB-E77D-A3D1-D038-B725BC792A22}</UniqueIdentifier>
     </Filter>
-    <Filter Include="core\IOCore">
-      <UniqueIdentifier>{5E0E3226-CAC3-AA1B-53B8-A4F2BF6CA11F}</UniqueIdentifier>
+    <Filter Include="engine\render">
+      <UniqueIdentifier>{2A265F8D-96E6-DAC3-5F21-2441CBA01FA0}</UniqueIdentifier>
     </Filter>
-    <Filter Include="core\container">
-      <UniqueIdentifier>{C061332E-AC2F-2734-95C3-975A81300399}</UniqueIdentifier>
+    <Filter Include="engine\window">
+      <UniqueIdentifier>{A2545199-0E15-CDCF-D74F-164D43CF11AC}</UniqueIdentifier>
     </Filter>
-    <Filter Include="core\render">
-      <UniqueIdentifier>{1D0F7B87-89C4-F37C-12B9-ED537E6DEA80}</UniqueIdentifier>
+    <Filter Include="util">
+      <UniqueIdentifier>{43339F7C-2F6A-A00D-D856-8610C46C1C0F}</UniqueIdentifier>
     </Filter>
-    <Filter Include="core\utils">
-      <UniqueIdentifier>{4ED4EC51-3A8C-2E9F-A393-07FB8F6AC98F}</UniqueIdentifier>
+    <Filter Include="util\IOCore">
+      <UniqueIdentifier>{B37B58F8-1F31-D1ED-A825-CBC414DAC7F1}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="util\container">
+      <UniqueIdentifier>{F54A8DD2-E118-81D8-CAAC-F1FEB6195D3D}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="src\core\IOCore\IOCore.h">
-      <Filter>core\IOCore</Filter>
+    <ClInclude Include="src\PFF.h" />
+    <ClInclude Include="src\application.h" />
+    <ClInclude Include="src\engine\config.h">
+      <Filter>engine</Filter>
     </ClInclude>
-    <ClInclude Include="src\core\config.h">
-      <Filter>core</Filter>
+    <ClInclude Include="src\engine\core.h">
+      <Filter>engine</Filter>
     </ClInclude>
-    <ClInclude Include="src\core\container\darray.h">
-      <Filter>core\container</Filter>
+    <ClInclude Include="src\engine\global.h">
+      <Filter>engine</Filter>
     </ClInclude>
-    <ClInclude Include="src\core\global.h">
-      <Filter>core</Filter>
+    <ClInclude Include="src\engine\input.h">
+      <Filter>engine</Filter>
     </ClInclude>
-    <ClInclude Include="src\core\input.h">
-      <Filter>core</Filter>
+    <ClInclude Include="src\engine\render\render.h">
+      <Filter>engine\render</Filter>
     </ClInclude>
-    <ClInclude Include="src\core\logger.h">
-      <Filter>core</Filter>
+    <ClInclude Include="src\engine\window\platform.h">
+      <Filter>engine\window</Filter>
     </ClInclude>
-    <ClInclude Include="src\core\pch.h">
-      <Filter>core</Filter>
+    <ClInclude Include="src\entry_point.h" />
+    <ClInclude Include="src\game_types.h" />
+    <ClInclude Include="src\pch.h" />
+    <ClInclude Include="src\util\IOCore\IOCore.h">
+      <Filter>util\IOCore</Filter>
     </ClInclude>
-    <ClInclude Include="src\core\render\render.h">
-      <Filter>core\render</Filter>
+    <ClInclude Include="src\util\IOCore\logger.h">
+      <Filter>util\IOCore</Filter>
     </ClInclude>
-    <ClInclude Include="src\core\types.h">
-      <Filter>core</Filter>
+    <ClInclude Include="src\util\container\c_vec.h">
+      <Filter>util\container</Filter>
     </ClInclude>
-    <ClInclude Include="src\core\utils\pff_time.h">
-      <Filter>core\utils</Filter>
+    <ClInclude Include="src\util\pff_math.h">
+      <Filter>util</Filter>
     </ClInclude>
-    <ClInclude Include="src\core\utils\platform.h">
-      <Filter>core\utils</Filter>
+    <ClInclude Include="src\util\pff_time.h">
+      <Filter>util</Filter>
     </ClInclude>
-    <ClInclude Include="src\core\utils\util.h">
-      <Filter>core\utils</Filter>
+    <ClInclude Include="src\util\types.h">
+      <Filter>util</Filter>
+    </ClInclude>
+    <ClInclude Include="src\util\util.h">
+      <Filter>util</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="src\core\IOCore\IOCore.c">
-      <Filter>core\IOCore</Filter>
+    <ClCompile Include="src\application.c" />
+    <ClCompile Include="src\engine\config.c">
+      <Filter>engine</Filter>
     </ClCompile>
-    <ClCompile Include="src\core\config.c">
-      <Filter>core</Filter>
+    <ClCompile Include="src\engine\global.c">
+      <Filter>engine</Filter>
     </ClCompile>
-    <ClCompile Include="src\core\container\darray.c">
-      <Filter>core\container</Filter>
+    <ClCompile Include="src\engine\input.c">
+      <Filter>engine</Filter>
     </ClCompile>
-    <ClCompile Include="src\core\global.c">
-      <Filter>core</Filter>
+    <ClCompile Include="src\engine\render\render.c">
+      <Filter>engine\render</Filter>
     </ClCompile>
-    <ClCompile Include="src\core\input.c">
-      <Filter>core</Filter>
-    </ClCompile>
-    <ClCompile Include="src\core\logger.c">
-      <Filter>core</Filter>
-    </ClCompile>
-    <ClCompile Include="src\core\render\render.c">
-      <Filter>core\render</Filter>
-    </ClCompile>
-    <ClCompile Include="src\core\utils\pff_time.c">
-      <Filter>core\utils</Filter>
-    </ClCompile>
-    <ClCompile Include="src\core\utils\platform.c">
-      <Filter>core\utils</Filter>
-    </ClCompile>
-    <ClCompile Include="src\core\utils\util.c">
-      <Filter>core\utils</Filter>
+    <ClCompile Include="src\engine\window\platform.c">
+      <Filter>engine\window</Filter>
     </ClCompile>
     <ClCompile Include="src\glad.c" />
-    <ClCompile Include="src\main.c" />
+    <ClCompile Include="src\util\IOCore\IOCore.c">
+      <Filter>util\IOCore</Filter>
+    </ClCompile>
+    <ClCompile Include="src\util\IOCore\logger.c">
+      <Filter>util\IOCore</Filter>
+    </ClCompile>
+    <ClCompile Include="src\util\container\c_vec.c">
+      <Filter>util\container</Filter>
+    </ClCompile>
+    <ClCompile Include="src\util\pff_math.c">
+      <Filter>util</Filter>
+    </ClCompile>
+    <ClCompile Include="src\util\pff_time.c">
+      <Filter>util</Filter>
+    </ClCompile>
   </ItemGroup>
 </Project>
