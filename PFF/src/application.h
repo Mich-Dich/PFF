@@ -15,6 +15,10 @@ typedef struct {
 
 PFF_API bool application_create(struct game* game_inst);
 
-PFF_API bool application_run();
+PFF_API bool application_run(void);
 
-bool application_shutdown();
+PFF_API f32 get_delta_time(void);
+PFF_API u32 get_window_width(void);
+PFF_API u32 get_window_height(void);
+
+bool application_shutdown(void);

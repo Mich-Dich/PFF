@@ -73,10 +73,10 @@ typedef	struct {
 
 
 void input_init(void);
-void register_key_binding_bool(const char* key, input_action* action);
-void register_key_binding_float(const char* plus, const char* minus, input_action* action);
-void register_key_binding_vec2(const char* x_plus, const char* x_minus, const char* y_plus, const char* y_minus, input_action* action);
-void change_key_binding_Settings(input_mapping mapping, const input_action_settings settings);
+PFF_API void register_key_binding_bool(const char* key, input_action* action);
+PFF_API void register_key_binding_float(const char* plus, const char* minus, input_action* action);
+PFF_API void register_key_binding_vec2(const char* x_plus, const char* x_minus, const char* y_plus, const char* y_minus, input_action* action);
+PFF_API void change_key_binding_Settings(input_mapping mapping, const input_action_settings settings);
 
 // --------------------------------------------------- OLD SHITY SYSTEM ---------------------------------------------------
 

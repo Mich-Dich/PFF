@@ -26,4 +26,4 @@ void render_begin(void);
 void render_end(void);
 
 // client usable funcs
-void render_quad(vec2 pos, vec2 size, vec4 color);
+PFF_API void render_quad(vec2 pos, vec2 size, vec4 color);
