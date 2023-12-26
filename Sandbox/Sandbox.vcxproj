@@ -93,6 +93,9 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="src\Sandbox.cpp" />
+  </ItemGroup>
+  <ItemGroup>
     <ProjectReference Include="..\PFF\PFF.vcxproj">
       <Project>{8110880B-ED19-887C-7695-9E7CE29D937C}</Project>
     </ProjectReference>

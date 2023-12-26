@@ -21,8 +21,8 @@ workspace "PFF"
 
 project "PFF"
 	location "PFF"
-	kind "ConsoleApp"
-	language "C"
+	kind "SharedLib"
+	language "C++"
 
 	targetdir ("bin/" .. outputs  .. "/%{prj.name}")
 	objdir ("bin-int/" .. outputs  .. "/%{prj.name}")
@@ -33,7 +33,8 @@ project "PFF"
 	files
     {
 		"%{prj.name}/src/**.h",
-		"%{prj.name}/src/**.c"
+		"%{prj.name}/src/**.c",
+		"%{prj.name}/src/**.cpp"
 	}
 
       -- Specify the directory where the DLL is located
@@ -69,13 +70,13 @@ project "PFF"
 		defines
 		{
 			"PFF_PLATFORM_WINDOWS",
-			"PFF_BUILD_DLL"
+			"PFF_INSIDE_ENGINE"
 		}
 
-		-- postbuildcommands
-		-- {
-		-- 	("{COPY} %{cfg.buildtarget.relpath} ../bin/" .. outputs  .. "/Sandbox")
-		-- }
+		postbuildcommands
+		{
+			("{COPY} %{cfg.buildtarget.relpath} ../bin/" .. outputs  .. "/Sandbox")
+		}
 
 	filter "configurations:Debug"
 		defines "PFF_DEBUG"
@@ -90,7 +91,7 @@ project "PFF"
 project "Sandbox"
 	location "Sandbox"
 	kind "ConsoleApp"
-	language "C"
+	language "C++"
 
 	targetdir ("bin/" .. outputs  .. "/%{prj.name}")
 	objdir ("bin-int/" .. outputs  .. "/%{prj.name}")
@@ -98,7 +99,8 @@ project "Sandbox"
 	files
 	{
 		"%{prj.name}/src/**.h",
-		"%{prj.name}/src/**.c"
+		"%{prj.name}/src/**.c",
+		"%{prj.name}/src/**.cpp"
 	}
 
 	includedirs

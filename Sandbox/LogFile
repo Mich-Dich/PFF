@@ -1,0 +1,15 @@
+[2023/12/26 - 13:40:30]  Log initialized
+   Inital Log Format: '[$B$T:$J$E] [$B$L$X - $K - $P:$G$E] $C$Z'
+   Enabled Log Levels: Fatal + Error + Warn + Info + Debug + Trace
+====================================================================================================================
+[[90m13:40:30:513[97m[40m] [[90mTRACE - PFF\src\engine\core\Logger.cpp - Init:97[97m[40m] Subsystem [Logger] initialized
+[[90m13:40:30:515[97m[40m] [[90mTRACE - Sandbox\src\Sandbox.cpp - Sandbox:9[97m[40m] Start Custom Application
+[[90m13:40:30:516[97m[40m] [[90mTRACE - PFF\src\engine\core\window.cpp - Window:14[97m[40m] Window Constructor: Custom
+[[92m13:40:30:730[97m[40m] [[92mINFO  - PFF\src\engine\core\window.cpp - Window:34[97m[40m] OpenGL Loaded
+[[92m13:40:30:732[97m[40m] [[92mINFO  - PFF\src\engine\core\window.cpp - Window:35[97m[40m] Vendor:   %sNVIDIA Corporation
+[[92m13:40:30:733[97m[40m] [[92mINFO  - PFF\src\engine\core\window.cpp - Window:36[97m[40m] Renderer: %sNVIDIA GeForce RTX 3060 Laptop GPU/PCIe/SSE2
+[[92m13:40:30:735[97m[40m] [[92mINFO  - PFF\src\engine\core\window.cpp - Window:37[97m[40m] Version:  %s4.6.0 NVIDIA 535.98
+[[90m13:40:30:737[97m[40m] [[90mTRACE - Sandbox\src\Sandbox.cpp - Sandbox:11[97m[40m] Log msg 900/600
+[[94m13:40:30:738[97m[40m] [[94mDEBUG - Sandbox\src\Sandbox.cpp - Sandbox:12[97m[40m] Log msg 900/600
+[[90m13:40:30:740[97m[40m] [[90mTRACE - PFF\src\engine\application.cpp - Run:18[97m[40m] application Run
+

@@ -1,92 +1,59 @@
 <?xml version="1.0" encoding="utf-8"?>
 <Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <ItemGroup>
-    <Filter Include="core">
-      <UniqueIdentifier>{4E40957C-3A77-960D-E363-7C10CF79120F}</UniqueIdentifier>
+    <Filter Include="engine">
+      <UniqueIdentifier>{FBDB78FB-E77D-A3D1-D038-B725BC792A22}</UniqueIdentifier>
     </Filter>
-    <Filter Include="core\IOCore">
-      <UniqueIdentifier>{5E0E3226-CAC3-AA1B-53B8-A4F2BF6CA11F}</UniqueIdentifier>
+    <Filter Include="engine\Events">
+      <UniqueIdentifier>{7FDF9525-EB9F-115C-B4DA-5AD9205A5638}</UniqueIdentifier>
     </Filter>
-    <Filter Include="core\container">
-      <UniqueIdentifier>{C061332E-AC2F-2734-95C3-975A81300399}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="core\render">
-      <UniqueIdentifier>{1D0F7B87-89C4-F37C-12B9-ED537E6DEA80}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="core\utils">
-      <UniqueIdentifier>{4ED4EC51-3A8C-2E9F-A393-07FB8F6AC98F}</UniqueIdentifier>
+    <Filter Include="engine\core">
+      <UniqueIdentifier>{5341430D-BFF6-BB02-48EB-B5D9B49FB206}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="src\core\IOCore\IOCore.h">
-      <Filter>core\IOCore</Filter>
+    <ClInclude Include="src\PFF.h" />
+    <ClInclude Include="src\engine\EntryPoint.h">
+      <Filter>engine</Filter>
     </ClInclude>
-    <ClInclude Include="src\core\config.h">
-      <Filter>core</Filter>
+    <ClInclude Include="src\engine\Events\ApplicationEvent.h">
+      <Filter>engine\Events</Filter>
     </ClInclude>
-    <ClInclude Include="src\core\container\darray.h">
-      <Filter>core\container</Filter>
+    <ClInclude Include="src\engine\Events\Event.h">
+      <Filter>engine\Events</Filter>
     </ClInclude>
-    <ClInclude Include="src\core\global.h">
-      <Filter>core</Filter>
+    <ClInclude Include="src\engine\Events\KeyEvent.h">
+      <Filter>engine\Events</Filter>
     </ClInclude>
-    <ClInclude Include="src\core\input.h">
-      <Filter>core</Filter>
+    <ClInclude Include="src\engine\Events\MouseEvent.h">
+      <Filter>engine\Events</Filter>
     </ClInclude>
-    <ClInclude Include="src\core\logger.h">
-      <Filter>core</Filter>
+    <ClInclude Include="src\engine\application.h">
+      <Filter>engine</Filter>
     </ClInclude>
-    <ClInclude Include="src\core\pch.h">
-      <Filter>core</Filter>
+    <ClInclude Include="src\engine\core\Logger.h">
+      <Filter>engine\core</Filter>
     </ClInclude>
-    <ClInclude Include="src\core\render\render.h">
-      <Filter>core\render</Filter>
+    <ClInclude Include="src\engine\core\window.h">
+      <Filter>engine\core</Filter>
     </ClInclude>
-    <ClInclude Include="src\core\types.h">
-      <Filter>core</Filter>
+    <ClInclude Include="src\engine\types.h">
+      <Filter>engine</Filter>
     </ClInclude>
-    <ClInclude Include="src\core\utils\pff_time.h">
-      <Filter>core\utils</Filter>
-    </ClInclude>
-    <ClInclude Include="src\core\utils\platform.h">
-      <Filter>core\utils</Filter>
-    </ClInclude>
-    <ClInclude Include="src\core\utils\util.h">
-      <Filter>core\utils</Filter>
+    <ClInclude Include="src\engine\util.h">
+      <Filter>engine</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="src\core\IOCore\IOCore.c">
-      <Filter>core\IOCore</Filter>
+    <ClCompile Include="src\engine\application.cpp">
+      <Filter>engine</Filter>
     </ClCompile>
-    <ClCompile Include="src\core\config.c">
-      <Filter>core</Filter>
+    <ClCompile Include="src\engine\core\Logger.cpp">
+      <Filter>engine\core</Filter>
     </ClCompile>
-    <ClCompile Include="src\core\container\darray.c">
-      <Filter>core\container</Filter>
-    </ClCompile>
-    <ClCompile Include="src\core\global.c">
-      <Filter>core</Filter>
-    </ClCompile>
-    <ClCompile Include="src\core\input.c">
-      <Filter>core</Filter>
-    </ClCompile>
-    <ClCompile Include="src\core\logger.c">
-      <Filter>core</Filter>
-    </ClCompile>
-    <ClCompile Include="src\core\render\render.c">
-      <Filter>core\render</Filter>
-    </ClCompile>
-    <ClCompile Include="src\core\utils\pff_time.c">
-      <Filter>core\utils</Filter>
-    </ClCompile>
-    <ClCompile Include="src\core\utils\platform.c">
-      <Filter>core\utils</Filter>
-    </ClCompile>
-    <ClCompile Include="src\core\utils\util.c">
-      <Filter>core\utils</Filter>
+    <ClCompile Include="src\engine\core\window.cpp">
+      <Filter>engine\core</Filter>
     </ClCompile>
     <ClCompile Include="src\glad.c" />
-    <ClCompile Include="src\main.c" />
   </ItemGroup>
 </Project>
