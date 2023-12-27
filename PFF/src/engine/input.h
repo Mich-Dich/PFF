@@ -1,17 +1,8 @@
 #pragma once
 
 #include "pch.h"
-#include "util/util.h"
 
 // --------------------------------------------------- General Action Structs ---------------------------------------------------
-
-typedef enum {
-	IAT_key_down = 0,
-	IAT_key_up,
-	IAT_hold,		// hold for min duration
-	IAT_tap			// down & up in short time
-} input_action_trigger;
-
 
 #define INPUT_ACTION_TRIGGER_KEY_DOWN		BIT(0)
 #define INPUT_ACTION_TRIGGER_KEY_UP			BIT(1)
@@ -26,6 +17,17 @@ typedef enum {
 #define MIN_DIF_BETWEEN_SMOOTH_INPUT_AND_TARGET		0.08
 #define INPUT_ACTION_REGISTER_NAME(var)         var.action_name = #var
 
+
+typedef struct {
+	c_vector input_actions;
+	i32 courser_pos_x;
+	i32 courser_pos_y;
+	bool courser_in_window;
+} input_State;
+
+
+// --------------------------------------------------- Input Action ---------------------------------------------------
+
 typedef struct {
 	float duration_in_sec;
 	u32 trigger_flags;
@@ -37,8 +39,6 @@ typedef enum {
 	KS_pressed,
 	KS_held
 } Key_state;
-
-// --------------------------------------------------- Input Action ---------------------------------------------------
 
 typedef enum {
 	IV_bool = 0,
@@ -73,29 +73,14 @@ typedef	struct {
 
 
 void input_init(void);
-PFF_API void register_key_binding_bool(const char* key, input_action* action);
-PFF_API void register_key_binding_float(const char* plus, const char* minus, input_action* action);
-PFF_API void register_key_binding_vec2(const char* x_plus, const char* x_minus, const char* y_plus, const char* y_minus, input_action* action);
-PFF_API void change_key_binding_Settings(input_mapping mapping, const input_action_settings settings);
-
-// --------------------------------------------------- OLD SHITY SYSTEM ---------------------------------------------------
-
-typedef enum {
-	IK_left,
-	IK_right,
-	IK_up,
-	IK_down,
-	IK_jump,
-	IK_escape
-} input_key;
-
-
-typedef struct {
-	Key_state left;
-	Key_state right;
-	Key_state up;
-	Key_state down;
-	Key_state escape;
-} input_State;
-
 void input_update(void);
+
+PFF_API void input_register_action_bool(const char* key, input_action* action);
+PFF_API void input_register_action_float(const char* plus, const char* minus, input_action* action);
+PFF_API void input_register_action_vec2(const char* x_plus, const char* x_minus, const char* y_plus, const char* y_minus, input_action* action);
+
+PFF_API void input_change_action_settings(input_mapping mapping, const input_action_settings settings);
+PFF_API bool input_update_action_binding_bool(input_action* action, char* key);
+PFF_API bool input_update_action_binding_float(input_action* action, const char* plus, const char* minus);
+PFF_API bool input_update_action_binding_vec2(input_action* action, const char* x_plus, const char* x_minus, const char* y_plus, const char* y_minus);
+

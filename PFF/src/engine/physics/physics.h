@@ -1,19 +1,16 @@
 #pragma once
 
 #include "pch.h"
-
-typedef struct {
-	vec2 pos;
-	vec2 size;
-} AABB;
-
-typedef struct {
-	AABB aabb;
-	vec2 velocity;
-	vec2 acceleration;
-} body;
+#include "engine/engine_types.h"
 
 void physics_init(void);
 void physics_update(void);
-size_t physics_body_create(vec2 position, vec2 size);
-body* physics_body_get_data(size_t index);
+
+PFF_API size_t physics_body_create(vec2 position, vec2 size);
+PFF_API pyhsics_body* physics_body_get_data(size_t index);
+PFF_API bool physics_test_intersect_point_aabb(vec2 point, AABB aabb);
+PFF_API bool physics_test_intersect_aabb_aabb(AABB a, AABB b);
+
+// TODO: make internal
+PFF_API AABB aabb_minkowski_difference(AABB a, AABB b);
+PFF_API void aabb_penetration_vector(vec2 r, AABB aabb);

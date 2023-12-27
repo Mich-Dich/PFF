@@ -39,8 +39,8 @@
 #define VECTOR_ASSERT_INPUT									assert(v != NULL);								\
 															assert(v->data != NULL)
 
-#define VALIDATE_VACTOR_SIZE								if (v->size == 0) {								\
-																return NULL;								\
+#define VALIDATE_VACTOR_SIZE(return_value)					if (v->size == 0) {								\
+																return return_value;								\
 															}
 
 // ------------------------------------------------------------------------------------------ simple functions ------------------------------------------------------------------------------------------
@@ -197,7 +197,7 @@ void* c_vec_at(c_vector* v, size_t i) {
 void* c_vec_front(c_vector* v) {
 
 	VECTOR_ASSERT_INPUT;
-	VALIDATE_VACTOR_SIZE;
+	VALIDATE_VACTOR_SIZE(NULL);
 
 	return v->data;
 }
@@ -206,7 +206,7 @@ void* c_vec_front(c_vector* v) {
 void* c_vec_back(c_vector* v) {
 
 	VECTOR_ASSERT_INPUT;
-	VALIDATE_VACTOR_SIZE;
+	VALIDATE_VACTOR_SIZE(NULL);
 
 	return __c_AT(v, v->size - 1);
 }
@@ -215,7 +215,7 @@ void* c_vec_back(c_vector* v) {
 void* c_vec_data(c_vector* v) {
 
 	VECTOR_ASSERT_INPUT;
-	VALIDATE_VACTOR_SIZE;
+	VALIDATE_VACTOR_SIZE(NULL);
 
 	return v->data;
 }
@@ -397,7 +397,7 @@ int c_vec_push_back(c_vector* v, const void* data) {
 int c_vec_pop_back(c_vector* v) {
 
 	VECTOR_ASSERT_INPUT;
-	VALIDATE_VACTOR_SIZE;
+	VALIDATE_VACTOR_SIZE(c_EINVAL);
 
 	v->size -= 1;
 

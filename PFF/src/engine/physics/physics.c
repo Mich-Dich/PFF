@@ -15,9 +15,9 @@ pyhsics_state_internal internal_state;
 
 
 
-// ------------------------------------------------------------------------------------------ public functions ------------------------------------------------------------------------------------------
+// ------------------------------------------------------------------------------------------ private functions ------------------------------------------------------------------------------------------
 
-
+void __aabb_min_max(AABB aabb, vec2 min, vec2 max);
 
 
 // ========================================================================================== PUBLIC FUNCS ==========================================================================================
@@ -25,13 +25,13 @@ pyhsics_state_internal internal_state;
 //
 void physics_init(void) {
 
-	internal_state.body_list = c_vec_new(sizeof(body), 1);
+	internal_state.body_list = c_vec_new(sizeof(pyhsics_body), 1);
 }
 
 //
 void physics_update(void) {
 
-	body* loc_body;
+	pyhsics_body* loc_body;
 
 	for (u32 x = 0; x < internal_state.body_list->size; x++) {
 
@@ -47,7 +47,7 @@ void physics_update(void) {
 //
 size_t physics_body_create(vec2 position, vec2 size) {
 
-	body loc_body = {
+	pyhsics_body loc_body = {
 		.aabb = {
 			.pos = {position[0], position[1]},
 			.size = {size[0] * 0.5f, size[1] * 0.5f}
@@ -62,9 +62,77 @@ size_t physics_body_create(vec2 position, vec2 size) {
 }
 
 //
-body* physics_body_get_data(size_t index) {
+pyhsics_body* physics_body_get_data(size_t index) {
 
 	return c_vec_at(internal_state.body_list, index);
 }
 
+//
+bool physics_test_intersect_point_aabb(vec2 point, AABB aabb) {
+
+	vec2 loc_min, loc_max;
+	__aabb_min_max(aabb, loc_min, loc_max);
+
+	return	point[0] >= loc_min[0] &&
+			point[0] <= loc_max[0] &&
+			point[1] >= loc_min[1] &&
+			point[1] <= loc_max[1];
+}
+
+//
+bool physics_test_intersect_aabb_aabb(AABB a, AABB b) {
+
+	vec2 min, max;
+	__aabb_min_max(aabb_minkowski_difference(a, b), min, max);
+
+	return (min[0] <= 0 && max[0] >= 0 && min[1] <= 0 && max[1] >= 0);
+}
+
+
 // ------------------------------------------------------------------------------------------ public functions ------------------------------------------------------------------------------------------
+
+AABB aabb_minkowski_difference(AABB a, AABB b) {
+
+	AABB result;
+	vec2_sub(result.pos, a.pos, b.pos);
+	vec2_add(result.size, a.size, b.size);
+
+	return result;
+}
+
+//
+void aabb_penetration_vector(vec2 r, AABB aabb) {
+
+	vec2 min, max;
+	__aabb_min_max(aabb, min, max);
+
+	f32 min_dist = fabsf(min[0]);
+	r[0] = min[0];
+	r[1] = 0;
+
+	if (fabsf(max[0]) < min_dist) {
+		min_dist = fabsf(max[0]);
+		r[0] = max[0];
+	}
+
+	if (fabsf(min[1]) < min_dist) {
+		min_dist = fabsf(min[1]);
+		r[0] = 0;
+		r[1] = min[1];
+	}
+
+	if (fabsf(max[1]) < min_dist) {
+		r[0] = 0;
+		r[1] = max[1];
+	}
+}
+
+// 
+void __aabb_min_max(AABB aabb, vec2 min, vec2 max) {
+
+	vec2 buf;
+	vec2_scale(buf, aabb.size, 0.5f);
+
+	vec2_sub(min, aabb.pos, buf);
+	vec2_add(max, aabb.pos, buf);
+}

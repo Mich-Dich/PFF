@@ -4,6 +4,9 @@
     <Filter Include="engine">
       <UniqueIdentifier>{FBDB78FB-E77D-A3D1-D038-B725BC792A22}</UniqueIdentifier>
     </Filter>
+    <Filter Include="engine\physics">
+      <UniqueIdentifier>{8D421EA7-7910-12AD-62A4-82D34E11EE11}</UniqueIdentifier>
+    </Filter>
     <Filter Include="engine\render">
       <UniqueIdentifier>{2A265F8D-96E6-DAC3-5F21-2441CBA01FA0}</UniqueIdentifier>
     </Filter>
@@ -29,11 +32,17 @@
     <ClInclude Include="src\engine\core.h">
       <Filter>engine</Filter>
     </ClInclude>
+    <ClInclude Include="src\engine\engine_types.h">
+      <Filter>engine</Filter>
+    </ClInclude>
     <ClInclude Include="src\engine\global.h">
       <Filter>engine</Filter>
     </ClInclude>
     <ClInclude Include="src\engine\input.h">
       <Filter>engine</Filter>
+    </ClInclude>
+    <ClInclude Include="src\engine\physics\physics.h">
+      <Filter>engine\physics</Filter>
     </ClInclude>
     <ClInclude Include="src\engine\render\render.h">
       <Filter>engine\render</Filter>
@@ -53,6 +62,9 @@
     <ClInclude Include="src\util\container\c_vec.h">
       <Filter>util\container</Filter>
     </ClInclude>
+    <ClInclude Include="src\util\dll_interface.h">
+      <Filter>util</Filter>
+    </ClInclude>
     <ClInclude Include="src\util\pff_math.h">
       <Filter>util</Filter>
     </ClInclude>
@@ -65,8 +77,6 @@
     <ClInclude Include="src\util\util.h">
       <Filter>util</Filter>
     </ClInclude>
-    <ClInclude Include="src\engine\physics\physics.h" />
-    <ClInclude Include="src\util\dll_interface.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="src\application.c" />
@@ -78,6 +88,9 @@
     </ClCompile>
     <ClCompile Include="src\engine\input.c">
       <Filter>engine</Filter>
+    </ClCompile>
+    <ClCompile Include="src\engine\physics\physics.c">
+      <Filter>engine\physics</Filter>
     </ClCompile>
     <ClCompile Include="src\engine\render\render.c">
       <Filter>engine\render</Filter>
@@ -101,6 +114,5 @@
     <ClCompile Include="src\util\pff_time.c">
       <Filter>util</Filter>
     </ClCompile>
-    <ClCompile Include="src\engine\physics\physics.c" />
   </ItemGroup>
 </Project>

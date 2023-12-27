@@ -24,7 +24,7 @@ void time_update(fps_time_info* time_info) {
 
 	f32 now = (f32)SDL_GetTicks();
 	time_info->delta = (now - time_info->last) / 1000.f;
-	time_info->fps = (1 / time_info->delta);
+	time_info->fps = (u32)(1 / time_info->delta);
 	time_info->last = now;
 }
 

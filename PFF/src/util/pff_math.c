@@ -25,7 +25,7 @@ f32 clamp_f_get(const f32 value, const f32 min, const f32 max) {
     }
 }
 
-
+// 
 i32 rand_in_range(i32 min, i32 max) {
 
     // Ensure that min is less than or equal to max
@@ -38,3 +38,17 @@ i32 rand_in_range(i32 min, i32 max) {
     i32 range_size = max - min + 1;
     return (rand() % range_size) + min;
 }
+
+//
+f32 rand_f_in_range(f32 min, f32 max) {
+
+    // Ensure that min is less than or equal to max
+    if (min > max) {
+        float temp = min;
+        min = max;
+        max = temp;
+    }
+
+    return ((f32)rand() / RAND_MAX) * (max - min) + min;;
+}
+

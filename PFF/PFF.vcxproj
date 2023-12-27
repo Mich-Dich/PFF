@@ -105,22 +105,23 @@
     </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <ClInclude Include="src\engine\physics\physics.h" />
     <ClInclude Include="src\PFF.h" />
     <ClInclude Include="src\application.h" />
     <ClInclude Include="src\engine\config.h" />
     <ClInclude Include="src\engine\core.h" />
+    <ClInclude Include="src\engine\engine_types.h" />
     <ClInclude Include="src\engine\global.h" />
     <ClInclude Include="src\engine\input.h" />
+    <ClInclude Include="src\engine\physics\physics.h" />
     <ClInclude Include="src\engine\render\render.h" />
     <ClInclude Include="src\engine\window\platform.h" />
     <ClInclude Include="src\entry_point.h" />
     <ClInclude Include="src\game_types.h" />
     <ClInclude Include="src\pch.h" />
-    <ClInclude Include="src\util\dll_interface.h" />
     <ClInclude Include="src\util\IOCore\IOCore.h" />
     <ClInclude Include="src\util\IOCore\logger.h" />
     <ClInclude Include="src\util\container\c_vec.h" />
+    <ClInclude Include="src\util\dll_interface.h" />
     <ClInclude Include="src\util\pff_math.h" />
     <ClInclude Include="src\util\pff_time.h" />
     <ClInclude Include="src\util\types.h" />

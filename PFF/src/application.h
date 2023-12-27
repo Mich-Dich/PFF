@@ -20,5 +20,8 @@ PFF_API bool application_run(void);
 PFF_API f32 get_delta_time(void);
 PFF_API u32 get_window_width(void);
 PFF_API u32 get_window_height(void);
+PFF_API bool is_courser_in_window(void);
+PFF_API void get_courser_pos(i32* x, i32* y);
+PFF_API void QuitGame(void);
 
 bool application_shutdown(void);

@@ -10,10 +10,10 @@
 #include "platform.h"
 
 // 
-SDL_Window* create_window(const char* title, u32 window_width, u32 window_height) {
+SDL_Window* window_create(const char* title, u32 window_width, u32 window_height) {
 
-    global.render.width = (f32)window_width;
-    global.render.height = (f32)window_height;
+    global.render.width = window_width;
+    global.render.height = window_height;
 
     SDL_GL_SetAttribute(SDL_GL_CONTEXT_PROFILE_MASK, SDL_GL_CONTEXT_PROFILE_CORE);
     SDL_GL_SetAttribute(SDL_GL_CONTEXT_MAJOR_VERSION, 3);
@@ -40,4 +40,11 @@ SDL_Window* create_window(const char* title, u32 window_width, u32 window_height
 
     global.render.window = window;
     return window;
+}
+
+//
+void window_update(void) {
+
+    SDL_GetWindowPosition(global.render.window, &global.render.pos_x, &global.render.pos_y);
+    SDL_GetWindowSize(global.render.window, &global.render.width, &global.render.height);
 }

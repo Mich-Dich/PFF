@@ -8,6 +8,7 @@
 #include <string.h>
 #include <math.h>
 #include <errno.h>
+#include <stdio.h>
 
 #pragma warning(disable: 4244)
 #include "linmath.h"

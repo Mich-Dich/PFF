@@ -38,30 +38,34 @@ bool application_create(game* game_inst) {
     time_init(&global.time, game_inst->app_config.target_fps);
     input_init();
     config_init();
-    create_window(
+    window_create(
         game_inst->app_config.name,
         game_inst->app_config.start_width,
         game_inst->app_config.start_hight);
 
     global.render.width = game_inst->app_config.start_width;
     global.render.height = game_inst->app_config.start_hight;
+    SDL_ShowCursor(false);
 
     render_init();
     physics_init();
 
-    // ===================================================== TEST-ONLY =====================================================
+    //srand((unsigned int)time(NULL));     // Seed the random number generator with the current time
 
+    // ============================================================================ TEST-ONLY ============================================================================
+
+    /*
     for (u32 x = 0; x < body_count; x++) {
 
         size_t body_index = physics_body_create(
-            (vec2) { rand() % (i32)global.render.width, rand() % (i32)global.render.width },
-            (vec2) { rand() % 100, rand() % 100 });
-        body* loc_body = physics_body_get_data(body_index);
-        loc_body->acceleration[0] = rand_in_range(-100, 100);
-        loc_body->acceleration[1] = rand_in_range(-100, 100);
-    }
+            (vec2) { rand_f_in_range(0, (f32)global.render.width), rand_f_in_range(0, (f32)global.render.height) },
+            (vec2) { rand_f_in_range(30, 100), rand_f_in_range(30, 100) });
+        pyhsics_body* loc_body = physics_body_get_data(body_index);
+        loc_body->acceleration[0] = rand_f_in_range(-100, 100);
+        loc_body->acceleration[1] = rand_f_in_range(-100, 100);
+    }*/
 
-    // ===================================================== TEST-ONLY =====================================================
+    // ============================================================================ TEST-ONLY ============================================================================
 
     app_state.running = true;
     app_state.suspended = false;
@@ -99,19 +103,32 @@ bool application_run() {
         if (!app_state.suspended) {
 
             time_update(&global.time);
+            window_update();
             input_update();
             physics_update();
 
-            // game update routine
+
+            // ============================================================================ TEST-ONLY <INPUT> ============================================================================
+
+            // LOG(Debug, "Mouse in Window: %s    mouse [%d / %d]", bool_to_str(is_courser_in_window()), global.input.courser_pos_x, global.input.courser_pos_y);
+
+            // ============================================================================ TEST-ONLY <INPUT> ============================================================================
+            
+            // client update routine
             CL_VALIDATE(app_state.game_inst->update(app_state.game_inst, global.time.delta), app_state.running = false, "", "Failed to update game, shutting down");
 
 
             // game render routine
             render_begin();
 
+            // ============================================================================ TEST-ONLY <RENDER> ============================================================================
+
+            // physics_test_intersect_point_aabb()
+
+            /*
             for (u32 x = 0; x < body_count; x++) {
-                body* loc_body = physics_body_get_data(x);
-                render_quad(loc_body->aabb.pos, loc_body->aabb.size, (vec4) { 1, 0, 1, 1 });
+                pyhsics_body* loc_body = physics_body_get_data(x);
+                render_quad(loc_body->aabb.pos, loc_body->aabb.size, (vec4) { 0.3, 0.3, 1, 1 });
 
                 if (loc_body->aabb.pos[0] > (global.render.width / 1) || loc_body->aabb.pos[0] < 0)
                     loc_body->velocity[0] *= -1;
@@ -120,8 +137,11 @@ bool application_run() {
 
                 clamp_f(loc_body->velocity[0], -500, 500);
                 clamp_f(loc_body->velocity[1], -500, 500);
-            }
+            }*/
 
+            // ============================================================================ TEST-ONLY <RENDER> ============================================================================
+
+            // client render routine
             CL_VALIDATE(app_state.game_inst->render(app_state.game_inst, global.time.delta), app_state.running = false, "", "Failed to render game, shutting down");
             render_end();
 
@@ -134,24 +154,30 @@ bool application_run() {
     return true;
 }
 
+//
+bool application_shutdown() {
+
+    // Add shutdown code here
+
+    return true;
+}
+
+
 f32 get_delta_time(void) { return global.time.delta; }
 
 u32 get_window_width(void) { return global.render.width; }
 
 u32 get_window_height(void) { return global.render.height; }
 
-//
-bool application_shutdown() {
+bool is_courser_in_window(void) { return global.input.courser_in_window; }
 
-    return true;
+void get_courser_pos(i32* x, i32* y) {
+
+    *x = global.input.courser_pos_x;
+    *y = global.input.courser_pos_y;
 }
 
-
-
-
-
-
-
+void QuitGame(void) { app_state.running = false; }
 
 
 
