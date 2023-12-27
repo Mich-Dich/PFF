@@ -1,12 +1,15 @@
+
+#include "render.h"
+
 #include <glad/glad.h>
 #undef APIENTRY
 #include <stdio.h>
 #include <SDL.h>
 
+#include "engine/engine_types.h"
 #include "engine/global.h"
 #include "engine/window/platform.h"
 
-#include "render.h"
 
 
 static Render_State_Internal state;
@@ -110,7 +113,7 @@ void render_quad_line(vec2 pos, vec2 size, vec4 color) {
 //
 void render_aabb(AABB* aabb, vec4 color) {
 
-    render_quad_line(&aabb->pos, aabb->size, color);
+    render_quad_line(aabb->pos, aabb->size, color);
 }
 
 // ========================================================================================== PRIVATE FUNCS ==========================================================================================

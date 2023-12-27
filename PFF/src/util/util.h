@@ -21,17 +21,19 @@
 
 // ========================================================================================== main functions ==========================================================================================
 
-#define WHITE (vec4){1, 1, 1, 1}
-#define BLACK (vec4){0, 0, 0, 1}
-#define RED (vec4){1, 0, 0, 1}
-#define GREEN (vec4){0, 1, 0, 1}
-#define BLUE (vec4){0, 0, 1, 1}
-#define YELLOW (vec4){1, 1, 0, 1}
-#define CYAN (vec4){0, 1, 1, 1}
-#define MAGENTA (vec4){1, 0, 1, 1}
-#define ORANGE (vec4){1, 0.5, 0, 1}
-#define PURPLE (vec4){0.5, 0, 1, 1}
-#define TURQUOISE (vec4){0, 1, 0.5, 1}
+#define WHITE			(vec4){1, 1, 1, 1}
+#define BLACK			(vec4){0, 0, 0, 1}
+#define RED				(vec4){1, 0, 0, 1}
+#define GREEN			(vec4){0, 1, 0, 1}
+#define GREEN_DARK		(vec4){0, 0.5f, 0, 1}
+#define GREEN_DARK_02	(vec4){0, 0.3f, 0, 1}
+#define BLUE			(vec4){0, 0, 1, 1}
+#define YELLOW			(vec4){1, 1, 0, 1}
+#define CYAN			(vec4){0, 1, 1, 1}
+#define MAGENTA			(vec4){1, 0, 1, 1}
+#define ORANGE			(vec4){1, 0.5f, 0, 1}
+#define PURPLE			(vec4){0.5f, 0, 1, 1}
+#define TURQUOISE		(vec4){0, 1, 0.5f, 1}
 
 static inline char* bool_to_str(bool value) { return (value) ? " true" : "false"; }
 

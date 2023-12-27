@@ -25,7 +25,7 @@ typedef struct {
 
 static bool Iintialized = false;
 static application_state app_state;
-static u32 body_count = 100;
+static u32 body_count = 900;
 
 //
 bool application_create(game* game_inst) {
@@ -54,16 +54,16 @@ bool application_create(game* game_inst) {
 
     // ============================================================================ TEST-ONLY ============================================================================
 
-    /*
+    
     for (u32 x = 0; x < body_count; x++) {
 
         size_t body_index = physics_body_create(
             (vec2) { rand_f_in_range(0, (f32)global.render.width), rand_f_in_range(0, (f32)global.render.height) },
-            (vec2) { rand_f_in_range(30, 100), rand_f_in_range(30, 100) });
+            (vec2) { rand_f_in_range(5, 30), rand_f_in_range(5, 30) });
         pyhsics_body* loc_body = physics_body_get_data(body_index);
         loc_body->acceleration[0] = rand_f_in_range(-100, 100);
         loc_body->acceleration[1] = rand_f_in_range(-100, 100);
-    }*/
+    }
 
     // ============================================================================ TEST-ONLY ============================================================================
 
@@ -125,10 +125,10 @@ bool application_run() {
 
             // physics_test_intersect_point_aabb()
 
-            /*
+            
             for (u32 x = 0; x < body_count; x++) {
                 pyhsics_body* loc_body = physics_body_get_data(x);
-                render_quad(loc_body->aabb.pos, loc_body->aabb.size, (vec4) { 0.3, 0.3, 1, 1 });
+                render_quad(loc_body->aabb.pos, loc_body->aabb.size, GREEN_DARK);
 
                 if (loc_body->aabb.pos[0] > (global.render.width / 1) || loc_body->aabb.pos[0] < 0)
                     loc_body->velocity[0] *= -1;
@@ -137,7 +137,7 @@ bool application_run() {
 
                 clamp_f(loc_body->velocity[0], -500, 500);
                 clamp_f(loc_body->velocity[1], -500, 500);
-            }*/
+            }
 
             // ============================================================================ TEST-ONLY <RENDER> ============================================================================
 

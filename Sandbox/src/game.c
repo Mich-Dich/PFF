@@ -31,7 +31,7 @@ bool game_initalize(game* game_inst) {
     movement.description = "Move the player in all directions";
     movement.settings.trigger_flags |= INPUT_ACTION_TRIGGER_KEY_DOWN;
     movement.settings.modefiers_flags |= INPUT_ACTION_MODEFIER_SMOOTH | INPUT_ACTION_MODEFIER_VEC2_NORMAL;
-    movement.settings.duration_in_sec = 0.5f;
+    movement.settings.duration_in_sec = 0.2f;
     input_register_action_vec2("D", "A", "W", "S", &movement);
 
     // set player starting pos
@@ -41,7 +41,7 @@ bool game_initalize(game* game_inst) {
     PlayerPos[1] = window_h * 0.5f;
 
     test_aabb = (AABB){
-        .pos = {window_w * 0.5, window_h * 0.5},
+        .pos = {window_w * 0.5f, window_h * 0.5f},
         .size = {50, 50}
     };
 
@@ -69,7 +69,7 @@ bool game_update(game* game_inst, f64 delta_time) {
     if (movement.vector2D[0] != 0.0f || movement.vector2D[1] != 0.0f) {
 
         vec2 buf = { 0 };
-        vec2_scale(buf, movement.vector2D, 500 * delta_time);
+        vec2_scale(buf, movement.vector2D, (f32)(500 * delta_time));
         vec2_add(PlayerPos, PlayerPos, buf);
     }
 
@@ -94,12 +94,12 @@ bool game_render(game* game_inst, f64 delta_time) {
     cursor_aabb.pos[0] = PlayerPos[0];
     cursor_aabb.pos[1] = PlayerPos[1];
 
-    render_aabb((f32*)&test_aabb, WHITE);
+    render_aabb(&test_aabb, WHITE);
 
-    render_aabb((f32*)&sum_aabb, (vec4) { 1, 1, 1, 0.5 });
+    render_aabb(&sum_aabb, (vec4) { 1, 1, 1, 0.5 });
 
     AABB minkowski_difference = aabb_minkowski_difference(test_aabb, cursor_aabb);
-    render_aabb((f32*)&minkowski_difference, ORANGE);
+    render_aabb(&minkowski_difference, ORANGE);
 
     vec2 pv;
     aabb_penetration_vector(pv, minkowski_difference);
@@ -109,16 +109,16 @@ bool game_render(game* game_inst, f64 delta_time) {
     collision_aabb.pos[1] += pv[1];
 
     if (physics_test_intersect_aabb_aabb(test_aabb, cursor_aabb)) {
-        render_aabb((f32*)&cursor_aabb, RED);
-        render_aabb((f32*)&collision_aabb, CYAN);
+        render_aabb(&cursor_aabb, RED);
+        render_aabb(&collision_aabb, CYAN);
 
         vec2_add(pv, PlayerPos, pv);
         render_line_segment(PlayerPos, pv, CYAN);
     } else {
-        render_aabb((f32*)&cursor_aabb, WHITE);
+        render_aabb(&cursor_aabb, WHITE);
     }
 
-    render_aabb((f32*)&start_aabb, (vec4) { 1, 1, 1, 0.5 });
+    render_aabb(&start_aabb, (vec4) { 1, 1, 1, 0.5 });
     render_line_segment(start_aabb.pos, PlayerPos, WHITE);
 
     if (physics_test_intersect_point_aabb(PlayerPos, test_aabb))

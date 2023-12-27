@@ -1,4 +1,4 @@
-workspace "SDL"
+project "SDL"
 	kind "StaticLib"
 	staticruntime "off"
 	location         ""
@@ -11,12 +11,8 @@ workspace "SDL"
 
 	platforms
 	{
-		"x32",
 		"x64"
 	}
-
-	filter "platforms:x32"
-		architecture "x32"
 
 	filter "platforms:x64"
 		architecture "x64"

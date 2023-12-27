@@ -234,11 +234,11 @@ bool Create_Log_File(const char* FileName) {
         getCurrentTime(&locTimeInfo);
         fprintf(logFile, "[%04d/%02d/%02d - %02d:%02d:%02d] Log initialized\n    Output-file: [%s]\n    Starting-format: %s\n",
             locTimeInfo.TI_year + 1900, locTimeInfo.TI_month + 1, locTimeInfo.TI_day, locTimeInfo.TI_hour, locTimeInfo.TI_minute, locTimeInfo.TI_sec, FileName, m_GeneralLogFormat);
-
+        
         if (LOG_LEVEL_ENABLED <= 4 || LOG_LEVEL_ENABLED >= 0) {
 
-            static const char* loc_level_str[6] = {"FATAL", " + ERROR", " + WARN", " + INFO", " + DEBUG", " + TRACE"};
-            
+            static const char* loc_level_str[6] = { "FATAL", " + ERROR", " + WARN", " + INFO", " + DEBUG", " + TRACE" };
+
             size_t LevelText_len = 1;
             for (int x = 0; x < LOG_LEVEL_ENABLED + 2; x++)
                 LevelText_len += strlen(loc_level_str[x]);
@@ -246,11 +246,11 @@ bool Create_Log_File(const char* FileName) {
             char* LogLevelText = malloc(LevelText_len);
             if (LogLevelText == NULL)
                 CL_INTERNAL_ERROR_MSG("FAILED to allocate memory in [Create_Log_File()] to print enabled LogLevels")
-            
-            LogLevelText[0] = '\0';
+
+                LogLevelText[0] = '\0';
             for (int x = 0; x < LOG_LEVEL_ENABLED + 2; x++)
-                strcat(LogLevelText, loc_level_str[x]);
-                            
+                strcat_s(LogLevelText, LevelText_len, loc_level_str[x]);
+
             fprintf(logFile, "    LOG_LEVEL_ENABLED = %d    enabled log macros are: %s\n", LOG_LEVEL_ENABLED, LogLevelText);
             free(LogLevelText);
         }

@@ -32,6 +32,9 @@ void render_end(void);
 
 // client usable funcs
 PFF_API void render_quad(vec2 pos, vec2 size, vec4 color);
+
 PFF_API void render_line_segment(vec2 start, vec2 end, vec4 color);
+
 PFF_API void render_quad_line(vec2 pos, vec2 size, vec4 color);
+
 PFF_API void render_aabb(AABB* aabb, vec4 color);

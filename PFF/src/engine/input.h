@@ -75,9 +75,9 @@ typedef	struct {
 void input_init(void);
 void input_update(void);
 
-PFF_API void input_register_action_bool(const char* key, input_action* action);
-PFF_API void input_register_action_float(const char* plus, const char* minus, input_action* action);
-PFF_API void input_register_action_vec2(const char* x_plus, const char* x_minus, const char* y_plus, const char* y_minus, input_action* action);
+PFF_API bool input_register_action_bool(const char* key, input_action* action);
+PFF_API bool input_register_action_float(const char* plus, const char* minus, input_action* action);
+PFF_API bool input_register_action_vec2(const char* x_plus, const char* x_minus, const char* y_plus, const char* y_minus, input_action* action);
 
 PFF_API void input_change_action_settings(input_mapping mapping, const input_action_settings settings);
 PFF_API bool input_update_action_binding_bool(input_action* action, char* key);

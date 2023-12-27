@@ -15,7 +15,9 @@ workspace "PFF"
 	IncludeDir["glad"] = "%{prj.name}/vendor/glad/include"
 
 	Lib_Dir = "lib"
-	-- include "PFF/vendor/glad"
+	
+	include "PFF/vendor/glad"
+	include "PFF/vendor/SDL2/premake5.lua"
 
 project "PFF"
 	location "PFF"
@@ -129,3 +131,5 @@ project "Sandbox"
 		defines "PFF_RELEASE"
 		buildoptions "/MD"
 		optimize "On"
+
+		
