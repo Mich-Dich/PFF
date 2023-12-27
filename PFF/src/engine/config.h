@@ -11,12 +11,9 @@ typedef struct {
 	//c_vector bound_input_actions;		//replace with dynamic Array
 } Config_State;
 
+
 void config_init(void);
 error_code config_try_to_find(const char* key, char* value);
-
 error_code config_save_a_configuration(const char* key, const char* value, const bool override);
 
 
-
-// OLD - void config_key_bind(input_key Key, const char* Key_Name);
-PFF_API bool config_bind_key_input_action_bool();

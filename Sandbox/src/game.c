@@ -42,18 +42,18 @@ bool game_initalize(game* game_inst) {
 
     test_aabb = (AABB){
         .pos = {window_w * 0.5f, window_h * 0.5f},
-        .size = {50, 50}
+        .half_size = {20, 20}
     };
 
-    cursor_aabb = (AABB){ .size = {75, 75} };
+    cursor_aabb = (AABB){ .half_size = {5, 5} };
 
-    start_aabb = (AABB){ .size = {75, 75} };
+    start_aabb = (AABB){ .half_size = {5, 5} };
 
     sum_aabb = (AABB){
         .pos= {test_aabb.pos[0], test_aabb.pos[1]},
-        .size = {
-            test_aabb.size[0] + cursor_aabb.size[0],
-            test_aabb.size[1] + cursor_aabb.size[1]}
+        .half_size = {
+            test_aabb.half_size[0] + cursor_aabb.half_size[0],
+            test_aabb.half_size[1] + cursor_aabb.half_size[1]}
     };
 
 	return true;
@@ -62,25 +62,31 @@ bool game_initalize(game* game_inst) {
 //
 bool game_update(game* game_inst, f64 delta_time) {
 
-    if (change_key_binding.boolean)
-        input_update_action_binding_vec2(&movement, "K", "H", "U", "J");
+    if (change_key_binding.boolean) {
+
+        vec2_copy(start_aabb.pos, PlayerPos);
 
 
+        //start_aabb.pos[0] = PlayerPos[0];
+        //start_aabb.pos[1] = PlayerPos[1];
+    }
+
+    /*
     if (movement.vector2D[0] != 0.0f || movement.vector2D[1] != 0.0f) {
 
         vec2 buf = { 0 };
         vec2_scale(buf, movement.vector2D, (f32)(500 * delta_time));
         vec2_add(PlayerPos, PlayerPos, buf);
-    }
+    }*/
 
     if (quit.boolean)
         QuitGame();
 
     i32 mousePos_x, mousePos_y;
     get_courser_pos(&mousePos_x, &mousePos_y);
-    /*
-    PlayerPos[0] = mousePos_x;
-    PlayerPos[1] = get_window_height() - mousePos_y;*/
+    
+    PlayerPos[0] = (f32)mousePos_x;
+    PlayerPos[1] = (f32)mousePos_y;
 
 
     // LOG(Debug, "Mouse in Window: %s    mouse [%d / %d]", bool_to_str(is_courser_in_window()), mousePos_x, mousePos_y);
@@ -96,35 +102,64 @@ bool game_render(game* game_inst, f64 delta_time) {
 
     render_aabb(&test_aabb, WHITE);
 
-    render_aabb(&sum_aabb, (vec4) { 1, 1, 1, 0.5 });
-
-    AABB minkowski_difference = aabb_minkowski_difference(test_aabb, cursor_aabb);
-    render_aabb(&minkowski_difference, ORANGE);
-
-    vec2 pv;
-    aabb_penetration_vector(pv, minkowski_difference);
-
-    AABB collision_aabb = cursor_aabb;
-    collision_aabb.pos[0] += pv[0];
-    collision_aabb.pos[1] += pv[1];
+    vec4 faded = { 1, 1, 1, 0.3f };
 
     if (physics_test_intersect_aabb_aabb(test_aabb, cursor_aabb)) {
         render_aabb(&cursor_aabb, RED);
-        render_aabb(&collision_aabb, CYAN);
-
-        vec2_add(pv, PlayerPos, pv);
-        render_line_segment(PlayerPos, pv, CYAN);
     } else {
         render_aabb(&cursor_aabb, WHITE);
     }
 
-    render_aabb(&start_aabb, (vec4) { 1, 1, 1, 0.5 });
-    render_line_segment(start_aabb.pos, PlayerPos, WHITE);
+    render_aabb(&start_aabb, faded);
+    render_line_segment(start_aabb.pos, PlayerPos, faded);
 
-    if (physics_test_intersect_point_aabb(PlayerPos, test_aabb))
-        render_quad(PlayerPos, (vec2) { 5, 5 }, RED);
-    else
-        render_quad(PlayerPos, (vec2) { 5, 5 }, WHITE);
+    f32 x = sum_aabb.pos[0];
+    f32 y = sum_aabb.pos[1];
+    f32 size = sum_aabb.half_size[0];
+
+    render_line_segment((vec2) { x - size, 0 }, (vec2) { x - size, (f32)get_window_height() }, faded);
+    render_line_segment((vec2) { x + size, 0 }, (vec2) { x + size, (f32)get_window_height() }, faded);
+    render_line_segment((vec2) { 0, y - size }, (vec2) { (f32)get_window_width() , y - size }, faded);
+    render_line_segment((vec2) { 0, y + size }, (vec2) { (f32)get_window_width() , y + size }, faded);
+
+    vec2 min, max;
+    aabb_min_max(sum_aabb, min, max);
+
+    vec2 magnitude;
+    vec2_sub(magnitude, PlayerPos, start_aabb.pos);
+
+    physics_hit hit = ray_intersect_aabb(start_aabb.pos, magnitude, sum_aabb);
+
+    if (hit.is_hit) {
+        AABB hit_aabb = {
+            .pos= {hit.pos[0], hit.pos[1]},
+            .half_size = {start_aabb.half_size[0], start_aabb.half_size[1]}
+        };
+        render_aabb(&hit_aabb, CYAN);
+        render_quad(hit.pos, (vec2) { 5, 5 }, CYAN);
+    }
+
+    for (u8 i = 0; i < 2; ++i) {
+        if (magnitude[i] != 0) {
+            f32 t1 = (min[i] - PlayerPos[i]) / magnitude[i];
+            f32 t2 = (max[i] - PlayerPos[i]) / magnitude[i];
+
+            vec2 point;
+            vec2_scale(point, magnitude, t1);
+            vec2_add(point, point, PlayerPos);
+            if (min[i] < start_aabb.pos[i])
+                render_quad(point, (vec2) { 5, 5 }, ORANGE);
+            else
+                render_quad(point, (vec2) { 5, 5 }, CYAN);
+
+            vec2_scale(point, magnitude, t2);
+            vec2_add(point, point, PlayerPos);
+            if (max[i] < start_aabb.pos[i])
+                render_quad(point, (vec2) { 5, 5 }, CYAN);
+            else
+                render_quad(point, (vec2) { 5, 5 }, ORANGE);
+        }
+    }
 
 	return true;
 }

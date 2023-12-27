@@ -128,7 +128,7 @@ bool application_run() {
             
             for (u32 x = 0; x < body_count; x++) {
                 pyhsics_body* loc_body = physics_body_get_data(x);
-                render_quad(loc_body->aabb.pos, loc_body->aabb.size, GREEN_DARK);
+                render_quad(loc_body->aabb.pos, loc_body->aabb.half_size, GREEN_DARK);
 
                 if (loc_body->aabb.pos[0] > (global.render.width / 1) || loc_body->aabb.pos[0] < 0)
                     loc_body->velocity[0] *= -1;
@@ -174,7 +174,7 @@ bool is_courser_in_window(void) { return global.input.courser_in_window; }
 void get_courser_pos(i32* x, i32* y) {
 
     *x = global.input.courser_pos_x;
-    *y = global.input.courser_pos_y;
+    *y = global.render.height - global.input.courser_pos_y;
 }
 
 void QuitGame(void) { app_state.running = false; }

@@ -98,10 +98,10 @@ void render_line_segment(vec2 start, vec2 end, vec4 color) {
 void render_quad_line(vec2 pos, vec2 size, vec4 color) {
 
     vec2 points[4] = {
-        {pos[0] - size[0] * 0.5f, pos[1] - size[1] * 0.5f},
-        {pos[0] + size[0] * 0.5f, pos[1] - size[1] * 0.5f},
-        {pos[0] + size[0] * 0.5f, pos[1] + size[1] * 0.5f},
-        {pos[0] - size[0] * 0.5f, pos[1] + size[1] * 0.5f},
+        {pos[0] - size[0], pos[1] - size[1]},
+        {pos[0] + size[0], pos[1] - size[1]},
+        {pos[0] + size[0], pos[1] + size[1]},
+        {pos[0] - size[0], pos[1] + size[1]},
     };
 
     render_line_segment(points[0], points[1], color);
@@ -113,7 +113,7 @@ void render_quad_line(vec2 pos, vec2 size, vec4 color) {
 //
 void render_aabb(AABB* aabb, vec4 color) {
 
-    render_quad_line(aabb->pos, aabb->size, color);
+    render_quad_line(aabb->pos, aabb->half_size, color);
 }
 
 // ========================================================================================== PRIVATE FUNCS ==========================================================================================

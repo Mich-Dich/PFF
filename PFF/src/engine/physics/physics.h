@@ -14,3 +14,7 @@ PFF_API bool physics_test_intersect_aabb_aabb(AABB a, AABB b);
 // TODO: make internal
 PFF_API AABB aabb_minkowski_difference(AABB a, AABB b);
 PFF_API void aabb_penetration_vector(vec2 r, AABB aabb);
+
+
+PFF_API void aabb_min_max(AABB aabb, vec2 min, vec2 max);
+PFF_API physics_hit ray_intersect_aabb(vec2 position, vec2 magnitude, AABB aabb);

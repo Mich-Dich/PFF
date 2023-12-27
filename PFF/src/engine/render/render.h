@@ -7,6 +7,11 @@ struct SDL_Window;
 
 
 typedef struct {
+
+} pyhsics_material;
+
+
+typedef struct {
     struct SDL_Window* window;
     u32 width;
     u32 height;
