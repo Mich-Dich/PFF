@@ -12,7 +12,7 @@ typedef struct global {
 	Render_State render;
 	Config_State config;
 	input_State input;
-	time_info time;
+	fps_time_info time;
 	c_vector Input_Mappings;
 } Global;
 

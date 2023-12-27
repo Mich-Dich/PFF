@@ -253,7 +253,7 @@ void input_update(void) {
 				}
 
 				buffer = target;
-				current_mapping->action->floating_point = clamp(buffer, -1, 1);
+				current_mapping->action->floating_point = clamp_f_get(buffer, -1, 1);
 
 			} break;
 
@@ -346,8 +346,8 @@ void input_update(void) {
 
 				buffer[0] = target[0];
 				buffer[1] = target[1];
-				current_mapping->action->vector2D[0] = clamp(buffer[0], -1, 1);
-				current_mapping->action->vector2D[1] = clamp(buffer[1], -1, 1);
+				current_mapping->action->vector2D[0] = clamp_f_get(buffer[0], -1, 1);
+				current_mapping->action->vector2D[1] = clamp_f_get(buffer[1], -1, 1);
 
 			} break;
 

@@ -105,6 +105,7 @@
     </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClInclude Include="src\engine\physics\physics.h" />
     <ClInclude Include="src\PFF.h" />
     <ClInclude Include="src\application.h" />
     <ClInclude Include="src\engine\config.h" />
@@ -116,6 +117,7 @@
     <ClInclude Include="src\entry_point.h" />
     <ClInclude Include="src\game_types.h" />
     <ClInclude Include="src\pch.h" />
+    <ClInclude Include="src\util\dll_interface.h" />
     <ClInclude Include="src\util\IOCore\IOCore.h" />
     <ClInclude Include="src\util\IOCore\logger.h" />
     <ClInclude Include="src\util\container\c_vec.h" />
@@ -129,6 +131,7 @@
     <ClCompile Include="src\engine\config.c" />
     <ClCompile Include="src\engine\global.c" />
     <ClCompile Include="src\engine\input.c" />
+    <ClCompile Include="src\engine\physics\physics.c" />
     <ClCompile Include="src\engine\render\render.c" />
     <ClCompile Include="src\engine\window\platform.c" />
     <ClCompile Include="src\glad.c" />

@@ -6,6 +6,8 @@
 #include <stdint.h>
 
 
+#include "util/dll_interface.h"
+
 #if defined(_WIN32) || defined(__CYGWIN__)
     #include <Windows.h>
     #define CL_THREAD_ID            (uintptr_t)GetCurrentThreadId()
@@ -19,9 +21,6 @@
     #define ERROR_STR               strerror(errno)
 #endif
 
-#ifndef PFF_API
-    #definr PFF_API 
-#endif // !PFF_API
 
 
 // This enables the compilation of various logging levels (FATAL & ERROR are always on)

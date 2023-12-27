@@ -65,6 +65,8 @@
     <ClInclude Include="src\util\util.h">
       <Filter>util</Filter>
     </ClInclude>
+    <ClInclude Include="src\engine\physics\physics.h" />
+    <ClInclude Include="src\util\dll_interface.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="src\application.c" />
@@ -99,5 +101,6 @@
     <ClCompile Include="src\util\pff_time.c">
       <Filter>util</Filter>
     </ClCompile>
+    <ClCompile Include="src\engine\physics\physics.c" />
   </ItemGroup>
 </Project>

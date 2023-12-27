@@ -1,6 +1,7 @@
 #pragma once
 
 #include "pch.h"
+#include "util/dll_interface.h"
 
 typedef struct file {
     char* data;

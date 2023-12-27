@@ -2,21 +2,9 @@
 
 #include "util/types.h"
 
-typedef struct {
-	f32 delta;			// time between frames
-	f32 now;			// time of current frame
-	f32 last;			// time of last frame
-
-	f32 frame_last;		// last time FPS was calculated
-	f32 frame_delay;	// max time a frame should take (target FPS)
-	f32 frame_time;		// time the current frame took
-
-	u32 target_FPS;		// current FPS
-	u32 frame_count;	// helps calculate FPS
-} Time_State;
+#include "dll_interface.h"
 
 
-// ==================  New Version  ==================
 typedef struct {
 
 	f32 delta;				// time between frames
@@ -25,8 +13,7 @@ typedef struct {
 	u32 fps;				// current FPS
 	f32 target_frame_delay;	// the targeted FPS in seconds x = 1/FSP
 
-} time_info;
-// ==================  New Version  ==================
+} fps_time_info;
 
 
 typedef struct {
@@ -39,10 +26,11 @@ typedef struct {
 	int TI_nSec;
 } time_stamp;
 
-void time_init(time_info* time_info, u32 target_FPS);
-void time_update(time_info* time_info);
-void time_calc_frame_time(time_info* time_info);
-void time_limit_FPS(time_info* time_info);
+
+void time_init(fps_time_info* time_info, u32 target_FPS);
+void time_update(fps_time_info* time_info);
+void time_calc_frame_time(fps_time_info* time_info);
+void time_limit_FPS(fps_time_info* time_info);
 
 PFF_API u64 Get_TimeStamp(void);
 PFF_API float Calc_Time_Dif_in_Seconds(const u64 startTimeStamp, const u64 endTimeStamp);

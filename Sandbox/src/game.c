@@ -30,6 +30,7 @@ bool game_update(game* game_inst, f64 delta_time) {
         vec2_scale(buf, movement.vector2D, 500 * delta_time);
         vec2_add(PlayerPos, PlayerPos, buf);
     }
+
 	return true;
 }
 

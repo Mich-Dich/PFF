@@ -9,7 +9,7 @@
 // ========================================================================================== PUBLIC FUNCS ==========================================================================================
 
 //
-void time_init(time_info* time_info, u32 target_FPS) {
+void time_init(fps_time_info* time_info, u32 target_FPS) {
 
 	if (target_FPS == 0)
 		time_info->target_frame_delay = 0;
@@ -20,7 +20,7 @@ void time_init(time_info* time_info, u32 target_FPS) {
 }
 
 // calculated the FPS for every loop
-void time_update(time_info* time_info) {
+void time_update(fps_time_info* time_info) {
 
 	f32 now = (f32)SDL_GetTicks();
 	time_info->delta = (now - time_info->last) / 1000.f;
@@ -29,13 +29,13 @@ void time_update(time_info* time_info) {
 }
 
 // to be called right after Frame is finished calculating
-void time_calc_frame_time(time_info* time_info) {
+void time_calc_frame_time(fps_time_info* time_info) {
 
 	time_info->frame_time = (f32)SDL_GetTicks() - time_info->last;
 }
 
 //
-void time_limit_FPS(time_info* time_info) {
+void time_limit_FPS(fps_time_info* time_info) {
 
 	time_info->frame_time = (f32)SDL_GetTicks() - time_info->last;
 

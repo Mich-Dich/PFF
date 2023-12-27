@@ -151,6 +151,9 @@ void print_Separator(uintptr_t threadID)        { output_Message(Trace, separato
 // Print a separator "==="
 void print_Separator_Big(uintptr_t threadID)    { output_Message(Trace, separator_Big, threadID); }
 
+
+// ------------------------------------------------------------------------------------------ public functions ------------------------------------------------------------------------------------------
+
 // Create or reset a Log-File: [LogFileName] and setup output format & stream
 // - [LogFileName] default logfile name
 // - [m_GeneralLogFormat] general format for LogLevels that are not specifically set
