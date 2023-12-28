@@ -15,8 +15,8 @@ void time_init(fps_time_info* time_info, u32 target_FPS) {
 		time_info->target_frame_delay = 0;
 	else
 		time_info->target_frame_delay = 1000.f / (f32)target_FPS;
-
-	CORE_LOG_INIT_SUBSYS("time")
+	
+	LOG_FUNC_END("")
 }
 
 // calculated the FPS for every loop

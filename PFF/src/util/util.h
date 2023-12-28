@@ -37,7 +37,7 @@
 
 static inline char* bool_to_str(bool value) { return (value) ? " true" : "false"; }
 
-static inline char* ptr_to_str(void* value) { return (value == NULL) ? " NULL" : "valid"; }
+static inline char* ptr_to_str(void* value) { return (value != NULL) ? "  valid" : "invalid"; }
 
 typedef enum {
 	EC_success = 0,

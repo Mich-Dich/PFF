@@ -30,7 +30,7 @@ static u32 body_count = 900;
 //
 bool application_create(game* game_inst) {
 
-    CORE_VALIDATE(!Iintialized, return false, "Creating application", "[application_create()] called more than once");
+    CL_VALIDATE(!Iintialized, return false, "Creating application", "[application_create()] called more than once");
 
     app_state.game_inst = game_inst;
 
@@ -45,6 +45,7 @@ bool application_create(game* game_inst) {
 
     global.render.width = game_inst->app_config.start_width;
     global.render.height = game_inst->app_config.start_hight;
+    SDL_ShowCursor(false);
 
     render_init();
     physics_init();
@@ -69,12 +70,10 @@ bool application_create(game* game_inst) {
     app_state.running = true;
     app_state.suspended = false;
 
-    CORE_ASSERT(app_state.game_inst->initalize(app_state.game_inst), "Initializing game", "Failed to Initialize game");
+    CL_ASSERT(app_state.game_inst->initalize(app_state.game_inst), "Initializing game", "Failed to Initialize game");
 
     // TODO: Implement this
     // app_state.game_inst->on_resize(app_state.game_inst, app_state.width, app_state.height);
-
-    SDL_ShowCursor(false);
 
     Iintialized = true;
     return true;
@@ -116,7 +115,7 @@ bool application_run() {
             // ============================================================================ TEST-ONLY <INPUT> ============================================================================
             
             // client update routine
-            CORE_VALIDATE(app_state.game_inst->update(app_state.game_inst, global.time.delta), app_state.running = false, "", "Failed to update game, shutting down");
+            CL_VALIDATE(app_state.game_inst->update(app_state.game_inst, global.time.delta), app_state.running = false, "", "Failed to update game, shutting down");
 
 
             // game render routine
@@ -143,7 +142,7 @@ bool application_run() {
             // ============================================================================ TEST-ONLY <RENDER> ============================================================================
 
             // client render routine
-            CORE_VALIDATE(app_state.game_inst->render(app_state.game_inst, global.time.delta), app_state.running = false, "", "Failed to render game, shutting down");
+            CL_VALIDATE(app_state.game_inst->render(app_state.game_inst, global.time.delta), app_state.running = false, "", "Failed to render game, shutting down");
             render_end();
 
             time_limit_FPS(&global.time);
@@ -158,7 +157,7 @@ bool application_run() {
 //
 bool application_shutdown() {
 
-    logger_shutdown();
+    // Add shutdown code here
 
     return true;
 }
