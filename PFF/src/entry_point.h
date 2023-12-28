@@ -8,7 +8,7 @@ extern bool create_game(game* out_game);
 
 int main(void) {
 	
-	log_init("main", "logs", "[$B$L$X$E] [$B$F: $G$E] - $B$C$E$Z", CL_THREAD_ID, CL_FALSE);
+	log_init("main", "logs", "[$B$L$X - $T:$J$E] [$B$F: $G$E] - $B$C$E$Z", CL_THREAD_ID, CL_FALSE);
 
 	game game_inst = { 0 };
 

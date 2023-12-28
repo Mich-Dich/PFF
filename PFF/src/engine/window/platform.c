@@ -48,3 +48,8 @@ void window_update(void) {
     SDL_GetWindowPosition(global.render.window, &global.render.pos_x, &global.render.pos_y);
     SDL_GetWindowSize(global.render.window, &global.render.width, &global.render.height);
 }
+
+void window_shutdown(void) {
+
+    SDL_Quit();
+}

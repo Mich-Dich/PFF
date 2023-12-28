@@ -45,7 +45,7 @@ bool game_initalize(game* game_inst) {
         .half_size = {20, 20}
     };
 
-    cursor_aabb = (AABB){ .half_size = {5, 5} };
+    cursor_aabb = (AABB){ .half_size = {20, 5} };
 
     start_aabb = (AABB){ .half_size = {5, 5} };
 
@@ -97,30 +97,22 @@ bool game_update(game* game_inst, f64 delta_time) {
 //
 bool game_render(game* game_inst, f64 delta_time) {
 
+    // RENDER PHYSICS INTERACTION DEMO
+
+    vec4 faded = { 1, 1, 1, 0.3f };
     cursor_aabb.pos[0] = PlayerPos[0];
     cursor_aabb.pos[1] = PlayerPos[1];
 
     render_aabb(&test_aabb, WHITE);
-
-    vec4 faded = { 1, 1, 1, 0.3f };
-
-    if (physics_test_intersect_aabb_aabb(test_aabb, cursor_aabb)) {
-        render_aabb(&cursor_aabb, RED);
-    } else {
-        render_aabb(&cursor_aabb, WHITE);
-    }
-
     render_aabb(&start_aabb, faded);
+    render_aabb(&cursor_aabb, WHITE);
+
+
     render_line_segment(start_aabb.pos, PlayerPos, faded);
 
     f32 x = sum_aabb.pos[0];
     f32 y = sum_aabb.pos[1];
     f32 size = sum_aabb.half_size[0];
-
-    render_line_segment((vec2) { x - size, 0 }, (vec2) { x - size, (f32)get_window_height() }, faded);
-    render_line_segment((vec2) { x + size, 0 }, (vec2) { x + size, (f32)get_window_height() }, faded);
-    render_line_segment((vec2) { 0, y - size }, (vec2) { (f32)get_window_width() , y - size }, faded);
-    render_line_segment((vec2) { 0, y + size }, (vec2) { (f32)get_window_width() , y + size }, faded);
 
     vec2 min, max;
     aabb_min_max(sum_aabb, min, max);
@@ -139,34 +131,12 @@ bool game_render(game* game_inst, f64 delta_time) {
         render_quad(hit.pos, (vec2) { 5, 5 }, CYAN);
     }
 
-    for (u8 i = 0; i < 2; ++i) {
-        if (magnitude[i] != 0) {
-            f32 t1 = (min[i] - PlayerPos[i]) / magnitude[i];
-            f32 t2 = (max[i] - PlayerPos[i]) / magnitude[i];
-
-            vec2 point;
-            vec2_scale(point, magnitude, t1);
-            vec2_add(point, point, PlayerPos);
-            if (min[i] < start_aabb.pos[i])
-                render_quad(point, (vec2) { 5, 5 }, ORANGE);
-            else
-                render_quad(point, (vec2) { 5, 5 }, CYAN);
-
-            vec2_scale(point, magnitude, t2);
-            vec2_add(point, point, PlayerPos);
-            if (max[i] < start_aabb.pos[i])
-                render_quad(point, (vec2) { 5, 5 }, CYAN);
-            else
-                render_quad(point, (vec2) { 5, 5 }, ORANGE);
-        }
-    }
-
 	return true;
 }
 
 //
 void game_on_resize(game* game_inst, u32 width, u32 height) {
 
-	LOG(Trace, "new size [%d / %d]", width, height);
+	LOG(Info, "new size [%d / %d]", width, height);
 }
 

@@ -5,10 +5,10 @@
 
 struct SDL_Window;
 
-
+/*
 typedef struct {
 
-} pyhsics_material;
+} pyhsics_material;*/
 
 
 typedef struct {

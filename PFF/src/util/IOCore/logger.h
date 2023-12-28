@@ -70,7 +70,7 @@ struct CL_Time_Info {
     $H		Hour				hh
     $M		Minute				mm
     $S		Second				ss
-    $J		MilliSecond		mm
+    $J		MilliSecond         mm
 
     $N		Date				yyyy:mm:dd:
     $Y		Date Year			yyyy

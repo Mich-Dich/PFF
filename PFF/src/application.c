@@ -25,7 +25,12 @@ typedef struct {
 
 static bool Iintialized = false;
 static application_state app_state;
-static u32 body_count = 900;
+//static u32 body_count = 900;
+
+static handle H_moving;
+static physics_body* ph_moving;
+static handle H_still;
+static physics_body* ph_still;
 
 //
 bool application_create(game* game_inst) {
@@ -54,16 +59,24 @@ bool application_create(game* game_inst) {
 
     // ============================================================================ TEST-ONLY ============================================================================
 
-    
+    H_moving = physics_body_create((vec2) { global.render.width * 0.3f, global.render.height * 0.5f }, (vec2) { 50, 50 });
+    ph_moving = physics_body_get_data(H_moving);
+
+    H_still = physics_body_create((vec2) { global.render.width * 0.65f, global.render.height * 0.5f }, (vec2) { 120, 120 });
+    ph_still= physics_body_get_data(H_still);
+
+    physics_set_velocity_aabb(H_moving, (vec2) { 100, 0 });
+
+    /*
     for (u32 x = 0; x < body_count; x++) {
 
         size_t body_index = physics_body_create(
             (vec2) { rand_f_in_range(0, (f32)global.render.width), rand_f_in_range(0, (f32)global.render.height) },
             (vec2) { rand_f_in_range(5, 30), rand_f_in_range(5, 30) });
-        pyhsics_body* loc_body = physics_body_get_data(body_index);
+        physics_body* loc_body = physics_body_get_data(body_index);
         loc_body->acceleration[0] = rand_f_in_range(-100, 100);
         loc_body->acceleration[1] = rand_f_in_range(-100, 100);
-    }
+    }*/
 
     // ============================================================================ TEST-ONLY ============================================================================
 
@@ -120,14 +133,16 @@ bool application_run() {
 
             // game render routine
             render_begin();
+            // client render routine
+            CL_VALIDATE(app_state.game_inst->render(app_state.game_inst, global.time.delta), app_state.running = false, "", "Failed to render game, shutting down");
 
             // ============================================================================ TEST-ONLY <RENDER> ============================================================================
 
             // physics_test_intersect_point_aabb()
 
-            
+            /*
             for (u32 x = 0; x < body_count; x++) {
-                pyhsics_body* loc_body = physics_body_get_data(x);
+                physics_body* loc_body = physics_body_get_data(x);
                 render_quad(loc_body->aabb.pos, loc_body->aabb.half_size, GREEN_DARK);
 
                 if (loc_body->aabb.pos[0] > (global.render.width / 1) || loc_body->aabb.pos[0] < 0)
@@ -137,12 +152,17 @@ bool application_run() {
 
                 clamp_f(loc_body->velocity[0], -500, 500);
                 clamp_f(loc_body->velocity[1], -500, 500);
-            }
+            }*/
+
+            render_aabb(&ph_still->aabb, GREEN);
+
+            render_quad(ph_moving->aabb.pos, ph_moving->aabb.half_size, WHITE);
+            //LOG(Trace, "position: %3.2f / %3.2f", ph_moving->aabb.pos[0], ph_moving->aabb.pos[1]);
+
+            //LOG(Trace, "Updating render demo");
 
             // ============================================================================ TEST-ONLY <RENDER> ============================================================================
 
-            // client render routine
-            CL_VALIDATE(app_state.game_inst->render(app_state.game_inst, global.time.delta), app_state.running = false, "", "Failed to render game, shutting down");
             render_end();
 
             time_limit_FPS(&global.time);
@@ -158,6 +178,8 @@ bool application_run() {
 bool application_shutdown() {
 
     // Add shutdown code here
+    window_shutdown();
+    log_shutdown();
 
     return true;
 }

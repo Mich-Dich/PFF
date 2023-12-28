@@ -381,7 +381,7 @@ void log_output(const enum log_level level, const char* prefix, const char* func
 
             // Clock ss
             case 'J': 
-                LOGGER_FORMAT_MESSAGE("%02d", locTimeInfo.TI_nSec)
+                LOGGER_FORMAT_MESSAGE("%03d", (locTimeInfo.TI_nSec / 1000000))
             break;
 
             // ------------------------------------  Date  -------------------------------------------------------------------------------

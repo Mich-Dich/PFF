@@ -12,6 +12,7 @@ typedef struct {
 // ------------------------------------------------------------------------------------------ internal variables ------------------------------------------------------------------------------------------
 
 pyhsics_state_internal internal_state;
+static u16 iterations = 2;
 
 
 
@@ -25,29 +26,35 @@ pyhsics_state_internal internal_state;
 //
 void physics_init(void) {
 
-	internal_state.body_list = c_vec_new(sizeof(pyhsics_body), 1);
+	internal_state.body_list = c_vec_new(sizeof(physics_body), 1);
 }
 
 //
 void physics_update(void) {
 
-	pyhsics_body* loc_body;
+	f32 delta_time = global.time.delta;
+	physics_body* loc_body;
 
 	for (u32 x = 0; x < internal_state.body_list->size; x++) {
 
 		loc_body = c_vec_at(internal_state.body_list, x);
-		loc_body->velocity[0] += loc_body->acceleration[0] * global.time.delta;
-		loc_body->velocity[1] += loc_body->acceleration[1] * global.time.delta;
-		loc_body->aabb.pos[0] += loc_body->velocity[0] * global.time.delta;
-		loc_body->aabb.pos[1] += loc_body->velocity[1] * global.time.delta;
+		loc_body->velocity[0] += loc_body->acceleration[0] * delta_time;
+		loc_body->velocity[1] += loc_body->acceleration[1] * delta_time;
+		loc_body->aabb.pos[0] += loc_body->velocity[0] * delta_time;
+		loc_body->aabb.pos[1] += loc_body->velocity[1] * delta_time;
+		/*
+		if () {
+
+
+		}*/
 	}
 
 }
 
 //
-size_t physics_body_create(vec2 position, vec2 size) {
+handle physics_body_create(vec2 position, vec2 size) {
 
-	pyhsics_body loc_body = {
+	physics_body loc_body = {
 		.aabb = {
 			.pos = {position[0], position[1]},
 			.half_size = {size[0] * 0.5f, size[1] * 0.5f}
@@ -58,11 +65,11 @@ size_t physics_body_create(vec2 position, vec2 size) {
 
 	CL_ASSERT(c_vec_push_back(internal_state.body_list, &loc_body) == c_OK, "", "Failed to create physics body");
 
-	return internal_state.body_list->size -1;
+	return (handle)internal_state.body_list->size - 1;
 }
 
 //
-pyhsics_body* physics_body_get_data(size_t index) {
+physics_body* physics_body_get_data(size_t index) {
 
 	return c_vec_at(internal_state.body_list, index);
 }
@@ -86,6 +93,17 @@ bool physics_test_intersect_aabb_aabb(AABB a, AABB b) {
 	aabb_min_max(aabb_minkowski_difference(a, b), min, max);
 
 	return (min[0] <= 0 && max[0] >= 0 && min[1] <= 0 && max[1] >= 0);
+}
+
+//
+bool physics_set_velocity_aabb(handle target, vec2 velocity) {
+
+	physics_body* loc_body = physics_body_get_data(target);
+
+	loc_body->velocity[0] = velocity[0];
+	loc_body->velocity[1] = velocity[1];
+
+	return true;
 }
 
 //
