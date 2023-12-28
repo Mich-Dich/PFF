@@ -34,15 +34,13 @@ error_code __overrideLine(int lineToOverride, const char* newLine);
 
 //
 void config_init(void) {
-
-    LOG_FUNC_START("");
-    
+        
     // make shure file exists
     FILE* config_file;
     if (fopen_s(&config_file, configFileName, "r") != 0) {
 
         // File does not exist, create a new file
-        CL_VALIDATE(fopen_s(&config_file, configFileName, "w") == 0, return, "Created new config file [%s]", "Failed to create a new config file [%s]", configFileName)
+        CORE_VALIDATE(fopen_s(&config_file, configFileName, "w") == 0, return, "Created new config file [%s]", "Failed to create a new config file [%s]", configFileName)
         fprintf(config_file, "# config file for PFF-Engine\n");
     }
     fclose(config_file);
@@ -51,7 +49,7 @@ void config_init(void) {
 
 
 
-	LOG_FUNC_END("")
+    CORE_LOG_INIT_SUBSYS("config")
 }
 
 // Function to read from the config file
@@ -96,7 +94,7 @@ error_code config_save_a_configuration(const char* key, const char* value, const
     if (fopen_s(&configFile, configFileName, "r") != 0) {
 
         // File does not exist, create a new file
-        CL_VALIDATE(fopen_s(&configFile, configFileName, "w") == 0, return EC_error_opening_file, "Created new config file [%s]", "Failed to create a new config file [%s]", configFileName)
+        CORE_VALIDATE(fopen_s(&configFile, configFileName, "w") == 0, return EC_error_opening_file, "Created new config file [%s]", "Failed to create a new config file [%s]", configFileName)
             fprintf(configFile, "# config file for PFF-Engine");
     }
 
@@ -126,7 +124,7 @@ error_code config_save_a_configuration(const char* key, const char* value, const
 
     // Key is not present, add a new key-value pair
     fclose(configFile);
-    CL_VALIDATE(fopen_s(&configFile, configFileName, "a") == 0, return EC_error_opening_file, "", "Failed to re-open for appending");
+    CORE_VALIDATE(fopen_s(&configFile, configFileName, "a") == 0, return EC_error_opening_file, "", "Failed to re-open for appending");
 
     fprintf(configFile, "%s=%s\n", key, value);
     fclose(configFile);
@@ -161,10 +159,10 @@ error_code __overrideLine(int lineToOverride, const char* newLine) {
     int currentLine = 0;
 
     fopen_s(&oldFile, configFileName, "r");
-    CL_VALIDATE(oldFile != NULL, return EC_error_opening_file, "", "Failed to open old file");
+    CORE_VALIDATE(oldFile != NULL, return EC_error_opening_file, "", "Failed to open old file");
 
     fopen_s(&newFile, TEMP_FILE_NAME, "w");
-    CL_VALIDATE(newFile != NULL, fclose(oldFile); return EC_error_opening_file, "", "Failed to open new file");
+    CORE_VALIDATE(newFile != NULL, fclose(oldFile); return EC_error_opening_file, "", "Failed to open new file");
 
     // replace line with the new content OR copy line as is
     while (fgets(buffer, sizeof(buffer), oldFile) != NULL) {
@@ -180,7 +178,7 @@ error_code __overrideLine(int lineToOverride, const char* newLine) {
     fclose(newFile);
 
     // Rename the new file to the original filename
-    CL_VALIDATE(!remove(configFileName), , "", "Failed to remove file: %s", ERROR_STR);
-    CL_VALIDATE(!rename(TEMP_FILE_NAME, configFileName), return EC_error_opening_file, "", "Failed to rename file [%s] %s", TEMP_FILE_NAME, ERROR_STR);
+    CORE_VALIDATE(!remove(configFileName), , "", "Failed to remove file: %s", ERROR_STR);
+    CORE_VALIDATE(!rename(TEMP_FILE_NAME, configFileName), return EC_error_opening_file, "", "Failed to rename file [%s] %s", TEMP_FILE_NAME, ERROR_STR);
     return EC_success;
 }

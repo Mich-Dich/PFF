@@ -33,6 +33,8 @@ void render_init(void) {
     __render_init_line(&state.vao_line, &state.vbo_line);
     __render_init_shaders(&state);
     __render_init_color_texture(&state.texture_color);
+
+    CORE_LOG_INIT_SUBSYS("render")
 }
 
 //
@@ -209,30 +211,30 @@ u32 __render_shader_create(const char* path_vert, const char* path_frag) {
     char log[512];
 
     File file_vertex = read_from_file(path_vert);
-    CL_ASSERT(file_vertex.is_valid, "", "Error reading vert-shader: %s\n", path_vert);
+    CORE_ASSERT(file_vertex.is_valid, "", "Error reading vert-shader: %s\n", path_vert);
 
     u32 shader_vertex = glCreateShader(GL_VERTEX_SHADER);
     glShaderSource(shader_vertex, 1, (const char* const*)&file_vertex, NULL);
     glCompileShader(shader_vertex);
     glGetShaderiv(shader_vertex, GL_COMPILE_STATUS, &success);
 
-    CL_ASSERT_PLUS(success, glGetShaderInfoLog(shader_vertex, 512, NULL, log), "", "Error compiling vertex shader: %s\n", path_vert);
+    CORE_ASSERT_PLUS(success, glGetShaderInfoLog(shader_vertex, 512, NULL, log), "", "Error compiling vertex shader: %s\n", path_vert);
 
     File file_fragment = read_from_file(path_frag);
-    CL_ASSERT(file_fragment.is_valid, "", "Error reading frag-shader: %s\n", path_vert);
+    CORE_ASSERT(file_fragment.is_valid, "", "Error reading frag-shader: %s\n", path_vert);
 
     u32 shader_fragment = glCreateShader(GL_FRAGMENT_SHADER);
     glShaderSource(shader_fragment, 1, (const char* const*)&file_fragment, NULL);
     glCompileShader(shader_fragment);
     glGetShaderiv(shader_fragment, GL_COMPILE_STATUS, &success);
-    CL_ASSERT_PLUS(success, glGetShaderInfoLog(shader_fragment, 512, NULL, log), "", "Error compiling fragment shader: %s\n", path_vert);
+    CORE_ASSERT_PLUS(success, glGetShaderInfoLog(shader_fragment, 512, NULL, log), "", "Error compiling fragment shader: %s\n", path_vert);
 
     u32 shader = glCreateProgram();
     glAttachShader(shader, shader_vertex);
     glAttachShader(shader, shader_fragment);
     glLinkProgram(shader);
     glGetProgramiv(shader, GL_LINK_STATUS, &success);
-    CL_ASSERT_PLUS(success, glGetProgramInfoLog(shader, 512, NULL, log), "", "Error linking shader: %s\n", log);
+    CORE_ASSERT_PLUS(success, glGetProgramInfoLog(shader, 512, NULL, log), "", "Error linking shader: %s\n", log);
 
     free(file_vertex.data);
     free(file_fragment.data);

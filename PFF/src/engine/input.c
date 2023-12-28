@@ -40,7 +40,7 @@
 #define CHANGE_VAR_BY_DELTA(index, sign)	target##index = buffer##index sign global.time.delta / current_mapping->settings.duration_in_sec
 
 #define SAVE_CONFIGURATION(format, override, input_key)		sprintf_s(config_field_name, sizeof(config_field_name), format, action->action_name);			\
-															CL_VALIDATE(config_save_a_configuration(config_field_name, input_key, override) == EC_success, return false, "", "Failed to save to config")
+															CORE_VALIDATE(config_save_a_configuration(config_field_name, input_key, override) == EC_success, return false, "", "Failed to save to config")
 
 #define TRY_LOAD_CONFIGURATION(config_value, key)				if (config_try_to_find(config_field_name, config_value) != EC_success) {					\
 																strncpy_s(config_value, sizeof(config_value), key, 100);								\
@@ -58,6 +58,8 @@ static inline void __update_key_state(input_mapping* mapping, const bool is_pres
 void input_init(void) {
 
 	global.input.input_actions = *c_vec_new(sizeof(input_mapping), 1);
+
+	CORE_LOG_INIT_SUBSYS("input")
 }
 
 //
@@ -80,7 +82,7 @@ bool input_register_action_bool(const char* key, input_action* action) {
 	TRY_LOAD_CONFIGURATION(config_value, key);
 
 	SDL_Scancode scan_code = SDL_GetScancodeFromName(config_value);
-	CL_VALIDATE(scan_code != SDL_SCANCODE_UNKNOWN, return false, "scan_code: %s/ %d", "Invalid scan code when binding key: %s", key, scan_code);
+	CORE_VALIDATE(scan_code != SDL_SCANCODE_UNKNOWN, return false, "scan_code: %s/ %d", "Invalid scan code when binding key: %s", key, scan_code);
 	action->value = IV_bool;
 	input_mapping new_mapping = { 0 };
 	new_mapping.key_codes = c_vec_new(sizeof(u8), 1);
@@ -97,7 +99,7 @@ bool input_register_action_bool(const char* key, input_action* action) {
 // This is a soft process, meaning it only registers this binding if the config file doesnt habe it already
 bool input_register_action_float(const char* plus, const char* minus, input_action* action) {
 
-	CL_VALIDATE(plus != minus, return false, "", "registering the same key multiple time is not supported");
+	CORE_VALIDATE(plus != minus, return false, "", "registering the same key multiple time is not supported");
 
 	char config_field_name[100] = { 0 };
 	char config_value_p[100] = { 0 };
@@ -110,7 +112,7 @@ bool input_register_action_float(const char* plus, const char* minus, input_acti
 
 	SDL_Scancode scan_code_p = SDL_GetScancodeFromName(config_value_p);
 	SDL_Scancode scan_code_m = SDL_GetScancodeFromName(config_value_m);
-	CL_VALIDATE(scan_code_p != SDL_SCANCODE_UNKNOWN && scan_code_m != SDL_SCANCODE_UNKNOWN,
+	CORE_VALIDATE(scan_code_p != SDL_SCANCODE_UNKNOWN && scan_code_m != SDL_SCANCODE_UNKNOWN,
 		return false, "keys [%s %s] are valid", "Invalid scan code when binding keys: [%s %s]", plus, minus);
 
 	action->value = IV_float;
@@ -130,7 +132,7 @@ bool input_register_action_float(const char* plus, const char* minus, input_acti
 // This is a soft process, meaning it only registers this binding if the config file doesnt habe it already
 bool input_register_action_vec2(const char* x_plus, const char* x_minus, const char* y_plus, const char* y_minus, input_action* action) {
 
-	CL_VALIDATE((x_plus != x_minus) && (y_plus != y_minus) && (x_plus != y_plus) && (x_minus != y_minus), return false, "", "registering the same key multiple time is not supported");
+	CORE_VALIDATE((x_plus != x_minus) && (y_plus != y_minus) && (x_plus != y_plus) && (x_minus != y_minus), return false, "", "registering the same key multiple time is not supported");
 
 	char config_field_name[100] = { 0 };
 	char config_value_xp[100] = { 0 };
@@ -148,13 +150,13 @@ bool input_register_action_vec2(const char* x_plus, const char* x_minus, const c
 	TRY_LOAD_CONFIGURATION(config_value_ym, y_minus);
 
 	//sprintf_s(&config_field_name, sizeof(config_field_name), "%s_x_plus", action->action_name);
-	//CL_VALIDATE(config_save_a_configuration(config_field_name, x_plus, false) == EC_success, return, "", "Failed to save to config");
+	//CORE_VALIDATE(config_save_a_configuration(config_field_name, x_plus, false) == EC_success, return, "", "Failed to save to config");
 
 	SDL_Scancode scan_code_xp = SDL_GetScancodeFromName(config_value_xp);
 	SDL_Scancode scan_code_xm = SDL_GetScancodeFromName(config_value_xm);
 	SDL_Scancode scan_code_yp = SDL_GetScancodeFromName(config_value_yp);
 	SDL_Scancode scan_code_ym = SDL_GetScancodeFromName(config_value_ym);
-	CL_VALIDATE(scan_code_xp != SDL_SCANCODE_UNKNOWN && scan_code_xm != SDL_SCANCODE_UNKNOWN && scan_code_yp != SDL_SCANCODE_UNKNOWN && scan_code_ym != SDL_SCANCODE_UNKNOWN,
+	CORE_VALIDATE(scan_code_xp != SDL_SCANCODE_UNKNOWN && scan_code_xm != SDL_SCANCODE_UNKNOWN && scan_code_yp != SDL_SCANCODE_UNKNOWN && scan_code_ym != SDL_SCANCODE_UNKNOWN,
 		return false, "keys [%s %s %s %s] are valid", "Invalid scan code when binding keys: [%s %s %s %s]", x_plus, x_minus, y_plus, y_minus);
 
 	action->value = IV_vec2;
@@ -178,7 +180,7 @@ bool input_register_action_vec2(const char* x_plus, const char* x_minus, const c
 bool input_update_action_binding_bool(input_action* action, char* key) {
 
 	SDL_Scancode scan_code = SDL_GetScancodeFromName(key);
-	CL_VALIDATE(scan_code != SDL_SCANCODE_UNKNOWN, return false, "scan_code: %s/ %d", "Failed to update to value saved in config", key, scan_code);
+	CORE_VALIDATE(scan_code != SDL_SCANCODE_UNKNOWN, return false, "scan_code: %s/ %d", "Failed to update to value saved in config", key, scan_code);
 
 	for (u32 x = 0; x < global.input.input_actions.size; x++) {
 
@@ -187,7 +189,7 @@ bool input_update_action_binding_bool(input_action* action, char* key) {
 
 			c_vec_clear(loc_mapping->key_codes);
 			c_vec_push_back(loc_mapping->key_codes, &scan_code);
-			LOG(Info, "Updating binding for [%s] to [%s/%d] (key/code)", action->action_name, key, scan_code);
+			CORE_LOG(Info, "Updating binding for [%s] to [%s/%d] (key/code)", action->action_name, key, scan_code);
 			break;
 		}
 	}
@@ -199,11 +201,11 @@ bool input_update_action_binding_bool(input_action* action, char* key) {
 //
 bool input_update_action_binding_float(input_action* action, const char* plus, const char* minus) {
 
-	CL_VALIDATE(plus != minus, return false, "", "registering the same key multiple time is not supported");
+	CORE_VALIDATE(plus != minus, return false, "", "registering the same key multiple time is not supported");
 
 	SDL_Scancode scan_code_p = SDL_GetScancodeFromName(plus);
 	SDL_Scancode scan_code_m = SDL_GetScancodeFromName(minus);
-	CL_VALIDATE(scan_code_p != SDL_SCANCODE_UNKNOWN && scan_code_m != SDL_SCANCODE_UNKNOWN,
+	CORE_VALIDATE(scan_code_p != SDL_SCANCODE_UNKNOWN && scan_code_m != SDL_SCANCODE_UNKNOWN,
 		return false, "keys [%s %s] are valid", "Invalid scan code when binding keys: [%s %s]", plus, minus);
 
 	for (u32 x = 0; x < global.input.input_actions.size; x++) {
@@ -214,7 +216,7 @@ bool input_update_action_binding_float(input_action* action, const char* plus, c
 			c_vec_clear(loc_mapping->key_codes);
 			c_vec_push_back(loc_mapping->key_codes, &scan_code_p);
 			c_vec_push_back(loc_mapping->key_codes, &scan_code_m);
-			LOG(Info, "Updating binding for [%s] to [%s/%d  %s/%d] (key/code)", action->action_name, plus, scan_code_p, minus, scan_code_m);
+			CORE_LOG(Info, "Updating binding for [%s] to [%s/%d  %s/%d] (key/code)", action->action_name, plus, scan_code_p, minus, scan_code_m);
 			break;
 		}
 	}
@@ -227,13 +229,13 @@ bool input_update_action_binding_float(input_action* action, const char* plus, c
 //
 bool input_update_action_binding_vec2(input_action* action, const char* x_plus, const char* x_minus, const char* y_plus, const char* y_minus) {
 
-	CL_VALIDATE((x_plus != x_minus) && (y_plus != y_minus) && (x_plus != y_plus) && (x_minus != y_minus), return false, "", "registering the same key multiple time is not supported");
+	CORE_VALIDATE((x_plus != x_minus) && (y_plus != y_minus) && (x_plus != y_plus) && (x_minus != y_minus), return false, "", "registering the same key multiple time is not supported");
 
 	SDL_Scancode scan_code_xp = SDL_GetScancodeFromName(x_plus);
 	SDL_Scancode scan_code_xm = SDL_GetScancodeFromName(x_minus);
 	SDL_Scancode scan_code_yp = SDL_GetScancodeFromName(y_plus);
 	SDL_Scancode scan_code_ym = SDL_GetScancodeFromName(y_minus);
-	CL_VALIDATE(scan_code_xp != SDL_SCANCODE_UNKNOWN && scan_code_xm != SDL_SCANCODE_UNKNOWN && scan_code_yp != SDL_SCANCODE_UNKNOWN && scan_code_ym != SDL_SCANCODE_UNKNOWN,
+	CORE_VALIDATE(scan_code_xp != SDL_SCANCODE_UNKNOWN && scan_code_xm != SDL_SCANCODE_UNKNOWN && scan_code_yp != SDL_SCANCODE_UNKNOWN && scan_code_ym != SDL_SCANCODE_UNKNOWN,
 		return false, "keys [%s %s %s %s] are valid", "Invalid scan code when binding keys: [%s %s %s %s]", x_plus, x_minus, y_plus, y_minus);
 
 	for (u32 x = 0; x < global.input.input_actions.size; x++) {
@@ -246,7 +248,7 @@ bool input_update_action_binding_vec2(input_action* action, const char* x_plus, 
 			c_vec_push_back(loc_mapping->key_codes, &scan_code_xm);
 			c_vec_push_back(loc_mapping->key_codes, &scan_code_yp);
 			c_vec_push_back(loc_mapping->key_codes, &scan_code_ym);
-			LOG(Info, "Updating binding for [%s] to [%s/%d  %s/%d  %s/%d  %s/%d] (key/code)", 
+			CORE_LOG(Info, "Updating binding for [%s] to [%s/%d  %s/%d  %s/%d  %s/%d] (key/code)",
 				action->action_name, x_plus, scan_code_xp, x_minus, scan_code_xm, y_plus, scan_code_yp, y_minus, scan_code_ym);
 			break;
 		}

@@ -16,10 +16,10 @@
 // Adapted from https://stackoverflow.com/a/44894946 (not the chosen answer) by Nominal Animal
 File read_from_file(const char* path) {
 
-    LOG_FUNC_START("")
+    CORE_LOG_FUNC_START("")
     File file = { .is_valid = false };
     FILE* file_pointer = fopen(path, "rb");
-    CL_VALIDATE(file_pointer, return file, "", IO_READ_ERROR_GENERAL(path));
+    CORE_VALIDATE(file_pointer, return file, "", IO_READ_ERROR_GENERAL(path));
 
     char* data = NULL;
     char* tmp;
@@ -32,10 +32,10 @@ File read_from_file(const char* path) {
         if (used + IO_READ_CHUNK_SIZE + 1 > size) {
             size = used + IO_READ_CHUNK_SIZE + 1;
 
-            CL_VALIDATE(size > used, return file, "", "Input file too large: %s\n", path);
+            CORE_VALIDATE(size > used, return file, "", "Input file too large: %s\n", path);
 
             tmp = realloc(data, size);
-            CL_VALIDATE(tmp, free(data);  return file, "", IO_READ_ERROR_MEMORY(path));
+            CORE_VALIDATE(tmp, free(data);  return file, "", IO_READ_ERROR_MEMORY(path));
 
             data = tmp;
         }
@@ -47,10 +47,10 @@ File read_from_file(const char* path) {
         used += n;
     }
 
-    CL_VALIDATE(!ferror(file_pointer), free(data);  return file, "", IO_READ_ERROR_GENERAL(path));
+    CORE_VALIDATE(!ferror(file_pointer), free(data);  return file, "", IO_READ_ERROR_GENERAL(path));
 
     tmp = realloc(data, used + 1);
-    CL_VALIDATE(tmp, free(data);  return file, "", IO_READ_ERROR_MEMORY(path));
+    CORE_VALIDATE(tmp, free(data);  return file, "", IO_READ_ERROR_MEMORY(path));
 
     data = tmp;
     data[used] = 0;
@@ -59,21 +59,21 @@ File read_from_file(const char* path) {
     file.len = used;
     file.is_valid = true;
 
-    LOG_FUNC_END("")
+    CORE_LOG_FUNC_END("")
     return file;
 }
 
 int write_to_file(void* buffer, size_t size, const char* path) {
 
-    LOG_FUNC_START("")
+    CORE_LOG_FUNC_START("")
     FILE* file_pointer = fopen(path, "wb");
-    CL_VALIDATE(file_pointer || !ferror(file_pointer), return -1, "", IO_WRITE_ERROR_GENERAL(path));
+    CORE_VALIDATE(file_pointer || !ferror(file_pointer), return -1, "", IO_WRITE_ERROR_GENERAL(path));
 
     size_t chunkes_written = fwrite(buffer, size, 1, file_pointer);
     fclose(file_pointer);
 
-    CL_VALIDATE(chunkes_written == 1, return -1, "", "Failed to write to file [%s]. Expected 1 chunk, but got [%zu]", path, chunkes_written);
+    CORE_VALIDATE(chunkes_written == 1, return -1, "", "Failed to write to file [%s]. Expected 1 chunk, but got [%zu]", path, chunkes_written);
 
-    LOG_FUNC_END("")
+    CORE_LOG_FUNC_END("")
     return 0;
 }

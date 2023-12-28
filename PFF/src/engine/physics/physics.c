@@ -26,6 +26,8 @@ pyhsics_state_internal internal_state;
 void physics_init(void) {
 
 	internal_state.body_list = c_vec_new(sizeof(pyhsics_body), 1);
+
+	CORE_LOG_INIT_SUBSYS("physics")
 }
 
 //
@@ -56,7 +58,7 @@ size_t physics_body_create(vec2 position, vec2 size) {
 		.acceleration = {0, 0}
 	};
 
-	CL_ASSERT(c_vec_push_back(internal_state.body_list, &loc_body) == c_OK, "", "Failed to create physics body");
+	CORE_ASSERT(c_vec_push_back(internal_state.body_list, &loc_body) == c_OK, "", "Failed to create physics body");
 
 	return internal_state.body_list->size -1;
 }
