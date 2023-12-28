@@ -62,6 +62,8 @@ bool application_create(game* game_inst) {
         pyhsics_body* loc_body = physics_body_get_data(body_index);
         loc_body->acceleration[0] = rand_f_in_range(-100, 100);
         loc_body->acceleration[1] = rand_f_in_range(-100, 100);
+
+        CORE_LOG(Debug, "updating render test");
     }
 
     // ============================================================================ TEST-ONLY ============================================================================

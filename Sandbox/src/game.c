@@ -14,6 +14,8 @@ static bool updated = false;
 //
 bool game_initalize(game* game_inst) {
 
+    //logger_set_format("$C$Z");
+
     // register 2-axis input action
     INPUT_ACTION_REGISTER_NAME(quit);
     quit.description = "Quit the game";
@@ -89,7 +91,7 @@ bool game_update(game* game_inst, f64 delta_time) {
     PlayerPos[1] = (f32)mousePos_y;
 
 
-    // LOG(Debug, "Mouse in Window: %s    mouse [%d / %d]", bool_to_str(is_courser_in_window()), mousePos_x, mousePos_y);
+    //LOG(Debug, "Mouse in Window: %s    mouse [%d / %d]", bool_to_str(is_courser_in_window()), mousePos_x, mousePos_y);
 
 	return true;
 }
