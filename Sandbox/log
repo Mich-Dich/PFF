@@ -1,6 +1,0 @@
-[2023/12/26 - 09:49:23]  Log initialized
-   Inital Log Format: '[$B$T:$J$E] [$B$L$X $F:$G$E] $C'
-   Enabled Log Levels: Fatal + Error + Warn + Info + Debug + Trace
-====================================================================================================================
-[09:49:23:494] [TRACE Log_Init:86] Subsystem [Logger] initialized
-[09:49:23:507] [TRACE application::application:23] Log msg

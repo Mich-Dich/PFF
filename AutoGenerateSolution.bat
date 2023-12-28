@@ -30,7 +30,6 @@ echo.
 echo =================================== Compile Result:
 if %errorlevel% neq 0 (
     echo !ESC![31mFAILED!ESC![0m Premake5 encountered errors. !ESC![31mError count [%errorlevel%] Build aborted!ESC![0m
-    exit /b %errorlevel%
 ) else (
     echo !ESC![32mNo errors found!ESC![0m
 )

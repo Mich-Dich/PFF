@@ -4,56 +4,52 @@
     <Filter Include="engine">
       <UniqueIdentifier>{FBDB78FB-E77D-A3D1-D038-B725BC792A22}</UniqueIdentifier>
     </Filter>
-    <Filter Include="engine\Events">
-      <UniqueIdentifier>{7FDF9525-EB9F-115C-B4DA-5AD9205A5638}</UniqueIdentifier>
+    <Filter Include="engine\events">
+      <UniqueIdentifier>{9FF33A70-0BB4-B6A6-D4EE-FF23406EFB82}</UniqueIdentifier>
     </Filter>
-    <Filter Include="engine\core">
-      <UniqueIdentifier>{5341430D-BFF6-BB02-48EB-B5D9B49FB206}</UniqueIdentifier>
+    <Filter Include="engine\platform">
+      <UniqueIdentifier>{CF5EE486-3BEA-514B-44FB-D43FB005AE4B}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="util">
+      <UniqueIdentifier>{43339F7C-2F6A-A00D-D856-8610C46C1C0F}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="src\PFF.h" />
-    <ClInclude Include="src\engine\EntryPoint.h">
-      <Filter>engine</Filter>
+    <ClInclude Include="src\application.h" />
+    <ClInclude Include="src\engine\events\application_event.h">
+      <Filter>engine\events</Filter>
     </ClInclude>
-    <ClInclude Include="src\engine\Events\ApplicationEvent.h">
-      <Filter>engine\Events</Filter>
+    <ClInclude Include="src\engine\events\event.h">
+      <Filter>engine\events</Filter>
     </ClInclude>
-    <ClInclude Include="src\engine\Events\Event.h">
-      <Filter>engine\Events</Filter>
+    <ClInclude Include="src\engine\events\key_event.h">
+      <Filter>engine\events</Filter>
     </ClInclude>
-    <ClInclude Include="src\engine\Events\KeyEvent.h">
-      <Filter>engine\Events</Filter>
+    <ClInclude Include="src\engine\events\mouse_event.h">
+      <Filter>engine\events</Filter>
     </ClInclude>
-    <ClInclude Include="src\engine\Events\MouseEvent.h">
-      <Filter>engine\Events</Filter>
+    <ClInclude Include="src\engine\platform\window.h">
+      <Filter>engine\platform</Filter>
     </ClInclude>
-    <ClInclude Include="src\engine\application.h">
-      <Filter>engine</Filter>
+    <ClInclude Include="src\entry_point.h" />
+    <ClInclude Include="src\util\logger.h">
+      <Filter>util</Filter>
     </ClInclude>
-    <ClInclude Include="src\engine\core\Logger.h">
-      <Filter>engine\core</Filter>
+    <ClInclude Include="src\util\data_types.h">
+      <Filter>util</Filter>
     </ClInclude>
-    <ClInclude Include="src\engine\core\window.h">
-      <Filter>engine\core</Filter>
-    </ClInclude>
-    <ClInclude Include="src\engine\types.h">
-      <Filter>engine</Filter>
-    </ClInclude>
-    <ClInclude Include="src\engine\util.h">
-      <Filter>engine</Filter>
+    <ClInclude Include="src\util\util.h">
+      <Filter>util</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="src\engine\application.cpp">
-      <Filter>engine</Filter>
+    <ClCompile Include="src\application.cpp" />
+    <ClCompile Include="src\engine\platform\window.cpp">
+      <Filter>engine\platform</Filter>
     </ClCompile>
-    <ClCompile Include="src\engine\core\Logger.cpp">
-      <Filter>engine\core</Filter>
+    <ClCompile Include="src\util\logger.cpp">
+      <Filter>util</Filter>
     </ClCompile>
-    <ClCompile Include="src\engine\core\window.cpp">
-      <Filter>engine\core</Filter>
-    </ClCompile>
-    <ClCompile Include="src\glad.c" />
   </ItemGroup>
 </Project>

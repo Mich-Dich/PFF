@@ -11,13 +11,13 @@ workspace "PFF"
 
 	-- Include directories relative to root folder (solution directory)
 	IncludeDir = {}
-	IncludeDir["SDL2"] = "%{prj.name}/vendor/SDL2/include"
-	IncludeDir["glad"] = "%{prj.name}/vendor/glad/include"
-	-- IncludeDir["GLFW"] = "%{prj.name}/vendor/GLFW/include"
-	-- IncludeDir["ImGui"] = "%{prj.name}/vendor/ImGui"
+	IncludeDir["GLFW"] = "PFF/vendor/GLFW/include"
+	IncludeDir["glad"] = "PFF/vendor/glad/include"
+	IncludeDir["ImGui"] = "PFF/vendor/ImGui"
 
-	Lib_Dir = "lib"
-	-- include "PFF/vendor/glad"
+	include "PFF/vendor/GLFW"
+	include "PFF/vendor/glad"
+	include "PFF/vendor/ImGui"
 
 project "PFF"
 	location "PFF"
@@ -33,44 +33,38 @@ project "PFF"
 	files
     {
 		"%{prj.name}/src/**.h",
-		"%{prj.name}/src/**.c",
-		"%{prj.name}/src/**.cpp"
-	}
-
-      -- Specify the directory where the DLL is located
-    libdirs
-	{
-		"DLL"
+		"%{prj.name}/src/**.cpp",
 	}
 
 	includedirs
 	{
 		"%{prj.name}/src",
-		"%{prj.name}/vendor",
-		"%{IncludeDir.SDL2}",
+		"%{IncludeDir.GLFW}",
 		"%{IncludeDir.glad}",
-		-- "%{IncludeDir.GLFW}",
 		-- "%{IncludeDir.ImGui}"
 	}
 	
 	links 
 	{
-		"%{Lib_Dir}/SDL2.lib",
-		"%{Lib_Dir}/SDL2main.lib",
-		"%{Lib_Dir}/SDL2_mixer.lib",
-		"%{Lib_Dir}/SDL2test.lib",
-		"%{Lib_Dir}/freetype.lib"
+		"GLFW",
+		"glad",
+		"opengl32.lib",
 	}
 
 	filter "system:windows"
+		cppdialect "C++17"
 		defines { "_CRT_STDIO_ISO_WIDE_SPECIFIERS" } -- Enable C17 features for Visual Studio
 		staticruntime "On"
 		systemversion "latest"
 
+        -- Add /NODEFAULTLIB:LIBCMTD to the linker options
+        linkoptions { "/NODEFAULTLIB:LIBCMTD" }
+
 		defines
 		{
 			"PFF_PLATFORM_WINDOWS",
-			"PFF_INSIDE_ENGINE"
+			"PFF_INSIDE_ENGINE",
+			"GLFW_INCLUDE_NONE"
 		}
 
 		postbuildcommands
@@ -99,21 +93,28 @@ project "Sandbox"
 	files
 	{
 		"%{prj.name}/src/**.h",
-		"%{prj.name}/src/**.c",
-		"%{prj.name}/src/**.cpp"
+		"%{prj.name}/src/**.cpp",
 	}
-
 	includedirs
 	{
-		"PFF/src"
+		"PFF/src",
+		
+		"%{IncludeDir.GLFW}",
+		--"%{IncludeDir.glad}",
+		-- "%{IncludeDir.ImGui}"
 	}
 
 	links
 	{
-		"PFF"
+		"PFF",
+		
+		--"GLFW",
+		--"glad",
+		--"opengl32.lib",
 	}
 
 	filter "system:windows"
+		cppdialect "C++17"
 		defines { "_CRT_STDIO_ISO_WIDE_SPECIFIERS" } -- Enable C17 features for Visual Studio
 		staticruntime "On"
 		systemversion "latest"

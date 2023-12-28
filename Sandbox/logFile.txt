@@ -1,17 +1,6 @@
-[09:30:11:229] [TRACE - engine\application.cpp - PFF::application::application:23] Log msg
-[09:50:22:949] [FATAL - engine\core\window.cpp - Window::Window:27] Failed to init window: Window is too large.
-[09:51:17:413] [INFO  - engine\core\window.cpp - Window::Window:31] OpenGL Loaded
-[09:51:17:417] [INFO  - engine\core\window.cpp - Window::Window:32] Vendor:   NVIDIA Corporation
-[09:51:17:420] [INFO  - engine\core\window.cpp - Window::Window:33] Renderer: NVIDIA GeForce RTX 3060 Laptop GPU/PCIe/SSE2
-[09:51:17:423] [INFO  - engine\core\window.cpp - Window::Window:34] Version:  4.6.0 NVIDIA 535.98
-[09:51:17:426] [TRACE - engine\application.cpp - application::application:13] Log msg
-[[90m11:12:44:867[97m[40m] [[90mTRACE - C:\CustomGameEngine\PFF\Sandbox\src\Sandbox.cpp - PFF::Create_application:15[97m[40m] Start Custom Application[[92m11:12:45:116[97m[40m] [[92mINFO  - C:\CustomGameEngine\PFF\PFF\src\engine\core\window.cpp - PFF::Window::Window:28[97m[40m] OpenGL Loaded[[92m11:12:45:118[97m[40m] [[92mINFO  - C:\CustomGameEngine\PFF\PFF\src\engine\core\window.cpp - PFF::Window::Window:29[97m[40m] Vendor:   %s[[92m11:12:45:119[97m[40m] [[92mINFO  - C:\CustomGameEngine\PFF\PFF\src\engine\core\window.cpp - PFF::Window::Window:30[97m[40m] Renderer: %s[[92m11:12:45:120[97m[40m] [[92mINFO  - C:\CustomGameEngine\PFF\PFF\src\engine\core\window.cpp - PFF::Window::Window:31[97m[40m] Version:  %s[[31m11:12:45:122[97m[40m] [[31mERROR - C:\CustomGameEngine\PFF\PFF\src\engine\application.cpp - PFF::application::application:13[97m[40m] Log msg600/400[[90m11:15:51:149[97m[40m] [[90mTRACE - C:\CustomGameEngine\PFF\Sandbox\src\Sandbox.cpp - PFF::Create_application:15[97m[40m] Start Custom Application
-[[90m11:16:42:526[97m[40m] [[90mTRACE - C:\CustomGameEngine\PFF\Sandbox\src\Sandbox.cpp - PFF::Create_application:15[97m[40m] Start Custom Application
-[[90m11:17:39:481[97m[40m] [[90mTRACE - C:\CustomGameEngine\PFF\Sandbox\src\Sandbox.cpp - PFF::Create_application:15[97m[40m] Start Custom Application
-[[90m11:18:12:332[97m[40m] [[90mTRACE - C:\CustomGameEngine\PFF\Sandbox\src\Sandbox.cpp - PFF::Create_application:15[97m[40m] Start Custom Application
-[[90m11:22:06:234[97m[40m] [[90mTRACE - C:\CustomGameEngine\PFF\Sandbox\src\Sandbox.cpp - PFF::Create_application:15[97m[40m] Start Custom Application
-[[90m11:23:12:220[97m[40m] [[90mTRACE - C:\CustomGameEngine\PFF\Sandbox\src\Sandbox.cpp - PFF::Create_application:15[97m[40m] Start Custom Application
-[[90m11:24:10:411[97m[40m] [[90mTRACE - C:\CustomGameEngine\PFF\Sandbox\src\Sandbox.cpp - PFF::Create_application:15[97m[40m] Start Custom Application
-[[90m11:26:00:031[97m[40m] [[90mTRACE - C:\CustomGameEngine\PFF\Sandbox\src\Sandbox.cpp - PFF::Create_application:15[97m[40m] Start Custom Application
-[[90m11:29:38:808[97m[40m] [[90mTRACE - C:\CustomGameEngine\PFF\Sandbox\src\Sandbox.cpp - PFF::Create_application:15[97m[40m] Start Custom Application
-[[90m11:34:45:022[97m[40m] [[90mTRACE - C:\CustomGameEngine\PFF\Sandbox\src\Sandbox.cpp - PFF::Create_application:15[97m[40m] Start Custom Application
+[[90m18:05:38:719[97m[40m] [[90mTRACE - C:\CustomGameEngine\PFF\PFF\src\engine\platform\window.cpp - PFF::window::window:27[97m[40m] Creating window [Gluttony width: 1280  height: 720]
+[[90m18:05:38:765[97m[40m] [[90mTRACE - C:\CustomGameEngine\PFF\PFF\src\engine\platform\window.cpp - PFF::window::window:31[97m[40m] GLFW initialized
+[[90m18:05:39:014[97m[40m] [[90mTRACE - C:\CustomGameEngine\PFF\PFF\src\engine\platform\window.cpp - PFF::window::~window:131[97m[40m] Destroying window
+[[90m18:11:13:892[97m[40m] [[90mTRACE - C:\CustomGameEngine\PFF\PFF\src\engine\platform\window.cpp - PFF::window::window:27[97m[40m] Creating window [Gluttony width: 1280  height: 720]
+[[90m18:11:13:930[97m[40m] [[90mTRACE - C:\CustomGameEngine\PFF\PFF\src\engine\platform\window.cpp - PFF::window::window:31[97m[40m] GLFW initialized
+[[90m18:11:14:146[97m[40m] [[90mTRACE - C:\CustomGameEngine\PFF\PFF\src\engine\platform\window.cpp - PFF::window::~window:131[97m[40m] Destroying window
