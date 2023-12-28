@@ -71,15 +71,6 @@
 
 #define RELATIVE_PATH(file)                         (strstr(file, ROOT_FOLDER) ? strchr(file + strlen(ROOT_FOLDER), '\\') + 1 : file)
 
-#define USE_CORE_PROFILE(useCore)                   (useCore ? core : client)
-
-#define MODEFIE_PROFILE(useCore, command)           if (useCore) {                                                              \
-                                                        core.command;                                                           \
-                                                    } else {                                                                    \
-                                                        client.command;                                                         \
-                                                    }
-
-
 
 typedef struct message_plus_thread {
     char text[MAX_MESSAGE_SIZE];
@@ -194,24 +185,22 @@ static logger_data client = {
 // ------------------------------------------------------------------------------------------ private functions ------------------------------------------------------------------------------------------
 
 // local Functions
-void __output_Message(const bool is_core, enum log_level level, const char* message, uintptr_t threadID);
-void __write_messages_to_file(const bool is_core);
+void __output_Message(enum log_level level, const char* message, uintptr_t threadID);
+void __write_messages_to_file();
 bool __create_log_file(const char* FileName);
-ThreadNameMap* __add_thread_name_mapping(const bool is_core, uintptr_t thread, const char* name);
-ThreadNameMap* __find_entry(const bool is_core, uintptr_t threadID);
-void __remove_entry(const bool is_core, uintptr_t threadID);
+ThreadNameMap* __add_thread_name_mapping(uintptr_t thread, const char* name);
+ThreadNameMap* __find_entry(uintptr_t threadID);
+void __remove_entry(uintptr_t threadID);
 int __remove_all_files_in_directory(const char *dirName);
 void __get_current_time(struct CL_Time_Info *timeInfo);
-void __log_msg(const bool is_core, const log_level level, const char* prefix, const char* funcName, char* fileName, const int Line, const uintptr_t thread_id, const char* message);
+void __log_msg(const log_level level, const char* prefix, const char* funcName, char* fileName, const int Line, const uintptr_t thread_id, const char* message);
 
 // ------------------------------------------------------------------------------------------ Semi-inline functions ------------------------------------------------------------------------------------------
 // Print a separator "---"
-void logger_print_separator(uintptr_t threadID)             { __output_Message(false, Trace, separator, threadID); }
-void logger_core_print_separator(uintptr_t threadID)        { __output_Message(true, Trace, separator, threadID); }
+void logger_print_separator(uintptr_t threadID)        { __output_Message(Trace, separator, threadID); }
 
 // Print a separator "==="
-void logger_print_separator_big(uintptr_t threadID)         { __output_Message(false, Trace, separator_Big, threadID); }
-void logger_core_print_separator_big(uintptr_t threadID)    { __output_Message(true, Trace, separator_Big, threadID); }
+void logger_print_separator_big(uintptr_t threadID)    { __output_Message(Trace, separator_Big, threadID); }
 
 
 // ------------------------------------------------------------------------------------------ public functions ------------------------------------------------------------------------------------------
@@ -243,9 +232,10 @@ int logger_init(const char* LogFileName, const char* directoryName, char* Genera
 
     MUTEX_INITIALIZE;
 
-    char file_buffer[REGISTERED_THREAD_NAME_LEN_MAX];
-    snprintf(file_buffer, sizeof(file_buffer), "%s/%s.log", USE_CORE_PROFILE(true).MainLogDirectory, USE_CORE_PROFILE(true).MainLogFileName);
-    __create_log_file(file_buffer);
+    strcpy_s(core.MainLogFileName, sizeof(core.MainLogFileName), LogFileName);
+    strcpy_s(core.MainLogDirectory, sizeof(core.MainLogDirectory), directoryName);
+    core.m_Format = GeneralLogFormat;
+    core.Loc_Use_separate_Files_for_every_Thread = (Use_separate_Files_for_every_Thread == CL_TRUE) ? true : false;
 
     strcpy_s(USE_CORE_PROFILE(true).MainLogFileName, sizeof(USE_CORE_PROFILE(true).MainLogFileName), LogFileName);
     strcpy_s(USE_CORE_PROFILE(true).MainLogDirectory, sizeof(USE_CORE_PROFILE(true).MainLogDirectory), directoryName);
@@ -264,9 +254,9 @@ int logger_init(const char* LogFileName, const char* directoryName, char* Genera
 #if defined(_WIN32) || defined(__CYGWIN__)
 
     // create directory [MainLogDirectory]
-    if (!CreateDirectoryA(USE_CORE_PROFILE(true).MainLogDirectory, NULL)) {
+    if (!CreateDirectoryA(core.MainLogDirectory, NULL)) {
         if (ERROR_ALREADY_EXISTS != GetLastError())
-            CL_INTERNAL_ERROR_MSG("Failed to create directory: %s\n", USE_CORE_PROFILE(true).MainLogDirectory);
+            CL_INTERNAL_ERROR_MSG("Failed to create directory: %s\n", core.MainLogDirectory);
     }
     // create directory [MainLogDirectory]
     if (!CreateDirectoryA(client.MainLogDirectory, NULL)) {
@@ -296,12 +286,9 @@ int logger_init(const char* LogFileName, const char* directoryName, char* Genera
 
 #endif
 
-    snprintf(file_buffer, sizeof(file_buffer), "%s/%s.log", USE_CORE_PROFILE(true).MainLogDirectory, USE_CORE_PROFILE(true).MainLogFileName);
-    __create_log_file(file_buffer);
-
-    snprintf(file_buffer, sizeof(file_buffer), "%s/%s.log", USE_CORE_PROFILE(false).MainLogDirectory, USE_CORE_PROFILE(false).MainLogFileName);
-    __create_log_file(file_buffer);
-
+    char filename[REGISTERED_THREAD_NAME_LEN_MAX];
+    snprintf(filename, sizeof(filename), "%s/%s.log", core.MainLogDirectory, core.MainLogFileName);
+    __create_log_file(filename);
 
     logger_register_thread_log_under_name(threadID, core.MainLogFileName);
     Is_Initalised = CL_TRUE;
@@ -354,8 +341,7 @@ bool __create_log_file(const char* FileName) {
 void logger_shutdown(){
 
     CORE_LOG(Trace, "Shutdown")
-    __write_messages_to_file(true);
-    __write_messages_to_file(false);
+    __write_messages_to_file();
 }
 
 
@@ -374,7 +360,7 @@ void logger_log_msg(const log_level level, const char* prefix, const char* funcN
     vsnprintf(message_formatted, MAX_MESSAGE_SIZE, message, args_ptr);
     va_end(args_ptr);
 
-    __log_msg(false, level, prefix, funcName, fileName, Line, thread_id, message_formatted);
+    __log_msg(level, prefix, funcName, fileName, Line, thread_id, message_formatted);
 }
 
 // Output a message to the standard output stream and a log file
@@ -394,11 +380,11 @@ void logger_core_log_msg(const log_level level, const char* prefix, const char* 
     vsnprintf(message_formatted, MAX_MESSAGE_SIZE, message, args_ptr);
     va_end(args_ptr);
 
-    __log_msg(true, level, prefix, funcName, fileName, Line, thread_id, message_formatted);
+    __log_msg(level, prefix, funcName, fileName, Line, thread_id, message_formatted);
 }
 
 //
-void __log_msg(const bool is_core, const log_level level, const char* prefix, const char* funcName, char* fileName, const int Line, const uintptr_t thread_id, const char* message) {
+void __log_msg(const log_level level, const char* prefix, const char* funcName, char* fileName, const int Line, const uintptr_t thread_id, const char* message) {
 
     SETUP_FOR_FORMAT_MACRO;
     sprintf_s(message_formatted, MAX_MESSAGE_SIZE, "%s", message);
@@ -406,9 +392,9 @@ void __log_msg(const bool is_core, const log_level level, const char* prefix, co
     struct CL_Time_Info locTimeInfo;
     __get_current_time(&locTimeInfo);
 
-    char* locTargetFormat = USE_CORE_PROFILE(is_core).m_Format;
-    if (USE_CORE_PROFILE(is_core).SpecificLogFormatArray[level].isInUse)
-        locTargetFormat = USE_CORE_PROFILE(is_core).SpecificLogFormatArray[level].Format;
+    char* locTargetFormat = core.m_Format;
+    if (core.SpecificLogFormatArray[level].isInUse)
+        locTargetFormat = core.SpecificLogFormatArray[level].Format;
 
     int FormatLen = (int)strlen(locTargetFormat);
     for (int x = 0; x < FormatLen; x++) {
@@ -499,14 +485,14 @@ void __log_msg(const bool is_core, const log_level level, const char* prefix, co
     }
 
     if (Is_Initalised == CL_TRUE)
-        __output_Message(is_core, level, (const char*)message_out, thread_id);
+        __output_Message(level, (const char*)message_out, thread_id);
     else
         printf("%s LOGGER IS NOT INITALIZED: %s %s", Console_Colour_Strings[0], Console_Colour_Reset, message_out);
 }
 
 
 //
-void __output_Message(const bool is_core, enum log_level level, const char* message, uintptr_t threadID) {
+void __output_Message(enum log_level level, const char* message, uintptr_t threadID) {
     
     // Print Message to standard output
     if (level <= core.internal_level) {
@@ -517,20 +503,15 @@ void __output_Message(const bool is_core, enum log_level level, const char* mess
 
     MUTEX_LOCK
     // Save message in Buffer
-    strncpy_s(
-        USE_CORE_PROFILE(is_core).Log_Message_Buffer.messages[USE_CORE_PROFILE(is_core).Log_Message_Buffer.count].text,
-        sizeof(USE_CORE_PROFILE(is_core).Log_Message_Buffer.messages[USE_CORE_PROFILE(is_core).Log_Message_Buffer.count].text),
-        message, 
-        sizeof(USE_CORE_PROFILE(is_core).Log_Message_Buffer.messages[0].text));
-    
-    USE_CORE_PROFILE(is_core).Log_Message_Buffer.messages[USE_CORE_PROFILE(is_core).Log_Message_Buffer.count].text[sizeof(USE_CORE_PROFILE(is_core).Log_Message_Buffer.messages[USE_CORE_PROFILE(is_core).Log_Message_Buffer.count].text) - 1] = '\0';
-    USE_CORE_PROFILE(is_core).Log_Message_Buffer.messages[USE_CORE_PROFILE(is_core).Log_Message_Buffer.count].thread = threadID;
-    MODEFIE_PROFILE(is_core, Log_Message_Buffer.count++);
+    strncpy_s(core.Log_Message_Buffer.messages[core.Log_Message_Buffer.count].text,sizeof(core.Log_Message_Buffer.messages[core.Log_Message_Buffer.count].text), message, sizeof(core.Log_Message_Buffer.messages[0].text));
+    core.Log_Message_Buffer.messages[core.Log_Message_Buffer.count].text[sizeof(core.Log_Message_Buffer.messages[core.Log_Message_Buffer.count].text) - 1] = '\0';
+    core.Log_Message_Buffer.messages[core.Log_Message_Buffer.count].thread = threadID;
+    core.Log_Message_Buffer.count++;
 
     // Check if buffer full OR important message
-    if (core.Log_Message_Buffer.count >= (MAX_BUFFERED_MESSAGES -1) || (unsigned int)level < (6 - (unsigned int)USE_CORE_PROFILE(is_core).log_level_for_buffer)) {
+    if (core.Log_Message_Buffer.count >= (MAX_BUFFERED_MESSAGES -1) || (unsigned int)level < (6 - (unsigned int)core.log_level_for_buffer)) {
         
-        __write_messages_to_file(is_core);
+        __write_messages_to_file();
         core.Log_Message_Buffer.count = 0;
     }
     
@@ -538,23 +519,23 @@ void __output_Message(const bool is_core, enum log_level level, const char* mess
 }
 
 //
-void __write_messages_to_file(const bool is_core) {
+void __write_messages_to_file() {
 
     ThreadNameMap* loc_Entry = NULL;
     char filename[REGISTERED_THREAD_NAME_LEN_MAX];
-    for (int x = 0; x < USE_CORE_PROFILE(is_core).Log_Message_Buffer.count; x++) {
+    for (int x = 0; x < core.Log_Message_Buffer.count; x++) {
 
-        if(USE_CORE_PROFILE(is_core).Loc_Use_separate_Files_for_every_Thread) {
+        if(core.Loc_Use_separate_Files_for_every_Thread) {
 
-            loc_Entry = __find_entry(is_core, USE_CORE_PROFILE(is_core).Log_Message_Buffer.messages[x].thread);
+            loc_Entry = __find_entry(core.Log_Message_Buffer.messages[x].thread);
             if(loc_Entry != NULL) {
 
                 snprintf(filename, sizeof(filename), "%s", loc_Entry->name);
             }
             else {
 
-                //printf("    loc_Entry: %s [tread: %lu]\n", ptr_To_String(loc_Entry), profile.Log_Message_Buffer.messages[x].thread);
-                snprintf(filename, sizeof(filename), "%s\\thread_log_%lu.log", USE_CORE_PROFILE(is_core).MainLogDirectory, (unsigned long)USE_CORE_PROFILE(is_core).Log_Message_Buffer.messages[x].thread);
+                //printf("    loc_Entry: %s [tread: %lu]\n", ptr_To_String(loc_Entry), core.Log_Message_Buffer.messages[x].thread);
+                snprintf(filename, sizeof(filename), "%s\\thread_log_%lu.log", core.MainLogDirectory, (unsigned long)core.Log_Message_Buffer.messages[x].thread);
                 if(access(filename, F_OK) != 0) 
                     __create_log_file(filename);
             }
@@ -562,7 +543,7 @@ void __write_messages_to_file(const bool is_core) {
 
         else {
 
-            snprintf(filename, sizeof(filename), "%s\\%s.log", USE_CORE_PROFILE(is_core).MainLogDirectory, USE_CORE_PROFILE(is_core).MainLogFileName);
+            snprintf(filename, sizeof(filename), "%s\\%s.log", core.MainLogDirectory, core.MainLogFileName);
             if(access(filename, F_OK) != 0) {
 
                 printf("  Could not poen [%s] => calling __create_log_file()\n", filename);
@@ -579,22 +560,22 @@ void __write_messages_to_file(const bool is_core) {
             continue;
         }
         
-        fputs((const char*)USE_CORE_PROFILE(is_core).Log_Message_Buffer.messages[x].text, file);
+        fputs((const char*)core.Log_Message_Buffer.messages[x].text, file);
         fclose(file);
     }
 }
 
 // change the 
-int __logger_register_thread_log_under_name(const bool is_core, uintptr_t threadID, const char* name) {
+int logger_register_thread_log_under_name(uintptr_t threadID, const char* name) {
 
     char filename[REGISTERED_THREAD_NAME_LEN_MAX];
-    snprintf(filename, sizeof(filename), "%sthread_log_%lu.log", USE_CORE_PROFILE(is_core).MainLogDirectory, (unsigned long)threadID);
+    snprintf(filename, sizeof(filename), "%sthread_log_%lu.log", core.MainLogDirectory, (unsigned long)threadID);
 
     char newFilename[REGISTERED_THREAD_NAME_LEN_MAX];
-    snprintf(newFilename, sizeof(newFilename), "%s%s.log", USE_CORE_PROFILE(is_core).MainLogDirectory, name);
+    snprintf(newFilename, sizeof(newFilename), "%s%s.log", core.MainLogDirectory, name);
 
     // Create a new entry in list
-    __add_thread_name_mapping(is_core, threadID, newFilename);
+    __add_thread_name_mapping(threadID, newFilename);
 
     if (access(filename, F_OK) != 0)
         return -1;
@@ -623,9 +604,9 @@ int logger_register_thread_log_under_name(uintptr_t threadID, const char* name) 
 // ------------------------------------------------------------------------------------------ Thread-Name Mapping ------------------------------------------------------------------------------------------
 
 //
-ThreadNameMap* __add_thread_name_mapping(const bool is_core, uintptr_t thread, const char* name) {
+ThreadNameMap* __add_thread_name_mapping(uintptr_t thread, const char* name) {
 
-    ThreadNameMap* loc_Found = __find_entry(is_core, thread);
+    ThreadNameMap* loc_Found = __find_entry(thread);
     if(loc_Found != NULL) {
 
         //printf("  thread already has an Entry in [ThreadNameMap], [name] was updated");
@@ -644,47 +625,47 @@ ThreadNameMap* __add_thread_name_mapping(const bool is_core, uintptr_t thread, c
     strncpy_s(newEntry->name, sizeof(newEntry->name), name, MIN(strlen(name), REGISTERED_THREAD_NAME_LEN_MAX));
     newEntry->thread_id = thread;
     
-    if (USE_CORE_PROFILE(is_core).firstEntry == NULL) {   // list is Empty
+    if (core.firstEntry == NULL) {   // list is Empty
 
-        MODEFIE_PROFILE(is_core, firstEntry = newEntry);
-        MODEFIE_PROFILE(is_core, lastEntry = newEntry);
+        core.firstEntry = newEntry;
+        core.lastEntry = newEntry;
     
     } else {                      // Add to List-End
 
-        MODEFIE_PROFILE(is_core, lastEntry->next = newEntry);
-        newEntry->prev = USE_CORE_PROFILE(is_core).lastEntry;
-        MODEFIE_PROFILE(is_core, lastEntry = newEntry);
+        core.lastEntry->next = newEntry;
+        newEntry->prev = core.lastEntry;
+        core.lastEntry = newEntry;
     }
     
     return newEntry;
 }
 
 // removes entry from linked list, if found
-void __remove_entry(const bool is_core, uintptr_t threadID) {
+void __remove_entry(uintptr_t threadID) {
 
     MUTEX_LOCK
-    ThreadNameMap *locPointer = __find_entry(is_core, threadID);
+    ThreadNameMap *locPointer = __find_entry(threadID);
     if (locPointer == NULL)
         return;
     
-    if (USE_CORE_PROFILE(is_core).firstEntry == USE_CORE_PROFILE(is_core).lastEntry) {          // List has only one element
+    if (core.firstEntry == core.lastEntry) {          // List has only one element
 
-        MODEFIE_PROFILE(is_core, firstEntry = NULL);
-        MODEFIE_PROFILE(is_core, lastEntry = NULL);
+        core.firstEntry = NULL;
+        core.lastEntry = NULL;
     }
 
     // List has more than one element
     else {
 
-        if (locPointer == USE_CORE_PROFILE(is_core).firstEntry){      // Is First?
+        if (locPointer == core.firstEntry){      // Is First?
 
-            MODEFIE_PROFILE(is_core, firstEntry = USE_CORE_PROFILE(is_core).firstEntry->next);
-            USE_CORE_PROFILE(is_core).firstEntry->prev = NULL;
+            core.firstEntry = core.firstEntry->next;
+            core.firstEntry->prev = NULL;
         
-        } else if (locPointer == USE_CORE_PROFILE(is_core).lastEntry) { // Is Last?
+        } else if (locPointer == core.lastEntry) { // Is Last?
 
-            MODEFIE_PROFILE(is_core, lastEntry = USE_CORE_PROFILE(is_core).lastEntry->prev);
-            USE_CORE_PROFILE(is_core).lastEntry->next = NULL;
+            core.lastEntry = core.lastEntry->prev;
+            core.lastEntry->next = NULL;
         
         } else {                              // is in middle
 
@@ -698,11 +679,11 @@ void __remove_entry(const bool is_core, uintptr_t threadID) {
 }
 
 // Iterate through list and try to find entry by thread // Returns NULL if not found
-ThreadNameMap* __find_entry(const bool is_core, uintptr_t threadID) {
+ThreadNameMap* __find_entry(uintptr_t threadID) {
     
     //printf("    __find_entry()  [thread: %lu]\n", threadID);
     bool locFound = false;
-    ThreadNameMap *locPointer = USE_CORE_PROFILE(is_core).firstEntry;
+    ThreadNameMap *locPointer = core.firstEntry;
     while (locFound == false && locPointer != NULL) {
 
         //printf("    Iterating over Entry List current Entry.thread: %lu] [next: %s]\n", locPointer->thread_id, ptr_To_String(locPointer->next));

@@ -96,12 +96,9 @@ void logger_core_set_format_for_specific_log_level(enum log_level level, char* F
 void logger_core_disable_format_for_specific_log_level(enum log_level level);
 
 void logger_shutdown();
-int logger_core_register_thread_log_under_name(uintptr_t threadID, const char* name);
+int logger_register_thread_log_under_name(uintptr_t threadID, const char* name);
 void logger_set_log_level(enum log_level new_level);
 void logger_core_log_msg(const enum log_level level, const char* prefix, const char* funcName, char* fileName, const int Line, const uintptr_t thread_id, const char* message, ...);
-
-void logger_core_print_separator(uintptr_t threadID);
-void logger_core_print_separator_big(uintptr_t threadID);
 
 // Define witch log levels should be written to log file directly and witch should be buffered
 //  0    =>   write all logs directly to log file
@@ -113,11 +110,10 @@ PFF_API void logger_set_buffer_level(int newLevel);
 PFF_API void logger_log_msg(const enum log_level level, const char* prefix, const char* funcName, char* fileName, const int Line, const uintptr_t thread_id, const char* message, ...);
 PFF_API int logger_is_initalized(void);
 
-PFF_API void logger_print_separator(uintptr_t threadID);
-PFF_API void logger_print_separator_big(uintptr_t threadID);
 PFF_API void logger_set_format(char* format);
 PFF_API void logger_use_format_backup(void);
-PFF_API int logger_register_thread_log_under_name(uintptr_t threadID, const char* name);
+PFF_API void logger_print_separator(uintptr_t threadID);
+PFF_API void logger_print_separator_big(uintptr_t threadID);
 
 PFF_API int logger_init(const char* LogFileName, const char* directoryName, char* GeneralLogFormat, uintptr_t threadID, int Use_separate_Files_for_every_Thread);
 
