@@ -59,7 +59,7 @@
       <PrecompiledHeader>NotUsing</PrecompiledHeader>
       <WarningLevel>Level3</WarningLevel>
       <PreprocessorDefinitions>_CRT_STDIO_ISO_WIDE_SPECIFIERS;PFF_PLATFORM_WINDOWS;PFF_INSIDE_ENGINE;GLFW_INCLUDE_NONE;PFF_DEBUG;%(PreprocessorDefinitions)</PreprocessorDefinitions>
-      <AdditionalIncludeDirectories>src;vendor\GLFW\include;vendor\glad\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>src;C:\VulkanSDK\1.3.250.1\Include;C:\Users\mally\Documents\Visual Studio 2022\Libraries\glm;C:\Users\mally\Documents\Visual Studio 2022\Libraries\glfw-3.3.8.bin.WIN64\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <DebugInformationFormat>EditAndContinue</DebugInformationFormat>
       <Optimization>Disabled</Optimization>
       <RuntimeLibrary>MultiThreadedDebug</RuntimeLibrary>
@@ -70,7 +70,8 @@
     <Link>
       <SubSystem>Windows</SubSystem>
       <GenerateDebugInformation>true</GenerateDebugInformation>
-      <AdditionalDependencies>opengl32.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>vulkan-1.lib;glfw3.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalLibraryDirectories>C:\VulkanSDK\1.3.250.1\Lib;C:\Users\mally\Documents\Visual Studio 2022\Libraries\glfw-3.3.8.bin.WIN64\lib-vc2022;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
       <ImportLibrary>..\bin\Debug-windows-x86_64\PFF\PFF.lib</ImportLibrary>
       <AdditionalOptions>/NODEFAULTLIB:LIBCMTD %(AdditionalOptions)</AdditionalOptions>
     </Link>
@@ -83,7 +84,7 @@
       <PrecompiledHeader>NotUsing</PrecompiledHeader>
       <WarningLevel>Level3</WarningLevel>
       <PreprocessorDefinitions>_CRT_STDIO_ISO_WIDE_SPECIFIERS;PFF_PLATFORM_WINDOWS;PFF_INSIDE_ENGINE;GLFW_INCLUDE_NONE;PFF_RELEASE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
-      <AdditionalIncludeDirectories>src;vendor\GLFW\include;vendor\glad\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>src;C:\VulkanSDK\1.3.250.1\Include;C:\Users\mally\Documents\Visual Studio 2022\Libraries\glm;C:\Users\mally\Documents\Visual Studio 2022\Libraries\glfw-3.3.8.bin.WIN64\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <Optimization>Full</Optimization>
       <FunctionLevelLinking>true</FunctionLevelLinking>
       <IntrinsicFunctions>true</IntrinsicFunctions>
@@ -98,7 +99,8 @@
       <SubSystem>Windows</SubSystem>
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
       <OptimizeReferences>true</OptimizeReferences>
-      <AdditionalDependencies>opengl32.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>vulkan-1.lib;glfw3.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalLibraryDirectories>C:\VulkanSDK\1.3.250.1\Lib;C:\Users\mally\Documents\Visual Studio 2022\Libraries\glfw-3.3.8.bin.WIN64\lib-vc2022;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
       <ImportLibrary>..\bin\Release-windows-x86_64\PFF\PFF.lib</ImportLibrary>
       <AdditionalOptions>/NODEFAULTLIB:LIBCMTD %(AdditionalOptions)</AdditionalOptions>
     </Link>
@@ -107,30 +109,26 @@
     </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClInclude Include="src\engine\render\vk_pipeline.h" />
+    <ClInclude Include="src\util\io_handler.h" />
     <ClInclude Include="src\PFF.h" />
     <ClInclude Include="src\application.h" />
     <ClInclude Include="src\engine\events\application_event.h" />
     <ClInclude Include="src\engine\events\event.h" />
     <ClInclude Include="src\engine\events\key_event.h" />
     <ClInclude Include="src\engine\events\mouse_event.h" />
-    <ClInclude Include="src\engine\platform\window.h" />
+    <ClInclude Include="src\engine\platform\pff_window.h" />
     <ClInclude Include="src\entry_point.h" />
-    <ClInclude Include="src\util\logger.h" />
     <ClInclude Include="src\util\data_types.h" />
+    <ClInclude Include="src\util\logger.h" />
     <ClInclude Include="src\util\util.h" />
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="src\engine\render\vk_pipline.cpp" />
+    <ClCompile Include="src\util\io_handler.cpp" />
     <ClCompile Include="src\application.cpp" />
-    <ClCompile Include="src\engine\platform\window.cpp" />
+    <ClCompile Include="src\engine\platform\pff_window.cpp" />
     <ClCompile Include="src\util\logger.cpp" />
-  </ItemGroup>
-  <ItemGroup>
-    <ProjectReference Include="vendor\GLFW\GLFW.vcxproj">
-      <Project>{154B857C-0182-860D-AA6E-6C109684020F}</Project>
-    </ProjectReference>
-    <ProjectReference Include="vendor\glad\glad.vcxproj">
-      <Project>{DD62977C-C999-980D-7286-7E105E9C140F}</Project>
-    </ProjectReference>
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

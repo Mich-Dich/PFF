@@ -29,27 +29,31 @@
     <ClInclude Include="src\engine\events\mouse_event.h">
       <Filter>engine\events</Filter>
     </ClInclude>
-    <ClInclude Include="src\engine\platform\window.h">
+    <ClInclude Include="src\engine\platform\pff_window.h">
       <Filter>engine\platform</Filter>
     </ClInclude>
     <ClInclude Include="src\entry_point.h" />
-    <ClInclude Include="src\util\logger.h">
+    <ClInclude Include="src\util\data_types.h">
       <Filter>util</Filter>
     </ClInclude>
-    <ClInclude Include="src\util\data_types.h">
+    <ClInclude Include="src\util\logger.h">
       <Filter>util</Filter>
     </ClInclude>
     <ClInclude Include="src\util\util.h">
       <Filter>util</Filter>
     </ClInclude>
+    <ClInclude Include="src\util\io_handler.h" />
+    <ClInclude Include="src\engine\render\vk_pipeline.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="src\application.cpp" />
-    <ClCompile Include="src\engine\platform\window.cpp">
+    <ClCompile Include="src\engine\platform\pff_window.cpp">
       <Filter>engine\platform</Filter>
     </ClCompile>
     <ClCompile Include="src\util\logger.cpp">
       <Filter>util</Filter>
     </ClCompile>
+    <ClCompile Include="src\util\io_handler.cpp" />
+    <ClCompile Include="src\engine\render\vk_pipline.cpp" />
   </ItemGroup>
 </Project>

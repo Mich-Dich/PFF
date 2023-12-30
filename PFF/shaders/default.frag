@@ -1,12 +1,7 @@
-#version 330 core
-out vec4 frag_color;
+#version 450
 
-in vec2 uvs;
-
-uniform vec4 color;
-uniform sampler2D texture_id;
+layout (location = 0) out vec4 outColor;
 
 void main() {
-	frag_color = texture(texture_id, uvs) * color;
+  outColor = vec4(1.0, 0.0, 0.0, 1.0);
 }
-

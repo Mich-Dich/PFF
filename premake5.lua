@@ -1,5 +1,8 @@
+-- premake5.lua
+
 workspace "PFF"
 	platforms "x64"
+    startproject "Sandbox" -- Replace with the actual project name
 
 	configurations
 	{
@@ -39,16 +42,29 @@ project "PFF"
 	includedirs
 	{
 		"%{prj.name}/src",
-		"%{IncludeDir.GLFW}",
-		"%{IncludeDir.glad}",
+		
+		"C:/VulkanSDK/1.3.250.1/Include", -- CHANGE THIS
+		"C:/Users/mally/Documents/Visual Studio 2022/Libraries/glm",
+		"C:/Users/mally/Documents/Visual Studio 2022/Libraries/glfw-3.3.8.bin.WIN64/include"
+		
+		--"%{IncludeDir.GLFW}",
+		--"%{IncludeDir.glad}",
 		-- "%{IncludeDir.ImGui}"
 	}
 	
+	libdirs 
+	{
+		"C:/VulkanSDK/1.3.250.1/Lib",
+		"C:/Users/mally/Documents/Visual Studio 2022/Libraries/glfw-3.3.8.bin.WIN64/lib-vc2022",
+	}
+
 	links 
 	{
-		"GLFW",
-		"glad",
-		"opengl32.lib",
+		"vulkan-1.lib",
+		"glfw3.lib",
+		--"GLFW",
+		--"glad",
+		--"opengl32.lib",
 	}
 
 	filter "system:windows"
@@ -98,8 +114,7 @@ project "Sandbox"
 	includedirs
 	{
 		"PFF/src",
-		
-		"%{IncludeDir.GLFW}",
+		--"%{IncludeDir.GLFW}",
 		--"%{IncludeDir.glad}",
 		-- "%{IncludeDir.ImGui}"
 	}
@@ -107,7 +122,6 @@ project "Sandbox"
 	links
 	{
 		"PFF",
-		
 		--"GLFW",
 		--"glad",
 		--"opengl32.lib",

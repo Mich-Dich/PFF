@@ -1,3 +1,5 @@
+-- premake5.lua
+
 project "GLFW"
 	kind "StaticLib"
 	language "C"

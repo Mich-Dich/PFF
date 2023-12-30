@@ -177,37 +177,35 @@ namespace APP_NAMESPACE {
 	#define CORE_VALIDATE(expr, successMsg, failureMsg, ReturnCommand)			{expr;}
 	#endif // ENABLE_VALIDATION
 
-#else
-
-	//  ===================================================================================  Client Logger  ===================================================================================
-
-	#define LOG_Fatal(message)						{ APP_NAMESPACE::Logger::LogMessage(APP_NAMESPACE::Logger::LogMsgSeverity::Fatal,__FILE__,__FUNCTION__,__LINE__) << message; }
-	#define LOG_Error(message)						{ APP_NAMESPACE::Logger::LogMessage(APP_NAMESPACE::Logger::LogMsgSeverity::Error,__FILE__,__FUNCTION__,__LINE__) << message; }
-
-	#if LOG_LEVEL_ENABLED >= 1
-		#define LOG_Warn(message, ...)					{ APP_NAMESPACE::Logger::LogMessage(APP_NAMESPACE::Logger::LogMsgSeverity::Warn,__FILE__,__FUNCTION__,__LINE__) << message; }
-	#else
-		#define LOG_Warn(message, ...)					{;}
-	#endif
-
-	#if LOG_LEVEL_ENABLED >= 2
-		#define LOG_Info(message, ...)					{ APP_NAMESPACE::Logger::LogMessage(APP_NAMESPACE::Logger::LogMsgSeverity::Info,__FILE__,__FUNCTION__,__LINE__) << message; }
-	#else
-		#define LOG_Info(message, ...)					{;}
-	#endif
-
-	#if LOG_LEVEL_ENABLED >= 3
-		#define LOG_Debug(message, ...)					{ APP_NAMESPACE::Logger::LogMessage(APP_NAMESPACE::Logger::LogMsgSeverity::Debug,__FILE__,__FUNCTION__,__LINE__) << message; }
-	#else
-		#define LOG_Debug(message, ...)					{;}
-	#endif
-
-	#if LOG_LEVEL_ENABLED >= 4
-		#define LOG_Trace(message, ...)					{ APP_NAMESPACE::Logger::LogMessage(APP_NAMESPACE::Logger::LogMsgSeverity::Trace,__FILE__,__FUNCTION__,__LINE__) << message; }
-	#else
-		#define LOG_Trace(message, ...)					{;}
-	#endif
-
-	#define LOG(severity, message)					LOG_##severity(message)
-
 #endif
+
+//  ===================================================================================  Client Logger  ===================================================================================
+
+#define LOG_Fatal(message)						{ APP_NAMESPACE::Logger::LogMessage(APP_NAMESPACE::Logger::LogMsgSeverity::Fatal,__FILE__,__FUNCTION__,__LINE__) << message; }
+#define LOG_Error(message)						{ APP_NAMESPACE::Logger::LogMessage(APP_NAMESPACE::Logger::LogMsgSeverity::Error,__FILE__,__FUNCTION__,__LINE__) << message; }
+
+#if LOG_LEVEL_ENABLED >= 1
+	#define LOG_Warn(message, ...)					{ APP_NAMESPACE::Logger::LogMessage(APP_NAMESPACE::Logger::LogMsgSeverity::Warn,__FILE__,__FUNCTION__,__LINE__) << message; }
+#else
+	#define LOG_Warn(message, ...)					{;}
+#endif
+
+#if LOG_LEVEL_ENABLED >= 2
+	#define LOG_Info(message, ...)					{ APP_NAMESPACE::Logger::LogMessage(APP_NAMESPACE::Logger::LogMsgSeverity::Info,__FILE__,__FUNCTION__,__LINE__) << message; }
+#else
+	#define LOG_Info(message, ...)					{;}
+#endif
+
+#if LOG_LEVEL_ENABLED >= 3
+	#define LOG_Debug(message, ...)					{ APP_NAMESPACE::Logger::LogMessage(APP_NAMESPACE::Logger::LogMsgSeverity::Debug,__FILE__,__FUNCTION__,__LINE__) << message; }
+#else
+	#define LOG_Debug(message, ...)					{;}
+#endif
+
+#if LOG_LEVEL_ENABLED >= 4
+	#define LOG_Trace(message, ...)					{ APP_NAMESPACE::Logger::LogMessage(APP_NAMESPACE::Logger::LogMsgSeverity::Trace,__FILE__,__FUNCTION__,__LINE__) << message; }
+#else
+	#define LOG_Trace(message, ...)					{;}
+#endif
+
+#define LOG(severity, message)					LOG_##severity(message)

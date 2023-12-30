@@ -1,29 +1,34 @@
 
-#include "glad/glad.h"
+// #include "glad/glad.h"
+
+#define GLFW_INCLUDE_VULKAN
+#include "GLFW/glfw3.h"
 
 #include "engine/events/application_event.h"
 #include "engine/events/mouse_event.h"
 #include "engine/events/key_event.h"
 
-#include "window.h"
+#include "pff_window.h"
 
 
 namespace PFF {
 
 	static bool s_GLFWinitialized = false;
 
-
+	/*
 	static void GLFW_error_callback(int errorCode, const char* description) {
 
 		CORE_LOG(Error, "[GLFW Error: " << errorCode << "]: " << description);
-	}
+	}*/
 
-	window::window(const WindowAttributes& attributes) {
+	pff_window::pff_window(std::string title, u32 width, u32 height)  {
+		
+		m_Data.title = title;
+		m_Data.width = width;
+		m_Data.height = height;
+		m_Window = init_window();
 
-		m_Data.Title = attributes.Title;
-		m_Data.Width = attributes.Width;
-		m_Data.Height = attributes.Height;
-
+		/*
 		CORE_LOG(Trace, "Creating window [" << m_Data.Title << " width: " << m_Data.Width << "  height: " << m_Data.Height << "]");
 
 		if (!s_GLFWinitialized) {
@@ -123,28 +128,38 @@ namespace PFF {
 					break;
 				}
 		});
-
+*/
 	}
 
-	window::~window() { 
+	pff_window::~pff_window() {
 
 		CORE_LOG(Trace, "Destroying window");
 		glfwDestroyWindow(m_Window);
+		glfwTerminate();
 	}
 
-	void window::OnUpdate() {
+	GLFWwindow* pff_window::init_window() {
 
-		glfwPollEvents();
-		glfwSwapBuffers(m_Window);
+		glfwInit();
+		glfwWindowHint(GLFW_CLIENT_API, GLFW_NO_API);
+		glfwWindowHint(GLFW_RESIZABLE, GLFW_FALSE);
+
+		return glfwCreateWindow(m_Data.width, m_Data.height, m_Data.title.c_str(), nullptr, nullptr);
 	}
 
-	void window::SetVSync(bool enable) {
+	void pff_window::OnUpdate() {
 
-		if (enable)	glfwSwapInterval(1);
+		//glfwPollEvents();
+		//glfwSwapBuffers(m_Window);
+	}
+
+	void pff_window::SetVSync(bool enable) {
+
+		/*if (enable)	glfwSwapInterval(1);
 		else			glfwSwapInterval(0);
-		m_Data.VSync = enable;
+		m_Data.VSync = enable;*/
 	}
 
-	bool window::IsVSync() { return m_Data.VSync; }
+	bool pff_window::IsVSync() { return m_Data.VSync; }
 
 }
