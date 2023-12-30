@@ -10,6 +10,9 @@
     <Filter Include="engine\platform">
       <UniqueIdentifier>{CF5EE486-3BEA-514B-44FB-D43FB005AE4B}</UniqueIdentifier>
     </Filter>
+    <Filter Include="engine\render">
+      <UniqueIdentifier>{2A265F8D-96E6-DAC3-5F21-2441CBA01FA0}</UniqueIdentifier>
+    </Filter>
     <Filter Include="util">
       <UniqueIdentifier>{43339F7C-2F6A-A00D-D856-8610C46C1C0F}</UniqueIdentifier>
     </Filter>
@@ -32,8 +35,17 @@
     <ClInclude Include="src\engine\platform\pff_window.h">
       <Filter>engine\platform</Filter>
     </ClInclude>
+    <ClInclude Include="src\engine\render\vk_device.h">
+      <Filter>engine\render</Filter>
+    </ClInclude>
+    <ClInclude Include="src\engine\render\vk_pipeline.h">
+      <Filter>engine\render</Filter>
+    </ClInclude>
     <ClInclude Include="src\entry_point.h" />
     <ClInclude Include="src\util\data_types.h">
+      <Filter>util</Filter>
+    </ClInclude>
+    <ClInclude Include="src\util\io_handler.h">
       <Filter>util</Filter>
     </ClInclude>
     <ClInclude Include="src\util\logger.h">
@@ -42,18 +54,29 @@
     <ClInclude Include="src\util\util.h">
       <Filter>util</Filter>
     </ClInclude>
-    <ClInclude Include="src\util\io_handler.h" />
-    <ClInclude Include="src\engine\render\vk_pipeline.h" />
+    <ClInclude Include="src\engine\render\vk_swap_chain.h" />
+    <ClInclude Include="src\engine\render\vulkan_renderer.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="src\application.cpp" />
     <ClCompile Include="src\engine\platform\pff_window.cpp">
       <Filter>engine\platform</Filter>
     </ClCompile>
+    <ClCompile Include="src\engine\render\vk_swap_chain.cpp">
+      <Filter>engine\render</Filter>
+    </ClCompile>
+    <ClCompile Include="src\engine\render\vk_device.cpp">
+      <Filter>engine\render</Filter>
+    </ClCompile>
+    <ClCompile Include="src\engine\render\vk_pipeline.cpp">
+      <Filter>engine\render</Filter>
+    </ClCompile>
+    <ClCompile Include="src\util\io_handler.cpp">
+      <Filter>util</Filter>
+    </ClCompile>
     <ClCompile Include="src\util\logger.cpp">
       <Filter>util</Filter>
     </ClCompile>
-    <ClCompile Include="src\util\io_handler.cpp" />
-    <ClCompile Include="src\engine\render\vk_pipline.cpp" />
+    <ClCompile Include="src\engine\render\vulkan_renderer.cpp" />
   </ItemGroup>
 </Project>

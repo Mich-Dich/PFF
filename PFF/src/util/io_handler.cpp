@@ -4,7 +4,8 @@ namespace PFF {
 
 	namespace io_handler {
 
-		std::vector<char> read_a_file(const std::string& file_path) {
+		//
+		std::vector<char> read_file(const std::string& file_path) {
 
 			std::ifstream file{ file_path, std::ios::ate | std::ios::binary };
 
@@ -17,7 +18,16 @@ namespace PFF {
 			file.read(buffer.data(), file_size);
 			file.close();
 
+			CORE_LOG(Trace, "loaded file at [" << file_path << "] with length[" << file_size << "]");
+
 			return buffer;
+		}
+
+		//
+		bool write_file(const std::string& file_path, std::vector<char> content) {
+
+
+			return false;
 		}
 	}
 }

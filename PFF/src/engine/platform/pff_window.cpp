@@ -133,7 +133,7 @@ namespace PFF {
 
 	pff_window::~pff_window() {
 
-		CORE_LOG(Trace, "Destroying window");
+		CORE_LOG(Trace, "Destroying m_window");
 		glfwDestroyWindow(m_Window);
 		glfwTerminate();
 	}
@@ -161,5 +161,17 @@ namespace PFF {
 	}
 
 	bool pff_window::IsVSync() { return m_Data.VSync; }
+
+	bool pff_window::should_close() {
+	
+		return glfwWindowShouldClose(m_Window);
+	}
+
+	void pff_window::createWindowSurface(VkInstance instance, VkSurfaceKHR* surface) {
+
+
+		CORE_ASSERT(glfwCreateWindowSurface(instance, m_Window, nullptr, surface) == VK_SUCCESS, "", "Failed to create awindow surface");
+
+	}
 
 }

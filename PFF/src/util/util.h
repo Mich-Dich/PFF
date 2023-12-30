@@ -16,6 +16,8 @@
 
 #include <list>
 #include <map>
+#include <set>
+#include <array>
 #include <type_traits>
 
 #include <stdio.h>

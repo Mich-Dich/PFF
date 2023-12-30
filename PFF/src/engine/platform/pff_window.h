@@ -2,13 +2,15 @@
 
 #include "util/util.h"
 
+#include <vulkan/vulkan.h>
+
 /*
 #include "engine/events/event.h"
 #include "engine/events/application_event.h"
 #include "engine/events/mouse_event.h"
 #include "engine/events/key_event.h"*/
 
-	struct GLFWwindow;
+struct GLFWwindow;
 
 namespace PFF {
 
@@ -23,7 +25,7 @@ namespace PFF {
 			: title(title), width(width), height(height) {}
 	};
 
-	class PFF_API pff_window {
+	class pff_window {
 
 	public:
 		//using EventCallbackFn = std::function<void(Event&)>;
@@ -34,12 +36,17 @@ namespace PFF {
 		pff_window(const pff_window&) = delete;
 		pff_window& operator=(const pff_window&) = delete;
 
+		void createWindowSurface(VkInstance instance, VkSurfaceKHR* surface);
+
+		inline VkExtent2D get_extend() { return { m_Data.width, m_Data.height }; }
+		bool should_close();
+
+	private:
 		GLFWwindow* init_window();
 		void OnUpdate();
 		void SetVSync(bool enable);
 		bool IsVSync();
 
-		inline bool should_close() { return glfwWindowShouldClose(m_Window); }
 
 		inline u32 GetWidth() { return m_Data.width; }
 		inline u32 GetHeight() { return m_Data.height; }

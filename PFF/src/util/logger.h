@@ -152,30 +152,37 @@ namespace APP_NAMESPACE {
 
 	// ---------------------------------------------------------------------------  Assertion & Validation  ---------------------------------------------------------------------------
 
-	#ifdef ENABLED_ASSERTS
-	#define CORE_ASSERT(expr, successMsg, failureMsg)							\
-				if (expr) {														\
-					CORE_LOG(Trace, successMsg);								\
-				} else {														\
-					CORE_LOG(Fatal, failureMsg);								\
-					__debugbreak();												\
-				}
-	#else
-	#define CORE_ASSERT(expr, successMsg, failureMsg)							{expr;}
-	#endif // ASSERTS_ENABLED
+#ifdef ENABLED_ASSERTS
+	#define CORE_ASSERT(expr, successMsg, failureMsg)									\
+					if (expr) {														\
+						CORE_LOG(Trace, successMsg);								\
+					} else {														\
+						CORE_LOG(Fatal, failureMsg);								\
+						__debugbreak();												\
+					}
+
+	#define CORE_ASSERT_S(expr)														\
+					if (!(expr)) {													\
+						CORE_LOG(Fatal, #expr);										\
+						__debugbreak();												\
+					}
+#else
+	#define CORE_ASSERT(expr, successMsg, failureMsg)								{expr;}
+	#define CORE_ASSERT_S(expr)														{expr;}
+#endif // ASSERTS_ENABLED
 
 
-	#ifdef ENABLE_VALIDATION
-	#define CORE_VALIDATE(expr, successMsg, failureMsg, ReturnCommand)			\
-				if (expr) {														\
-					CORE_LOG(Trace, successMsg);								\
-				} else {														\
-					CORE_LOG(Warn, failureMsg);									\
-					ReturnCommand;												\
-				}
-	#else
+#ifdef ENABLE_VALIDATION
+	#define CORE_VALIDATE(expr, successMsg, failureMsg, ReturnCommand)				\
+					if (expr) {														\
+						CORE_LOG(Trace, successMsg);								\
+					} else {														\
+						CORE_LOG(Warn, failureMsg);									\
+						ReturnCommand;												\
+					}
+#else
 	#define CORE_VALIDATE(expr, successMsg, failureMsg, ReturnCommand)			{expr;}
-	#endif // ENABLE_VALIDATION
+#endif // ENABLE_VALIDATION
 
 #endif
 

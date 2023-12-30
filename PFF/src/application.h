@@ -5,6 +5,9 @@
 namespace PFF {
 
 	class pff_window;
+	class vk_pipeline;
+	class vk_device;
+	class vulkan_renderer;
 
 	class PFF_API application {
 	public:
@@ -20,7 +23,8 @@ namespace PFF {
 
 	private:
 
-		pff_window* m_window;
+		std::shared_ptr<pff_window> m_window;
+		std::shared_ptr<vulkan_renderer> m_vulkan_renderer;
 		bool m_running = true;
 	};
 

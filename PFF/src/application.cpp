@@ -1,14 +1,15 @@
+
 #define GLFW_INCLUDE_VULKAN
 #include <GLFW/glfw3.h>
-
+/*
 #define GLM_FORCE_RADIANS
 #define GLM_FORCE_DEPTH_ZERO_TO_ONE
 #include <glm/vec4.hpp>
 #include <glm/mat4x4.hpp>
-
-
+*/
 #include "application.h"
 #include "util/util.h"
+#include "engine/render/vulkan_renderer.h"
 #include "engine/platform/pff_window.h"
 
 
@@ -21,7 +22,8 @@ namespace PFF {
 		s_instance = this;
 
 		// TODO: load WindowAttributes from config file and pass into constructor
-		m_window = new pff_window("test", 800, 600);			// Can be called after inital setup like [compiling shaders]
+		m_window = std::make_shared<pff_window>("test", 800, 600);			// Can be called after inital setup like [compiling shaders]
+		m_vulkan_renderer = std::make_shared<vulkan_renderer>(m_window);
 	}
 
 	application::~application() {}
@@ -50,4 +52,3 @@ namespace PFF {
 	}*/
 
 }
-
