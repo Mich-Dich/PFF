@@ -32,7 +32,11 @@ namespace PFF {
 
 			while (!m_window->should_close()) {
 				glfwPollEvents();
+
+				m_vulkan_renderer->draw_frame();
+
 			}
+		m_vulkan_renderer->wait_Idle();
 	}
 	/*
 	void application::on_event() {}

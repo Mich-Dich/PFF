@@ -48,8 +48,14 @@
 #include "util/io_handler.h"
 
 
-#define DELETE_COPY_CONSTRUCTOR				pff_window(const pff_window&) = delete;							\
-											pff_window& operator=(const pff_window&) = delete;
+#define DELETE_COPY(classname)				classname(const classname&) = delete;							\
+											classname& operator=(const classname&) = delete;
+
+#define DELETE_COPY_MOVE(classname)			classname(const classname&) = delete;							\
+											void operator=(const classname&) = delete;						\
+											classname(classname&&) = delete;								\
+											classname& operator=(classname&&) = delete;
+
 
 #define GENERATE_CLASS_BODY					static const char* getClassName() { \
 												static const std::string className = __PRETTY_FUNCTION__; \

@@ -1,5 +1,6 @@
 
 #include "engine/render/vk_device.h"
+#include "engine/geometry/basic_mesh.h"
 
 #include "vk_pipeline.h"
 
@@ -104,6 +105,11 @@ namespace PFF {
 		vkDestroyPipeline(m_device->get_device(), m_graphics_pipeline, nullptr);
 	}
 
+	void vk_pipeline::bind_commnad_buffers(VkCommandBuffer command_buffer) {
+	
+		vkCmdBindPipeline(command_buffer, VK_PIPELINE_BIND_POINT_GRAPHICS, m_graphics_pipeline);
+	}
+
 	void vk_pipeline::create_graphics_pipeline(const pipeline_config_info config, const std::string& vert_file_path, const std::string& frag_file_path) {
 		/*
 		auto config = default_pipline_config_info(config.scissor.extent.width, config.scissor.extent.height);
@@ -136,12 +142,15 @@ namespace PFF {
 		shader_stage_CI[1].pNext = nullptr;
 		shader_stage_CI[1].pSpecializationInfo = nullptr;
 
+		auto attribute_desc = basic_mesh::vertex::get_attribute_descriptions();
+		auto binding_desc = basic_mesh::vertex::get_binding_descriptions();
+
 		VkPipelineVertexInputStateCreateInfo vert_input_SCT{};
 		vert_input_SCT.sType = VK_STRUCTURE_TYPE_PIPELINE_VERTEX_INPUT_STATE_CREATE_INFO;
-		vert_input_SCT.vertexAttributeDescriptionCount = 0;
-		vert_input_SCT.vertexBindingDescriptionCount = 0;
-		vert_input_SCT.pVertexAttributeDescriptions = nullptr;
-		vert_input_SCT.pVertexBindingDescriptions = nullptr;
+		vert_input_SCT.vertexAttributeDescriptionCount = static_cast<u32>(attribute_desc.size());
+		vert_input_SCT.vertexBindingDescriptionCount = static_cast<u32>(binding_desc.size());
+		vert_input_SCT.pVertexAttributeDescriptions = attribute_desc.data();
+		vert_input_SCT.pVertexBindingDescriptions = binding_desc.data();
 
 		VkPipelineViewportStateCreateInfo viewport_CI{};
 		viewport_CI.sType = VK_STRUCTURE_TYPE_PIPELINE_VIEWPORT_STATE_CREATE_INFO;

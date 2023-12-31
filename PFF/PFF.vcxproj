@@ -109,6 +109,7 @@
     </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClInclude Include="src\engine\geometry\basic_mesh.h" />
     <ClInclude Include="src\PFF.h" />
     <ClInclude Include="src\application.h" />
     <ClInclude Include="src\engine\events\application_event.h" />
@@ -127,6 +128,7 @@
     <ClInclude Include="src\util\util.h" />
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="src\engine\geometry\basic_mesh.cpp" />
     <ClCompile Include="src\application.cpp" />
     <ClCompile Include="src\engine\platform\pff_window.cpp" />
     <ClCompile Include="src\engine\render\vk_device.cpp" />

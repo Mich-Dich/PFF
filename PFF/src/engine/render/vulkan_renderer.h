@@ -7,24 +7,28 @@ namespace PFF{
 	class vk_device;
 	class vk_swapchain;
 	class vk_pipeline;
+	class basic_mesh;
 
 	class vulkan_renderer {
 	public:
 		vulkan_renderer(std::shared_ptr<pff_window> window);
 		~vulkan_renderer();
 
-		vulkan_renderer(const vulkan_renderer&) = delete;
-		vulkan_renderer& operator=(const vulkan_renderer&) = delete;
+		DELETE_COPY(vulkan_renderer)
+
+		void draw_frame();
+		void wait_Idle();
 
 	private:
-
+		void load_meshes();
 		void create_pipeline_layout();
 		void create_pipeline();
 		void create_command_buffer();
-		void draw_frame();
+
+
+		std::unique_ptr<basic_mesh> m_testmodel;
 
 		std::shared_ptr<pff_window> m_window;
-
 		std::shared_ptr<vk_device> m_device;
 		std::shared_ptr<vk_swapchain> m_swapchain;
 		std::unique_ptr<vk_pipeline> m_vk_pipeline;

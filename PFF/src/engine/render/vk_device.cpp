@@ -1,6 +1,9 @@
 
 #include "engine/platform/pff_window.h"
 
+#define GLFW_INCLUDE_VULKAN
+#include <GLFW/glfw3.h>
+
 #include "vk_device.h"
 
 namespace PFF {
@@ -453,37 +456,37 @@ namespace PFF {
 
     void vk_device::createBuffer(VkDeviceSize size, VkBufferUsageFlags usage, VkMemoryPropertyFlags properties, VkBuffer& buffer, VkDeviceMemory& bufferMemory) {
 
-        VkBufferCreateInfo bufferInfo{};
-        bufferInfo.sType = VK_STRUCTURE_TYPE_BUFFER_CREATE_INFO;
-        bufferInfo.size = size;
-        bufferInfo.usage = usage;
-        bufferInfo.sharingMode = VK_SHARING_MODE_EXCLUSIVE;
+        VkBufferCreateInfo buffer_CI{};
+        buffer_CI.sType = VK_STRUCTURE_TYPE_BUFFER_CREATE_INFO;
+        buffer_CI.size = size;
+        buffer_CI.usage = usage;
+        buffer_CI.sharingMode = VK_SHARING_MODE_EXCLUSIVE;
 
-        CORE_ASSERT(vkCreateBuffer(m_device, &bufferInfo, nullptr, &buffer) == VK_SUCCESS, "", "failed to create vertex buffer!");
+        CORE_ASSERT(vkCreateBuffer(m_device, &buffer_CI, nullptr, &buffer) == VK_SUCCESS, "", "failed to create vertex buffer!");
 
         VkMemoryRequirements memRequirements;
         vkGetBufferMemoryRequirements(m_device, buffer, &memRequirements);
 
-        VkMemoryAllocateInfo allocInfo{};
-        allocInfo.sType = VK_STRUCTURE_TYPE_MEMORY_ALLOCATE_INFO;
-        allocInfo.allocationSize = memRequirements.size;
-        allocInfo.memoryTypeIndex = findMemoryType(memRequirements.memoryTypeBits, properties);
+        VkMemoryAllocateInfo alloc_CI{};
+        alloc_CI.sType = VK_STRUCTURE_TYPE_MEMORY_ALLOCATE_INFO;
+        alloc_CI.allocationSize = memRequirements.size;
+        alloc_CI.memoryTypeIndex = findMemoryType(memRequirements.memoryTypeBits, properties);
 
-        CORE_ASSERT(vkAllocateMemory(m_device, &allocInfo, nullptr, &bufferMemory) != VK_SUCCESS, "", "failed to allocate vertex buffer memory!");
+        CORE_ASSERT(vkAllocateMemory(m_device, &alloc_CI, nullptr, &bufferMemory) == VK_SUCCESS, "", "failed to allocate vertex buffer memory!");
 
         vkBindBufferMemory(m_device, buffer, bufferMemory, 0);
     }
 
     VkCommandBuffer vk_device::beginSingleTimeCommands() {
 
-        VkCommandBufferAllocateInfo allocInfo{};
-        allocInfo.sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_ALLOCATE_INFO;
-        allocInfo.level = VK_COMMAND_BUFFER_LEVEL_PRIMARY;
-        allocInfo.commandPool = commandPool;
-        allocInfo.commandBufferCount = 1;
+        VkCommandBufferAllocateInfo alloc_CI{};
+        alloc_CI.sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_ALLOCATE_INFO;
+        alloc_CI.level = VK_COMMAND_BUFFER_LEVEL_PRIMARY;
+        alloc_CI.commandPool = commandPool;
+        alloc_CI.commandBufferCount = 1;
 
         VkCommandBuffer commandBuffer;
-        vkAllocateCommandBuffers(m_device, &allocInfo, &commandBuffer);
+        vkAllocateCommandBuffers(m_device, &alloc_CI, &commandBuffer);
 
         VkCommandBufferBeginInfo beginInfo{};
         beginInfo.sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_BEGIN_INFO;

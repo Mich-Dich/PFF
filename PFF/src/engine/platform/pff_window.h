@@ -36,13 +36,13 @@ namespace PFF {
 		pff_window(std::string title = "defaultWindow", u32 width = 300, u32 height = 200);
 		~pff_window();
 
-		pff_window(const pff_window&) = delete;
-		pff_window& operator=(const pff_window&) = delete;
+		DELETE_COPY(pff_window)
 
 		void createWindowSurface(VkInstance_T* instance, VkSurfaceKHR_T** surface);
 
 		VkExtent2D get_extend();
 		bool should_close();
+		
 
 	private:
 		GLFWwindow* init_window();

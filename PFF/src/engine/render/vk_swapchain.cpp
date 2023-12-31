@@ -258,8 +258,8 @@ namespace PFF {
 
     void vk_swapchain::createFramebuffers() {
 
-        m_swap_chain_framebuffers.resize(imageCount());
-        for (size_t i = 0; i < imageCount(); i++) {
+        m_swap_chain_framebuffers.resize(get_image_count());
+        for (size_t i = 0; i < get_image_count(); i++) {
 
             std::array<VkImageView, 2> attachments = { m_swap_chain_image_views[i], m_depth_image_views[i] };
 
@@ -287,9 +287,9 @@ namespace PFF {
         VkFormat depthFormat = findDepthFormat();
         VkExtent2D m_swap_chain_extent = getSwapChainExtent();
 
-        m_depth_images.resize(imageCount());
-        m_depth_image_memorys.resize(imageCount());
-        m_depth_image_views.resize(imageCount());
+        m_depth_images.resize(get_image_count());
+        m_depth_image_memorys.resize(get_image_count());
+        m_depth_image_views.resize(get_image_count());
 
         for (int i = 0; i < m_depth_images.size(); i++) {
             VkImageCreateInfo imageInfo{};
@@ -335,7 +335,7 @@ namespace PFF {
         m_image_available_semaphores.resize(MAX_FRAMES_IN_FLIGHT);
         m_render_finished_semaphores.resize(MAX_FRAMES_IN_FLIGHT);
         m_in_flight_fences.resize(MAX_FRAMES_IN_FLIGHT);
-        m_images_in_flight.resize(imageCount(), VK_NULL_HANDLE);
+        m_images_in_flight.resize(get_image_count(), VK_NULL_HANDLE);
 
         VkSemaphoreCreateInfo semaphoreInfo = {};
         semaphoreInfo.sType = VK_STRUCTURE_TYPE_SEMAPHORE_CREATE_INFO;

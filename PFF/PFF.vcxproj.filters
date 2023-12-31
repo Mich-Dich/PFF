@@ -60,6 +60,7 @@
     <ClInclude Include="src\util\util.h">
       <Filter>util</Filter>
     </ClInclude>
+    <ClInclude Include="src\engine\geometry\basic_mesh.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="src\application.cpp" />
@@ -84,5 +85,6 @@
     <ClCompile Include="src\util\logger.cpp">
       <Filter>util</Filter>
     </ClCompile>
+    <ClCompile Include="src\engine\geometry\basic_mesh.cpp" />
   </ItemGroup>
 </Project>

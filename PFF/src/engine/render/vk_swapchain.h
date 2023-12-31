@@ -22,10 +22,10 @@ namespace PFF {
 
         VkFramebuffer getFrameBuffer(int index) { return m_swap_chain_framebuffers[index]; }
         VkImageView getImageView(int index) { return m_swap_chain_image_views[index]; }
-        size_t imageCount() { return m_swap_chain_images.size(); }
         VkFormat getSwapChainImageFormat() { return m_swap_chainImage_format; }
         VkExtent2D getSwapChainExtent() { return m_swap_chain_extent; }
 
+        inline size_t get_image_count() { return m_swap_chain_images.size(); }
         inline VkRenderPass get_render_pass() { return m_render_pass; }
         inline u32 get_width() { return m_swap_chain_extent.width; }
         inline u32 get_height() { return m_swap_chain_extent.height; }

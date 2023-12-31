@@ -2,8 +2,8 @@
 
 #include "util/util.h"
 
-#define GLFW_INCLUDE_VULKAN
-#include "GLFW/glfw3.h"
+#include <vulkan/vulkan.h>
+
 
 namespace PFF {
 
@@ -35,17 +35,13 @@ namespace PFF {
         ~vk_device();
 
         // Not copyable or movable
-        /*
-        vk_device(const vk_device&) = delete;
-        void operator=(const vk_device&) = delete;
-        vk_device(vk_device&&) = delete;
-        vk_device& operator=(vk_device&&) = delete;*/
+        DELETE_COPY_MOVE(vk_device)
 
-        VkCommandPool getCommandPool() { return commandPool; }
-        VkDevice get_device() { return m_device; }
-        VkSurfaceKHR surface() { return m_surface; }
-        VkQueue graphicsQueue() { return graphicsQueue_; }
-        VkQueue presentQueue() { return presentQueue_; }
+        inline VkCommandPool getCommandPool() { return commandPool; }
+        inline VkDevice get_device() { return m_device; }
+        inline VkSurfaceKHR surface() { return m_surface; }
+        inline VkQueue graphicsQueue() { return graphicsQueue_; }
+        inline VkQueue presentQueue() { return presentQueue_; }
 
         SwapChainSupportDetails getSwapChainSupport() { return querySwapChainSupport(m_physical_device); }
         uint32_t findMemoryType(uint32_t typeFilter, VkMemoryPropertyFlags properties);

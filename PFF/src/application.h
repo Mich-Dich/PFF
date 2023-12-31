@@ -6,11 +6,14 @@ namespace PFF {
 
 	class pff_window;
 	class vulkan_renderer;
+	class basic_mesh;
 
 	class PFF_API application {
 	public:
 		application();
 		virtual ~application();
+
+		DELETE_COPY(application)
 
 		void run();
 		/*

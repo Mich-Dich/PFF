@@ -37,9 +37,9 @@ namespace PFF {
 		
 		~vk_pipeline();
 
-		vk_pipeline(const vk_pipeline&) = delete;
-		vk_pipeline& operator=(const vk_pipeline&) = delete;
+		DELETE_COPY(vk_pipeline)
 
+		void bind_commnad_buffers(VkCommandBuffer command_buffer);
 
 	private:
 
