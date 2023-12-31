@@ -109,8 +109,6 @@
     </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <ClInclude Include="src\engine\render\vk_swap_chain.h" />
-    <ClInclude Include="src\engine\render\vulkan_renderer.h" />
     <ClInclude Include="src\PFF.h" />
     <ClInclude Include="src\application.h" />
     <ClInclude Include="src\engine\events\application_event.h" />
@@ -120,6 +118,8 @@
     <ClInclude Include="src\engine\platform\pff_window.h" />
     <ClInclude Include="src\engine\render\vk_device.h" />
     <ClInclude Include="src\engine\render\vk_pipeline.h" />
+    <ClInclude Include="src\engine\render\vk_swapchain.h" />
+    <ClInclude Include="src\engine\render\vulkan_renderer.h" />
     <ClInclude Include="src\entry_point.h" />
     <ClInclude Include="src\util\data_types.h" />
     <ClInclude Include="src\util\io_handler.h" />
@@ -129,9 +129,9 @@
   <ItemGroup>
     <ClCompile Include="src\application.cpp" />
     <ClCompile Include="src\engine\platform\pff_window.cpp" />
-    <ClCompile Include="src\engine\render\vk_swap_chain.cpp" />
     <ClCompile Include="src\engine\render\vk_device.cpp" />
     <ClCompile Include="src\engine\render\vk_pipeline.cpp" />
+    <ClCompile Include="src\engine\render\vk_swapchain.cpp" />
     <ClCompile Include="src\engine\render\vulkan_renderer.cpp" />
     <ClCompile Include="src\util\io_handler.cpp" />
     <ClCompile Include="src\util\logger.cpp" />

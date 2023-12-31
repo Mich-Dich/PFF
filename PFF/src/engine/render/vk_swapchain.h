@@ -9,32 +9,30 @@ namespace PFF {
 
     class vk_device;
 
-    class vk_swap_chain {
+    class vk_swapchain {
     public:
         static constexpr int MAX_FRAMES_IN_FLIGHT = 2;
 
-        vk_swap_chain(std::shared_ptr<vk_device>& device, VkExtent2D m_window_extent);
-        ~vk_swap_chain();
+        vk_swapchain(std::shared_ptr<vk_device>& device, VkExtent2D m_window_extent);
+        ~vk_swapchain();
 
-        vk_swap_chain(const vk_swap_chain&) = delete;
-        void operator=(const vk_swap_chain&) = delete;
+        vk_swapchain(const vk_swapchain&) = delete;
+        void operator=(const vk_swapchain&) = delete;
+        VkFormat findDepthFormat();
 
         VkFramebuffer getFrameBuffer(int index) { return m_swap_chain_framebuffers[index]; }
-        VkRenderPass getRenderPass() { return m_render_pass; }
         VkImageView getImageView(int index) { return m_swap_chain_image_views[index]; }
         size_t imageCount() { return m_swap_chain_images.size(); }
         VkFormat getSwapChainImageFormat() { return m_swap_chainImage_format; }
         VkExtent2D getSwapChainExtent() { return m_swap_chain_extent; }
-        uint32_t width() { return m_swap_chain_extent.width; }
-        uint32_t height() { return m_swap_chain_extent.height; }
 
-        float extentAspectRatio() {
-            return static_cast<float>(m_swap_chain_extent.width) / static_cast<float>(m_swap_chain_extent.height);
-        }
-        VkFormat findDepthFormat();
+        inline VkRenderPass get_render_pass() { return m_render_pass; }
+        inline u32 get_width() { return m_swap_chain_extent.width; }
+        inline u32 get_height() { return m_swap_chain_extent.height; }
+        inline f32 get_extentAspectRatio() { return static_cast<float>(m_swap_chain_extent.width) / static_cast<float>(m_swap_chain_extent.height); }
 
-        VkResult acquireNextImage(uint32_t* imageIndex);
-        VkResult submitCommandBuffers(const VkCommandBuffer* buffers, uint32_t* imageIndex);
+        VkResult acquireNextImage(u32* imageIndex);
+        VkResult submitCommandBuffers(const VkCommandBuffer* buffers, u32* imageIndex);
 
     private:
         void createSwapChain();
@@ -45,10 +43,8 @@ namespace PFF {
         void createSyncObjects();
 
         // Helper functions
-        VkSurfaceFormatKHR chooseSwapSurfaceFormat(
-            const std::vector<VkSurfaceFormatKHR>& availableFormats);
-        VkPresentModeKHR chooseSwapPresentMode(
-            const std::vector<VkPresentModeKHR>& availablePresentModes);
+        VkSurfaceFormatKHR chooseSwapSurfaceFormat(const std::vector<VkSurfaceFormatKHR>& availableFormats);
+        VkPresentModeKHR chooseSwapPresentMode(const std::vector<VkPresentModeKHR>& availablePresentModes);
         VkExtent2D chooseSwapExtent(const VkSurfaceCapabilitiesKHR& capabilities);
 
         VkFormat m_swap_chainImage_format;

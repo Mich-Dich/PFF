@@ -45,4 +45,15 @@
 // ======================================  utils  ======================================
 #include "logger.h"
 #include "data_types.h"
+#include "util/io_handler.h"
 
+
+#define DELETE_COPY_CONSTRUCTOR				pff_window(const pff_window&) = delete;							\
+											pff_window& operator=(const pff_window&) = delete;
+
+#define GENERATE_CLASS_BODY					static const char* getClassName() { \
+												static const std::string className = __PRETTY_FUNCTION__; \
+												size_t start = className.find("class ") + 6; \
+												size_t end = className.find(" ", start); \
+												return className.substr(start, end - start).c_str(); \
+											}

@@ -5,8 +5,6 @@
 namespace PFF {
 
 	class pff_window;
-	class vk_pipeline;
-	class vk_device;
 	class vulkan_renderer;
 
 	class PFF_API application {

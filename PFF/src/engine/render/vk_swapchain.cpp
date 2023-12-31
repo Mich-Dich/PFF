@@ -1,10 +1,10 @@
 
-#include "vk_swap_chain.h"
+#include "vk_swapchain.h"
 #include "engine/render/vk_device.h"
 
 namespace PFF {
 
-    vk_swap_chain::vk_swap_chain(std::shared_ptr<vk_device>& device, VkExtent2D extent)
+    vk_swapchain::vk_swapchain(std::shared_ptr<vk_device>& device, VkExtent2D extent)
         : m_device{ device }, m_window_extent{ extent } {
 
         createSwapChain();
@@ -15,7 +15,9 @@ namespace PFF {
         createSyncObjects();
     }
 
-    vk_swap_chain::~vk_swap_chain() {
+    vk_swapchain::~vk_swapchain() {
+
+        LOG(Info, "Destroying vk_pipeline");
         for (auto imageView : m_swap_chain_image_views) {
             vkDestroyImageView(m_device->get_device(), imageView, nullptr);
         }
@@ -46,7 +48,7 @@ namespace PFF {
         }
     }
 
-    VkResult vk_swap_chain::acquireNextImage(uint32_t* imageIndex) {
+    VkResult vk_swapchain::acquireNextImage(u32* imageIndex) {
         vkWaitForFences(
             m_device->get_device(),
             1,
@@ -65,8 +67,8 @@ namespace PFF {
         return result;
     }
 
-    VkResult vk_swap_chain::submitCommandBuffers(
-        const VkCommandBuffer* buffers, uint32_t* imageIndex) {
+    VkResult vk_swapchain::submitCommandBuffers(const VkCommandBuffer* buffers, u32* imageIndex) {
+
         if (m_images_in_flight[*imageIndex] != VK_NULL_HANDLE) {
             vkWaitForFences(m_device->get_device(), 1, &m_images_in_flight[*imageIndex], VK_TRUE, UINT64_MAX);
         }
@@ -113,14 +115,14 @@ namespace PFF {
         return result;
     }
 
-    void vk_swap_chain::createSwapChain() {
+    void vk_swapchain::createSwapChain() {
         SwapChainSupportDetails swapChainSupport = m_device->getSwapChainSupport();
 
         VkSurfaceFormatKHR surfaceFormat = chooseSwapSurfaceFormat(swapChainSupport.formats);
         VkPresentModeKHR presentMode = chooseSwapPresentMode(swapChainSupport.presentModes);
         VkExtent2D extent = chooseSwapExtent(swapChainSupport.capabilities);
 
-        uint32_t imageCount = swapChainSupport.capabilities.minImageCount + 1;
+        u32 imageCount = swapChainSupport.capabilities.minImageCount + 1;
         if (swapChainSupport.capabilities.maxImageCount > 0 &&
             imageCount > swapChainSupport.capabilities.maxImageCount) {
             imageCount = swapChainSupport.capabilities.maxImageCount;
@@ -138,8 +140,8 @@ namespace PFF {
         createInfo.imageUsage = VK_IMAGE_USAGE_COLOR_ATTACHMENT_BIT;
 
         QueueFamilyIndices indices = m_device->findPhysicalQueueFamilies();
-        uint32_t queueFamilyIndices[] = { indices.graphicsFamily, indices.presentFamily };
 
+        u32 queueFamilyIndices[] = { indices.graphicsFamily, indices.presentFamily };
         if (indices.graphicsFamily != indices.presentFamily) {
             createInfo.imageSharingMode = VK_SHARING_MODE_CONCURRENT;
             createInfo.queueFamilyIndexCount = 2;
@@ -174,7 +176,7 @@ namespace PFF {
         m_swap_chain_extent = extent;
     }
 
-    void vk_swap_chain::createImageViews() {
+    void vk_swapchain::createImageViews() {
         m_swap_chain_image_views.resize(m_swap_chain_images.size());
         for (size_t i = 0; i < m_swap_chain_images.size(); i++) {
             VkImageViewCreateInfo viewInfo{};
@@ -195,7 +197,7 @@ namespace PFF {
         }
     }
 
-    void vk_swap_chain::createRenderPass() {
+    void vk_swapchain::createRenderPass() {
 
         VkAttachmentDescription depthAttachment{};
         depthAttachment.format = findDepthFormat();
@@ -234,18 +236,15 @@ namespace PFF {
         VkSubpassDependency dependency = {};
         dependency.srcSubpass = VK_SUBPASS_EXTERNAL;
         dependency.srcAccessMask = 0;
-        dependency.srcStageMask =
-            VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT | VK_PIPELINE_STAGE_EARLY_FRAGMENT_TESTS_BIT;
+        dependency.srcStageMask = VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT | VK_PIPELINE_STAGE_EARLY_FRAGMENT_TESTS_BIT;
         dependency.dstSubpass = 0;
-        dependency.dstStageMask =
-            VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT | VK_PIPELINE_STAGE_EARLY_FRAGMENT_TESTS_BIT;
-        dependency.dstAccessMask =
-            VK_ACCESS_COLOR_ATTACHMENT_WRITE_BIT | VK_ACCESS_DEPTH_STENCIL_ATTACHMENT_WRITE_BIT;
+        dependency.dstStageMask = VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT | VK_PIPELINE_STAGE_EARLY_FRAGMENT_TESTS_BIT;
+        dependency.dstAccessMask = VK_ACCESS_COLOR_ATTACHMENT_WRITE_BIT | VK_ACCESS_DEPTH_STENCIL_ATTACHMENT_WRITE_BIT;
 
         std::array<VkAttachmentDescription, 2> attachments = { colorAttachment, depthAttachment };
         VkRenderPassCreateInfo renderPassInfo = {};
         renderPassInfo.sType = VK_STRUCTURE_TYPE_RENDER_PASS_CREATE_INFO;
-        renderPassInfo.attachmentCount = static_cast<uint32_t>(attachments.size());
+        renderPassInfo.attachmentCount = static_cast<u32>(attachments.size());
         renderPassInfo.pAttachments = attachments.data();
         renderPassInfo.subpassCount = 1;
         renderPassInfo.pSubpasses = &subpass;
@@ -257,7 +256,7 @@ namespace PFF {
         }
     }
 
-    void vk_swap_chain::createFramebuffers() {
+    void vk_swapchain::createFramebuffers() {
 
         m_swap_chain_framebuffers.resize(imageCount());
         for (size_t i = 0; i < imageCount(); i++) {
@@ -268,7 +267,7 @@ namespace PFF {
             VkFramebufferCreateInfo framebufferInfo = {};
             framebufferInfo.sType = VK_STRUCTURE_TYPE_FRAMEBUFFER_CREATE_INFO;
             framebufferInfo.renderPass = m_render_pass;
-            framebufferInfo.attachmentCount = static_cast<uint32_t>(attachments.size());
+            framebufferInfo.attachmentCount = static_cast<u32>(attachments.size());
             framebufferInfo.pAttachments = attachments.data();
             framebufferInfo.width = m_swap_chain_extent.width;
             framebufferInfo.height = m_swap_chain_extent.height;
@@ -284,7 +283,7 @@ namespace PFF {
         }
     }
 
-    void vk_swap_chain::createDepthResources() {
+    void vk_swapchain::createDepthResources() {
         VkFormat depthFormat = findDepthFormat();
         VkExtent2D m_swap_chain_extent = getSwapChainExtent();
 
@@ -332,7 +331,7 @@ namespace PFF {
         }
     }
 
-    void vk_swap_chain::createSyncObjects() {
+    void vk_swapchain::createSyncObjects() {
         m_image_available_semaphores.resize(MAX_FRAMES_IN_FLIGHT);
         m_render_finished_semaphores.resize(MAX_FRAMES_IN_FLIGHT);
         m_in_flight_fences.resize(MAX_FRAMES_IN_FLIGHT);
@@ -356,7 +355,7 @@ namespace PFF {
         }
     }
 
-    VkSurfaceFormatKHR vk_swap_chain::chooseSwapSurfaceFormat(
+    VkSurfaceFormatKHR vk_swapchain::chooseSwapSurfaceFormat(
         const std::vector<VkSurfaceFormatKHR>& availableFormats) {
         for (const auto& availableFormat : availableFormats) {
             if (availableFormat.format == VK_FORMAT_B8G8R8A8_UNORM &&
@@ -368,28 +367,28 @@ namespace PFF {
         return availableFormats[0];
     }
 
-    VkPresentModeKHR vk_swap_chain::chooseSwapPresentMode(
+    VkPresentModeKHR vk_swapchain::chooseSwapPresentMode(
         const std::vector<VkPresentModeKHR>& availablePresentModes) {
         for (const auto& availablePresentMode : availablePresentModes) {
             if (availablePresentMode == VK_PRESENT_MODE_MAILBOX_KHR) {
-                std::cout << "Present mode: Mailbox" << std::endl;
+                LOG(Trace, "Present mode: Mailbox");
                 return availablePresentMode;
             }
         }
 
-        // for (const auto &availablePresentMode : availablePresentModes) {
-        //   if (availablePresentMode == VK_PRESENT_MODE_IMMEDIATE_KHR) {
-        //     std::cout << "Present mode: Immediate" << std::endl;
-        //     return availablePresentMode;
-        //   }
-        // }
+        //for (const auto& availablePresentMode : availablePresentModes) {
+        //    if (availablePresentMode == VK_PRESENT_MODE_IMMEDIATE_KHR) {
+        //        LOG(Trace, "Present mode: Immediate");
+        //        return availablePresentMode;
+        //    }
+        //}
 
-        std::cout << "Present mode: V-Sync" << std::endl;
+        LOG(Trace, "Present mode: V-Sync");
         return VK_PRESENT_MODE_FIFO_KHR;
     }
 
-    VkExtent2D vk_swap_chain::chooseSwapExtent(const VkSurfaceCapabilitiesKHR& capabilities) {
-        if (capabilities.currentExtent.width != std::numeric_limits<uint32_t>::max()) {
+    VkExtent2D vk_swapchain::chooseSwapExtent(const VkSurfaceCapabilitiesKHR& capabilities) {
+        if (capabilities.currentExtent.width != std::numeric_limits<u32>::max()) {
             return capabilities.currentExtent;
         } else {
             VkExtent2D actualExtent = m_window_extent;
@@ -404,7 +403,7 @@ namespace PFF {
         }
     }
 
-    VkFormat vk_swap_chain::findDepthFormat() {
+    VkFormat vk_swapchain::findDepthFormat() {
         return m_device->findSupportedFormat(
             { VK_FORMAT_D32_SFLOAT, VK_FORMAT_D32_SFLOAT_S8_UINT, VK_FORMAT_D24_UNORM_S8_UINT },
             VK_IMAGE_TILING_OPTIMAL,

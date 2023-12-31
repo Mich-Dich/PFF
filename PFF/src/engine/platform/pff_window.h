@@ -2,8 +2,6 @@
 
 #include "util/util.h"
 
-#include <vulkan/vulkan.h>
-
 /*
 #include "engine/events/event.h"
 #include "engine/events/application_event.h"
@@ -11,6 +9,11 @@
 #include "engine/events/key_event.h"*/
 
 struct GLFWwindow;
+
+struct VkExtent2D;
+struct VkInstance_T;
+struct VkSurfaceKHR_T;
+
 
 namespace PFF {
 
@@ -36,9 +39,9 @@ namespace PFF {
 		pff_window(const pff_window&) = delete;
 		pff_window& operator=(const pff_window&) = delete;
 
-		void createWindowSurface(VkInstance instance, VkSurfaceKHR* surface);
+		void createWindowSurface(VkInstance_T* instance, VkSurfaceKHR_T** surface);
 
-		inline VkExtent2D get_extend() { return { m_Data.width, m_Data.height }; }
+		VkExtent2D get_extend();
 		bool should_close();
 
 	private:

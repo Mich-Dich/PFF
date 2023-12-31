@@ -41,6 +41,12 @@
     <ClInclude Include="src\engine\render\vk_pipeline.h">
       <Filter>engine\render</Filter>
     </ClInclude>
+    <ClInclude Include="src\engine\render\vk_swapchain.h">
+      <Filter>engine\render</Filter>
+    </ClInclude>
+    <ClInclude Include="src\engine\render\vulkan_renderer.h">
+      <Filter>engine\render</Filter>
+    </ClInclude>
     <ClInclude Include="src\entry_point.h" />
     <ClInclude Include="src\util\data_types.h">
       <Filter>util</Filter>
@@ -54,21 +60,22 @@
     <ClInclude Include="src\util\util.h">
       <Filter>util</Filter>
     </ClInclude>
-    <ClInclude Include="src\engine\render\vk_swap_chain.h" />
-    <ClInclude Include="src\engine\render\vulkan_renderer.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="src\application.cpp" />
     <ClCompile Include="src\engine\platform\pff_window.cpp">
       <Filter>engine\platform</Filter>
     </ClCompile>
-    <ClCompile Include="src\engine\render\vk_swap_chain.cpp">
-      <Filter>engine\render</Filter>
-    </ClCompile>
     <ClCompile Include="src\engine\render\vk_device.cpp">
       <Filter>engine\render</Filter>
     </ClCompile>
     <ClCompile Include="src\engine\render\vk_pipeline.cpp">
+      <Filter>engine\render</Filter>
+    </ClCompile>
+    <ClCompile Include="src\engine\render\vk_swapchain.cpp">
+      <Filter>engine\render</Filter>
+    </ClCompile>
+    <ClCompile Include="src\engine\render\vulkan_renderer.cpp">
       <Filter>engine\render</Filter>
     </ClCompile>
     <ClCompile Include="src\util\io_handler.cpp">
@@ -77,6 +84,5 @@
     <ClCompile Include="src\util\logger.cpp">
       <Filter>util</Filter>
     </ClCompile>
-    <ClCompile Include="src\engine\render\vulkan_renderer.cpp" />
   </ItemGroup>
 </Project>
