@@ -284,6 +284,7 @@ namespace PFF {
     }
 
     void vk_swapchain::createDepthResources() {
+
         VkFormat depthFormat = findDepthFormat();
         VkExtent2D m_swap_chain_extent = getSwapChainExtent();
 
@@ -332,6 +333,7 @@ namespace PFF {
     }
 
     void vk_swapchain::createSyncObjects() {
+
         m_image_available_semaphores.resize(MAX_FRAMES_IN_FLIGHT);
         m_render_finished_semaphores.resize(MAX_FRAMES_IN_FLIGHT);
         m_in_flight_fences.resize(MAX_FRAMES_IN_FLIGHT);
@@ -355,11 +357,10 @@ namespace PFF {
         }
     }
 
-    VkSurfaceFormatKHR vk_swapchain::chooseSwapSurfaceFormat(
-        const std::vector<VkSurfaceFormatKHR>& availableFormats) {
+    VkSurfaceFormatKHR vk_swapchain::chooseSwapSurfaceFormat(const std::vector<VkSurfaceFormatKHR>& availableFormats) {
+
         for (const auto& availableFormat : availableFormats) {
-            if (availableFormat.format == VK_FORMAT_B8G8R8A8_UNORM &&
-                availableFormat.colorSpace == VK_COLOR_SPACE_SRGB_NONLINEAR_KHR) {
+            if (availableFormat.format == VK_FORMAT_B8G8R8A8_SRGB && availableFormat.colorSpace == VK_COLOR_SPACE_SRGB_NONLINEAR_KHR) {
                 return availableFormat;
             }
         }
@@ -367,8 +368,8 @@ namespace PFF {
         return availableFormats[0];
     }
 
-    VkPresentModeKHR vk_swapchain::chooseSwapPresentMode(
-        const std::vector<VkPresentModeKHR>& availablePresentModes) {
+    VkPresentModeKHR vk_swapchain::chooseSwapPresentMode(const std::vector<VkPresentModeKHR>& availablePresentModes) {
+
         for (const auto& availablePresentMode : availablePresentModes) {
             if (availablePresentMode == VK_PRESENT_MODE_MAILBOX_KHR) {
                 LOG(Trace, "Present mode: Mailbox");

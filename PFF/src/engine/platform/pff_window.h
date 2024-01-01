@@ -9,64 +9,58 @@
 #include "engine/events/key_event.h"*/
 
 struct GLFWwindow;
-
 struct VkExtent2D;
 struct VkInstance_T;
 struct VkSurfaceKHR_T;
 
+class event;
+
 
 namespace PFF {
 
+	using EventCallbackFn = std::function<void(event&)>;
 
 	struct WindowAttributes {
 
 		std::string title;
-		unsigned int width;
-		unsigned int height;
+		u32 width;
+		u32 height;
+		bool VSync;
+		EventCallbackFn EventCallback;
 
-		WindowAttributes(const std::string title = "Gluttony", unsigned int width = 1280, unsigned int height = 720)
-			: title(title), width(width), height(height) {}
+		WindowAttributes(const std::string title = "Gluttony", const u32 width = 1280, const  u32 height = 720, const  bool VSync = false, const EventCallbackFn& callback = nullptr)
+			: title(title), width(width), height(height), VSync(VSync), EventCallback(callback){}
 	};
 
 	class pff_window {
 
 	public:
-		//using EventCallbackFn = std::function<void(Event&)>;
+		using EventCallbackFn = std::function<void(event&)>;
 
-		pff_window(std::string title = "defaultWindow", u32 width = 300, u32 height = 200);
+		pff_window(WindowAttributes);
 		~pff_window();
 
-		DELETE_COPY(pff_window)
+		DELETE_COPY(pff_window);
 
 		void createWindowSurface(VkInstance_T* instance, VkSurfaceKHR_T** surface);
+		inline void SetEventCallback(const EventCallbackFn& callback) { m_data.EventCallback = callback; }
 
 		VkExtent2D get_extend();
 		bool should_close();
+		FORCEINLINE bool IsVSync() { return m_data.VSync; }
+		FORCEINLINE u32 get_width() { return m_data.width; }
+		FORCEINLINE u32 get_height() { return m_data.height; }
 		
-
 	private:
-		GLFWwindow* init_window();
+		
+		void init();
+		void shutdown();
 		void OnUpdate();
 		void SetVSync(bool enable);
-		bool IsVSync();
 
-
-		inline u32 GetWidth() { return m_Data.width; }
-		inline u32 GetHeight() { return m_Data.height; }
-		//inline void SetEventCallback(const EventCallbackFn& callback) { m_Data.EventCallback = callback; }
-
-		struct WindowData {
-
-			std::string title;
-			unsigned int width;
-			unsigned int height;
-			bool VSync;
-			//EventCallbackFn EventCallback;
-		};
-
+		//EventCallbackFn EventCallback;
+		WindowAttributes m_data;
 		GLFWwindow* m_Window;
-		WindowData m_Data;
 	};
-
 
 }

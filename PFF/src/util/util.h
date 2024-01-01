@@ -25,19 +25,17 @@
 #include <fstream>
 #include <iomanip>
 
-#ifdef GL_PLATFORM_WINDOWS
-#include <Windows.h>
-#endif
 
 #define APP_NAMESPACE PFF
 
 #ifdef PFF_PLATFORM_WINDOWS
-	#ifdef PFF_INSIDE_ENGINE
-		#define PFF_API __declspec(dllexport)
-	#else
-		#define PFF_API __declspec(dllimport)
-	#endif // PFF_INSIDE_ENGINE
-#endif // PFF_PLATFORM_WINDOWS
+
+	//#include <Windows.h>
+	#include "platform/windows_util.h"
+
+#else
+	#error PFF only suports windows
+#endif
 
 #define BIT(x) (1 << x)
 
@@ -49,12 +47,12 @@
 
 
 #define DELETE_COPY(classname)				classname(const classname&) = delete;							\
-											classname& operator=(const classname&) = delete;
+											classname& operator=(const classname&) = delete
 
 #define DELETE_COPY_MOVE(classname)			classname(const classname&) = delete;							\
-											void operator=(const classname&) = delete;						\
+											classname& operator=(const classname&) = delete;						\
 											classname(classname&&) = delete;								\
-											classname& operator=(classname&&) = delete;
+											classname& operator=(classname&&) = delete
 
 
 #define GENERATE_CLASS_BODY					static const char* getClassName() { \
@@ -63,3 +61,5 @@
 												size_t end = className.find(" ", start); \
 												return className.substr(start, end - start).c_str(); \
 											}
+
+#define STD_BIND_EVENT_FN(x)				std::bind(&x, this, std::placeholders::_1)

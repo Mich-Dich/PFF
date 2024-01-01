@@ -1,15 +1,13 @@
 #pragma once
 
-#include <sstream>
-#include <vector>
-
 #include "util/util.h"
+
 
 namespace PFF {
 
 	// FIXME: Event are currently blocking => Fix that!
 
-	enum class EventType {
+	enum class event_type {
 		None = 0,
 		WindowClose, WindowResize, WindowFocus, WindowLostFocus, WindowMoved,
 		AppTick, AppUpdate, AppRender,
@@ -17,49 +15,49 @@ namespace PFF {
 		MouseButtonPressed, MouseButtonReleased, MouseMoved, MouseScrolled
 	};
 
-	enum EventCategory {
-		None = 0,
-		EventCategoryApplication	= BIT(0),
-		EventCategoryInput			= BIT(1),
-		EventCategoryKeyboard		= BIT(2),
-		EventCategoryMouse			= BIT(3),
-		EventCategoryMouseButton	= BIT(4)
+	enum event_category {
+		None				= 0,
+		EC_Application		= BIT(0),
+		EC_Input			= BIT(1),
+		EC_Keyboard			= BIT(2),
+		EC_Mouse			= BIT(3),
+		EC_Button			= BIT(4)
 	};
 
-#define EVENT_CLASS_TYPE(type)				static EventType GetStaticType() { return EventType::##type; }					\
-											virtual EventType GetEventType() const override { return GetStaticType(); }		\
-											virtual const char* GetName() const override { return #type; }
+#define EVENT_CLASS_TYPE(type)				static event_type get_static_type() { return event_type::##type; }					\
+											virtual event_type get_event_type() const override { return get_static_type(); }		\
+											virtual const char* get_name() const override { return #type; }
 
-#define	EVENT_CLASS_CATEGORY(category)		virtual int GetCategoryFlag() const override { return category; }
+#define	EVENT_CLASS_CATEGORY(category)		virtual int32 get_category_flag() const override { return category; }
 
-	class PFF_API Event {
+	class PFF_API event {
 
 	public:
 		bool Handeled = false;
 
-		virtual EventType GetEventType() const = 0;
-		virtual const char* GetName() const = 0;
-		virtual int GetCategoryFlag() const = 0;
-		virtual std::string ToString() const { return GetName(); }
+		virtual event_type get_event_type() const = 0;
+		virtual const char* get_name() const = 0;
+		virtual int32 get_category_flag() const = 0;
+		virtual std::string to_string() const { return get_name(); }
 
-		inline bool IsInCategory(EventCategory category) { return (GetCategoryFlag() & category); }
+		inline bool is_in_category(event_category category) { return (get_category_flag() & category); }
 
 	};
 
-	class EventDispacher {
+	class event_dispatcher {
 
 		template<typename T>
 		using EventFn = std::function<bool(T&)>;
 
 	public:
-		EventDispacher(Event& event) : m_Evemt(event) {}
+		event_dispatcher(event& event) : m_event(event) {}
 
 		template<typename T>
-		bool Dispach(EventFn<T> func) {
+		bool dispatch(EventFn<T> func) {
 
-			if (m_Evemt.GetEventType() == T::GetStaticType()) {
+			if (m_event.get_event_type() == T::get_static_type()) {
 
-				m_Evemt.Handeled = func(*(T*)&m_Evemt);
+				m_event.Handeled = func(*(T*)&m_event);
 				return true;
 			}
 			return false;
@@ -67,8 +65,8 @@ namespace PFF {
 
 	private:
 
-		Event& m_Evemt;
+		event& m_event;
 	};
 
-	// inline std::ostream& operator<<(std::ostream & os, const Event & e) { return os << e.ToString(); }
+	// inline std::ostream& operator<<(std::ostream & os, const Event & e) { return os << e.to_string(); }
 }

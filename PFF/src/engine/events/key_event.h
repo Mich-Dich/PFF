@@ -1,55 +1,53 @@
 #pragma once
 
-#include <sstream>
-#include <vector>
-
 #include "util/util.h"
-#include "Event.h"
+#include "event.h"
+
 
 namespace PFF {
 
-	class PFF_API KeyEvent : public Event {
+	class PFF_API key_event : public event {
 
 	public:
-		inline int GetKeyCode() const { return KeyCode_m; }
+		inline int32 get_keycode() const { return m_keycode; }
 
-		EVENT_CLASS_CATEGORY(EventCategoryKeyboard | EventCategoryInput)
+		EVENT_CLASS_CATEGORY(EC_Keyboard | EC_Input)
 
 	protected:
-		KeyEvent(int keyCode) : KeyCode_m(keyCode) {}
+		key_event(int32 keyCode) : m_keycode(keyCode) {}
 
-		int KeyCode_m;
+		int32 m_keycode;
 	};
 
-	class PFF_API KeyPressedEvent : public KeyEvent {
+	class PFF_API key_pressed_event : public key_event {
 
 	public:
-		KeyPressedEvent(int keyCode, int repeatCount) : KeyEvent(keyCode), RepeatCount_m(repeatCount) {}
+		key_pressed_event(int32 keyCode, int32 repeatCount) : key_event(keyCode), RepeatCount_m(repeatCount) {}
 
-		inline int GetRepeatCount() const { return RepeatCount_m; }
+		inline int32 GetRepeatCount() const { return RepeatCount_m; }
 
-		std::string ToString() const override {
+		std::string to_string() const override {
 
 			std::stringstream ss;
-			ss << "Event - KeyPressedEvent [Code:" << KeyCode_m << ", Repeats: " << RepeatCount_m << "]";
+			ss << "Event - KeyPressedEvent [Code:" << m_keycode << ", Repeats: " << RepeatCount_m << "]";
 			return ss.str();
 		}
 
 		EVENT_CLASS_TYPE(KeyPressed)
 
 	private:
-		int RepeatCount_m;
+		int32 RepeatCount_m;
 	};
 
-	class PFF_API KeyReleasedEvent : public KeyEvent {
+	class PFF_API key_released_event : public key_event {
 
 	public:
-		KeyReleasedEvent(int keyCode) : KeyEvent(keyCode) {}
+		key_released_event(int32 keyCode) : key_event(keyCode) {}
 
-		std::string ToString() const override {
+		std::string to_string() const override {
 
 			std::stringstream ss;
-			ss << "Event - KeyReleased [Code: " << KeyCode_m << "]";
+			ss << "Event - KeyReleased [Code: " << m_keycode << "]";
 			return ss.str();
 		}
 

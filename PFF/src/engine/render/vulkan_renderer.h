@@ -14,17 +14,19 @@ namespace PFF{
 		vulkan_renderer(std::shared_ptr<pff_window> window);
 		~vulkan_renderer();
 
-		DELETE_COPY(vulkan_renderer)
-
 		void draw_frame();
 		void wait_Idle();
+		void set_size(u32 width, u32 height);
+
+		DELETE_COPY(vulkan_renderer);
 
 	private:
 		void load_meshes();
 		void create_pipeline_layout();
 		void create_pipeline();
 		void create_command_buffer();
-
+		void recreate_swapchian();
+		void recordCommandBuffer(int32 image_index);
 
 		std::unique_ptr<basic_mesh> m_testmodel;
 

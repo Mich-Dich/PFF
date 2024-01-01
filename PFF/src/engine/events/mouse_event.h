@@ -1,44 +1,43 @@
 #pragma once
 
-#include <sstream>
-#include <vector>
-
 #include "util/util.h"
-#include "Event.h"
+#include "event.h"
+
 
 namespace PFF {
 
-	class PFF_API MouseMovedEvent : public Event {
+	class PFF_API MouseMovedEvent : public event {
 
 	public:
-		MouseMovedEvent(float x, float y) : MousePosX_m(x), MousePosY_m(y) {}
+		MouseMovedEvent(f32 x, f32 y) : m_mouse_posX(x), m_mouse_posY(y) {}
 
-		inline int GetX() const { return static_cast<int>(MousePosX_m); }
-		inline int GetY() const { return static_cast<int>(MousePosY_m); }
+		inline int32 GetX() const { return static_cast<int32>(m_mouse_posX); }
+		inline int32 GetY() const { return static_cast<int32>(m_mouse_posY); }
 
-		std::string ToString() const override {
+		std::string to_string() const override {
 
 			std::stringstream ss;
-			ss << "Event - MouseMoved [X: " << MousePosX_m << " Y: " << MousePosY_m << "]";
+			ss << "Event - MouseMoved [X: " << m_mouse_posX << " Y: " << m_mouse_posY << "]";
 			return ss.str();
 		}
 
 		EVENT_CLASS_TYPE(MouseMoved)
-		EVENT_CLASS_CATEGORY(EventCategoryMouse | EventCategoryInput)
+		EVENT_CLASS_CATEGORY(EC_Mouse | EC_Input)
 
 	private:
-		float MousePosX_m, MousePosY_m;
+		f32 m_mouse_posX, m_mouse_posY;
 	};
 
-	class PFF_API MouseScrolledEvent : public Event {
+
+	class PFF_API MouseScrolledEvent : public event {
 
 	public:
-		MouseScrolledEvent(float xOffset, float yOffset) : m_XOffset(xOffset), m_YOffset(yOffset) {}
+		MouseScrolledEvent(f32 xOffset, f32 yOffset) : m_offsetX(xOffset), m_offsetY(yOffset) {}
 
-		inline float GetXOffset() const { return m_XOffset; }
-		inline float GetYOffset() const { return m_YOffset; }
+		inline f32 GetXOffset() const { return m_offsetX; }
+		inline f32 GetYOffset() const { return m_offsetY; }
 
-		std::string ToString() const override {
+		std::string to_string() const override {
 
 			std::stringstream ss;
 			ss << "Event - MouseScrolled [X: " << GetXOffset() << " Y: " << GetYOffset() << "]";
@@ -46,31 +45,33 @@ namespace PFF {
 		}
 
 		EVENT_CLASS_TYPE(MouseScrolled)
-		EVENT_CLASS_CATEGORY(EventCategoryMouse | EventCategoryInput)
+		EVENT_CLASS_CATEGORY(EC_Mouse | EC_Input)
 
 	private:
-		float m_XOffset, m_YOffset;
+		f32 m_offsetX, m_offsetY;
 	};
 
-	class PFF_API MouseButtonEvent : public Event {
+
+	class PFF_API MouseButtonEvent : public event {
 
 	public:
-		inline int GetMouseButton() const { return m_Button; }
+		inline int32 GetMouseButton() const { return m_Button; }
 
-		EVENT_CLASS_CATEGORY(EventCategoryMouse | EventCategoryInput)
+		EVENT_CLASS_CATEGORY(EC_Mouse | EC_Input)
 
 	protected:
-		MouseButtonEvent(int button) : m_Button(button) {}
+		MouseButtonEvent(int32 button) : m_Button(button) {}
 
-		int m_Button;
+		int32 m_Button;
 	};
+
 
 	class PFF_API MouseButtonPressedEvent : public MouseButtonEvent {
 
 	public:
-		MouseButtonPressedEvent(int button) : MouseButtonEvent(button) {}
+		MouseButtonPressedEvent(int32 button) : MouseButtonEvent(button) {}
 
-		std::string ToString() const override {
+		std::string to_string() const override {
 
 			std::stringstream ss;
 			ss << "Event - MouseButtonPressed: " << m_Button;
@@ -80,12 +81,13 @@ namespace PFF {
 		EVENT_CLASS_TYPE(MouseButtonPressed)
 	};
 
+
 	class PFF_API MouseButtonReleasedEvent : public MouseButtonEvent {
 
 	public:
-		MouseButtonReleasedEvent(int button) : MouseButtonEvent(button) {}
+		MouseButtonReleasedEvent(int32 button) : MouseButtonEvent(button) {}
 
-		std::string ToString() const override {
+		std::string to_string() const override {
 
 			std::stringstream ss;
 			ss << "Event - MouseButtonReleased: " << m_Button;

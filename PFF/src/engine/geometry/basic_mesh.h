@@ -25,6 +25,7 @@ namespace PFF {
 
 		struct vertex {
 			glm::vec2 position;
+			glm::vec3 color;
 
 			static std::vector<VkVertexInputBindingDescription> get_binding_descriptions();
 			static std::vector<VkVertexInputAttributeDescription> get_attribute_descriptions();
@@ -36,7 +37,7 @@ namespace PFF {
 		void bind(VkCommandBuffer_T* commandBuffer);
 		void draw(VkCommandBuffer_T* commandBuffer);
 
-		DELETE_COPY(basic_mesh)
+		DELETE_COPY(basic_mesh);
 
 	private:
 		

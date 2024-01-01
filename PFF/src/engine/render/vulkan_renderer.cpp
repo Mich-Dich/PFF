@@ -23,6 +23,8 @@
 
 namespace PFF {
 
+	// ============================================================================ setup ============================================================================
+
 	vulkan_renderer::vulkan_renderer(std::shared_ptr<pff_window> window) 
 		: m_window{ window } {
 	
@@ -40,13 +42,60 @@ namespace PFF {
 		vkDestroyPipelineLayout(m_device->get_device(), m_pipeline_layout, nullptr);
 	}
 
+	// ============================================================================ public funcs ============================================================================
+
+	void sierpinski(std::vector<basic_mesh::vertex>& verts, u32 depth, glm::vec2 pos1, glm::vec2 pos2, glm::vec2 pos3) {
+
+		if (depth <= 0) {
+
+			verts.push_back({ pos1 });
+			verts.push_back({ pos2 });
+			verts.push_back({ pos3 });
+		} else {
+
+			auto pos12 = 0.5f * (pos1 + pos2);
+			auto pos23 = 0.5f * (pos2 + pos3);
+			auto pos31 = 0.5f * (pos3 + pos1);
+			sierpinski(verts, depth - 1, pos1, pos12, pos31);
+			sierpinski(verts, depth - 1, pos12, pos2, pos23);
+			sierpinski(verts, depth - 1, pos31, pos23, pos3);
+		}
+	}
+
+	void vulkan_renderer::draw_frame() {
+
+		u32 image_index;
+		auto result = m_swapchain->acquireNextImage(&image_index);
+
+		CORE_ASSERT(result == VK_SUCCESS || result == VK_SUBOPTIMAL_KHR, "", "Failed to aquire swapchain Image");
+
+		result = m_swapchain->submitCommandBuffers(&m_command_buffers[image_index], &image_index);
+		CORE_ASSERT(result == VK_SUCCESS, "", "Failed to present swapchain image");
+	}
+
+	void vulkan_renderer::wait_Idle() {
+
+		vkDeviceWaitIdle(m_device->get_device());
+	}
+
+	void vulkan_renderer::set_size(u32 width, u32 height) {
+
+		CORE_LOG(Info, "Resize: [" << width << ", " << height << "]");
+	}
+
+	// ============================================================================ private funcs ============================================================================
+
+
 	void vulkan_renderer::load_meshes() {
 
-		std::vector<basic_mesh::vertex> vertices{
-			{{0.5f,-0.5f}},
-			{{0.5f,0.5f}},
-			{{-0.5f,0.5f}},
+		std::vector<basic_mesh::vertex> vertices;
+		vertices = {
+			{{0.0f,-0.5f}, {1.0f,0.0f,0.0f}},
+			{{0.5f,0.5f}, {0.0f,1.0f,0.0f}},
+			{{-0.5f,0.5f}, {0.0f,0.0f,1.0f}},
 		};
+		//sierpinski(vertices, 3, { 0.0f, -0.5f }, { 0.5f, 0.5f }, { -0.5f, 0.5f });
+
 
 		m_testmodel = std::make_unique<basic_mesh>(m_device, vertices);
 	}
@@ -65,7 +114,7 @@ namespace PFF {
 
 	void vulkan_renderer::create_pipeline() {
 
-		pipeline_config_info pipeline_config (m_swapchain->get_width(), m_swapchain->get_height(), m_pipeline_layout, m_swapchain->get_render_pass(), 0);
+		pipeline_config_info pipeline_config(m_swapchain->get_width(), m_swapchain->get_height(), m_pipeline_layout, m_swapchain->get_render_pass(), 0);
 
 		m_vk_pipeline = std::make_unique<vk_pipeline>(m_device, pipeline_config, "shaders/default.vert.spv", "shaders/default.frag.spv");
 	}
@@ -112,22 +161,6 @@ namespace PFF {
 
 			CORE_ASSERT_S(vkEndCommandBuffer(m_command_buffers[x]) == VK_SUCCESS);
 		}
-	}
-
-	void vulkan_renderer::draw_frame() {
-
-		u32 image_index;
-		auto result = m_swapchain->acquireNextImage(&image_index);
-
-		CORE_ASSERT(result == VK_SUCCESS || result == VK_SUBOPTIMAL_KHR, "", "Failed to aquire swapchain Image");
-
-		result = m_swapchain->submitCommandBuffers(&m_command_buffers[image_index], &image_index);
-		CORE_ASSERT(result == VK_SUCCESS, "", "Failed to present swapchain image");
-	}
-
-	void vulkan_renderer::wait_Idle() {
-
-		vkDeviceWaitIdle(m_device->get_device());
 	}
 
 }

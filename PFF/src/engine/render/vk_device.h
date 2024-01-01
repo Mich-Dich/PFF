@@ -35,13 +35,13 @@ namespace PFF {
         ~vk_device();
 
         // Not copyable or movable
-        DELETE_COPY_MOVE(vk_device)
+        DELETE_COPY_MOVE(vk_device);
 
-        inline VkCommandPool getCommandPool() { return commandPool; }
-        inline VkDevice get_device() { return m_device; }
-        inline VkSurfaceKHR surface() { return m_surface; }
-        inline VkQueue graphicsQueue() { return graphicsQueue_; }
-        inline VkQueue presentQueue() { return presentQueue_; }
+        FORCEINLINE VkCommandPool getCommandPool() { return commandPool; }
+        FORCEINLINE VkDevice get_device() { return m_device; }
+        FORCEINLINE VkSurfaceKHR surface() { return m_surface; }
+        FORCEINLINE VkQueue graphicsQueue() { return graphicsQueue_; }
+        FORCEINLINE VkQueue presentQueue() { return presentQueue_; }
 
         SwapChainSupportDetails getSwapChainSupport() { return querySwapChainSupport(m_physical_device); }
         uint32_t findMemoryType(uint32_t typeFilter, VkMemoryPropertyFlags properties);

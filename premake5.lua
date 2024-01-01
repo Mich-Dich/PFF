@@ -74,7 +74,11 @@ project "PFF"
 		systemversion "latest"
 
         -- Add /NODEFAULTLIB:LIBCMTD to the linker options
-        linkoptions { "/NODEFAULTLIB:LIBCMTD" }
+        linkoptions 
+		{
+			 "/NODEFAULTLIB:LIBCMTD",
+			 "/NODEFAULTLIB:MSVCRT"
+		}
 
 		defines
 		{
@@ -85,17 +89,18 @@ project "PFF"
 
 		postbuildcommands
 		{
-			("{COPY} %{cfg.buildtarget.relpath} ../bin/" .. outputs  .. "/Sandbox")
+			"{MKDIR} ../bin/" .. outputs .. "/Sandbox",
+			"{COPY} %{cfg.buildtarget.relpath} ../bin/" .. outputs  .. "/Sandbox",
 		}
 
 	filter "configurations:Debug"
-		defines "PFF_DEBUG"
 		buildoptions "/MDd"
+		defines "PFF_DEBUG"
 		symbols "On"
 
 	filter "configurations:Release"
-		defines "PFF_RELEASE"
 		buildoptions "/MD"
+		defines "PFF_RELEASE"
 		optimize "On"
 
 project "Sandbox"
@@ -139,11 +144,11 @@ project "Sandbox"
 		}
 
 	filter "configurations:Debug"
-		defines "PFF_DEBUG"
 		buildoptions "/MDd"
+		defines "SANDBOX_DEBUG"
 		symbols "On"
 
 	filter "configurations:Release"
-		defines "PFF_RELEASE"
 		buildoptions "/MD"
+		defines "SANDBOX_RELEASE"
 		optimize "On"

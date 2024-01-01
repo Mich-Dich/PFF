@@ -10,6 +10,11 @@
 
 #undef ERROR
 
+#ifndef DEBUG_BREAK
+	#define DEBUG_BREAK() __debugbreak()
+#endif // !DEBUG_BREAK
+
+
 #define APP_NAMESPACE			PFF
 #define PROJECT_FOLDER			"PFF"
 #define LOGGER_MACRP_PREFIX		PFF
@@ -158,13 +163,13 @@ namespace APP_NAMESPACE {
 						CORE_LOG(Trace, successMsg);								\
 					} else {														\
 						CORE_LOG(Fatal, failureMsg);								\
-						__debugbreak();												\
+						DEBUG_BREAK();												\
 					}
 
 	#define CORE_ASSERT_S(expr)														\
 					if (!(expr)) {													\
 						CORE_LOG(Fatal, #expr);										\
-						__debugbreak();												\
+						DEBUG_BREAK();												\
 					}
 #else
 	#define CORE_ASSERT(expr, successMsg, failureMsg)								{expr;}

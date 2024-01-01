@@ -1,69 +1,68 @@
 #pragma once
 
-#include <sstream>
-#include <vector>
-
 #include "util/util.h"
-#include "Event.h"
+#include "event.h"
+
 
 namespace PFF {
 
-	class PFF_API WindowResizeEvent : public Event {
+	class PFF_API window_resize_event : public event {
 
 	public:
-		WindowResizeEvent(unsigned int width, unsigned int height)
-			: Width_m(width), Height_m(height) {}
+		window_resize_event(u32 width, u32 height)
+			: m_width(width), m_height(height) {}
 
-		inline unsigned int GetWidth() const { return Width_m; }
-		inline unsigned int GetHeight() const { return Height_m; }
+		inline u32 get_width() const { return m_width; }
+		inline u32 get_height() const { return m_height; }
 
-		std::string ToString() const override {
+		std::string to_string() const override {
 
 			std::stringstream ss;
-			ss << "Event - WindowResizeEvent [" << Width_m << ", " << Height_m << "]";
+			ss << "Event - WindowResizeEvent [" << m_width << ", " << m_height << "]";
 			return ss.str();
 		}
 
 		EVENT_CLASS_TYPE(WindowResize)
-		EVENT_CLASS_CATEGORY(EventCategoryApplication)
+		EVENT_CLASS_CATEGORY(EC_Application)
 			
 	private:
-		unsigned int Width_m, Height_m;
+		u32 m_width;
+		u32 m_height;
 	};
 
-	class PFF_API WindowCloseEvent : public Event {
+	class PFF_API window_close_event : public event {
 
 	public:
-		WindowCloseEvent() {}
+		window_close_event() {}
 
 		EVENT_CLASS_TYPE(WindowClose)
-		EVENT_CLASS_CATEGORY(EventCategoryApplication)
+		EVENT_CLASS_CATEGORY(EC_Application)
 	};
 
-	class PFF_API AppTickEvent : public Event {
+	class PFF_API app_Tick_event : public event {
 
 	public:
-		AppTickEvent() {}
+		app_Tick_event() {}
 		
 		EVENT_CLASS_TYPE(AppTick)
-		EVENT_CLASS_CATEGORY(EventCategoryApplication)
+		EVENT_CLASS_CATEGORY(EC_Application)
 	};
 
-	class PFF_API AppUpdateEvent : public Event {
+	class PFF_API app_update_event : public event {
 
 	public:
-		AppUpdateEvent() {}
+		app_update_event() {}
 
 		EVENT_CLASS_TYPE(AppUpdate)
-			EVENT_CLASS_CATEGORY(EventCategoryApplication)
+			EVENT_CLASS_CATEGORY(EC_Application)
 	};
 
-	class PFF_API AppRenderEvent : public Event {
+	class PFF_API app_render_event : public event {
 
 	public:
-		AppRenderEvent() {}
+		app_render_event() {}
 
 		EVENT_CLASS_TYPE(AppRender)
-			EVENT_CLASS_CATEGORY(EventCategoryApplication)
+			EVENT_CLASS_CATEGORY(EC_Application)
 	};
 }

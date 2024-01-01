@@ -7,6 +7,9 @@
     <Filter Include="engine\events">
       <UniqueIdentifier>{9FF33A70-0BB4-B6A6-D4EE-FF23406EFB82}</UniqueIdentifier>
     </Filter>
+    <Filter Include="engine\geometry">
+      <UniqueIdentifier>{D64FE53D-42DB-5202-4BEC-D5F6B7F6AE02}</UniqueIdentifier>
+    </Filter>
     <Filter Include="engine\platform">
       <UniqueIdentifier>{CF5EE486-3BEA-514B-44FB-D43FB005AE4B}</UniqueIdentifier>
     </Filter>
@@ -15,6 +18,9 @@
     </Filter>
     <Filter Include="util">
       <UniqueIdentifier>{43339F7C-2F6A-A00D-D856-8610C46C1C0F}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="util\platform">
+      <UniqueIdentifier>{1767156D-8327-91A3-4C62-DA20B8E1D57F}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
   <ItemGroup>
@@ -31,6 +37,9 @@
     </ClInclude>
     <ClInclude Include="src\engine\events\mouse_event.h">
       <Filter>engine\events</Filter>
+    </ClInclude>
+    <ClInclude Include="src\engine\geometry\basic_mesh.h">
+      <Filter>engine\geometry</Filter>
     </ClInclude>
     <ClInclude Include="src\engine\platform\pff_window.h">
       <Filter>engine\platform</Filter>
@@ -57,13 +66,18 @@
     <ClInclude Include="src\util\logger.h">
       <Filter>util</Filter>
     </ClInclude>
+    <ClInclude Include="src\util\platform\windows_util.h">
+      <Filter>util\platform</Filter>
+    </ClInclude>
     <ClInclude Include="src\util\util.h">
       <Filter>util</Filter>
     </ClInclude>
-    <ClInclude Include="src\engine\geometry\basic_mesh.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="src\application.cpp" />
+    <ClCompile Include="src\engine\geometry\basic_mesh.cpp">
+      <Filter>engine\geometry</Filter>
+    </ClCompile>
     <ClCompile Include="src\engine\platform\pff_window.cpp">
       <Filter>engine\platform</Filter>
     </ClCompile>
@@ -85,6 +99,5 @@
     <ClCompile Include="src\util\logger.cpp">
       <Filter>util</Filter>
     </ClCompile>
-    <ClCompile Include="src\engine\geometry\basic_mesh.cpp" />
   </ItemGroup>
 </Project>

@@ -141,9 +141,7 @@ namespace PFF {
 
     void vk_device::createInstance() {
 
-        if (enableValidationLayers && !checkValidationLayerSupport()) {
-            throw std::runtime_error("validation layers requested, but not available!");
-        }
+        CORE_ASSERT(!(enableValidationLayers && !checkValidationLayerSupport()),"", "validation layers requested, but not available!");
 
         VkApplicationInfo appInfo = {};
         appInfo.sType = VK_STRUCTURE_TYPE_APPLICATION_INFO;
@@ -163,18 +161,20 @@ namespace PFF {
 
         VkDebugUtilsMessengerCreateInfoEXT debugCreateInfo;
         if (enableValidationLayers) {
+
             createInfo.enabledLayerCount = static_cast<uint32_t>(validationLayers.size());
             createInfo.ppEnabledLayerNames = validationLayers.data();
-
             populateDebugMessengerCreateInfo(debugCreateInfo);
             createInfo.pNext = (VkDebugUtilsMessengerCreateInfoEXT*)&debugCreateInfo;
+
         } else {
+
             createInfo.enabledLayerCount = 0;
             createInfo.pNext = nullptr;
         }
 
         CORE_ASSERT(vkCreateInstance(&createInfo, nullptr, &m_VkInstance) == VK_SUCCESS, "", "failed to create m_VkInstance!");
-
+       
         hasGflwRequiredInstanceExtensions();
     }
 
