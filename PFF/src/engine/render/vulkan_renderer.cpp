@@ -26,7 +26,7 @@ namespace PFF {
 	// ============================================================================ setup ============================================================================
 
 	vulkan_renderer::vulkan_renderer(std::shared_ptr<pff_window> window)
-		: m_window( window ), m_active( true ) {
+		: m_window( window ), m_active( true ), needs_to_resize(false) {
 	
 		m_device = std::make_shared<vk_device>(m_window);
 		load_meshes();
@@ -62,13 +62,31 @@ namespace PFF {
 
 	void vulkan_renderer::draw_frame() {
 
-		u32 image_index;
-		auto result = m_swapchain->acquireNextImage(&image_index);
+		if (m_active) {
 
-		CORE_ASSERT(result == VK_SUCCESS || result == VK_SUBOPTIMAL_KHR, "", "Failed to aquire swapchain Image");
+			u32 image_index;
+			auto result = m_swapchain->acquireNextImage(&image_index);
 
-		result = m_swapchain->submitCommandBuffers(&m_command_buffers[image_index], &image_index);
-		CORE_ASSERT(result == VK_SUCCESS, "", "Failed to present swapchain image");
+			if (result == VK_ERROR_OUT_OF_DATE_KHR) {
+
+				needs_to_resize = true;
+				recreate_swapchian();
+				return;
+			}
+
+			CORE_ASSERT(result == VK_SUCCESS || result == VK_SUBOPTIMAL_KHR, "", "Failed to aquire swapchain Image");
+
+			recordCommandBuffer(image_index);
+			result = m_swapchain->submitCommandBuffers(&m_command_buffers[image_index], &image_index);
+			if (result == VK_ERROR_OUT_OF_DATE_KHR || result == VK_SUBOPTIMAL_KHR) {
+
+				needs_to_resize = true;
+				recreate_swapchian();
+				return;
+			}
+
+			CORE_ASSERT(result == VK_SUCCESS, "", "Failed to present swapchain image");
+		}
 	}
 
 	void vulkan_renderer::wait_Idle() {
@@ -79,7 +97,7 @@ namespace PFF {
 	void vulkan_renderer::set_size(u32 width, u32 height) {
 
 		CORE_LOG(Info, "Resize: [" << width << ", " << height << "]");
-		m_active = false;
+		needs_to_resize = true;
 
 		if (width > 0 && height > 0) {
 
@@ -98,9 +116,38 @@ namespace PFF {
 		m_swapchain = std::make_shared<vk_swapchain>(m_device, m_window->get_extend());
 		create_pipeline();
 		create_command_buffer();
+		needs_to_resize = false;
 	}
 
 	void vulkan_renderer::recordCommandBuffer(int32 image_index) {
+
+		VkCommandBufferBeginInfo begin_I{};
+		begin_I.sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_BEGIN_INFO;
+
+		CORE_ASSERT_S(vkBeginCommandBuffer(m_command_buffers[image_index], &begin_I) == VK_SUCCESS);
+
+		VkRenderPassBeginInfo render_pass_BI{};
+		render_pass_BI.sType = VK_STRUCTURE_TYPE_RENDER_PASS_BEGIN_INFO;
+		render_pass_BI.renderPass = m_swapchain->get_render_pass();
+		render_pass_BI.framebuffer = m_swapchain->getFrameBuffer(image_index);
+		render_pass_BI.renderArea.offset = { 0,0 };
+		render_pass_BI.renderArea.extent = m_swapchain->getSwapChainExtent();
+
+		std::array<VkClearValue, 2> clear_values{};
+		clear_values[0].color = { 0.2f, 0.2f, 0.2f, 1.0f };
+		clear_values[1].depthStencil = { 1.0f,0 };
+		render_pass_BI.clearValueCount = static_cast<u32>(clear_values.size());
+		render_pass_BI.pClearValues = clear_values.data();
+
+		vkCmdBeginRenderPass(m_command_buffers[image_index], &render_pass_BI, VK_SUBPASS_CONTENTS_INLINE);
+
+		m_vk_pipeline->bind_commnad_buffers(m_command_buffers[image_index]);
+		m_testmodel->bind(m_command_buffers[image_index]);
+		m_testmodel->draw(m_command_buffers[image_index]);
+
+		vkCmdEndRenderPass(m_command_buffers[image_index]);
+
+		CORE_ASSERT_S(vkEndCommandBuffer(m_command_buffers[image_index]) == VK_SUCCESS);
 	}
 
 	void vulkan_renderer::load_meshes() {
@@ -147,37 +194,6 @@ namespace PFF {
 		allocat_I.commandBufferCount = static_cast<u32>(m_command_buffers.size());
 
 		CORE_ASSERT_S(vkAllocateCommandBuffers(m_device->get_device(), &allocat_I, m_command_buffers.data()) == VK_SUCCESS);
-
-		for (u32 x = 0; x < m_command_buffers.size(); x++) {
-
-			VkCommandBufferBeginInfo begin_I{};
-			begin_I.sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_BEGIN_INFO;
-
-			CORE_ASSERT_S(vkBeginCommandBuffer(m_command_buffers[x], &begin_I) == VK_SUCCESS);
-
-			VkRenderPassBeginInfo render_pass_BI{};
-			render_pass_BI.sType = VK_STRUCTURE_TYPE_RENDER_PASS_BEGIN_INFO;
-			render_pass_BI.renderPass = m_swapchain->get_render_pass();
-			render_pass_BI.framebuffer = m_swapchain->getFrameBuffer(x);
-			render_pass_BI.renderArea.offset = { 0,0 };
-			render_pass_BI.renderArea.extent = m_swapchain->getSwapChainExtent();
-
-			std::array<VkClearValue, 2> clear_values{};
-			clear_values[0].color = { 0.2f, 0.2f, 0.2f, 1.0f };
-			clear_values[1].depthStencil = { 1.0f,0 };
-			render_pass_BI.clearValueCount = static_cast<u32>(clear_values.size());
-			render_pass_BI.pClearValues = clear_values.data();
-
-			vkCmdBeginRenderPass(m_command_buffers[x], &render_pass_BI, VK_SUBPASS_CONTENTS_INLINE);
-
-			m_vk_pipeline->bind_commnad_buffers(m_command_buffers[x]);
-			m_testmodel->bind(m_command_buffers[x]);
-			m_testmodel->draw(m_command_buffers[x]);
-
-			vkCmdEndRenderPass(m_command_buffers[x]);
-
-			CORE_ASSERT_S(vkEndCommandBuffer(m_command_buffers[x]) == VK_SUCCESS);
-		}
 	}
 
 }

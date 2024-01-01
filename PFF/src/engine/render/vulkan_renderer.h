@@ -30,6 +30,8 @@ namespace PFF{
 
 
 		bool m_active;
+		bool needs_to_resize;
+
 		std::unique_ptr<basic_mesh> m_testmodel;
 
 		std::shared_ptr<pff_window> m_window;

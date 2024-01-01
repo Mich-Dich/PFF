@@ -49,20 +49,11 @@ namespace PFF {
     }
 
     VkResult vk_swapchain::acquireNextImage(u32* imageIndex) {
-        vkWaitForFences(
-            m_device->get_device(),
-            1,
-            &m_in_flight_fences[m_current_frame],
-            VK_TRUE,
-            std::numeric_limits<uint64_t>::max());
 
-        VkResult result = vkAcquireNextImageKHR(
-            m_device->get_device(),
-            m_swap_chain,
-            std::numeric_limits<uint64_t>::max(),
-            m_image_available_semaphores[m_current_frame],  // must be a not signaled semaphore
-            VK_NULL_HANDLE,
-            imageIndex);
+        vkWaitForFences(m_device->get_device(), 1, &m_in_flight_fences[m_current_frame], VK_TRUE, std::numeric_limits<uint64_t>::max());
+
+        VkResult result = vkAcquireNextImageKHR(m_device->get_device(), m_swap_chain, std::numeric_limits<uint64_t>::max(), m_image_available_semaphores[m_current_frame],  // must be a not signaled semaphore
+            VK_NULL_HANDLE, imageIndex);
 
         return result;
     }
@@ -91,10 +82,7 @@ namespace PFF {
         submitInfo.pSignalSemaphores = signalSemaphores;
 
         vkResetFences(m_device->get_device(), 1, &m_in_flight_fences[m_current_frame]);
-        if (vkQueueSubmit(m_device->graphicsQueue(), 1, &submitInfo, m_in_flight_fences[m_current_frame]) !=
-            VK_SUCCESS) {
-            throw std::runtime_error("failed to submit draw command buffer!");
-        }
+        CORE_ASSERT(vkQueueSubmit(m_device->graphicsQueue(), 1, &submitInfo, m_in_flight_fences[m_current_frame]) == VK_SUCCESS, "", "failed to submit draw command buffer!");
 
         VkPresentInfoKHR presentInfo = {};
         presentInfo.sType = VK_STRUCTURE_TYPE_PRESENT_INFO_KHR;
@@ -160,9 +148,7 @@ namespace PFF {
 
         createInfo.oldSwapchain = VK_NULL_HANDLE;
 
-        if (vkCreateSwapchainKHR(m_device->get_device(), &createInfo, nullptr, &m_swap_chain) != VK_SUCCESS) {
-            throw std::runtime_error("failed to create swap chain!");
-        }
+        CORE_ASSERT(vkCreateSwapchainKHR(m_device->get_device(), &createInfo, nullptr, &m_swap_chain) == VK_SUCCESS, "", "failed to create swap chain!");
 
         // we only specified a minimum number of images in the swap chain, so the implementation is
         // allowed to create a swap chain with more. That's why we'll first query the final number of
@@ -190,10 +176,7 @@ namespace PFF {
             viewInfo.subresourceRange.baseArrayLayer = 0;
             viewInfo.subresourceRange.layerCount = 1;
 
-            if (vkCreateImageView(m_device->get_device(), &viewInfo, nullptr, &m_swap_chain_image_views[i]) !=
-                VK_SUCCESS) {
-                throw std::runtime_error("failed to create texture image view!");
-            }
+            CORE_ASSERT(vkCreateImageView(m_device->get_device(), &viewInfo, nullptr, &m_swap_chain_image_views[i]) == VK_SUCCESS, "", "failed to create texture image view!");
         }
     }
 
@@ -251,9 +234,7 @@ namespace PFF {
         renderPassInfo.dependencyCount = 1;
         renderPassInfo.pDependencies = &dependency;
 
-        if (vkCreateRenderPass(m_device->get_device(), &renderPassInfo, nullptr, &m_render_pass) != VK_SUCCESS) {
-            throw std::runtime_error("failed to create render pass!");
-        }
+        CORE_ASSERT(vkCreateRenderPass(m_device->get_device(), &renderPassInfo, nullptr, &m_render_pass) == VK_SUCCESS, "", "failed to create render pass!");
     }
 
     void vk_swapchain::createFramebuffers() {
@@ -273,13 +254,7 @@ namespace PFF {
             framebufferInfo.height = m_swap_chain_extent.height;
             framebufferInfo.layers = 1;
 
-            if (vkCreateFramebuffer(
-                m_device->get_device(),
-                &framebufferInfo,
-                nullptr,
-                &m_swap_chain_framebuffers[i]) != VK_SUCCESS) {
-                throw std::runtime_error("failed to create framebuffer!");
-            }
+            CORE_ASSERT(vkCreateFramebuffer(m_device->get_device(), &framebufferInfo, nullptr, &m_swap_chain_framebuffers[i]) == VK_SUCCESS, "", "failed to create framebuffer!");
         }
     }
 
@@ -309,11 +284,7 @@ namespace PFF {
             imageInfo.sharingMode = VK_SHARING_MODE_EXCLUSIVE;
             imageInfo.flags = 0;
 
-            m_device->createImageWithInfo(
-                imageInfo,
-                VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT,
-                m_depth_images[i],
-                m_depth_image_memorys[i]);
+            m_device->createImageWithInfo(imageInfo, VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT, m_depth_images[i], m_depth_image_memorys[i]);
 
             VkImageViewCreateInfo viewInfo{};
             viewInfo.sType = VK_STRUCTURE_TYPE_IMAGE_VIEW_CREATE_INFO;
@@ -326,9 +297,7 @@ namespace PFF {
             viewInfo.subresourceRange.baseArrayLayer = 0;
             viewInfo.subresourceRange.layerCount = 1;
 
-            if (vkCreateImageView(m_device->get_device(), &viewInfo, nullptr, &m_depth_image_views[i]) != VK_SUCCESS) {
-                throw std::runtime_error("failed to create texture image view!");
-            }
+            CORE_ASSERT(vkCreateImageView(m_device->get_device(), &viewInfo, nullptr, &m_depth_image_views[i]) == VK_SUCCESS, "", "failed to create texture image view!");
         }
     }
 
@@ -347,13 +316,9 @@ namespace PFF {
         fenceInfo.flags = VK_FENCE_CREATE_SIGNALED_BIT;
 
         for (size_t i = 0; i < MAX_FRAMES_IN_FLIGHT; i++) {
-            if (vkCreateSemaphore(m_device->get_device(), &semaphoreInfo, nullptr, &m_image_available_semaphores[i]) !=
-                VK_SUCCESS ||
-                vkCreateSemaphore(m_device->get_device(), &semaphoreInfo, nullptr, &m_render_finished_semaphores[i]) !=
-                VK_SUCCESS ||
-                vkCreateFence(m_device->get_device(), &fenceInfo, nullptr, &m_in_flight_fences[i]) != VK_SUCCESS) {
-                throw std::runtime_error("failed to create synchronization objects for a frame!");
-            }
+            CORE_ASSERT(vkCreateSemaphore(m_device->get_device(), &semaphoreInfo, nullptr, &m_image_available_semaphores[i]) == VK_SUCCESS &&
+                vkCreateSemaphore(m_device->get_device(), &semaphoreInfo, nullptr, &m_render_finished_semaphores[i]) == VK_SUCCESS &&
+                vkCreateFence(m_device->get_device(), &fenceInfo, nullptr, &m_in_flight_fences[i]) == VK_SUCCESS, "", "failed to create synchronization objects for a frame!");
         }
     }
 
@@ -389,16 +354,15 @@ namespace PFF {
     }
 
     VkExtent2D vk_swapchain::chooseSwapExtent(const VkSurfaceCapabilitiesKHR& capabilities) {
-        if (capabilities.currentExtent.width != std::numeric_limits<u32>::max()) {
+
+        if (capabilities.currentExtent.width != std::numeric_limits<u32>::max())
             return capabilities.currentExtent;
-        } else {
+
+        else {
+
             VkExtent2D actualExtent = m_window_extent;
-            actualExtent.width = std::max(
-                capabilities.minImageExtent.width,
-                std::min(capabilities.maxImageExtent.width, actualExtent.width));
-            actualExtent.height = std::max(
-                capabilities.minImageExtent.height,
-                std::min(capabilities.maxImageExtent.height, actualExtent.height));
+            actualExtent.width = std::max(capabilities.minImageExtent.width, std::min(capabilities.maxImageExtent.width, actualExtent.width));
+            actualExtent.height = std::max(capabilities.minImageExtent.height, std::min(capabilities.maxImageExtent.height, actualExtent.height));
 
             return actualExtent;
         }
