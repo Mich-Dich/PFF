@@ -25,15 +25,13 @@ namespace PFF {
 
 	// ============================================================================ setup ============================================================================
 
-	vulkan_renderer::vulkan_renderer(std::shared_ptr<pff_window> window) 
-		: m_window{ window } {
+	vulkan_renderer::vulkan_renderer(std::shared_ptr<pff_window> window)
+		: m_window( window ), m_active( true ) {
 	
 		m_device = std::make_shared<vk_device>(m_window);
 		load_meshes();
-		m_swapchain = std::make_shared<vk_swapchain>(m_device, m_window->get_extend());
 		create_pipeline_layout();
-		create_pipeline();
-		create_command_buffer();
+		recreate_swapchian();
 	}
 
 	vulkan_renderer::~vulkan_renderer() {
@@ -81,10 +79,29 @@ namespace PFF {
 	void vulkan_renderer::set_size(u32 width, u32 height) {
 
 		CORE_LOG(Info, "Resize: [" << width << ", " << height << "]");
+		m_active = false;
+
+		if (width > 0 && height > 0) {
+
+			LOG(Info, "Resize with valid size => rebuild swapchain");
+			vkDeviceWaitIdle(m_device->get_device());
+			recreate_swapchian();
+		}
 	}
 
 	// ============================================================================ private funcs ============================================================================
 
+
+	void vulkan_renderer::recreate_swapchian() {
+
+		m_swapchain = nullptr;
+		m_swapchain = std::make_shared<vk_swapchain>(m_device, m_window->get_extend());
+		create_pipeline();
+		create_command_buffer();
+	}
+
+	void vulkan_renderer::recordCommandBuffer(int32 image_index) {
+	}
 
 	void vulkan_renderer::load_meshes() {
 

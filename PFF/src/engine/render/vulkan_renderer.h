@@ -21,20 +21,21 @@ namespace PFF{
 		DELETE_COPY(vulkan_renderer);
 
 	private:
+		void recreate_swapchian();
+		void recordCommandBuffer(int32 image_index);
 		void load_meshes();
 		void create_pipeline_layout();
 		void create_pipeline();
 		void create_command_buffer();
-		void recreate_swapchian();
-		void recordCommandBuffer(int32 image_index);
 
+
+		bool m_active;
 		std::unique_ptr<basic_mesh> m_testmodel;
 
 		std::shared_ptr<pff_window> m_window;
 		std::shared_ptr<vk_device> m_device;
 		std::shared_ptr<vk_swapchain> m_swapchain;
 		std::unique_ptr<vk_pipeline> m_vk_pipeline;
-
 		VkPipelineLayout m_pipeline_layout;
 		std::vector<VkCommandBuffer> m_command_buffers;
 	};

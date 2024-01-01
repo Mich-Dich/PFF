@@ -113,10 +113,10 @@ IF EXIST ..\bin\Release-windows-x86_64\PFF\PFF.dll\ (xcopy /Q /E /Y /I ..\bin\Re
   <ItemGroup>
     <ClInclude Include="src\PFF.h" />
     <ClInclude Include="src\application.h" />
-    <ClInclude Include="src\engine\events\application_event.h" />
-    <ClInclude Include="src\engine\events\event.h" />
-    <ClInclude Include="src\engine\events\key_event.h" />
-    <ClInclude Include="src\engine\events\mouse_event.h" />
+    <ClInclude Include="src\engine\Events\Event.h" />
+    <ClInclude Include="src\engine\Events\application_event.h" />
+    <ClInclude Include="src\engine\Events\key_event.h" />
+    <ClInclude Include="src\engine\Events\mouse_event.h" />
     <ClInclude Include="src\engine\geometry\basic_mesh.h" />
     <ClInclude Include="src\engine\platform\pff_window.h" />
     <ClInclude Include="src\engine\render\vk_device.h" />

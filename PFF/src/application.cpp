@@ -61,9 +61,9 @@ namespace PFF {
 			while (m_running) {
 				glfwPollEvents();
 
-				update(m_delta_time);	// potentall remove  (like UNREAL)
-				render(m_delta_time);	// potentall remove  (like UNREAL)
-				//m_vulkan_renderer->draw_frame();
+				update(m_delta_time);	// potentally remove  (like UNREAL)
+				render(m_delta_time);	// potentally remove  (like UNREAL)
+				m_vulkan_renderer->draw_frame();
 			}
 
 		m_vulkan_renderer->wait_Idle();
