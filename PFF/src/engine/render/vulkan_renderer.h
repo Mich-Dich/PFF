@@ -4,13 +4,16 @@
 
 // DEV-ONLY
 #include "engine/render/vk_pipeline.h"
-
+/*
+#define GLM_FORCE_RADIANS
+#define GLM_FORCE_DEPTH_ZERO_TO_ONE
+#include <glm/vec4.hpp>
+*/
 namespace PFF{
 
+	class basic_mesh;
 	class vk_device;
 	class vk_swapchain;
-	class vk_pipeline;
-	class basic_mesh;
 
 	class vulkan_renderer {
 	public:
@@ -39,15 +42,15 @@ namespace PFF{
 		bool m_active;
 		bool needs_to_resize;
 
-		std::unique_ptr<basic_mesh> m_testmodel;
-
 		std::shared_ptr<pff_window> m_window;
+
+		std::unique_ptr<basic_mesh> m_testmodel;
 		std::shared_ptr<vk_device> m_device;
 		std::shared_ptr<vk_swapchain> m_swapchain;
 		std::unique_ptr<vk_pipeline> m_vk_pipeline;
 
 		std::vector<VkCommandBuffer> m_command_buffers;
-		VkPipelineLayout m_pipeline_layout;
+		VkPipelineLayout_T* m_pipeline_layout;
 		pipeline_config_info m_pipeline_config;
 	};
 

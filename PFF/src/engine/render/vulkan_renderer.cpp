@@ -30,8 +30,8 @@ namespace PFF {
 		
 		m_device = std::make_shared<vk_device>(m_window);
 		load_meshes();
-		recreate_swapchian();
 		create_pipeline_layout();
+		recreate_swapchian();
 	}
 
 	vulkan_renderer::~vulkan_renderer() {
@@ -101,9 +101,13 @@ namespace PFF {
 
 		if (width > 0 && height > 0) {
 
+			m_active = true;
 			LOG(Info, "Resize with valid size => rebuild swapchain");
 			vkDeviceWaitIdle(m_device->get_device());
 			recreate_swapchian();
+		}
+		else {
+			m_active = false;
 		}
 	}
 
@@ -196,9 +200,6 @@ namespace PFF {
 
 	void vulkan_renderer::create_pipeline_layout() {
 
-		CORE_ASSERT(m_swapchain != nullptr, "", "[create_pipeline_layout()] was called bevor [m_swapchain] is set");
-		CORE_ASSERT(m_pipeline_layout != nullptr, "", "[create_pipeline_layout()] was called bevor [m_pipeline_layout] is set");
-
 		VkPipelineLayoutCreateInfo pipeline_layout_CI{};
 		pipeline_layout_CI.sType = VK_STRUCTURE_TYPE_PIPELINE_LAYOUT_CREATE_INFO;
 		pipeline_layout_CI.setLayoutCount = 0;
@@ -210,6 +211,9 @@ namespace PFF {
 	}
 
 	void vulkan_renderer::create_pipeline() {
+
+		CORE_ASSERT(m_swapchain != nullptr, "", "[create_pipeline_layout()] was called bevor [m_swapchain] is set");
+		CORE_ASSERT(m_pipeline_layout != nullptr, "", "[create_pipeline_layout()] was called bevor [m_pipeline_layout] is set");
 
 		m_pipeline_config = pipeline_config_info();
 		m_pipeline_config.pipeline_layout = m_pipeline_layout;
