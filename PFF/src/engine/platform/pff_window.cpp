@@ -56,6 +56,13 @@ namespace PFF {
 		glfwSetWindowUserPointer(m_Window, &m_data);
 		SetVSync(true);
 
+		glfwSetWindowRefreshCallback(m_Window, [](GLFWwindow* window) {
+			
+			WindowAttributes& data = *(WindowAttributes*)glfwGetWindowUserPointer(window);
+			window_refresh_event event;
+			data.EventCallback(event);
+		});
+
 		glfwSetWindowSizeCallback(m_Window, [](GLFWwindow* window, int width, int height) {
 
 			WindowAttributes& Data = *(WindowAttributes*)glfwGetWindowUserPointer(window);

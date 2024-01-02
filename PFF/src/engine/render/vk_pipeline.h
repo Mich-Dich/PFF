@@ -10,19 +10,23 @@ namespace PFF {
 
 	struct pipeline_config_info {
 
-		VkRect2D scissor;
-		VkViewport viewport;
-		VkPipelineInputAssemblyStateCreateInfo input_assembly_CI;
-		VkPipelineRasterizationStateCreateInfo rasterization_CI;
-		VkPipelineMultisampleStateCreateInfo multisample_CI;
-		VkPipelineColorBlendAttachmentState color_blend_attachment;
-		VkPipelineColorBlendStateCreateInfo color_blend_CI;
-		VkPipelineDepthStencilStateCreateInfo depth_stencil_CI;
+		VkPipelineViewportStateCreateInfo	viewport_CI{};
+		VkPipelineInputAssemblyStateCreateInfo input_assembly_CI{};
+		VkPipelineRasterizationStateCreateInfo rasterization_CI{};
+		VkPipelineMultisampleStateCreateInfo multisample_CI{};
+		VkPipelineColorBlendAttachmentState color_blend_attachment{};
+		VkPipelineColorBlendStateCreateInfo color_blend_CI{};
+		VkPipelineDepthStencilStateCreateInfo depth_stencil_CI{};
+		std::vector<VkDynamicState> dynamic_states_enables{};
+		VkPipelineDynamicStateCreateInfo dynamic_state_CI{};
 		VkPipelineLayout pipeline_layout = nullptr;
 		VkRenderPass render_pass = nullptr;
 		u32 subpass = 0;
 
-		pipeline_config_info(u32 width, u32 height, VkPipelineLayout in_pipeline_layout, VkRenderPass in_render_pass, u32 in_subpass);
+		pipeline_config_info();
+
+		// DELETE_COPY(pipeline_config_info);
+	
 	};
 
 	class vk_pipeline {
@@ -31,7 +35,7 @@ namespace PFF {
 
 		vk_pipeline(
 			std::shared_ptr<vk_device> device,
-			const pipeline_config_info config, 
+			const pipeline_config_info& config, 
 			const std::string& vert_file_path, 
 			const std::string& frag_file_path);
 		
@@ -44,7 +48,7 @@ namespace PFF {
 	private:
 
 		void create_graphics_pipeline(
-			const pipeline_config_info config, 
+			const pipeline_config_info& config, 
 			const std::string& vert_file_path, 
 			const std::string& frag_file_path);
 		

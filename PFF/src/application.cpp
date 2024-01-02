@@ -42,13 +42,19 @@ namespace PFF {
 
 				m_running = false;
 				return true;
-			});
+		});
 
 		dispatcher.dispatch<window_resize_event>([&](window_resize_event& event) {
 			
 			m_vulkan_renderer->set_size(event.get_width(), event.get_height());
 			return true;
-			});
+		});
+
+		dispatcher.dispatch<window_refresh_event>([&](window_refresh_event& event) {
+
+			m_vulkan_renderer->refresh();
+			return true;
+		});
 
 	}
 

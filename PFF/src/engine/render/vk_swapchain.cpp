@@ -4,15 +4,17 @@
 
 namespace PFF {
 
-    vk_swapchain::vk_swapchain(std::shared_ptr<vk_device>& device, VkExtent2D extent)
-        : m_device{ device }, m_window_extent{ extent } {
+    vk_swapchain::vk_swapchain(std::shared_ptr<vk_device>& device, VkExtent2D window_extent)
+        : m_device{ device }, m_window_extent{ window_extent } {
 
-        createSwapChain();
-        createImageViews();
-        createRenderPass();
-        createDepthResources();
-        createFramebuffers();
-        createSyncObjects();
+        init();
+    }
+
+    vk_swapchain::vk_swapchain(std::shared_ptr<vk_device>& device, VkExtent2D window_extent, std::shared_ptr<vk_swapchain> previous)
+        : m_device{ device }, m_window_extent{ window_extent }, m_old_swapchain{ previous } {
+
+        init();
+        m_old_swapchain = nullptr;      // clean up  old swapchain, not needed anymore
     }
 
     vk_swapchain::~vk_swapchain() {
@@ -103,6 +105,16 @@ namespace PFF {
         return result;
     }
 
+    void vk_swapchain::init() {
+
+        createSwapChain();
+        createImageViews();
+        createRenderPass();
+        createDepthResources();
+        createFramebuffers();
+        createSyncObjects();
+    }
+
     void vk_swapchain::createSwapChain() {
         SwapChainSupportDetails swapChainSupport = m_device->getSwapChainSupport();
 
@@ -142,11 +154,9 @@ namespace PFF {
 
         createInfo.preTransform = swapChainSupport.capabilities.currentTransform;
         createInfo.compositeAlpha = VK_COMPOSITE_ALPHA_OPAQUE_BIT_KHR;
-
         createInfo.presentMode = presentMode;
         createInfo.clipped = VK_TRUE;
-
-        createInfo.oldSwapchain = VK_NULL_HANDLE;
+        createInfo.oldSwapchain = (m_old_swapchain == nullptr) ? VK_NULL_HANDLE : m_old_swapchain->m_swap_chain;
 
         CORE_ASSERT(vkCreateSwapchainKHR(m_device->get_device(), &createInfo, nullptr, &m_swap_chain) == VK_SUCCESS, "", "failed to create swap chain!");
 

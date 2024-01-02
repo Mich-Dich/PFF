@@ -28,7 +28,7 @@ namespace PFF {
 		bool VSync;
 		EventCallbackFn EventCallback;
 
-		WindowAttributes(const std::string title = "Gluttony", const u32 width = 1280, const  u32 height = 720, const  bool VSync = false, const EventCallbackFn& callback = nullptr)
+		WindowAttributes(const std::string title = "PFF - Sandbox", const u32 width = 1280, const  u32 height = 720, const  bool VSync = false, const EventCallbackFn& callback = nullptr)
 			: title(title), width(width), height(height), VSync(VSync), EventCallback(callback){}
 	};
 

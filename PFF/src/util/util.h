@@ -46,8 +46,8 @@
 #include "util/io_handler.h"
 
 
-#define DELETE_COPY(classname)				classname(const classname&) = delete;							\
-											classname& operator=(const classname&) = delete
+#define DELETE_COPY(type_name)				type_name(const type_name&) = delete;							\
+											type_name& operator=(const type_name&) = delete
 
 #define DELETE_COPY_MOVE(classname)			classname(const classname&) = delete;							\
 											classname& operator=(const classname&) = delete;						\

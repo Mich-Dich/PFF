@@ -7,29 +7,23 @@
 
 namespace PFF {
 
-	pipeline_config_info::pipeline_config_info(u32 width, u32 height, VkPipelineLayout in_pipeline_layout, VkRenderPass in_render_pass, u32 in_subpass) {
-
+	pipeline_config_info::pipeline_config_info() {
+		/*
 		//pipeline_config_info CI{};
 		pipeline_layout = in_pipeline_layout;
 		render_pass = in_render_pass;
-		subpass = in_subpass;
-
-		scissor = VkRect2D{};
-		scissor.offset = { 0, 0 };
-		scissor.extent = { width, height };
-
-		viewport = VkViewport{};
-		viewport.x = 0.0f;
-		viewport.y = 0.0f;
-		viewport.width = static_cast<float>(width);
-		viewport.height = static_cast<float>(height);
-		viewport.minDepth = 0.0f;
-		viewport.maxDepth = 1.0f;
+		subpass = in_subpass;*/
 
 		input_assembly_CI = VkPipelineInputAssemblyStateCreateInfo{};
 		input_assembly_CI.sType = VK_STRUCTURE_TYPE_PIPELINE_INPUT_ASSEMBLY_STATE_CREATE_INFO;
 		input_assembly_CI.topology = VK_PRIMITIVE_TOPOLOGY_TRIANGLE_LIST;
 		input_assembly_CI.primitiveRestartEnable = VK_FALSE;
+
+		viewport_CI.sType = VK_STRUCTURE_TYPE_PIPELINE_VIEWPORT_STATE_CREATE_INFO;
+		viewport_CI.viewportCount = 1;
+		viewport_CI.pViewports = nullptr;
+		viewport_CI.scissorCount = 1;
+		viewport_CI.pScissors = nullptr;
 
 		rasterization_CI = VkPipelineRasterizationStateCreateInfo{};
 		rasterization_CI.sType = VK_STRUCTURE_TYPE_PIPELINE_RASTERIZATION_STATE_CREATE_INFO;
@@ -85,12 +79,18 @@ namespace PFF {
 		depth_stencil_CI.stencilTestEnable = VK_FALSE;
 		depth_stencil_CI.front = {};  // Optional
 		depth_stencil_CI.back = {};   // Optional
+
+		dynamic_states_enables = { VK_DYNAMIC_STATE_VIEWPORT, VK_DYNAMIC_STATE_SCISSOR };
+		dynamic_state_CI.sType = VK_STRUCTURE_TYPE_PIPELINE_DYNAMIC_STATE_CREATE_INFO;
+		dynamic_state_CI.pDynamicStates = dynamic_states_enables.data();
+		dynamic_state_CI.dynamicStateCount = static_cast<u32>(dynamic_states_enables.size());
+		dynamic_state_CI.flags = 0;
 	}
 
 
 
 	//
-	vk_pipeline::vk_pipeline(std::shared_ptr<vk_device> device, const pipeline_config_info config, const std::string& vert_file_path, const std::string& frag_file_path)
+	vk_pipeline::vk_pipeline(std::shared_ptr<vk_device> device, const pipeline_config_info& config, const std::string& vert_file_path, const std::string& frag_file_path)
 		:m_device{ device } {
 
 		create_graphics_pipeline(config, vert_file_path, frag_file_path);
@@ -110,7 +110,7 @@ namespace PFF {
 		vkCmdBindPipeline(command_buffer, VK_PIPELINE_BIND_POINT_GRAPHICS, m_graphics_pipeline);
 	}
 
-	void vk_pipeline::create_graphics_pipeline(const pipeline_config_info config, const std::string& vert_file_path, const std::string& frag_file_path) {
+	void vk_pipeline::create_graphics_pipeline(const pipeline_config_info& config, const std::string& vert_file_path, const std::string& frag_file_path) {
 		/*
 		auto config = default_pipline_config_info(config.scissor.extent.width, config.scissor.extent.height);
 		config.render_pass = config.render_pass;
@@ -152,24 +152,17 @@ namespace PFF {
 		vert_input_SCT.pVertexAttributeDescriptions = attribute_desc.data();
 		vert_input_SCT.pVertexBindingDescriptions = binding_desc.data();
 
-		VkPipelineViewportStateCreateInfo viewport_CI{};
-		viewport_CI.sType = VK_STRUCTURE_TYPE_PIPELINE_VIEWPORT_STATE_CREATE_INFO;
-		viewport_CI.viewportCount = 1;
-		viewport_CI.pViewports = &config.viewport;
-		viewport_CI.scissorCount = 1;
-		viewport_CI.pScissors = &config.scissor;
-
 		VkGraphicsPipelineCreateInfo pipeline_CI{};
 		pipeline_CI.sType = VK_STRUCTURE_TYPE_GRAPHICS_PIPELINE_CREATE_INFO;
 		pipeline_CI.stageCount = 2;
 		pipeline_CI.pStages = shader_stage_CI;
 		pipeline_CI.pVertexInputState = &vert_input_SCT;
 		pipeline_CI.pInputAssemblyState = &config.input_assembly_CI;
-		pipeline_CI.pViewportState = &viewport_CI;
+		pipeline_CI.pViewportState = &config.viewport_CI;
 		pipeline_CI.pRasterizationState = &config.rasterization_CI;
 		pipeline_CI.pMultisampleState = &config.multisample_CI;
 		pipeline_CI.pColorBlendState = &config.color_blend_CI;
-		pipeline_CI.pDynamicState = nullptr;  // Optional
+		pipeline_CI.pDynamicState = &config.dynamic_state_CI;
 		pipeline_CI.pDepthStencilState = &config.depth_stencil_CI;
 
 		pipeline_CI.layout = config.pipeline_layout;

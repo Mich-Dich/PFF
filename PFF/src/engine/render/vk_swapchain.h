@@ -13,7 +13,8 @@ namespace PFF {
     public:
         static constexpr int MAX_FRAMES_IN_FLIGHT = 2;
 
-        vk_swapchain(std::shared_ptr<vk_device>& device, VkExtent2D m_window_extent);
+        vk_swapchain(std::shared_ptr<vk_device>& device, VkExtent2D window_extent);
+        vk_swapchain(std::shared_ptr<vk_device>& device, VkExtent2D window_extent, std::shared_ptr<vk_swapchain> previous);
         ~vk_swapchain();
         DELETE_COPY(vk_swapchain);
 
@@ -33,6 +34,7 @@ namespace PFF {
 
     private:
 
+        void init();
         void createSwapChain();
         void createImageViews();
         void createDepthResources();
@@ -61,6 +63,7 @@ namespace PFF {
         VkExtent2D m_window_extent;
 
         VkSwapchainKHR m_swap_chain;
+        std::shared_ptr<vk_swapchain> m_old_swapchain;
 
         std::vector<VkSemaphore> m_image_available_semaphores;
         std::vector<VkSemaphore> m_render_finished_semaphores;

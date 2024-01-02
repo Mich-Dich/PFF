@@ -27,11 +27,11 @@ namespace PFF {
 
 	vulkan_renderer::vulkan_renderer(std::shared_ptr<pff_window> window)
 		: m_window( window ), m_active( true ), needs_to_resize(false) {
-	
+		
 		m_device = std::make_shared<vk_device>(m_window);
 		load_meshes();
-		create_pipeline_layout();
 		recreate_swapchian();
+		create_pipeline_layout();
 	}
 
 	vulkan_renderer::~vulkan_renderer() {
@@ -107,13 +107,31 @@ namespace PFF {
 		}
 	}
 
+	void vulkan_renderer::refresh() {
+
+		draw_frame();
+	}
+
 	// ============================================================================ private funcs ============================================================================
 
 
 	void vulkan_renderer::recreate_swapchian() {
 
-		m_swapchain = nullptr;
-		m_swapchain = std::make_shared<vk_swapchain>(m_device, m_window->get_extend());
+		//m_swapchain = nullptr;
+
+		if (m_swapchain == nullptr) {
+
+			m_swapchain = std::make_shared<vk_swapchain>(m_device, m_window->get_extend());
+		} else {
+
+			m_swapchain = std::make_shared<vk_swapchain>(m_device, m_window->get_extend(), std::move(m_swapchain));
+			if (m_swapchain->get_image_count() != m_command_buffers.size()) {
+
+				free_command_buffers();
+				create_command_buffer();
+			}
+		}
+
 		create_pipeline();
 		create_command_buffer();
 		needs_to_resize = false;
@@ -141,6 +159,18 @@ namespace PFF {
 
 		vkCmdBeginRenderPass(m_command_buffers[image_index], &render_pass_BI, VK_SUBPASS_CONTENTS_INLINE);
 
+		VkViewport viewport{};
+		viewport.x = 0.0f;
+		viewport.x = 0.0f;
+		viewport.width = static_cast<f32>(m_swapchain->getSwapChainExtent().width);
+		viewport.height = static_cast<f32>(m_swapchain->getSwapChainExtent().height);
+		viewport.minDepth = 0.0f;
+		viewport.maxDepth = 1.0f;
+
+		VkRect2D scissors{ {0,0},m_swapchain->getSwapChainExtent() };
+		vkCmdSetViewport(m_command_buffers[image_index], 0, 1, &viewport);
+		vkCmdSetScissor(m_command_buffers[image_index], 0, 1, &scissors);
+
 		m_vk_pipeline->bind_commnad_buffers(m_command_buffers[image_index]);
 		m_testmodel->bind(m_command_buffers[image_index]);
 		m_testmodel->draw(m_command_buffers[image_index]);
@@ -166,6 +196,9 @@ namespace PFF {
 
 	void vulkan_renderer::create_pipeline_layout() {
 
+		CORE_ASSERT(m_swapchain != nullptr, "", "[create_pipeline_layout()] was called bevor [m_swapchain] is set");
+		CORE_ASSERT(m_pipeline_layout != nullptr, "", "[create_pipeline_layout()] was called bevor [m_pipeline_layout] is set");
+
 		VkPipelineLayoutCreateInfo pipeline_layout_CI{};
 		pipeline_layout_CI.sType = VK_STRUCTURE_TYPE_PIPELINE_LAYOUT_CREATE_INFO;
 		pipeline_layout_CI.setLayoutCount = 0;
@@ -178,9 +211,12 @@ namespace PFF {
 
 	void vulkan_renderer::create_pipeline() {
 
-		pipeline_config_info pipeline_config(m_swapchain->get_width(), m_swapchain->get_height(), m_pipeline_layout, m_swapchain->get_render_pass(), 0);
+		m_pipeline_config = pipeline_config_info();
+		m_pipeline_config.pipeline_layout = m_pipeline_layout;
+		m_pipeline_config.render_pass = m_swapchain->get_render_pass();
+		m_pipeline_config.subpass = 0;
 
-		m_vk_pipeline = std::make_unique<vk_pipeline>(m_device, pipeline_config, "shaders/default.vert.spv", "shaders/default.frag.spv");
+		m_vk_pipeline = std::make_unique<vk_pipeline>(m_device, m_pipeline_config, "shaders/default.vert.spv", "shaders/default.frag.spv");
 	}
 
 	void vulkan_renderer::create_command_buffer() {
@@ -194,6 +230,12 @@ namespace PFF {
 		allocat_I.commandBufferCount = static_cast<u32>(m_command_buffers.size());
 
 		CORE_ASSERT_S(vkAllocateCommandBuffers(m_device->get_device(), &allocat_I, m_command_buffers.data()) == VK_SUCCESS);
+	}
+
+	void vulkan_renderer::free_command_buffers() {
+
+		vkFreeCommandBuffers(m_device->get_device(), m_device->getCommandPool(), static_cast<u32>(m_command_buffers.size()), m_command_buffers.data());
+		m_command_buffers.clear();
 	}
 
 }

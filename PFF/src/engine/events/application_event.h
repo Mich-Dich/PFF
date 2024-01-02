@@ -22,8 +22,8 @@ namespace PFF {
 			return ss.str();
 		}
 
-		EVENT_CLASS_TYPE(WindowResize)
-		EVENT_CLASS_CATEGORY(EC_Application)
+		EVENT_CLASS_TYPE(WindowResize);
+		EVENT_CLASS_CATEGORY(EC_Application);
 			
 	private:
 		u32 m_width;
@@ -35,8 +35,17 @@ namespace PFF {
 	public:
 		window_close_event() {}
 
-		EVENT_CLASS_TYPE(WindowClose)
-		EVENT_CLASS_CATEGORY(EC_Application)
+		EVENT_CLASS_TYPE(WindowClose);
+		EVENT_CLASS_CATEGORY(EC_Application);
+	};
+
+	class PFF_API window_refresh_event : public event {
+
+	public:
+		window_refresh_event() {}
+
+		EVENT_CLASS_TYPE(WindowRefresh);
+		EVENT_CLASS_CATEGORY(EC_Application);
 	};
 
 	class PFF_API app_Tick_event : public event {
@@ -44,8 +53,8 @@ namespace PFF {
 	public:
 		app_Tick_event() {}
 		
-		EVENT_CLASS_TYPE(AppTick)
-		EVENT_CLASS_CATEGORY(EC_Application)
+		EVENT_CLASS_TYPE(AppTick);
+		EVENT_CLASS_CATEGORY(EC_Application);
 	};
 
 	class PFF_API app_update_event : public event {
