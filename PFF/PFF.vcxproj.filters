@@ -19,6 +19,9 @@
     <Filter Include="util">
       <UniqueIdentifier>{43339F7C-2F6A-A00D-D856-8610C46C1C0F}</UniqueIdentifier>
     </Filter>
+    <Filter Include="util\io">
+      <UniqueIdentifier>{4AE65B48-B6C5-DAE3-BFDD-65BA2B3C4145}</UniqueIdentifier>
+    </Filter>
     <Filter Include="util\platform">
       <UniqueIdentifier>{1767156D-8327-91A3-4C62-DA20B8E1D57F}</UniqueIdentifier>
     </Filter>
@@ -60,8 +63,11 @@
     <ClInclude Include="src\util\data_types.h">
       <Filter>util</Filter>
     </ClInclude>
+    <ClInclude Include="src\util\io\config.h">
+      <Filter>util\io</Filter>
+    </ClInclude>
     <ClInclude Include="src\util\io\io_handler.h">
-      <Filter>util</Filter>
+      <Filter>util\io</Filter>
     </ClInclude>
     <ClInclude Include="src\util\logger.h">
       <Filter>util</Filter>
@@ -72,7 +78,6 @@
     <ClInclude Include="src\util\util.h">
       <Filter>util</Filter>
     </ClInclude>
-    <ClInclude Include="src\util\io\config.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="src\application.cpp" />
@@ -94,12 +99,14 @@
     <ClCompile Include="src\engine\render\vulkan_renderer.cpp">
       <Filter>engine\render</Filter>
     </ClCompile>
+    <ClCompile Include="src\util\io\config.cpp">
+      <Filter>util\io</Filter>
+    </ClCompile>
     <ClCompile Include="src\util\io\io_handler.cpp">
-      <Filter>util</Filter>
+      <Filter>util\io</Filter>
     </ClCompile>
     <ClCompile Include="src\util\logger.cpp">
       <Filter>util</Filter>
     </ClCompile>
-    <ClCompile Include="src\util\io\config.cpp" />
   </ItemGroup>
 </Project>

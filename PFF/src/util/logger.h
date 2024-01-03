@@ -1,11 +1,6 @@
 #pragma once
 #pragma warning(disable: 4251)
 
-//#include "glpch.h"
-#include <iostream>
-#include <string>
-#include <sstream>
-
 #include "util/util.h"
 
 #undef ERROR
@@ -23,6 +18,11 @@
 #define ENABLED_ASSERTS
 
 namespace APP_NAMESPACE {
+
+	class Exception : public std::runtime_error {
+	public:
+		using std::runtime_error::runtime_error;
+	};
 
 	namespace Logger {
 

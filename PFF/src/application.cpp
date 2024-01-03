@@ -24,8 +24,18 @@ namespace PFF {
 
 		config::init();
 
+		std::string buffer = "6665";
+		CORE_LOG(Info, "buffer value: " << buffer);
+		config::check_for_configuration(config::config_file_types::default_engine, "database", "test", buffer, false);
+		CORE_LOG(Info, "buffer value: " << buffer);
+
+		exit(EXIT_SUCCESS);
+
 		// TODO: load WindowAttributes from config file
 		WindowAttributes loc_window_att = WindowAttributes();
+
+		// WindowAttributes(const std::string title = "PFF - Sandbox", const u32 width = 1280, const  u32 height = 720, const  bool VSync = false, const EventCallbackFn & callback = nullptr)
+
 		m_window = std::make_shared<pff_window>(loc_window_att);			// Can be called after inital setup like [compiling shaders]
 		m_window->SetEventCallback(STD_BIND_EVENT_FN(application::on_event));
 

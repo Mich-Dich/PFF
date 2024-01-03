@@ -16,3 +16,10 @@ typedef	float f32;
 typedef double f64;
 
 typedef unsigned long long handle;
+
+enum class error_code {
+	success = 0,
+	generic_not_found,
+	error_opening_file,
+	line_not_found,
+};

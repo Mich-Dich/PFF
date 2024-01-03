@@ -26,8 +26,6 @@
 #include <iomanip>
 
 
-#define APP_NAMESPACE PFF
-
 #ifdef PFF_PLATFORM_WINDOWS
 
 	//#include <Windows.h>
@@ -37,7 +35,6 @@
 	#error PFF only suports windows
 #endif
 
-#define BIT(x) (1 << x)
 
 
 // ======================================  utils  ======================================
@@ -47,20 +44,31 @@
 #include "util/io/config.h"
 
 
-#define DELETE_COPY(type_name)				type_name(const type_name&) = delete;							\
+#define APP_NAMESPACE PFF
+
+#define BIT(x) (1 << x)
+
+#define DELETE_COPY(type_name)				type_name(const type_name&) = delete;								\
 											type_name& operator=(const type_name&) = delete
 
-#define DELETE_COPY_MOVE(classname)			classname(const classname&) = delete;							\
-											classname& operator=(const classname&) = delete;						\
-											classname(classname&&) = delete;								\
+#define DELETE_COPY_MOVE(classname)			classname(const classname&) = delete;								\
+											classname& operator=(const classname&) = delete;					\
+											classname(classname&&) = delete;									\
 											classname& operator=(classname&&) = delete
 
-
-#define GENERATE_CLASS_BODY					static const char* getClassName() { \
-												static const std::string className = __PRETTY_FUNCTION__; \
-												size_t start = className.find("class ") + 6; \
-												size_t end = className.find(" ", start); \
-												return className.substr(start, end - start).c_str(); \
+#define GENERATE_CLASS_BODY					static const char* getClassName() {									\
+												static const std::string className = __PRETTY_FUNCTION__;		\
+												size_t start = className.find("class ") + 6;					\
+												size_t end = className.find(" ", start);						\
+												return className.substr(start, end - start).c_str();			\
 											}
 
 #define STD_BIND_EVENT_FN(x)				std::bind(&x, this, std::placeholders::_1)
+
+template <typename T>
+T string_to_num(const std::string& str) {
+	std::istringstream ss(str);
+	T num{};
+	ss >> num;
+	return num;
+}
