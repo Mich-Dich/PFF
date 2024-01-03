@@ -60,7 +60,7 @@
     <ClInclude Include="src\util\data_types.h">
       <Filter>util</Filter>
     </ClInclude>
-    <ClInclude Include="src\util\io_handler.h">
+    <ClInclude Include="src\util\io\io_handler.h">
       <Filter>util</Filter>
     </ClInclude>
     <ClInclude Include="src\util\logger.h">
@@ -72,6 +72,7 @@
     <ClInclude Include="src\util\util.h">
       <Filter>util</Filter>
     </ClInclude>
+    <ClInclude Include="src\util\io\config.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="src\application.cpp" />
@@ -93,11 +94,12 @@
     <ClCompile Include="src\engine\render\vulkan_renderer.cpp">
       <Filter>engine\render</Filter>
     </ClCompile>
-    <ClCompile Include="src\util\io_handler.cpp">
+    <ClCompile Include="src\util\io\io_handler.cpp">
       <Filter>util</Filter>
     </ClCompile>
     <ClCompile Include="src\util\logger.cpp">
       <Filter>util</Filter>
     </ClCompile>
+    <ClCompile Include="src\util\io\config.cpp" />
   </ItemGroup>
 </Project>

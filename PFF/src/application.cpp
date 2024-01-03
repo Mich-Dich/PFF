@@ -22,6 +22,8 @@ namespace PFF {
 		CORE_ASSERT(!s_instance, "", "Application already exists");
 		s_instance = this;
 
+		config::init();
+
 		// TODO: load WindowAttributes from config file
 		WindowAttributes loc_window_att = WindowAttributes();
 		m_window = std::make_shared<pff_window>(loc_window_att);			// Can be called after inital setup like [compiling shaders]

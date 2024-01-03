@@ -35,51 +35,57 @@ namespace APP_NAMESPACE {
 			Fatal = 5,
 			NUM_SEVERITIES = 6
 		};
-		static const char* SeperatorStringBig = "====================================================================================================================";
-		static const char* SeperatorStringSmall = "--------------------------------------------------------------------------------------------------------------------";
 
-		PFF_API int Init(const char* LogCoreFile, const char* LogFile, const char* Format);
+		// Initializes the logging system.
+		// @param [Format] The initial log format.
+		// @return [bool] Returns true if the initialization is successful, false otherwise.
+		PFF_API bool Init(const std::string& format);
 
-		/*  Formating the LogMessages can be customised with the following tags
-			to format all following Log Messages use: set_Formating(char* format);
-			e.g. set_Formating("$B[$T] $L [$F]  $C$E")  or set_Formating("$BTime:[$M $S] $L $E ==> $C")
+		// Formating the LogMessages can be customised with the following tags
+		// to format all following Log Messages use: set_Formating(char* format);
+		// e.g. set_Formating("$B[$T] $L [$F]  $C$E")  or set_Formating("$BTime:[$M $S] $L $E ==> $C")
+		// 
+		// @param $T		Time				hh:mm:ss
+		// @param $H		Hour				hh
+		// @param $M		Minute				mm
+		// @param $S		Secunde				ss
+		// @param $J		MilliSecunde			mm
+		// @param 
+		// @param $N		Date				yyyy:mm:dd:
+		// @param $Y		Date Year			yyyy
+		// @param $O		Date Month			mm
+		// @param $D		Date Day			dd
+		// @param 
+		// @param $F		Func. Name			application::main, math::foo
+		// @param $P		Func. Name			main, foo
+		// @param $A		File Name			C:/Porject/main.c C:/Porject/foo.c
+		// @param $K		shortend File Name		Porject/main.c Porject/foo.c
+		// @param $I		only File Name			main.c foo.c
+		// @param $G		Line				1, 42
+		// @param 
+		// @param $L		LogLevel				[TRACE], [DEBUG] … [FATAL]
+		// @param $X		Alienment			add space for "INFO" & "WARN"
+		// @param $B		Color Begin			from here the color starts
+		// @param $E		Color End			from here the color ends
+		// @param $C		Text				Formated Message with variables
+		// @param $Z		New Line			Adds a new Line to the log
+		PFF_API void Set_Format(const std::string& format);
 
-		$T		Time				hh:mm:ss
-		$H		Hour				hh
-		$M		Minute				mm
-		$S		Secunde				ss
-		$J		MilliSecunde		mm
-
-		$N		Date				yyyy:mm:dd:
-		$Y		Date Year			yyyy
-		$O		Date Month			mm
-		$D		Date Day			dd
-
-		$F		Func. Name			application::main, math::foo
-		$P		Func. Name			main, foo
-		$A		File Name           C:\Porject\main.c C:\Porject\foo.c
-		$K		shortend File Name  Porject\main.c Porject\foo.c
-		$I		only File Name      main.c foo.c
-		$G		Line				1, 42
-
-		$L		LogLevel			[TRACE], [DEBUG] … [FATAL]
-		$X		Alienment			add space for "INFO" & "WARN"
-		$B		Color Begin			from here the color starts
-		$E		Color End			from here the color ends
-		$C		Text				Formated Message with variables
-		$Z		New Line			Adds a new Line to the log*/
-		void Set_Format(const char* newFormat);
-		void Use_Format_Backup();
+		//Restores the previous log message format
+		//	@brief This function swaps the current log message format with the previously stored backup.
+		//	It is useful for reverting to a previous format after temporary changes.
+		PFF_API void Use_Format_Backup();
 
 		// Define witch log levels should be written to log file directly and witch should be buffered
-		//  0    =>   write all logs directly to log file
-		//  1    =>   buffer: TRACE
-		//  2    =>   buffer: TRACE + DEBUG
-		//  3    =>   buffer: TRACE + DEBUG + INFO
-		//  4    =>   buffer: TRACE + DEBUG + INFO + WARN
-		void set_buffer_Level(int newLevel);
+		// @param 0    =>   write all logs directly to log file
+		// @param 1    =>   buffer: TRACE
+		// @param 2    =>   buffer: TRACE + DEBUG
+		// @param 3    =>   buffer: TRACE + DEBUG + INFO
+		// @param 4    =>   buffer: TRACE + DEBUG + INFO + WARN
+		PFF_API void set_buffer_Level(int newLevel);
+
+
 		void LogMsg(LogMsgSeverity level, const char* fileName, const char* funcName, int line, const char* message);
-		const char* extractFileName(const char* filePath);
 
 
 		class PFF_API LogMessage : public std::ostringstream {
@@ -141,11 +147,11 @@ namespace APP_NAMESPACE {
 	#if CORE_LOG_LEVEL_ENABLED >= 4
 	#define CORE_LOG_Trace(message)				{ APP_NAMESPACE::Logger::LogMessage(APP_NAMESPACE::Logger::LogMsgSeverity::Trace,__FILE__,__FUNCTION__,__LINE__).flush() << message; }
 	#define CORE_LOG_SEPERATOR					APP_NAMESPACE::Logger::Set_Format("$C$Z");										\
-													GL_CORE_LOG_Trace(APP_NAMESPACE::Logger::SeperatorStringSmall)				\
+													CORE_LOG_Trace(APP_NAMESPACE::Logger::SeperatorStringSmall)				\
 													APP_NAMESPACE::Logger::Use_Format_Backup();
 
 	#define CORE_LOG_SEPERATOR_BIG				APP_NAMESPACE::Logger::Set_Format("$C$Z");										\
-													GL_CORE_LOG_Trace(APP_NAMESPACE::Logger::SeperatorStringBig)				\
+													CORE_LOG_Trace(APP_NAMESPACE::Logger::SeperatorStringBig)				\
 													APP_NAMESPACE::Logger::Use_Format_Backup();
 	#else
 	#define CORE_LOG_Trace(message, ...)		{;}

@@ -1,6 +1,34 @@
 # PFF - Procedurally Focused Framework
 
-Introducing PFF (Procedurally Focused Framework), a powerful 2D game engine crafted in C, designed with a primary focus on harnessing the potential of procedural generation. Primarily developed for Windows, PFF is poised to extend its capabilities to Linux in the future, aspiring to offer a versatile and dynamic platform for game development.
+PFF (Procedurally Focused Framework) is a powerful 2D/3D game engine crafted in C/C++, designed with a primary focus on harnessing the potential of procedural generation. Primarily developed for Windows, PFF is poised to extend its capabilities to Linux in the future, aspiring to offer a versatile and dynamic platform for game development.
+
+## Getting Started
+To get started with PFF, follow these simple steps:
+
+1. Clone the repository using:
+   ```
+   git clone --recursive https://github.com/Mich-Dich/PFF
+   ```
+
+2. Execute the following file to create a VS 2022 solution:
+   ```
+   AutoGenerateSolution.bat
+   ```
+
+## Dependencies
+PFF relies on the following dependencies:
+
+- [premake5](https://premake.github.io/)
+- [glfw](https://www.glfw.org/)
+- [ImGui](https://github.com/ocornut/imgui)
+- [glm]
+
+-[Vulkan]
+Make sure you install Vulkan SDK and update the path in [premake5.lua]
+
+## Usage
+You can start using PFF by either utilizing the provided project, [Sandbox], or creating your own project and linking it by adjusting the `premake5.lua` file. 
+Your game (main class) has to inherit from the [application] class.
 
 ## Procedural Generation Unleashed
 
@@ -14,9 +42,20 @@ At the heart of PFF lies its commitment to procedural generation, an innovative 
 
 3. **Randomized Assets:** Generate diverse and unique assets, such as textures, models, and environments, promoting diversity and creativity in game design.
 
-4. **Efficient Resource Management:** Procedural generation minimizes the need for static, pre-designed assets, resulting in optimized resource utilization and smaller game file sizes.
+4. **Efficient Resource Management:** Procedural generation minimizes the need for static, pre-designed assets.
 
 5. **Adaptive Challenges:** Generate challenges and obstacles based on player skill level or in-game progression, ensuring a balanced and responsive difficulty curve.
+
+### Procedurally Focused Systems:
+
+#### 1. Procedural Animation:
+   - Dynamically generate character animations, offering fluid and realistic movements that adapt to in-game scenarios.
+
+#### 2. Procedural Sound Design:
+   - Create immersive audio experiences through algorithmic sound generation, enhancing the atmosphere and realism of the game environment.
+
+#### 3. Procedural Mesh Generation:
+   - Generate diverse and complex 3D meshes on-the-fly, allowing for unique and intricate designs without the need for pre-made assets.
 
 **Examples:**
 - **Terrain Generation:** Procedurally generate realistic terrains with varying elevations, landscapes, and biomes.
@@ -24,57 +63,30 @@ At the heart of PFF lies its commitment to procedural generation, an innovative 
 - **Weather Systems:** Generate diverse weather conditions, affecting gameplay and immersion.
 
 By leveraging procedural generation, PFF empowers game developers to break free from conventional constraints, fostering creativity, and delivering unique and immersive gaming experiences. Explore the endless possibilities with PFF! 🌐✨
-## Features
 
-### Input System
-PFF boasts a flexible input system capable of handling various input types, including boolean, 1-axis, and 2-axis. The system supports multiple trigger events such as key down, key up, key tap, and key hold, as well as,  several modifiers including negate, smooth, and normalize vec2.
+## Roadmap
+PFF's development roadmap outlines key focus areas:
 
-## Planned Features
+### General Systems
+- Editor
+- Launcher
+- Asset manager
 
-### Editor
-A comprehensive editor is in the pipeline to enhance the development experience within PFF.
+### Procedural Systems
+- Animation
+- Sound
+- Mesh generation
 
-### Physics Engine
-PFF plans to incorporate a robust physics engine to facilitate realistic in-game interactions.
-
-### Enemy AI System
-An advanced Enemy AI System is on the horizon to bring life to your game environments.
-
-## Inspiration
-
-The initial inspiration for PFF came from the [engine-from-scratch](https://github.com/Falconerd/engine-from-scratch) GitHub repository. We express our gratitude to the contributors of that project.
-
-## Project Structure
-
-- **PFF (Engine)**
-  - Contains the entire source code for the engine.
-  - Houses 3rd party code used in the engine.
-
-- **Sandbox**
-  - Starter project bundled with the engine for quick setup.
-
-- **/bin and /bin-int**
-  - Folders for compiled results.
-
-- **/vendor**
-  - Contains 3rd party code shared across all projects.
-
-- **AutoGenerateSolution.bat**
-  - Build script for generating the Visual Studio 2022 solution.
-
-## Build System
-
-PFF utilizes the premake5 build system to generate the Visual Studio 2022 solution. To generate the solution, simply execute the `AutoGenerateSolution.bat` script.
-
-## Contributing
-Contributions to PFF are welcome! If you have ideas for improvements, new features, or find any issues, please open an issue or submit a pull request.
+Feel free to contribute and help shape the future of PFF. Thank you for your interest and support!
 
 ## Acknowledgments
+This project ia a significant undertaking, and I owe a debt of gratitude to the following individuals and projects:
 
-Special thanks to the [engine-from-scratch](https://github.com/Falconerd/engine-from-scratch) repository for providing initial inspiration.
+- [TheCherno](https://github.com/TheCherno)
+- [Falconerd/engine-from-scratch](https://github.com/Falconerd/engine-from-scratch)
 
 ## License
 
-PFF is published under the [Apache License 2.0](LICENSE). Feel free to explore, contribute, and build upon this framework.
+PFF is open-source under the [Apache License 2.0](LICENSE). Feel free to explore, contribute, and build upon this framework.
 
 Happy coding with PFF! 🚀

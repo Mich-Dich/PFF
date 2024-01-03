@@ -1,6 +1,0 @@
-[[90m18:05:38:719[97m[40m] [[90mTRACE - C:\CustomGameEngine\PFF\PFF\src\engine\platform\window.cpp - PFF::window::window:27[97m[40m] Creating window [Gluttony width: 1280  height: 720]
-[[90m18:05:38:765[97m[40m] [[90mTRACE - C:\CustomGameEngine\PFF\PFF\src\engine\platform\window.cpp - PFF::window::window:31[97m[40m] GLFW initialized
-[[90m18:05:39:014[97m[40m] [[90mTRACE - C:\CustomGameEngine\PFF\PFF\src\engine\platform\window.cpp - PFF::window::~window:131[97m[40m] Destroying window
-[[90m18:11:13:892[97m[40m] [[90mTRACE - C:\CustomGameEngine\PFF\PFF\src\engine\platform\window.cpp - PFF::window::window:27[97m[40m] Creating window [Gluttony width: 1280  height: 720]
-[[90m18:11:13:930[97m[40m] [[90mTRACE - C:\CustomGameEngine\PFF\PFF\src\engine\platform\window.cpp - PFF::window::window:31[97m[40m] GLFW initialized
-[[90m18:11:14:146[97m[40m] [[90mTRACE - C:\CustomGameEngine\PFF\PFF\src\engine\platform\window.cpp - PFF::window::~window:131[97m[40m] Destroying window

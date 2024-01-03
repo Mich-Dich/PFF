@@ -1,15 +1,12 @@
 
-    // from logger.h
-    #include <list>
-    #include <map>
-    #include <type_traits>
-
-    // from logger.cpp
-    #include <stdio.h>
-    #include <cstdarg>
-    #include <fstream>
-    #include <iomanip>
-    #include <Windows.h>
+#include <list>
+#include <map>
+#include <type_traits>
+#include <stdio.h>
+#include <cstdarg>
+#include <fstream>
+#include <iomanip>
+#include <Windows.h>
 
 #include "logger.h"
 
@@ -23,17 +20,18 @@ namespace APP_NAMESPACE {
 
     namespace Logger {
 
+        static const char* SeperatorStringBig = "====================================================================================================================";
+        static const char* SeperatorStringSmall = "--------------------------------------------------------------------------------------------------------------------";
         static const char* SeverityNames[LogMsgSeverity::NUM_SEVERITIES]{ "TRACE", "DEBUG", "INFO", "WARN", "ERROR", "FATAL" };
-        static const char* LogFileName = "logFile.txt";
-        static const char* LogCoreFileName = "logFileCORE.txt";
-        static const char* LogMessageFormat = "[$B$T:$J$E] [$B$L$X - $A - $F:$G$E] $C$Z";
-        static const char* LogMessageFormat_BACKUP = "$B[$T] $L$E - $C";
-        static const char* displayed_Path_Start = "VulkanTest\\";
-        static const char* displayed_FuncName_Start = "Gluttony::";
-        static const char* ConsoleRESET = "\x1b[97m\x1b[40m";
+        static std::string LogFileName = "logFile.txt";
+        static std::string LogCoreFileName = "logFileCORE.txt";
+        static std::string LogMessageFormat = "[$B$T:$J$E] [$B$L$X - $A - $F:$G$E] $C$Z";
+        static std::string LogMessageFormat_BACKUP = "$B[$T] $L$E - $C";
+        static std::string displayed_Path_Start = "VulkanTest\\";
+        static std::string displayed_FuncName_Start = "Gluttony::";
+        static std::string ConsoleRESET = "\x1b[97m\x1b[40m";
         static int Buffer_Level;
         static int LegLevelToBuffer = 3;
-
         static const char* ConsoleColorTable[LogMsgSeverity::NUM_SEVERITIES] = {
           "\x1b[90m",           // Gray
           "\x1b[94m",           // Blue
@@ -43,11 +41,17 @@ namespace APP_NAMESPACE {
           "\x1b[41m\x1b[30m",   // Red Background
         };
 
-        int Init(const char* LogCoreFile, const char* LogFile, const char* Format) {
+        // ================================================================= public functions =================================================================
 
-            LogCoreFileName = LogCoreFile;
-            LogFileName = LogFile;
-            Set_Format(Format);
+        bool Init(const std::string& format) {
+
+            std::string file_dir = "./logs";
+            io_handler::create_directory(file_dir);
+
+            LogCoreFileName = (file_dir + "/engine.log").c_str();
+            LogFileName = (file_dir + "/" + PROJECT_NAME + ".log").c_str();
+
+            Set_Format(format);
 
             std::ostringstream Init_Message;
             Init_Message.flush();
@@ -63,7 +67,7 @@ namespace APP_NAMESPACE {
                 << ":" << std::setw(2) << std::setfill('0') << TimeLoc.wSecond << "]"
                 << "  Log initialized" << std::endl
 
-                << "   Inital Log Format: '" << Format << "'" << std::endl << "   Enabled Log Levels: ";
+                << "   Inital Log Format: '" << format << "'" << std::endl << "   Enabled Log Levels: ";
 
             static const char* loc_level_str[6] = { "Fatal", " + Error", " + Warn", " + Info", " + Debug", " + Trace" };
             for (int x = 0; x < LOG_LEVEL_ENABLED + 2; x++)
@@ -73,30 +77,30 @@ namespace APP_NAMESPACE {
 
             // Write the content to a file
             std::ofstream outputFile(LogFileName);
-            if (outputFile.is_open()) {
-                outputFile << Init_Message.str() << std::endl;
-                outputFile.close();
-            } else {
+            if (!outputFile.is_open()) {
                 std::cerr << "Error: Unable to open the file for writing." << std::endl;
-                return -1;
+                return false;
             }
 
+            outputFile << Init_Message.str() << std::endl;
+            outputFile.close();
+
             CORE_LOG(Trace, "Subsystem [Logger] initialized");
-            //GL_CORE_LOG_SEPERATOR_BIG;
-            return 0;
+            CORE_LOG_SEPERATOR_BIG;
+            return true;
         }
 
         // change Format for all following messages
-        void Set_Format(const char* newFormat) {
+        void Set_Format(const std::string& format) {
 
             LogMessageFormat_BACKUP = LogMessageFormat;
-            LogMessageFormat = newFormat;
+            LogMessageFormat = format;
         }
 
         // Use previous Format
         void Use_Format_Backup() {
 
-            const char* buffer = LogMessageFormat;
+            std::string buffer = LogMessageFormat;
             LogMessageFormat = LogMessageFormat_BACKUP;
             LogMessageFormat_BACKUP = buffer;
         }
@@ -128,7 +132,7 @@ namespace APP_NAMESPACE {
 
 
             // Loop over Format string and build Final Message
-            int FormatLen = static_cast<int>(strlen(LogMessageFormat));
+            int FormatLen = static_cast<int>(LogMessageFormat.length());
             for (int x = 0; x < FormatLen; x++) {
 
                 if (LogMessageFormat[x] == '$' && x + 1 < FormatLen) {
@@ -240,6 +244,7 @@ namespace APP_NAMESPACE {
 
             LogMsg(m_Severity, m_FileName, m_FuncName, m_Line, str().c_str());
         }
+
     }
 }
 

@@ -1,8 +1,11 @@
 -- premake5.lua
 
+project_name = "Sandbox"										-- This is the name of your project
+outputs  = "%{cfg.buildcfg}-%{cfg.system}-%{cfg.architecture}"		-- output direactory of complie results
+
 workspace "PFF"
 	platforms "x64"
-    startproject "Sandbox" -- Replace with the actual project name
+    startproject (project_name)
 
 	configurations
 	{
@@ -10,16 +13,10 @@ workspace "PFF"
 		"Release"
 	}
 
-	outputs  = "%{cfg.buildcfg}-%{cfg.system}-%{cfg.architecture}"
-
-	-- Include directories relative to root folder (solution directory)
-	IncludeDir = {}
-	IncludeDir["GLFW"] = "PFF/vendor/GLFW/include"
-	IncludeDir["glad"] = "PFF/vendor/glad/include"
+	IncludeDir = {}				-- Include directories relative to root folder (solution directory)
 	IncludeDir["ImGui"] = "PFF/vendor/ImGui"
+	IncludeDir["glm"] = "PFF/vendor/glm"
 
-	include "PFF/vendor/GLFW"
-	include "PFF/vendor/glad"
 	include "PFF/vendor/ImGui"
 
 project "PFF"
@@ -33,6 +30,14 @@ project "PFF"
 	-- pchheader "pffpch.h"
 	-- pchsource "PFF/src/pffpch.cpp"
 
+	defines
+	{
+		"ENGINE_NAME=PFF",
+		'PROJECT_NAME="' .. project_name .. '"',
+		"PFF_INSIDE_ENGINE",
+		"GLFW_INCLUDE_NONE",
+	}
+
 	files
     {
 		"%{prj.name}/src/**.h",
@@ -42,29 +47,23 @@ project "PFF"
 	includedirs
 	{
 		"%{prj.name}/src",
+		"PFF/vendor/glm",
+		"PFF/vendor/glfw-3.3.8.bin.WIN64/include",
 		
 		"C:/VulkanSDK/1.3.250.1/Include", -- CHANGE THIS
-		"C:/Users/mally/Documents/Visual Studio 2022/Libraries/glm",
-		"C:/Users/mally/Documents/Visual Studio 2022/Libraries/glfw-3.3.8.bin.WIN64/include"
-		
-		--"%{IncludeDir.GLFW}",
-		--"%{IncludeDir.glad}",
-		-- "%{IncludeDir.ImGui}"
 	}
 	
 	libdirs 
 	{
-		"C:/VulkanSDK/1.3.250.1/Lib",
-		"C:/Users/mally/Documents/Visual Studio 2022/Libraries/glfw-3.3.8.bin.WIN64/lib-vc2022",
+		"PFF/vendor/glfw-3.3.8.bin.WIN64/lib-vc2022",
+
+		"C:/VulkanSDK/1.3.250.1/Lib", -- CHANGE THIS
 	}
 
 	links 
 	{
 		"vulkan-1.lib",
 		"glfw3.lib",
-		--"GLFW",
-		--"glad",
-		--"opengl32.lib",
 	}
 
 	filter "system:windows"
@@ -72,25 +71,22 @@ project "PFF"
 		defines { "_CRT_STDIO_ISO_WIDE_SPECIFIERS" } -- Enable C17 features for Visual Studio
 		staticruntime "On"
 		systemversion "latest"
-
-        -- Add /NODEFAULTLIB:LIBCMTD to the linker options
+		
         linkoptions 
 		{
 			 "/NODEFAULTLIB:LIBCMTD",
-			 "/NODEFAULTLIB:MSVCRT"
+			 "/NODEFAULTLIB:MSVCRT",
 		}
 
 		defines
 		{
 			"PFF_PLATFORM_WINDOWS",
-			"PFF_INSIDE_ENGINE",
-			"GLFW_INCLUDE_NONE"
 		}
 
 		postbuildcommands
 		{
-			"{MKDIR} ../bin/" .. outputs .. "/Sandbox",
-			"{COPY} %{cfg.buildtarget.relpath} ../bin/" .. outputs  .. "/Sandbox",
+			"{MKDIR} ../bin/" .. outputs .. "/" .. project_name,
+			"{COPY} %{cfg.buildtarget.relpath} ../bin/" .. outputs  .. "/" .. project_name,
 		}
 
 	filter "configurations:Debug"
@@ -103,33 +99,34 @@ project "PFF"
 		defines "PFF_RELEASE"
 		optimize "On"
 
-project "Sandbox"
-	location "Sandbox"
+project (project_name)
+	location (project_name)
 	kind "ConsoleApp"
 	language "C++"
 
 	targetdir ("bin/" .. outputs  .. "/%{prj.name}")
 	objdir ("bin-int/" .. outputs  .. "/%{prj.name}")
 
+	defines
+	{
+		"ENGINE_NAME=PFF",
+		"PROJECT_NAME=%{project_name}",
+	}
+
 	files
 	{
 		"%{prj.name}/src/**.h",
 		"%{prj.name}/src/**.cpp",
 	}
+	
 	includedirs
 	{
 		"PFF/src",
-		--"%{IncludeDir.GLFW}",
-		--"%{IncludeDir.glad}",
-		-- "%{IncludeDir.ImGui}"
 	}
 
 	links
 	{
 		"PFF",
-		--"GLFW",
-		--"glad",
-		--"opengl32.lib",
 	}
 
 	filter "system:windows"
@@ -145,10 +142,10 @@ project "Sandbox"
 
 	filter "configurations:Debug"
 		buildoptions "/MDd"
-		defines "SANDBOX_DEBUG"
+		defines "GAME_DEBUG"
 		symbols "On"
 
 	filter "configurations:Release"
 		buildoptions "/MD"
-		defines "SANDBOX_RELEASE"
+		defines "GAME_RELEASE"
 		optimize "On"

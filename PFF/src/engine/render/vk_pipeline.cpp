@@ -119,11 +119,12 @@ namespace PFF {
 		CORE_ASSERT_S(config.pipeline_layout != VK_NULL_HANDLE);
 		CORE_ASSERT_S(config.render_pass != VK_NULL_HANDLE);
 
-		auto vertCode = io_handler::read_file(vert_file_path);
-		create_shader_module(vertCode, &m_vert_shader_module);
+		std::vector<char> shader_code;
+		CORE_ASSERT_S(io_handler::read_file(vert_file_path, shader_code));
+		create_shader_module(shader_code, &m_vert_shader_module);
 
-		auto fragCode = io_handler::read_file(frag_file_path);
-		create_shader_module(fragCode, &m_frag_shader_module);
+		CORE_ASSERT_S(io_handler::read_file(frag_file_path, shader_code));
+		create_shader_module(shader_code, &m_frag_shader_module);
 
 		VkPipelineShaderStageCreateInfo shader_stage_CI[2]{};
 		shader_stage_CI[0].sType = VK_STRUCTURE_TYPE_PIPELINE_SHADER_STAGE_CREATE_INFO;
