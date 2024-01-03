@@ -50,6 +50,7 @@ namespace PFF {
 		FORCEINLINE bool IsVSync() { return m_data.VSync; }
 		FORCEINLINE u32 get_width() { return m_data.width; }
 		FORCEINLINE u32 get_height() { return m_data.height; }
+		FORCEINLINE WindowAttributes get_attributes() { return m_data; }
 		
 	private:
 		

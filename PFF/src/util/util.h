@@ -66,9 +66,19 @@
 #define STD_BIND_EVENT_FN(x)				std::bind(&x, this, std::placeholders::_1)
 
 template <typename T>
-T string_to_num(const std::string& str) {
+T str_to_num(const std::string& str) {
 	std::istringstream ss(str);
 	T num{};
 	ss >> num;
 	return num;
 }
+
+template <typename T>
+std::string num_to_str(const T& num) {
+	std::ostringstream oss;
+	oss << num;
+	return oss.str();
+}
+
+FORCEINLINE bool str_to_bool(const std::string& string) { return(string == "true") ? true : false; }
+FORCEINLINE const char* bool_to_str(bool boolean) { return boolean ? "true" : "false"; }

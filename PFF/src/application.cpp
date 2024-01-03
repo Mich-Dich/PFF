@@ -24,17 +24,12 @@ namespace PFF {
 
 		config::init();
 
-		std::string buffer = "6665";
-		CORE_LOG(Info, "buffer value: " << buffer);
-		config::check_for_configuration(config::config_file_types::default_engine, "database", "test", buffer, false);
-		CORE_LOG(Info, "buffer value: " << buffer);
-
-		exit(EXIT_SUCCESS);
-
 		// TODO: load WindowAttributes from config file
 		WindowAttributes loc_window_att = WindowAttributes();
-
-		// WindowAttributes(const std::string title = "PFF - Sandbox", const u32 width = 1280, const  u32 height = 720, const  bool VSync = false, const EventCallbackFn & callback = nullptr)
+		CKECK_FOR_CONFIG_STR(default_editor, loc_window_att.title, "WindowAttributes", "title", false);
+		CKECK_FOR_CONFIG_NUM(default_editor, loc_window_att.width, u32, "WindowAttributes", "width", false);
+		CKECK_FOR_CONFIG_NUM(default_editor, loc_window_att.height, u32, "WindowAttributes", "height", false);
+		CKECK_FOR_CONFIG_BOOL(default_editor, loc_window_att.VSync, "WindowAttributes", "VSync", false);
 
 		m_window = std::make_shared<pff_window>(loc_window_att);			// Can be called after inital setup like [compiling shaders]
 		m_window->SetEventCallback(STD_BIND_EVENT_FN(application::on_event));
@@ -44,7 +39,15 @@ namespace PFF {
 
 	application::~application() {
 
-		LOG(Info, "Destroying vk_pipeline");
+		m_vulkan_renderer.reset();
+
+		WindowAttributes loc_window_att = m_window->get_attributes();
+		CKECK_FOR_CONFIG_STR(default_editor, loc_window_att.title, "WindowAttributes", "title", true);
+		CKECK_FOR_CONFIG_NUM(default_editor, loc_window_att.width, u32, "WindowAttributes", "width", true);
+		CKECK_FOR_CONFIG_NUM(default_editor, loc_window_att.height, u32, "WindowAttributes", "height", true);
+		CKECK_FOR_CONFIG_BOOL(default_editor, loc_window_att.VSync, "WindowAttributes", "VSync", true);
+		m_window.reset();
+
 	}
 
 	void application::on_event(event& event) {
