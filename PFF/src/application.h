@@ -1,7 +1,7 @@
 #pragma once
 
 #include "engine/game_objects/game_object.h"
-#include "engine/map/game_map.h"
+//#include "engine/map/game_map.h"
 
 namespace PFF {
 
@@ -9,6 +9,7 @@ namespace PFF {
 	class vulkan_renderer;
 	class basic_mesh;
 	class event;
+	class game_map;
 
 	class PFF_API application {
 	public:

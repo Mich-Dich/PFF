@@ -11,6 +11,7 @@
 
 #include "engine/platform/pff_window.h"
 #include "engine/render/vulkan_renderer.h"
+#include "engine/map/game_map.h"
 
 #include "application.h"
 

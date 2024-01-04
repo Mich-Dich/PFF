@@ -10,7 +10,6 @@ struct VkCommandBuffer_T;
 struct VkVertexInputBindingDescription;
 struct VkVertexInputAttributeDescription;
 
-
 namespace PFF {
 
 	class vk_device;
