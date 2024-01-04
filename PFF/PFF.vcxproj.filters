@@ -41,7 +41,7 @@
     <ClInclude Include="src\engine\Events\mouse_event.h">
       <Filter>engine\Events</Filter>
     </ClInclude>
-    <ClInclude Include="src\engine\game_object.h">
+    <ClInclude Include="src\engine\game_objects\game_object.h">
       <Filter>engine</Filter>
     </ClInclude>
     <ClInclude Include="src\engine\geometry\basic_mesh.h">
@@ -84,6 +84,7 @@
     <ClInclude Include="src\util\util.h">
       <Filter>util</Filter>
     </ClInclude>
+    <ClInclude Include="src\engine\map\game_map.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="src\application.cpp" />
@@ -117,5 +118,7 @@
     <ClCompile Include="src\util\pffpch.cpp">
       <Filter>util</Filter>
     </ClCompile>
+    <ClCompile Include="src\engine\game_objects\game_object.cpp" />
+    <ClCompile Include="src\engine\map\game_map.cpp" />
   </ItemGroup>
 </Project>

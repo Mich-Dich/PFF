@@ -86,6 +86,9 @@ namespace PFF {
 				update(m_delta_time);	// potentally remove  (like UNREAL)
 				render(m_delta_time);	// potentally remove  (like UNREAL)
 				m_vulkan_renderer->draw_frame();
+
+
+
 			}
 
 		m_vulkan_renderer->wait_Idle();
