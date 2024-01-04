@@ -48,6 +48,7 @@ namespace PFF {
 
 		glfwWindowHint(GLFW_CLIENT_API, GLFW_NO_API);
 		glfwWindowHint(GLFW_RESIZABLE, GLFW_TRUE);
+
 		m_Window = glfwCreateWindow(static_cast<int>(m_data.width), static_cast<int>(m_data.height), m_data.title.c_str(), nullptr, nullptr);
 
 		CORE_LOG(Trace, "Creating window [" << m_data.title << " width: " << m_data.width << "  height: " << m_data.height << "]");
@@ -70,6 +71,18 @@ namespace PFF {
 			Data.height = static_cast<u32>(height);
 			window_resize_event event(Data.width, Data.height);
 			Data.EventCallback(event);
+		});
+
+		glfwSetWindowFocusCallback(m_Window, [](GLFWwindow* window, int focused) {
+
+			WindowAttributes& data = *(WindowAttributes*)glfwGetWindowUserPointer(window);
+			window_focus_event event(focused == GLFW_TRUE);
+			data.EventCallback(event);
+			if (focused == GLFW_TRUE) {
+				CORE_LOG(Trace, "Window entered fullscreen mode");
+			} else {
+				CORE_LOG(Trace, "Window exited fullscreen mode");
+			}
 		});
 
 		glfwSetWindowCloseCallback(m_Window, [](GLFWwindow* window) {

@@ -7,6 +7,7 @@
 
 #define GLM_FORCE_RADIANS
 #define GLM_FORCE_DEPTH_ZERO_TO_ONE
+#include <glm/glm.hpp>
 #include <glm/vec4.hpp>
 #include <glm/mat4x4.hpp>
 
@@ -23,11 +24,16 @@
 
 namespace PFF {
 
+	struct simple_push_constant_data {
+		glm::vec2 offset;
+		alignas(16) glm::vec3 color;
+	};
+
 	// ============================================================================ setup ============================================================================
 
 	vulkan_renderer::vulkan_renderer(std::shared_ptr<pff_window> window)
 		: m_window( window ), m_active( true ), needs_to_resize(false) {
-		
+
 		m_device = std::make_shared<vk_device>(m_window);
 		load_meshes();
 		create_pipeline_layout();
@@ -143,6 +149,17 @@ namespace PFF {
 
 	void vulkan_renderer::recordCommandBuffer(int32 image_index) {
 
+		// DEV-ONLY
+		static int frame = 0;
+		static bool go_up = true;
+		if (go_up) {
+			go_up = frame < 1000;
+			frame++;
+		} else {
+			go_up = frame < -1000;
+			frame--;
+		}
+
 		VkCommandBufferBeginInfo begin_I{};
 		begin_I.sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_BEGIN_INFO;
 
@@ -156,7 +173,7 @@ namespace PFF {
 		render_pass_BI.renderArea.extent = m_swapchain->getSwapChainExtent();
 
 		std::array<VkClearValue, 2> clear_values{};
-		clear_values[0].color = { 0.2f, 0.2f, 0.2f, 1.0f };
+		clear_values[0].color = { 0.01f, 0.01f, 0.01f, 1.0f };
 		clear_values[1].depthStencil = { 1.0f,0 };
 		render_pass_BI.clearValueCount = static_cast<u32>(clear_values.size());
 		render_pass_BI.pClearValues = clear_values.data();
@@ -177,7 +194,17 @@ namespace PFF {
 
 		m_vk_pipeline->bind_commnad_buffers(m_command_buffers[image_index]);
 		m_testmodel->bind(m_command_buffers[image_index]);
-		m_testmodel->draw(m_command_buffers[image_index]);
+
+		for (u16 x = 0; x < 4; x++) {
+			simple_push_constant_data PCD{};
+			PCD.offset = { 0.f + frame * 0.0005f, -0.4f + x * 0.25f };
+			PCD.color = { 0.f , 0.f , 0.2f + 0.2f * x };
+
+			vkCmdPushConstants(m_command_buffers[image_index], m_pipeline_layout, VK_SHADER_STAGE_VERTEX_BIT | VK_SHADER_STAGE_FRAGMENT_BIT, 0, sizeof(simple_push_constant_data), &PCD);
+
+			m_testmodel->draw(m_command_buffers[image_index]);
+		}
+
 
 		vkCmdEndRenderPass(m_command_buffers[image_index]);
 
@@ -200,12 +227,17 @@ namespace PFF {
 
 	void vulkan_renderer::create_pipeline_layout() {
 
+		VkPushConstantRange push_constant_range{};
+		push_constant_range.stageFlags = VK_SHADER_STAGE_VERTEX_BIT | VK_SHADER_STAGE_FRAGMENT_BIT;
+		push_constant_range.offset = 0;
+		push_constant_range.size = sizeof(simple_push_constant_data);
+
 		VkPipelineLayoutCreateInfo pipeline_layout_CI{};
 		pipeline_layout_CI.sType = VK_STRUCTURE_TYPE_PIPELINE_LAYOUT_CREATE_INFO;
 		pipeline_layout_CI.setLayoutCount = 0;
 		pipeline_layout_CI.pSetLayouts = nullptr;
-		pipeline_layout_CI.pushConstantRangeCount = 0;
-		pipeline_layout_CI.pPushConstantRanges = nullptr;
+		pipeline_layout_CI.pushConstantRangeCount = 1;
+		pipeline_layout_CI.pPushConstantRanges = &push_constant_range;
 
 		CORE_ASSERT_S(vkCreatePipelineLayout(m_device->get_device(), &pipeline_layout_CI, nullptr, &m_pipeline_layout) == VK_SUCCESS);
 	}

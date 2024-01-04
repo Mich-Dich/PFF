@@ -26,11 +26,10 @@ namespace PFF {
 
 		// TODO: load WindowAttributes from config file
 		WindowAttributes loc_window_att = WindowAttributes();
-		CKECK_FOR_CONFIG_STR(default_editor, loc_window_att.title, "WindowAttributes", "title", false);
-		CKECK_FOR_CONFIG_NUM(default_editor, loc_window_att.width, u32, "WindowAttributes", "width", false);
-		CKECK_FOR_CONFIG_NUM(default_editor, loc_window_att.height, u32, "WindowAttributes", "height", false);
-		CKECK_FOR_CONFIG_BOOL(default_editor, loc_window_att.VSync, "WindowAttributes", "VSync", false);
-
+		LOAD_CONFIG_STR(default_editor, loc_window_att.title, "WindowAttributes", "title");
+		LOAD_CONFIG_NUM(default_editor, loc_window_att.width, u32, "WindowAttributes", "width");
+		LOAD_CONFIG_NUM(default_editor, loc_window_att.height, u32, "WindowAttributes", "height");
+		LOAD_CONFIG_BOOL(default_editor, loc_window_att.VSync, "WindowAttributes", "VSync");
 		m_window = std::make_shared<pff_window>(loc_window_att);			// Can be called after inital setup like [compiling shaders]
 		m_window->SetEventCallback(STD_BIND_EVENT_FN(application::on_event));
 
@@ -42,10 +41,10 @@ namespace PFF {
 		m_vulkan_renderer.reset();
 
 		WindowAttributes loc_window_att = m_window->get_attributes();
-		CKECK_FOR_CONFIG_STR(default_editor, loc_window_att.title, "WindowAttributes", "title", true);
-		CKECK_FOR_CONFIG_NUM(default_editor, loc_window_att.width, u32, "WindowAttributes", "width", true);
-		CKECK_FOR_CONFIG_NUM(default_editor, loc_window_att.height, u32, "WindowAttributes", "height", true);
-		CKECK_FOR_CONFIG_BOOL(default_editor, loc_window_att.VSync, "WindowAttributes", "VSync", true);
+		SAVE_CONFIG_STR(default_editor, loc_window_att.title, "WindowAttributes", "title");
+		SAVE_CONFIG_NUM(default_editor, loc_window_att.width, u32, "WindowAttributes", "width");
+		SAVE_CONFIG_NUM(default_editor, loc_window_att.height, u32, "WindowAttributes", "height");
+		SAVE_CONFIG_BOOL(default_editor, loc_window_att.VSync, "WindowAttributes", "VSync");
 		m_window.reset();
 
 	}

@@ -1,6 +1,7 @@
 -- premake5.lua
 
 project_name = "Sandbox"										-- This is the name of your project
+vulkan_dir = "C:/VulkanSDK/1.3.250.1"
 outputs  = "%{cfg.buildcfg}-%{cfg.system}-%{cfg.architecture}"		-- output direactory of complie results
 
 workspace "PFF"
@@ -50,14 +51,13 @@ project "PFF"
 		"PFF/vendor/glm",
 		"PFF/vendor/glfw-3.3.8.bin.WIN64/include",
 		
-		"C:/VulkanSDK/1.3.250.1/Include", -- CHANGE THIS
+		vulkan_dir .. "/Include",
 	}
 	
 	libdirs 
 	{
 		"PFF/vendor/glfw-3.3.8.bin.WIN64/lib-vc2022",
-
-		"C:/VulkanSDK/1.3.250.1/Lib", -- CHANGE THIS
+		vulkan_dir .. "/Lib",
 	}
 
 	links 
@@ -138,6 +138,12 @@ project (project_name)
 		defines
 		{
 			"PFF_PLATFORM_WINDOWS"
+		}
+
+		postbuildcommands
+		{
+			'"C:/VulkanSDK/1.3.250.1/Bin/glslc.exe" shaders/default.vert -o shaders/default.vert.spv',
+			'"C:/VulkanSDK/1.3.250.1/Bin/glslc.exe" shaders/default.frag -o shaders/default.frag.spv',
 		}
 
 	filter "configurations:Debug"

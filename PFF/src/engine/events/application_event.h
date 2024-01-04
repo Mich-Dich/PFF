@@ -30,6 +30,19 @@ namespace PFF {
 		u32 m_height;
 	};
 
+	class PFF_API window_focus_event : public event {
+
+	public:
+		window_focus_event(bool focus)
+			: m_focus(focus) {}
+
+		EVENT_CLASS_TYPE(WindowFocus);
+		EVENT_CLASS_CATEGORY(EC_Application);
+
+	private:
+		bool m_focus;
+	};
+
 	class PFF_API window_close_event : public event {
 
 	public:
@@ -63,7 +76,7 @@ namespace PFF {
 		app_update_event() {}
 
 		EVENT_CLASS_TYPE(AppUpdate)
-			EVENT_CLASS_CATEGORY(EC_Application)
+		EVENT_CLASS_CATEGORY(EC_Application)
 	};
 
 	class PFF_API app_render_event : public event {
@@ -72,6 +85,6 @@ namespace PFF {
 		app_render_event() {}
 
 		EVENT_CLASS_TYPE(AppRender)
-			EVENT_CLASS_CATEGORY(EC_Application)
+		EVENT_CLASS_CATEGORY(EC_Application)
 	};
 }

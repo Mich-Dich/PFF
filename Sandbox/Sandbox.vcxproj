@@ -71,6 +71,10 @@
       <SubSystem>Console</SubSystem>
       <GenerateDebugInformation>true</GenerateDebugInformation>
     </Link>
+    <PostBuildEvent>
+      <Command>"C:/VulkanSDK/1.3.250.1/Bin/glslc.exe" shaders/default.vert -o shaders/default.vert.spv
+"C:/VulkanSDK/1.3.250.1/Bin/glslc.exe" shaders/default.frag -o shaders/default.frag.spv</Command>
+    </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
     <ClCompile>
@@ -93,6 +97,10 @@
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
       <OptimizeReferences>true</OptimizeReferences>
     </Link>
+    <PostBuildEvent>
+      <Command>"C:/VulkanSDK/1.3.250.1/Bin/glslc.exe" shaders/default.vert -o shaders/default.vert.spv
+"C:/VulkanSDK/1.3.250.1/Bin/glslc.exe" shaders/default.frag -o shaders/default.frag.spv</Command>
+    </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="src\entry.cpp" />
