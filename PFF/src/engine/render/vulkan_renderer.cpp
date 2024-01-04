@@ -1,4 +1,6 @@
 
+#include "util/pffpch.h"
+
 // vulkan headers
 #include <vulkan/vulkan.h>
 
@@ -25,6 +27,7 @@
 namespace PFF {
 
 	struct simple_push_constant_data {
+		glm::mat2 transform{ 1.0f };
 		glm::vec2 offset;
 		alignas(16) glm::vec3 color;
 	};

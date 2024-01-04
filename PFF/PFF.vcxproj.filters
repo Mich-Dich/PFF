@@ -41,6 +41,9 @@
     <ClInclude Include="src\engine\Events\mouse_event.h">
       <Filter>engine\Events</Filter>
     </ClInclude>
+    <ClInclude Include="src\engine\game_object.h">
+      <Filter>engine</Filter>
+    </ClInclude>
     <ClInclude Include="src\engine\geometry\basic_mesh.h">
       <Filter>engine\geometry</Filter>
     </ClInclude>
@@ -70,6 +73,9 @@
       <Filter>util\io</Filter>
     </ClInclude>
     <ClInclude Include="src\util\logger.h">
+      <Filter>util</Filter>
+    </ClInclude>
+    <ClInclude Include="src\util\pffpch.h">
       <Filter>util</Filter>
     </ClInclude>
     <ClInclude Include="src\util\platform\windows_util.h">
@@ -106,6 +112,9 @@
       <Filter>util\io</Filter>
     </ClCompile>
     <ClCompile Include="src\util\logger.cpp">
+      <Filter>util</Filter>
+    </ClCompile>
+    <ClCompile Include="src\util\pffpch.cpp">
       <Filter>util</Filter>
     </ClCompile>
   </ItemGroup>

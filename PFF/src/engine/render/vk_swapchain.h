@@ -1,7 +1,5 @@
 #pragma once
 
-#include "util/util.h"
-
 // vulkan headers
 #include <vulkan/vulkan.h>
 

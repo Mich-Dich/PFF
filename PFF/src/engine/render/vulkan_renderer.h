@@ -1,7 +1,5 @@
 #pragma once
 
-#include "util/util.h"
-
 // DEV-ONLY
 #include "engine/render/vk_pipeline.h"
 

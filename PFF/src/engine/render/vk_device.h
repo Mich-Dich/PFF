@@ -1,7 +1,5 @@
 #pragma once
 
-#include "util/util.h"
-
 #include <vulkan/vulkan.h>
 
 

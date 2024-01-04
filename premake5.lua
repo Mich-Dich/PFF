@@ -2,7 +2,6 @@
 
 project_name = "Sandbox"										-- This is the name of your project
 vulkan_dir = "C:/VulkanSDK/1.3.250.1"
-outputs  = "%{cfg.buildcfg}-%{cfg.system}-%{cfg.architecture}"		-- output direactory of complie results
 
 workspace "PFF"
 	platforms "x64"
@@ -18,6 +17,8 @@ workspace "PFF"
 	IncludeDir["ImGui"] = "PFF/vendor/ImGui"
 	IncludeDir["glm"] = "PFF/vendor/glm"
 
+	outputs  = "%{cfg.buildcfg}-%{cfg.system}-%{cfg.architecture}"		-- output direactory of complie results
+
 	include "PFF/vendor/ImGui"
 
 project "PFF"
@@ -28,8 +29,8 @@ project "PFF"
 	targetdir ("bin/" .. outputs  .. "/%{prj.name}")
 	objdir ("bin-int/" .. outputs  .. "/%{prj.name}")
 
-	-- pchheader "pffpch.h"
-	-- pchsource "PFF/src/pffpch.cpp"
+	pchheader "util/pffpch.h"
+	pchsource "PFF/src/util/pffpch.cpp"
 
 	defines
 	{
@@ -106,6 +107,8 @@ project (project_name)
 
 	targetdir ("bin/" .. outputs  .. "/%{prj.name}")
 	objdir ("bin-int/" .. outputs  .. "/%{prj.name}")
+	
+	glslc = "../PFF/vendor/vulkan-glslc/glslc.exe"
 
 	defines
 	{
@@ -117,6 +120,8 @@ project (project_name)
 	{
 		"%{prj.name}/src/**.h",
 		"%{prj.name}/src/**.cpp",
+		"%{prj.name}/**.vert",
+		"%{prj.name}/**.frag",
 	}
 	
 	includedirs
@@ -142,8 +147,8 @@ project (project_name)
 
 		postbuildcommands
 		{
-			'"C:/VulkanSDK/1.3.250.1/Bin/glslc.exe" shaders/default.vert -o shaders/default.vert.spv',
-			'"C:/VulkanSDK/1.3.250.1/Bin/glslc.exe" shaders/default.frag -o shaders/default.frag.spv',
+			'"%{glslc}" shaders/default.vert -o shaders/default.vert.spv',
+			'"%{glslc}" shaders/default.frag -o shaders/default.frag.spv',
 		}
 
 	filter "configurations:Debug"

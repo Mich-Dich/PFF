@@ -56,7 +56,8 @@
   </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
     <ClCompile>
-      <PrecompiledHeader>NotUsing</PrecompiledHeader>
+      <PrecompiledHeader>Use</PrecompiledHeader>
+      <PrecompiledHeaderFile>util/pffpch.h</PrecompiledHeaderFile>
       <WarningLevel>Level3</WarningLevel>
       <PreprocessorDefinitions>ENGINE_NAME=PFF;PROJECT_NAME="Sandbox";PFF_INSIDE_ENGINE;GLFW_INCLUDE_NONE;_CRT_STDIO_ISO_WIDE_SPECIFIERS;PFF_PLATFORM_WINDOWS;PFF_DEBUG;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <AdditionalIncludeDirectories>src;vendor\glm;vendor\glfw-3.3.8.bin.WIN64\include;C:\VulkanSDK\1.3.250.1\Include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
@@ -82,7 +83,8 @@ IF EXIST ..\bin\Debug-windows-x86_64\PFF\PFF.dll\ (xcopy /Q /E /Y /I ..\bin\Debu
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
     <ClCompile>
-      <PrecompiledHeader>NotUsing</PrecompiledHeader>
+      <PrecompiledHeader>Use</PrecompiledHeader>
+      <PrecompiledHeaderFile>util/pffpch.h</PrecompiledHeaderFile>
       <WarningLevel>Level3</WarningLevel>
       <PreprocessorDefinitions>ENGINE_NAME=PFF;PROJECT_NAME="Sandbox";PFF_INSIDE_ENGINE;GLFW_INCLUDE_NONE;_CRT_STDIO_ISO_WIDE_SPECIFIERS;PFF_PLATFORM_WINDOWS;PFF_RELEASE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <AdditionalIncludeDirectories>src;vendor\glm;vendor\glfw-3.3.8.bin.WIN64\include;C:\VulkanSDK\1.3.250.1\Include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
@@ -117,6 +119,7 @@ IF EXIST ..\bin\Release-windows-x86_64\PFF\PFF.dll\ (xcopy /Q /E /Y /I ..\bin\Re
     <ClInclude Include="src\engine\Events\application_event.h" />
     <ClInclude Include="src\engine\Events\key_event.h" />
     <ClInclude Include="src\engine\Events\mouse_event.h" />
+    <ClInclude Include="src\engine\game_object.h" />
     <ClInclude Include="src\engine\geometry\basic_mesh.h" />
     <ClInclude Include="src\engine\platform\pff_window.h" />
     <ClInclude Include="src\engine\render\vk_device.h" />
@@ -128,6 +131,7 @@ IF EXIST ..\bin\Release-windows-x86_64\PFF\PFF.dll\ (xcopy /Q /E /Y /I ..\bin\Re
     <ClInclude Include="src\util\io\config.h" />
     <ClInclude Include="src\util\io\io_handler.h" />
     <ClInclude Include="src\util\logger.h" />
+    <ClInclude Include="src\util\pffpch.h" />
     <ClInclude Include="src\util\platform\windows_util.h" />
     <ClInclude Include="src\util\util.h" />
   </ItemGroup>
@@ -142,6 +146,9 @@ IF EXIST ..\bin\Release-windows-x86_64\PFF\PFF.dll\ (xcopy /Q /E /Y /I ..\bin\Re
     <ClCompile Include="src\util\io\config.cpp" />
     <ClCompile Include="src\util\io\io_handler.cpp" />
     <ClCompile Include="src\util\logger.cpp" />
+    <ClCompile Include="src\util\pffpch.cpp">
+      <PrecompiledHeader>Create</PrecompiledHeader>
+    </ClCompile>
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
