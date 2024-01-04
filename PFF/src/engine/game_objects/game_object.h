@@ -5,8 +5,18 @@
 namespace PFF {
 
 	struct transform_comp_2d {
-		glm::vec2 translation;							// position offset
-		glm::mat2 mat2() { return glm::mat2{ 1.0f }; }
+		glm::vec2 translation;
+		glm::vec2 scale{ 1.0f,1.0f };
+		f32 rotation;
+
+		glm::mat2 mat2() {
+			const f32 sin = glm::sin(rotation);
+			const f32 cos = glm::cos(rotation);
+
+			glm::mat2 rotMat{ {cos,sin},{-sin,cos} };
+			glm::mat2 scaleMat{ {scale.x, 0.0f},{0.0f, scale.y} };
+			return rotMat * scaleMat;
+		}
 	};
 
 	class game_object {
@@ -29,7 +39,7 @@ namespace PFF {
 
 		std::shared_ptr<basic_mesh> mesh{};
 		glm::vec3 color{};
-		transform_comp_2d transform_3D{};
+		transform_comp_2d transform_2D{};
 
 	private:
 

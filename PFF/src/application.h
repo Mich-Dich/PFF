@@ -27,7 +27,6 @@ namespace PFF {
 	private:
 
 		std::shared_ptr<pff_window> m_window{};
-		std::shared_ptr<game_map> m_map{};
 		std::shared_ptr<vulkan_renderer> m_vulkan_renderer{};
 		f32 m_delta_time = 1;
 		bool m_running = true;

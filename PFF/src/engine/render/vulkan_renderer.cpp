@@ -1,25 +1,16 @@
 
 #include "util/pffpch.h"
 
-// vulkan headers
-#include <vulkan/vulkan.h>
-
 #define GLFW_INCLUDE_VULKAN
 #include <GLFW/glfw3.h>
-
-#define GLM_FORCE_RADIANS
-#define GLM_FORCE_DEPTH_ZERO_TO_ONE
-#include <glm/glm.hpp>
-#include <glm/vec4.hpp>
-#include <glm/mat4x4.hpp>
-
-#include <vulkan/vulkan.h>
 
 #include "engine/platform/pff_window.h"
 #include "engine/render/vk_device.h"
 #include "engine/render/vk_pipeline.h"
 #include "engine/render/vk_swapchain.h"
+
 #include "engine/geometry/basic_mesh.h"
+#include "engine/game_objects/game_object.h"
 
 #include "vulkan_renderer.h"
 
@@ -38,7 +29,7 @@ namespace PFF {
 		: m_window( window ), m_active( true ), needs_to_resize(false) {
 
 		m_device = std::make_shared<vk_device>(m_window);
-		load_meshes();
+		create_dummy_game_objects();
 		create_pipeline_layout();
 		recreate_swapchian();
 	}
@@ -128,6 +119,24 @@ namespace PFF {
 	// ============================================================================ private funcs ============================================================================
 
 
+	void vulkan_renderer::render_game_objects(VkCommandBuffer_T* command_buffer) {
+
+		m_vk_pipeline->bind_commnad_buffers((VkCommandBuffer)command_buffer);
+
+		for (auto& obj : m_game_objects) {
+
+			simple_push_constant_data PCD{};
+			PCD.offset = obj.transform_2D.translation;
+			PCD.color = obj.color;
+			PCD.transform = obj.transform_2D.mat2();
+
+			vkCmdPushConstants((VkCommandBuffer)command_buffer, m_pipeline_layout, VK_SHADER_STAGE_VERTEX_BIT | VK_SHADER_STAGE_FRAGMENT_BIT, 0, sizeof(simple_push_constant_data), &PCD);
+
+			obj.mesh->bind(command_buffer);
+			obj.mesh->draw(command_buffer);
+		}
+	}
+
 	void vulkan_renderer::recreate_swapchian() {
 
 		//m_swapchain = nullptr;
@@ -151,17 +160,6 @@ namespace PFF {
 	}
 
 	void vulkan_renderer::recordCommandBuffer(int32 image_index) {
-
-		// DEV-ONLY
-		static int frame = 0;
-		static bool go_up = true;
-		if (go_up) {
-			go_up = frame < 1000;
-			frame++;
-		} else {
-			go_up = frame < -1000;
-			frame--;
-		}
 
 		VkCommandBufferBeginInfo begin_I{};
 		begin_I.sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_BEGIN_INFO;
@@ -194,27 +192,15 @@ namespace PFF {
 		VkRect2D scissors{ {0,0},m_swapchain->getSwapChainExtent() };
 		vkCmdSetViewport(m_command_buffers[image_index], 0, 1, &viewport);
 		vkCmdSetScissor(m_command_buffers[image_index], 0, 1, &scissors);
-
-		m_vk_pipeline->bind_commnad_buffers(m_command_buffers[image_index]);
-		m_testmodel->bind(m_command_buffers[image_index]);
-
-		for (u16 x = 0; x < 4; x++) {
-			simple_push_constant_data PCD{};
-			PCD.offset = { 0.f + frame * 0.0005f, -0.4f + x * 0.25f };
-			PCD.color = { 0.f , 0.f , 0.2f + 0.2f * x };
-
-			vkCmdPushConstants(m_command_buffers[image_index], m_pipeline_layout, VK_SHADER_STAGE_VERTEX_BIT | VK_SHADER_STAGE_FRAGMENT_BIT, 0, sizeof(simple_push_constant_data), &PCD);
-
-			m_testmodel->draw(m_command_buffers[image_index]);
-		}
-
+		
+		render_game_objects((VkCommandBuffer)m_command_buffers[image_index]);
 
 		vkCmdEndRenderPass(m_command_buffers[image_index]);
 
 		CORE_ASSERT_S(vkEndCommandBuffer(m_command_buffers[image_index]) == VK_SUCCESS);
 	}
 
-	void vulkan_renderer::load_meshes() {
+	void vulkan_renderer::create_dummy_game_objects() {
 
 		std::vector<basic_mesh::vertex> vertices;
 		vertices = {
@@ -222,10 +208,16 @@ namespace PFF {
 			{{0.5f,0.5f}, {0.0f,1.0f,0.0f}},
 			{{-0.5f,0.5f}, {0.0f,0.0f,1.0f}},
 		};
-		//sierpinski(vertices, 3, { 0.0f, -0.5f }, { 0.5f, 0.5f }, { -0.5f, 0.5f });
+		auto model = std::make_shared<basic_mesh>(m_device, vertices);
 
+		auto triangle = game_object::create_game_object();
+		triangle.mesh = model;
+		triangle.color = { .1f, .8f, .1f };
+		triangle.transform_2D.translation.x = .2f;
+		triangle.transform_2D.scale = { 2.0f ,0.5f };
+		triangle.transform_2D.rotation = 0.25f * glm::two_pi<float>();
 
-		m_testmodel = std::make_unique<basic_mesh>(m_device, vertices);
+		m_game_objects.push_back(std::move(triangle));
 	}
 
 	void vulkan_renderer::create_pipeline_layout() {

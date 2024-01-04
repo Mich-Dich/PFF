@@ -12,6 +12,8 @@ namespace PFF {
 		game_map();
 		~game_map();
 
+		
+
 	private:
 
 		std::vector<game_object> game_objects{};
