@@ -66,7 +66,6 @@ project "PFF"
 		"vulkan-1.lib",
 		"glfw3.lib",
 	}
-
 	filter "system:windows"
 		cppdialect "C++17"
 		defines { "_CRT_STDIO_ISO_WIDE_SPECIFIERS" } -- Enable C17 features for Visual Studio
@@ -126,6 +125,7 @@ project (project_name)
 	
 	includedirs
 	{
+		"PFF/vendor/glm",
 		"PFF/src",
 	}
 

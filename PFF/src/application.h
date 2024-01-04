@@ -1,7 +1,5 @@
 #pragma once
 
-#include "engine/game_objects/game_object.h"
-//#include "engine/map/game_map.h"
 
 namespace PFF {
 

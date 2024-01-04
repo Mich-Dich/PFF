@@ -1,18 +1,12 @@
 
 #include "util/pffpch.h"
 
-#include "util/pffpch.h"
-
-#include "basic_mesh.h"
-
 #include <cstring>
 #include <vulkan/vulkan.h>
 
-#define GLM_FORCE_RADIANS
-#define GLM_FORCE_DEPTH_ZERO_TO_ONE
-#include <glm/glm.hpp>
-
 #include "engine/render/vk_device.h"
+
+#include "basic_mesh.h"
 
 
 

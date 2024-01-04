@@ -1,5 +1,4 @@
 
-#include "util/util.h"
 #include "application.h"
 
 #ifdef PFF_PLATFORM_WINDOWS

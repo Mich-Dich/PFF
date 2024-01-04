@@ -23,3 +23,4 @@ enum class error_code {
 	error_opening_file,
 	line_not_found,
 };
+

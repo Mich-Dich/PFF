@@ -134,7 +134,6 @@ IF EXIST ..\bin\Release-windows-x86_64\PFF\PFF.dll\ (xcopy /Q /E /Y /I ..\bin\Re
     <ClInclude Include="src\util\logger.h" />
     <ClInclude Include="src\util\pffpch.h" />
     <ClInclude Include="src\util\platform\windows_util.h" />
-    <ClInclude Include="src\util\util.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="src\application.cpp" />

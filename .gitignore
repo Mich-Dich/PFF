@@ -6,6 +6,10 @@
 # Compile results
 /logs
 *.log
+
+/config
+*.ini
+
 /bin
 /bin-int
 

@@ -1,5 +1,7 @@
 #pragma once
 
+// =================================================================================  general  ================================================================================
+
 #include <cstdlib>
 #include <stdexcept>
 #include <iostream>
@@ -25,6 +27,12 @@
 #include <fstream>
 #include <iomanip>
 
+#define GLM_FORCE_RADIANS
+#define GLM_FORCE_DEPTH_ZERO_TO_ONE
+#include <glm/glm.hpp>
+
+// ============================================================================  platform specific  ============================================================================
+
 #ifdef PFF_PLATFORM_WINDOWS
 
 	//#include <Windows.h>
@@ -34,35 +42,33 @@
 	#error PFF only suports windows
 #endif
 
+// ==================================================================================  utils  ==================================================================================
 
-
-// ======================================  utils  ======================================
 #include "logger.h"
 #include "data_types.h"
 #include "util/io/io_handler.h"
 #include "util/io/config.h"
 
+// =================================================================================  macros  ==================================================================================
 
 #define APP_NAMESPACE PFF
 
 #define BIT(x) (1 << x)
 
-#define DELETE_COPY(type_name)				type_name(const type_name&) = delete;								\
-											type_name& operator=(const type_name&) = delete
-
-#define DELETE_COPY_MOVE(classname)			classname(const classname&) = delete;								\
-											classname& operator=(const classname&) = delete;					\
-											classname(classname&&) = delete;									\
-											classname& operator=(classname&&) = delete
-
-#define GENERATE_CLASS_BODY					static const char* getClassName() {									\
-												static const std::string className = __PRETTY_FUNCTION__;		\
-												size_t start = className.find("class ") + 6;					\
-												size_t end = className.find(" ", start);						\
-												return className.substr(start, end - start).c_str();			\
-											}
-
 #define STD_BIND_EVENT_FN(x)				std::bind(&x, this, std::placeholders::_1)
+
+#define DELETE_COPY(type)					type(const type&) = delete;								\
+											type& operator=(const type&) = delete
+
+#define DELETE_MOVE(type)					type(type&&) = delete;									\
+											type& operator=(type&&) = delete
+
+#define DELETE_COPY_MOVE(type)				type(const type&) = delete;								\
+											type& operator=(const type&) = delete;					\
+											type(type&&) = delete;									\
+											type& operator=(type&&) = delete
+
+// ================================================================================  functions  ================================================================================
 
 template <typename T>
 T str_to_num(const std::string& str) {
