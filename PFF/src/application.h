@@ -19,8 +19,8 @@ namespace PFF {
 
 		void run();
 		virtual bool initalize();							// to be used by client
-		virtual bool update(f32 delta_time);				// to be used by client
-		virtual bool render(f32 delta_time);				// to be used by client
+		virtual bool update(f32 delta_time);				// potentally make private - every actor has own function (like UNREAL)
+		virtual bool render(f32 delta_time);				// potentally make private - every actor has own function (like UNREAL)
 
 		DELETE_COPY(application);
 
@@ -36,7 +36,11 @@ namespace PFF {
 		layer_stack m_layerstack{};
 		std::shared_ptr<pff_window> m_window{};
 		std::shared_ptr<vulkan_renderer> m_vulkan_renderer{};
-		f32 m_delta_time = 1;
+		f32 m_delta_time = 1.0f;
+		f32 m_targetdelta_time = 100.0f;
+		f32 m_target_fps = 60.0f;
+		std::chrono::system_clock::time_point m_frame_start;
+		std::chrono::system_clock::time_point m_frame_end;
 		bool m_running = true;
 	};
 

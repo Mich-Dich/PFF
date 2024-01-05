@@ -24,7 +24,7 @@ namespace PFF {
 	// ==================================================================== setup ====================================================================
 
 	application::application() :
-		m_delta_time(1), m_running(true) {
+		m_delta_time(1), m_running(true), m_frame_start(std::chrono::system_clock::now()), m_frame_end(std::chrono::system_clock::now()) {
 
 		CORE_LOG(Debug, "application Constructor");
 		CORE_ASSERT(!s_instance, "", "Application already exists");
@@ -32,7 +32,6 @@ namespace PFF {
 
 		config::init();
 
-		// TODO: load WindowAttributes from config file
 		WindowAttributes loc_window_att = WindowAttributes();
 		LOAD_CONFIG_STR(default_editor, loc_window_att.title, "WindowAttributes", "title");
 		LOAD_CONFIG_NUM(default_editor, loc_window_att.width, u32, "WindowAttributes", "width");
@@ -63,6 +62,8 @@ namespace PFF {
 
 		initalize();
 
+		m_targetdelta_time = (1000.0f / m_target_fps);
+
 		CORE_LOG(Trace, "Running")
 
 			while (m_running) {
@@ -77,6 +78,20 @@ namespace PFF {
 				render(m_delta_time);	// potentally make private - every actor has own function (like UNREAL)
 				m_vulkan_renderer->draw_frame();
 
+
+
+				// Simple FPS controller - needs work
+				m_frame_end = std::chrono::system_clock::now();
+				std::chrono::duration<double, std::milli> work_time = m_frame_end - m_frame_start;
+				std::chrono::duration<double, std::milli> delta_ms(m_targetdelta_time - work_time.count());
+				auto delta_ms_duration = std::chrono::duration_cast<std::chrono::milliseconds>(delta_ms);
+				if (work_time.count() < m_targetdelta_time)
+					std::this_thread::sleep_for(std::chrono::milliseconds(delta_ms_duration.count()));
+
+				m_frame_start = std::chrono::system_clock::now();
+				m_delta_time = std::chrono::duration<float, std::milli>(work_time + delta_ms_duration).count();
+
+				CORE_LOG(Trace, "FPS: " << std::fixed << std::setprecision(2) << 1000 / m_delta_time << " possible FPS: " << std::fixed << std::setprecision(2) << 1000 / work_time.count());
 			}
 
 		m_vulkan_renderer->wait_Idle();
