@@ -24,3 +24,4 @@ enum class error_code {
 	line_not_found,
 };
 
+#define FILE_EXTENSION_CONFIG ".ini"

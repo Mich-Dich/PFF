@@ -46,8 +46,8 @@ namespace PFF {
 		// @param [section] The section within the configuration file where the key-value pair is located.
 		// @param [key] The key of the configuration to be checked/updated.
 		// @see check_for_configuration
-		#define LOAD_CONFIG_NUM(config_file, value, type, section, key)																								\
-														{std::string buffer = num_to_str(value);																						\
+		#define LOAD_CONFIG_NUM(config_file, value, type, section, key)																										\
+														{std::string buffer = num_to_str(value);																			\
 														PFF::config::check_for_configuration(PFF::config::config_file_types::config_file, section, key, buffer, false);		\
 														value = str_to_num<type>(buffer);}
 
@@ -68,7 +68,7 @@ namespace PFF {
 		// @param [section] The section within the configuration file where the key-value pair is located.
 		// @param [key] The key of the configuration to be checked/updated.
 		// @see check_for_configuration
-		#define LOAD_CONFIG_BOOL(config_file, value, section, key)																					\
+		#define LOAD_CONFIG_BOOL(config_file, value, section, key)																											\
 														{std::string buffer = bool_to_str(value);																			\
 														PFF::config::check_for_configuration(PFF::config::config_file_types::config_file, section, key, buffer, false);		\
 														value = str_to_bool(buffer);}
@@ -84,7 +84,7 @@ namespace PFF {
 		// @param [section] The section within the configuration file where the key-value pair is located.
 		// @param [key] The key of the configuration to be checked/updated.
 		// @see check_for_configuration
-		#define SAVE_CONFIG_NUM(config_file, value, type, section, key)																					\
+		#define SAVE_CONFIG_NUM(config_file, value, type, section, key)																										\
 														{std::string buffer = num_to_str(value);																			\
 														PFF::config::check_for_configuration(PFF::config::config_file_types::config_file, section, key, buffer, true);		\
 														value = str_to_num<type>(buffer);}

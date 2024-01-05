@@ -9,18 +9,31 @@ int main() {
 
 	PFF::Logger::Init("[$B$T:$J$E] [$B$L$X $K - $F:$G$E] $C$Z");
 	auto app = PFF::create_application();
-
-	try {
-		app->run();
-	} 
-	
-	catch (const std::exception& e) {
-		LOG(Trace, "Error: " << e.what());
-		return EXIT_FAILURE;
-	}
+	app->run();
 	delete app;
 
 	return EXIT_SUCCESS;
 }
 
 #endif
+
+
+/*
+
+ToDo:
+	- port input system from C-version
+	- add ImGui
+	- create level editor
+
+
+
+
+
+
+
+
+
+
+
+
+*/

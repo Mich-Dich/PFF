@@ -69,7 +69,7 @@ project "PFF"
 	filter "system:windows"
 		cppdialect "C++17"
 		defines { "_CRT_STDIO_ISO_WIDE_SPECIFIERS" } -- Enable C17 features for Visual Studio
-		staticruntime "On"
+		staticruntime "off"
 		systemversion "latest"
 		
         linkoptions 
@@ -92,12 +92,12 @@ project "PFF"
 	filter "configurations:Debug"
 		buildoptions "/MDd"
 		defines "PFF_DEBUG"
-		symbols "On"
+		symbols "on"
 
 	filter "configurations:Release"
 		buildoptions "/MD"
 		defines "PFF_RELEASE"
-		optimize "On"
+		optimize "on"
 
 project (project_name)
 	location (project_name)
@@ -136,13 +136,13 @@ project (project_name)
 
 	filter "system:windows"
 		cppdialect "C++17"
-		defines { "_CRT_STDIO_ISO_WIDE_SPECIFIERS" } -- Enable C17 features for Visual Studio
-		staticruntime "On"
+		staticruntime "on"
 		systemversion "latest"
 
 		defines
 		{
-			"PFF_PLATFORM_WINDOWS"
+			"PFF_PLATFORM_WINDOWS",
+			"_CRT_STDIO_ISO_WIDE_SPECIFIERS",	-- Enable C17 features for Visual Studio
 		}
 
 		postbuildcommands
@@ -154,9 +154,9 @@ project (project_name)
 	filter "configurations:Debug"
 		buildoptions "/MDd"
 		defines "GAME_DEBUG"
-		symbols "On"
+		symbols "on"
 
 	filter "configurations:Release"
 		buildoptions "/MD"
 		defines "GAME_RELEASE"
-		optimize "On"
+		optimize "on"

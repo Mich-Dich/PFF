@@ -33,7 +33,7 @@ namespace PFF {
 	class PFF_API event {
 
 	public:
-		bool Handeled = false;
+		bool handled = false;
 
 		virtual event_type get_event_type() const = 0;
 		virtual const char* get_name() const = 0;
@@ -43,6 +43,7 @@ namespace PFF {
 		inline bool is_in_category(event_category category) { return (get_category_flag() & category); }
 
 	};
+	FORCEINLINE std::ostream& operator<<(std::ostream & os, const event & e) { return os << e.to_string(); }
 
 	class event_dispatcher {
 
@@ -52,12 +53,12 @@ namespace PFF {
 	public:
 		event_dispatcher(event& event) : m_event(event) {}
 
-		template<typename T>
-		bool dispatch(EventFn<T> func) {
+		template <typename T, typename Function>
+		bool dispatch(Function func) {
 
 			if (m_event.get_event_type() == T::get_static_type()) {
 
-				m_event.Handeled = func(*(T*)&m_event);
+				m_event.handled = func(*(T*)&m_event);
 				return true;
 			}
 			return false;
@@ -68,5 +69,4 @@ namespace PFF {
 		event& m_event;
 	};
 
-	// inline std::ostream& operator<<(std::ostream & os, const Event & e) { return os << e.to_string(); }
 }

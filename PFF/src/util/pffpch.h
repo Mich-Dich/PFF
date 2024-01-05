@@ -58,7 +58,7 @@
 
 #define BIT(x) (1 << x)
 
-#define STD_BIND_EVENT_FN(x)				std::bind(&x, this, std::placeholders::_1)
+#define BIND_FN(x)							std::bind(&x, this, std::placeholders::_1)
 
 #define DELETE_COPY(type)					type(const type&) = delete;								\
 											type& operator=(const type&) = delete

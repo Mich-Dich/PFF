@@ -4,14 +4,17 @@
     <Filter Include="engine">
       <UniqueIdentifier>{FBDB78FB-E77D-A3D1-D038-B725BC792A22}</UniqueIdentifier>
     </Filter>
-    <Filter Include="engine\Events">
-      <UniqueIdentifier>{7FDF9525-EB9F-115C-B4DA-5AD9205A5638}</UniqueIdentifier>
+    <Filter Include="engine\events">
+      <UniqueIdentifier>{9FF33A70-0BB4-B6A6-D4EE-FF23406EFB82}</UniqueIdentifier>
     </Filter>
     <Filter Include="engine\game_objects">
       <UniqueIdentifier>{ADBB125B-191D-F068-A28A-361B0EEB2628}</UniqueIdentifier>
     </Filter>
     <Filter Include="engine\geometry">
       <UniqueIdentifier>{D64FE53D-42DB-5202-4BEC-D5F6B7F6AE02}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="engine\layer">
+      <UniqueIdentifier>{27B946B6-131C-D65A-BCA1-0E11A8E3A1DD}</UniqueIdentifier>
     </Filter>
     <Filter Include="engine\map">
       <UniqueIdentifier>{E8034884-D4BB-89D1-3DC3-622D299A24C2}</UniqueIdentifier>
@@ -35,23 +38,29 @@
   <ItemGroup>
     <ClInclude Include="src\PFF.h" />
     <ClInclude Include="src\application.h" />
-    <ClInclude Include="src\engine\Events\Event.h">
-      <Filter>engine\Events</Filter>
+    <ClInclude Include="src\engine\events\application_event.h">
+      <Filter>engine\events</Filter>
     </ClInclude>
-    <ClInclude Include="src\engine\Events\application_event.h">
-      <Filter>engine\Events</Filter>
+    <ClInclude Include="src\engine\events\event.h">
+      <Filter>engine\events</Filter>
     </ClInclude>
-    <ClInclude Include="src\engine\Events\key_event.h">
-      <Filter>engine\Events</Filter>
+    <ClInclude Include="src\engine\events\key_event.h">
+      <Filter>engine\events</Filter>
     </ClInclude>
-    <ClInclude Include="src\engine\Events\mouse_event.h">
-      <Filter>engine\Events</Filter>
+    <ClInclude Include="src\engine\events\mouse_event.h">
+      <Filter>engine\events</Filter>
     </ClInclude>
     <ClInclude Include="src\engine\game_objects\game_object.h">
       <Filter>engine\game_objects</Filter>
     </ClInclude>
     <ClInclude Include="src\engine\geometry\basic_mesh.h">
       <Filter>engine\geometry</Filter>
+    </ClInclude>
+    <ClInclude Include="src\engine\layer\layer.h">
+      <Filter>engine\layer</Filter>
+    </ClInclude>
+    <ClInclude Include="src\engine\layer\layer_stack.h">
+      <Filter>engine\layer</Filter>
     </ClInclude>
     <ClInclude Include="src\engine\map\game_map.h">
       <Filter>engine\map</Filter>
@@ -98,6 +107,12 @@
     </ClCompile>
     <ClCompile Include="src\engine\geometry\basic_mesh.cpp">
       <Filter>engine\geometry</Filter>
+    </ClCompile>
+    <ClCompile Include="src\engine\layer\layer.cpp">
+      <Filter>engine\layer</Filter>
+    </ClCompile>
+    <ClCompile Include="src\engine\layer\layer_stack.cpp">
+      <Filter>engine\layer</Filter>
     </ClCompile>
     <ClCompile Include="src\engine\map\game_map.cpp">
       <Filter>engine\map</Filter>

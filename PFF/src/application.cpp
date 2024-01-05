@@ -9,6 +9,9 @@
 #include "engine/events/mouse_event.h"
 #include "engine/events/key_event.h"
 
+#include "engine/layer/layer_stack.h"
+#include "engine/layer/layer.h"
+
 #include "engine/platform/pff_window.h"
 #include "engine/render/vulkan_renderer.h"
 
@@ -17,6 +20,8 @@
 #include "application.h"
 
 namespace PFF {
+
+	// ==================================================================== setup ====================================================================
 
 	application::application() :
 		m_delta_time(1), m_running(true) {
@@ -34,7 +39,7 @@ namespace PFF {
 		LOAD_CONFIG_NUM(default_editor, loc_window_att.height, u32, "WindowAttributes", "height");
 		LOAD_CONFIG_BOOL(default_editor, loc_window_att.VSync, "WindowAttributes", "VSync");
 		m_window = std::make_shared<pff_window>(loc_window_att);			// Can be called after inital setup like [compiling shaders]
-		m_window->SetEventCallback(STD_BIND_EVENT_FN(application::on_event));
+		m_window->SetEventCallback(BIND_FN(application::on_event));
 
 		m_vulkan_renderer = std::make_shared<vulkan_renderer>(m_window);
 	}
@@ -52,31 +57,10 @@ namespace PFF {
 
 	}
 
-	void application::on_event(event& event) {
-
-		event_dispatcher dispatcher(event);
-		dispatcher.dispatch<window_close_event>([&](window_close_event& event) {
-
-				m_running = false;
-				return true;
-		});
-
-		dispatcher.dispatch<window_resize_event>([&](window_resize_event& event) {
-			
-			m_vulkan_renderer->set_size(event.get_width(), event.get_height());
-			return true;
-		});
-
-		dispatcher.dispatch<window_refresh_event>([&](window_refresh_event& event) {
-
-			m_vulkan_renderer->refresh();
-			return true;
-		});
-
-	}
+	// ==================================================================== main loop ====================================================================
 
 	void application::run() {
-	
+
 		initalize();
 
 		CORE_LOG(Trace, "Running")
@@ -84,22 +68,75 @@ namespace PFF {
 			while (m_running) {
 				glfwPollEvents();
 
-				update(m_delta_time);	// potentally remove  (like UNREAL)
-				render(m_delta_time);	// potentally remove  (like UNREAL)
+				// update all layers
+				for (layer* layer : m_layerstack) {
+					layer->on_update();
+				}
+
+				update(m_delta_time);	// potentally make private - every actor has own function (like UNREAL)
+				render(m_delta_time);	// potentally make private - every actor has own function (like UNREAL)
 				m_vulkan_renderer->draw_frame();
-
-
 
 			}
 
 		m_vulkan_renderer->wait_Idle();
 	}
 
+	// ==================================================================== event handling ====================================================================
+
+	void application::on_event(event& event) {
+
+		event_dispatcher dispatcher(event);
+		dispatcher.dispatch<window_close_event>(BIND_FN(application::on_window_close));
+		dispatcher.dispatch<window_resize_event>(BIND_FN(application::on_window_resize));
+		dispatcher.dispatch<window_refresh_event>(BIND_FN(application::on_window_refresh));
+
+		for (auto it = m_layerstack.end(); it != m_layerstack.begin(); ) {
+			(*--it)->on_event(event);
+			if (event.handled)
+				break;
+		}
+	}
+
+	bool application::on_window_resize(window_resize_event& event) {
+
+		m_vulkan_renderer->set_size(event.get_width(), event.get_height());
+		return true;
+	}
+
+	bool application::on_window_close(window_close_event& e) {
+
+		m_running = false;
+		return true;
+	}
+
+	bool application::on_window_refresh(window_refresh_event& e) {
+
+		m_vulkan_renderer->refresh();
+		return true;
+	}
+
+	// ==================================================================== layer system ====================================================================
+
+	void application::push_layer(layer* layer) {
+
+		m_layerstack.push_layer(layer);
+	}
+
+	void application::push_overlay(layer* overlay) {
+
+		m_layerstack.push_overlay(overlay);
+	}
+
+	// ==================================================================== event handling ====================================================================
+
 	bool application::initalize() {
+
 		return true;
 	}
 
 	bool application::update(f32 delta_time) {
+
 		return true;
 	}
 
@@ -107,7 +144,5 @@ namespace PFF {
 		return true;
 	}
 
-	void application::on_window_resize(event& event) {
-	}
 
 }

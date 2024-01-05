@@ -11,8 +11,7 @@
 #include <fstream>
 #include <string>
 
-#define BUILD_CONFIG_PATH(x)	config_dir + "/" + configtype_to_string(x) + ".ini"
-
+#define BUILD_CONFIG_PATH(x)	config_dir + "/" + configtype_to_string(x) + FILE_EXTENSION_CONFIG
 
 namespace PFF {
 
