@@ -5,7 +5,7 @@
 namespace PFF {
 
 	class pff_window;
-	class vulkan_renderer;
+	class renderer;
 	class event;
 	class window_resize_event;
 	class window_close_event;
@@ -35,7 +35,8 @@ namespace PFF {
 
 		layer_stack m_layerstack{};
 		std::shared_ptr<pff_window> m_window{};
-		std::shared_ptr<vulkan_renderer> m_vulkan_renderer{};
+		std::unique_ptr<renderer> m_renderer;
+
 		f32 m_delta_time = 1.0f;
 		f32 m_targetdelta_time = 100.0f;
 		f32 m_target_fps = 60.0f;

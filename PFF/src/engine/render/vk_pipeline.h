@@ -1,5 +1,6 @@
 #pragma once
 
+#include <vulkan/vulkan.h>
 
 namespace PFF {
 
@@ -33,9 +34,9 @@ namespace PFF {
 		vk_pipeline(std::shared_ptr<vk_device> device, const pipeline_config_info& config, const std::string& vert_file_path, const std::string& frag_file_path);
 		~vk_pipeline();
 
-		void bind_commnad_buffers(VkCommandBuffer command_buffer);
-
 		DELETE_COPY(vk_pipeline);
+
+		void bind_commnad_buffers(VkCommandBuffer command_buffer);
 
 	private:
 

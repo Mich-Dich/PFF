@@ -31,6 +31,9 @@
     <Filter Include="util\io">
       <UniqueIdentifier>{4AE65B48-B6C5-DAE3-BFDD-65BA2B3C4145}</UniqueIdentifier>
     </Filter>
+    <Filter Include="util\math">
+      <UniqueIdentifier>{1CA6F0CE-8810-A545-D14E-56EB3DF8829A}</UniqueIdentifier>
+    </Filter>
     <Filter Include="util\platform">
       <UniqueIdentifier>{1767156D-8327-91A3-4C62-DA20B8E1D57F}</UniqueIdentifier>
     </Filter>
@@ -71,6 +74,12 @@
     <ClInclude Include="src\engine\platform\pff_window.h">
       <Filter>engine\platform</Filter>
     </ClInclude>
+    <ClInclude Include="src\engine\render\render_system.h">
+      <Filter>engine\render</Filter>
+    </ClInclude>
+    <ClInclude Include="src\engine\render\renderer.h">
+      <Filter>engine\render</Filter>
+    </ClInclude>
     <ClInclude Include="src\engine\render\vk_device.h">
       <Filter>engine\render</Filter>
     </ClInclude>
@@ -78,9 +87,6 @@
       <Filter>engine\render</Filter>
     </ClInclude>
     <ClInclude Include="src\engine\render\vk_swapchain.h">
-      <Filter>engine\render</Filter>
-    </ClInclude>
-    <ClInclude Include="src\engine\render\vulkan_renderer.h">
       <Filter>engine\render</Filter>
     </ClInclude>
     <ClInclude Include="src\entry_point.h" />
@@ -96,6 +102,9 @@
     <ClInclude Include="src\util\logger.h">
       <Filter>util</Filter>
     </ClInclude>
+    <ClInclude Include="src\util\math\constance.h">
+      <Filter>util\math</Filter>
+    </ClInclude>
     <ClInclude Include="src\util\pffpch.h">
       <Filter>util</Filter>
     </ClInclude>
@@ -105,7 +114,6 @@
     <ClInclude Include="src\util\util.h">
       <Filter>util</Filter>
     </ClInclude>
-    <ClInclude Include="src\util\math\constance.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="src\application.cpp" />
@@ -130,6 +138,12 @@
     <ClCompile Include="src\engine\platform\pff_window.cpp">
       <Filter>engine\platform</Filter>
     </ClCompile>
+    <ClCompile Include="src\engine\render\render_system.cpp">
+      <Filter>engine\render</Filter>
+    </ClCompile>
+    <ClCompile Include="src\engine\render\renderer.cpp">
+      <Filter>engine\render</Filter>
+    </ClCompile>
     <ClCompile Include="src\engine\render\vk_device.cpp">
       <Filter>engine\render</Filter>
     </ClCompile>
@@ -137,9 +151,6 @@
       <Filter>engine\render</Filter>
     </ClCompile>
     <ClCompile Include="src\engine\render\vk_swapchain.cpp">
-      <Filter>engine\render</Filter>
-    </ClCompile>
-    <ClCompile Include="src\engine\render\vulkan_renderer.cpp">
       <Filter>engine\render</Filter>
     </ClCompile>
     <ClCompile Include="src\util\io\config.cpp">

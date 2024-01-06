@@ -24,4 +24,10 @@ enum class error_code {
 	line_not_found,
 };
 
+enum class system_state {
+	active,
+	suspended,
+	inactive,
+};
+
 #define FILE_EXTENSION_CONFIG ".ini"

@@ -13,7 +13,7 @@
 #include "engine/layer/layer.h"
 
 #include "engine/platform/pff_window.h"
-#include "engine/render/vulkan_renderer.h"
+#include "engine/render/renderer.h"
 
 #include "engine/map/game_map.h"
 
@@ -40,12 +40,12 @@ namespace PFF {
 		m_window = std::make_shared<pff_window>(loc_window_att);			// Can be called after inital setup like [compiling shaders]
 		m_window->SetEventCallback(BIND_FN(application::on_event));
 
-		m_vulkan_renderer = std::make_shared<vulkan_renderer>(m_window);
+		m_renderer = std::make_unique<renderer>(m_window);
 	}
 
 	application::~application() {
 
-		m_vulkan_renderer.reset();
+		m_renderer.reset();
 
 		WindowAttributes loc_window_att = m_window->get_attributes();
 		SAVE_CONFIG_STR(default_editor, loc_window_att.title, "WindowAttributes", "title");
@@ -60,9 +60,11 @@ namespace PFF {
 
 	void application::run() {
 
-		init();
+		init();							// init user code / potentally make every actor have own function (like UNREAL)
 		m_targetdelta_time = (1000.0f / m_target_fps);
 
+		m_renderer->create_dummy_game_objects();
+		m_renderer->add_render_system(std::make_unique<render_system>(m_renderer->get_device(), m_renderer->get_swapchain_render_pass()));
 		CORE_LOG(Trace, "Running")
 
 			while (m_running) {
@@ -73,10 +75,10 @@ namespace PFF {
 					layer->on_update();
 				}
 
-				update(m_delta_time);	// potentally make private - every actor has own function (like UNREAL)
-				render(m_delta_time);	// potentally make private - every actor has own function (like UNREAL)
-				m_vulkan_renderer->draw_frame();
+				update(m_delta_time);	// potentally make every actor have own function (like UNREAL)
+				render(m_delta_time);	// potentally make every actor have own function (like UNREAL)
 
+				m_renderer->draw_frame();
 
 
 				// Simple FPS controller - needs work
@@ -92,7 +94,7 @@ namespace PFF {
 				//CORE_LOG(Trace, "FPS: " << std::fixed << std::setprecision(2) << 1000 / m_delta_time << " possible FPS: " << std::fixed << std::setprecision(2) << 1000 / work_time.count());
 			}
 
-		m_vulkan_renderer->wait_Idle();
+		m_renderer->wait_Idle();
 	}
 
 	// ==================================================================== event handling ====================================================================
@@ -113,7 +115,7 @@ namespace PFF {
 
 	bool application::on_window_resize(window_resize_event& event) {
 
-		m_vulkan_renderer->set_size(event.get_width(), event.get_height());
+		m_renderer->set_size(event.get_width(), event.get_height());
 		return true;
 	}
 
@@ -125,7 +127,7 @@ namespace PFF {
 
 	bool application::on_window_refresh(window_refresh_event& e) {
 
-		m_vulkan_renderer->refresh();
+		m_renderer->refresh();
 		return true;
 	}
 
@@ -141,21 +143,18 @@ namespace PFF {
 		m_layerstack.push_overlay(overlay);
 	}
 
-	// ==================================================================== event handling ====================================================================
+	// ==================================================================== engine events ====================================================================
 
 	bool application::init() {
-
 		return true;
 	}
 
 	bool application::update(f32 delta_time) {
-
 		return true;
 	}
 
 	bool application::render(f32 delta_time) {
 		return true;
 	}
-
 
 }
