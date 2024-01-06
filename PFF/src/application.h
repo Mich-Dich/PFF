@@ -18,7 +18,7 @@ namespace PFF {
 		virtual ~application();
 
 		void run();
-		virtual bool initalize();							// to be used by client
+		virtual bool init();							// to be used by client
 		virtual bool update(f32 delta_time);				// potentally make private - every actor has own function (like UNREAL)
 		virtual bool render(f32 delta_time);				// potentally make private - every actor has own function (like UNREAL)
 

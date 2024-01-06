@@ -56,6 +56,9 @@
     <ClInclude Include="src\engine\geometry\basic_mesh.h">
       <Filter>engine\geometry</Filter>
     </ClInclude>
+    <ClInclude Include="src\engine\layer\imgui_layer.h">
+      <Filter>engine\layer</Filter>
+    </ClInclude>
     <ClInclude Include="src\engine\layer\layer.h">
       <Filter>engine\layer</Filter>
     </ClInclude>
@@ -99,6 +102,10 @@
     <ClInclude Include="src\util\platform\windows_util.h">
       <Filter>util\platform</Filter>
     </ClInclude>
+    <ClInclude Include="src\util\util.h">
+      <Filter>util</Filter>
+    </ClInclude>
+    <ClInclude Include="src\util\math\constance.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="src\application.cpp" />
@@ -107,6 +114,9 @@
     </ClCompile>
     <ClCompile Include="src\engine\geometry\basic_mesh.cpp">
       <Filter>engine\geometry</Filter>
+    </ClCompile>
+    <ClCompile Include="src\engine\layer\imgui_layer.cpp">
+      <Filter>engine\layer</Filter>
     </ClCompile>
     <ClCompile Include="src\engine\layer\layer.cpp">
       <Filter>engine\layer</Filter>

@@ -24,19 +24,13 @@ namespace PFF {
 		pipeline_config_info();
 
 		// DELETE_COPY(pipeline_config_info);
-	
 	};
 
 	class vk_pipeline {
 
 	public:
 
-		vk_pipeline(
-			std::shared_ptr<vk_device> device,
-			const pipeline_config_info& config, 
-			const std::string& vert_file_path, 
-			const std::string& frag_file_path);
-		
+		vk_pipeline(std::shared_ptr<vk_device> device, const pipeline_config_info& config, const std::string& vert_file_path, const std::string& frag_file_path);
 		~vk_pipeline();
 
 		void bind_commnad_buffers(VkCommandBuffer command_buffer);
@@ -45,11 +39,7 @@ namespace PFF {
 
 	private:
 
-		void create_graphics_pipeline(
-			const pipeline_config_info& config, 
-			const std::string& vert_file_path, 
-			const std::string& frag_file_path);
-		
+		void create_graphics_pipeline(const pipeline_config_info& config, const std::string& vert_file_path, const std::string& frag_file_path);
 		void create_shader_module(const std::vector<char>& code, VkShaderModule* shader_module);
 
 		std::shared_ptr<vk_device> m_device;

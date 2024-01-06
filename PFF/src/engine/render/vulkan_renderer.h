@@ -49,6 +49,7 @@ namespace PFF{
 
 		std::vector<game_object> m_game_objects{};				// move into map class
 
+		VkDescriptorPool m_imgui_descriptor_pool;
 		std::vector<VkCommandBuffer> m_command_buffers;
 		VkPipelineLayout_T* m_pipeline_layout;
 		pipeline_config_info m_pipeline_config;

@@ -51,6 +51,7 @@ project "PFF"
 		"%{prj.name}/src",
 		"PFF/vendor/glm",
 		"PFF/vendor/glfw-3.3.8.bin.WIN64/include",
+		"%{IncludeDir.ImGui}",
 		
 		vulkan_dir .. "/Include",
 	}

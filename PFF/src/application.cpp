@@ -60,8 +60,7 @@ namespace PFF {
 
 	void application::run() {
 
-		initalize();
-
+		init();
 		m_targetdelta_time = (1000.0f / m_target_fps);
 
 		CORE_LOG(Trace, "Running")
@@ -90,8 +89,7 @@ namespace PFF {
 
 				m_frame_start = std::chrono::system_clock::now();
 				m_delta_time = std::chrono::duration<float, std::milli>(work_time + delta_ms_duration).count();
-
-				CORE_LOG(Trace, "FPS: " << std::fixed << std::setprecision(2) << 1000 / m_delta_time << " possible FPS: " << std::fixed << std::setprecision(2) << 1000 / work_time.count());
+				//CORE_LOG(Trace, "FPS: " << std::fixed << std::setprecision(2) << 1000 / m_delta_time << " possible FPS: " << std::fixed << std::setprecision(2) << 1000 / work_time.count());
 			}
 
 		m_vulkan_renderer->wait_Idle();
@@ -145,7 +143,7 @@ namespace PFF {
 
 	// ==================================================================== event handling ====================================================================
 
-	bool application::initalize() {
+	bool application::init() {
 
 		return true;
 	}

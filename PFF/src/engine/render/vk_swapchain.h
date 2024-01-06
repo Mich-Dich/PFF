@@ -14,21 +14,22 @@ namespace PFF {
         vk_swapchain(std::shared_ptr<vk_device>& device, VkExtent2D window_extent);
         vk_swapchain(std::shared_ptr<vk_device>& device, VkExtent2D window_extent, std::shared_ptr<vk_swapchain> previous);
         ~vk_swapchain();
+
         DELETE_COPY(vk_swapchain);
 
         VkFormat findDepthFormat();
         VkResult acquireNextImage(u32* imageIndex);
         VkResult submitCommandBuffers(const VkCommandBuffer* buffers, u32* imageIndex);
 
-        FORCEINLINE VkFramebuffer getFrameBuffer(int index) { return m_swap_chain_framebuffers[index]; }
-        FORCEINLINE VkImageView getImageView(int index) { return m_swap_chain_image_views[index]; }
-        FORCEINLINE VkFormat getSwapChainImageFormat() { return m_swap_chainImage_format; }
-        FORCEINLINE VkExtent2D getSwapChainExtent() { return m_swap_chain_extent; }
-        FORCEINLINE size_t get_image_count() { return m_swap_chain_images.size(); }
-        FORCEINLINE VkRenderPass get_render_pass() { return m_render_pass; }
-        FORCEINLINE u32 get_width() { return m_swap_chain_extent.width; }
-        FORCEINLINE u32 get_height() { return m_swap_chain_extent.height; }
-        FORCEINLINE f32 get_extentAspectRatio() { return static_cast<float>(m_swap_chain_extent.width) / static_cast<float>(m_swap_chain_extent.height); }
+        FORCEINLINE VkFramebuffer getFrameBuffer(int index)  const { return m_swap_chain_framebuffers[index]; }
+        FORCEINLINE VkImageView getImageView(int index)  const { return m_swap_chain_image_views[index]; }
+        FORCEINLINE VkFormat getSwapChainImageFormat()  const { return m_swap_chainImage_format; }
+        FORCEINLINE VkExtent2D getSwapChainExtent() const { return m_swap_chain_extent; }
+        FORCEINLINE size_t get_image_count() const { return m_swap_chain_images.size(); }
+        FORCEINLINE VkRenderPass get_render_pass()  const { return m_render_pass; }
+        FORCEINLINE u32 get_width() const { return m_swap_chain_extent.width; }
+        FORCEINLINE u32 get_height() const { return m_swap_chain_extent.height; }
+        FORCEINLINE f32 get_extentAspectRatio() const { return static_cast<float>(m_swap_chain_extent.width) / static_cast<float>(m_swap_chain_extent.height); }
 
     private:
 

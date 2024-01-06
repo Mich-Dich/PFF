@@ -86,7 +86,7 @@ namespace PFF {
         submitInfo.pSignalSemaphores = signalSemaphores;
 
         vkResetFences(m_device->get_device(), 1, &m_in_flight_fences[m_current_frame]);
-        CORE_ASSERT(vkQueueSubmit(m_device->graphicsQueue(), 1, &submitInfo, m_in_flight_fences[m_current_frame]) == VK_SUCCESS, "", "failed to submit draw command buffer!");
+        CORE_ASSERT(vkQueueSubmit(m_device->get_graphics_queue(), 1, &submitInfo, m_in_flight_fences[m_current_frame]) == VK_SUCCESS, "", "failed to submit draw command buffer!");
 
         VkPresentInfoKHR presentInfo = {};
         presentInfo.sType = VK_STRUCTURE_TYPE_PRESENT_INFO_KHR;
@@ -100,7 +100,7 @@ namespace PFF {
 
         presentInfo.pImageIndices = imageIndex;
 
-        auto result = vkQueuePresentKHR(m_device->presentQueue(), &presentInfo);
+        auto result = vkQueuePresentKHR(m_device->get_present_queue(), &presentInfo);
 
         m_current_frame = (m_current_frame + 1) % MAX_FRAMES_IN_FLIGHT;
 
@@ -118,7 +118,7 @@ namespace PFF {
     }
 
     void vk_swapchain::createSwapChain() {
-        SwapChainSupportDetails swapChainSupport = m_device->getSwapChainSupport();
+        SwapChainSupportDetails swapChainSupport = m_device->get_swap_chain_support();
 
         VkSurfaceFormatKHR surfaceFormat = chooseSwapSurfaceFormat(swapChainSupport.formats);
         VkPresentModeKHR presentMode = chooseSwapPresentMode(swapChainSupport.presentModes);
@@ -132,7 +132,7 @@ namespace PFF {
 
         VkSwapchainCreateInfoKHR createInfo = {};
         createInfo.sType = VK_STRUCTURE_TYPE_SWAPCHAIN_CREATE_INFO_KHR;
-        createInfo.surface = m_device->surface();
+        createInfo.surface = m_device->get_surface();
 
         createInfo.minImageCount = imageCount;
         createInfo.imageFormat = surfaceFormat.format;
@@ -141,7 +141,7 @@ namespace PFF {
         createInfo.imageArrayLayers = 1;
         createInfo.imageUsage = VK_IMAGE_USAGE_COLOR_ATTACHMENT_BIT;
 
-        QueueFamilyIndices indices = m_device->findPhysicalQueueFamilies();
+        QueueFamilyIndices indices = m_device->find_physical_queue_families();
 
         u32 queueFamilyIndices[] = { indices.graphicsFamily, indices.presentFamily };
         if (indices.graphicsFamily != indices.presentFamily) {
@@ -296,7 +296,7 @@ namespace PFF {
             imageInfo.sharingMode = VK_SHARING_MODE_EXCLUSIVE;
             imageInfo.flags = 0;
 
-            m_device->createImageWithInfo(imageInfo, VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT, m_depth_images[i], m_depth_image_memorys[i]);
+            m_device->create_image_with_info(imageInfo, VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT, m_depth_images[i], m_depth_image_memorys[i]);
 
             VkImageViewCreateInfo viewInfo{};
             viewInfo.sType = VK_STRUCTURE_TYPE_IMAGE_VIEW_CREATE_INFO;
@@ -381,7 +381,7 @@ namespace PFF {
     }
 
     VkFormat vk_swapchain::findDepthFormat() {
-        return m_device->findSupportedFormat(
+        return m_device->find_supported_format(
             { VK_FORMAT_D32_SFLOAT, VK_FORMAT_D32_SFLOAT_S8_UINT, VK_FORMAT_D24_UNORM_S8_UINT },
             VK_IMAGE_TILING_OPTIMAL,
             VK_FORMAT_FEATURE_DEPTH_STENCIL_ATTACHMENT_BIT);

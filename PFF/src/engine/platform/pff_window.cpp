@@ -195,9 +195,9 @@ namespace PFF {
 		return glfwWindowShouldClose(m_Window);
 	}
 
-	void pff_window::createWindowSurface(VkInstance_T* instance, VkSurfaceKHR_T** surface) {
+	void pff_window::createWindowSurface(VkInstance_T* instance, VkSurfaceKHR_T** get_surface) {
 
-		CORE_ASSERT(glfwCreateWindowSurface(instance, m_Window, nullptr, surface) == VK_SUCCESS, "", "Failed to create awindow surface");
+		CORE_ASSERT(glfwCreateWindowSurface(instance, m_Window, nullptr, get_surface) == VK_SUCCESS, "", "Failed to create awindow surface");
 
 	}
 

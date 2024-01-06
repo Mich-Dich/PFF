@@ -44,7 +44,7 @@ namespace PFF {
 
 		CORE_ASSERT(m_vertex_count >= 3, "", "Vertex count must be at least 3");
 		VkDeviceSize buffer_size = sizeof(vertices[0]) * m_vertex_count;
-		m_device->createBuffer(buffer_size, VK_BUFFER_USAGE_VERTEX_BUFFER_BIT, VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT, m_vertex_buffer, m_vertex_buffer_memory);
+		m_device->create_buffer(buffer_size, VK_BUFFER_USAGE_VERTEX_BUFFER_BIT, VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT, m_vertex_buffer, m_vertex_buffer_memory);
 
 		void* data;
 		vkMapMemory(m_device->get_device(), m_vertex_buffer_memory, 0, buffer_size, 0, &data);

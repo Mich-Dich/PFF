@@ -14,6 +14,10 @@
 
 #include "vulkan_renderer.h"
 
+#include "imgui.h"
+#include "backends/imgui_impl_glfw.h"
+#include "backends/imgui_impl_vulkan.h"
+
 
 namespace PFF {
 
@@ -32,6 +36,68 @@ namespace PFF {
 		create_dummy_game_objects();
 		create_pipeline_layout();
 		recreate_swapchian();
+
+		// Init ImGui
+		// VkDescriptorPoolSize poolSizes[] = {
+		// 	{ VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER, 1 },
+		// 	// { VK_DESCRIPTOR_TYPE_SAMPLER, 1000 },
+		// 	// { VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER, 1000 },
+		// 	// { VK_DESCRIPTOR_TYPE_SAMPLED_IMAGE, 1000 },
+		// 	// { VK_DESCRIPTOR_TYPE_STORAGE_IMAGE, 1000 },
+		// 	// { VK_DESCRIPTOR_TYPE_UNIFORM_TEXEL_BUFFER, 1000 },
+		// 	// { VK_DESCRIPTOR_TYPE_STORAGE_TEXEL_BUFFER, 1000 },
+		// 	// { VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER, 1000 },
+		// 	// { VK_DESCRIPTOR_TYPE_STORAGE_BUFFER, 1000 },
+		// 	// { VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER_DYNAMIC, 1000 },
+		// 	// { VK_DESCRIPTOR_TYPE_STORAGE_BUFFER_DYNAMIC, 1000 },
+		// 	// { VK_DESCRIPTOR_TYPE_INPUT_ATTACHMENT, 1000 }
+		// };
+		// VkDescriptorPoolCreateInfo poolInfo = {};
+		// poolInfo.sType = VK_STRUCTURE_TYPE_DESCRIPTOR_POOL_CREATE_INFO;
+		// poolInfo.flags = VK_DESCRIPTOR_POOL_CREATE_FREE_DESCRIPTOR_SET_BIT;
+		// poolInfo.maxSets = 10 * ARRAY_SIZE(poolSizes);
+		// poolInfo.poolSizeCount = (uint32_t)ARRAY_SIZE(poolSizes);
+		// poolInfo.pPoolSizes = poolSizes;
+		// CORE_ASSERT_S(vkCreateDescriptorPool(m_device->get_device(), &poolInfo, 0, &m_imgui_descriptor_pool) == VK_SUCCESS);
+		// 
+		// ImGui::CreateContext();
+		// ImGui::StyleColorsDark();
+		// ImGui_ImplGlfw_InitForVulkan(m_window->get_window(), false);
+		// ImGui_ImplVulkan_InitInfo initInfo = {};
+		// initInfo.Instance = m_device->get_instance();
+		// initInfo.PhysicalDevice = m_device->get_physical_device();
+		// initInfo.Device = m_device->get_device();
+		// initInfo.QueueFamily = m_device->find_physical_queue_families().graphicsFamily;
+		// initInfo.Queue = m_device->get_graphics_queue();
+		// initInfo.DescriptorPool = m_imgui_descriptor_pool;
+		// initInfo.MinImageCount = 2;
+		// initInfo.ImageCount = m_swapchain->get_image_count();
+		// initInfo.MSAASamples = VK_SAMPLE_COUNT_4_BIT;
+		// ImGui_ImplVulkan_Init(&initInfo, m_swapchain->get_render_pass());
+		// // Upload Fonts
+		// 
+		// // Use any command queue
+		// VkCommandPool commandPool = m_device->get_command_pool();
+		// VkCommandBuffer commandBuffer = commandBuffers[0];
+		// 
+		// CORE_ASSERT_S(vkResetCommandPool(context->device, commandPool, 0) == VK_SUCCESS);
+		// VkCommandBufferBeginInfo begin_info = {};
+		// begin_info.sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_BEGIN_INFO;
+		// begin_info.flags |= VK_COMMAND_BUFFER_USAGE_ONE_TIME_SUBMIT_BIT;
+		// CORE_ASSERT_S(vkBeginCommandBuffer(commandBuffer, &begin_info) == VK_SUCCESS);
+		// 
+		// ImGui_ImplVulkan_CreateFontsTexture(commandBuffer);
+		// 
+		// CORE_ASSERT_S(vkEndCommandBuffer(commandBuffer) == VK_SUCCESS);
+		// 
+		// VkSubmitInfo submitInfo = {};
+		// submitInfo.sType = VK_STRUCTURE_TYPE_SUBMIT_INFO;
+		// submitInfo.commandBufferCount = 1;
+		// submitInfo.pCommandBuffers = &commandBuffer;
+		// CORE_ASSERT_S(vkQueueSubmit(context->graphicsQueue.queue, 1, &submitInfo, VK_NULL_HANDLE) == VK_SUCCESS);
+		// 
+		// CORE_ASSERT_S(vkDeviceWaitIdle(context->device) == VK_SUCCESS);
+		// ImGui_ImplVulkan_DestroyFontUploadObjects();
 	}
 
 	vulkan_renderer::~vulkan_renderer() {
@@ -215,7 +281,7 @@ namespace PFF {
 		triangle.color = { .1f, .8f, .1f };
 		triangle.transform_2D.translation.x = .2f;
 		triangle.transform_2D.scale = { 2.0f ,0.5f };
-		triangle.transform_2D.rotation = 0.25f * glm::two_pi<float>();
+		triangle.transform_2D.rotation = 0.25f * two_pi<float>();
 
 		m_game_objects.push_back(std::move(triangle));
 	}
@@ -257,7 +323,7 @@ namespace PFF {
 		VkCommandBufferAllocateInfo allocat_I{};
 		allocat_I.sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_ALLOCATE_INFO;
 		allocat_I.level = VK_COMMAND_BUFFER_LEVEL_PRIMARY;
-		allocat_I.commandPool = m_device->getCommandPool();
+		allocat_I.commandPool = m_device->get_command_pool();
 		allocat_I.commandBufferCount = static_cast<u32>(m_command_buffers.size());
 
 		CORE_ASSERT_S(vkAllocateCommandBuffers(m_device->get_device(), &allocat_I, m_command_buffers.data()) == VK_SUCCESS);
@@ -265,7 +331,7 @@ namespace PFF {
 
 	void vulkan_renderer::free_command_buffers() {
 
-		vkFreeCommandBuffers(m_device->get_device(), m_device->getCommandPool(), static_cast<u32>(m_command_buffers.size()), m_command_buffers.data());
+		vkFreeCommandBuffers(m_device->get_device(), m_device->get_command_pool(), static_cast<u32>(m_command_buffers.size()), m_command_buffers.data());
 		m_command_buffers.clear();
 	}
 

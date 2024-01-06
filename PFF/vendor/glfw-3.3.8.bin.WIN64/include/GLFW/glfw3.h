@@ -4160,7 +4160,7 @@ GLFWAPI void glfwSetInputMode(GLFWwindow* window, int mode, int value);
  *  a system that does not support it, @ref GLFW_PLATFORM_ERROR will be emitted.
  *
  *  Raw mouse motion is closer to the actual motion of the mouse across
- *  a surface.  It is not affected by the scaling and acceleration applied to
+ *  a get_surface.  It is not affected by the scaling and acceleration applied to
  *  the motion of the desktop cursor.  That processing is suitable for a cursor
  *  while raw motion is better for controlling for example a 3D camera.  Because
  *  of this, raw mouse motion is only provided when the cursor is disabled.
@@ -5667,9 +5667,9 @@ GLFWAPI GLFWglproc glfwGetProcAddress(const char* procname);
  *  ICD have been found.
  *
  *  The availability of a Vulkan loader and even an ICD does not by itself guarantee that
- *  surface creation or even instance creation is possible.  Call @ref
+ *  get_surface creation or even instance creation is possible.  Call @ref
  *  glfwGetRequiredInstanceExtensions to check whether the extensions necessary for Vulkan
- *  surface creation are available and @ref glfwGetPhysicalDevicePresentationSupport to
+ *  get_surface creation are available and @ref glfwGetPhysicalDevicePresentationSupport to
  *  check whether a queue family of a physical device supports image presentation.
  *
  *  @return `GLFW_TRUE` if Vulkan is minimally available, or `GLFW_FALSE`
@@ -5699,7 +5699,7 @@ GLFWAPI int glfwVulkanSupported(void);
  *  generates a @ref GLFW_API_UNAVAILABLE error.  Call @ref glfwVulkanSupported
  *  to check whether Vulkan is at least minimally available.
  *
- *  If Vulkan is available but no set of extensions allowing window surface
+ *  If Vulkan is available but no set of extensions allowing window get_surface
  *  creation was found, this function returns `NULL`.  You may still use Vulkan
  *  for off-screen rendering and compute work.
  *
@@ -5779,7 +5779,7 @@ GLFWAPI GLFWvkproc glfwGetInstanceProcAddress(VkInstance instance, const char* p
  *  This function returns whether the specified queue family of the specified
  *  physical device supports presentation to the platform GLFW was built for.
  *
- *  If Vulkan or the required window surface creation instance extensions are
+ *  If Vulkan or the required window get_surface creation instance extensions are
  *  not available on the machine, or if the specified instance was not created
  *  with the required extensions, this function returns `GLFW_FALSE` and
  *  generates a @ref GLFW_API_UNAVAILABLE error.  Call @ref glfwVulkanSupported
@@ -5811,37 +5811,37 @@ GLFWAPI GLFWvkproc glfwGetInstanceProcAddress(VkInstance instance, const char* p
  */
 GLFWAPI int glfwGetPhysicalDevicePresentationSupport(VkInstance instance, VkPhysicalDevice device, uint32_t queuefamily);
 
-/*! @brief Creates a Vulkan surface for the specified window.
+/*! @brief Creates a Vulkan get_surface for the specified window.
  *
- *  This function creates a Vulkan surface for the specified window.
+ *  This function creates a Vulkan get_surface for the specified window.
  *
  *  If the Vulkan loader or at least one minimally functional ICD were not found,
  *  this function returns `VK_ERROR_INITIALIZATION_FAILED` and generates a @ref
  *  GLFW_API_UNAVAILABLE error.  Call @ref glfwVulkanSupported to check whether
  *  Vulkan is at least minimally available.
  *
- *  If the required window surface creation instance extensions are not
+ *  If the required window get_surface creation instance extensions are not
  *  available or if the specified instance was not created with these extensions
  *  enabled, this function returns `VK_ERROR_EXTENSION_NOT_PRESENT` and
  *  generates a @ref GLFW_API_UNAVAILABLE error.  Call @ref
  *  glfwGetRequiredInstanceExtensions to check what instance extensions are
  *  required.
  *
- *  The window surface cannot be shared with another API so the window must
+ *  The window get_surface cannot be shared with another API so the window must
  *  have been created with the [client api hint](@ref GLFW_CLIENT_API_attrib)
  *  set to `GLFW_NO_API` otherwise it generates a @ref GLFW_INVALID_VALUE error
  *  and returns `VK_ERROR_NATIVE_WINDOW_IN_USE_KHR`.
  *
- *  The window surface must be destroyed before the specified Vulkan instance.
- *  It is the responsibility of the caller to destroy the window surface.  GLFW
+ *  The window get_surface must be destroyed before the specified Vulkan instance.
+ *  It is the responsibility of the caller to destroy the window get_surface.  GLFW
  *  does not destroy it for you.  Call `vkDestroySurfaceKHR` to destroy the
- *  surface.
+ *  get_surface.
  *
- *  @param[in] instance The Vulkan instance to create the surface in.
- *  @param[in] window The window to create the surface for.
+ *  @param[in] instance The Vulkan instance to create the get_surface in.
+ *  @param[in] window The window to create the get_surface for.
  *  @param[in] allocator The allocator to use, or `NULL` to use the default
  *  allocator.
- *  @param[out] surface Where to store the handle of the surface.  This is set
+ *  @param[out] get_surface Where to store the handle of the get_surface.  This is set
  *  to `VK_NULL_HANDLE` if an error occurred.
  *  @return `VK_SUCCESS` if successful, or a Vulkan error code if an
  *  [error](@ref error_handling) occurred.
@@ -5872,7 +5872,7 @@ GLFWAPI int glfwGetPhysicalDevicePresentationSupport(VkInstance instance, VkPhys
  *
  *  @ingroup vulkan
  */
-GLFWAPI VkResult glfwCreateWindowSurface(VkInstance instance, GLFWwindow* window, const VkAllocationCallbacks* allocator, VkSurfaceKHR* surface);
+GLFWAPI VkResult glfwCreateWindowSurface(VkInstance instance, GLFWwindow* window, const VkAllocationCallbacks* allocator, VkSurfaceKHR* get_surface);
 
 #endif /*VK_VERSION_1_0*/
 
