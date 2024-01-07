@@ -1,9 +1,6 @@
 
 #include "util/pffpch.h"
 
-
-// #include "glad/glad.h"
-
 #define GLFW_INCLUDE_VULKAN
 #include "GLFW/glfw3.h"
 
@@ -53,6 +50,7 @@ namespace PFF {
 		glfwWindowHint(GLFW_RESIZABLE, GLFW_TRUE);
 
 		m_Window = glfwCreateWindow(static_cast<int>(m_data.width), static_cast<int>(m_data.height), m_data.title.c_str(), nullptr, nullptr);
+		CORE_ASSERT(glfwVulkanSupported(), "", "GLFW: Vulkan Not Supported");
 
 		CORE_LOG(Trace, "Creating window [" << m_data.title << " width: " << m_data.width << "  height: " << m_data.height << "]");
 
@@ -163,6 +161,7 @@ namespace PFF {
 					break;
 			}
 		});
+		
 	}
 
 	void pff_window::shutdown() {

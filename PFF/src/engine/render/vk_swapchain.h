@@ -22,10 +22,11 @@ namespace PFF {
         VkResult submitCommandBuffers(const VkCommandBuffer* buffers, u32* imageIndex);
 
         FORCEINLINE VkFramebuffer getFrameBuffer(int index)  const { return m_swap_chain_framebuffers[index]; }
-        FORCEINLINE VkImageView getImageView(int index)  const { return m_swap_chain_image_views[index]; }
-        FORCEINLINE VkFormat getSwapChainImageFormat()  const { return m_swap_chainImage_format; }
-        FORCEINLINE VkExtent2D getSwapChainExtent() const { return m_swap_chain_extent; }
-        FORCEINLINE size_t get_image_count() const { return m_swap_chain_images.size(); }
+        FORCEINLINE VkImageView get_image_view(int index)  const { return m_swap_chain_image_views[index]; }
+        FORCEINLINE VkFormat get_swapchain_image_format()  const { return m_swap_chainImage_format; }
+        FORCEINLINE VkExtent2D get_swapchain_extent() const { return m_swap_chain_extent; }
+        FORCEINLINE u32 get_image_count() const { return static_cast<u32>(m_swap_chain_images.size()); }
+        FORCEINLINE u32 get_max_frames_in_flight() const { return static_cast<u32>(MAX_FRAMES_IN_FLIGHT); }
         FORCEINLINE VkRenderPass get_render_pass()  const { return m_render_pass; }
         FORCEINLINE u32 get_width() const { return m_swap_chain_extent.width; }
         FORCEINLINE u32 get_height() const { return m_swap_chain_extent.height; }

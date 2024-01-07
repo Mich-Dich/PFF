@@ -1,7 +1,7 @@
 -- premake5.lua
 
-project_name = "Sandbox"										-- This is the name of your project
-vulkan_dir = "C:/VulkanSDK/1.3.250.1"
+project_name = "Sandbox"						-- This is the name of your project
+vulkan_dir = "C:/VulkanSDK/1.3.250.1"			-- CHANGE THIS
 
 workspace "PFF"
 	platforms "x64"
@@ -13,22 +13,23 @@ workspace "PFF"
 		"Release"
 	}
 
-	IncludeDir = {}				-- Include directories relative to root folder (solution directory)
-	IncludeDir["ImGui"] = "PFF/vendor/ImGui"
+	outputs  = "%{cfg.buildcfg}-%{cfg.system}-%{cfg.architecture}"
+
+	IncludeDir = {}
 	IncludeDir["glm"] = "PFF/vendor/glm"
+	IncludeDir["ImGui"] = "PFF/vendor/imgui"
 
-	outputs  = "%{cfg.buildcfg}-%{cfg.system}-%{cfg.architecture}"		-- output direactory of complie results
-
-	include "PFF/vendor/ImGui"
+	include "PFF/vendor/imgui"
 
 project "PFF"
 	location "PFF"
-	kind "SharedLib"
+	kind "SharedLib"	
+	staticruntime "off"
 	language "C++"
 
 	targetdir ("bin/" .. outputs  .. "/%{prj.name}")
 	objdir ("bin-int/" .. outputs  .. "/%{prj.name}")
-
+	
 	pchheader "util/pffpch.h"
 	pchsource "PFF/src/util/pffpch.cpp"
 
@@ -52,25 +53,28 @@ project "PFF"
 		"PFF/vendor/glm",
 		"PFF/vendor/glfw-3.3.8.bin.WIN64/include",
 		"%{IncludeDir.ImGui}",
+		"%{IncludeDir.ImGui}/backends/",
 		
 		vulkan_dir .. "/Include",
-	}
-	
-	libdirs 
-	{
-		"PFF/vendor/glfw-3.3.8.bin.WIN64/lib-vc2022",
-		vulkan_dir .. "/Lib",
 	}
 
 	links 
 	{
+		"ImGui",
 		"vulkan-1.lib",
 		"glfw3.lib",
 	}
+	
+	libdirs 
+	{
+		--"PFF/libs",
+		--"%{IncludeDir.ImGui}/bin/" .. outputs .. "/ImGui",
+		"PFF/vendor/glfw-3.3.8.bin.WIN64/lib-vc2022",
+		vulkan_dir .. "/Lib",
+	}
+	
 	filter "system:windows"
 		cppdialect "C++17"
-		defines { "_CRT_STDIO_ISO_WIDE_SPECIFIERS" } -- Enable C17 features for Visual Studio
-		staticruntime "off"
 		systemversion "latest"
 		
         linkoptions 
@@ -93,17 +97,20 @@ project "PFF"
 	filter "configurations:Debug"
 		buildoptions "/MDd"
 		defines "PFF_DEBUG"
+		runtime "Debug"
 		symbols "on"
 
 	filter "configurations:Release"
 		buildoptions "/MD"
 		defines "PFF_RELEASE"
+		runtime "Release"
 		optimize "on"
 
 project (project_name)
 	location (project_name)
 	kind "ConsoleApp"
 	language "C++"
+	staticruntime "off"
 
 	targetdir ("bin/" .. outputs  .. "/%{prj.name}")
 	objdir ("bin-int/" .. outputs  .. "/%{prj.name}")
@@ -137,13 +144,11 @@ project (project_name)
 
 	filter "system:windows"
 		cppdialect "C++17"
-		staticruntime "on"
 		systemversion "latest"
 
 		defines
 		{
 			"PFF_PLATFORM_WINDOWS",
-			"_CRT_STDIO_ISO_WIDE_SPECIFIERS",	-- Enable C17 features for Visual Studio
 		}
 
 		postbuildcommands
@@ -155,9 +160,11 @@ project (project_name)
 	filter "configurations:Debug"
 		buildoptions "/MDd"
 		defines "GAME_DEBUG"
+		runtime "Debug"
 		symbols "on"
 
 	filter "configurations:Release"
 		buildoptions "/MD"
 		defines "GAME_RELEASE"
+		runtime "Release"
 		optimize "on"

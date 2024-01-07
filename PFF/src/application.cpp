@@ -41,6 +41,7 @@ namespace PFF {
 		m_window->SetEventCallback(BIND_FN(application::on_event));
 
 		m_renderer = std::make_unique<renderer>(m_window);
+
 	}
 
 	application::~application() {
@@ -64,7 +65,7 @@ namespace PFF {
 		m_targetdelta_time = (1000.0f / m_target_fps);
 
 		m_renderer->create_dummy_game_objects();
-		m_renderer->add_render_system(std::make_unique<render_system>(m_renderer->get_device(), m_renderer->get_swapchain_render_pass()));
+
 		CORE_LOG(Trace, "Running")
 
 			while (m_running) {

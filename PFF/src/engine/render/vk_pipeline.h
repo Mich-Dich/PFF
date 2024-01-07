@@ -36,6 +36,8 @@ namespace PFF {
 
 		DELETE_COPY(vk_pipeline);
 
+		FORCEINLINE u32 get_subpass() const { return m_subpass; }
+
 		void bind_commnad_buffers(VkCommandBuffer command_buffer);
 
 	private:
@@ -45,6 +47,7 @@ namespace PFF {
 
 		std::shared_ptr<vk_device> m_device;
 
+		u32 m_subpass = 0;
 		VkPipeline m_graphics_pipeline;
 		VkShaderModule m_vert_shader_module;
 		VkShaderModule m_frag_shader_module;

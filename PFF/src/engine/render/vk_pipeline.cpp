@@ -171,6 +171,7 @@ namespace PFF {
 		pipeline_CI.layout = config.pipeline_layout;
 		pipeline_CI.renderPass = config.render_pass;
 		pipeline_CI.subpass = config.subpass;
+		m_subpass = config.subpass;
 
 		pipeline_CI.basePipelineHandle = VK_NULL_HANDLE;  // Optional
 		pipeline_CI.basePipelineIndex = -1;               // Optional
@@ -178,7 +179,8 @@ namespace PFF {
 		CORE_ASSERT_S(&pipeline_CI != nullptr);
 		CORE_ASSERT_S(&m_graphics_pipeline != nullptr);
 
-		CORE_ASSERT_S(vkCreateGraphicsPipelines(m_device->get_device(), VK_NULL_HANDLE, 1, &pipeline_CI, nullptr, &m_graphics_pipeline) == VK_SUCCESS);
+		CORE_ASSERT(vkCreateGraphicsPipelines(m_device->get_device(), VK_NULL_HANDLE, 1, &pipeline_CI, nullptr, &m_graphics_pipeline) == VK_SUCCESS,
+			"Created graphics pipeline", "Failed to create graphics pipeline");
 	}
 
 	void vk_pipeline::create_shader_module(const std::vector<char>& code, VkShaderModule* shader_module) {

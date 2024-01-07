@@ -17,6 +17,10 @@ namespace PFF {
 		
 		DELETE_COPY(render_system);
 
+		FORCEINLINE u32 get_pipeline_subpass() const { return m_vk_pipeline->get_subpass(); }
+		FORCEINLINE void pipeline_bind_commnad_buffers(VkCommandBuffer command_buffer) const { return m_vk_pipeline->bind_commnad_buffers(command_buffer); }
+		//void bind_commnad_buffers(VkCommandBuffer command_buffer);
+
 		void render_game_objects(VkCommandBuffer command_buffer, std::vector<game_object>& game_objects);
 
 	private:

@@ -21,7 +21,7 @@ namespace PFF {
 		FORCEINLINE VkCommandBuffer get_current_command_buffer() const {	CORE_ASSERT(m_is_frame_started, "", "Cant get command buffer when frame not in progress");
 																			return m_command_buffers[m_current_image_index]; }
 
-		void add_render_system(std::unique_ptr<render_system> render_system);
+		void add_render_system(std::shared_ptr<vk_device> device, VkRenderPass renderPass);
 		void draw_frame();
 		void wait_Idle();
 		void set_size(u32 width, u32 height);
@@ -29,7 +29,8 @@ namespace PFF {
 		void create_dummy_game_objects();
 
 	private:
-
+		void imgui_init();
+		void imgui_sutdown();
 		VkCommandBuffer begin_frame();
 		void end_frame();
 		void begin_swapchain_renderpass(VkCommandBuffer commandbuffer);

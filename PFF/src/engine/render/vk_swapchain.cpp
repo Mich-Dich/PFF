@@ -125,10 +125,8 @@ namespace PFF {
         VkExtent2D extent = chooseSwapExtent(swapChainSupport.capabilities);
 
         u32 imageCount = swapChainSupport.capabilities.minImageCount + 1;
-        if (swapChainSupport.capabilities.maxImageCount > 0 &&
-            imageCount > swapChainSupport.capabilities.maxImageCount) {
+        if (swapChainSupport.capabilities.maxImageCount > 0 && imageCount > swapChainSupport.capabilities.maxImageCount)
             imageCount = swapChainSupport.capabilities.maxImageCount;
-        }
 
         VkSwapchainCreateInfoKHR createInfo = {};
         createInfo.sType = VK_STRUCTURE_TYPE_SWAPCHAIN_CREATE_INFO_KHR;
@@ -209,7 +207,7 @@ namespace PFF {
         depthAttachmentRef.layout = VK_IMAGE_LAYOUT_DEPTH_STENCIL_ATTACHMENT_OPTIMAL;
 
         VkAttachmentDescription colorAttachment = {};
-        colorAttachment.format = getSwapChainImageFormat();
+        colorAttachment.format = get_swapchain_image_format();
         colorAttachment.samples = VK_SAMPLE_COUNT_1_BIT;
         colorAttachment.loadOp = VK_ATTACHMENT_LOAD_OP_CLEAR;
         colorAttachment.storeOp = VK_ATTACHMENT_STORE_OP_STORE;
@@ -256,7 +254,7 @@ namespace PFF {
 
             std::array<VkImageView, 2> attachments = { m_swap_chain_image_views[i], m_depth_image_views[i] };
 
-            VkExtent2D m_swap_chain_extent = getSwapChainExtent();
+            VkExtent2D m_swap_chain_extent = get_swapchain_extent();
             VkFramebufferCreateInfo framebufferInfo = {};
             framebufferInfo.sType = VK_STRUCTURE_TYPE_FRAMEBUFFER_CREATE_INFO;
             framebufferInfo.renderPass = m_render_pass;
@@ -273,7 +271,7 @@ namespace PFF {
     void vk_swapchain::createDepthResources() {
 
         VkFormat depthFormat = findDepthFormat();
-        VkExtent2D m_swap_chain_extent = getSwapChainExtent();
+        VkExtent2D m_swap_chain_extent = get_swapchain_extent();
 
         m_depth_images.resize(get_image_count());
         m_depth_image_memorys.resize(get_image_count());
@@ -337,7 +335,7 @@ namespace PFF {
     VkSurfaceFormatKHR vk_swapchain::chooseSwapSurfaceFormat(const std::vector<VkSurfaceFormatKHR>& availableFormats) {
 
         for (const auto& availableFormat : availableFormats) {
-            if (availableFormat.format == VK_FORMAT_B8G8R8A8_SRGB && availableFormat.colorSpace == VK_COLOR_SPACE_SRGB_NONLINEAR_KHR) {
+            if (availableFormat.format == VK_FORMAT_B8G8R8A8_UNORM && availableFormat.colorSpace == VK_COLOR_SPACE_SRGB_NONLINEAR_KHR) {
                 return availableFormat;
             }
         }
