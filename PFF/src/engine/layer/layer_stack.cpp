@@ -8,10 +8,7 @@
 namespace PFF {
 
 	//
-	layer_stack::layer_stack() {
-	
-		m_layer_insert = m_layers.begin();
-	}
+	layer_stack::layer_stack() {}
 	
 	//
 	layer_stack::~layer_stack() {
@@ -23,7 +20,7 @@ namespace PFF {
 	//
 	void layer_stack::push_layer(layer* layer) {
 
-		m_layers.emplace(m_layer_insert, layer);
+		m_layers.emplace(m_layers.begin() + m_layer_insert, layer);
 		m_layer_insert++;
 	}
 	

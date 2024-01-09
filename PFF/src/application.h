@@ -10,6 +10,7 @@ namespace PFF {
 	class window_resize_event;
 	class window_close_event;
 	class window_refresh_event;
+	class imgui_layer;
 	class game_map;
 
 	class PFF_API application {
@@ -17,12 +18,16 @@ namespace PFF {
 		application();
 		virtual ~application();
 
+		DELETE_COPY(application);
+
+		FORCEINLINE static application& get() { return *s_instance; }
+		FORCEINLINE std::shared_ptr<pff_window> get_window() const { return m_window; }
+
 		void run();
 		virtual bool init();							// to be used by client
 		virtual bool update(f32 delta_time);				// potentally make private - every actor has own function (like UNREAL)
 		virtual bool render(f32 delta_time);				// potentally make private - every actor has own function (like UNREAL)
 
-		DELETE_COPY(application);
 
 	private:
 
@@ -32,6 +37,8 @@ namespace PFF {
 		bool on_window_refresh(window_refresh_event& e);
 		void push_layer(layer* layer);						// client doesnt need to be consernt with layer-system, just tick a box if you want debug stuff
 		void push_overlay(layer* overlay);					// client doesnt need to be consernt with layer-system, just tick a box if you want debug stuff
+		void pop_layer(layer* layer);
+		void pop_overlay(layer* overlay);
 
 		layer_stack m_layerstack{};
 		std::shared_ptr<pff_window> m_window{};
@@ -43,9 +50,12 @@ namespace PFF {
 		std::chrono::system_clock::time_point m_frame_start;
 		std::chrono::system_clock::time_point m_frame_end;
 		bool m_running = true;
+		static application* s_instance;
+
+		imgui_layer* m_imgui_layer;
 	};
 
-	static application* s_instance;
+	
 
 	// to be defined in Client
 	application* create_application();

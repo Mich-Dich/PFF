@@ -21,9 +21,8 @@ namespace PFF {
 
 	private:
 		std::vector<layer*> m_layers;
-		std::vector<layer*>::iterator m_layer_insert;
+		u32 m_layer_insert = 0;
 
 	};
 
 }
-

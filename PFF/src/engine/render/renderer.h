@@ -4,6 +4,7 @@
 #include "engine/render/vk_swapchain.h"
 #include "engine/render/render_system.h"
 #include "engine/platform/pff_window.h"
+#include "engine/layer/layer_stack.h"
 
 namespace PFF {
 
@@ -22,10 +23,10 @@ namespace PFF {
 																			return m_command_buffers[m_current_image_index]; }
 
 		void add_render_system(std::shared_ptr<vk_device> device, VkRenderPass renderPass);
-		void draw_frame();
+		void draw_frame(layer_stack layerstack);
+		void refresh(layer_stack layerstack);
 		void wait_Idle();
 		void set_size(u32 width, u32 height);
-		void refresh();
 		void create_dummy_game_objects();
 
 	private:
@@ -39,7 +40,7 @@ namespace PFF {
 		void free_command_buffers();
 		void recreate_swapchian();
 		
-		system_state state;
+		system_state m_state = system_state::inactive;
 		bool needs_to_resize;
 		u32 m_current_image_index;
 		bool m_is_frame_started = false;

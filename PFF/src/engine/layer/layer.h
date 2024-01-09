@@ -13,8 +13,9 @@ namespace PFF {
 		virtual void on_detach();
 		virtual void on_update();
 		virtual void on_event(event& event);
+		virtual void on_imgui_render();
 
-		FORCEINLINE const  std::string& get_name() const { return m_debugname; }
+		FORCEINLINE const std::string& get_name() const { return m_debugname; }
 
 	private:
 

@@ -2,19 +2,12 @@
 #include "util/pffpch.h"
 
 #include "engine/render/render_system.h"
+#include "engine/layer/layer_stack.h"
+#include "engine/layer/imgui_layer.h"
 
 #define IMGUI_DEFINE_MATH_OPERATORS
-#include "imgui.h"
-#include "imconfig.h"
-#include "imgui_impl_glfw.h"
 #include "imgui_impl_vulkan.h"
-#include "imgui_tables.cpp"
-#include "imgui_internal.h"
-#include "imgui.cpp"
-#include "imgui_draw.cpp"
-#include "imgui_widgets.cpp"
-#include "imgui_demo.cpp"
-#include "imgui_impl_glfw.cpp"
+#include "imgui_impl_glfw.h"
 //#include "imgui_impl_vulkan_but_better.h"
 
 // DEV-ONLY
@@ -31,11 +24,10 @@ namespace PFF {
 	renderer::renderer(std::shared_ptr<pff_window> window) 
 		: m_window(window) {
 
+		CORE_LOG(Trace, "Render starting ...");
 		m_device = std::make_shared<vk_device>(m_window);
 		recreate_swapchian();
 		create_command_buffer();
-		state = system_state::active;
-		CORE_LOG(Trace, "renderstarted");
 
 		// Create Descriptor Pool (ImGui_ImplVulkan_Init)
 		// The example only requires a single combined image sampler descriptor for the font image and only uses one descriptor set (for that)
@@ -58,13 +50,15 @@ namespace PFF {
 		add_render_system(get_device(), get_swapchain_render_pass());
 
 		imgui_init();
+		m_state = system_state::active;
+		CORE_LOG(Trace, "Render started");
 	}
 
 	renderer::~renderer() {
 
-		free_command_buffers();
-		vkDestroyDescriptorPool(m_device->get_device(), m_imgui_descriptor_pool, nullptr);
 		imgui_sutdown();
+		vkDestroyDescriptorPool(m_device->get_device(), m_imgui_descriptor_pool, nullptr);
+		free_command_buffers();
 	}
 
 	// ==================================================================== public functions ====================================================================
@@ -75,29 +69,29 @@ namespace PFF {
 	}
 
 	//
-	void renderer::draw_frame() {
+	void renderer::draw_frame(layer_stack layerstack) {
 		
-		if (state == system_state::active) {
+		if (m_state == system_state::active) {
 
 			if (auto commandbuffer = begin_frame()) {
 
 				begin_swapchain_renderpass(commandbuffer);
-				m_render_system->render_game_objects(commandbuffer, m_game_objects);
 
-				ImGui_ImplVulkan_NewFrame();
-				ImGui_ImplGlfw_NewFrame();
-				ImGui::NewFrame();
+				for (layer* target : layerstack)
+					target->on_imgui_render();
 
-				ImGui::ShowDemoWindow();
-
-				ImGui::Render();
-				ImGui_ImplVulkan_RenderDrawData(ImGui::GetDrawData(), commandbuffer, 0);
-
+				m_render_system->render_game_objects(commandbuffer, m_game_objects);		// move to layer // make [m_game_objects] into pointer to a vector in game_map.h
 				end_swapchain_renderpass(commandbuffer);
 
 				end_frame();
 			}
 		}
+	}
+
+	//
+	void renderer::refresh(layer_stack layerstack) {
+
+		draw_frame(layerstack);
 	}
 
 	//
@@ -114,19 +108,13 @@ namespace PFF {
 
 		if (width > 0 && height > 0) {
 
-			state = system_state::active;
+			m_state = system_state::active;
 			LOG(Info, "Resize with valid size => rebuild swapchain");
 			vkDeviceWaitIdle(m_device->get_device());
 			recreate_swapchian();
 		} else {
-			state = system_state::inactive;
+			m_state = system_state::inactive;
 		}
-	}
-
-	//
-	void renderer::refresh() {
-
-		draw_frame();
 	}
 
 	//
@@ -154,15 +142,6 @@ namespace PFF {
 
 	void renderer::imgui_init() {
 
-		// Setup Dear ImGui context
-		IMGUI_CHECKVERSION();
-		ImGui::CreateContext();
-		ImGuiIO& io = ImGui::GetIO(); (void)io;
-		io.ConfigFlags |= ImGuiConfigFlags_NavEnableKeyboard;     // Enable Keyboard Controls
-		io.ConfigFlags |= ImGuiConfigFlags_NavEnableGamepad;      // Enable Gamepad Controls
-		//io.ConfigFlags |= ImGuiConfigFlags_Docking_enabled;
-		ImGui::StyleColorsDark();
-
 		// Setup Platform/Renderer backends
 		ImGui_ImplGlfw_InitForVulkan(m_window->get_window(), true);
 		ImGui_ImplVulkan_InitInfo init_info{};
@@ -180,22 +159,10 @@ namespace PFF {
 		//init_info.Allocator = nullptr;
 		//init_info.CheckVkResultFn = check_vk_result;
 		CORE_ASSERT(ImGui_ImplVulkan_Init(&init_info, m_swapchain->get_render_pass()), "", "");
-
-		// Use any command queue
-		VkCommandBuffer command_buffer = m_device->begin_single_time_commands();
-		ImGui_ImplVulkan_CreateFontsTexture(command_buffer);
-		m_device->end_single_time_commands(command_buffer);
-
-		CORE_ASSERT(vkDeviceWaitIdle(m_device->get_device()) == VK_SUCCESS, "", "Failed wait idle");
-		ImGui_ImplVulkan_DestroyFontUploadObjects();
-
 	}
 
 	void renderer::imgui_sutdown() {
 
-		ImGui_ImplVulkan_Shutdown();
-		ImGui_ImplGlfw_Shutdown();
-		ImGui::DestroyContext();
 	}
 
 	//

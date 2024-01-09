@@ -11,6 +11,7 @@
 
 #include "engine/layer/layer_stack.h"
 #include "engine/layer/layer.h"
+#include "engine/layer/imgui_layer.h"
 
 #include "engine/platform/pff_window.h"
 #include "engine/render/renderer.h"
@@ -22,6 +23,8 @@
 namespace PFF {
 
 	// ==================================================================== setup ====================================================================
+
+	application* application::s_instance = nullptr;
 
 	application::application() :
 		m_delta_time(1), m_running(true), m_frame_start(std::chrono::system_clock::now()), m_frame_end(std::chrono::system_clock::now()) {
@@ -41,12 +44,15 @@ namespace PFF {
 		m_window->SetEventCallback(BIND_FN(application::on_event));
 
 		m_renderer = std::make_unique<renderer>(m_window);
-
+		m_imgui_layer = new imgui_layer(m_renderer->get_device());
+		//push_overlay(m_imgui_layer);
 	}
 
 	application::~application() {
 
-		m_renderer.reset();
+		//pop_layer(m_imgui_layer);
+		delete m_imgui_layer;
+		m_renderer.release();
 
 		WindowAttributes loc_window_att = m_window->get_attributes();
 		SAVE_CONFIG_STR(default_editor, loc_window_att.title, "WindowAttributes", "title");
@@ -79,7 +85,7 @@ namespace PFF {
 				update(m_delta_time);	// potentally make every actor have own function (like UNREAL)
 				render(m_delta_time);	// potentally make every actor have own function (like UNREAL)
 
-				m_renderer->draw_frame();
+				m_renderer->draw_frame(m_layerstack);
 
 
 				// Simple FPS controller - needs work
@@ -128,7 +134,7 @@ namespace PFF {
 
 	bool application::on_window_refresh(window_refresh_event& e) {
 
-		m_renderer->refresh();
+		m_renderer->refresh(m_layerstack);
 		return true;
 	}
 
@@ -142,6 +148,16 @@ namespace PFF {
 	void application::push_overlay(layer* overlay) {
 
 		m_layerstack.push_overlay(overlay);
+	}
+
+	void application::pop_layer(layer* layer) {
+
+		m_layerstack.pop_layer(layer);
+	}
+
+	void application::pop_overlay(layer* overlay) {
+
+		m_layerstack.pop_overlay(overlay);
 	}
 
 	// ==================================================================== engine events ====================================================================
