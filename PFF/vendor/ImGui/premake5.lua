@@ -29,7 +29,6 @@ project "ImGui"
 	{
 		"PFF/vendor/ImGui",
 		"%{prj.name}",
-		"%{prj.name}/backends",
 		"../../vendor/glfw-3.3.8.bin.WIN64/include",
 		vulkan_dir .. "/Include",
 	}
@@ -42,6 +41,7 @@ project "ImGui"
 		{
 			"{COPY} %{cfg.buildtarget.relpath} ../../libs",
 		}
+
 
 	filter "system:linux"
 		pic "On"

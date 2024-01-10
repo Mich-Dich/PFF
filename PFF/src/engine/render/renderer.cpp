@@ -4,19 +4,8 @@
 #include "engine/render/render_system.h"
 #include "engine/layer/layer.h"
 
-#define IMGUI_DEFINE_MATH_OPERATORS
-#include "imgui.h"
-#include "imconfig.h"
 #include "imgui_impl_glfw.h"
 #include "imgui_impl_vulkan.h"
-#include "imgui_tables.cpp"
-#include "imgui_internal.h"
-#include "imgui.cpp"
-#include "imgui_draw.cpp"
-#include "imgui_widgets.cpp"
-#include "imgui_demo.cpp"
-#include "imgui_impl_glfw.cpp"
-//#include "imgui_impl_vulkan_but_better.h"
 
 // DEV-ONLY
 #include "engine/geometry/basic_mesh.h"
@@ -172,11 +161,10 @@ namespace PFF {
 
 		// Use any command queue
 		VkCommandBuffer command_buffer = m_device->begin_single_time_commands();
-		ImGui_ImplVulkan_CreateFontsTexture(command_buffer);
+		ImGui_ImplVulkan_CreateFontsTexture();
 		m_device->end_single_time_commands(command_buffer);
 
 		CORE_ASSERT(vkDeviceWaitIdle(m_device->get_device()) == VK_SUCCESS, "", "Failed wait idle");
-		ImGui_ImplVulkan_DestroyFontUploadObjects();
 
 	}
 

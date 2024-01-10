@@ -42,12 +42,12 @@ namespace PFF {
 		LOAD_CONFIG_NUM(default_editor, loc_window_att.height, u32, "WindowAttributes", "height");
 		LOAD_CONFIG_BOOL(default_editor, loc_window_att.VSync, "WindowAttributes", "VSync");
 		m_window = std::make_shared<pff_window>(loc_window_att);			// Can be called after inital setup like [compiling shaders]
-		m_window->SetEventCallback(BIND_FN(application::on_event));
 
 		m_imgui_layer = new imgui_layer();
 		push_overlay(m_imgui_layer);
 
 		m_renderer = std::make_unique<renderer>(m_window, &m_layerstack);
+		m_window->SetEventCallback(BIND_FN(application::on_event));
 	}
 
 	application::~application() {
