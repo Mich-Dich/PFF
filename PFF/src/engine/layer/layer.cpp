@@ -26,5 +26,8 @@ namespace PFF {
 	void layer::on_event(event& event) {
 	}
 
+	void layer::on_imgui_render() {
+	}
+
 
 }

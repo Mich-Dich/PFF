@@ -2,6 +2,7 @@
 #include "util/pffpch.h"
 
 #include "engine/render/render_system.h"
+#include "engine/layer/layer.h"
 
 #define IMGUI_DEFINE_MATH_OPERATORS
 #include "imgui.h"
@@ -28,8 +29,8 @@ namespace PFF {
 
 	// ==================================================================== setup ====================================================================
 
-	renderer::renderer(std::shared_ptr<pff_window> window) 
-		: m_window(window) {
+	renderer::renderer(std::shared_ptr<pff_window> window, layer_stack* layerstack)
+		: m_window(window), m_layerstack(layerstack) {
 
 		m_device = std::make_shared<vk_device>(m_window);
 		recreate_swapchian();
@@ -57,12 +58,12 @@ namespace PFF {
 		// add first render system
 		add_render_system(get_device(), get_swapchain_render_pass());
 
-		//imgui_init();
+		imgui_init();
 	}
 
 	renderer::~renderer() {
 
-		//imgui_sutdown();
+		imgui_sutdown();
 		vkDestroyDescriptorPool(m_device->get_device(), m_imgui_descriptor_pool, nullptr);
 		free_command_buffers();
 	}
@@ -82,19 +83,14 @@ namespace PFF {
 			if (auto commandbuffer = begin_frame()) {
 
 				begin_swapchain_renderpass(commandbuffer);
+				imgui_begin_frame();
+
 				m_render_system->render_game_objects(commandbuffer, m_game_objects);
+				for (layer* target : *m_layerstack)
+					target->on_imgui_render();
 
-				//ImGui_ImplVulkan_NewFrame();
-				//ImGui_ImplGlfw_NewFrame();
-				//ImGui::NewFrame();
-				//
-				//ImGui::ShowDemoWindow();
-				//
-				//ImGui::Render();
-				//ImGui_ImplVulkan_RenderDrawData(ImGui::GetDrawData(), commandbuffer, 0);
-
+				imgui_end_frame(commandbuffer);				
 				end_swapchain_renderpass(commandbuffer);
-
 				end_frame();
 			}
 		}
@@ -154,14 +150,7 @@ namespace PFF {
 
 	void renderer::imgui_init() {
 
-		// Setup Dear ImGui context
-		IMGUI_CHECKVERSION();
-		ImGui::CreateContext();
-		ImGui::StyleColorsDark();
-		ImGuiIO& io = ImGui::GetIO(); (void)io;
-		io.ConfigFlags |= ImGuiConfigFlags_NavEnableKeyboard;     // Enable Keyboard Controls
-		io.ConfigFlags |= ImGuiConfigFlags_NavEnableGamepad;      // Enable Gamepad Controls
-		//io.ConfigFlags |= ImGuiConfigFlags_Docking_enabled;
+		LOG(Info, "Init Imgui");
 
 		// Setup Platform/Renderer backends
 		ImGui_ImplGlfw_InitForVulkan(m_window->get_window(), true);
@@ -195,7 +184,20 @@ namespace PFF {
 
 		ImGui_ImplVulkan_Shutdown();
 		ImGui_ImplGlfw_Shutdown();
-		ImGui::DestroyContext();
+	}
+
+	void renderer::imgui_begin_frame() {
+
+		ImGui_ImplVulkan_NewFrame();
+		ImGui_ImplGlfw_NewFrame();
+		ImGui::NewFrame();
+	}
+
+	void renderer::imgui_end_frame(VkCommandBuffer commandbuffer) {
+
+		ImGui::Render();
+		ImGui_ImplVulkan_RenderDrawData(ImGui::GetDrawData(), commandbuffer, 0);
+
 	}
 
 	//

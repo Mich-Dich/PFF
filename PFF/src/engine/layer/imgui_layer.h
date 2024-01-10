@@ -9,11 +9,15 @@ namespace PFF {
 		imgui_layer();
 		~imgui_layer();
 
-		void on_attach();
-		void on_detach();
-		void on_update();
-		void on_event(event& event);
+		void on_attach() override;
+		void on_detach() override;
+		void on_update() override;
+		void on_event(event& event) override;
+		void on_imgui_render() override;
 
+		void begin_frame();
+		void end_frame();
+	
 	private:
 
 	};

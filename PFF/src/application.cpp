@@ -11,6 +11,7 @@
 
 #include "engine/layer/layer_stack.h"
 #include "engine/layer/layer.h"
+#include "engine/layer/imgui_layer.h"
 
 #include "engine/platform/pff_window.h"
 #include "engine/render/renderer.h"
@@ -22,6 +23,9 @@
 namespace PFF {
 
 	// ==================================================================== setup ====================================================================
+
+	application* application::s_instance = nullptr;
+
 
 	application::application() :
 		m_delta_time(1), m_running(true), m_frame_start(std::chrono::system_clock::now()), m_frame_end(std::chrono::system_clock::now()) {
@@ -40,8 +44,10 @@ namespace PFF {
 		m_window = std::make_shared<pff_window>(loc_window_att);			// Can be called after inital setup like [compiling shaders]
 		m_window->SetEventCallback(BIND_FN(application::on_event));
 
-		m_renderer = std::make_unique<renderer>(m_window);
+		m_imgui_layer = new imgui_layer();
+		push_overlay(m_imgui_layer);
 
+		m_renderer = std::make_unique<renderer>(m_window, &m_layerstack);
 	}
 
 	application::~application() {

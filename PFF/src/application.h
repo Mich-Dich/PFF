@@ -1,6 +1,7 @@
 #pragma once
 
 #include "engine/layer/layer_stack.h"			// need to include this for some reason
+#include "engine/layer/imgui_layer.h"
 
 namespace PFF {
 
@@ -17,12 +18,15 @@ namespace PFF {
 		application();
 		virtual ~application();
 
+		DELETE_COPY(application);
+
+		FORCEINLINE static application& get() { return *s_instance; }
+
 		void run();
 		virtual bool init();							// to be used by client
 		virtual bool update(f32 delta_time);				// potentally make private - every actor has own function (like UNREAL)
 		virtual bool render(f32 delta_time);				// potentally make private - every actor has own function (like UNREAL)
 
-		DELETE_COPY(application);
 
 	private:
 
@@ -33,6 +37,9 @@ namespace PFF {
 		void push_layer(layer* layer);						// client doesnt need to be consernt with layer-system, just tick a box if you want debug stuff
 		void push_overlay(layer* overlay);					// client doesnt need to be consernt with layer-system, just tick a box if you want debug stuff
 
+		static application* s_instance;
+
+		imgui_layer* m_imgui_layer;
 		layer_stack m_layerstack{};
 		std::shared_ptr<pff_window> m_window{};
 		std::unique_ptr<renderer> m_renderer;
@@ -45,7 +52,6 @@ namespace PFF {
 		bool m_running = true;
 	};
 
-	static application* s_instance;
 
 	// to be defined in Client
 	application* create_application();

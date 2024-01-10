@@ -4,13 +4,14 @@
 #include "engine/render/vk_swapchain.h"
 #include "engine/render/render_system.h"
 #include "engine/platform/pff_window.h"
+#include "engine/layer/layer_stack.h"
 
 namespace PFF {
 
 	class renderer {
 	public:
 
-		renderer(std::shared_ptr<pff_window> window);
+		renderer(std::shared_ptr<pff_window> window, layer_stack* layerstack);
 		~renderer();
 
 		DELETE_COPY(renderer);
@@ -29,8 +30,12 @@ namespace PFF {
 		void create_dummy_game_objects();
 
 	private:
+
 		void imgui_init();
 		void imgui_sutdown();
+		void imgui_begin_frame();
+		void imgui_end_frame(VkCommandBuffer commandbuffer);
+
 		VkCommandBuffer begin_frame();
 		void end_frame();
 		void begin_swapchain_renderpass(VkCommandBuffer commandbuffer);
@@ -47,6 +52,7 @@ namespace PFF {
 		std::shared_ptr<pff_window> m_window;
 		std::shared_ptr<vk_device> m_device;
 		std::unique_ptr<render_system> m_render_system{};
+		layer_stack* m_layerstack;
 
 		std::vector<game_object> m_game_objects{};				// move into map class
 		std::unique_ptr<vk_swapchain> m_swapchain{};
