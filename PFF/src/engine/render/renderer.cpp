@@ -57,17 +57,17 @@ namespace PFF {
 		// add first render system
 		add_render_system(get_device(), get_swapchain_render_pass());
 
-		imgui_init();
+		//imgui_init();
 	}
 
 	renderer::~renderer() {
 
-		free_command_buffers();
+		//imgui_sutdown();
 		vkDestroyDescriptorPool(m_device->get_device(), m_imgui_descriptor_pool, nullptr);
-		imgui_sutdown();
+		free_command_buffers();
 	}
 
-	// ==================================================================== public functions ====================================================================
+	// ==================================================================== public ====================================================================
 
 	void renderer::add_render_system(std::shared_ptr<vk_device> device, VkRenderPass renderPass) {
 
@@ -84,14 +84,14 @@ namespace PFF {
 				begin_swapchain_renderpass(commandbuffer);
 				m_render_system->render_game_objects(commandbuffer, m_game_objects);
 
-				ImGui_ImplVulkan_NewFrame();
-				ImGui_ImplGlfw_NewFrame();
-				ImGui::NewFrame();
-
-				ImGui::ShowDemoWindow();
-
-				ImGui::Render();
-				ImGui_ImplVulkan_RenderDrawData(ImGui::GetDrawData(), commandbuffer, 0);
+				//ImGui_ImplVulkan_NewFrame();
+				//ImGui_ImplGlfw_NewFrame();
+				//ImGui::NewFrame();
+				//
+				//ImGui::ShowDemoWindow();
+				//
+				//ImGui::Render();
+				//ImGui_ImplVulkan_RenderDrawData(ImGui::GetDrawData(), commandbuffer, 0);
 
 				end_swapchain_renderpass(commandbuffer);
 
@@ -150,18 +150,18 @@ namespace PFF {
 		m_game_objects.push_back(std::move(triangle));
 	}
 
-	// ==================================================================== private functions ====================================================================
+	// ==================================================================== private ====================================================================
 
 	void renderer::imgui_init() {
 
 		// Setup Dear ImGui context
 		IMGUI_CHECKVERSION();
 		ImGui::CreateContext();
+		ImGui::StyleColorsDark();
 		ImGuiIO& io = ImGui::GetIO(); (void)io;
 		io.ConfigFlags |= ImGuiConfigFlags_NavEnableKeyboard;     // Enable Keyboard Controls
 		io.ConfigFlags |= ImGuiConfigFlags_NavEnableGamepad;      // Enable Gamepad Controls
 		//io.ConfigFlags |= ImGuiConfigFlags_Docking_enabled;
-		ImGui::StyleColorsDark();
 
 		// Setup Platform/Renderer backends
 		ImGui_ImplGlfw_InitForVulkan(m_window->get_window(), true);
@@ -309,8 +309,8 @@ namespace PFF {
 	//
 	void renderer::recreate_swapchian() {
 
-
-		//m_swapchain = nullptr;
+		//imgui_sutdown();
+		//imgui_init();
 
 		if (m_swapchain == nullptr) {
 
