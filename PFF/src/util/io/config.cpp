@@ -120,7 +120,7 @@ namespace PFF {
                     outFile << '\t' << key << "=" << value << '\n';
 
                 outFile.close();
-                CORE_LOG(Debug, "File [" << file_path << "] updated with [" << section << "] - [" << key << "][" << value << "]");
+                CORE_LOG(Debug, "File [" << file_path << "] updated with [" << std::setw(20) << std::left << section << " / " << std::setw(15) << std::left << key << "]: [" << value << "]");
             }
             return false; // Key not found
         }
