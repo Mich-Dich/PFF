@@ -12,7 +12,7 @@ namespace PFF {
 	class render_system {
 	public:
 
-		render_system(std::shared_ptr<vk_device> device, VkRenderPass renderPass);
+		render_system(std::shared_ptr<vk_device> device, VkRenderPass renderPass, VkDescriptorSetLayout descriptor_set_layout);
 		~render_system();
 		
 		DELETE_COPY(render_system);
@@ -25,9 +25,8 @@ namespace PFF {
 
 	private:
 
-		void create_pipeline_layout();
+		void create_pipeline_layout(VkDescriptorSetLayout descriptor_set_layout);
 		void create_pipeline(VkRenderPass renderPass);
-
 
 		bool m_active;
 		bool needs_to_resize;

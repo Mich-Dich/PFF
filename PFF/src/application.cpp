@@ -121,6 +121,8 @@ namespace PFF {
 
 				m_frame_start = std::chrono::system_clock::now();
 				m_delta_time = std::chrono::duration<float, std::milli>(work_time + delta_ms_duration).count();
+
+				m_imgui_layer->set_fps_values(1000 / m_targetdelta_time, 1000 / m_delta_time, 1000 / work_time.count(), work_time.count());
 				//CORE_LOG(Trace, "FPS: " << std::fixed << std::setprecision(2) << 1000 / m_delta_time << " possible FPS: " << std::fixed << std::setprecision(2) << 1000 / work_time.count());
 			}
 
@@ -159,10 +161,10 @@ namespace PFF {
 		
 		// Simple FPS controller - needs work
 		m_frame_end = std::chrono::system_clock::now();
-		std::chrono::duration<double, std::milli> refrech_time = m_frame_end - m_frame_start;
+		std::chrono::duration<double, std::milli> refresh_time = m_frame_end - m_frame_start;
 		//CORE_LOG(Trace, "Refrech_time: " << std::fixed << std::setprecision(2) << refrech_time.count() << " refrech_time FPS: " << std::fixed << std::setprecision(2) << 1000 / refrech_time.count());
 
-		m_renderer->refresh(refrech_time.count());
+		m_renderer->refresh(static_cast<f32>(refresh_time.count()));
 		m_frame_start = std::chrono::system_clock::now();
 		return true;
 	}

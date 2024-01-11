@@ -48,7 +48,7 @@ namespace PFF {
 
 		f32 m_delta_time = 1.0f;
 		f32 m_targetdelta_time = 100.0f;
-		f32 m_target_fps = 60.0f;
+		f32 m_target_fps = 120.0f;
 		std::chrono::system_clock::time_point m_frame_start;
 		std::chrono::system_clock::time_point m_frame_end;
 		bool m_running = true;

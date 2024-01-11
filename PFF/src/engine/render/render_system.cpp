@@ -32,10 +32,10 @@ namespace PFF {
 	};
 
 
-	render_system::render_system(std::shared_ptr<vk_device> device, VkRenderPass renderPass)
+	render_system::render_system(std::shared_ptr<vk_device> device, VkRenderPass renderPass, VkDescriptorSetLayout descriptor_set_layout)
 	 : m_device( device ) {
 
-		create_pipeline_layout();
+		create_pipeline_layout(descriptor_set_layout);
 		create_pipeline(renderPass);
 		CORE_LOG(Trace, "render_system started");
 	}
@@ -64,7 +64,7 @@ namespace PFF {
 		}
 	}
 
-	void render_system::create_pipeline_layout() {
+	void render_system::create_pipeline_layout(VkDescriptorSetLayout descriptor_set_layout) {
 
 		VkPushConstantRange push_constant_range{};
 		push_constant_range.stageFlags = VK_SHADER_STAGE_VERTEX_BIT | VK_SHADER_STAGE_FRAGMENT_BIT;
@@ -74,7 +74,7 @@ namespace PFF {
 		VkPipelineLayoutCreateInfo pipeline_layout_CI{};
 		pipeline_layout_CI.sType = VK_STRUCTURE_TYPE_PIPELINE_LAYOUT_CREATE_INFO;
 		pipeline_layout_CI.setLayoutCount = 0;
-		pipeline_layout_CI.pSetLayouts = nullptr;
+		pipeline_layout_CI.pSetLayouts = &descriptor_set_layout;
 		pipeline_layout_CI.pushConstantRangeCount = 1;
 		pipeline_layout_CI.pPushConstantRanges = &push_constant_range;
 

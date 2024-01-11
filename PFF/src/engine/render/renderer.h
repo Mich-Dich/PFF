@@ -35,6 +35,8 @@ namespace PFF {
 
 	private:
 
+		void createDescriptorSetLayout();
+		void createDescriptorSets();
 		VkCommandBuffer begin_frame();
 		void end_frame();
 		void begin_swapchain_renderpass(VkCommandBuffer commandbuffer);
@@ -57,7 +59,10 @@ namespace PFF {
 		std::vector<game_object> m_game_objects{};				// move into map class
 		std::unique_ptr<vk_swapchain> m_swapchain{};
 		std::vector<VkCommandBuffer> m_command_buffers{};
+
 		VkDescriptorPool m_imgui_descriptor_pool{};
+		VkDescriptorSetLayout m_descriptor_set_layout;
+		std::vector<VkDescriptorSet> m_DescriptorSets;
 	};
 
 }
