@@ -10,14 +10,14 @@ To get started with PFF, follow these simple steps:
    git clone --recursive https://github.com/Mich-Dich/PFF
    ```
 
-2. Execute the following file to create a VS 2022 solution:
-   ```
-   AutoGenerateSolution.bat
-   ```
-   
 3. in [premake5.lua] change line [4] to point to your Vulkan-SDK location
    ```
    4  vulkan_dir = "C:/VulkanSDK/1.3.250.1"			-- CHANGE THIS
+   ```
+   
+3. Execute the following file to create a VS 2022 solution:
+   ```
+   AutoGenerateSolution.bat
    ```
 
 
@@ -27,7 +27,7 @@ PFF relies on the following dependencies:
 - [premake5](https://premake.github.io/)
 - [glfw](https://www.glfw.org/)
 - [ImGui](https://github.com/ocornut/imgui)
-- [glm]
+- [glm](https://github.com/icaven/glm)
 
 -[Vulkan]
 Make sure you install Vulkan SDK and update the path in [premake5.lua]
