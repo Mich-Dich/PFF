@@ -133,9 +133,9 @@ namespace PFF {
 
 			ImGui::Text("performance timer");
 			ImGui::Separator();
-			ImGui::Text("current fps      [%7.2f/%6.2f]", m_current_fps, m_target_fps);
-			ImGui::Text("possible fps     [%7.2f]", m_possible_fps);
-			ImGui::Text("total work time  [%7.2f] ms", m_work_time);
+			ImGui::Text("current fps   [%d/%d]", m_current_fps, m_target_fps);
+			ImGui::Text("work time     [%7.2f] ms", m_work_time);
+			ImGui::Text("sleep time    [%7.2f] ms", m_sleep_time);
 
 			if (ImGui::BeginPopupContextWindow()) {
 				if (ImGui::MenuItem("Custom", NULL, location == -1)) location = -1;

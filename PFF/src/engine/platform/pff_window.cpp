@@ -79,11 +79,6 @@ namespace PFF {
 			WindowAttributes& data = *(WindowAttributes*)glfwGetWindowUserPointer(window);
 			window_focus_event event(focused == GLFW_TRUE);
 			data.EventCallback(event);
-			if (focused == GLFW_TRUE) {
-				CORE_LOG(Trace, "Window entered fullscreen mode");
-			} else {
-				CORE_LOG(Trace, "Window exited fullscreen mode");
-			}
 		});
 
 		glfwSetWindowCloseCallback(m_Window, [](GLFWwindow* window) {

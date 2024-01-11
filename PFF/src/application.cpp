@@ -15,8 +15,9 @@
 
 #include "engine/platform/pff_window.h"
 #include "engine/render/renderer.h"
-
 #include "engine/map/game_map.h"
+
+#include "util/timer.h"
 
 #include "application.h"
 
@@ -28,13 +29,17 @@ namespace PFF {
 
 
 	application::application() :
-		m_delta_time(1), m_running(true), m_frame_start(std::chrono::system_clock::now()), m_frame_end(std::chrono::system_clock::now()) {
+		m_delta_time(1), m_running(true) {
 
 		CORE_LOG(Debug, "application Constructor");
 		CORE_ASSERT(!s_instance, "", "Application already exists");
 		s_instance = this;
 
 		config::init();
+
+		// init FPS system
+		fps_timer = std::make_unique<timer>();
+		fps_timer->set_fps_settings(m_target_fps);
 
 		WindowAttributes loc_window_att = WindowAttributes();
 		LOAD_CONFIG_STR(default_editor, loc_window_att.title, "WindowAttributes", "title");
@@ -75,7 +80,6 @@ namespace PFF {
 	void application::run() {
 
 		init();							// init user code / potentally make every actor have own function (like UNREAL)
-		m_targetdelta_time = (1000.0f / m_target_fps);
 
 		//m_renderer->create_dummy_game_objects();		// TODO: move object creation to map
 
@@ -89,42 +93,35 @@ namespace PFF {
 
 		auto triangle = m_current_map->create_empty_game_object();
 		triangle->mesh = model;
-		triangle->color = { .1f, .8f, .1f };
+		triangle->color = { .02f, 1.0f, .02f };
 		triangle->transform_2D.translation.x = .2f;
-		//triangle->transform_2D.scale = { 2.0f ,0.5f };
-		triangle->transform_2D.rotation_speed = 0.002f;
-		//triangle->transform_2D.rotation = 0.25f * two_pi<float>();
-
-		CORE_LOG(Trace, "Running")
-
-			while (m_running) {
-				glfwPollEvents();
-
-				// update all layers
-				for (layer* layer : m_layerstack) {
-					layer->on_update();
-				}
-
-				update(m_delta_time);	// potentally make every actor have own function (like UNREAL)
-				render(m_delta_time);	// potentally make every actor have own function (like UNREAL)
-
-				m_renderer->draw_frame(m_delta_time);
+		triangle->transform_2D.scale = { 2.0f ,0.5f };
+		triangle->transform_2D.rotation_speed = 0.05f;
+		triangle->transform_2D.rotation = 0.25f * two_pi<float>();
 
 
-				// Simple FPS controller - needs work
-				m_frame_end = std::chrono::system_clock::now();
-				std::chrono::duration<double, std::milli> work_time = m_frame_end - m_frame_start;
-				std::chrono::duration<double, std::milli> delta_ms(m_targetdelta_time - work_time.count());
-				auto delta_ms_duration = std::chrono::duration_cast<std::chrono::milliseconds>(delta_ms);
-				if (work_time.count() < m_targetdelta_time)
-					std::this_thread::sleep_for(std::chrono::milliseconds(delta_ms_duration.count()));
+		while (m_running) {
 
-				m_frame_start = std::chrono::system_clock::now();
-				m_delta_time = std::chrono::duration<float, std::milli>(work_time + delta_ms_duration).count();
+			glfwPollEvents();
 
-				m_imgui_layer->set_fps_values(1000 / m_targetdelta_time, 1000 / m_delta_time, 1000 / work_time.count(), work_time.count());
-				//CORE_LOG(Trace, "FPS: " << std::fixed << std::setprecision(2) << 1000 / m_delta_time << " possible FPS: " << std::fixed << std::setprecision(2) << 1000 / work_time.count());
-			}
+			// update all layers
+			for (layer* layer : m_layerstack) 
+				layer->on_update();			
+
+			// TODO: MOVE to world_layer
+			for (auto& obj : m_current_map->get_all_game_objects())
+				obj.transform_2D.rotation = obj.transform_2D.rot(m_delta_time);
+
+
+			update(m_delta_time);	// potentally make every actor have own function (like UNREAL)
+			render(m_delta_time);	// potentally make every actor have own function (like UNREAL)
+
+			m_imgui_layer->set_fps_values((m_focus ? m_target_fps : m_nonefocus_fps), m_fps, static_cast<f32>(m_work_time * 1000), static_cast<f32>(m_sleep_time * 1000));
+			m_renderer->draw_frame(m_delta_time);
+
+			// Simple FPS controller - needs work
+			fps_timer->limit_fps(m_fps, m_delta_time, m_work_time, m_sleep_time);
+		}
 
 		m_renderer->wait_Idle();
 	}
@@ -137,6 +134,7 @@ namespace PFF {
 		dispatcher.dispatch<window_close_event>(BIND_FN(application::on_window_close));
 		dispatcher.dispatch<window_resize_event>(BIND_FN(application::on_window_resize));
 		dispatcher.dispatch<window_refresh_event>(BIND_FN(application::on_window_refresh));
+		dispatcher.dispatch<window_focus_event>(BIND_FN(application::on_window_focus));
 
 		for (auto it = m_layerstack.end(); it != m_layerstack.begin(); ) {
 			(*--it)->on_event(event);
@@ -145,7 +143,7 @@ namespace PFF {
 		}
 	}
 
-	bool application::on_window_close(window_close_event& e) {
+	bool application::on_window_close(window_close_event& event) {
 
 		m_running = false;
 		return true;
@@ -157,16 +155,24 @@ namespace PFF {
 		return true;
 	}
 
-	bool application::on_window_refresh(window_refresh_event& e) {
+	bool application::on_window_refresh(window_refresh_event& event) {
 		
-		// Simple FPS controller - needs work
-		m_frame_end = std::chrono::system_clock::now();
-		std::chrono::duration<double, std::milli> refresh_time = m_frame_end - m_frame_start;
-		//CORE_LOG(Trace, "Refrech_time: " << std::fixed << std::setprecision(2) << refrech_time.count() << " refrech_time FPS: " << std::fixed << std::setprecision(2) << 1000 / refrech_time.count());
-
-		m_renderer->refresh(static_cast<f32>(refresh_time.count()));
-		m_frame_start = std::chrono::system_clock::now();
+		fps_timer->end_measurement(m_fps, m_delta_time, m_work_time, m_sleep_time);
+		m_imgui_layer->set_fps_values((m_focus ? m_target_fps : m_nonefocus_fps), m_fps, static_cast<f32>(m_work_time * 1000), static_cast<f32>(m_sleep_time * 1000));
+		m_renderer->refresh(m_delta_time);
+		fps_timer->start_measurement();
 		return true;
+	}
+
+	bool PFF::application::on_window_focus(window_focus_event& event) {
+
+		m_focus = event.get_focus();
+		if (event.get_focus())
+			fps_timer->set_fps_settings(m_target_fps);
+		else
+			fps_timer->set_fps_settings(m_nonefocus_fps);
+
+		return false;
 	}
 
 	// ==================================================================== engine events ====================================================================

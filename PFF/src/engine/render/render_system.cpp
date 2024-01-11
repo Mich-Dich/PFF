@@ -51,7 +51,6 @@ namespace PFF {
 
 		for (auto& obj : game_objects) {
 			
-			obj.transform_2D.rotation = obj.transform_2D.rot(delta_time);
 			simple_push_constant_data PCD{};
 			PCD.offset = obj.transform_2D.translation;
 			PCD.color = obj.color;

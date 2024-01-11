@@ -114,6 +114,8 @@
     <ClInclude Include="src\util\util.h">
       <Filter>util</Filter>
     </ClInclude>
+    <ClInclude Include="src\engine\layer\world_layer.h" />
+    <ClInclude Include="src\util\timer.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="src\application.cpp" />
@@ -165,5 +167,7 @@
     <ClCompile Include="src\util\pffpch.cpp">
       <Filter>util</Filter>
     </ClCompile>
+    <ClCompile Include="src\engine\layer\world_layer.cpp" />
+    <ClCompile Include="src\util\timer.cpp" />
   </ItemGroup>
 </Project>

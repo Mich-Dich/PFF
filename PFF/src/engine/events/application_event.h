@@ -11,8 +11,8 @@ namespace PFF {
 		window_resize_event(u32 width, u32 height)
 			: m_width(width), m_height(height) {}
 
-		inline u32 get_width() const { return m_width; }
-		inline u32 get_height() const { return m_height; }
+		FORCEINLINE u32 get_width() const { return m_width; }
+		FORCEINLINE u32 get_height() const { return m_height; }
 
 		std::string to_string() const override {
 
@@ -34,6 +34,8 @@ namespace PFF {
 	public:
 		window_focus_event(bool focus)
 			: m_focus(focus) {}
+
+		FORCEINLINE bool get_focus() const { return m_focus; }
 
 		EVENT_CLASS_TYPE(WindowFocus);
 		EVENT_CLASS_CATEGORY(EC_Application);

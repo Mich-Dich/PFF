@@ -11,7 +11,9 @@ namespace PFF {
 	class window_resize_event;
 	class window_close_event;
 	class window_refresh_event;
+	class window_focus_event;
 	class game_map;
+	class timer;
 
 	class PFF_API application {
 	public:
@@ -35,9 +37,10 @@ namespace PFF {
 	private:
 
 		void on_event(event& event);
-		bool on_window_close(window_close_event& e);
+		bool on_window_close(window_close_event& event);
 		bool on_window_resize(window_resize_event& event);
-		bool on_window_refresh(window_refresh_event& e);
+		bool on_window_refresh(window_refresh_event& event);
+		bool on_window_focus(window_focus_event& event);
 
 		static application* s_instance;
 		imgui_layer* m_imgui_layer;
@@ -46,12 +49,15 @@ namespace PFF {
 		std::shared_ptr<pff_window> m_window = nullptr;
 		std::shared_ptr<renderer> m_renderer;
 
-		f32 m_delta_time = 1.0f;
-		f32 m_targetdelta_time = 100.0f;
-		f32 m_target_fps = 120.0f;
-		std::chrono::system_clock::time_point m_frame_start;
-		std::chrono::system_clock::time_point m_frame_end;
+		bool m_focus = true;
 		bool m_running = true;
+
+		u32 m_target_fps = 144;
+		u32 m_fps = 0;
+		u32 m_nonefocus_fps = 20;
+		f32 m_delta_time = 0.0f;
+		f64 m_work_time = 0, m_sleep_time = 0;
+		std::unique_ptr<timer> fps_timer{};
 	};
 
 

@@ -113,6 +113,7 @@ IF EXIST ..\bin\Release-windows-x86_64\PFF\PFF.dll\ (xcopy /Q /E /Y /I ..\bin\Re
     </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClInclude Include="src\engine\layer\world_layer.h" />
     <ClInclude Include="src\PFF.h" />
     <ClInclude Include="src\application.h" />
     <ClInclude Include="src\engine\Events\Event.h" />
@@ -139,6 +140,7 @@ IF EXIST ..\bin\Release-windows-x86_64\PFF\PFF.dll\ (xcopy /Q /E /Y /I ..\bin\Re
     <ClInclude Include="src\util\math\constance.h" />
     <ClInclude Include="src\util\pffpch.h" />
     <ClInclude Include="src\util\platform\windows_util.h" />
+    <ClInclude Include="src\util\timer.h" />
     <ClInclude Include="src\util\util.h" />
   </ItemGroup>
   <ItemGroup>
@@ -148,6 +150,7 @@ IF EXIST ..\bin\Release-windows-x86_64\PFF\PFF.dll\ (xcopy /Q /E /Y /I ..\bin\Re
     <ClCompile Include="src\engine\layer\imgui_layer.cpp" />
     <ClCompile Include="src\engine\layer\layer.cpp" />
     <ClCompile Include="src\engine\layer\layer_stack.cpp" />
+    <ClCompile Include="src\engine\layer\world_layer.cpp" />
     <ClCompile Include="src\engine\map\game_map.cpp" />
     <ClCompile Include="src\engine\platform\pff_window.cpp" />
     <ClCompile Include="src\engine\render\render_system.cpp" />
@@ -161,6 +164,7 @@ IF EXIST ..\bin\Release-windows-x86_64\PFF\PFF.dll\ (xcopy /Q /E /Y /I ..\bin\Re
     <ClCompile Include="src\util\pffpch.cpp">
       <PrecompiledHeader>Create</PrecompiledHeader>
     </ClCompile>
+    <ClCompile Include="src\util\timer.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="vendor\imgui\ImGui.vcxproj">
