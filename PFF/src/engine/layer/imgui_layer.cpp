@@ -7,6 +7,9 @@
 #include "engine/platform/pff_window.h"
 #include "engine/render/renderer.h"
 
+#define GLFW_INCLUDE_VULKAN
+#include "GLFW/glfw3.h"
+
 #include "imgui.h"
 #include "imgui_impl_glfw.h"
 #include "imgui_impl_vulkan.h"
@@ -39,7 +42,7 @@ namespace PFF {
 		io.ConfigFlags |= ImGuiConfigFlags_NavEnableKeyboard;     // Enable Keyboard Controls
 		io.ConfigFlags |= ImGuiConfigFlags_NavEnableGamepad;      // Enable Gamepad Controls
 		io.ConfigFlags |= ImGuiConfigFlags_DockingEnable;         // IF using Docking Branch
-		//io.ConfigFlags |= ImGuiConfigFlags_ViewportsEnable;
+		io.ConfigFlags |= ImGuiConfigFlags_ViewportsEnable;
 		//io.ConfigFlags |= ImGuiConfigFlags_ViewportsNoTaskBarIcons;
 		//io.ConfigFlags |= ImGuiConfigFlags_ViewportsNoMerge;
 
@@ -51,7 +54,6 @@ namespace PFF {
 			style.WindowRounding = 0.0f;
 			style.Colors[ImGuiCol_WindowBg].w = 1.0f;
 		}
-		;
 
 		application& app = application::get();
 
@@ -110,9 +112,20 @@ namespace PFF {
 
 	void imgui_layer::end_frame(VkCommandBuffer commandbuffer) {
 
+		ImGuiIO& io = ImGui::GetIO();
+		application& app = application::get();
+		io.DisplaySize = ImVec2(app.get_window()->get_width(), app.get_window()->get_height());
+
 		ImGui::Render();
 		ImGui_ImplVulkan_RenderDrawData(ImGui::GetDrawData(), commandbuffer, 0);
 
+		if (io.ConfigFlags & ImGuiConfigFlags_ViewportsEnable) {
+
+			GLFWwindow* backup_current_context = glfwGetCurrentContext();
+			ImGui::UpdatePlatformWindows();
+			ImGui::RenderPlatformWindowsDefault();
+			glfwMakeContextCurrent(backup_current_context);
+		}
 	}
 
 }
