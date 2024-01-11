@@ -91,10 +91,9 @@ namespace PFF {
 		triangle->mesh = model;
 		triangle->color = { .1f, .8f, .1f };
 		triangle->transform_2D.translation.x = .2f;
-		triangle->transform_2D.scale = { 2.0f ,0.5f };
+		//triangle->transform_2D.scale = { 2.0f ,0.5f };
 		triangle->transform_2D.rotation_speed = 0.002f;
-		triangle->transform_2D.rotation = 0.25f * two_pi<float>();
-
+		//triangle->transform_2D.rotation = 0.25f * two_pi<float>();
 
 		CORE_LOG(Trace, "Running")
 
