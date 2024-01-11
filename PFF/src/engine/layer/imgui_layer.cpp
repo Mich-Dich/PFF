@@ -114,7 +114,7 @@ namespace PFF {
 
 		ImGuiIO& io = ImGui::GetIO();
 		application& app = application::get();
-		io.DisplaySize = ImVec2(app.get_window()->get_width(), app.get_window()->get_height());
+		io.DisplaySize = ImVec2(static_cast<f32>(app.get_window()->get_width()), static_cast<f32>(app.get_window()->get_height()));
 
 		ImGui::Render();
 		ImGui_ImplVulkan_RenderDrawData(ImGui::GetDrawData(), commandbuffer, 0);

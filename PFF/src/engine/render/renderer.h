@@ -5,6 +5,7 @@
 #include "engine/render/render_system.h"
 #include "engine/platform/pff_window.h"
 #include "engine/layer/layer_stack.h"
+#include "engine/map/game_map.h"
 
 namespace PFF {
 
@@ -24,6 +25,7 @@ namespace PFF {
 		FORCEINLINE u32 get_render_system_pipeline_subpass() const { return m_render_system->get_pipeline_subpass(); }
 		FORCEINLINE VkCommandBuffer get_current_command_buffer() const {	CORE_ASSERT(m_is_frame_started, "", "Cant get command buffer when frame not in progress");
 																			return m_command_buffers[m_current_image_index]; }
+		FORCENOINLINE void set_current_map(std::shared_ptr<game_map> current_map) { m_current_map = current_map; }
 
 		void add_render_system(std::shared_ptr<vk_device> device, VkRenderPass renderPass);
 		void draw_frame();
@@ -41,7 +43,8 @@ namespace PFF {
 		void create_command_buffer();
 		void free_command_buffers();
 		void recreate_swapchian();
-		
+
+		std::shared_ptr<game_map> m_current_map{};
 		system_state state;
 		bool needs_to_resize;
 		u32 m_current_image_index;

@@ -23,19 +23,21 @@ namespace PFF {
 
 	public:
 
-		using id_t = u32;
-
-		FORCEINLINE id_t get_ID() const { return m_id; }
-
-		static game_object create_game_object() {
-
-			static id_t current_id = 0;
-			return game_object(current_id++);
-		}
-
 		DELETE_COPY(game_object);
+
+		FORCEINLINE u32 get_ID() const { return m_id; }
+
 		game_object(game_object&&) = default;
 		game_object& operator=(game_object&&) = default;
+
+
+
+		// TODO: remove this 
+		static game_object create_game_object() {
+
+			static u32 current_id = 0;
+			return game_object(current_id++);
+		}
 
 		std::shared_ptr<basic_mesh> mesh{};
 		glm::vec3 color{};
@@ -43,9 +45,9 @@ namespace PFF {
 
 	private:
 
-		game_object(id_t object_id) : m_id(object_id) {};
+		game_object(u32 object_id) : m_id(object_id) {};
 
-		id_t m_id;
+		u32 m_id;
 	};
 
 }

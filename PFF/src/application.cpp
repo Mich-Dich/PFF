@@ -48,10 +48,16 @@ namespace PFF {
 
 		m_imgui_layer = new imgui_layer(m_renderer);
 		m_layerstack.push_overlay(m_imgui_layer);
+
+		m_current_map = std::make_shared<game_map>();
+		m_renderer->set_current_map(m_current_map);
+
+		init();
 	}
 
 	application::~application() {
-
+		
+		shutdown();
 		m_layerstack.pop_overlay(m_imgui_layer);
 		m_renderer.reset();
 
@@ -71,7 +77,7 @@ namespace PFF {
 		init();							// init user code / potentally make every actor have own function (like UNREAL)
 		m_targetdelta_time = (1000.0f / m_target_fps);
 
-		m_renderer->create_dummy_game_objects();
+		m_renderer->create_dummy_game_objects();		// TODO: move object creation to map
 
 		CORE_LOG(Trace, "Running")
 
@@ -150,6 +156,10 @@ namespace PFF {
 	}
 
 	bool application::render(f32 delta_time) {
+		return true;
+	}
+
+	bool application::shutdown() {
 		return true;
 	}
 

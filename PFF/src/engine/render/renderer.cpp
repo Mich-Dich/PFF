@@ -4,6 +4,7 @@
 #include "engine/render/render_system.h"
 #include "engine/layer/layer.h"
 #include "application.h"
+#include "engine/map/game_map.h"
 
 // DEV-ONLY
 #include "engine/geometry/basic_mesh.h"
@@ -13,6 +14,7 @@
 
 namespace PFF {
 
+#define IMGUI_LAYER			application::get().get_imgui_layer()
 
 	// ==================================================================== setup ====================================================================
 
@@ -68,13 +70,13 @@ namespace PFF {
 			if (auto commandbuffer = begin_frame()) {
 
 				begin_swapchain_renderpass(commandbuffer);
-				application::get().get_imgui_layer()->begin_frame();
+				IMGUI_LAYER->begin_frame();
 
-				m_render_system->render_game_objects(commandbuffer, m_game_objects);
+				m_render_system->render_game_objects(commandbuffer, m_current_map->get_all_game_objects());
 				for (layer* target : *m_layerstack)
 					target->on_imgui_render();
 
-				application::get().get_imgui_layer()->end_frame(commandbuffer);
+				IMGUI_LAYER->end_frame(commandbuffer);
 				end_swapchain_renderpass(commandbuffer);
 				end_frame();
 			}
@@ -121,14 +123,14 @@ namespace PFF {
 		};
 		auto model = std::make_shared<basic_mesh>(m_device, vertices);
 
-		auto triangle = game_object::create_game_object();
-		triangle.mesh = model;
-		triangle.color = { .1f, .8f, .1f };
-		triangle.transform_2D.translation.x = .2f;
-		triangle.transform_2D.scale = { 2.0f ,0.5f };
-		triangle.transform_2D.rotation = 0.25f * two_pi<float>();
+		auto triangle = m_current_map->create_empty_game_object();
+		triangle->mesh = model;
+		triangle->color = { .1f, .8f, .1f };
+		triangle->transform_2D.translation.x = .2f;
+		triangle->transform_2D.scale = { 2.0f ,0.5f };
+		triangle->transform_2D.rotation = 0.25f * two_pi<float>();
 
-		m_game_objects.push_back(std::move(triangle));
+		// m_game_objects.push_back(std::move(triangle));
 	}
 
 	// ==================================================================== private ====================================================================
@@ -243,9 +245,6 @@ namespace PFF {
 
 	//
 	void renderer::recreate_swapchian() {
-
-		//imgui_sutdown();
-		//imgui_init();
 
 		if (m_swapchain == nullptr) {
 
