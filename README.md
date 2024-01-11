@@ -14,6 +14,12 @@ To get started with PFF, follow these simple steps:
    ```
    AutoGenerateSolution.bat
    ```
+   
+3. in [premake5.lua] change line [4] to point to your Vulkan-SDK location
+   ```
+   4  vulkan_dir = "C:/VulkanSDK/1.3.250.1"			-- CHANGE THIS
+   ```
+
 
 ## Dependencies
 PFF relies on the following dependencies:
