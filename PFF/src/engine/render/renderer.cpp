@@ -3,9 +3,7 @@
 
 #include "engine/render/render_system.h"
 #include "engine/layer/layer.h"
-
-#include "imgui_impl_glfw.h"
-#include "imgui_impl_vulkan.h"
+#include "application.h"
 
 // DEV-ONLY
 #include "engine/geometry/basic_mesh.h"
@@ -47,12 +45,10 @@ namespace PFF {
 		// add first render system
 		add_render_system(get_device(), get_swapchain_render_pass());
 
-		imgui_init();
 	}
 
 	renderer::~renderer() {
 
-		imgui_sutdown();
 		vkDestroyDescriptorPool(m_device->get_device(), m_imgui_descriptor_pool, nullptr);
 		free_command_buffers();
 	}
@@ -72,13 +68,13 @@ namespace PFF {
 			if (auto commandbuffer = begin_frame()) {
 
 				begin_swapchain_renderpass(commandbuffer);
-				imgui_begin_frame();
+				application::get().get_imgui_layer()->begin_frame();
 
 				m_render_system->render_game_objects(commandbuffer, m_game_objects);
 				for (layer* target : *m_layerstack)
 					target->on_imgui_render();
 
-				imgui_end_frame(commandbuffer);				
+				application::get().get_imgui_layer()->end_frame(commandbuffer);
 				end_swapchain_renderpass(commandbuffer);
 				end_frame();
 			}
@@ -136,58 +132,7 @@ namespace PFF {
 	}
 
 	// ==================================================================== private ====================================================================
-
-	void renderer::imgui_init() {
-
-		LOG(Info, "Init Imgui");
-
-		// Setup Platform/Renderer backends
-		ImGui_ImplGlfw_InitForVulkan(m_window->get_window(), true);
-		ImGui_ImplVulkan_InitInfo init_info{};
-		init_info.Instance = m_device->get_instance();
-		init_info.PhysicalDevice = m_device->get_physical_device();
-		init_info.Device = m_device->get_device();
-		init_info.QueueFamily = m_device->find_physical_queue_families().graphicsFamily;
-		init_info.Queue = m_device->get_graphics_queue();
-		init_info.DescriptorPool = m_imgui_descriptor_pool;
-		init_info.Subpass = m_render_system->get_pipeline_subpass();
-		init_info.MinImageCount = m_device->get_swap_chain_support().capabilities.minImageCount;
-		init_info.ImageCount = m_swapchain->get_image_count();
-		//init_info.PipelineCache = g_PipelineCache;
-		//init_info.MSAASamples = VK_SAMPLE_COUNT_1_BIT;
-		//init_info.Allocator = nullptr;
-		//init_info.CheckVkResultFn = check_vk_result;
-		CORE_ASSERT(ImGui_ImplVulkan_Init(&init_info, m_swapchain->get_render_pass()), "", "");
-
-		// Use any command queue
-		VkCommandBuffer command_buffer = m_device->begin_single_time_commands();
-		ImGui_ImplVulkan_CreateFontsTexture();
-		m_device->end_single_time_commands(command_buffer);
-
-		CORE_ASSERT(vkDeviceWaitIdle(m_device->get_device()) == VK_SUCCESS, "", "Failed wait idle");
-
-	}
-
-	void renderer::imgui_sutdown() {
-
-		ImGui_ImplVulkan_Shutdown();
-		ImGui_ImplGlfw_Shutdown();
-	}
-
-	void renderer::imgui_begin_frame() {
-
-		ImGui_ImplVulkan_NewFrame();
-		ImGui_ImplGlfw_NewFrame();
-		ImGui::NewFrame();
-	}
-
-	void renderer::imgui_end_frame(VkCommandBuffer commandbuffer) {
-
-		ImGui::Render();
-		ImGui_ImplVulkan_RenderDrawData(ImGui::GetDrawData(), commandbuffer, 0);
-
-	}
-
+	
 	//
 	VkCommandBuffer renderer::begin_frame() {
 

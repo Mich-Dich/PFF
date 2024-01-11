@@ -41,18 +41,16 @@ namespace PFF {
 
 		DELETE_COPY(pff_window);
 
-		void createWindowSurface(VkInstance_T* instance, VkSurfaceKHR_T** get_surface);
-		inline void SetEventCallback(const EventCallbackFn& callback) { m_data.EventCallback = callback; }
-
-		VkExtent2D get_extend();
-		bool should_close();
 		FORCEINLINE bool IsVSync() const { return m_data.VSync; }
 		FORCEINLINE u32 get_width() const { return m_data.width; }
 		FORCEINLINE u32 get_height() const { return m_data.height; }
 		FORCEINLINE WindowAttributes get_attributes() const { return m_data; }
-
-		// TEMPORARY
 		FORCEINLINE GLFWwindow* get_window() const { return m_Window; }
+		FORCEINLINE void SetEventCallback(const EventCallbackFn& callback) { m_data.EventCallback = callback; }
+
+		void createWindowSurface(VkInstance_T* instance, VkSurfaceKHR_T** get_surface);
+		VkExtent2D get_extend();
+		bool should_close();
 		
 	private:
 		

@@ -18,7 +18,10 @@ namespace PFF {
 
 		FORCEINLINE bool is_frame_started() const { return m_is_frame_started; }
 		FORCEINLINE std::shared_ptr<vk_device> get_device() const { return m_device; }
+		FORCEINLINE VkDescriptorPool get_imgui_descriptor_pool() const { return m_imgui_descriptor_pool; }
 		FORCEINLINE VkRenderPass get_swapchain_render_pass() const { return m_swapchain->get_render_pass(); }
+		FORCEINLINE u32 get_swapchain_image_count() const { return m_swapchain->get_image_count(); }
+		FORCEINLINE u32 get_render_system_pipeline_subpass() const { return m_render_system->get_pipeline_subpass(); }
 		FORCEINLINE VkCommandBuffer get_current_command_buffer() const {	CORE_ASSERT(m_is_frame_started, "", "Cant get command buffer when frame not in progress");
 																			return m_command_buffers[m_current_image_index]; }
 
@@ -30,11 +33,6 @@ namespace PFF {
 		void create_dummy_game_objects();
 
 	private:
-
-		void imgui_init();
-		void imgui_sutdown();
-		void imgui_begin_frame();
-		void imgui_end_frame(VkCommandBuffer commandbuffer);
 
 		VkCommandBuffer begin_frame();
 		void end_frame();

@@ -43,15 +43,16 @@ namespace PFF {
 		LOAD_CONFIG_BOOL(default_editor, loc_window_att.VSync, "WindowAttributes", "VSync");
 		m_window = std::make_shared<pff_window>(loc_window_att);			// Can be called after inital setup like [compiling shaders]
 
-		m_imgui_layer = new imgui_layer();
-		push_overlay(m_imgui_layer);
-
-		m_renderer = std::make_unique<renderer>(m_window, &m_layerstack);
+		m_renderer = std::make_shared<renderer>(m_window, &m_layerstack);
 		m_window->SetEventCallback(BIND_FN(application::on_event));
+
+		m_imgui_layer = new imgui_layer(m_renderer);
+		m_layerstack.push_overlay(m_imgui_layer);
 	}
 
 	application::~application() {
 
+		m_layerstack.pop_overlay(m_imgui_layer);
 		m_renderer.reset();
 
 		WindowAttributes loc_window_att = m_window->get_attributes();
@@ -120,15 +121,15 @@ namespace PFF {
 		}
 	}
 
-	bool application::on_window_resize(window_resize_event& event) {
-
-		m_renderer->set_size(event.get_width(), event.get_height());
-		return true;
-	}
-
 	bool application::on_window_close(window_close_event& e) {
 
 		m_running = false;
+		return true;
+	}
+
+	bool application::on_window_resize(window_resize_event& event) {
+
+		m_renderer->set_size(event.get_width(), event.get_height());
 		return true;
 	}
 
@@ -136,18 +137,6 @@ namespace PFF {
 
 		m_renderer->refresh();
 		return true;
-	}
-
-	// ==================================================================== layer system ====================================================================
-
-	void application::push_layer(layer* layer) {
-
-		m_layerstack.push_layer(layer);
-	}
-
-	void application::push_overlay(layer* overlay) {
-
-		m_layerstack.push_overlay(overlay);
 	}
 
 	// ==================================================================== engine events ====================================================================
