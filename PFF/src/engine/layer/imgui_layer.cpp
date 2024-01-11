@@ -131,7 +131,7 @@ namespace PFF {
 		ImGui::SetNextWindowBgAlpha(0.35f); // Transparent background
 		if (ImGui::Begin("overlay", &show_fps, window_flags)) {
 
-			ImGui::Text(" performance timer ");
+			ImGui::Text("performance timer");
 			ImGui::Separator();
 			ImGui::Text("current fps      [%7.2f/%6.2f]", m_current_fps, m_target_fps);
 			ImGui::Text("possible fps     [%7.2f]", m_possible_fps);
