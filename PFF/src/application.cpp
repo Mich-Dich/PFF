@@ -77,7 +77,24 @@ namespace PFF {
 		init();							// init user code / potentally make every actor have own function (like UNREAL)
 		m_targetdelta_time = (1000.0f / m_target_fps);
 
-		m_renderer->create_dummy_game_objects();		// TODO: move object creation to map
+		//m_renderer->create_dummy_game_objects();		// TODO: move object creation to map
+
+		std::vector<basic_mesh::vertex> vertices;
+		vertices = {
+			{{0.0f,-0.5f}},
+			{{0.5f,0.5f}},
+			{{-0.5f,0.5f}},
+		};
+		auto model = std::make_shared<basic_mesh>(m_renderer->get_device(), vertices);
+
+		auto triangle = m_current_map->create_empty_game_object();
+		triangle->mesh = model;
+		triangle->color = { .1f, .8f, .1f };
+		triangle->transform_2D.translation.x = .2f;
+		triangle->transform_2D.scale = { 2.0f ,0.5f };
+		triangle->transform_2D.rotation_speed = 0.002f;
+		triangle->transform_2D.rotation = 0.25f * two_pi<float>();
+
 
 		CORE_LOG(Trace, "Running")
 
@@ -92,7 +109,7 @@ namespace PFF {
 				update(m_delta_time);	// potentally make every actor have own function (like UNREAL)
 				render(m_delta_time);	// potentally make every actor have own function (like UNREAL)
 
-				m_renderer->draw_frame();
+				m_renderer->draw_frame(m_delta_time);
 
 
 				// Simple FPS controller - needs work
@@ -140,8 +157,14 @@ namespace PFF {
 	}
 
 	bool application::on_window_refresh(window_refresh_event& e) {
+		
+		// Simple FPS controller - needs work
+		m_frame_end = std::chrono::system_clock::now();
+		std::chrono::duration<double, std::milli> refrech_time = m_frame_end - m_frame_start;
+		//CORE_LOG(Trace, "Refrech_time: " << std::fixed << std::setprecision(2) << refrech_time.count() << " refrech_time FPS: " << std::fixed << std::setprecision(2) << 1000 / refrech_time.count());
 
-		m_renderer->refresh();
+		m_renderer->refresh(refrech_time.count());
+		m_frame_start = std::chrono::system_clock::now();
 		return true;
 	}
 

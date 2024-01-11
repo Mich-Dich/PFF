@@ -5,14 +5,10 @@
 #include <vulkan/vulkan.h>
 
 #include "engine/render/vk_device.h"
-
 #include "basic_mesh.h"
 
 
-
 namespace PFF {
-
-
 
 	basic_mesh::basic_mesh(std::shared_ptr<vk_device> device, const std::vector<vertex> vertices)
 		:m_device{ device } {

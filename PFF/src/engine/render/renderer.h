@@ -28,11 +28,10 @@ namespace PFF {
 		FORCENOINLINE void set_current_map(std::shared_ptr<game_map> current_map) { m_current_map = current_map; }
 
 		void add_render_system(std::shared_ptr<vk_device> device, VkRenderPass renderPass);
-		void draw_frame();
+		void draw_frame(f32 delta_time);
 		void wait_Idle();
 		void set_size(u32 width, u32 height);
-		void refresh();
-		void create_dummy_game_objects();
+		void refresh(f32 delta_time);
 
 	private:
 

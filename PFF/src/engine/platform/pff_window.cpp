@@ -179,9 +179,12 @@ namespace PFF {
 
 	void pff_window::SetVSync(bool enable) {
 
-		/*if (enable)	glfwSwapInterval(1);
-		else			glfwSwapInterval(0);
-		m_data.VSync = enable;*/
+		if (enable)
+			glfwSwapInterval(1);
+		else
+			glfwSwapInterval(0);
+		
+		m_data.VSync = enable;
 	}
 
 	VkExtent2D pff_window::get_extend() { 

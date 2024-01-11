@@ -2,12 +2,19 @@
 
 #include "engine/geometry/basic_mesh.h"
 
+#define GLM_FORCE_RADIANS
+#define GLM_FORCE_DEPTH_ZERO_TO_ONE
+#include <glm/glm.hpp>
+#include <glm/gtc/constants.hpp>
+
 namespace PFF {
 
 	struct transform_comp_2d {
+
 		glm::vec2 translation;
 		glm::vec2 scale{ 1.0f,1.0f };
-		f32 rotation;
+		f32 rotation = 0.0f;
+		f32 rotation_speed = 0.0f;
 
 		glm::mat2 mat2() {
 			const f32 sin = glm::sin(rotation);
@@ -16,6 +23,10 @@ namespace PFF {
 			glm::mat2 rotMat{ {cos,sin},{-sin,cos} };
 			glm::mat2 scaleMat{ {scale.x, 0.0f},{0.0f, scale.y} };
 			return rotMat * scaleMat;
+		}
+
+		f32 rot(f32 delta_time) {
+			return glm::mod(rotation + (rotation_speed * delta_time), two_pi<float>());
 		}
 	};
 

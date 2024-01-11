@@ -45,13 +45,13 @@ namespace PFF {
 		vkDestroyPipelineLayout(m_device->get_device(), m_pipeline_layout, nullptr);
 	}
 
-	void render_system::render_game_objects(VkCommandBuffer command_buffer, std::vector<game_object>& game_objects) {
+	void render_system::render_game_objects(f32 delta_time, VkCommandBuffer command_buffer, std::vector<game_object>& game_objects) {
 
 		m_vk_pipeline->bind_commnad_buffers(command_buffer);
 
 		for (auto& obj : game_objects) {
 			
-			obj.transform_2D.rotation = glm::mod(obj.transform_2D.rotation + 0.01f, two_pi<float>());
+			obj.transform_2D.rotation = obj.transform_2D.rot(delta_time);
 			simple_push_constant_data PCD{};
 			PCD.offset = obj.transform_2D.translation;
 			PCD.color = obj.color;

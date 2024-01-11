@@ -63,7 +63,7 @@ namespace PFF {
 	}
 
 	//
-	void renderer::draw_frame() {
+	void renderer::draw_frame(f32 delta_time) {
 		
 		if (state == system_state::active) {
 
@@ -72,7 +72,7 @@ namespace PFF {
 				begin_swapchain_renderpass(commandbuffer);
 				IMGUI_LAYER->begin_frame();
 
-				m_render_system->render_game_objects(commandbuffer, m_current_map->get_all_game_objects());
+				m_render_system->render_game_objects(delta_time, commandbuffer, m_current_map->get_all_game_objects());
 				for (layer* target : *m_layerstack)
 					target->on_imgui_render();
 
@@ -107,31 +107,11 @@ namespace PFF {
 	}
 
 	//
-	void renderer::refresh() {
+	void renderer::refresh(f32 delta_time) {
 
-		draw_frame();
+		draw_frame(delta_time);
 	}
 
-	//
-	void renderer::create_dummy_game_objects() {
-
-		std::vector<basic_mesh::vertex> vertices;
-		vertices = {
-			{{0.0f,-0.5f}},
-			{{0.5f,0.5f}},
-			{{-0.5f,0.5f}},
-		};
-		auto model = std::make_shared<basic_mesh>(m_device, vertices);
-
-		auto triangle = m_current_map->create_empty_game_object();
-		triangle->mesh = model;
-		triangle->color = { .1f, .8f, .1f };
-		triangle->transform_2D.translation.x = .2f;
-		triangle->transform_2D.scale = { 2.0f ,0.5f };
-		triangle->transform_2D.rotation = 0.25f * two_pi<float>();
-
-		// m_game_objects.push_back(std::move(triangle));
-	}
 
 	// ==================================================================== private ====================================================================
 	
