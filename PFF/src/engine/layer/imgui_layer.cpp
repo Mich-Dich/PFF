@@ -95,7 +95,7 @@ namespace PFF {
 		ImGui::DestroyContext();
 	}
 
-	void imgui_layer::on_update() {
+	void imgui_layer::on_update(f32 delta_time) {
 	}
 
 	void imgui_layer::on_event(event& event) {

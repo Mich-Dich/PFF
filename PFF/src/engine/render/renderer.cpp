@@ -74,7 +74,7 @@ namespace PFF {
 				begin_swapchain_renderpass(commandbuffer);
 				IMGUI_LAYER->begin_frame();
 
-				m_render_system->render_game_objects(delta_time, commandbuffer, m_current_map->get_all_game_objects());
+				m_render_system->render_game_objects(delta_time, commandbuffer, application::get().get_current_map()->get_all_game_objects());
 				for (layer* target : *m_layerstack)
 					target->on_imgui_render();
 

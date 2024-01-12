@@ -16,7 +16,7 @@ namespace PFF {
 		m_end_time = std::chrono::high_resolution_clock::now();
 		std::chrono::duration<f64> elapsed_time = m_end_time - m_start_time;
 		work_time = elapsed_time.count();
-		delta_time = work_time;
+		delta_time = static_cast<f32>(work_time);
 		sleep_time = 0;
 		fps = static_cast<u32>(1 / (work_time + sleep_time));
 	}

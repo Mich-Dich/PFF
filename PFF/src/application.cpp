@@ -51,19 +51,22 @@ namespace PFF {
 		m_renderer = std::make_shared<renderer>(m_window, &m_layerstack);
 		m_window->set_event_callback(BIND_FN(application::on_event));
 
+		m_world_layer = new world_layer();
+		m_layerstack.push_layer(m_world_layer);
+
 		m_imgui_layer = new imgui_layer(m_renderer);
 		m_layerstack.push_overlay(m_imgui_layer);
 
-		m_current_map = std::make_shared<game_map>();
-		m_renderer->set_current_map(m_current_map);
-
-		init();
+		init();					// init user code / potentally make every actor have own function (like UNREAL)
 	}
 
 	application::~application() {
 		
 		shutdown();
+		
 		m_layerstack.pop_overlay(m_imgui_layer);
+		m_layerstack.pop_layer(m_world_layer);
+
 		m_renderer.reset();
 
 		window_attributes loc_window_att = m_window->get_attributes();
@@ -79,10 +82,6 @@ namespace PFF {
 
 	void application::run() {
 
-		init();							// init user code / potentally make every actor have own function (like UNREAL)
-
-		//m_renderer->create_dummy_game_objects();		// TODO: move object creation to map
-
 		std::vector<basic_mesh::vertex> vertices;
 		vertices = {
 			{{0.0f,-0.5f}},
@@ -91,7 +90,7 @@ namespace PFF {
 		};
 		auto model = std::make_shared<basic_mesh>(m_renderer->get_device(), vertices);
 
-		auto triangle = m_current_map->create_empty_game_object();
+		auto triangle = get_current_map()->create_empty_game_object();
 		triangle->mesh = model;
 		triangle->color = { .02f, 1.0f, .02f };
 		triangle->transform_2D.translation.x = .2f;
@@ -99,19 +98,13 @@ namespace PFF {
 		triangle->transform_2D.rotation_speed = 0.05f;
 		triangle->transform_2D.rotation = 0.25f * two_pi<float>();
 
-
 		while (m_running) {
 
 			m_window->update();
 
 			// update all layers
 			for (layer* layer : m_layerstack) 
-				layer->on_update();			
-
-			// TODO: MOVE to world_layer
-			for (auto& obj : m_current_map->get_all_game_objects())
-				obj.transform_2D.rotation = obj.transform_2D.rot(m_delta_time);
-
+				layer->on_update(m_delta_time);
 
 			update(m_delta_time);	// potentally make every actor have own function (like UNREAL)
 			render(m_delta_time);	// potentally make every actor have own function (like UNREAL)

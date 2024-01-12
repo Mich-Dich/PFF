@@ -68,6 +68,9 @@
     <ClInclude Include="src\engine\layer\layer_stack.h">
       <Filter>engine\layer</Filter>
     </ClInclude>
+    <ClInclude Include="src\engine\layer\world_layer.h">
+      <Filter>engine\layer</Filter>
+    </ClInclude>
     <ClInclude Include="src\engine\map\game_map.h">
       <Filter>engine\map</Filter>
     </ClInclude>
@@ -111,11 +114,12 @@
     <ClInclude Include="src\util\platform\windows_util.h">
       <Filter>util\platform</Filter>
     </ClInclude>
+    <ClInclude Include="src\util\timer.h">
+      <Filter>util</Filter>
+    </ClInclude>
     <ClInclude Include="src\util\util.h">
       <Filter>util</Filter>
     </ClInclude>
-    <ClInclude Include="src\engine\layer\world_layer.h" />
-    <ClInclude Include="src\util\timer.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="src\application.cpp" />
@@ -132,6 +136,9 @@
       <Filter>engine\layer</Filter>
     </ClCompile>
     <ClCompile Include="src\engine\layer\layer_stack.cpp">
+      <Filter>engine\layer</Filter>
+    </ClCompile>
+    <ClCompile Include="src\engine\layer\world_layer.cpp">
       <Filter>engine\layer</Filter>
     </ClCompile>
     <ClCompile Include="src\engine\map\game_map.cpp">
@@ -167,7 +174,8 @@
     <ClCompile Include="src\util\pffpch.cpp">
       <Filter>util</Filter>
     </ClCompile>
-    <ClCompile Include="src\engine\layer\world_layer.cpp" />
-    <ClCompile Include="src\util\timer.cpp" />
+    <ClCompile Include="src\util\timer.cpp">
+      <Filter>util</Filter>
+    </ClCompile>
   </ItemGroup>
 </Project>

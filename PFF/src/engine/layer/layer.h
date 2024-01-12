@@ -11,7 +11,7 @@ namespace PFF {
 
 		virtual void on_attach();
 		virtual void on_detach();
-		virtual void on_update();
+		virtual void on_update(f32 delta_time);
 		virtual void on_event(event& event);
 		virtual void on_imgui_render();
 

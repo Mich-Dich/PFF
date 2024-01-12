@@ -2,6 +2,7 @@
 
 #include "engine/layer/layer_stack.h"			// need to include this for some reason
 #include "engine/layer/imgui_layer.h"
+#include "engine/layer/world_layer.h"
 
 namespace PFF {
 
@@ -26,7 +27,7 @@ namespace PFF {
 		FORCEINLINE imgui_layer* get_imgui_layer() const { return m_imgui_layer; }
 		FORCEINLINE std::shared_ptr<pff_window> get_window() const { return m_window; }
 		FORCEINLINE std::shared_ptr<renderer> get_renderer() const { return m_renderer; }
-		FORCEINLINE std::shared_ptr<game_map> get_current_map() { return m_current_map; }
+		FORCEINLINE std::shared_ptr<game_map> get_current_map() { return m_world_layer->get_current_map(); }
 
 		void run();
 		virtual bool init();								// to be used by client
@@ -44,7 +45,9 @@ namespace PFF {
 
 		static application* s_instance;
 		imgui_layer* m_imgui_layer;
+		world_layer* m_world_layer;
 		layer_stack m_layerstack{};
+
 		std::shared_ptr<game_map> m_current_map = nullptr;
 		std::shared_ptr<pff_window> m_window = nullptr;
 		std::shared_ptr<renderer> m_renderer;

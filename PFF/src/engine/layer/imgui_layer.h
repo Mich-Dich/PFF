@@ -16,7 +16,7 @@ namespace PFF {
 
 		void on_attach() override;
 		void on_detach() override;
-		void on_update() override;
+		void on_update(f32 delta_time) override;
 		void on_event(event& event) override;
 		void on_imgui_render() override;
 		void set_fps_values(u32 target_fps, u32 current_fps, f32 work_time, f32 sleep_time)

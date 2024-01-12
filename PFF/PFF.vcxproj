@@ -113,7 +113,6 @@ IF EXIST ..\bin\Release-windows-x86_64\PFF\PFF.dll\ (xcopy /Q /E /Y /I ..\bin\Re
     </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <ClInclude Include="src\engine\layer\world_layer.h" />
     <ClInclude Include="src\PFF.h" />
     <ClInclude Include="src\application.h" />
     <ClInclude Include="src\engine\Events\Event.h" />
@@ -125,6 +124,7 @@ IF EXIST ..\bin\Release-windows-x86_64\PFF\PFF.dll\ (xcopy /Q /E /Y /I ..\bin\Re
     <ClInclude Include="src\engine\layer\imgui_layer.h" />
     <ClInclude Include="src\engine\layer\layer.h" />
     <ClInclude Include="src\engine\layer\layer_stack.h" />
+    <ClInclude Include="src\engine\layer\world_layer.h" />
     <ClInclude Include="src\engine\map\game_map.h" />
     <ClInclude Include="src\engine\platform\pff_window.h" />
     <ClInclude Include="src\engine\render\render_system.h" />
