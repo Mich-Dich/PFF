@@ -56,7 +56,7 @@ namespace PFF {
 
 		//glfwMakeContextCurrent(m_Window);
 		glfwSetWindowUserPointer(m_Window, &m_data);
-		set_vsync(true);
+		set_vsync(m_data.vsync);
 
 		CORE_LOG(Info, "bind event callbacks");
 		glfwSetWindowRefreshCallback(m_Window, [](GLFWwindow* window) {
@@ -176,7 +176,6 @@ namespace PFF {
 	void pff_window::set_vsync(bool enable) {
 
 		CORE_LOG(Warn, "VSync functionality not supported yet");
-		m_data.vsync = enable;
 	}
 
 	VkExtent2D pff_window::get_extend() { 
