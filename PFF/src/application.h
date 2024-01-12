@@ -52,7 +52,7 @@ namespace PFF {
 		bool m_focus = true;
 		bool m_running = true;
 
-		u32 m_target_fps = 144;
+		u32 m_target_fps = 60;
 		u32 m_fps = 0;
 		u32 m_nonefocus_fps = 20;
 		f32 m_delta_time = 0.0f;

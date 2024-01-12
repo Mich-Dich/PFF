@@ -19,16 +19,16 @@ namespace PFF {
 
 	using EventCallbackFn = std::function<void(event&)>;
 
-	struct WindowAttributes {
+	struct window_attributes {
 
 		std::string title;
 		u32 width;
 		u32 height;
-		bool VSync;
-		EventCallbackFn EventCallback;
+		bool vsync;
+		EventCallbackFn event_callback;
 
-		WindowAttributes(const std::string title = "PFF - Sandbox", const u32 width = 1280, const  u32 height = 720, const  bool VSync = false, const EventCallbackFn& callback = nullptr)
-			: title(title), width(width), height(height), VSync(VSync), EventCallback(callback){}
+		window_attributes(const std::string title = "PFF - Sandbox", const u32 width = 1280, const  u32 height = 720, const  bool vsync = false, const EventCallbackFn& callback = nullptr)
+			: title(title), width(width), height(height), vsync(vsync), event_callback(callback){}
 	};
 
 	class pff_window {
@@ -36,31 +36,30 @@ namespace PFF {
 	public:
 		using EventCallbackFn = std::function<void(event&)>;
 
-		pff_window(WindowAttributes);
+		pff_window(window_attributes);
 		~pff_window();
 
 		DELETE_COPY(pff_window);
 
-		FORCEINLINE bool IsVSync() const { return m_data.VSync; }
+		FORCEINLINE bool is_vsync() const { return m_data.vsync; }
 		FORCEINLINE u32 get_width() const { return m_data.width; }
 		FORCEINLINE u32 get_height() const { return m_data.height; }
-		FORCEINLINE WindowAttributes get_attributes() const { return m_data; }
+		FORCEINLINE window_attributes get_attributes() const { return m_data; }
 		FORCEINLINE GLFWwindow* get_window() const { return m_Window; }
-		FORCEINLINE void SetEventCallback(const EventCallbackFn& callback) { m_data.EventCallback = callback; }
+		FORCEINLINE void set_event_callback(const EventCallbackFn& callback) { m_data.event_callback = callback; }
 
-		void createWindowSurface(VkInstance_T* instance, VkSurfaceKHR_T** get_surface);
+		void create_window_surface(VkInstance_T* instance, VkSurfaceKHR_T** get_surface);
 		VkExtent2D get_extend();
 		bool should_close();
+		void update();
 		
 	private:
 		
 		void init();
 		void shutdown();
-		void OnUpdate();
-		void SetVSync(bool enable);
+		void set_vsync(bool enable);
 
-		//EventCallbackFn EventCallback;
-		WindowAttributes m_data;
+		window_attributes m_data;
 		GLFWwindow* m_Window;
 	};
 

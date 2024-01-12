@@ -41,15 +41,15 @@ namespace PFF {
 		fps_timer = std::make_unique<timer>();
 		fps_timer->set_fps_settings(m_target_fps);
 
-		WindowAttributes loc_window_att = WindowAttributes();
-		LOAD_CONFIG_STR(default_editor, loc_window_att.title, "WindowAttributes", "title");
-		LOAD_CONFIG_NUM(default_editor, loc_window_att.width, u32, "WindowAttributes", "width");
-		LOAD_CONFIG_NUM(default_editor, loc_window_att.height, u32, "WindowAttributes", "height");
-		LOAD_CONFIG_BOOL(default_editor, loc_window_att.VSync, "WindowAttributes", "VSync");
+		window_attributes loc_window_att = window_attributes();
+		LOAD_CONFIG_STR(default_editor, loc_window_att.title, "window_attributes", "title");
+		LOAD_CONFIG_NUM(default_editor, loc_window_att.width, u32, "window_attributes", "width");
+		LOAD_CONFIG_NUM(default_editor, loc_window_att.height, u32, "window_attributes", "height");
+		LOAD_CONFIG_BOOL(default_editor, loc_window_att.vsync, "window_attributes", "vsync");
 		m_window = std::make_shared<pff_window>(loc_window_att);			// Can be called after inital setup like [compiling shaders]
 
 		m_renderer = std::make_shared<renderer>(m_window, &m_layerstack);
-		m_window->SetEventCallback(BIND_FN(application::on_event));
+		m_window->set_event_callback(BIND_FN(application::on_event));
 
 		m_imgui_layer = new imgui_layer(m_renderer);
 		m_layerstack.push_overlay(m_imgui_layer);
@@ -66,11 +66,11 @@ namespace PFF {
 		m_layerstack.pop_overlay(m_imgui_layer);
 		m_renderer.reset();
 
-		WindowAttributes loc_window_att = m_window->get_attributes();
-		SAVE_CONFIG_STR(default_editor, loc_window_att.title, "WindowAttributes", "title");
-		SAVE_CONFIG_NUM(default_editor, loc_window_att.width, u32, "WindowAttributes", "width");
-		SAVE_CONFIG_NUM(default_editor, loc_window_att.height, u32, "WindowAttributes", "height");
-		SAVE_CONFIG_BOOL(default_editor, loc_window_att.VSync, "WindowAttributes", "VSync");
+		window_attributes loc_window_att = m_window->get_attributes();
+		SAVE_CONFIG_STR(default_editor, loc_window_att.title, "window_attributes", "title");
+		SAVE_CONFIG_NUM(default_editor, loc_window_att.width, u32, "window_attributes", "width");
+		SAVE_CONFIG_NUM(default_editor, loc_window_att.height, u32, "window_attributes", "height");
+		SAVE_CONFIG_BOOL(default_editor, loc_window_att.vsync, "window_attributes", "vsync");
 		m_window.reset();
 
 	}
@@ -102,7 +102,7 @@ namespace PFF {
 
 		while (m_running) {
 
-			glfwPollEvents();
+			m_window->update();
 
 			// update all layers
 			for (layer* layer : m_layerstack) 

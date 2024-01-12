@@ -257,7 +257,7 @@ namespace PFF {
         CORE_ASSERT(vkCreateCommandPool(m_device, &poolInfo, nullptr, &m_commandPool) == VK_SUCCESS, "", "failed to create command pool!");
     }
 
-    void vk_device::create_surface() { m_window->createWindowSurface(m_VkInstance, &m_surface); }
+    void vk_device::create_surface() { m_window->create_window_surface(m_VkInstance, &m_surface); }
 
     bool vk_device::is_device_suitable(VkPhysicalDevice device) {
 
