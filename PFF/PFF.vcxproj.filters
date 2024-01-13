@@ -120,6 +120,7 @@
     <ClInclude Include="src\util\util.h">
       <Filter>util</Filter>
     </ClInclude>
+    <ClInclude Include="src\engine\game_objects\camera.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="src\application.cpp" />
@@ -177,5 +178,6 @@
     <ClCompile Include="src\util\timer.cpp">
       <Filter>util</Filter>
     </ClCompile>
+    <ClCompile Include="src\engine\game_objects\camera.cpp" />
   </ItemGroup>
 </Project>

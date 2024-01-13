@@ -25,6 +25,7 @@ namespace PFF {
 		FORCEINLINE u32 get_render_system_pipeline_subpass() const { return m_render_system->get_pipeline_subpass(); }
 		FORCEINLINE VkCommandBuffer get_current_command_buffer() const {	CORE_ASSERT(m_is_frame_started, "", "Cant get command buffer when frame not in progress");
 																			return m_command_buffers[m_current_image_index]; }
+		FORCEINLINE float get_aspect_ratio() const { return m_swapchain->get_extentAspectRatio(); }
 
 		void add_render_system(std::shared_ptr<vk_device> device, VkRenderPass renderPass);
 		void draw_frame(f32 delta_time);

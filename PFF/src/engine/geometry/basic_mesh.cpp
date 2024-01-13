@@ -63,7 +63,7 @@ namespace PFF {
 		std::vector<VkVertexInputAttributeDescription> attribut_desc(2);
 		attribut_desc[0].location = 0;
 		attribut_desc[0].binding = 0;
-		attribut_desc[0].format = VK_FORMAT_R32G32_SFLOAT;
+		attribut_desc[0].format = VK_FORMAT_R32G32B32_SFLOAT;
 		attribut_desc[0].offset = offsetof(vertex, position);
 
 		attribut_desc[1].location = 1;

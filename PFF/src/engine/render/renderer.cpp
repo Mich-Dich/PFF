@@ -69,12 +69,17 @@ namespace PFF {
 		
 		if (state == system_state::active) {
 
+			float aspect = m_swapchain->get_extentAspectRatio();
+
+			camera camera{};
+			camera.set_orthographic_projection(-aspect, aspect, -1, 1, -1, 1);
+
 			if (auto commandbuffer = begin_frame()) {
 
 				begin_swapchain_renderpass(commandbuffer);
 				IMGUI_LAYER->begin_frame();
 
-				m_render_system->render_game_objects(delta_time, commandbuffer, application::get().get_current_map()->get_all_game_objects());
+				m_render_system->render_game_objects(delta_time, commandbuffer, application::get().get_current_map()->get_all_game_objects(), camera);
 				for (layer* target : *m_layerstack)
 					target->on_imgui_render();
 

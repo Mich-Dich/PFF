@@ -17,6 +17,10 @@
 #include "engine/render/renderer.h"
 #include "engine/map/game_map.h"
 
+// DEV-ONLY:
+#include "engine/game_objects/camera.h"
+
+
 #include "util/timer.h"
 
 #include "application.h"
@@ -82,21 +86,12 @@ namespace PFF {
 
 	void application::run() {
 
-		std::vector<basic_mesh::vertex> vertices;
-		vertices = {
-			{{0.0f,-0.5f}},
-			{{0.5f,0.5f}},
-			{{-0.5f,0.5f}},
-		};
-		auto model = std::make_shared<basic_mesh>(m_renderer->get_device(), vertices);
+		std::shared_ptr<basic_mesh> model = createCubeModel(m_renderer->get_device(), { 0.0f, 0.0f, 0.0f });
+		auto cube = m_world_layer->get_current_map()->create_empty_game_object();
+		cube->mesh = model;
+		cube->transform.translation = { .0f, .0f, .5f };
+		cube->transform.scale = { .5f, .5f, .5f };
 
-		auto triangle = get_current_map()->create_empty_game_object();
-		triangle->mesh = model;
-		triangle->color = { .02f, 1.0f, .02f };
-		triangle->transform_2D.translation.x = .2f;
-		triangle->transform_2D.scale = { 2.0f ,0.5f };
-		triangle->transform_2D.rotation_speed = 0.05f;
-		triangle->transform_2D.rotation = 0.25f * two_pi<float>();
 
 		while (m_running) {
 
@@ -166,6 +161,65 @@ namespace PFF {
 			fps_timer->set_fps_settings(m_nonefocus_fps);
 
 		return false;
+	}
+
+	std::unique_ptr<basic_mesh> application::createCubeModel(std::shared_ptr<vk_device> device, glm::vec3 offset) {
+
+		std::vector<basic_mesh::vertex> vertices{
+
+			// left face (white)
+			{{-.5f, -.5f, -.5f}, {.9f, .9f, .9f}},
+			{{-.5f, .5f, .5f}, {.9f, .9f, .9f}},
+			{{-.5f, -.5f, .5f}, {.9f, .9f, .9f}},
+			{{-.5f, -.5f, -.5f}, {.9f, .9f, .9f}},
+			{{-.5f, .5f, -.5f}, {.9f, .9f, .9f}},
+			{{-.5f, .5f, .5f}, {.9f, .9f, .9f}},
+
+			// right face (yellow)
+			{{.5f, -.5f, -.5f}, {.8f, .8f, .1f}},
+			{{.5f, .5f, .5f}, {.8f, .8f, .1f}},
+			{{.5f, -.5f, .5f}, {.8f, .8f, .1f}},
+			{{.5f, -.5f, -.5f}, {.8f, .8f, .1f}},
+			{{.5f, .5f, -.5f}, {.8f, .8f, .1f}},
+			{{.5f, .5f, .5f}, {.8f, .8f, .1f}},
+
+			// top face (orange, remember y axis points down)
+			{{-.5f, -.5f, -.5f}, {.9f, .6f, .1f}},
+			{{.5f, -.5f, .5f}, {.9f, .6f, .1f}},
+			{{-.5f, -.5f, .5f}, {.9f, .6f, .1f}},
+			{{-.5f, -.5f, -.5f}, {.9f, .6f, .1f}},
+			{{.5f, -.5f, -.5f}, {.9f, .6f, .1f}},
+			{{.5f, -.5f, .5f}, {.9f, .6f, .1f}},
+
+			// bottom face (red)
+			{{-.5f, .5f, -.5f}, {.8f, .1f, .1f}},
+			{{.5f, .5f, .5f}, {.8f, .1f, .1f}},
+			{{-.5f, .5f, .5f}, {.8f, .1f, .1f}},
+			{{-.5f, .5f, -.5f}, {.8f, .1f, .1f}},
+			{{.5f, .5f, -.5f}, {.8f, .1f, .1f}},
+			{{.5f, .5f, .5f}, {.8f, .1f, .1f}},
+
+			// nose face (blue)
+			{{-.5f, -.5f, 0.5f}, {.1f, .1f, .8f}},
+			{{.5f, .5f, 0.5f}, {.1f, .1f, .8f}},
+			{{-.5f, .5f, 0.5f}, {.1f, .1f, .8f}},
+			{{-.5f, -.5f, 0.5f}, {.1f, .1f, .8f}},
+			{{.5f, -.5f, 0.5f}, {.1f, .1f, .8f}},
+			{{.5f, .5f, 0.5f}, {.1f, .1f, .8f}},
+
+			// tail face (green)
+			{{-.5f, -.5f, -0.5f}, {.1f, .8f, .1f}},
+			{{.5f, .5f, -0.5f}, {.1f, .8f, .1f}},
+			{{-.5f, .5f, -0.5f}, {.1f, .8f, .1f}},
+			{{-.5f, -.5f, -0.5f}, {.1f, .8f, .1f}},
+			{{.5f, -.5f, -0.5f}, {.1f, .8f, .1f}},
+			{{.5f, .5f, -0.5f}, {.1f, .8f, .1f}},
+
+		};
+		for (auto& v : vertices) {
+			v.position += offset;
+		}
+		return std::make_unique<basic_mesh>(device, vertices);
 	}
 
 	// ==================================================================== engine events ====================================================================

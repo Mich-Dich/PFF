@@ -43,6 +43,8 @@ namespace PFF {
 		bool on_window_refresh(window_refresh_event& event);
 		bool on_window_focus(window_focus_event& event);
 
+		std::unique_ptr<basic_mesh> createCubeModel(std::shared_ptr<vk_device> device, glm::vec3 offset);
+
 		static application* s_instance;
 		imgui_layer* m_imgui_layer;
 		world_layer* m_world_layer;
@@ -57,7 +59,7 @@ namespace PFF {
 
 		u32 m_target_fps = 60;
 		u32 m_fps = 0;
-		u32 m_nonefocus_fps = 20;
+		u32 m_nonefocus_fps = 25;
 		f32 m_delta_time = 0.0f;
 		f64 m_work_time = 0, m_sleep_time = 0;
 		std::unique_ptr<timer> fps_timer{};
