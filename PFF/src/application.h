@@ -38,6 +38,7 @@ namespace PFF {
 	private:
 
 		void on_event(event& event);
+		void proccess_events();
 		bool on_window_close(window_close_event& event);
 		bool on_window_resize(window_resize_event& event);
 		bool on_window_refresh(window_refresh_event& event);
@@ -49,6 +50,7 @@ namespace PFF {
 		imgui_layer* m_imgui_layer;
 		world_layer* m_world_layer;
 		layer_stack m_layerstack{};
+		std::vector<event> m_event_queue;		// TODO: change to queue
 
 		std::shared_ptr<game_map> m_current_map = nullptr;
 		std::shared_ptr<pff_window> m_window = nullptr;

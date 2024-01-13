@@ -21,6 +21,7 @@
 
 #include <list>
 #include <map>
+#include <deque>
 #include <set>
 #include <array>
 #include <type_traits>

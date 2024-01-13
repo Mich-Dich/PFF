@@ -2,6 +2,7 @@
 
 #include "engine/layer/layer.h"
 #include "engine/map/game_map.h"
+#include "engine/game_objects/player_controller.h"
 
 namespace PFF {
 
@@ -25,6 +26,7 @@ namespace PFF {
 	private:
 
 		std::shared_ptr<game_map> m_current_map = nullptr;
+		player_controller m_player_controller{};
 
 	};
 

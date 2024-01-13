@@ -13,6 +13,9 @@
     <Filter Include="engine\geometry">
       <UniqueIdentifier>{D64FE53D-42DB-5202-4BEC-D5F6B7F6AE02}</UniqueIdentifier>
     </Filter>
+    <Filter Include="engine\io_handler">
+      <UniqueIdentifier>{1F9FA092-8BB5-9E28-D42C-2A4A40826FB0}</UniqueIdentifier>
+    </Filter>
     <Filter Include="engine\layer">
       <UniqueIdentifier>{27B946B6-131C-D65A-BCA1-0E11A8E3A1DD}</UniqueIdentifier>
     </Filter>
@@ -53,11 +56,20 @@
     <ClInclude Include="src\engine\Events\mouse_event.h">
       <Filter>engine\Events</Filter>
     </ClInclude>
+    <ClInclude Include="src\engine\game_objects\camera.h">
+      <Filter>engine\game_objects</Filter>
+    </ClInclude>
     <ClInclude Include="src\engine\game_objects\game_object.h">
       <Filter>engine\game_objects</Filter>
     </ClInclude>
     <ClInclude Include="src\engine\geometry\basic_mesh.h">
       <Filter>engine\geometry</Filter>
+    </ClInclude>
+    <ClInclude Include="src\engine\io_handler\input_action.h">
+      <Filter>engine\io_handler</Filter>
+    </ClInclude>
+    <ClInclude Include="src\engine\io_handler\input_mapping.h">
+      <Filter>engine\io_handler</Filter>
     </ClInclude>
     <ClInclude Include="src\engine\layer\imgui_layer.h">
       <Filter>engine\layer</Filter>
@@ -120,17 +132,21 @@
     <ClInclude Include="src\util\util.h">
       <Filter>util</Filter>
     </ClInclude>
-    <ClInclude Include="src\engine\game_objects\camera.h" />
-    <ClInclude Include="src\engine\io_handler\input_action.h" />
-    <ClInclude Include="src\engine\io_handler\input_mapping.h" />
+    <ClInclude Include="src\engine\game_objects\player_controller.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="src\application.cpp" />
+    <ClCompile Include="src\engine\game_objects\camera.cpp">
+      <Filter>engine\game_objects</Filter>
+    </ClCompile>
     <ClCompile Include="src\engine\game_objects\game_object.cpp">
       <Filter>engine\game_objects</Filter>
     </ClCompile>
     <ClCompile Include="src\engine\geometry\basic_mesh.cpp">
       <Filter>engine\geometry</Filter>
+    </ClCompile>
+    <ClCompile Include="src\engine\io_handler\input_mapping.cpp">
+      <Filter>engine\io_handler</Filter>
     </ClCompile>
     <ClCompile Include="src\engine\layer\imgui_layer.cpp">
       <Filter>engine\layer</Filter>
@@ -180,7 +196,6 @@
     <ClCompile Include="src\util\timer.cpp">
       <Filter>util</Filter>
     </ClCompile>
-    <ClCompile Include="src\engine\game_objects\camera.cpp" />
-    <ClCompile Include="src\engine\io_handler\input_mapping.cpp" />
+    <ClCompile Include="src\engine\game_objects\player_controller.cpp" />
   </ItemGroup>
 </Project>

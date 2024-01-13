@@ -92,10 +92,10 @@ namespace PFF {
 		cube->transform.translation = { .0f, .0f, 3.5f };
 		cube->transform.scale = { .5f, .5f, .5f };
 
-
 		while (m_running) {
 
 			m_window->update();
+			proccess_events();
 
 			// update all layers
 			for (layer* layer : m_layerstack) 
@@ -118,17 +118,44 @@ namespace PFF {
 
 	void application::on_event(event& event) {
 
+		CORE_LOG(Info, "Event");
+
+		// blocking events
 		event_dispatcher dispatcher(event);
 		dispatcher.dispatch<window_close_event>(BIND_FN(application::on_window_close));
 		dispatcher.dispatch<window_resize_event>(BIND_FN(application::on_window_resize));
 		dispatcher.dispatch<window_refresh_event>(BIND_FN(application::on_window_refresh));
 		dispatcher.dispatch<window_focus_event>(BIND_FN(application::on_window_focus));
 
-		for (auto it = m_layerstack.end(); it != m_layerstack.begin(); ) {
-			(*--it)->on_event(event);
-			if (event.handled)
-				break;
+		// nonblocking events
+		if (!event.handled) {
+
+			for (auto it = m_layerstack.end(); it != m_layerstack.begin(); ) {
+
+				(*--it)->on_event(event);
+				if (event.handled)
+					break;
+			}
 		}
+	}
+
+	void application::proccess_events() {
+		/*
+		while (!m_event_queue.empty()) {
+
+		while (!m_event_queue.empty()) {
+
+			for (auto it = m_layerstack.end(); it != m_layerstack.begin(); ) {
+				(*--it)->on_event(m_event_queue[0]);
+				if (m_event_queue[0].handled)
+					break;
+			}
+			m_event_queue.erase(m_event_queue.begin());
+		}
+			m_event_queue.erase(m_event_queue.begin());
+		}
+		*/
+
 	}
 
 	bool application::on_window_close(window_close_event& event) {
@@ -160,7 +187,7 @@ namespace PFF {
 		else
 			fps_timer->set_fps_settings(m_nonefocus_fps);
 
-		return false;
+		return true;
 	}
 
 	std::unique_ptr<basic_mesh> application::createCubeModel(std::shared_ptr<vk_device> device, glm::vec3 offset) {

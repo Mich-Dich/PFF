@@ -5,17 +5,17 @@ namespace {
 
 	// --------------------------------------------------- General Action Structs ---------------------------------------------------
 
-	#define INPUT_ACTION_TRIGGER_KEY_DOWN		BIT(0)
-	#define INPUT_ACTION_TRIGGER_KEY_UP			BIT(1)
-	#define INPUT_ACTION_TRIGGER_HOLD			BIT(2)
-	#define INPUT_ACTION_TRIGGER_TAP			BIT(3)
+	#define INPUT_ACTION_TRIGGER_KEY_DOWN				BIT(0)
+	#define INPUT_ACTION_TRIGGER_KEY_UP					BIT(1)
+	#define INPUT_ACTION_TRIGGER_HOLD					BIT(2)
+	#define INPUT_ACTION_TRIGGER_TAP					BIT(3)
 
-	#define INPUT_ACTION_MODEFIER_NEGATE		BIT(0)
-	#define INPUT_ACTION_MODEFIER_VEC2_NORMAL	BIT(1)
-	#define INPUT_ACTION_MODEFIER_SMOOTH		BIT(2)
+	#define INPUT_ACTION_MODEFIER_NEGATE				BIT(0)
+	#define INPUT_ACTION_MODEFIER_VEC2_NORMAL			BIT(1)
+	#define INPUT_ACTION_MODEFIER_SMOOTH				BIT(2)
 
 	#define MIN_DIF_BETWEEN_SMOOTH_INPUT_AND_TARGET		0.08
-	#define INPUT_ACTION_REGISTER_NAME(var)         var.action_name = #var
+	#define INPUT_ACTION_REGISTER_NAME(var)				var.action_name = #var
 
 
 	// --------------------------------------------------- Input Action ---------------------------------------------------
@@ -66,7 +66,7 @@ namespace {
 		union value_type {
 			bool boolean;
 			float floating_point;
-		//	vec2 vector2D;
+			glm::vec2 vector2D;
 		};
 		input::settings settings;
 

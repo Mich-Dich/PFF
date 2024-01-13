@@ -113,17 +113,18 @@ IF EXIST ..\bin\Release-windows-x86_64\PFF\PFF.dll\ (xcopy /Q /E /Y /I ..\bin\Re
     </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <ClInclude Include="src\engine\game_objects\camera.h" />
-    <ClInclude Include="src\engine\io_handler\input_action.h" />
-    <ClInclude Include="src\engine\io_handler\input_mapping.h" />
+    <ClInclude Include="src\engine\game_objects\player_controller.h" />
     <ClInclude Include="src\PFF.h" />
     <ClInclude Include="src\application.h" />
     <ClInclude Include="src\engine\Events\Event.h" />
     <ClInclude Include="src\engine\Events\application_event.h" />
     <ClInclude Include="src\engine\Events\key_event.h" />
     <ClInclude Include="src\engine\Events\mouse_event.h" />
+    <ClInclude Include="src\engine\game_objects\camera.h" />
     <ClInclude Include="src\engine\game_objects\game_object.h" />
     <ClInclude Include="src\engine\geometry\basic_mesh.h" />
+    <ClInclude Include="src\engine\io_handler\input_action.h" />
+    <ClInclude Include="src\engine\io_handler\input_mapping.h" />
     <ClInclude Include="src\engine\layer\imgui_layer.h" />
     <ClInclude Include="src\engine\layer\layer.h" />
     <ClInclude Include="src\engine\layer\layer_stack.h" />
@@ -147,6 +148,7 @@ IF EXIST ..\bin\Release-windows-x86_64\PFF\PFF.dll\ (xcopy /Q /E /Y /I ..\bin\Re
     <ClInclude Include="src\util\util.h" />
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="src\engine\game_objects\player_controller.cpp" />
     <ClCompile Include="src\application.cpp" />
     <ClCompile Include="src\engine\game_objects\camera.cpp" />
     <ClCompile Include="src\engine\game_objects\game_object.cpp" />

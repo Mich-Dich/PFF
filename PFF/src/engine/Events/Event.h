@@ -33,6 +33,8 @@ namespace PFF {
 	class PFF_API event {
 
 	public:
+		event() {}
+
 		bool handled = false;
 
 		virtual event_type get_event_type() const = 0;

@@ -23,6 +23,8 @@ namespace PFF {
 
 	void world_layer::on_update(f32 delta_time) {
 
+		m_player_controller.update();
+
 		for (auto& obj : m_current_map->get_all_game_objects()) {
 
 			obj.transform.rotation.y = glm::mod(obj.transform.rotation.y + delta_time, two_pi<float>());
@@ -32,6 +34,8 @@ namespace PFF {
 	}
 
 	void world_layer::on_event(event& event) {
+
+		// CORE_LOG(Info, "Event: " << event);
 	}
 
 	void world_layer::on_imgui_render() {
