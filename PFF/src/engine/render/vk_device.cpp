@@ -53,7 +53,7 @@ namespace PFF {
         VkDebugUtilsMessengerCreateInfoEXT createInfo{};
         populate_debug_messenger_CI(createInfo);
 
-        CORE_VALIDATE(create_debug_utils_messengerEXT(m_VkInstance, &createInfo, nullptr, &m_debug_messanger) == VK_SUCCESS, "Successfully set up debug messanger", "FAILED to set up debug messenger", return);
+        CORE_VALIDATE(create_debug_utils_messengerEXT(m_VkInstance, &createInfo, nullptr, &m_debug_messanger) == VK_SUCCESS, return, "Successfully set up debug messanger", "FAILED to set up debug messenger");
     }
 
     //

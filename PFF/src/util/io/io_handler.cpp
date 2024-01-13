@@ -10,7 +10,7 @@ namespace PFF::io_handler {
 	bool read_file(const std::string& file_path, std::vector<char>& content) {
 
 		std::ifstream file{ file_path, std::ios::ate | std::ios::binary };
-		CORE_VALIDATE(file.is_open(), "", "Failed to open file at: " << file_path, return false);
+		CORE_VALIDATE(file.is_open(), return false, "", "Failed to open file at: " << file_path);
 
 		size_t file_size = static_cast<size_t>(file.tellg());
 		content.clear();
@@ -28,7 +28,7 @@ namespace PFF::io_handler {
 	bool write_file(const std::string& file_path, const std::vector<char>& content) {
 
 		std::ofstream file{ file_path, std::ios::binary };
-		CORE_VALIDATE(file.is_open(), "", "Failed to open file for writing at: " << file_path, return false);
+		CORE_VALIDATE(file.is_open(), return false, "", "Failed to open file for writing at: " << file_path);
 
 		file.write(content.data(), content.size());
 		file.close();

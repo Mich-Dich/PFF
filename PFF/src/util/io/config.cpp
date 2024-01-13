@@ -44,7 +44,7 @@ namespace PFF {
 
             std::filesystem::path file_path = BUILD_CONFIG_PATH(target_config_file);
             std::ifstream configFile(file_path, std::ios::in | std::ios::binary);
-            CORE_VALIDATE(configFile.is_open(), "", "Fauled to open file: [" << file_path << "]", return false);
+            CORE_VALIDATE(configFile.is_open(), return false, "", "Fauled to open file: [" << file_path << "]");
 
             bool found_key = false;
             bool section_found = false;

@@ -183,7 +183,7 @@ namespace APP_NAMESPACE {
 
 
 #ifdef ENABLE_VALIDATION
-	#define CORE_VALIDATE(expr, successMsg, failureMsg, ReturnCommand)				\
+	#define CORE_VALIDATE(expr, ReturnCommand, successMsg, failureMsg)				\
 					if (expr) {														\
 						CORE_LOG(Trace, successMsg);								\
 					} else {														\

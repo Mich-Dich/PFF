@@ -121,6 +121,8 @@
       <Filter>util</Filter>
     </ClInclude>
     <ClInclude Include="src\engine\game_objects\camera.h" />
+    <ClInclude Include="src\engine\io_handler\input_action.h" />
+    <ClInclude Include="src\engine\io_handler\input_mapping.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="src\application.cpp" />
@@ -179,5 +181,6 @@
       <Filter>util</Filter>
     </ClCompile>
     <ClCompile Include="src\engine\game_objects\camera.cpp" />
+    <ClCompile Include="src\engine\io_handler\input_mapping.cpp" />
   </ItemGroup>
 </Project>

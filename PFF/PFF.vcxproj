@@ -114,6 +114,8 @@ IF EXIST ..\bin\Release-windows-x86_64\PFF\PFF.dll\ (xcopy /Q /E /Y /I ..\bin\Re
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClInclude Include="src\engine\game_objects\camera.h" />
+    <ClInclude Include="src\engine\io_handler\input_action.h" />
+    <ClInclude Include="src\engine\io_handler\input_mapping.h" />
     <ClInclude Include="src\PFF.h" />
     <ClInclude Include="src\application.h" />
     <ClInclude Include="src\engine\Events\Event.h" />
@@ -149,6 +151,7 @@ IF EXIST ..\bin\Release-windows-x86_64\PFF\PFF.dll\ (xcopy /Q /E /Y /I ..\bin\Re
     <ClCompile Include="src\engine\game_objects\camera.cpp" />
     <ClCompile Include="src\engine\game_objects\game_object.cpp" />
     <ClCompile Include="src\engine\geometry\basic_mesh.cpp" />
+    <ClCompile Include="src\engine\io_handler\input_mapping.cpp" />
     <ClCompile Include="src\engine\layer\imgui_layer.cpp" />
     <ClCompile Include="src\engine\layer\layer.cpp" />
     <ClCompile Include="src\engine\layer\layer_stack.cpp" />

@@ -89,7 +89,7 @@ namespace PFF {
 		std::shared_ptr<basic_mesh> model = createCubeModel(m_renderer->get_device(), { 0.0f, 0.0f, 0.0f });
 		auto cube = m_world_layer->get_current_map()->create_empty_game_object();
 		cube->mesh = model;
-		cube->transform.translation = { .0f, .0f, .5f };
+		cube->transform.translation = { .0f, .0f, 3.5f };
 		cube->transform.scale = { .5f, .5f, .5f };
 
 

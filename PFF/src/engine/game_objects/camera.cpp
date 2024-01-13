@@ -13,7 +13,7 @@ namespace PFF {
 	camera::~camera() {
 	}
 
-	inline void camera::set_orthographic_projection(f32 left, f32 right, f32 top, f32 bottom, f32 near, f32 far) {
+	void camera::set_orthographic_projection(f32 left, f32 right, f32 top, f32 bottom, f32 near, f32 far) {
 
 		m_projection_matrix= glm::mat4{ 1.0f };
 		m_projection_matrix[0][0] = 2.f / (right - left);
@@ -24,7 +24,7 @@ namespace PFF {
 		m_projection_matrix[3][2] = -near / (far - near);
 	}
 
-	inline void camera::set_perspective_projection(f32 fov_y, f32 aspect_ratio, f32 near, f32 far) {
+	void camera::set_perspective_projection(f32 fov_y, f32 aspect_ratio, f32 near, f32 far) {
 
 		CORE_ASSERT(glm::abs(aspect_ratio - std::numeric_limits<float>::epsilon()) > 0.0f, "", "Aspect ratio check failed: [aspect_ratio - epsilon] > 0.0f");
 		const float tanHalfFovy = tan(fov_y / 2.f);
