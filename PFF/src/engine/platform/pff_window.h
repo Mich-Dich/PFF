@@ -24,6 +24,8 @@ namespace PFF {
 		std::string title;
 		u32 width;
 		u32 height;
+		f64 cursor_pos_x{};
+		f64 cursor_pos_y{};
 		bool vsync;
 		EventCallbackFn event_callback;
 
@@ -47,6 +49,8 @@ namespace PFF {
 		FORCEINLINE window_attributes get_attributes() const { return m_data; }
 		FORCEINLINE GLFWwindow* get_window() const { return m_Window; }
 		FORCEINLINE void set_event_callback(const EventCallbackFn& callback) { m_data.event_callback = callback; }
+		FORCEINLINE f64 get_cursor_pos_x() const { return m_data.cursor_pos_x; }
+		FORCEINLINE f64 get_cursor_pos_y() const { return m_data.cursor_pos_y; }
 
 		void create_window_surface(VkInstance_T* instance, VkSurfaceKHR_T** get_surface);
 		VkExtent2D get_extend();

@@ -29,7 +29,7 @@ namespace PFF {
 
 #define	EVENT_CLASS_CATEGORY(category)			virtual int32 get_category_flag() const override { return category; }
 
-#define EVENT_CLASS_STRING(custom_string)		std::string to_string() const override {												\
+#define EVENT_CLASS_STRING(custom_string)		FORCEINLINE std::string to_string() const override {									\
 													std::stringstream ss;																\
 													ss << "event - " << custom_string;													\
 													return ss.str();}
@@ -47,7 +47,7 @@ namespace PFF {
 		virtual int32 get_category_flag() const = 0;
 		virtual std::string to_string() const { return get_name(); }
 
-		inline bool is_in_category(event_category category) { return (get_category_flag() & category); }
+		FORCEINLINE bool is_in_category(event_category category) { return (get_category_flag() & category); }
 
 	};
 	FORCEINLINE std::ostream& operator<<(std::ostream & os, const event & e) { return os << e.to_string(); }

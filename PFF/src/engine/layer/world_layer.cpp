@@ -34,7 +34,6 @@ namespace PFF {
 
 	void world_layer::on_event(event& event) {
 
-		// CORE_LOG(Info, "Event: " << event);
 		if(m_player_controller)
 			m_player_controller->handle_event(event);
 	}

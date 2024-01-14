@@ -23,6 +23,7 @@ namespace PFF {
 
 		DELETE_COPY(application);
 
+		FORCEINLINE f32 get_delta_time() { return m_delta_time; }
 		FORCEINLINE static application& get() { return *s_instance; }
 		FORCEINLINE imgui_layer* get_imgui_layer() const { return m_imgui_layer; }
 		FORCEINLINE std::shared_ptr<pff_window> get_window() const { return m_window; }

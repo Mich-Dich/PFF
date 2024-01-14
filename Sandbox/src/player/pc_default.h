@@ -4,13 +4,8 @@
 
 class pc_default : public PFF::player_controller {
 public:
-	pc_default() {
-		LOG(Trace, "player controller constructor");
-		init();
-	};
+	pc_default();
 	~pc_default() {};
-
-	void init() override;
 
 private:
 

@@ -6,11 +6,11 @@
 #include "input_mapping.h"
 
 
-void pc_default::init() {
+
+pc_default::pc_default() {
 
 	// register Input mapping
 	LOG(Debug, "register Input mapping");
 	m_input_mapping = default_IAM{};
 }
-
 

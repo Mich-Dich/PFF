@@ -11,40 +11,11 @@ namespace PFF {
 	#define INPUT_ACTION_TRIGGER_TAP					BIT(3)
 
 	#define INPUT_ACTION_MODEFIER_NEGATE				BIT(0)
-	#define INPUT_ACTION_MODEFIER_VEC2_NORMAL			BIT(1)
-	#define INPUT_ACTION_MODEFIER_SMOOTH				BIT(2)
+	#define INPUT_ACTION_MODEFIER_SMOOTH_INTERP			BIT(1)
+	#define INPUT_ACTION_MODEFIER_VEC2_NORMAL			BIT(2)
 
 	#define MIN_DIF_BETWEEN_SMOOTH_INPUT_AND_TARGET		0.08
 	#define INPUT_ACTION_REGISTER_NAME(var)				var.action_name = #var
-
-	/*
-	namespace input {
-		
-		enum class key_state {
-
-		};
-
-	enum class input_value {
-		_bool,
-		_float,
-		_vec2,
-	};
-
-	struct settings {
-		float duration_in_sec;
-		u32 trigger_flags;
-		u32 modefiers_flags;
-	};
-}
-
-
-typedef enum {
-	KS_released,
-	KS_pressed,
-	KS_held
-} Key_state;
-
-*/
 
 	// --------------------------------------------------- Input Action ---------------------------------------------------
 
@@ -58,6 +29,7 @@ typedef enum {
 		key_code key;
 		u16 trigger_flags;
 		u16 modefier_flags;
+		f32 duration_in_sec;
 
 		key_details(key_code key, u16 trigger_flags = 0, u16 modefier_flags = 0) 
 			: key(key), trigger_flags(trigger_flags), modefier_flags(modefier_flags) {};
@@ -65,15 +37,19 @@ typedef enum {
 
 	struct input_action {
 
-		std::string description;
 		bool triger_when_paused;
 		input_value value;
-		union value_type {
+		union {
 			bool boolean;
-			float floating_point;
-			glm::vec2 vector2D;
-		};
+			f32 axis_1d;
+			glm::vec2 axis_2d{};
+		} data;
+		std::chrono::time_point<std::chrono::high_resolution_clock> time_stamp;
+		f32 duration_in_sec;
 		std::vector<key_details> keys;
+
+		input_action(bool triger_when_paused = false, input_value value = input_value::IV_bool, std::vector<key_details> keys = {})
+			: triger_when_paused(triger_when_paused), value(value), keys(keys) {}
 
 		std::vector<key_details>::iterator begin() { return keys.begin(); }
 		std::vector<key_details>::iterator end() { return keys.end(); }

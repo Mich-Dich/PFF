@@ -33,6 +33,11 @@ enum class system_state {
 #define CONFIG_DIR				"./config/"
 #define FILE_EXTENSION_CONFIG	".ini"
 
+enum class key_state {
+	release = 0,
+	press	= 1,
+	repeat	= 2,
+};
 
 enum class key_code {
 

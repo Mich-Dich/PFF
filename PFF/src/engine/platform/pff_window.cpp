@@ -35,6 +35,7 @@ namespace PFF {
 	}
 
 	// ============================================================================== inplemantation ==============================================================================
+	
 
 	void pff_window::init() {
 
@@ -50,12 +51,13 @@ namespace PFF {
 
 		m_Window = glfwCreateWindow(static_cast<int>(m_data.width), static_cast<int>(m_data.height), m_data.title.c_str(), nullptr, nullptr);
 		CORE_ASSERT(glfwVulkanSupported(), "", "GLFW: Vulkan Not Supported");
-
 		CORE_LOG(Trace, "Creating window [" << m_data.title << " width: " << m_data.width << "  height: " << m_data.height << "]");
 
-		//glfwMakeContextCurrent(m_Window);
 		glfwSetWindowUserPointer(m_Window, &m_data);
+		glfwGetCursorPos(m_Window, &m_data.cursor_pos_x, &m_data.cursor_pos_y);
 		set_vsync(m_data.vsync);
+
+		GLFW_PRESS;
 
 		CORE_LOG(Info, "bind event callbacks");
 		glfwSetWindowRefreshCallback(m_Window, [](GLFWwindow* window) {
@@ -98,63 +100,25 @@ namespace PFF {
 		glfwSetCursorPosCallback(m_Window, [](GLFWwindow* window, double xPos, double yPos) {
 
 			window_attributes& Data = *(window_attributes*)glfwGetWindowUserPointer(window);
-			MouseMovedEvent event(static_cast<float>(xPos), static_cast<float>(yPos));
+			MouseMovedEvent event(static_cast<f32>(Data.cursor_pos_x - xPos), static_cast<f32>(Data.cursor_pos_y - yPos));
 			Data.event_callback(event);
+
+			Data.cursor_pos_x = xPos;
+			Data.cursor_pos_y = yPos;
 		});
 
 		glfwSetKeyCallback(m_Window, [](GLFWwindow* window, int key, int scancode, int action, int mods) {
 
 			window_attributes& Data = *(window_attributes*)glfwGetWindowUserPointer(window);
-
-			switch (action) {
-				case GLFW_PRESS: {
-
-					key_pressed_event event(key, 0);
-					Data.event_callback(event);
-				
-				} break;
-
-				case GLFW_RELEASE: {
-
-					key_released_event event(key);
-					Data.event_callback(event);
-				
-				} break;
-
-				case GLFW_REPEAT: {
-
-					key_pressed_event event(key, 1);
-					Data.event_callback(event);
-				
-				} break;
-
-				default:
-					break;
-			}
+			key_event event(key, static_cast<key_state>(action));
+			Data.event_callback(event);
 		});
 
 		glfwSetMouseButtonCallback(m_Window, [](GLFWwindow* window, int button, int action, int mods) {
 
 			window_attributes& Data = *(window_attributes*)glfwGetWindowUserPointer(window);
-
-			switch (action) {
-				case GLFW_PRESS:{
-
-					MouseButtonPressedEvent event(button);
-					Data.event_callback(event);
-				
-				}break;
-
-				case GLFW_RELEASE: {
-
-					MouseButtonReleasedEvent event(button);
-					Data.event_callback(event);
-				
-				} break;
-
-				default:
-					break;
-			}
+			key_event event(button, static_cast<key_state>(action));
+			Data.event_callback(event);
 		});
 
 		CORE_LOG(Info, "finished setup");
@@ -176,6 +140,7 @@ namespace PFF {
 
 		CORE_LOG(Warn, "VSync functionality not supported yet");
 	}
+
 
 	VkExtent2D pff_window::get_extend() { 
 		
