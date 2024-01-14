@@ -1,9 +1,9 @@
 #pragma once
 
 
-namespace {
+namespace PFF {
 
-	// --------------------------------------------------- General Action Structs ---------------------------------------------------
+	// --------------------------------------------------- trigger and modefier flags ---------------------------------------------------
 
 	#define INPUT_ACTION_TRIGGER_KEY_DOWN				BIT(0)
 	#define INPUT_ACTION_TRIGGER_KEY_UP					BIT(1)
@@ -17,49 +17,54 @@ namespace {
 	#define MIN_DIF_BETWEEN_SMOOTH_INPUT_AND_TARGET		0.08
 	#define INPUT_ACTION_REGISTER_NAME(var)				var.action_name = #var
 
-
-	// --------------------------------------------------- Input Action ---------------------------------------------------
+	/*
 	namespace input {
-
+		
 		enum class key_state {
 
 		};
 
-		enum class input_value {
-			_bool,
-			_float,
-			_vec2,
-		};
+	enum class input_value {
+		_bool,
+		_float,
+		_vec2,
+	};
 
-		struct settings {
-			float duration_in_sec;
-			u32 trigger_flags;
-			u32 modefiers_flags;
-		};
-	}
+	struct settings {
+		float duration_in_sec;
+		u32 trigger_flags;
+		u32 modefiers_flags;
+	};
+}
 
 
-	typedef enum {
-		KS_released,
-		KS_pressed,
-		KS_held
-	} Key_state;
+typedef enum {
+	KS_released,
+	KS_pressed,
+	KS_held
+} Key_state;
 
-	typedef enum {
-		IV_bool = 0,
+*/
+
+	// --------------------------------------------------- Input Action ---------------------------------------------------
+
+	enum class input_value {
+		IV_bool,
 		IV_float,
 		IV_vec2
-	} input_value;
+	};
 
+	struct key_details {
+		key_code key;
+		u16 trigger_flags;
+		u16 modefier_flags;
 
+		key_details(key_code key, u16 trigger_flags = 0, u16 modefier_flags = 0) 
+			: key(key), trigger_flags(trigger_flags), modefier_flags(modefier_flags) {};
+	};
 
-	class input_action {
+	struct input_action {
 
-	public:
-
-	private:
-
-		std::string action_name;
 		std::string description;
 		bool triger_when_paused;
 		input_value value;
@@ -68,8 +73,10 @@ namespace {
 			float floating_point;
 			glm::vec2 vector2D;
 		};
-		input::settings settings;
+		std::vector<key_details> keys;
 
+		std::vector<key_details>::iterator begin() { return keys.begin(); }
+		std::vector<key_details>::iterator end() { return keys.end(); }
 	};
 
 }

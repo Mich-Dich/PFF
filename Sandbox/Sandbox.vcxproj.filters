@@ -12,6 +12,7 @@
     <ClCompile Include="src\entry.cpp">
       <Filter>src</Filter>
     </ClCompile>
+    <ClCompile Include="src\player\pc_default.cpp" />
   </ItemGroup>
   <ItemGroup>
     <None Include="shaders\default.frag">
@@ -20,5 +21,9 @@
     <None Include="shaders\default.vert">
       <Filter>shaders</Filter>
     </None>
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="src\player\pc_default.h" />
+    <ClInclude Include="src\player\input_mapping.h" />
   </ItemGroup>
 </Project>

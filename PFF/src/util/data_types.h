@@ -30,10 +30,14 @@ enum class system_state {
 	inactive,
 };
 
-#define FILE_EXTENSION_CONFIG ".ini"
+#define CONFIG_DIR				"./config/"
+#define FILE_EXTENSION_CONFIG	".ini"
 
 
 enum class key_code {
+
+	mouse_moved       = 10,
+	mouse_scrolled    = 11,
 
 	key_unknown       = -1,
 	key_SPACE         = 32,

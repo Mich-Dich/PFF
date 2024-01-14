@@ -23,10 +23,12 @@ namespace PFF {
 		virtual void on_event(event& event);
 		virtual void on_imgui_render();
 
+		void register_player_controller(std::shared_ptr<player_controller> player_controller);
+
 	private:
 
 		std::shared_ptr<game_map> m_current_map = nullptr;
-		player_controller m_player_controller{};
+		std::shared_ptr<player_controller> m_player_controller{};
 
 	};
 

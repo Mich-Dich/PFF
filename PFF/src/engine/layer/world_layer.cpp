@@ -1,6 +1,7 @@
 
 #include "util/pffpch.h"
 
+#include "engine/Events/Event.h"
 #include "world_layer.h"
 
 namespace PFF {
@@ -23,22 +24,27 @@ namespace PFF {
 
 	void world_layer::on_update(f32 delta_time) {
 
-		m_player_controller.update();
-
 		for (auto& obj : m_current_map->get_all_game_objects()) {
 
-			obj.transform.rotation.y = glm::mod(obj.transform.rotation.y + delta_time, two_pi<float>());
-			obj.transform.rotation.x = glm::mod(obj.transform.rotation.x + (delta_time * .5f), two_pi<float>());
-			obj.transform.rotation.z = glm::mod(obj.transform.rotation.z + (delta_time * .75f), two_pi<float>());
+			obj.transform.rotation.y += glm::mod(obj.rotation_speed.y * delta_time, two_pi<float>());
+			obj.transform.rotation.x += glm::mod(obj.rotation_speed.x * (delta_time * .5f), two_pi<float>());
+			obj.transform.rotation.z += glm::mod(obj.rotation_speed.z * (delta_time * .75f), two_pi<float>());
 		}
 	}
 
 	void world_layer::on_event(event& event) {
 
 		// CORE_LOG(Info, "Event: " << event);
+		if(m_player_controller)
+			m_player_controller->handle_event(event);
 	}
 
 	void world_layer::on_imgui_render() {
+	}
+
+	void world_layer::register_player_controller(std::shared_ptr<player_controller> player_controller) {
+
+		m_player_controller = player_controller;
 	}
 
 }

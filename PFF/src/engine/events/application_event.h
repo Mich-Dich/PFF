@@ -14,13 +14,7 @@ namespace PFF {
 		FORCEINLINE u32 get_width() const { return m_width; }
 		FORCEINLINE u32 get_height() const { return m_height; }
 
-		std::string to_string() const override {
-
-			std::stringstream ss;
-			ss << "Event - WindowResizeEvent [" << m_width << ", " << m_height << "]";
-			return ss.str();
-		}
-
+		EVENT_CLASS_STRING("window resize event [" << m_width << ", " << m_height << "]");
 		EVENT_CLASS_TYPE(WindowResize);
 		EVENT_CLASS_CATEGORY(EC_Application);
 			
@@ -37,6 +31,7 @@ namespace PFF {
 
 		FORCEINLINE bool get_focus() const { return m_focus; }
 
+		EVENT_CLASS_STRING("window focus event");
 		EVENT_CLASS_TYPE(WindowFocus);
 		EVENT_CLASS_CATEGORY(EC_Application);
 

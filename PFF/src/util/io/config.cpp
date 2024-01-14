@@ -11,22 +11,19 @@
 #include <fstream>
 #include <string>
 
-#define BUILD_CONFIG_PATH(x)	config_dir + "/" + configtype_to_string(x) + FILE_EXTENSION_CONFIG
 
 namespace PFF {
 
     namespace config {
 
-        static std::string config_dir = "./config";
-
         //
         void init() {
 
-            io_handler::create_directory(config_dir);
+            io_handler::create_directory(CONFIG_DIR);
 
-            for (int i = static_cast<int>(config_file_types::default_editor); i <= static_cast<int>(config_file_types::default_input); ++i) {
+            for (int i = static_cast<int>(file_types::editor); i <= static_cast<int>(file_types::input); ++i) {
 
-                std::filesystem::path file_path = BUILD_CONFIG_PATH(static_cast<config_file_types>(i));
+                std::filesystem::path file_path = BUILD_CONFIG_PATH(static_cast<file_types>(i));
                 std::ofstream config_file(file_path, std::ios::app);
                 if (!config_file.is_open()) {
 
@@ -40,7 +37,7 @@ namespace PFF {
         }
 
         // 
-        bool check_for_configuration(const config_file_types target_config_file, const std::string& section, const std::string& key, std::string& value, const bool override) {
+        bool check_for_configuration(const file_types target_config_file, const std::string& section, const std::string& key, std::string& value, const bool override) {
 
             std::filesystem::path file_path = BUILD_CONFIG_PATH(target_config_file);
             std::ifstream configFile(file_path, std::ios::in | std::ios::binary);
@@ -126,13 +123,14 @@ namespace PFF {
         }
 
         //
-        std::string configtype_to_string(config_file_types type) {
+        std::string file_type_to_string(file_types type) {
 
-            static const std::unordered_map<config_file_types, std::string> typeStrings{
-                {config_file_types::default_editor, "default_editor"},
-                {config_file_types::default_engine, "default_engine"},
-                {config_file_types::default_game, "default_game"},
-                {config_file_types::default_input, "default_input"}
+            static const std::unordered_map<file_types, std::string> typeStrings{
+                {file_types::editor, "editor"},
+                {file_types::engine, "engine"},
+                {file_types::game, "game"},
+                {file_types::input, "input"},
+                {file_types::ui, "imgui" },
             };
 
             auto it = typeStrings.find(type);

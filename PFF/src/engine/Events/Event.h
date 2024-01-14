@@ -9,10 +9,9 @@ namespace PFF {
 
 	enum class event_type {
 		None = 0,
-		WindowClose, WindowRefresh, WindowResize, WindowFocus, WindowLostFocus, WindowMoved,
-		AppTick, AppUpdate, AppRender,
-		KeyPressed, KeyReleased,
-		MouseButtonPressed, MouseButtonReleased, MouseMoved, MouseScrolled
+		WindowClose, WindowRefresh, WindowResize, WindowFocus, WindowLostFocus, WindowMoved,			// window
+		AppTick, AppUpdate, AppRender,																	// application
+		KeyPressed, KeyReleased, MouseButtonPressed, MouseButtonReleased, MouseMoved, MouseScrolled		// input
 	};
 
 	enum event_category {
@@ -24,11 +23,17 @@ namespace PFF {
 		EC_Button			= BIT(4)
 	};
 
-#define EVENT_CLASS_TYPE(type)				static event_type get_static_type() { return event_type::##type; }					\
-											virtual event_type get_event_type() const override { return get_static_type(); }		\
-											virtual const char* get_name() const override { return #type; }
+#define EVENT_CLASS_TYPE(type)					static event_type get_static_type() { return event_type::##type; }						\
+												virtual event_type get_event_type() const override { return get_static_type(); }		\
+												virtual const char* get_name() const override { return #type; }
 
-#define	EVENT_CLASS_CATEGORY(category)		virtual int32 get_category_flag() const override { return category; }
+#define	EVENT_CLASS_CATEGORY(category)			virtual int32 get_category_flag() const override { return category; }
+
+#define EVENT_CLASS_STRING(custom_string)		std::string to_string() const override {												\
+													std::stringstream ss;																\
+													ss << "event - " << custom_string;													\
+													return ss.str();}
+
 
 	class PFF_API event {
 
@@ -47,7 +52,7 @@ namespace PFF {
 	};
 	FORCEINLINE std::ostream& operator<<(std::ostream & os, const event & e) { return os << e.to_string(); }
 
-	class event_dispatcher {
+	class PFF_API event_dispatcher {
 
 		template<typename T>
 		using EventFn = std::function<bool(T&)>;

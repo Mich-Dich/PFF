@@ -48,6 +48,8 @@ namespace PFF {
 		io.ConfigFlags |= ImGuiConfigFlags_ViewportsEnable;
 		//io.ConfigFlags |= ImGuiConfigFlags_ViewportsNoTaskBarIcons;
 		//io.ConfigFlags |= ImGuiConfigFlags_ViewportsNoMerge;
+		io.IniFilename = "./config/imgui.ini";
+
 		ImGui::StyleColorsDark();
 		
 		// When viewports are enabled we tweak WindowRounding/WindowBg so platform windows can look identical to regular ones.
@@ -160,13 +162,20 @@ namespace PFF {
 				
 
 				if (ImGui::BeginPopupContextWindow()) {
-					if (ImGui::MenuItem("custom", NULL, location == -1)) location = -1;
-					if (ImGui::MenuItem("center", NULL, location == -2)) location = -2;
-					if (ImGui::MenuItem("top-left", NULL, location == 0)) location = 0;
-					if (ImGui::MenuItem("top-right", NULL, location == 1)) location = 1;
-					if (ImGui::MenuItem("bottom-left", NULL, location == 2)) location = 2;
-					if (ImGui::MenuItem("bottom-right", NULL, location == 3)) location = 3;
-					if (&show_fps && ImGui::MenuItem("close")) show_fps = false;
+					if (ImGui::MenuItem("custom", NULL, location == -1))
+						location = -1;
+					if (ImGui::MenuItem("center", NULL, location == -2))
+						location = -2;
+					if (ImGui::MenuItem("top-left", NULL, location == 0))
+						location = 0;
+					if (ImGui::MenuItem("top-right", NULL, location == 1)) 
+						location = 1;
+					if (ImGui::MenuItem("bottom-left", NULL, location == 2)) 
+						location = 2;
+					if (ImGui::MenuItem("bottom-right", NULL, location == 3))
+						location = 3;
+					if (&show_fps && ImGui::MenuItem("close"))
+						show_fps = false;
 					ImGui::EndPopup();
 				}
 			}

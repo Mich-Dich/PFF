@@ -62,6 +62,9 @@
     <ClInclude Include="src\engine\game_objects\game_object.h">
       <Filter>engine\game_objects</Filter>
     </ClInclude>
+    <ClInclude Include="src\engine\game_objects\player_controller.h">
+      <Filter>engine\game_objects</Filter>
+    </ClInclude>
     <ClInclude Include="src\engine\geometry\basic_mesh.h">
       <Filter>engine\geometry</Filter>
     </ClInclude>
@@ -132,7 +135,7 @@
     <ClInclude Include="src\util\util.h">
       <Filter>util</Filter>
     </ClInclude>
-    <ClInclude Include="src\engine\game_objects\player_controller.h" />
+    <ClInclude Include="src\engine\game_objects\game_manager.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="src\application.cpp" />
@@ -140,6 +143,9 @@
       <Filter>engine\game_objects</Filter>
     </ClCompile>
     <ClCompile Include="src\engine\game_objects\game_object.cpp">
+      <Filter>engine\game_objects</Filter>
+    </ClCompile>
+    <ClCompile Include="src\engine\game_objects\player_controller.cpp">
       <Filter>engine\game_objects</Filter>
     </ClCompile>
     <ClCompile Include="src\engine\geometry\basic_mesh.cpp">
@@ -196,6 +202,6 @@
     <ClCompile Include="src\util\timer.cpp">
       <Filter>util</Filter>
     </ClCompile>
-    <ClCompile Include="src\engine\game_objects\player_controller.cpp" />
+    <ClCompile Include="src\engine\game_objects\game_manager.cpp" />
   </ItemGroup>
 </Project>

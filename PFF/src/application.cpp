@@ -46,10 +46,10 @@ namespace PFF {
 		fps_timer->set_fps_settings(m_target_fps);
 
 		window_attributes loc_window_att = window_attributes();
-		LOAD_CONFIG_STR(default_editor, loc_window_att.title, "window_attributes", "title");
-		LOAD_CONFIG_NUM(default_editor, loc_window_att.width, u32, "window_attributes", "width");
-		LOAD_CONFIG_NUM(default_editor, loc_window_att.height, u32, "window_attributes", "height");
-		LOAD_CONFIG_BOOL(default_editor, loc_window_att.vsync, "window_attributes", "vsync");
+		LOAD_CONFIG_STR(editor, loc_window_att.title, "window_attributes", "title");
+		LOAD_CONFIG_NUM(editor, loc_window_att.width, u32, "window_attributes", "width");
+		LOAD_CONFIG_NUM(editor, loc_window_att.height, u32, "window_attributes", "height");
+		LOAD_CONFIG_BOOL(editor, loc_window_att.vsync, "window_attributes", "vsync");
 		m_window = std::make_shared<pff_window>(loc_window_att);			// Can be called after inital setup like [compiling shaders]
 
 		m_renderer = std::make_shared<renderer>(m_window, &m_layerstack);
@@ -74,10 +74,10 @@ namespace PFF {
 		m_renderer.reset();
 
 		window_attributes loc_window_att = m_window->get_attributes();
-		SAVE_CONFIG_STR(default_editor, loc_window_att.title, "window_attributes", "title");
-		SAVE_CONFIG_NUM(default_editor, loc_window_att.width, u32, "window_attributes", "width");
-		SAVE_CONFIG_NUM(default_editor, loc_window_att.height, u32, "window_attributes", "height");
-		SAVE_CONFIG_BOOL(default_editor, loc_window_att.vsync, "window_attributes", "vsync");
+		SAVE_CONFIG_STR(editor, loc_window_att.title, "window_attributes", "title");
+		SAVE_CONFIG_NUM(editor, loc_window_att.width, u32, "window_attributes", "width");
+		SAVE_CONFIG_NUM(editor, loc_window_att.height, u32, "window_attributes", "height");
+		SAVE_CONFIG_BOOL(editor, loc_window_att.vsync, "window_attributes", "vsync");
 		m_window.reset();
 
 	}
@@ -91,14 +91,14 @@ namespace PFF {
 		cube->mesh = model;
 		cube->transform.translation = { .0f, .0f, 3.5f };
 		cube->transform.scale = { .5f, .5f, .5f };
+		cube->rotation_speed = { 0.f,glm::radians(180.f), 0.f};
 
 		while (m_running) {
 
 			m_window->update();
-			proccess_events();
 
 			// update all layers
-			for (layer* layer : m_layerstack) 
+			for (layer* layer : m_layerstack)
 				layer->on_update(m_delta_time);
 
 			update(m_delta_time);	// potentally make every actor have own function (like UNREAL)
@@ -118,16 +118,14 @@ namespace PFF {
 
 	void application::on_event(event& event) {
 
-		CORE_LOG(Info, "Event");
-
-		// blocking events
+		// application events
 		event_dispatcher dispatcher(event);
 		dispatcher.dispatch<window_close_event>(BIND_FN(application::on_window_close));
 		dispatcher.dispatch<window_resize_event>(BIND_FN(application::on_window_resize));
 		dispatcher.dispatch<window_refresh_event>(BIND_FN(application::on_window_refresh));
 		dispatcher.dispatch<window_focus_event>(BIND_FN(application::on_window_focus));
 
-		// nonblocking events
+		// none application events
 		if (!event.handled) {
 
 			for (auto it = m_layerstack.end(); it != m_layerstack.begin(); ) {
@@ -137,25 +135,6 @@ namespace PFF {
 					break;
 			}
 		}
-	}
-
-	void application::proccess_events() {
-		/*
-		while (!m_event_queue.empty()) {
-
-		while (!m_event_queue.empty()) {
-
-			for (auto it = m_layerstack.end(); it != m_layerstack.begin(); ) {
-				(*--it)->on_event(m_event_queue[0]);
-				if (m_event_queue[0].handled)
-					break;
-			}
-			m_event_queue.erase(m_event_queue.begin());
-		}
-			m_event_queue.erase(m_event_queue.begin());
-		}
-		*/
-
 	}
 
 	bool application::on_window_close(window_close_event& event) {

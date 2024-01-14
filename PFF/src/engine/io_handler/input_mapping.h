@@ -4,23 +4,23 @@
 
 namespace PFF {
 
-	class input_mapping {
+	class PFF_API input_mapping {
 
 	public:
 
-		bool input_register_action_bool(key_code key, input_action* action);
+		input_mapping() {};
+		~input_mapping() {};
 
+		// DELETE_COPY(input_mapping);
+
+		// bool input_register_action_bool(key_code key, input_action* action);
+
+		std::vector<input_action>::iterator begin() { return m_actions.begin(); }
+		std::vector<input_action>::iterator end() { return m_actions.end(); }
+
+		std::vector<PFF::input_action> m_actions;
 	private:
 
-		std::vector<input_action> inputs;
-
-		std::vector<u16> key_codes;
-		Key_state key_state;
-		input_action* action;
-		bool override_settings;
-		input::settings settings;
-		u64 time_stamp;
-		u16 buffer;
 	};
 
 }

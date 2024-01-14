@@ -72,6 +72,7 @@ namespace PFF {
 		std::shared_ptr<basic_mesh> mesh{};
 		glm::vec3 color{};
 		transform_comp transform{};
+		glm::vec3 rotation_speed = {};
 
 	private:
 

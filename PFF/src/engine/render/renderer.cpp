@@ -71,8 +71,8 @@ namespace PFF {
 
 			camera camera{};
 			float aspect = m_swapchain->get_extentAspectRatio();
-			// camera.set_orthographic_projection(-aspect, aspect, -1, 1, -1, 1);
-			camera.set_perspective_projection(glm::radians(50.f), aspect, .1f, 10.0f);
+			//camera.set_orthographic_projection(-aspect, aspect, -1, 1, 0, 10);
+			camera.set_perspective_projection(glm::radians(50.f), aspect, .1f, 150.0f);
 
 			if (auto commandbuffer = begin_frame()) {
 
