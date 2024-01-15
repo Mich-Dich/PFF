@@ -118,7 +118,6 @@ namespace PFF {
 			key_event event(button, static_cast<key_state>(action));
 			Data.event_callback(event);
 		});
-
 		CORE_LOG(Info, "finished setup");
 	}
 

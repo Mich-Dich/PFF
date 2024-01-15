@@ -4,6 +4,9 @@
 
 struct VkCommandBuffer_T;
 typedef VkCommandBuffer_T* VkCommandBuffer;
+
+struct VkImageView_T;
+typedef VkImageView_T* VkImageView;
 typedef int ImGuiWindowFlags;
 
 namespace PFF {
@@ -25,15 +28,17 @@ namespace PFF {
 
 		void begin_frame();
 		void end_frame(VkCommandBuffer commandbuffer);
+		void capture_current_image(VkImageView frame_buffer);
 	
 	private:
 
-		void set_next_window_pos(int16 location, ImGuiWindowFlags& window_flags);
+		void set_next_window_pos(int16 location);
 		void progressbar_with_text(f32 percent, const char* text);
 
 		f32 m_work_time, m_sleep_time;
 		u32 m_target_fps, m_current_fps;
 		std::shared_ptr<renderer> m_renderer;
+		f32 m_font_size = 14.5f;
 	};
 
 }

@@ -55,6 +55,14 @@ namespace PFF {
 														PFF::config::check_for_configuration(PFF::config::file_types::config_file, section, key, buffer, false);			\
 														value = str_to_num<type>(buffer);}
 
+		#define LOAD_CONFIG_VEC4(config_file, vector, section, key)																											\
+														{std::ostringstream oss;																							\
+														oss << vector.x << ' ' << vector.y << ' ' << vector.z << ' ' << vector.w;											\
+														std::string buffer = oss.str();																						\
+														PFF::config::check_for_configuration(PFF::config::file_types::config_file, section, key, buffer, false);			\
+														std::istringstream iss(buffer);																						\
+														iss >> vector.x >> vector.y >> vector.z >> vector.w;}
+
 		// @brief Macro to load a string value from specified config file (save if not found)
 		// @param [config_file] The type of configuration file to be checked/updated.
 		// @param [value] Reference to the string variable that will store the configuration value.

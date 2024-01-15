@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <Filter Include="player">
+      <UniqueIdentifier>{9262FA14-7E04-25EB-67BF-383F5300AC3B}</UniqueIdentifier>
+    </Filter>
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="..\Sandbox\src\player\input_mapping.h">
+      <Filter>player</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Sandbox\src\player\pc_default.h">
+      <Filter>player</Filter>
+    </ClInclude>
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="..\Sandbox\src\entry.cpp" />
+    <ClCompile Include="..\Sandbox\src\player\pc_default.cpp">
+      <Filter>player</Filter>
+    </ClCompile>
+  </ItemGroup>
+</Project>

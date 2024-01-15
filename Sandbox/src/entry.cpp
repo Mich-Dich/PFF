@@ -30,7 +30,7 @@ bool Sandbox::init() {
 	Sandbox::register_player_controller(std::make_shared<pc_default>());
 
 	// TODO: move to map init() function
-#if 1
+#if 0
 	u32 counter = 0;
 	std::shared_ptr<PFF::basic_mesh> model = create_cube_model({ 0.0f, 0.0f, 0.0f });
 	for (int16 x = -13; x < 14; x++) {

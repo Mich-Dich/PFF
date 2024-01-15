@@ -18,7 +18,10 @@
 
 namespace PFF {
 
-#define IMGUI_DEMO_MARKER(section)  do { if (GImGuiDemoMarkerCallback != NULL) GImGuiDemoMarkerCallback(__FILE__, __LINE__, section, GImGuiDemoMarkerCallbackUserData); } while (0)
+#define LOAD_IMGUI_SETTING(key, value)				{ImVec4 buffer_vec = value;																\
+													LOAD_CONFIG_VEC4(editor, buffer_vec, "color_scheme", #key);								\
+													ImGui::PushStyleColor(ImGuiCol_##key, buffer_vec);}
+
 
 	static bool showdemo_window = true;
 	static bool show_fps = true;
@@ -51,7 +54,7 @@ namespace PFF {
 		io.IniFilename = "./config/imgui.ini";
 
 		ImGui::StyleColorsDark();
-		
+
 		// When viewports are enabled we tweak WindowRounding/WindowBg so platform windows can look identical to regular ones.
 		ImGuiStyle& style = ImGui::GetStyle();
 		if (io.ConfigFlags & ImGuiConfigFlags_ViewportsEnable) {
@@ -60,6 +63,7 @@ namespace PFF {
 		}
 
 		application& app = application::get();
+		LOAD_CONFIG_NUM(editor, m_font_size, f32, "UI", "font_size");
 
 		// Setup Platform/Renderer backends
 		ImGui_ImplGlfw_InitForVulkan(app.get_window()->get_window(), true);
@@ -81,6 +85,7 @@ namespace PFF {
 
 		// Use any command queue
 		VkCommandBuffer command_buffer = m_renderer->get_device()->begin_single_time_commands();
+		io.FontDefault = io.Fonts->AddFontFromFileTTF("../PFF/assets/fonts/Open_Sans/static/OpenSans-Regular.ttf", m_font_size);
 		ImGui_ImplVulkan_CreateFontsTexture();
 		m_renderer->get_device()->end_single_time_commands(command_buffer);
 
@@ -89,12 +94,75 @@ namespace PFF {
 		// Modify the color of the progress bar
 		ImGui::PushStyleColor(ImGuiCol_PlotHistogram, ImVec4(0.05f, 0.5f, 0.05f, 1.0f));
 
+		ImVec4 color_00_default = { 0.0f, 0.15f, 0.0f, 1.0f };
+		ImVec4 color_00_hover = { 0.0f, 0.20f, 0.0f, 1.0f };
+		ImVec4 color_00_active = { 0.0f, 0.13f, 0.0f, 1.0f };
+
+		ImVec4 color_01_default = { 0.0f, 0.2f, 0.0f, 1.0f };
+		ImVec4 color_01_hover = { 0.0f, 0.38f, 0.0f, 1.0f };
+		ImVec4 color_01_active = { 0.0f, 0.29f, 0.0f, 1.0f };
+
+		ImVec4 color_02_default = { 0.0f, 0.35f, 0.0f, 1.0f };
+		ImVec4 color_02_hover = { 0.0f, 0.75f, 0.0f, 1.0f };
+		ImVec4 color_02_active = { 0.0f, 0.6f, 0.0f, 1.0f };
+		ImVec4 color_backbround = {0.058f, 0.058f, 0.058f, 1.0f};
+
+		LOAD_IMGUI_SETTING(Header, color_00_default);
+		LOAD_IMGUI_SETTING(HeaderHovered, color_00_hover);
+		LOAD_IMGUI_SETTING(HeaderActive, color_00_active);
+
+		LOAD_IMGUI_SETTING(Button, color_01_default);
+		LOAD_IMGUI_SETTING(ButtonHovered, color_01_hover);
+		LOAD_IMGUI_SETTING(ButtonActive, color_01_active);
+
+		LOAD_IMGUI_SETTING(Tab, color_02_default);
+		LOAD_IMGUI_SETTING(TabHovered, color_02_hover);
+		LOAD_IMGUI_SETTING(TabActive, color_02_active);
+
+		LOAD_IMGUI_SETTING(FrameBg, color_backbround);
+		LOAD_IMGUI_SETTING(FrameBgHovered, ImVec4(0.1f, 0.4f, 0.1f, 1.0f));
+		LOAD_IMGUI_SETTING(FrameBgActive, ImVec4(0.1f, 0.3f, 0.1f, 1.0f));
+
+		LOAD_IMGUI_SETTING(ResizeGrip, color_01_default);
+		LOAD_IMGUI_SETTING(ResizeGripHovered, color_01_hover);
+		LOAD_IMGUI_SETTING(ResizeGripActive, color_01_active);
+
+		LOAD_IMGUI_SETTING(Separator, ImVec4(0.45f, 0.45f, 0.45f, 1.0f));
+		LOAD_IMGUI_SETTING(SeparatorHovered, ImVec4(0.45f, 0.45f, 0.45f, 1.0f));
+		LOAD_IMGUI_SETTING(SeparatorActive, ImVec4(0.45f, 0.45f, 0.45f, 1.0f));
+
+		LOAD_IMGUI_SETTING(TitleBg, ImVec4(.0f, 0.25f, .0f, 1.0f));
+		LOAD_IMGUI_SETTING(TitleBgActive, ImVec4(.0f, 0.45f, .0f, 1.0f));
+		LOAD_IMGUI_SETTING(TitleBgCollapsed, ImVec4(.0f, 0.1f, .0f, 1.0f));
+
+		LOAD_IMGUI_SETTING(DockingPreview, ImVec4(0.1f, 0.4f, 0.1f, 1.0f));
+		LOAD_IMGUI_SETTING(MenuBarBg, ImVec4(0.1f, 0.1f, 0.1f, 1.0f));
+		LOAD_IMGUI_SETTING(CheckMark, ImVec4(.0f, .625f, .0f, 1.0f));
+
+		LOAD_IMGUI_SETTING(SliderGrab, color_01_default);
+		LOAD_IMGUI_SETTING(SliderGrabActive, color_01_active);
+		
+		LOAD_IMGUI_SETTING(ScrollbarBg, color_backbround);
+		LOAD_IMGUI_SETTING(ScrollbarGrab, color_01_default);
+		LOAD_IMGUI_SETTING(ScrollbarGrabHovered, color_01_hover);
+		LOAD_IMGUI_SETTING(ScrollbarGrabActive, color_01_active);
+
+		LOAD_IMGUI_SETTING(TextSelectedBg, ImVec4(0.0f, 0.2f, 0.0f, 1.0f));
+		LOAD_IMGUI_SETTING(Border, ImVec4(0.33f, 0.33f, 0.33f, 1.0f));
+		LOAD_IMGUI_SETTING(WindowBg, ImVec4(0.027f, 0.027f, 0.027f, 1.0f));
+		LOAD_IMGUI_SETTING(ChildBg, ImVec4(0.f, 0.f, 0.f, 1.0f));
+		LOAD_IMGUI_SETTING(PopupBg, ImVec4(0.f, 0.f, 0.f, 0.9f));
+
+		ImGui::PushStyleVar(ImGuiStyleVar_FrameRounding, 2.0f);
+		//ImGui::PushStyleVar(ImGuiStyleVar_FramePadding, ImVec2(2.0f, 1.0f));
+
 	}
 
 	void imgui_layer::on_detach() {
 
 		LOG(Info, "detach imgui layer");
 		
+		SAVE_CONFIG_NUM(editor, m_font_size, f32, "UI", "font_size");
 		ImGui_ImplVulkan_Shutdown();
 		ImGui_ImplGlfw_Shutdown();
 		ImGui::DestroyContext();
@@ -116,72 +184,134 @@ namespace PFF {
 
 	void imgui_layer::on_imgui_render() {
 
+
+		if (ImGui::BeginMainMenuBar()) {
+			if (ImGui::BeginMenu("File")) {
+
+				ImGui::MenuItem("menu", NULL, false, false);
+				if (ImGui::MenuItem("New")) {}
+				if (ImGui::MenuItem("Open", "Ctrl+O")) {}
+				if (ImGui::BeginMenu("Open Recent")) {
+					ImGui::MenuItem("not implemented yet");
+					ImGui::EndMenu();
+				}
+				if (ImGui::MenuItem("Save", "Ctrl+S")) {}
+				if (ImGui::MenuItem("Save As..")) {}
+
+				ImGui::Separator();
+				if (ImGui::MenuItem("Options")) { /*TODO: add the show_menu_bool here*/ }
+				if (ImGui::MenuItem("Checked", NULL, true)) {}
+				ImGui::Separator();
+				if (ImGui::MenuItem("Quit", "Alt+F4")) {
+					application::get().close_application();
+				}
+				ImGui::EndMenu();
+			}
+			if (ImGui::BeginMenu("Edit")) {
+				if (ImGui::MenuItem("Undo", "CTRL+Z")) {}
+				if (ImGui::MenuItem("Redo", "CTRL+Y", false, false)) {}  // Disabled item
+				ImGui::Separator();
+				if (ImGui::MenuItem("Cut", "CTRL+X")) {}
+				if (ImGui::MenuItem("Copy", "CTRL+C")) {}
+				if (ImGui::MenuItem("Paste", "CTRL+V")) {}
+				ImGui::EndMenu();
+			}
+			ImGui::EndMainMenuBar();
+		}
+
 		// Demonstrate creating a simple static window with no decoration
 		// + a context-menu to choose which corner of the screen to use.
 		static int location = 1;
-		ImGuiWindowFlags window_flags;
-		//ImGuiIO& io = ImGui::GetIO();
+		{
+			 ImGuiWindowFlags window_flags = (ImGuiWindowFlags_NoDecoration |
+				ImGuiWindowFlags_NoDocking |
+				ImGuiWindowFlags_AlwaysAutoResize |
+				ImGuiWindowFlags_NoSavedSettings |
+				ImGuiWindowFlags_NoFocusOnAppearing |
+				ImGuiWindowFlags_NoNav);
+			if (location != -1)
+				window_flags |= ImGuiWindowFlags_NoMove;
 
-		if (show_fps) {
+			if (show_fps) {
 
-			set_next_window_pos(location, window_flags);
-			ImGui::SetNextWindowBgAlpha(0.35f); // Transparent background
-			if (ImGui::Begin("performance_timer", &show_fps, window_flags)) {
+				set_next_window_pos(location);
+				ImGui::SetNextWindowBgAlpha(0.8f); // Transparent background
+				if (ImGui::Begin("performance_timer", &show_fps, window_flags)) {
 
-				// Get the current style
-				ImGuiStyle& style = ImGui::GetStyle();
+					// Get the current style
+					ImGuiStyle& style = ImGui::GetStyle();
 
-				// Get the line spacing (vertical padding around text)
-				f32 lineSpacing = style.ItemSpacing.y / 2;
-				f32 fontSize = ImGui::GetFontSize();
-				f32 work_percent = m_work_time / (m_work_time + m_sleep_time);
-				f32 sleep_percent = 1 - work_percent;
-				char formattedText[32];
-				ImVec2 curser_pos;
-				ImVec2 textSize;
+					// Get the line spacing (vertical padding around text)
+					f32 lineSpacing = style.ItemSpacing.y / 2;
+					f32 fontSize = ImGui::GetFontSize();
+					f32 work_percent = m_work_time / (m_work_time + m_sleep_time);
+					f32 sleep_percent = 1 - work_percent;
+					char formattedText[32];
+					ImVec2 curser_pos;
+					ImVec2 textSize;
 
-				ImGui::Text("performance timer");
-				ImGui::Separator();
-				ImGui::Text("current fps [%d/%d]", m_current_fps, m_target_fps);
+					ImGui::Text("performance timer");
+					ImGui::Separator();
+					ImGui::Text("current fps [%d/%d]", m_current_fps, m_target_fps);
 
-				// work_time
-				ImGui::Text("work time  ");
-				ImGui::SameLine();
-				snprintf(formattedText, sizeof(formattedText), " %7.2f ", m_work_time);
-				progressbar_with_text(work_percent, formattedText);
-				ImGui::SameLine();
-				ImGui::Text("ms");
+					// work_time
+					ImGui::Text("work time  ");
+					ImGui::SameLine();
+					snprintf(formattedText, sizeof(formattedText), " %7.2f ", m_work_time);
+					progressbar_with_text(work_percent, formattedText);
+					ImGui::SameLine();
+					ImGui::Text("ms");
 
-				// sleep time
-				ImGui::Text("sleep time ");
-				ImGui::SameLine();
-				snprintf(formattedText, sizeof(formattedText), " %7.2f ", m_sleep_time);
-				progressbar_with_text(sleep_percent, formattedText);
-				ImGui::SameLine();
-				ImGui::Text("ms");
-				
+					// sleep time
+					ImGui::Text("sleep time ");
+					ImGui::SameLine();
+					snprintf(formattedText, sizeof(formattedText), " %7.2f ", m_sleep_time);
+					progressbar_with_text(sleep_percent, formattedText);
+					ImGui::SameLine();
+					ImGui::Text("ms");
 
-				if (ImGui::BeginPopupContextWindow()) {
-					if (ImGui::MenuItem("custom", NULL, location == -1))
-						location = -1;
-					if (ImGui::MenuItem("center", NULL, location == -2))
-						location = -2;
-					if (ImGui::MenuItem("top-left", NULL, location == 0))
-						location = 0;
-					if (ImGui::MenuItem("top-right", NULL, location == 1)) 
-						location = 1;
-					if (ImGui::MenuItem("bottom-left", NULL, location == 2)) 
-						location = 2;
-					if (ImGui::MenuItem("bottom-right", NULL, location == 3))
-						location = 3;
-					if (&show_fps && ImGui::MenuItem("close"))
-						show_fps = false;
-					ImGui::EndPopup();
+
+					if (ImGui::BeginPopupContextWindow()) {
+						if (ImGui::MenuItem("custom", NULL, location == -1))
+							location = -1;
+						if (ImGui::MenuItem("center", NULL, location == -2))
+							location = -2;
+						if (ImGui::MenuItem("top-left", NULL, location == 0))
+							location = 0;
+						if (ImGui::MenuItem("top-right", NULL, location == 1))
+							location = 1;
+						if (ImGui::MenuItem("bottom-left", NULL, location == 2))
+							location = 2;
+						if (ImGui::MenuItem("bottom-right", NULL, location == 3))
+							location = 3;
+						if (&show_fps && ImGui::MenuItem("close"))
+							show_fps = false;
+						ImGui::EndPopup();
+					}
 				}
+				ImGui::End();
 			}
-			ImGui::End();
 		}
 
+		ImGuiWindowFlags window_flags{};
+		static bool show_viewport = true;
+		set_next_window_pos(3);
+		ImGui::Begin("viewport test", &show_viewport, window_flags);
+		// ImGui::Image()
+
+		if (ImGui::BeginTabBar("##tabs", ImGuiTabBarFlags_None)) {
+			if (ImGui::BeginTabItem("Test")) {
+				ImGui::EndTabItem();
+			}
+			if (ImGui::BeginTabItem("Sizes")) {
+				ImGui::EndTabItem();
+			}
+			if (ImGui::BeginTabItem("Inputs")) {
+				ImGui::EndTabItem();
+			}
+			ImGui::EndTabBar();
+		}
+		ImGui::End();
 
 		ImGui::ShowDemoWindow(&showdemo_window);
 	}
@@ -213,9 +343,14 @@ namespace PFF {
 		}
 	}
 
-	void imgui_layer::set_next_window_pos(int16 location, ImGuiWindowFlags& window_flags) {
+	void imgui_layer::capture_current_image(VkImageView frame_buffer) {
 
-		window_flags = ImGuiWindowFlags_NoDecoration | ImGuiWindowFlags_NoDocking | ImGuiWindowFlags_AlwaysAutoResize | ImGuiWindowFlags_NoSavedSettings | ImGuiWindowFlags_NoFocusOnAppearing | ImGuiWindowFlags_NoNav;
+		//m_Dset = ImGui_ImplVulkan_AddTexture(m_TextureSampler, frame_buffer, VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL);
+
+	}
+
+	void imgui_layer::set_next_window_pos(int16 location) {
+
 		if (location >= 0) {
 
 			const float PAD = 10.0f;
@@ -229,11 +364,9 @@ namespace PFF {
 			window_pos_pivot.y = (location & 2) ? 1.0f : 0.0f;
 			ImGui::SetNextWindowPos(window_pos, ImGuiCond_Always, window_pos_pivot);
 			ImGui::SetNextWindowViewport(viewport->ID);
-			window_flags |= ImGuiWindowFlags_NoMove;
 		} else if (location == -2) {
 			// Center window
 			ImGui::SetNextWindowPos(ImGui::GetMainViewport()->GetCenter(), ImGuiCond_Always, ImVec2(0.5f, 0.5f));
-			window_flags |= ImGuiWindowFlags_NoMove;
 		}
 	}
 

@@ -12,6 +12,10 @@
 #include <string>
 
 
+#define REMOVE_WHITE_SPACE(line)                line.erase(std::remove_if(line.begin(), line.end(),                                         \
+                                                [](char c) { return c == '\r' || c == '\n' || c == '\t'; }),                                \
+                                                line.end());
+
 namespace PFF {
 
     namespace config {
@@ -49,9 +53,7 @@ namespace PFF {
             std::ostringstream updatedConfig;
             while (std::getline(configFile, line)) {
 
-                line.erase(std::remove_if(line.begin(), line.end(),
-                    [](char c) { return c == '\r' || c == '\n'; }),
-                    line.end());
+                REMOVE_WHITE_SPACE(line);
 
                 // Check if the line contains the desired section
                 if (line.find("[" + section + "]") != std::string::npos) {
@@ -62,9 +64,7 @@ namespace PFF {
                     // Read and update the lines inside the section until a line with '[' is encountered
                     while (std::getline(configFile, line) && (line.find('[') == std::string::npos)) {
 
-                        line.erase(std::remove_if(line.begin(), line.end(),
-                            [](char c) { return c == '\r' || c == '\n' || c == '\t'; }),
-                            line.end());
+                        REMOVE_WHITE_SPACE(line);
 
                         std::size_t found = line.find('=');
                         if (found != std::string::npos) {
@@ -77,21 +77,37 @@ namespace PFF {
 
                                     // Update the value for the specified key
                                     line.clear();
-                                    line = '\t' + key + "=" + value;
+                                    line = key + "=" + value;
                                 } else {
 
                                     value.clear();
                                     value = line.substr(found +1);
                                 }
-                            } else 
-                                line = '\t' + line;
+                            }
                         }
+                        updatedConfig << line << '\n';
+                    }
+
+                    if (!found_key) {
+
+                        updatedConfig << key + "=" + value << '\n';
+                        found_key = true;
+                    }
+
+                    if (!line.empty()) {
+
+                        REMOVE_WHITE_SPACE(line);
                         updatedConfig << line << '\n';
                     }
                 }
                 
                 else {
-                    updatedConfig << line << '\n';
+
+                    if(!line.empty())
+                        if (line.find("[") == std::string::npos)
+                            updatedConfig << line << '\n';
+                        else
+                            updatedConfig << line << '\n';
                 }
             }
 
@@ -99,7 +115,7 @@ namespace PFF {
             // Close the original file
             configFile.close();
 
-            if (!section_found || !found_key || override) {
+            if (!section_found || found_key || override) {
 
                 // Open the file in truncation mode to clear its content
                 std::ofstream outFile(file_path, std::ios::trunc);
@@ -110,14 +126,14 @@ namespace PFF {
 
                 // Write the updated content to the file
                 outFile << updatedConfig.str();
-                if (!section_found) 
-                    outFile << "[" << section << "]" << '\n';
+                if (!section_found) {
 
-                if (!found_key) 
-                    outFile << '\t' << key << "=" << value << '\n';
+                    outFile << "[" << section << "]" << '\n';
+                    outFile << key << "=" << value << '\n';
+                }
 
                 outFile.close();
-                CORE_LOG(Debug, "File [" << file_path << "] updated with [" << std::setw(20) << std::left << section << " / " << std::setw(15) << std::left << key << "]: [" << value << "]");
+                CORE_LOG(Trace, "File [" << file_path << "] updated with [" << std::setw(14) << std::left << section << " / " << std::setw(22) << std::left << key << "]: [" << value << "]");
             }
             return false; // Key not found
         }

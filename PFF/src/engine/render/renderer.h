@@ -22,10 +22,12 @@ namespace PFF {
 		FORCEINLINE VkDescriptorPool get_imgui_descriptor_pool() const { return m_imgui_descriptor_pool; }
 		FORCEINLINE VkRenderPass get_swapchain_render_pass() const { return m_swapchain->get_render_pass(); }
 		FORCEINLINE u32 get_swapchain_image_count() const { return m_swapchain->get_image_count(); }
+		FORCEINLINE float get_aspect_ratio() const { return m_swapchain->get_extentAspectRatio(); }
+		FORCEINLINE VkFramebuffer get_image_view() const { return m_swapchain->getFrameBuffer(m_current_image_index); }
+
 		FORCEINLINE u32 get_render_system_pipeline_subpass() const { return m_render_system->get_pipeline_subpass(); }
 		FORCEINLINE VkCommandBuffer get_current_command_buffer() const {	CORE_ASSERT(m_is_frame_started, "", "Cant get command buffer when frame not in progress");
 																			return m_command_buffers[m_current_image_index]; }
-		FORCEINLINE float get_aspect_ratio() const { return m_swapchain->get_extentAspectRatio(); }
 
 		void add_render_system(std::shared_ptr<vk_device> device, VkRenderPass renderPass);
 		void draw_frame(f32 delta_time);
