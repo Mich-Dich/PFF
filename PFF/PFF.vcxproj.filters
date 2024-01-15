@@ -59,6 +59,9 @@
     <ClInclude Include="src\engine\game_objects\camera.h">
       <Filter>engine\game_objects</Filter>
     </ClInclude>
+    <ClInclude Include="src\engine\game_objects\game_manager.h">
+      <Filter>engine\game_objects</Filter>
+    </ClInclude>
     <ClInclude Include="src\engine\game_objects\game_object.h">
       <Filter>engine\game_objects</Filter>
     </ClInclude>
@@ -135,11 +138,14 @@
     <ClInclude Include="src\util\util.h">
       <Filter>util</Filter>
     </ClInclude>
-    <ClInclude Include="src\engine\game_objects\game_manager.h" />
+    <ClInclude Include="src\util\math\random.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="src\application.cpp" />
     <ClCompile Include="src\engine\game_objects\camera.cpp">
+      <Filter>engine\game_objects</Filter>
+    </ClCompile>
+    <ClCompile Include="src\engine\game_objects\game_manager.cpp">
       <Filter>engine\game_objects</Filter>
     </ClCompile>
     <ClCompile Include="src\engine\game_objects\game_object.cpp">
@@ -202,6 +208,5 @@
     <ClCompile Include="src\util\timer.cpp">
       <Filter>util</Filter>
     </ClCompile>
-    <ClCompile Include="src\engine\game_objects\game_manager.cpp" />
   </ItemGroup>
 </Project>

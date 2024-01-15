@@ -47,7 +47,7 @@ namespace PFF {
 		bool on_window_refresh(window_refresh_event& event);
 		bool on_window_focus(window_focus_event& event);
 
-		std::unique_ptr<basic_mesh> createCubeModel(std::shared_ptr<vk_device> device, glm::vec3 offset);
+		//std::unique_ptr<basic_mesh> createCubeModel(glm::vec3 offset);
 
 		static application* s_instance;
 		imgui_layer* m_imgui_layer;

@@ -113,7 +113,6 @@ IF EXIST ..\bin\Release-windows-x86_64\PFF\PFF.dll\ (xcopy /Q /E /Y /I ..\bin\Re
     </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <ClInclude Include="src\engine\game_objects\game_manager.h" />
     <ClInclude Include="src\PFF.h" />
     <ClInclude Include="src\application.h" />
     <ClInclude Include="src\engine\Events\Event.h" />
@@ -121,6 +120,7 @@ IF EXIST ..\bin\Release-windows-x86_64\PFF\PFF.dll\ (xcopy /Q /E /Y /I ..\bin\Re
     <ClInclude Include="src\engine\Events\key_event.h" />
     <ClInclude Include="src\engine\Events\mouse_event.h" />
     <ClInclude Include="src\engine\game_objects\camera.h" />
+    <ClInclude Include="src\engine\game_objects\game_manager.h" />
     <ClInclude Include="src\engine\game_objects\game_object.h" />
     <ClInclude Include="src\engine\game_objects\player_controller.h" />
     <ClInclude Include="src\engine\geometry\basic_mesh.h" />
@@ -143,6 +143,7 @@ IF EXIST ..\bin\Release-windows-x86_64\PFF\PFF.dll\ (xcopy /Q /E /Y /I ..\bin\Re
     <ClInclude Include="src\util\io\io_handler.h" />
     <ClInclude Include="src\util\logger.h" />
     <ClInclude Include="src\util\math\constance.h" />
+    <ClInclude Include="src\util\math\random.h" />
     <ClInclude Include="src\util\pffpch.h" />
     <ClInclude Include="src\util\platform\windows_util.h" />
     <ClInclude Include="src\util\timer.h" />

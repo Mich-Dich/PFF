@@ -5,7 +5,7 @@
 
 namespace PFF {
 
-	class game_map {
+	class PFF_API game_map {
 
 	public:
 

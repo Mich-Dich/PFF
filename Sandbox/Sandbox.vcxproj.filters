@@ -7,12 +7,25 @@
     <Filter Include="src">
       <UniqueIdentifier>{2DAB880B-99B4-887C-2230-9F7C8E38947C}</UniqueIdentifier>
     </Filter>
+    <Filter Include="src\player">
+      <UniqueIdentifier>{C93B5972-B5F3-9ABF-1EFB-731B0AD235B0}</UniqueIdentifier>
+    </Filter>
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="src\player\input_mapping.h">
+      <Filter>src\player</Filter>
+    </ClInclude>
+    <ClInclude Include="src\player\pc_default.h">
+      <Filter>src\player</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="src\entry.cpp">
       <Filter>src</Filter>
     </ClCompile>
-    <ClCompile Include="src\player\pc_default.cpp" />
+    <ClCompile Include="src\player\pc_default.cpp">
+      <Filter>src\player</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <None Include="shaders\default.frag">
@@ -21,9 +34,5 @@
     <None Include="shaders\default.vert">
       <Filter>shaders</Filter>
     </None>
-  </ItemGroup>
-  <ItemGroup>
-    <ClInclude Include="src\player\pc_default.h" />
-    <ClInclude Include="src\player\input_mapping.h" />
   </ItemGroup>
 </Project>

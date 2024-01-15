@@ -12,7 +12,7 @@ namespace PFF {
 
 
 
-	class basic_mesh {
+	class PFF_API basic_mesh {
 
 	public:
 
@@ -24,7 +24,7 @@ namespace PFF {
 			static std::vector<VkVertexInputAttributeDescription> get_attribute_descriptions();
 		};
 	
-		basic_mesh(std::shared_ptr<vk_device> device, const std::vector<vertex> vertices);
+		basic_mesh(const std::vector<vertex> vertices);
 		~basic_mesh();
 
 		void bind(VkCommandBuffer_T* commandBuffer);

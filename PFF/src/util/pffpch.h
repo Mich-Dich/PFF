@@ -36,13 +36,13 @@
 #include <glm/glm.hpp>
 #include <glm/vec4.hpp>
 #include <glm/mat4x4.hpp>
+#include <glm/gtc/random.hpp>
 
 // ============================================================================  platform specific  ============================================================================
 
 #ifdef PFF_PLATFORM_WINDOWS
-
 	//#include <Windows.h>
-
+	#include "util/platform/windows_util.h"
 #else
 	#error PFF only suports windows
 #endif
@@ -50,29 +50,9 @@
 // ==================================================================================  utils  ==================================================================================
 
 #include "util/util.h"
-
-// ==================================================================================  utils  ==================================================================================
-
 #include "util/math/constance.h"
-
-// =================================================================================  macros  ==================================================================================
-
-#define APP_NAMESPACE PFF
-
-#define BIT(x) (1 << x)
-
-#define BIND_FN(x)							std::bind(&x, this, std::placeholders::_1)
-
-#define DELETE_COPY(type)					type(const type&) = delete;								\
-											type& operator=(const type&) = delete
-
-#define DELETE_MOVE(type)					type(type&&) = delete;									\
-											type& operator=(type&&) = delete
-
-#define DELETE_COPY_MOVE(type)				type(const type&) = delete;								\
-											type& operator=(const type&) = delete;					\
-											type(type&&) = delete;									\
-											type& operator=(type&&) = delete
+#include "util/math/random.h"
+//#include "util/math/random.h"
 
 // ================================================================================  functions  ================================================================================
 

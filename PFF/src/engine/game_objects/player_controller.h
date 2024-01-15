@@ -1,11 +1,12 @@
 #pragma once
 
 #include "engine/io_handler/input_mapping.h"
-#include "engine/Events/Event.h"
-#include "engine/Events/mouse_event.h"
-#include "engine/Events/key_event.h"
 
 namespace PFF {
+
+	class event;
+	class key_event;
+	class mouse_event;
 
 	class PFF_API player_controller {
 	

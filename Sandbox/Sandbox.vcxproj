@@ -103,6 +103,10 @@
     </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClInclude Include="src\player\input_mapping.h" />
+    <ClInclude Include="src\player\pc_default.h" />
+  </ItemGroup>
+  <ItemGroup>
     <ClCompile Include="src\entry.cpp" />
     <ClCompile Include="src\player\pc_default.cpp" />
   </ItemGroup>
@@ -114,10 +118,6 @@
     <ProjectReference Include="..\PFF\PFF.vcxproj">
       <Project>{8110880B-ED19-887C-7695-9E7CE29D937C}</Project>
     </ProjectReference>
-  </ItemGroup>
-  <ItemGroup>
-    <ClInclude Include="src\player\input_mapping.h" />
-    <ClInclude Include="src\player\pc_default.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

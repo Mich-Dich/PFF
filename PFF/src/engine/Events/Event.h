@@ -2,7 +2,6 @@
 
 #include "util/pffpch.h"
 
-
 namespace PFF {
 
 	// FIXME: Event are currently blocking => Fix that!
