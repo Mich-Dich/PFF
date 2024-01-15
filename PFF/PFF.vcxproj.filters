@@ -139,6 +139,7 @@
       <Filter>util</Filter>
     </ClInclude>
     <ClInclude Include="src\util\math\random.h" />
+    <ClInclude Include="src\engine\defaults\in_editor_controller.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="src\application.cpp" />

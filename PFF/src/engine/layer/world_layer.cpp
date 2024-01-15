@@ -26,9 +26,7 @@ namespace PFF {
 
 		for (auto& obj : m_current_map->get_all_game_objects()) {
 
-			obj.transform.rotation.y += glm::mod(obj.rotation_speed.y * delta_time, two_pi<float>());
-			obj.transform.rotation.x += glm::mod(obj.rotation_speed.x * delta_time, two_pi<float>());
-			obj.transform.rotation.z += glm::mod(obj.rotation_speed.z * delta_time, two_pi<float>());
+			obj.transform.rotation += glm::mod(obj.rotation_speed * delta_time, two_pi<float>());
 		}
 	}
 

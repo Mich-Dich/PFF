@@ -9,9 +9,12 @@
 #include "engine/Events/key_event.h"
 
 
+// !! CAUTION !! not implemented yet
+// defines the min diffrence between the input_value (in smooth input mode) and the target value
+#define INPUT_ACTION_MODEFIER_MIN_DIF_BETWEEN_SMOOTH_INPUT_AND_TARGET		0.08
+
+
 namespace PFF {
-
-
 
 	player_controller::player_controller() {
 		
@@ -35,21 +38,10 @@ namespace PFF {
 			dispatcher.dispatch<MouseScrolledEvent>(BIND_FN(player_controller::handle_mouse_events));
 		}
 	}
-	/*
-INPUT_ACTION_TRIGGER_KEY_DOWN				BIT(0)
-INPUT_ACTION_TRIGGER_KEY_UP					BIT(1)
-INPUT_ACTION_TRIGGER_HOLD					BIT(2)
-INPUT_ACTION_TRIGGER_TAP					BIT(3)
-
-INPUT_ACTION_MODEFIER_NEGATE				BIT(0)
-INPUT_ACTION_MODEFIER_SMOOTH_INTERP			BIT(1)
-INPUT_ACTION_MODEFIER_VEC2_NORMAL			BIT(2)
-*/
 
 	bool player_controller::handle_key_events(key_event& event) {
 		
-		CORE_LOG(Trace, event.get_keycode());
-
+		//CORE_LOG(Trace, event.get_keycode());
 		for (input_action& current_action : m_input_mapping) {						// get input_action
 			for (key_details key_details : current_action.keys) {					// get key in input_action
 				if (static_cast<u32>(key_details.key) == event.get_keycode()) {		// check if I have an event for that key
@@ -64,7 +56,7 @@ INPUT_ACTION_MODEFIER_VEC2_NORMAL			BIT(2)
 
 							// =============================================== triggers ===============================================
 							if (key_details.trigger_flags & INPUT_ACTION_TRIGGER_KEY_DOWN)
-								buffer = event.m_key_state != key_state::release;
+								buffer = event.m_key_state == key_state::press;
 
 							if (key_details.trigger_flags & INPUT_ACTION_TRIGGER_KEY_UP)
 								buffer = event.m_key_state == key_state::release;
@@ -83,14 +75,15 @@ INPUT_ACTION_MODEFIER_VEC2_NORMAL			BIT(2)
 								buffer = !buffer;
 
 							current_action.data.boolean = buffer;
-							LOG(Info, "action value: " << bool_to_str(current_action.data.boolean));
+							// CORE_LOG(Info, "action value: " << bool_to_str(current_action.data.boolean));
 
 						} break;
 
-						// ================================================================= float =================================================================
-						case input_value::IV_float: {
+						// ================================================================= float & vec2 =================================================================
+						case input_value::IV_float:
+						case input_value::IV_vec2: {
 
-							f32 buffer = 0;
+							f32 buffer{};
 
 							// =============================================== triggers ===============================================
 							if (key_details.trigger_flags & INPUT_ACTION_TRIGGER_KEY_DOWN)
@@ -104,6 +97,8 @@ INPUT_ACTION_MODEFIER_VEC2_NORMAL			BIT(2)
 								
 							if (key_details.trigger_flags & INPUT_ACTION_TRIGGER_TAP) {
 
+								// UNFINISHED
+								buffer = (event.m_key_state == key_state::press) ? 1.0f : 0.0f;
 							}
 
 							// =============================================== modefiers ===============================================
@@ -114,13 +109,23 @@ INPUT_ACTION_MODEFIER_VEC2_NORMAL			BIT(2)
 
 							}
 
-							current_action.data.axis_1d = buffer;
-							LOG(Info, "action value: " << current_action.data.axis_1d);
 
-						} break;
+							// =============================================== case spacific saving of data ===============================================
+							if (current_action.value == input_value::IV_float) {
 
-						// ================================================================= vec2 =================================================================
-						case input_value::IV_vec2: {
+								current_action.data.axis_1d = buffer;
+								// CORE_LOG(Info, "action value: " << current_action.data.axis_1d);
+							}
+
+							else if (current_action.value == input_value::IV_vec2) {
+
+								if (key_details.modefier_flags & INPUT_ACTION_MODEFIER_VEC2_SECOND_AXIS)
+									current_action.data.axis_2d.y = buffer;
+								else
+									current_action.data.axis_2d.x = buffer;
+
+								CORE_LOG(Info, "action value: [X: " << current_action.data.axis_2d.x << " Y: " << current_action.data.axis_2d.y << "]");
+							}
 
 
 						} break;
@@ -137,7 +142,7 @@ INPUT_ACTION_MODEFIER_VEC2_NORMAL			BIT(2)
 
 	bool player_controller::handle_mouse_events(mouse_event& event) {
 		
-		LOG(Trace, event);
+		//CORE_LOG(Trace, event);
 		return false;
 	}
 

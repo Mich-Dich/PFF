@@ -41,7 +41,6 @@ namespace PFF {
 	private:
 
 		void on_event(event& event);
-		void proccess_events();
 		bool on_window_close(window_close_event& event);
 		bool on_window_resize(window_resize_event& event);
 		bool on_window_refresh(window_refresh_event& event);

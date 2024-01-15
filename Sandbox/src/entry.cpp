@@ -29,11 +29,29 @@ bool Sandbox::init() {
 	LOG(Trace, "register player controller");
 	Sandbox::register_player_controller(std::make_shared<pc_default>());
 
+	// TODO: move to map init() function
+#if 1
+	u32 counter = 0;
+	std::shared_ptr<PFF::basic_mesh> model = create_cube_model({ 0.0f, 0.0f, 0.0f });
+	for (int16 x = -13; x < 14; x++) {
+		for (int16 y = -6; y < 7; y++) {
+
+			auto cube = get_current_map()->create_empty_game_object();
+			cube->mesh = model;
+			cube->transform.translation = { x * 2, y * 2, 30.f };
+			cube->rotation_speed = glm::linearRand(glm::vec3(0.0f), glm::vec3(glm::two_pi<f32>()));
+			counter++;
+		}
+	}
+	LOG(Info, "Num of objects: " << counter);
+#else
 	std::shared_ptr<PFF::basic_mesh> model = create_cube_model({ 0.0f, 0.0f, 0.0f });
 	auto cube = get_current_map()->create_empty_game_object();
 	cube->mesh = model;
-	cube->transform.translation = { .0f, .0f, 30.f };
-	cube->rotation_speed = glm::linearRand(glm::vec3(0.0f), glm::vec3(1.0f));
+	cube->transform.translation = { .0f, .0f, 10.f };
+	cube->rotation_speed = glm::linearRand(glm::vec3(0.0f), glm::vec3(glm::two_pi<f32>()));
+#endif // 1
+
 
 	return true;
 }

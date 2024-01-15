@@ -11,10 +11,12 @@ namespace PFF {
 	#define INPUT_ACTION_TRIGGER_TAP					BIT(3)
 
 	#define INPUT_ACTION_MODEFIER_NEGATE				BIT(0)
-	#define INPUT_ACTION_MODEFIER_SMOOTH_INTERP			BIT(1)
-	#define INPUT_ACTION_MODEFIER_VEC2_NORMAL			BIT(2)
+	#define INPUT_ACTION_MODEFIER_VEC2_NORMAL			BIT(1)
+	#define INPUT_ACTION_MODEFIER_VEC2_SECOND_AXIS		BIT(2)
 
-	#define MIN_DIF_BETWEEN_SMOOTH_INPUT_AND_TARGET		0.08
+	// !! CAUTION !! not implemented yet
+	#define INPUT_ACTION_MODEFIER_SMOOTH_INTERP			BIT(3)
+
 	#define INPUT_ACTION_REGISTER_NAME(var)				var.action_name = #var
 
 	// --------------------------------------------------- Input Action ---------------------------------------------------
@@ -29,8 +31,8 @@ namespace PFF {
 		key_code key;
 		u16 trigger_flags;
 		u16 modefier_flags;
-		f32 duration_in_sec;
 
+		key_details() : key(key_code::key_unknown), trigger_flags(0), modefier_flags(0) {};
 		key_details(key_code key, u16 trigger_flags = 0, u16 modefier_flags = 0) 
 			: key(key), trigger_flags(trigger_flags), modefier_flags(modefier_flags) {};
 	};
@@ -51,8 +53,6 @@ namespace PFF {
 		input_action(bool triger_when_paused = false, input_value value = input_value::IV_bool, std::vector<key_details> keys = {})
 			: triger_when_paused(triger_when_paused), value(value), keys(keys) {}
 
-		std::vector<key_details>::iterator begin() { return keys.begin(); }
-		std::vector<key_details>::iterator end() { return keys.end(); }
 	};
 
 }

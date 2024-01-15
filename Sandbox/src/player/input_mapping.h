@@ -15,39 +15,27 @@ public:
 
 default_IAM::default_IAM() {
 
-	//bool triger_when_paused;
-	//input_value value;
-	//union {
-	//	bool boolean;
-	//	f32 floating_point;
-	//	glm::vec2 vector2D{};
-	//} data;
-	//std::chrono::time_point<std::chrono::high_resolution_clock> time_point;
-	//f32 duration_in_sec;
-	//std::vector<key_details> keys;
-
 	move = PFF::input_action{};
 	move.triger_when_paused = false;
-	move.value = PFF::input_value::IV_float;
+	move.value = PFF::input_value::IV_vec2;
 	move.duration_in_sec = 0.5f;
 	move.keys = {
 		{key_code::key_W, INPUT_ACTION_TRIGGER_KEY_DOWN },
 		{key_code::key_S, INPUT_ACTION_TRIGGER_KEY_DOWN , INPUT_ACTION_MODEFIER_NEGATE },
-		// {key_code::key_A, INPUT_ACTION_TRIGGER_KEY_DOWN },
-		// {key_code::key_D, INPUT_ACTION_TRIGGER_KEY_DOWN , INPUT_ACTION_MODEFIER_NEGATE},
+		{key_code::key_A, INPUT_ACTION_TRIGGER_KEY_DOWN , INPUT_ACTION_MODEFIER_VEC2_SECOND_AXIS},
+		{key_code::key_D, INPUT_ACTION_TRIGGER_KEY_DOWN , INPUT_ACTION_MODEFIER_VEC2_SECOND_AXIS | INPUT_ACTION_MODEFIER_NEGATE},
 	};
-	register_action(move);
+	REGISTER_INPUT_ACTION(move);
 
 
 	look = PFF::input_action{};
 	look.triger_when_paused = false;
-	move.value = PFF::input_value::IV_bool;
-	move.duration_in_sec = 0.5f;
+	look.value = PFF::input_value::IV_bool;
+	look.duration_in_sec = 0.5f;
 	look.keys = {
-		{key_code::key_T },
-		{key_code::key_G },
+		{key_code::key_I, INPUT_ACTION_TRIGGER_KEY_DOWN},
 	};
-	register_action(look);
+	REGISTER_INPUT_ACTION(look);
 
 }
 

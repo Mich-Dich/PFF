@@ -57,8 +57,6 @@ namespace PFF {
 		glfwGetCursorPos(m_Window, &m_data.cursor_pos_x, &m_data.cursor_pos_y);
 		set_vsync(m_data.vsync);
 
-		GLFW_PRESS;
-
 		CORE_LOG(Info, "bind event callbacks");
 		glfwSetWindowRefreshCallback(m_Window, [](GLFWwindow* window) {
 			

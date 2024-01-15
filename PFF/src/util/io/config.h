@@ -52,7 +52,7 @@ namespace PFF {
 		// @see check_for_configuration
 		#define LOAD_CONFIG_NUM(config_file, value, type, section, key)																										\
 														{std::string buffer = num_to_str(value);																			\
-														PFF::config::check_for_configuration(PFF::config::file_types::config_file, section, key, buffer, false);		\
+														PFF::config::check_for_configuration(PFF::config::file_types::config_file, section, key, buffer, false);			\
 														value = str_to_num<type>(buffer);}
 
 		// @brief Macro to load a string value from specified config file (save if not found)
@@ -63,7 +63,7 @@ namespace PFF {
 		// @see check_for_configuration
 		#define LOAD_CONFIG_STR(config_file, value, section, key)																											\
 														{std::string buffer = (value);																						\
-														PFF::config::check_for_configuration(PFF::config::file_types::config_file, section, key, buffer, false);		\
+														PFF::config::check_for_configuration(PFF::config::file_types::config_file, section, key, buffer, false);			\
 														value = (buffer);}
 
 		// @brief Macro to check for the existence of a boolean configuration in the specified file, update it if found, and convert it to the bool type.
@@ -74,7 +74,7 @@ namespace PFF {
 		// @see check_for_configuration
 		#define LOAD_CONFIG_BOOL(config_file, value, section, key)																											\
 														{std::string buffer = bool_to_str(value);																			\
-														PFF::config::check_for_configuration(PFF::config::file_types::config_file, section, key, buffer, false);		\
+														PFF::config::check_for_configuration(PFF::config::file_types::config_file, section, key, buffer, false);			\
 														value = str_to_bool(buffer);}
 
 		
@@ -90,7 +90,7 @@ namespace PFF {
 		// @see check_for_configuration
 		#define SAVE_CONFIG_NUM(config_file, value, type, section, key)																										\
 														{std::string buffer = num_to_str(value);																			\
-														PFF::config::check_for_configuration(PFF::config::file_types::config_file, section, key, buffer, true);		\
+														PFF::config::check_for_configuration(PFF::config::file_types::config_file, section, key, buffer, true);				\
 														value = str_to_num<type>(buffer);}
 
 		// @brief Macro to save a string value in the specified file (update if found)
@@ -101,7 +101,7 @@ namespace PFF {
 		// @see check_for_configuration
 		#define SAVE_CONFIG_STR(config_file, value, section, key)																											\
 														{std::string buffer = (value);																						\
-														PFF::config::check_for_configuration(PFF::config::file_types::config_file, section, key, buffer, true);		\
+														PFF::config::check_for_configuration(PFF::config::file_types::config_file, section, key, buffer, true);				\
 														value = (buffer);}
 
 		// @brief Macro to check for the existence of a boolean configuration in the specified file, update it if found, and convert it to the bool type.
@@ -112,7 +112,7 @@ namespace PFF {
 		// @see check_for_configuration
 		#define SAVE_CONFIG_BOOL(config_file, value, section, key)																											\
 														{std::string buffer = bool_to_str(value);																			\
-														PFF::config::check_for_configuration(PFF::config::file_types::config_file, section, key, buffer, true);		\
+														PFF::config::check_for_configuration(PFF::config::file_types::config_file, section, key, buffer, true);				\
 														value = str_to_bool(buffer);}
 
 	}
