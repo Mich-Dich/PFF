@@ -16,6 +16,7 @@ namespace PFF {
 		DELETE_COPY(world_layer);
 
 		FORCEINLINE std::shared_ptr<game_map> get_current_map() const { return m_current_map; }
+		FORCEINLINE std::shared_ptr<player_controller> get_current_player_controller() const { return m_player_controller; }
 
 		virtual void on_attach();
 		virtual void on_detach();

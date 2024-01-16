@@ -35,6 +35,7 @@ namespace PFF {
 	application::application() :
 		m_delta_time(1), m_running(true) {
 
+		PFF::Logger::Init("[$B$T:$J$E] [$B$L$X $K - $P:$G$E] $C$Z");
 		CORE_LOG(Debug, "application Constructor");
 		CORE_ASSERT(!s_instance, "", "Application already exists");
 		s_instance = this;

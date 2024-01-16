@@ -26,6 +26,7 @@ namespace PFF {
 		FORCEINLINE f32 get_delta_time() { return m_delta_time; }
 		FORCEINLINE static application& get() { return *s_instance; }
 		FORCEINLINE imgui_layer* get_imgui_layer() const { return m_imgui_layer; }
+		FORCEINLINE world_layer* get_world_layer() const { return m_world_layer; }
 		FORCEINLINE std::shared_ptr<pff_window> get_window() const { return m_window; }
 		FORCEINLINE std::shared_ptr<renderer> get_renderer() const { return m_renderer; }
 		FORCEINLINE std::shared_ptr<game_map> get_current_map() { return m_world_layer->get_current_map(); }

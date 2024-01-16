@@ -5,7 +5,8 @@
 //@brief Registers an input_action and loades/updates its values from input.ini if the player has made modifications to the corresponding values.
 // 		This ensures that the default values are retained unless the player explicitly changes them.
 //@param [action] Reference to the input_action struct to be registered and configured.
-#define REGISTER_INPUT_ACTION(action)	register_action(#action, action);
+#define REGISTER_INPUT_ACTION(action)	action.name = #action;								\
+										register_action(#action, action);
 
 namespace PFF {
 

@@ -19,6 +19,7 @@ namespace PFF {
 	default_IAM::default_IAM() {
 
 		move = PFF::input_action{};
+		move.description = "Test description";
 		move.triger_when_paused = false;
 		move.value = PFF::input_value::IV_vec2;
 		move.duration_in_sec = 0.5f;
@@ -32,6 +33,7 @@ namespace PFF {
 
 
 		capture_mouse = PFF::input_action{};
+		move.description = "Test description";
 		capture_mouse.triger_when_paused = false;
 		capture_mouse.value = PFF::input_value::IV_bool;
 		capture_mouse.duration_in_sec = 0.5f;
@@ -42,6 +44,7 @@ namespace PFF {
 
 
 		look = PFF::input_action{};
+		move.description = "Test description";
 		look.triger_when_paused = false;
 		look.value = PFF::input_value::IV_vec2;
 		look.duration_in_sec = 0.5f;

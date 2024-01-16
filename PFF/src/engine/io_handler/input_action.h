@@ -43,6 +43,8 @@ namespace PFF {
 
 	struct input_action {
 
+		std::string name;
+		std::string description;
 		bool triger_when_paused;
 		input_value value;
 		union {

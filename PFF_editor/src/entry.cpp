@@ -33,14 +33,14 @@ namespace PFF {
 
 	bool PFF_editor::init() {
 
-		m_editor_layer = new editor_layer();
+		m_editor_layer = new editor_layer(get_imgui_layer()->get_context());
 		push_overlay(m_editor_layer);
 
 		LOG(Trace, "register player controller");
 		PFF_editor::register_player_controller(std::make_shared<pc_default>());
 
 		// TODO: move to map init() function
-#if 1
+#if 0
 		u32 counter = 0;
 		std::shared_ptr<basic_mesh> model = create_cube_model({ 0.0f, 0.0f, 0.0f });
 		for (int16 x = -13; x < 14; x++) {

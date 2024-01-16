@@ -43,7 +43,7 @@ namespace PFF {
 
 		// Setup Dear ImGui context
 		IMGUI_CHECKVERSION();
-		ImGui::CreateContext();
+		m_context = ImGui::CreateContext();
 		ImGuiIO& io = ImGui::GetIO();
 		io.ConfigFlags |= ImGuiConfigFlags_NavEnableKeyboard;     // Enable Keyboard Controls
 		io.ConfigFlags |= ImGuiConfigFlags_NavEnableGamepad;      // Enable Gamepad Controls
@@ -52,6 +52,7 @@ namespace PFF {
 		//io.ConfigFlags |= ImGuiConfigFlags_ViewportsNoTaskBarIcons;
 		//io.ConfigFlags |= ImGuiConfigFlags_ViewportsNoMerge;
 		io.IniFilename = "./config/imgui.ini";
+		ImGui::SetCurrentContext(m_context);
 
 		ImGui::StyleColorsDark();
 
@@ -184,6 +185,7 @@ namespace PFF {
 
 	void imgui_layer::on_imgui_render() {
 
+		ImGui::SetCurrentContext(m_context);
 		// Demonstrate creating a simple static window with no decoration
 		// + a context-menu to choose which corner of the screen to use.
 		static int location = 1;
@@ -258,25 +260,7 @@ namespace PFF {
 			}
 		}
 
-		ImGuiWindowFlags window_flags{};
-		static bool show_viewport = true;
-		set_next_window_pos(3);
-		ImGui::Begin("viewport test", &show_viewport, window_flags);
-			if (ImGui::BeginTabBar("##tabs", ImGuiTabBarFlags_None)) {
-				if (ImGui::BeginTabItem("Test")) {
-					ImGui::EndTabItem();
-				}
-				if (ImGui::BeginTabItem("Sizes")) {
-					ImGui::EndTabItem();
-				}
-				if (ImGui::BeginTabItem("Inputs")) {
-					ImGui::EndTabItem();
-				}
-				ImGui::EndTabBar();
-			}
-		ImGui::End();
-
-		ImGui::ShowDemoWindow(&showdemo_window);
+		// ImGui::ShowDemoWindow(&showdemo_window);
 	}
 
 	void imgui_layer::begin_frame() {

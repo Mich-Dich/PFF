@@ -10,6 +10,7 @@ typedef VkImageView_T* VkImageView;
 
 typedef int ImGuiWindowFlags;
 
+struct ImGuiContext;
 
 namespace PFF {
 
@@ -19,6 +20,8 @@ namespace PFF {
 	public:
 		imgui_layer(std::shared_ptr<renderer> renderer);
 		~imgui_layer();
+
+		FORCEINLINE ImGuiContext* get_context() const { return m_context; }
 
 		void on_attach() override;
 		void on_detach() override;
@@ -37,6 +40,7 @@ namespace PFF {
 		void set_next_window_pos(int16 location);
 		void progressbar_with_text(f32 percent, const char* text, f32 min_size_x = 1.0f, f32 min_size_y = 1.0f);
 
+		ImGuiContext* m_context;
 		f32 m_work_time, m_sleep_time;
 		u32 m_target_fps, m_current_fps;
 		std::shared_ptr<renderer> m_renderer;
