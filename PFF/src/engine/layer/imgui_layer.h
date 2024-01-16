@@ -7,7 +7,9 @@ typedef VkCommandBuffer_T* VkCommandBuffer;
 
 struct VkImageView_T;
 typedef VkImageView_T* VkImageView;
+
 typedef int ImGuiWindowFlags;
+
 
 namespace PFF {
 
@@ -33,7 +35,7 @@ namespace PFF {
 	private:
 
 		void set_next_window_pos(int16 location);
-		void progressbar_with_text(f32 percent, const char* text);
+		void progressbar_with_text(f32 percent, const char* text, f32 min_size_x = 1.0f, f32 min_size_y = 1.0f);
 
 		f32 m_work_time, m_sleep_time;
 		u32 m_target_fps, m_current_fps;

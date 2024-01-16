@@ -77,14 +77,14 @@ namespace PFF {
 			if (auto commandbuffer = begin_frame()) {
 
 				begin_swapchain_renderpass(commandbuffer);
-				IMGUI_LAYER->begin_frame();
-
 				m_render_system->render_game_objects(delta_time, commandbuffer, application::get().get_current_map()->get_all_game_objects(), camera);
 				// application::get().get_imgui_layer()->capture_current_image( ,m_swapchain->get_image_view(m_current_image_index));
+
+				IMGUI_LAYER->begin_frame();
 				for (layer* target : *m_layerstack)
 					target->on_imgui_render();
-
 				IMGUI_LAYER->end_frame(commandbuffer);
+
 				end_swapchain_renderpass(commandbuffer);
 				end_frame();
 			}

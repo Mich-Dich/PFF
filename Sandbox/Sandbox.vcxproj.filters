@@ -27,12 +27,4 @@
       <Filter>src\player</Filter>
     </ClCompile>
   </ItemGroup>
-  <ItemGroup>
-    <None Include="shaders\default.frag">
-      <Filter>shaders</Filter>
-    </None>
-    <None Include="shaders\default.vert">
-      <Filter>shaders</Filter>
-    </None>
-  </ItemGroup>
 </Project>

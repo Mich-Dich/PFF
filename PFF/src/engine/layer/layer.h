@@ -4,7 +4,7 @@
 
 namespace PFF {
 
-	class layer {
+	class PFF_API_EDITOR layer {
 	public:
 		layer(const std::string& name = "layer");
 		virtual ~layer();

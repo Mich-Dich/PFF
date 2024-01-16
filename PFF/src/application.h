@@ -30,14 +30,14 @@ namespace PFF {
 		FORCEINLINE std::shared_ptr<renderer> get_renderer() const { return m_renderer; }
 		FORCEINLINE std::shared_ptr<game_map> get_current_map() { return m_world_layer->get_current_map(); }
 		FORCEINLINE void close_application() { m_running = false; }
-
-		void register_player_controller(std::shared_ptr<player_controller> player_controller) { m_world_layer->register_player_controller(player_controller); }
+		FORCEINLINE /*USE_IN_EDITOR*/ void push_overlay(layer* overlay) { m_layerstack.push_overlay(overlay); }
 
 		void run();
 		virtual bool init();								// to be used by client
 		virtual bool update(f32 delta_time);				// potentally make private - every actor has own function (like UNREAL)
 		virtual bool render(f32 delta_time);				// potentally make private - every actor has own function (like UNREAL)
 		virtual bool shutdown();							// to be used by client
+		void register_player_controller(std::shared_ptr<player_controller> player_controller) { m_world_layer->register_player_controller(player_controller); }
 
 	private:
 

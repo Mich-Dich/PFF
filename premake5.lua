@@ -26,6 +26,7 @@ project "PFF"
 	kind "SharedLib"	
 	staticruntime "off"
 	language "C++"
+	cppdialect "C++17"
 
 	targetdir ("bin/" .. outputs  .. "/%{prj.name}")
 	objdir ("bin-int/" .. outputs  .. "/%{prj.name}")
@@ -75,7 +76,6 @@ project "PFF"
 	}
 	
 	filter "system:windows"
-		cppdialect "C++17"
 		systemversion "latest"
 		
         linkoptions 
@@ -93,6 +93,9 @@ project "PFF"
 		{
 			"{MKDIR} ../bin/" .. outputs .. "/" .. client_project_name,
 			"{COPY} %{cfg.buildtarget.relpath} ../bin/" .. outputs  .. "/" .. client_project_name,
+			
+			"{MKDIR} ../bin/" .. outputs .. "/PFF_editor",
+			"{COPY} %{cfg.buildtarget.relpath} ../bin/" .. outputs  .. "/PFF_editor",
 		}
 
 	filter "configurations:Debug"
@@ -111,6 +114,7 @@ project (client_project_name)
 	location (client_project_name)
 	kind "ConsoleApp"
 	language "C++"
+	cppdialect "C++17"
 	staticruntime "off"
 
 	targetdir ("bin/" .. outputs  .. "/%{prj.name}")
@@ -174,69 +178,50 @@ project "PFF_editor"
 	location "PFF_editor"
 	kind "ConsoleApp"
 	language "C++"
+	cppdialect "C++17"
 	staticruntime "off"
 
 	targetdir ("bin/" .. outputs  .. "/%{prj.name}")
 	objdir ("bin-int/" .. outputs  .. "/%{prj.name}")
-	
-	glslc = "../PFF/vendor/vulkan-glslc/glslc.exe"
 
-	pchheader "util/pffpch.h"
-	pchsource "PFF/src/util/pffpch.cpp"
+	glslc = "../PFF/vendor/vulkan-glslc/glslc.exe"
 
 	defines
 	{
 		"ENGINE_NAME=PFF",
-		'PROJECT_NAME=PFF_editor',
+		"PROJECT_NAME=PFF_editor",
 		"PFF_INSIDE_EDITOR",
-		"GLFW_INCLUDE_NONE",
 	}
 
 	files
 	{
 		"%{prj.name}/src/**.h",
 		"%{prj.name}/src/**.cpp",
-		"%{client_project_name}/src/**.h",
-		"%{client_project_name}/src/**.cpp",
+		"%{prj.name}/**.vert",
+		"%{prj.name}/**.frag",
 	}
 
 	includedirs
 	{
-		"%{prj.name}/src",
 		"PFF/vendor/glm",
-		"PFF/vendor/glfw-3.3.8.bin.WIN64/include",
+		"PFF/src",
+		"PFF/vendor/glm",
 		"%{IncludeDir.ImGui}",
 		"%{IncludeDir.ImGui}/backends/",
+		"%{prj.name}/src",
+		"%{prj.name}/assets",
 		
 		vulkan_dir .. "/Include",
 	}
 
-	links 
+	links
 	{
-		"PFF",
 		"ImGui",
-		"vulkan-1.lib",
-		"glfw3.lib",
-		client_project_name,
+		"PFF",
 	}
-	
-	libdirs 
-	{
-		--"PFF/libs",
-		--"%{IncludeDir.ImGui}/bin/" .. outputs .. "/ImGui",
-		"PFF/vendor/glfw-3.3.8.bin.WIN64/lib-vc2022",
-		vulkan_dir .. "/Lib",
-	}
-	
+
 	filter "system:windows"
-		cppdialect "C++17"
 		systemversion "latest"
-		
-		linkoptions 
-		{
-				"/NODEFAULTLIB:LIBCMTD",
-				"/NODEFAULTLIB:MSVCRT",
-		}
 
 		defines
 		{
@@ -245,18 +230,18 @@ project "PFF_editor"
 
 		postbuildcommands
 		{
-			"{MKDIR} ../bin/" .. outputs .. "/" .. client_project_name,
-			"{COPY} %{cfg.buildtarget.relpath} ../bin/" .. outputs  .. "/" .. client_project_name,
+			'"%{glslc}" shaders/default.vert -o shaders/default.vert.spv',
+			'"%{glslc}" shaders/default.frag -o shaders/default.frag.spv',
 		}
 
 	filter "configurations:Debug"
 		buildoptions "/MDd"
-		defines "PFF_DEBUG"
+		defines "GAME_DEBUG"
 		runtime "Debug"
 		symbols "on"
 
 	filter "configurations:Release"
 		buildoptions "/MD"
-		defines "PFF_RELEASE"
+		defines "GAME_RELEASE"
 		runtime "Release"
 		optimize "on"

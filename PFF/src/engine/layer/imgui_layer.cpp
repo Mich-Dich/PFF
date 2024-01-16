@@ -184,41 +184,6 @@ namespace PFF {
 
 	void imgui_layer::on_imgui_render() {
 
-
-		if (ImGui::BeginMainMenuBar()) {
-			if (ImGui::BeginMenu("File")) {
-
-				ImGui::MenuItem("menu", NULL, false, false);
-				if (ImGui::MenuItem("New")) {}
-				if (ImGui::MenuItem("Open", "Ctrl+O")) {}
-				if (ImGui::BeginMenu("Open Recent")) {
-					ImGui::MenuItem("not implemented yet");
-					ImGui::EndMenu();
-				}
-				if (ImGui::MenuItem("Save", "Ctrl+S")) {}
-				if (ImGui::MenuItem("Save As..")) {}
-
-				ImGui::Separator();
-				if (ImGui::MenuItem("Options")) { /*TODO: add the show_menu_bool here*/ }
-				if (ImGui::MenuItem("Checked", NULL, true)) {}
-				ImGui::Separator();
-				if (ImGui::MenuItem("Quit", "Alt+F4")) {
-					application::get().close_application();
-				}
-				ImGui::EndMenu();
-			}
-			if (ImGui::BeginMenu("Edit")) {
-				if (ImGui::MenuItem("Undo", "CTRL+Z")) {}
-				if (ImGui::MenuItem("Redo", "CTRL+Y", false, false)) {}  // Disabled item
-				ImGui::Separator();
-				if (ImGui::MenuItem("Cut", "CTRL+X")) {}
-				if (ImGui::MenuItem("Copy", "CTRL+C")) {}
-				if (ImGui::MenuItem("Paste", "CTRL+V")) {}
-				ImGui::EndMenu();
-			}
-			ImGui::EndMainMenuBar();
-		}
-
 		// Demonstrate creating a simple static window with no decoration
 		// + a context-menu to choose which corner of the screen to use.
 		static int location = 1;
@@ -297,26 +262,22 @@ namespace PFF {
 		static bool show_viewport = true;
 		set_next_window_pos(3);
 		ImGui::Begin("viewport test", &show_viewport, window_flags);
-		// ImGui::Image()
-
-		if (ImGui::BeginTabBar("##tabs", ImGuiTabBarFlags_None)) {
-			if (ImGui::BeginTabItem("Test")) {
-				ImGui::EndTabItem();
+			if (ImGui::BeginTabBar("##tabs", ImGuiTabBarFlags_None)) {
+				if (ImGui::BeginTabItem("Test")) {
+					ImGui::EndTabItem();
+				}
+				if (ImGui::BeginTabItem("Sizes")) {
+					ImGui::EndTabItem();
+				}
+				if (ImGui::BeginTabItem("Inputs")) {
+					ImGui::EndTabItem();
+				}
+				ImGui::EndTabBar();
 			}
-			if (ImGui::BeginTabItem("Sizes")) {
-				ImGui::EndTabItem();
-			}
-			if (ImGui::BeginTabItem("Inputs")) {
-				ImGui::EndTabItem();
-			}
-			ImGui::EndTabBar();
-		}
 		ImGui::End();
 
 		ImGui::ShowDemoWindow(&showdemo_window);
 	}
-
-	//f32 m_target_fps, m_current_fps, m_possible_fps, m_work_time;
 
 	void imgui_layer::begin_frame() {
 
@@ -370,7 +331,7 @@ namespace PFF {
 		}
 	}
 
-	void imgui_layer::progressbar_with_text(f32 percent, const char* text) {
+	void imgui_layer::progressbar_with_text(f32 percent, const char* text, f32 min_size_x, f32 min_size_y) {
 
 		ImVec2 curser_pos;
 		ImVec2 textSize;
@@ -379,6 +340,9 @@ namespace PFF {
 		ImGui::SetNextItemAllowOverlap();
 
 		textSize = ImGui::CalcTextSize(text);
+		textSize.x = std::max<f32>(textSize.x, min_size_x);
+		textSize.y = std::max<f32>(textSize.y, min_size_y);
+
 		ImGui::ProgressBar(percent, textSize, "");
 		ImGui::SetCursorScreenPos(curser_pos);
 		ImGui::Text("%s", text);

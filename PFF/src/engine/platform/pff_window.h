@@ -1,12 +1,6 @@
 #pragma once
 
 
-/*
-#include "engine/events/event.h"
-#include "engine/events/application_event.h"
-#include "engine/events/mouse_event.h"
-#include "engine/events/key_event.h"*/
-
 struct GLFWwindow;
 struct VkExtent2D;
 struct VkInstance_T;

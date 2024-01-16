@@ -1,22 +1,47 @@
 <?xml version="1.0" encoding="utf-8"?>
 <Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <ItemGroup>
-    <Filter Include="player">
-      <UniqueIdentifier>{9262FA14-7E04-25EB-67BF-383F5300AC3B}</UniqueIdentifier>
+    <Filter Include="shaders">
+      <UniqueIdentifier>{0F45D591-7B24-542D-843C-DF03F09ABA8E}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="src">
+      <UniqueIdentifier>{2DAB880B-99B4-887C-2230-9F7C8E38947C}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="src\controller">
+      <UniqueIdentifier>{C0646EF6-AC32-62FC-95C6-D22281333E61}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="src\ui">
+      <UniqueIdentifier>{7A4F661C-66F1-90F2-4FAC-A4463BED1743}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="..\Sandbox\src\player\input_mapping.h">
-      <Filter>player</Filter>
+    <ClInclude Include="src\controller\input_mapping.h">
+      <Filter>src\controller</Filter>
     </ClInclude>
-    <ClInclude Include="..\Sandbox\src\player\pc_default.h">
-      <Filter>player</Filter>
+    <ClInclude Include="src\controller\pc_default.h">
+      <Filter>src\controller</Filter>
+    </ClInclude>
+    <ClInclude Include="src\ui\editor_layer.h">
+      <Filter>src\ui</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="..\Sandbox\src\entry.cpp" />
-    <ClCompile Include="..\Sandbox\src\player\pc_default.cpp">
-      <Filter>player</Filter>
+    <ClCompile Include="src\controller\pc_default.cpp">
+      <Filter>src\controller</Filter>
     </ClCompile>
+    <ClCompile Include="src\entry.cpp">
+      <Filter>src</Filter>
+    </ClCompile>
+    <ClCompile Include="src\ui\editor_layer.cpp">
+      <Filter>src\ui</Filter>
+    </ClCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="shaders\default.frag">
+      <Filter>shaders</Filter>
+    </None>
+    <None Include="shaders\default.vert">
+      <Filter>shaders</Filter>
+    </None>
   </ItemGroup>
 </Project>

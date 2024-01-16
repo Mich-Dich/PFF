@@ -56,11 +56,10 @@
   </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
     <ClCompile>
-      <PrecompiledHeader>Use</PrecompiledHeader>
-      <PrecompiledHeaderFile>util/pffpch.h</PrecompiledHeaderFile>
+      <PrecompiledHeader>NotUsing</PrecompiledHeader>
       <WarningLevel>Level3</WarningLevel>
-      <PreprocessorDefinitions>ENGINE_NAME=PFF;PROJECT_NAME=PFF_editor;PFF_INSIDE_EDITOR;GLFW_INCLUDE_NONE;PFF_PLATFORM_WINDOWS;PFF_DEBUG;%(PreprocessorDefinitions)</PreprocessorDefinitions>
-      <AdditionalIncludeDirectories>src;..\PFF\vendor\glm;..\PFF\vendor\glfw-3.3.8.bin.WIN64\include;..\PFF\vendor\imgui;..\PFF\vendor\imgui\backends;C:\VulkanSDK\1.3.250.1\Include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <PreprocessorDefinitions>ENGINE_NAME=PFF;PROJECT_NAME=PFF_editor;PFF_INSIDE_EDITOR;PFF_PLATFORM_WINDOWS;GAME_DEBUG;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <AdditionalIncludeDirectories>..\PFF\src;..\PFF\vendor\glm;..\PFF\vendor\imgui;..\PFF\vendor\imgui\backends;src;assets;C:\VulkanSDK\1.3.250.1\Include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <DebugInformationFormat>EditAndContinue</DebugInformationFormat>
       <Optimization>Disabled</Optimization>
       <RuntimeLibrary>MultiThreadedDebugDLL</RuntimeLibrary>
@@ -71,22 +70,18 @@
     <Link>
       <SubSystem>Console</SubSystem>
       <GenerateDebugInformation>true</GenerateDebugInformation>
-      <AdditionalDependencies>vulkan-1.lib;glfw3.lib;%(AdditionalDependencies)</AdditionalDependencies>
-      <AdditionalLibraryDirectories>..\PFF\vendor\glfw-3.3.8.bin.WIN64\lib-vc2022;C:\VulkanSDK\1.3.250.1\Lib;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
-      <AdditionalOptions>/NODEFAULTLIB:LIBCMTD /NODEFAULTLIB:MSVCRT %(AdditionalOptions)</AdditionalOptions>
     </Link>
     <PostBuildEvent>
-      <Command>IF NOT EXIST ..\bin\Debug-windows-x86_64\Sandbox (mkdir ..\bin\Debug-windows-x86_64\Sandbox)
-IF EXIST ..\bin\Debug-windows-x86_64\PFF_editor\PFF_editor.exe\ (xcopy /Q /E /Y /I ..\bin\Debug-windows-x86_64\PFF_editor\PFF_editor.exe ..\bin\Debug-windows-x86_64\Sandbox &gt; nul) ELSE (xcopy /Q /Y /I ..\bin\Debug-windows-x86_64\PFF_editor\PFF_editor.exe ..\bin\Debug-windows-x86_64\Sandbox &gt; nul)</Command>
+      <Command>"../PFF/vendor/vulkan-glslc/glslc.exe" shaders/default.vert -o shaders/default.vert.spv
+"../PFF/vendor/vulkan-glslc/glslc.exe" shaders/default.frag -o shaders/default.frag.spv</Command>
     </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
     <ClCompile>
-      <PrecompiledHeader>Use</PrecompiledHeader>
-      <PrecompiledHeaderFile>util/pffpch.h</PrecompiledHeaderFile>
+      <PrecompiledHeader>NotUsing</PrecompiledHeader>
       <WarningLevel>Level3</WarningLevel>
-      <PreprocessorDefinitions>ENGINE_NAME=PFF;PROJECT_NAME=PFF_editor;PFF_INSIDE_EDITOR;GLFW_INCLUDE_NONE;PFF_PLATFORM_WINDOWS;PFF_RELEASE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
-      <AdditionalIncludeDirectories>src;..\PFF\vendor\glm;..\PFF\vendor\glfw-3.3.8.bin.WIN64\include;..\PFF\vendor\imgui;..\PFF\vendor\imgui\backends;C:\VulkanSDK\1.3.250.1\Include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <PreprocessorDefinitions>ENGINE_NAME=PFF;PROJECT_NAME=PFF_editor;PFF_INSIDE_EDITOR;PFF_PLATFORM_WINDOWS;GAME_RELEASE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <AdditionalIncludeDirectories>..\PFF\src;..\PFF\vendor\glm;..\PFF\vendor\imgui;..\PFF\vendor\imgui\backends;src;assets;C:\VulkanSDK\1.3.250.1\Include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <Optimization>Full</Optimization>
       <FunctionLevelLinking>true</FunctionLevelLinking>
       <IntrinsicFunctions>true</IntrinsicFunctions>
@@ -101,32 +96,32 @@ IF EXIST ..\bin\Debug-windows-x86_64\PFF_editor\PFF_editor.exe\ (xcopy /Q /E /Y 
       <SubSystem>Console</SubSystem>
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
       <OptimizeReferences>true</OptimizeReferences>
-      <AdditionalDependencies>vulkan-1.lib;glfw3.lib;%(AdditionalDependencies)</AdditionalDependencies>
-      <AdditionalLibraryDirectories>..\PFF\vendor\glfw-3.3.8.bin.WIN64\lib-vc2022;C:\VulkanSDK\1.3.250.1\Lib;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
-      <AdditionalOptions>/NODEFAULTLIB:LIBCMTD /NODEFAULTLIB:MSVCRT %(AdditionalOptions)</AdditionalOptions>
     </Link>
     <PostBuildEvent>
-      <Command>IF NOT EXIST ..\bin\Release-windows-x86_64\Sandbox (mkdir ..\bin\Release-windows-x86_64\Sandbox)
-IF EXIST ..\bin\Release-windows-x86_64\PFF_editor\PFF_editor.exe\ (xcopy /Q /E /Y /I ..\bin\Release-windows-x86_64\PFF_editor\PFF_editor.exe ..\bin\Release-windows-x86_64\Sandbox &gt; nul) ELSE (xcopy /Q /Y /I ..\bin\Release-windows-x86_64\PFF_editor\PFF_editor.exe ..\bin\Release-windows-x86_64\Sandbox &gt; nul)</Command>
+      <Command>"../PFF/vendor/vulkan-glslc/glslc.exe" shaders/default.vert -o shaders/default.vert.spv
+"../PFF/vendor/vulkan-glslc/glslc.exe" shaders/default.frag -o shaders/default.frag.spv</Command>
     </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <ClInclude Include="..\Sandbox\src\player\input_mapping.h" />
-    <ClInclude Include="..\Sandbox\src\player\pc_default.h" />
+    <ClInclude Include="src\controller\input_mapping.h" />
+    <ClInclude Include="src\controller\pc_default.h" />
+    <ClInclude Include="src\ui\editor_layer.h" />
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="..\Sandbox\src\entry.cpp" />
-    <ClCompile Include="..\Sandbox\src\player\pc_default.cpp" />
+    <ClCompile Include="src\controller\pc_default.cpp" />
+    <ClCompile Include="src\entry.cpp" />
+    <ClCompile Include="src\ui\editor_layer.cpp" />
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\PFF\PFF.vcxproj">
-      <Project>{8110880B-ED19-887C-7695-9E7CE29D937C}</Project>
-    </ProjectReference>
+    <None Include="shaders\default.frag" />
+    <None Include="shaders\default.vert" />
+  </ItemGroup>
+  <ItemGroup>
     <ProjectReference Include="..\PFF\vendor\imgui\ImGui.vcxproj">
       <Project>{C0FF640D-2C14-8DBE-F595-301E616989EF}</Project>
     </ProjectReference>
-    <ProjectReference Include="..\Sandbox\Sandbox.vcxproj">
-      <Project>{F4C124E3-60A1-A37E-69B9-2E55D5170AE0}</Project>
+    <ProjectReference Include="..\PFF\PFF.vcxproj">
+      <Project>{8110880B-ED19-887C-7695-9E7CE29D937C}</Project>
     </ProjectReference>
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />

@@ -58,6 +58,7 @@ namespace PFF {
 		set_vsync(m_data.vsync);
 
 		CORE_LOG(Info, "bind event callbacks");
+
 		glfwSetWindowRefreshCallback(m_Window, [](GLFWwindow* window) {
 			
 			window_attributes& data = *(window_attributes*)glfwGetWindowUserPointer(window);
@@ -91,15 +92,19 @@ namespace PFF {
 		glfwSetScrollCallback(m_Window, [](GLFWwindow* window, double xOffset, double yOffset) {
 
 			window_attributes& Data = *(window_attributes*)glfwGetWindowUserPointer(window);
-			MouseScrolledEvent event((float)xOffset, (float)yOffset);
-			Data.event_callback(event);
+			mouse_event event_x(key_code::mouse_moved_x, static_cast<f32>(xOffset));
+			mouse_event event_y(key_code::mouse_moved_y, static_cast<f32>(yOffset));
+			Data.event_callback(event_x);
+			Data.event_callback(event_y);
 		});
 
 		glfwSetCursorPosCallback(m_Window, [](GLFWwindow* window, double xPos, double yPos) {
 
 			window_attributes& Data = *(window_attributes*)glfwGetWindowUserPointer(window);
-			MouseMovedEvent event(static_cast<f32>(Data.cursor_pos_x - xPos), static_cast<f32>(Data.cursor_pos_y - yPos));
-			Data.event_callback(event);
+			mouse_event event_x(key_code::mouse_scrolled_x, static_cast<f32>(Data.cursor_pos_x - xPos));
+			mouse_event event_y(key_code::mouse_scrolled_y, static_cast<f32>(Data.cursor_pos_y - yPos));
+			Data.event_callback(event_x);
+			Data.event_callback(event_y);
 
 			Data.cursor_pos_x = xPos;
 			Data.cursor_pos_y = yPos;
@@ -108,16 +113,17 @@ namespace PFF {
 		glfwSetKeyCallback(m_Window, [](GLFWwindow* window, int key, int scancode, int action, int mods) {
 
 			window_attributes& Data = *(window_attributes*)glfwGetWindowUserPointer(window);
-			key_event event(key, static_cast<key_state>(action));
+			key_event event(static_cast<key_code>(key), static_cast<key_state>(action));
 			Data.event_callback(event);
 		});
 
 		glfwSetMouseButtonCallback(m_Window, [](GLFWwindow* window, int button, int action, int mods) {
 
 			window_attributes& Data = *(window_attributes*)glfwGetWindowUserPointer(window);
-			key_event event(button, static_cast<key_state>(action));
+			key_event event(static_cast<key_code>(button), static_cast<key_state>(action));
 			Data.event_callback(event);
 		});
+
 		CORE_LOG(Info, "finished setup");
 	}
 

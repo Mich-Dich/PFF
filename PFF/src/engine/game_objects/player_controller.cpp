@@ -33,9 +33,7 @@ namespace PFF {
 
 			event_dispatcher dispatcher(event);
 			dispatcher.dispatch<key_event>(BIND_FN(player_controller::handle_key_events));
-
-			dispatcher.dispatch<MouseMovedEvent>(BIND_FN(player_controller::handle_mouse_events));
-			dispatcher.dispatch<MouseScrolledEvent>(BIND_FN(player_controller::handle_mouse_events));
+			dispatcher.dispatch<mouse_event>(BIND_FN(player_controller::handle_mouse_events));
 		}
 	}
 
@@ -44,7 +42,7 @@ namespace PFF {
 		//CORE_LOG(Trace, event.get_keycode());
 		for (input_action& current_action : m_input_mapping) {						// get input_action
 			for (key_details key_details : current_action.keys) {					// get key in input_action
-				if (static_cast<u32>(key_details.key) == event.get_keycode()) {		// check if I have an event for that key
+				if (key_details.key == event.get_keycode()) {		// check if I have an event for that key
 
 					std::chrono::time_point<std::chrono::high_resolution_clock> time_now = std::chrono::high_resolution_clock::now();
 					switch (current_action.value) {
@@ -61,10 +59,10 @@ namespace PFF {
 							if (key_details.trigger_flags & INPUT_ACTION_TRIGGER_KEY_UP)
 								buffer = event.m_key_state == key_state::release;
 
-							if (key_details.trigger_flags & INPUT_ACTION_TRIGGER_HOLD)
+							if (key_details.trigger_flags & INPUT_ACTION_TRIGGER_KEY_HOLD)
 								buffer = event.m_key_state == key_state::repeat;
 
-							if (key_details.trigger_flags & INPUT_ACTION_TRIGGER_TAP) {
+							if (key_details.trigger_flags & INPUT_ACTION_TRIGGER_KEY_TAP) {
 
 
 								current_action.time_stamp = time_now;
@@ -92,10 +90,10 @@ namespace PFF {
 							if (key_details.trigger_flags & INPUT_ACTION_TRIGGER_KEY_UP)
 								buffer = (event.m_key_state == key_state::release) ? 1.0f : 0.0f;
 
-							if (key_details.trigger_flags & INPUT_ACTION_TRIGGER_HOLD)
+							if (key_details.trigger_flags & INPUT_ACTION_TRIGGER_KEY_HOLD)
 								buffer = (event.m_key_state == key_state::repeat) ? 1.0f : 0.0f;
 								
-							if (key_details.trigger_flags & INPUT_ACTION_TRIGGER_TAP) {
+							if (key_details.trigger_flags & INPUT_ACTION_TRIGGER_KEY_TAP) {
 
 								// UNFINISHED
 								buffer = (event.m_key_state == key_state::press) ? 1.0f : 0.0f;
@@ -141,8 +139,16 @@ namespace PFF {
 	}
 
 	bool player_controller::handle_mouse_events(mouse_event& event) {
-		
-		//CORE_LOG(Trace, event);
+
+		CORE_LOG(Trace, event << "  " << static_cast<int32>(event.get_keycode()));
+		for (input_action& current_action : m_input_mapping) {						// get input_action
+			for (key_details key_details : current_action.keys) {					// get key in input_action
+				if (key_details.key == event.get_keycode()) {		// check if I have an event for that key
+
+				}
+			}
+		}
+
 		return false;
 	}
 

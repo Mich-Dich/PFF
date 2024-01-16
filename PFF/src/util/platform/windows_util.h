@@ -5,8 +5,23 @@
 	#define PFF_API __declspec(dllexport)
 #else
 	#define PFF_API __declspec(dllimport)
-#endif // PFF_INSIDE_ENGINE
+#endif
 
+#ifdef PFF_INSIDE_ENGINE
+	#define PFF_API_EDITOR __declspec(dllexport)
+#elif PFF_INSIDE_EDITOR
+	#define PFF_API_EDITOR __declspec(dllimport)
+#else
+	#define PFF_API_EDITOR
+#endif
+
+#ifdef PFF_INSIDE_ENGINE
+	#define USE_IN_EDITOR 
+#elif PFF_INSIDE_EDITOR
+	#define USE_IN_EDITOR 
+#else
+	#define USE_IN_EDITOR	 #error "Error: Unauthorized Usage\n\nThe component you are attempting to utilize is restricted to the editor environment only. This functionality is exclusive to the editing tools and is not intended for general use in the application. If you require access to this feature, please use the appropriate editor interface or consult the documentation for guidance.\n\nFor further assistance, please contact our support team.\n\n[Company Name]"
+#endif
 
 #define DEBUG_BREAK() (__debugbreak())
 
