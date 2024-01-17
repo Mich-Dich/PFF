@@ -2,6 +2,7 @@
 
 #include <type_traits>
 
+struct ImVec4;
 
 namespace PFF {
 
@@ -28,13 +29,10 @@ namespace PFF {
 		// @return [void] This function does not have a return value.
 		void init();
 
-
-
 		// @brief Converts a configuration file type enum to its corresponding string representation.
 		// @param [type] The configuration file type to be converted.
 		// @return [std::string] The string representation of the given configuration file type.
 		std::string file_type_to_string(file type);
-
 
 		// @brief Checks for the existence of a configuration in the specified file, updates it if (found && override == true), and adds if not found.
 		// @param [target_config_file] The type of configuration file to be checked/updated.
@@ -47,26 +45,29 @@ namespace PFF {
 
 
 		template <typename T>
-		void load(const file target_config_file, const std::string& section, const std::string& key, T& value) {
+		void access(const file config_file, const std::string& section, const std::string& key, T& value, bool override) {
 
 			std::string buffer = "";
 			if constexpr (std::is_arithmetic_v<T>)
 				buffer = std::to_string(value);
-
+			
 			else if constexpr (std::is_same_v<T, bool>)
 				buffer = bool_to_str(value);
 
 			else if constexpr (std::is_convertible_v<T, std::string>)
 				buffer = value;
 
-			else if constexpr (std::is_same_v<T, glm::vec4>) {
+			else if constexpr (std::is_same_v<T, glm::vec4> || std::is_same_v<T, ImVec4>) {
 
 				std::ostringstream oss;
 				oss << value.x << ' ' << value.y << ' ' << value.z << ' ' << value.w;
 				buffer = oss.str();
 			}
 
-			PFF::config::check_for_configuration(target_config_file, section, key, buffer, false);
+			else
+				CORE_ASSERT(0 == 1, "", "Input value is not supported");
+
+			PFF::config::check_for_configuration(config_file, section, key, buffer, false);
 
 			if constexpr (std::is_arithmetic_v<T>)
 				value = str_to_num<T>(buffer);
@@ -77,96 +78,40 @@ namespace PFF {
 			else if constexpr (std::is_convertible_v<T, std::string>)
 				value = buffer;
 
-			else if constexpr (std::is_same_v<T, glm::vec4>) {
+			else if constexpr (std::is_same_v<T, glm::vec4> || std::is_same_v<T, ImVec4>) {
 
 				std::istringstream iss(buffer);
 				iss >> value.x >> value.y >> value.z >> value.w;
 			}
 
+			else
+				CORE_ASSERT(0 == 1, "", "Input value is not supported");
+
 		}
 
-		// ======================================================================= LOAD CONFIG =======================================================================
-		
-
-		// @brief Macro to check for the existence of a numerical configuration in the specified file, update it if found, and convert it to the desired type.
+		// @brief load a value from specified config file (save if not found)
 		// @param [config_file] The type of configuration file to be checked/updated.
-		// @param [value] Reference to the numerical variable that will store the configuration value.
-		// @param [type] The data type of the numerical configuration.
-		// @param [section] The section within the configuration file where the key-value pair is located.
-		// @param [key] The key of the configuration to be checked/updated.
-		// @see check_for_configuration
-		#define LOAD_CONFIG_NUM(config_file, value, type, section, key)																										\
-														{std::string buffer = num_to_str(value);																			\
-														PFF::config::check_for_configuration(PFF::config::file::config_file, section, key, buffer, false);			\
-														value = str_to_num<type>(buffer);}
-
-		#define LOAD_CONFIG_VEC4(config_file, vector, section, key)																											\
-														{std::ostringstream oss;																							\
-														oss << vector.x << ' ' << vector.y << ' ' << vector.z << ' ' << vector.w;											\
-														std::string buffer = oss.str();																						\
-														PFF::config::check_for_configuration(PFF::config::file::config_file, section, key, buffer, false);			\
-														std::istringstream iss(buffer);																						\
-														iss >> vector.x >> vector.y >> vector.z >> vector.w;}
-
-		// @brief Macro to load a string value from specified config file (save if not found)
-		// @param [config_file] The type of configuration file to be checked/updated.
-		// @param [value] Reference to the string variable that will store the configuration value.
+		// @param [value] Reference to the variable that will store the configuration value.
 		// @param [section] The section within the configuration file where the key-value pair is located.
 		// @param [key] The key of the configuration to be loaded.
 		// @see check_for_configuration
-		#define LOAD_CONFIG_STR(config_file, value, section, key)																											\
-														{std::string buffer = (value);																						\
-														PFF::config::check_for_configuration(PFF::config::file::config_file, section, key, buffer, false);			\
-														value = (buffer);}
+		template <typename T>
+		void load(const file config_file, const std::string& section, const std::string& key, T& value) {
 
-		// @brief Macro to check for the existence of a boolean configuration in the specified file, update it if found, and convert it to the bool type.
+			access(config_file, section, key, value, false);
+		}
+
+		// @brief save a value from specified config file (create if not found)
 		// @param [config_file] The type of configuration file to be checked/updated.
-		// @param [value] Reference to the boolean variable that will store the configuration value.
+		// @param [value] Reference to the variable that will be stored in the configuration falie.
 		// @param [section] The section within the configuration file where the key-value pair is located.
-		// @param [key] The key of the configuration to be checked/updated.
+		// @param [key] The key of the configuration to be loaded.
 		// @see check_for_configuration
-		#define LOAD_CONFIG_BOOL(config_file, value, section, key)																											\
-														{std::string buffer = bool_to_str(value);																			\
-														PFF::config::check_for_configuration(PFF::config::file::config_file, section, key, buffer, false);			\
-														value = str_to_bool(buffer);}
+		template <typename T>
+		void save(const file config_file, const std::string& section, const std::string& key, T& value) {
 
-		
-		// ====================================================================================== SAVE CONFIG ======================================================================================
-
-
-		// @brief Macro to check for the existence of a numerical configuration in the specified file, update it if found, and convert it to the desired type.
-		// @param [config_file] The type of configuration file to be checked/updated.
-		// @param [value] Reference to the numerical variable that will store the configuration value.
-		// @param [type] The data type of the numerical configuration.
-		// @param [section] The section within the configuration file where the key-value pair is located.
-		// @param [key] The key of the configuration to be checked/updated.
-		// @see check_for_configuration
-		#define SAVE_CONFIG_NUM(config_file, value, type, section, key)																										\
-														{std::string buffer = num_to_str(value);																			\
-														PFF::config::check_for_configuration(PFF::config::file::config_file, section, key, buffer, true);				\
-														value = str_to_num<type>(buffer);}
-
-		// @brief Macro to save a string value in the specified file (update if found)
-		// @param [config_file] The type of configuration file to be checked/updated.
-		// @param [value] Reference to the string variable that will store the configuration value.
-		// @param [section] The section within the configuration file where the key-value pair is located.
-		// @param [key] The key of the configuration to be saved.
-		// @see check_for_configuration
-		#define SAVE_CONFIG_STR(config_file, value, section, key)																											\
-														{std::string buffer = (value);																						\
-														PFF::config::check_for_configuration(PFF::config::file::config_file, section, key, buffer, true);				\
-														value = (buffer);}
-
-		// @brief Macro to check for the existence of a boolean configuration in the specified file, update it if found, and convert it to the bool type.
-		// @param [config_file] The type of configuration file to be checked/updated.
-		// @param [value] Reference to the boolean variable that will store the configuration value.
-		// @param [section] The section within the configuration file where the key-value pair is located.
-		// @param [key] The key of the configuration to be checked/updated.
-		// @see check_for_configuration
-		#define SAVE_CONFIG_BOOL(config_file, value, section, key)																											\
-														{std::string buffer = bool_to_str(value);																			\
-														PFF::config::check_for_configuration(PFF::config::file::config_file, section, key, buffer, true);				\
-														value = str_to_bool(buffer);}
+			access(config_file, section, key, value, true);
+		}
 
 	}
 

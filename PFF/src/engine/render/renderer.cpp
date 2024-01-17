@@ -103,7 +103,7 @@ namespace PFF {
 	//
 	void renderer::set_size(u32 width, u32 height) {
 
-		CORE_LOG(Info, "Resize: [" << width << ", " << height << "]");
+		CORE_LOG(Trace, "Resize: [" << width << ", " << height << "]");
 		needs_to_resize = true;
 
 		if (width > 0 && height > 0) {

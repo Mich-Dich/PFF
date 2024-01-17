@@ -19,7 +19,7 @@
 namespace PFF {
 
 #define LOAD_IMGUI_SETTING(key, value)				{ImVec4 buffer_vec = value;																\
-													LOAD_CONFIG_VEC4(editor, buffer_vec, "color_scheme", #key);								\
+													config::load(config::file::editor, "color_scheme", #key, buffer_vec);								\
 													ImGui::PushStyleColor(ImGuiCol_##key, buffer_vec);}
 
 
@@ -65,7 +65,7 @@ namespace PFF {
 		}
 
 		application& app = application::get();
-		LOAD_CONFIG_NUM(editor, m_font_size, f32, "UI", "font_size");
+		config::load(config::file::editor, "UI", "font_size", m_font_size);
 
 		// Setup Platform/Renderer backends
 		ImGui_ImplGlfw_InitForVulkan(app.get_window()->get_window(), true);
@@ -164,7 +164,7 @@ namespace PFF {
 
 		LOG(Info, "detach imgui layer");
 		
-		SAVE_CONFIG_NUM(editor, m_font_size, f32, "UI", "font_size");
+		config::save(config::file::editor, "UI", "font_size", m_font_size);
 		ImGui_ImplVulkan_Shutdown();
 		ImGui_ImplGlfw_Shutdown();
 		ImGui::DestroyContext();

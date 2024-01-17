@@ -31,10 +31,10 @@ namespace PFF {
 
 	pff_window::~pff_window() {
 
-		SAVE_CONFIG_STR(editor, m_data.title, "window_attributes", "title");
-		SAVE_CONFIG_NUM(editor, m_data.width, u32, "window_attributes", "width");
-		SAVE_CONFIG_NUM(editor, m_data.height, u32, "window_attributes", "height");
-		SAVE_CONFIG_BOOL(editor, m_data.vsync, "window_attributes", "vsync");
+		config::save(config::file::editor, "window_attributes", "title", m_data.title);
+		config::save(config::file::editor, "window_attributes", "width", m_data.width);
+		config::save(config::file::editor, "window_attributes", "height", m_data.height);
+		config::save(config::file::editor, "window_attributes", "vsync", m_data.vsync);
 
 		glfwDestroyWindow(m_Window);
 		glfwTerminate();
