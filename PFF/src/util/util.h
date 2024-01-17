@@ -49,9 +49,9 @@ std::string num_to_str(const T& num) {
 }
 
 template <typename VecType>
-std::string vec_to_str(const VecType& vec) {
+std::string vec_to_str(const VecType& vec, std::string_view name = "") {
 	std::stringstream ss;
-	ss << "[" << std::fixed << std::setprecision(2);
+	ss << name <<": [" << std::fixed << std::setprecision(2);
 
 	for (int i = 0; i < VecType::length(); ++i) {
 		ss << std::setw(9) << vec[i];

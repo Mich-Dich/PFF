@@ -141,7 +141,8 @@ namespace PFF {
 
 						// ================================================================= float & vec2 =================================================================
 						case input_value::_1D:
-						case input_value::_2D: {
+						case input_value::_2D:
+						case input_value::_3D: {
 
 							f32 buffer{};
 
@@ -189,6 +190,17 @@ namespace PFF {
 								// CORE_LOG(Info, "action value: [X: " << m_input_mapping->get_action(x)->data.axis_2d.x << " Y: " << m_input_mapping->get_action(x)->data.axis_2d.y << "]");
 							}
 
+							else if (action->value == input_value::_3D) {
+
+								if (key_details.modefier_flags & INPUT_ACTION_MODEFIER_VEC2_SECOND_AXIS)
+									action->data._3D.y = buffer;
+								else if (key_details.modefier_flags & INPUT_ACTION_MODEFIER_VEC3_SECOND_AXIS)
+									action->data._3D.z = buffer;
+								else
+									action->data._3D.x = buffer;
+
+								//CORE_LOG(Info, "action value: [X: " << action->data.axis_2d.x << " Y: " << action->data.axis_2d.y << "]");
+							}
 
 						} break;
 

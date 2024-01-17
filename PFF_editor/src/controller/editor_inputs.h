@@ -12,6 +12,7 @@ namespace PFF {
 
 		PFF::input_action move;
 		PFF::input_action capture_mouse;
+		PFF::input_action change_move_speed;
 		PFF::input_action look;
 
 	};
@@ -19,7 +20,7 @@ namespace PFF {
 	editor_inputs::editor_inputs() {
 
 		move = PFF::input_action{};
-		move.description = "Test description";
+		move.description = "reposition the editor camera";
 		move.triger_when_paused = false;
 		capture_mouse.modefier_flags = 0;
 		move.value = PFF::input_value::_3D;
@@ -27,8 +28,8 @@ namespace PFF {
 		move.keys = {
 			{key_code::key_W, INPUT_ACTION_TRIGGER_KEY_DOWN },
 			{key_code::key_S, INPUT_ACTION_TRIGGER_KEY_DOWN , INPUT_ACTION_MODEFIER_NEGATE },
-			{key_code::key_A, INPUT_ACTION_TRIGGER_KEY_DOWN , INPUT_ACTION_MODEFIER_VEC2_SECOND_AXIS},
-			{key_code::key_D, INPUT_ACTION_TRIGGER_KEY_DOWN , INPUT_ACTION_MODEFIER_VEC2_SECOND_AXIS | INPUT_ACTION_MODEFIER_NEGATE},
+			{key_code::key_A, INPUT_ACTION_TRIGGER_KEY_DOWN , INPUT_ACTION_MODEFIER_VEC2_SECOND_AXIS | INPUT_ACTION_MODEFIER_NEGATE},
+			{key_code::key_D, INPUT_ACTION_TRIGGER_KEY_DOWN , INPUT_ACTION_MODEFIER_VEC2_SECOND_AXIS},
 			{key_code::key_space, INPUT_ACTION_TRIGGER_KEY_DOWN , INPUT_ACTION_MODEFIER_VEC3_SECOND_AXIS},
 			{key_code::key_left_shift, INPUT_ACTION_TRIGGER_KEY_DOWN , INPUT_ACTION_MODEFIER_VEC3_SECOND_AXIS | INPUT_ACTION_MODEFIER_NEGATE},
 		};
@@ -36,7 +37,7 @@ namespace PFF {
 
 
 		capture_mouse = PFF::input_action{};
-		capture_mouse.description = "Test description";
+		capture_mouse.description = "left clicl to change the camera direction";
 		capture_mouse.triger_when_paused = false;
 		capture_mouse.modefier_flags = 0;
 		capture_mouse.value = PFF::input_value::_bool;
@@ -47,15 +48,27 @@ namespace PFF {
 		REGISTER_INPUT_ACTION(capture_mouse);
 
 
+		change_move_speed = PFF::input_action{};
+		change_move_speed.description = "increase/decrease the movement speed of the editor camera";
+		change_move_speed.triger_when_paused = false;
+		change_move_speed.modefier_flags = INPUT_ACTION_MODEFIER_AUTO_RESET;
+		change_move_speed.value = PFF::input_value::_1D;
+		change_move_speed.duration_in_sec = 0.5f;
+		change_move_speed.keys = {
+			{key_code::mouse_scrolled_y, INPUT_ACTION_TRIGGER_MOUSE_POS_AND_NEG},
+		};
+		REGISTER_INPUT_ACTION(change_move_speed);
+
+
 		look = PFF::input_action{};
-		look.description = "Test description";
+		look.description = "change the direction of the editor camera";
 		look.triger_when_paused = false;
 		look.modefier_flags = INPUT_ACTION_MODEFIER_AUTO_RESET;
 		look.value = PFF::input_value::_2D;
 		look.duration_in_sec = 0.5f;
 		look.keys = {
-			{key_code::mouse_moved_x, INPUT_ACTION_TRIGGER_MOUSE_POS_AND_NEG , INPUT_ACTION_MODEFIER_NEGATE},
-			{key_code::mouse_moved_y, INPUT_ACTION_TRIGGER_MOUSE_POS_AND_NEG , INPUT_ACTION_MODEFIER_VEC2_SECOND_AXIS},
+			{key_code::mouse_moved_x, INPUT_ACTION_TRIGGER_MOUSE_POS_AND_NEG},
+			{key_code::mouse_moved_y, INPUT_ACTION_TRIGGER_MOUSE_POS_AND_NEG , INPUT_ACTION_MODEFIER_VEC2_SECOND_AXIS | INPUT_ACTION_MODEFIER_NEGATE},
 		};
 		REGISTER_INPUT_ACTION(look);
 

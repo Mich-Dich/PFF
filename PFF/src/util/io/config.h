@@ -17,6 +17,11 @@ namespace PFF {
 			input,
 		};
 
+		enum class operation {
+			save,
+			load,
+		};
+
 		// @brief Initializes the configuration files by creating necessary directories and default files.
 		// @param [config_dir] The directory where configuration files will be stored.
 		// @return [void] This function does not have a return value.

@@ -35,30 +35,6 @@ namespace PFF {
 			return mapping;
 		}
 
-		// Struct for input values
-		template <typename T>
-		struct input_value_type {};
-
-		template <>
-		struct input_value_type < bool > {
-			using type = bool;
-		};
-
-		template <>
-		struct input_value_type < glm::vec2 > {
-			using type = glm::vec2;
-		};
-
-		template <>
-		struct input_value_type < f32 > {
-			using type = f32;
-		};
-
-		// Templated function to get the relevant data field
-		template <typename T>
-		typename input_value_type < T > ::type get_data(const T& input) {
-			return input.data.axis_2d; // Adjust based on your actual data structure
-		}
 
 		world_layer* m_world_layer{};
 	private:

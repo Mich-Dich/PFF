@@ -24,6 +24,11 @@ namespace PFF {
 		//  f32 duration_in_sec;														// SAVE
 		//  std::vector<key_details> keys;												// SAVE
 
+#if defined(PFF_INSIDE_EDITOR)
+
+#endif // 
+
+
 		LOAD_CONFIG_BOOL(input, action->triger_when_paused, action->name, "triger_when_paused");
 		LOAD_CONFIG_NUM(input, action->duration_in_sec, f32, action->name, "duration_in_sec");
 
