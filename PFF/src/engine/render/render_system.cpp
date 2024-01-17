@@ -48,11 +48,20 @@ namespace PFF {
 
 		m_vk_pipeline->bind_commnad_buffers(command_buffer);
 
+		auto projection_view = camera.get_projection() * camera.get_view();
+
+		/*for (int i = 0; i < 4; ++i) {
+			for (int j = 0; j < 4; ++j) {
+				std::cout << std::fixed << std::setprecision(2) << projection_view[i][j] << " ";
+			}
+			std::cout << std::endl;
+		}*/
+
 		for (auto& obj : game_objects) {
 			
 			simple_push_constant_data PCD{};
 			PCD.color = obj.color;
-			PCD.transform = camera.get_projection() * obj.transform.mat4();
+			PCD.transform = projection_view * obj.transform.mat4_XYZ();
 
 			vkCmdPushConstants(command_buffer, m_pipeline_layout, VK_SHADER_STAGE_VERTEX_BIT | VK_SHADER_STAGE_FRAGMENT_BIT, 0, sizeof(simple_push_constant_data), &PCD);
 

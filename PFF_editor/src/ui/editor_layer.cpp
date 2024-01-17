@@ -85,26 +85,32 @@ namespace PFF {
 		ImGui::Begin("viewport test", &show_viewport, window_flags);
 		if (ImGui::BeginTabBar("##tabs", ImGuiTabBarFlags_None)) {
 			if (ImGui::BeginTabItem("Inputs")) {
-
-				for (input_action& current_action : application::get().get_world_layer()->get_current_player_controller()->m_input_mapping) {						// get input_action
+				
+				for (input_action* action : *application::get().get_world_layer()->get_current_player_controller()->get_input_mapping()) {						// get input_action
 					
-					if (ImGui::CollapsingHeader(current_action.name.c_str())) {
+					if (ImGui::CollapsingHeader(action->name.c_str())) {
 
-						ImGui::Text("%s", current_action.description.c_str());
-						switch (current_action.value) {
+						ImGui::Text("%s", action->description.c_str());
+						switch (action->value) {
 						
-							case input_value::IV_bool: {
-								display_value_bool(current_action.data.boolean);
+							case input_value::_bool: {
+
+								display_value_bool(action->data.boolean);
 							} break;
 						
-							case input_value::IV_float: {
-								display_value_num(current_action.data.axis_1d);
+							case input_value::_1D: {
 
+								display_value_num(action->data._1D);
 							} break;
 						
-							case input_value::IV_vec2: {
-								display_value_vec2(current_action.data.axis_2d);
+							case input_value::_2D: {
 
+								display_value_vec(action->data._2D);
+							} break;
+
+							case input_value::_3D:{
+
+								display_value_vec(action->data._3D);
 							} break;
 							default:
 								break;
@@ -134,7 +140,7 @@ namespace PFF {
 	void editor_layer::display_value_num(f32 value) {
 	}
 
-	void editor_layer::display_value_vec2(glm::vec2 value) {
+	void editor_layer::display_value_vec(glm::vec2 value) {
 	}
 
 	void editor_layer::set_next_window_pos(int16 location) {

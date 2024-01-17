@@ -92,8 +92,8 @@ namespace PFF {
 		glfwSetScrollCallback(m_Window, [](GLFWwindow* window, double xOffset, double yOffset) {
 
 			window_attributes& Data = *(window_attributes*)glfwGetWindowUserPointer(window);
-			mouse_event event_x(key_code::mouse_moved_x, static_cast<f32>(xOffset));
-			mouse_event event_y(key_code::mouse_moved_y, static_cast<f32>(yOffset));
+			mouse_event event_x(key_code::mouse_scrolled_x, static_cast<f32>(xOffset));
+			mouse_event event_y(key_code::mouse_scrolled_y, static_cast<f32>(yOffset));
 			Data.event_callback(event_x);
 			Data.event_callback(event_y);
 		});
@@ -101,8 +101,8 @@ namespace PFF {
 		glfwSetCursorPosCallback(m_Window, [](GLFWwindow* window, double xPos, double yPos) {
 
 			window_attributes& Data = *(window_attributes*)glfwGetWindowUserPointer(window);
-			mouse_event event_x(key_code::mouse_scrolled_x, static_cast<f32>(Data.cursor_pos_x - xPos));
-			mouse_event event_y(key_code::mouse_scrolled_y, static_cast<f32>(Data.cursor_pos_y - yPos));
+			mouse_event event_x(key_code::mouse_moved_x, static_cast<f32>(Data.cursor_pos_x - xPos));
+			mouse_event event_y(key_code::mouse_moved_y, static_cast<f32>(Data.cursor_pos_y - yPos));
 			Data.event_callback(event_x);
 			Data.event_callback(event_y);
 

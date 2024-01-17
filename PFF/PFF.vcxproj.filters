@@ -7,9 +7,6 @@
     <Filter Include="engine\Events">
       <UniqueIdentifier>{7FDF9525-EB9F-115C-B4DA-5AD9205A5638}</UniqueIdentifier>
     </Filter>
-    <Filter Include="engine\defaults">
-      <UniqueIdentifier>{C2E15063-2E6D-BE27-377E-411CA3881A28}</UniqueIdentifier>
-    </Filter>
     <Filter Include="engine\game_objects">
       <UniqueIdentifier>{ADBB125B-191D-F068-A28A-361B0EEB2628}</UniqueIdentifier>
     </Filter>
@@ -58,9 +55,6 @@
     </ClInclude>
     <ClInclude Include="src\engine\Events\mouse_event.h">
       <Filter>engine\Events</Filter>
-    </ClInclude>
-    <ClInclude Include="src\engine\defaults\in_editor_controller.h">
-      <Filter>engine\defaults</Filter>
     </ClInclude>
     <ClInclude Include="src\engine\game_objects\camera.h">
       <Filter>engine\game_objects</Filter>

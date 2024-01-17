@@ -2,12 +2,12 @@
 
 #include "engine/layer/layer.h"
 #include "engine/map/game_map.h"
+#include "engine/game_objects/camera.h"
 #include "engine/game_objects/player_controller.h"
 
 namespace PFF {
 
 	class world_layer : public layer {
-
 	public:
 
 		world_layer();
@@ -15,8 +15,15 @@ namespace PFF {
 
 		DELETE_COPY(world_layer);
 
+		//FORCEINLINE camera get_camera() const { return m_camera; }
+		FORCEINLINE std::shared_ptr<camera> get_editor_camera() const { return m_editor_camera; }
 		FORCEINLINE std::shared_ptr<game_map> get_current_map() const { return m_current_map; }
 		FORCEINLINE std::shared_ptr<player_controller> get_current_player_controller() const { return m_player_controller; }
+		void register_player_controller(std::shared_ptr<player_controller> player_controller) {
+
+			m_player_controller = player_controller;
+			m_player_controller->set_world_layer_ref(this);
+		}
 
 		virtual void on_attach();
 		virtual void on_detach();
@@ -24,12 +31,12 @@ namespace PFF {
 		virtual void on_event(event& event);
 		virtual void on_imgui_render();
 
-		void register_player_controller(std::shared_ptr<player_controller> player_controller);
-
 	private:
 
-		std::shared_ptr<game_map> m_current_map = nullptr;
+		//camera m_camera{};
+		std::shared_ptr<camera> m_editor_camera{};
 		std::shared_ptr<player_controller> m_player_controller{};
+		std::shared_ptr<game_map> m_current_map{};
 
 	};
 

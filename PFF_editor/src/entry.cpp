@@ -1,7 +1,7 @@
 
 #include <PFF.h>
 
-#include "controller/pc_default.h"
+#include "controller/editor_controller.h"
 #include "ui/editor_layer.h"
 
 namespace PFF {
@@ -37,10 +37,10 @@ namespace PFF {
 		push_overlay(m_editor_layer);
 
 		LOG(Trace, "register player controller");
-		PFF_editor::register_player_controller(std::make_shared<pc_default>());
+		register_player_controller(std::make_shared<editor_controller>());
 
 		// TODO: move to map init() function
-#if 0
+#if 1
 		u32 counter = 0;
 		std::shared_ptr<basic_mesh> model = create_cube_model({ 0.0f, 0.0f, 0.0f });
 		for (int16 x = -13; x < 14; x++) {
@@ -62,7 +62,6 @@ namespace PFF {
 		cube->rotation_speed = glm::linearRand(glm::vec3(0.0f), glm::vec3(glm::two_pi<f32>()));
 #endif // 1
 
-
 		return true;
 	}
 
@@ -71,53 +70,53 @@ namespace PFF {
 
 		std::vector<basic_mesh::vertex> vertices{
 
-			// left face (white)
-			{{-.5f, -.5f, -.5f}, {.9f, .9f, .9f}},
-			{{-.5f, .5f, .5f}, {.9f, .9f, .9f}},
-			{{-.5f, -.5f, .5f}, {.9f, .9f, .9f}},
-			{{-.5f, -.5f, -.5f}, {.9f, .9f, .9f}},
-			{{-.5f, .5f, -.5f}, {.9f, .9f, .9f}},
-			{{-.5f, .5f, .5f}, {.9f, .9f, .9f}},
+			// left face (gray)
+			{{-.5f, -.5f, -.5f}, {0.2f, 0.2f, 0.2f}},
+			{{-.5f, .5f, .5f}, {0.2f, 0.2f, 0.2f}},
+			{{-.5f, -.5f, .5f}, {0.2f, 0.2f, 0.2f}},
+			{{-.5f, -.5f, -.5f}, {0.2f, 0.2f, 0.2f}},
+			{{-.5f, .5f, -.5f}, {0.2f, 0.2f, 0.2f}},
+			{{-.5f, .5f, .5f}, {0.2f, 0.2f, 0.2f}},
 
 			// right face (yellow)
-			{{.5f, -.5f, -.5f}, {.8f, .8f, .1f}},
-			{{.5f, .5f, .5f}, {.8f, .8f, .1f}},
-			{{.5f, -.5f, .5f}, {.8f, .8f, .1f}},
-			{{.5f, -.5f, -.5f}, {.8f, .8f, .1f}},
-			{{.5f, .5f, -.5f}, {.8f, .8f, .1f}},
-			{{.5f, .5f, .5f}, {.8f, .8f, .1f}},
+			{{.5f, -.5f, -.5f}, {0.6f, 0.6f, 0.0f}},
+			{{.5f, .5f, .5f}, {0.6f, 0.6f, 0.0f}},
+			{{.5f, -.5f, .5f}, {0.6f, 0.6f, 0.0f}},
+			{{.5f, -.5f, -.5f}, {0.6f, 0.6f, 0.0f}},
+			{{.5f, .5f, -.5f}, {0.6f, 0.6f, 0.0f}},
+			{{.5f, .5f, .5f}, {0.6f, 0.6f, 0.0f}},
 
-			// top face (orange, remember y axis points down)
-			{{-.5f, -.5f, -.5f}, {.9f, .6f, .1f}},
-			{{.5f, -.5f, .5f}, {.9f, .6f, .1f}},
-			{{-.5f, -.5f, .5f}, {.9f, .6f, .1f}},
-			{{-.5f, -.5f, -.5f}, {.9f, .6f, .1f}},
-			{{.5f, -.5f, -.5f}, {.9f, .6f, .1f}},
-			{{.5f, -.5f, .5f}, {.9f, .6f, .1f}},
+			// top face (orange)
+			{{-.5f, -.5f, -.5f}, {0.0f, 0.6f, 0.6f}},
+			{{.5f, -.5f, .5f}, {0.0f, 0.6f, 0.6f}},
+			{{-.5f, -.5f, .5f}, {0.0f, 0.6f, 0.6f}},
+			{{-.5f, -.5f, -.5f}, {0.0f, 0.6f, 0.6f}},
+			{{.5f, -.5f, -.5f}, {0.0f, 0.6f, 0.6f}},
+			{{.5f, -.5f, .5f}, {0.0f, 0.6f, 0.6f}},
 
 			// bottom face (red)
-			{{-.5f, .5f, -.5f}, {.8f, .1f, .1f}},
-			{{.5f, .5f, .5f}, {.8f, .1f, .1f}},
-			{{-.5f, .5f, .5f}, {.8f, .1f, .1f}},
-			{{-.5f, .5f, -.5f}, {.8f, .1f, .1f}},
-			{{.5f, .5f, -.5f}, {.8f, .1f, .1f}},
-			{{.5f, .5f, .5f}, {.8f, .1f, .1f}},
+			{{-.5f, .5f, -.5f}, {0.6f, 0.0f, 0.0f}},
+			{{.5f, .5f, .5f}, {0.6f, 0.0f, 0.0f}},
+			{{-.5f, .5f, .5f}, {0.6f, 0.0f, 0.0f}},
+			{{-.5f, .5f, -.5f}, {0.6f, 0.0f, 0.0f}},
+			{{.5f, .5f, -.5f}, {0.6f, 0.0f, 0.0f}},
+			{{.5f, .5f, .5f}, {0.6f, 0.0f, 0.0f}},
 
-			// nose face (blue)
-			{{-.5f, -.5f, 0.5f}, {.1f, .1f, .8f}},
-			{{.5f, .5f, 0.5f}, {.1f, .1f, .8f}},
-			{{-.5f, .5f, 0.5f}, {.1f, .1f, .8f}},
-			{{-.5f, -.5f, 0.5f}, {.1f, .1f, .8f}},
-			{{.5f, -.5f, 0.5f}, {.1f, .1f, .8f}},
-			{{.5f, .5f, 0.5f}, {.1f, .1f, .8f}},
+			// front face (blue)
+			{{-.5f, -.5f, 0.5f}, {0.0f, 0.0f, 0.6f}},
+			{{.5f, .5f, 0.5f}, {0.0f, 0.0f, 0.6f}},
+			{{-.5f, .5f, 0.5f}, {0.0f, 0.0f, 0.6f}},
+			{{-.5f, -.5f, 0.5f}, {0.0f, 0.0f, 0.6f}},
+			{{.5f, -.5f, 0.5f}, {0.0f, 0.0f, 0.6f}},
+			{{.5f, .5f, 0.5f}, {0.0f, 0.0f, 0.6f}},
 
-			// tail face (green)
-			{{-.5f, -.5f, -0.5f}, {.1f, .8f, .1f}},
-			{{.5f, .5f, -0.5f}, {.1f, .8f, .1f}},
-			{{-.5f, .5f, -0.5f}, {.1f, .8f, .1f}},
-			{{-.5f, -.5f, -0.5f}, {.1f, .8f, .1f}},
-			{{.5f, -.5f, -0.5f}, {.1f, .8f, .1f}},
-			{{.5f, .5f, -0.5f}, {.1f, .8f, .1f}},
+			// back face (green)
+			{{-.5f, -.5f, -0.5f}, {0.0f, 0.6f, 0.0f}},
+			{{.5f, .5f, -0.5f}, {0.0f, 0.6f, 0.0f}},
+			{{-.5f, .5f, -0.5f}, {0.0f, 0.6f, 0.0f}},
+			{{-.5f, -.5f, -0.5f}, {0.0f, 0.6f, 0.0f}},
+			{{.5f, -.5f, -0.5f}, {0.0f, 0.6f, 0.0f}},
+			{{.5f, .5f, -0.5f}, {0.0f, 0.6f, 0.0f}},
 
 		};
 		for (auto& v : vertices) {

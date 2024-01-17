@@ -123,7 +123,6 @@ IF EXIST ..\bin\Release-windows-x86_64\PFF\PFF.dll\ (xcopy /Q /E /Y /I ..\bin\Re
     <ClInclude Include="src\engine\Events\application_event.h" />
     <ClInclude Include="src\engine\Events\key_event.h" />
     <ClInclude Include="src\engine\Events\mouse_event.h" />
-    <ClInclude Include="src\engine\defaults\in_editor_controller.h" />
     <ClInclude Include="src\engine\game_objects\camera.h" />
     <ClInclude Include="src\engine\game_objects\game_manager.h" />
     <ClInclude Include="src\engine\game_objects\game_object.h" />

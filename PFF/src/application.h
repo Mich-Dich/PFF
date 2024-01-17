@@ -15,6 +15,7 @@ namespace PFF {
 	class window_focus_event;
 	class game_map;
 	class timer;
+	class camera;
 
 	class PFF_API application {
 	public:
