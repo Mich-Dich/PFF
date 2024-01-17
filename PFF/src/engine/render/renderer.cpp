@@ -53,8 +53,16 @@ namespace PFF {
 
 	renderer::~renderer() {
 
+		m_window.reset();
+		m_render_system.reset();
+
+		vkDestroyDescriptorSetLayout(m_device->get_device(), m_descriptor_set_layout, nullptr);
 		vkDestroyDescriptorPool(m_device->get_device(), m_imgui_descriptor_pool, nullptr);
 		free_command_buffers();
+
+		m_swapchain.reset();
+		m_device.reset();
+		LOG(Info, "shutdown");
 	}
 
 	// ==================================================================== public ====================================================================
@@ -101,7 +109,6 @@ namespace PFF {
 		if (width > 0 && height > 0) {
 
 			state = system_state::active;
-			LOG(Info, "Resize with valid size => rebuild swapchain");
 			vkDeviceWaitIdle(m_device->get_device());
 			recreate_swapchian();
 		} else {
@@ -304,9 +311,12 @@ namespace PFF {
 	//
 	void renderer::recreate_swapchian() {
 
+		// CORE_LOG(Warn, "size: " << m_window->get_extend().width << " / " << m_window->get_extend().height);
+
 		if (m_swapchain == nullptr) {
 
 			m_swapchain = std::make_unique<vk_swapchain>(m_device, m_window->get_extend());
+			create_command_buffer();
 
 		} else {
 
@@ -319,7 +329,6 @@ namespace PFF {
 		}
 
 		// TODO: create_pipeline();
-		create_command_buffer();
 		needs_to_resize = false;
 	}
 

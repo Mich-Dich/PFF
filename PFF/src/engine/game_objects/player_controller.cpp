@@ -23,6 +23,9 @@ namespace PFF {
 	}
 
 	player_controller::~player_controller() {
+
+		m_input_mapping.reset();
+		CORE_LOG(Info, "Shutdown");
 	}
 
 	void player_controller::set_world_layer_ref(world_layer* world_layer) {

@@ -23,7 +23,7 @@ namespace PFF {
 		bool vsync;
 		EventCallbackFn event_callback;
 
-		window_attributes(const std::string title = "PFF - Sandbox", const u32 width = 1280, const  u32 height = 720, const  bool vsync = false, const EventCallbackFn& callback = nullptr)
+		window_attributes(const std::string title = "PFF - Sandbox", const u32 width = 800, const  u32 height = 600, const  bool vsync = false, const EventCallbackFn& callback = nullptr)
 			: title(title), width(width), height(height), vsync(vsync), event_callback(callback){}
 	};
 
@@ -32,7 +32,7 @@ namespace PFF {
 	public:
 		using EventCallbackFn = std::function<void(event&)>;
 
-		pff_window(window_attributes);
+		pff_window(window_attributes attributes = window_attributes());
 		~pff_window();
 
 		DELETE_COPY(pff_window);
@@ -53,8 +53,7 @@ namespace PFF {
 		
 	private:
 		
-		void init();
-		void shutdown();
+		void init(window_attributes attributes);
 		void set_vsync(bool enable);
 
 		window_attributes m_data;

@@ -42,6 +42,12 @@ namespace PFF {
 	render_system::~render_system() {
 
 		vkDestroyPipelineLayout(m_device->get_device(), m_pipeline_layout, nullptr);
+
+		m_renderer.reset();
+		m_vk_pipeline.reset();
+		m_device.reset();
+
+		LOG(Info, "shutdown");
 	}
 
 	void render_system::render_game_objects(f32 delta_time, VkCommandBuffer command_buffer, std::vector<game_object>& game_objects, const camera& camera) {

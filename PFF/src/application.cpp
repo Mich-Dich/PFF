@@ -46,13 +46,7 @@ namespace PFF {
 		fps_timer = std::make_unique<timer>();
 		fps_timer->set_fps_settings(m_target_fps);
 
-		window_attributes loc_window_att = window_attributes();
-		LOAD_CONFIG_STR(editor, loc_window_att.title, "window_attributes", "title");
-		LOAD_CONFIG_NUM(editor, loc_window_att.width, u32, "window_attributes", "width");
-		LOAD_CONFIG_NUM(editor, loc_window_att.height, u32, "window_attributes", "height");
-		LOAD_CONFIG_BOOL(editor, loc_window_att.vsync, "window_attributes", "vsync");
-		m_window = std::make_shared<pff_window>(loc_window_att);			// Can be called after inital setup like [compiling shaders]
-
+		m_window = std::make_shared<pff_window>();			// Can be called after inital setup like [compiling shaders]
 		m_renderer = std::make_shared<renderer>(m_window, &m_layerstack);
 		m_window->set_event_callback(BIND_FN(application::on_event));
 
@@ -66,21 +60,21 @@ namespace PFF {
 	}
 
 	application::~application() {
-		
+
 		shutdown();
-		
+
+		m_current_map.reset();
+
 		m_layerstack.pop_overlay(m_imgui_layer);
+		delete m_imgui_layer;
+
 		m_layerstack.pop_layer(m_world_layer);
+		delete m_world_layer;
 
 		m_renderer.reset();
-
-		window_attributes loc_window_att = m_window->get_attributes();
-		SAVE_CONFIG_STR(editor, loc_window_att.title, "window_attributes", "title");
-		SAVE_CONFIG_NUM(editor, loc_window_att.width, u32, "window_attributes", "width");
-		SAVE_CONFIG_NUM(editor, loc_window_att.height, u32, "window_attributes", "height");
-		SAVE_CONFIG_BOOL(editor, loc_window_att.vsync, "window_attributes", "vsync");
 		m_window.reset();
-
+		fps_timer.reset();
+		CORE_LOG(Info, "Shutdown");
 	}
 
 	// ==================================================================== main loop ====================================================================

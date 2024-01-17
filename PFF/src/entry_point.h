@@ -20,19 +20,12 @@ int main() {
 /*
 
 ToDo:
-	- port input system from C-version
-	- add ImGui
+
 	- create level editor
-
-
-
-
-
-
-
-
-
-
+	- add input smoothing
+	- add lighting capability
+	- add modle import
+	- add texture import
 
 
 */

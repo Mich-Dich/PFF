@@ -12,6 +12,8 @@ namespace PFF {
 
 
 	editor_layer::~editor_layer() {
+
+		LOG(Info, "Shutdown");
 	}
 
 	void editor_layer::on_attach() {

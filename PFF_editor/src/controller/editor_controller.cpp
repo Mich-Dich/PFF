@@ -15,6 +15,11 @@ namespace PFF {
 		m_input_mapping = register_mapping<editor_inputs>();
 	}
 
+	editor_controller::~editor_controller() {
+
+		LOG(Info, "Shutdown");
+	}
+
 	void editor_controller::update(f32 delta) {
 
 		static f32 move_speed = 50.0f;

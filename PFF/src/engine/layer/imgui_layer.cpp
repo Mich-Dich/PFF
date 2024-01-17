@@ -34,7 +34,8 @@ namespace PFF {
 
 	imgui_layer::~imgui_layer() {
 
-		LOG(Info, "shutdown imgui layer");
+		m_renderer.reset();
+		CORE_LOG(Info, "Shutdown");
 	}
 
 	void imgui_layer::on_attach() {
@@ -167,6 +168,8 @@ namespace PFF {
 		ImGui_ImplVulkan_Shutdown();
 		ImGui_ImplGlfw_Shutdown();
 		ImGui::DestroyContext();
+
+		CORE_LOG(Info, "detach");
 	}
 
 	void imgui_layer::on_update(f32 delta_time) {

@@ -23,13 +23,19 @@ namespace PFF {
 
 	world_layer::~world_layer() {
 
+		m_player_controller.reset();
+		m_editor_camera.reset();
 		m_current_map.reset();
+
+		CORE_LOG(Info, "Shutdown");
 	}
 
 	void world_layer::on_attach() {
 	}
 
 	void world_layer::on_detach() {
+
+		CORE_LOG(Info, "Detach");
 	}
 
 	void world_layer::on_update(f32 delta_time) {
@@ -37,9 +43,9 @@ namespace PFF {
 		m_player_controller->update_internal(delta_time);
 
 		// m_camera.set_orthographic_projection(-aspect, aspect, -1, 1, 0, 10);
-		// m_camera.set_view_direction(glm::vec3{ 0.0f }, glm::vec3{ 0.5f, 0.0f, 1.0f });
 		// m_camera.set_view_YXZ(glm::vec3(-1.0f, -2.0f, -3.0f), glm::vec3(0.0f));
-		// m_camera.set_perspective_projection(glm::radians(50.f), aspect, .1f, 150.0f);
+		// m_camera.set_view_direction(glm::vec3{ 0.0f }, glm::vec3{ 0.5f, 0.0f, 1.0f });
+		m_editor_camera->set_perspective_projection(glm::radians(50.f), application::get().get_renderer()->get_aspect_ratio(), .1f, 150.0f);
 
 		for (auto& obj : m_current_map->get_all_game_objects()) {
 

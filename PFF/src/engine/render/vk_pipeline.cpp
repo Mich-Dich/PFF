@@ -101,10 +101,12 @@ namespace PFF {
 	//
 	vk_pipeline::~vk_pipeline() {
 
-		LOG(Info, "Destroying vk_pipeline");
 		vkDestroyShaderModule(m_device->get_device(), m_vert_shader_module, nullptr);
 		vkDestroyShaderModule(m_device->get_device(), m_frag_shader_module, nullptr);
 		vkDestroyPipeline(m_device->get_device(), m_graphics_pipeline, nullptr);
+
+		m_device.reset();
+		LOG(Info, "shutdown");
 	}
 
 	void vk_pipeline::bind_commnad_buffers(VkCommandBuffer command_buffer) {

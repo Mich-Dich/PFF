@@ -16,6 +16,8 @@ namespace PFF {
 
 		for (layer* layer : m_layers)
 			delete layer;
+
+		CORE_LOG(Info, "Shutdown");
 	}
 
 	//

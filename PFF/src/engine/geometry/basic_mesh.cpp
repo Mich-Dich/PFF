@@ -23,6 +23,9 @@ namespace PFF {
 	
 		vkDestroyBuffer(m_device->get_device(), m_vertex_buffer, nullptr);
 		vkFreeMemory(m_device->get_device(), m_vertex_buffer_memory, nullptr);
+
+		m_device.reset();
+		CORE_LOG(Info, "Shutdown");
 	}
 
 	void basic_mesh::bind(VkCommandBuffer_T* commandBuffer) {

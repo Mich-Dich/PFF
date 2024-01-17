@@ -48,6 +48,14 @@ std::string num_to_str(const T& num) {
 	return oss.str();
 }
 
+template <typename T>
+T convert_from_string(const std::string& str) {
+	std::istringstream iss(str);
+	T result;
+	iss >> result;
+	return result;
+}
+
 template <typename VecType>
 std::string vec_to_str(const VecType& vec, std::string_view name = "") {
 	std::stringstream ss;

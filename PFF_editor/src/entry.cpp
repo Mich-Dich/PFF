@@ -40,9 +40,9 @@ namespace PFF {
 		register_player_controller(std::make_shared<editor_controller>());
 
 		// TODO: move to map init() function
+		std::shared_ptr<basic_mesh> model = create_cube_model({ 0.0f, 0.0f, 0.0f });
 #if 1
 		u32 counter = 0;
-		std::shared_ptr<basic_mesh> model = create_cube_model({ 0.0f, 0.0f, 0.0f });
 		for (int16 x = -13; x < 14; x++) {
 			for (int16 y = -6; y < 7; y++) {
 
@@ -55,7 +55,6 @@ namespace PFF {
 		}
 		LOG(Info, "Num of objects: " << counter);
 #else
-		std::shared_ptr<basic_mesh> model = create_cube_model({ 0.0f, 0.0f, 0.0f });
 		auto cube = get_current_map()->create_empty_game_object();
 		cube->mesh = model;
 		cube->transform.translation = { .0f, .0f, 10.f };

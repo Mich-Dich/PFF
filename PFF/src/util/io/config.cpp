@@ -25,9 +25,9 @@ namespace PFF {
 
             io_handler::create_directory(CONFIG_DIR);
 
-            for (int i = static_cast<int>(file_types::editor); i <= static_cast<int>(file_types::input); ++i) {
+            for (int i = static_cast<int>(file::editor); i <= static_cast<int>(file::input); ++i) {
 
-                std::filesystem::path file_path = BUILD_CONFIG_PATH(static_cast<file_types>(i));
+                std::filesystem::path file_path = BUILD_CONFIG_PATH(static_cast<file>(i));
                 std::ofstream config_file(file_path, std::ios::app);
                 if (!config_file.is_open()) {
 
@@ -41,7 +41,7 @@ namespace PFF {
         }
 
         // 
-        bool check_for_configuration(const file_types target_config_file, const std::string& section, const std::string& key, std::string& value, const bool override) {
+        bool check_for_configuration(const file target_config_file, const std::string& section, const std::string& key, std::string& value, const bool override) {
 
             std::filesystem::path file_path = BUILD_CONFIG_PATH(target_config_file);
             std::ifstream configFile(file_path, std::ios::in | std::ios::binary);
@@ -139,14 +139,14 @@ namespace PFF {
         }
 
         //
-        std::string file_type_to_string(file_types type) {
+        std::string file_type_to_string(file type) {
 
-            static const std::unordered_map<file_types, std::string> typeStrings{
-                {file_types::editor, "editor"},
-                {file_types::engine, "engine"},
-                {file_types::game, "game"},
-                {file_types::input, "input"},
-                {file_types::ui, "imgui" },
+            static const std::unordered_map<file, std::string> typeStrings{
+                {file::editor, "editor"},
+                {file::engine, "engine"},
+                {file::game, "game"},
+                {file::input, "input"},
+                {file::ui, "imgui" },
             };
 
             auto it = typeStrings.find(type);

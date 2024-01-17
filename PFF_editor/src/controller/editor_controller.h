@@ -10,7 +10,7 @@ namespace PFF {
 	public:
 
 		editor_controller();
-		~editor_controller() {};
+		~editor_controller();
 
 		void update(f32 delta) override;
 

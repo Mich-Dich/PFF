@@ -16,12 +16,11 @@ namespace PFF {
         : m_device{ device }, m_window_extent{ window_extent }, m_old_swapchain{ previous } {
 
         init();
-        m_old_swapchain = nullptr;      // clean up  old swapchain, not needed anymore
+        m_old_swapchain.reset();      // clean up  old swapchain, not needed anymore
     }
 
     vk_swapchain::~vk_swapchain() {
 
-        LOG(Info, "Destroying vk_pipeline");
         for (auto imageView : m_swap_chain_image_views) {
             vkDestroyImageView(m_device->get_device(), imageView, nullptr);
         }
@@ -50,6 +49,10 @@ namespace PFF {
             vkDestroySemaphore(m_device->get_device(), m_image_available_semaphores[i], nullptr);
             vkDestroyFence(m_device->get_device(), m_in_flight_fences[i], nullptr);
         }
+
+        m_old_swapchain.reset();
+        m_device.reset();
+        LOG(Info, "shutdown");
     }
 
     VkResult vk_swapchain::acquireNextImage(u32* imageIndex) {
@@ -346,10 +349,9 @@ namespace PFF {
     VkPresentModeKHR vk_swapchain::chooseSwapPresentMode(const std::vector<VkPresentModeKHR>& availablePresentModes) {
 
         for (const auto& availablePresentMode : availablePresentModes) {
-            if (availablePresentMode == VK_PRESENT_MODE_MAILBOX_KHR) {
-                LOG(Trace, "Present mode: Mailbox");
+            if (availablePresentMode == VK_PRESENT_MODE_MAILBOX_KHR)
                 return availablePresentMode;
-            }
+            
         }
 
         //for (const auto& availablePresentMode : availablePresentModes) {
@@ -359,7 +361,6 @@ namespace PFF {
         //    }
         //}
 
-        LOG(Trace, "Present mode: V-Sync");
         return VK_PRESENT_MODE_FIFO_KHR;
     }
 
@@ -371,8 +372,11 @@ namespace PFF {
         else {
 
             VkExtent2D actualExtent = m_window_extent;
-            actualExtent.width = std::max(capabilities.minImageExtent.width, std::min(capabilities.maxImageExtent.width, actualExtent.width));
-            actualExtent.height = std::max(capabilities.minImageExtent.height, std::min(capabilities.maxImageExtent.height, actualExtent.height));
+            actualExtent.width = std::clamp(actualExtent.width, capabilities.minImageExtent.width, capabilities.maxImageExtent.width);
+            actualExtent.height = std::clamp(actualExtent.height, capabilities.minImageExtent.height, capabilities.maxImageExtent.height);
+
+            // actualExtent.width = std::max(capabilities.minImageExtent.width, std::min(capabilities.maxImageExtent.width, actualExtent.width));
+            // actualExtent.height = std::max(capabilities.minImageExtent.height, std::min(capabilities.maxImageExtent.height, actualExtent.height));
 
             return actualExtent;
         }

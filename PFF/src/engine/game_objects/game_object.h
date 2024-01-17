@@ -81,17 +81,14 @@ namespace PFF {
 	};
 
 	class game_object {
-
 	public:
 
 		DELETE_COPY(game_object);
 
-		FORCEINLINE u32 get_ID() const { return m_id; }
-
 		game_object(game_object&&) = default;
 		game_object& operator=(game_object&&) = default;
 
-
+		FORCEINLINE u32 get_ID() const { return m_id; }
 
 		// TODO: remove this 
 		static game_object create_game_object() {

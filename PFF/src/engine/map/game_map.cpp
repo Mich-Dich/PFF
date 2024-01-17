@@ -7,9 +7,13 @@ namespace PFF {
 
 
 	game_map::game_map() {
+
+		CORE_LOG(Info, "Init");
 	}
 
 	game_map::~game_map() {
+
+		CORE_LOG(Info, "Shutdown");
 	}
 
 	game_object* game_map::create_empty_game_object() {

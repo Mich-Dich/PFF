@@ -11,6 +11,8 @@ namespace PFF {
 	}
 
 	camera::~camera() {
+
+		CORE_LOG(Info, "Shutdown");
 	}
 
 	void camera::set_view_direction(glm::vec3 position, glm::vec3 direction, glm::vec3 up) {

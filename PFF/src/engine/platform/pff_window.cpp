@@ -26,18 +26,31 @@ namespace PFF {
 	pff_window::pff_window(window_attributes attributes) :
 		m_data(attributes) {
 		
-		init();
+		init(attributes);
 	}
 
 	pff_window::~pff_window() {
 
-		shutdown();
+		SAVE_CONFIG_STR(editor, m_data.title, "window_attributes", "title");
+		SAVE_CONFIG_NUM(editor, m_data.width, u32, "window_attributes", "width");
+		SAVE_CONFIG_NUM(editor, m_data.height, u32, "window_attributes", "height");
+		SAVE_CONFIG_BOOL(editor, m_data.vsync, "window_attributes", "vsync");
+
+		glfwDestroyWindow(m_Window);
+		glfwTerminate();
+		LOG(Info, "shutdown");
 	}
 
 	// ============================================================================== inplemantation ==============================================================================
 	
 
-	void pff_window::init() {
+	void pff_window::init(window_attributes attributes) {
+
+		config::load(config::file::editor, "window_attributes", "title", attributes.title);
+		config::load(config::file::editor, "window_attributes", "width", attributes.width);
+		config::load(config::file::editor, "window_attributes", "height", attributes.height);
+		config::load(config::file::editor, "window_attributes", "vsync", attributes.vsync);
+		m_data = attributes;
 
 		if (!s_GLFWinitialized) {
 
@@ -83,7 +96,6 @@ namespace PFF {
 		});
 
 		glfwSetWindowCloseCallback(m_Window, [](GLFWwindow* window) {
-
 			window_attributes& Data = *(window_attributes*)glfwGetWindowUserPointer(window);
 			window_close_event event;
 			Data.event_callback(event);
@@ -125,13 +137,6 @@ namespace PFF {
 		});
 
 		CORE_LOG(Info, "finished setup");
-	}
-
-	void pff_window::shutdown() {
-
-		LOG(Info, "Destroying pff_window");
-		glfwDestroyWindow(m_Window);
-		glfwTerminate();
 	}
 
 	void pff_window::update() {

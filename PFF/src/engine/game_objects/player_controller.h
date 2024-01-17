@@ -35,7 +35,6 @@ namespace PFF {
 			return mapping;
 		}
 
-
 		world_layer* m_world_layer{};
 	private:
 

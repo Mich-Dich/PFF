@@ -29,7 +29,7 @@ namespace PFF {
 
     vk_device::~vk_device() {
 
-        LOG(Info, "Destroying vk_device");
+        LOG(Info, "start shutdown");
         vkDestroyCommandPool(m_device, m_commandPool, nullptr);
         vkDestroyDevice(m_device, nullptr);
 
@@ -39,6 +39,9 @@ namespace PFF {
 
         vkDestroySurfaceKHR(m_VkInstance, m_surface, nullptr);
         vkDestroyInstance(m_VkInstance, nullptr);
+
+        m_window.reset();
+        LOG(Info, "shutdown");
     }
 
     // ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
