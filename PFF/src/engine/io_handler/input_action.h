@@ -15,10 +15,14 @@ namespace PFF {
 	#define INPUT_ACTION_TRIGGER_MOUSE_POS_AND_NEG		BIT(6)
 
 	#define INPUT_ACTION_MODEFIER_NEGATE				BIT(0)
-	#define INPUT_ACTION_MODEFIER_VEC2_NORMAL			BIT(1)
-	#define INPUT_ACTION_MODEFIER_VEC2_SECOND_AXIS		BIT(2)
-	#define INPUT_ACTION_MODEFIER_VEC3_SECOND_AXIS		BIT(3)
-	#define INPUT_ACTION_MODEFIER_AUTO_RESET			BIT(4)
+	#define INPUT_ACTION_MODEFIER_VEC_NORMAL			BIT(1)
+	#define INPUT_ACTION_MODEFIER_AXIS_1_NEGATIVE		BIT(2)
+	#define INPUT_ACTION_MODEFIER_AXIS_2				BIT(3)
+	#define INPUT_ACTION_MODEFIER_AXIS_2_NEGATIVE		BIT(4)
+	#define INPUT_ACTION_MODEFIER_AXIS_3				BIT(5)
+	#define INPUT_ACTION_MODEFIER_AXIS_3_NEGATIVE		BIT(6)
+	#define INPUT_ACTION_MODEFIER_AUTO_RESET			BIT(7)
+	#define INPUT_ACTION_MODEFIER_AUTO_RESET_ALL		BIT(8)
 
 	// !! CAUTION !! not implemented yet
 	#define INPUT_ACTION_MODEFIER_SMOOTH_INTERP			BIT(3)
@@ -38,12 +42,16 @@ namespace PFF {
 		key_code key{};
 		u16 trigger_flags{};
 		u16 modefier_flags{};
-		bool active = false;
+		int16 active{};
 
 		key_details() : key(key_code::key_unknown), trigger_flags(0), modefier_flags(0) {};
 		key_details(key_code key, u16 trigger_flags = 0, u16 modefier_flags = 0) 
 			: key(key), trigger_flags(trigger_flags), modefier_flags(modefier_flags) {};
 	};
+
+	#define INPUT_ACTION_BUFFER_NONE			0
+	#define INPUT_ACTION_BUFFER_POSITIVE		BIT(0)
+	#define INPUT_ACTION_BUFFER_NEGATIVE		BIT(1)
 
 	struct input_action {
 
@@ -58,6 +66,12 @@ namespace PFF {
 			glm::vec2 _2D;
 			glm::vec3 _3D{};
 		} data;
+		union {
+			bool boolean;
+			f32 _1D;
+			glm::vec2 _2D;
+			glm::vec3 _3D{};
+		} target;
 		std::chrono::time_point<std::chrono::high_resolution_clock> time_stamp{};
 		f32 duration_in_sec;
 		std::vector<key_details> keys;

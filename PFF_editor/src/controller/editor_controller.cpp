@@ -26,7 +26,7 @@ namespace PFF {
 
 		static f32 move_speed = 50.0f;
 		if (m_input_mapping->change_move_speed.data._1D != 0) 
-			move_speed = std::clamp(move_speed += (move_speed * 0.25f * m_input_mapping->change_move_speed.data._1D), 10.0f, 1000.0f);
+			move_speed = std::clamp(move_speed += (move_speed * 0.1f * m_input_mapping->change_move_speed.data._1D), 10.0f, 1000.0f);
 
 		float yaw = camera_direction.y;
 		const glm::vec3 forwardDir{ sin(-yaw), camera_direction.x, cos(yaw) };

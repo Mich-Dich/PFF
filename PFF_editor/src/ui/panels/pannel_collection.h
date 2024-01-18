@@ -32,13 +32,13 @@ namespace PFF {
 			ImGui::Text("%s", std::to_string(value).c_str());
 
 		else if constexpr (std::is_same_v<T, glm::vec2>)
-			ImGui::InputFloat2("", &value[0]);
+			ImGui::InputFloat2("", &value[0], "%.2f");
 
 		else if constexpr (std::is_same_v<T, glm::vec3>)
-			ImGui::InputFloat3("", &value[0]);
+			ImGui::InputFloat3("", &value[0], "%.2f");
 
 		else if constexpr (std::is_same_v<T, glm::vec4> || std::is_same_v<T, ImVec4>)
-			ImGui::InputFloat4("", &value[0] - 1, ImGuiInputTextFlags_None, ImGuiInputTextFlags_None, ImVec2(columnWidth, 0));
+			ImGui::InputFloat4("", &value[0] - 1, "%.2f", ImGuiInputTextFlags_None, ImVec2(columnWidth, 0));
 
 		ImGui::Columns(1);
 	}
