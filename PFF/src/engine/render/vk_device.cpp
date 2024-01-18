@@ -184,24 +184,46 @@ namespace PFF {
 
         uint32_t deviceCount = 0;
         vkEnumeratePhysicalDevices(m_VkInstance, &deviceCount, nullptr);
-        CORE_ASSERT(deviceCount != 0, "", "failed to find GPUs with Vulkan support!");
+        CORE_ASSERT(deviceCount > 0, "Num of GPUs supporting Vulkan: " << deviceCount, "No GPUs found suporting Vulkan");
 
-        LOG(Info, "Device count: " << deviceCount);
         std::vector<VkPhysicalDevice> devices(deviceCount);
         vkEnumeratePhysicalDevices(m_VkInstance, &deviceCount, devices.data());
 
+        std::multimap<int, VkPhysicalDevice> candidates;
+
+        for (int16 x = 0; x < devices.size(); x++) {
+
+            if (!is_device_suitable(devices[x])) {
+
+                CORE_LOG(Warn, "device [" << x << "] is NOT SUTABLE");
+                continue;
+            }
+
+            int score = rateDeviceSuitability(devices[x]);
+            candidates.insert(std::make_pair(score, devices[x]));
+            CORE_LOG(Trace, "device [" << x << "] has a Score of [" << score << "]");
+        }
+
+        if (candidates.rbegin()->first > 0) {
+            m_physical_device = candidates.rbegin()->second;
+            CORE_LOG(Debug, "Fount Device is sutable");
+        } else {
+            CORE_LOG(Error, "FAILED to find autable Device");
+        }
+        /*
         for (const auto& get_device : devices) {
             if (is_device_suitable(get_device)) {
                 m_physical_device = get_device;
                 break;
             }
         }
-
+        */
+        
         CORE_ASSERT(m_physical_device != VK_NULL_HANDLE, "", "failed to find a suitable GPU!");
-
         vkGetPhysicalDeviceProperties(m_physical_device, &properties);
         LOG(Info, "physical get_device: " << properties.deviceName);
     }
+
 
     void vk_device::create_logical_device() {
 
@@ -248,6 +270,7 @@ namespace PFF {
         vkGetDeviceQueue(m_device, indices.presentFamily, 0, &m_present_queue);
     }
 
+
     void vk_device::create_command_pool() {
 
         QueueFamilyIndices queueFamilyIndices = find_physical_queue_families();
@@ -260,7 +283,9 @@ namespace PFF {
         CORE_ASSERT(vkCreateCommandPool(m_device, &poolInfo, nullptr, &m_commandPool) == VK_SUCCESS, "", "failed to create command pool!");
     }
 
+
     void vk_device::create_surface() { m_window->create_window_surface(m_VkInstance, &m_surface); }
+
 
     bool vk_device::is_device_suitable(VkPhysicalDevice device) {
 
@@ -271,7 +296,7 @@ namespace PFF {
         bool swapChainAdequate = false;
         if (extensionsSupported) {
             SwapChainSupportDetails swapChainSupport = query_swapchain_support(device);
-            swapChainAdequate = !swapChainSupport.formats.empty() && !swapChainSupport.presentModes.empty();
+            swapChainAdequate = !swapChainSupport.formats.empty() && !swapChainSupport.presentModes.empty() && swapChainSupport.capabilities.minImageCount >= 2;
         }
 
         VkPhysicalDeviceFeatures supportedFeatures;
@@ -280,6 +305,31 @@ namespace PFF {
         return indices.isComplete() && extensionsSupported && swapChainAdequate &&
             supportedFeatures.samplerAnisotropy;
     }
+
+
+    int vk_device::rateDeviceSuitability(VkPhysicalDevice device) {
+
+        VkPhysicalDeviceProperties  deviceProps;
+        vkGetPhysicalDeviceProperties(device, &deviceProps);
+
+        VkPhysicalDeviceFeatures deviceFeatures;
+        vkGetPhysicalDeviceFeatures(device, &deviceFeatures);
+
+        // Application can't function without geometry shaders
+        CORE_VALIDATE(deviceFeatures.geometryShader, return 0, "", "device deosnt support [GeometryShader]")
+
+            int locScore = 0;
+        if (deviceProps.deviceType == VK_PHYSICAL_DEVICE_TYPE_DISCRETE_GPU)
+            locScore += 1000;
+
+        find_queue_families(device);
+
+        // Maximum possible size of textures affects graphics quality
+        locScore += deviceProps.limits.maxImageDimension2D;
+
+        return locScore;
+    }
+
 
     bool vk_device::check_validation_layer_support() {
 

@@ -22,7 +22,7 @@ namespace PFF {
 		move = PFF::input_action{};
 		move.description = "reposition the editor camera";
 		move.triger_when_paused = false;
-		capture_mouse.modefier_flags = 0;
+		capture_mouse.modefier_flags = INPUT_ACTION_MODEFIER_SMOOTH_INTERP;
 		move.value = PFF::input_value::_3D;
 		move.duration_in_sec = 0.5f;
 		move.keys = {
@@ -32,7 +32,7 @@ namespace PFF {
 			{key_code::key_D, INPUT_ACTION_TRIGGER_KEY_DOWN , INPUT_ACTION_MODEFIER_VEC2_SECOND_AXIS},
 			{key_code::key_space, INPUT_ACTION_TRIGGER_KEY_DOWN , INPUT_ACTION_MODEFIER_VEC3_SECOND_AXIS},
 			{key_code::key_left_shift, INPUT_ACTION_TRIGGER_KEY_DOWN , INPUT_ACTION_MODEFIER_VEC3_SECOND_AXIS | INPUT_ACTION_MODEFIER_NEGATE},
-		};
+		};								
 		REGISTER_INPUT_ACTION(move);
 
 
@@ -63,7 +63,7 @@ namespace PFF {
 		look = PFF::input_action{};
 		look.description = "change the direction of the editor camera";
 		look.triger_when_paused = false;
-		look.modefier_flags = INPUT_ACTION_MODEFIER_AUTO_RESET;
+		look.modefier_flags = INPUT_ACTION_MODEFIER_AUTO_RESET | INPUT_ACTION_MODEFIER_SMOOTH_INTERP;
 		look.value = PFF::input_value::_2D;
 		look.duration_in_sec = 0.5f;
 		look.keys = {

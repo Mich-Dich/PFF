@@ -38,19 +38,130 @@ namespace PFF {
 
 	void player_controller::update(f32 delta) {
 	}
+	/*
+	#define INPUT_ACTION_TRIGGER_KEY_DOWN				BIT(0)
+	#define INPUT_ACTION_TRIGGER_KEY_UP					BIT(1)
+	#define INPUT_ACTION_TRIGGER_KEY_HOLD				BIT(2)
+	#define INPUT_ACTION_TRIGGER_KEY_TAP				BIT(3)
 
+	#define INPUT_ACTION_TRIGGER_MOUSE_POSITIVE			BIT(4)
+	#define INPUT_ACTION_TRIGGER_MOUSE_NEGATIVE			BIT(5)
+	#define INPUT_ACTION_TRIGGER_MOUSE_POS_AND_NEG		BIT(6)
+
+	#define INPUT_ACTION_MODEFIER_NEGATE				BIT(0)
+	#define INPUT_ACTION_MODEFIER_VEC2_NORMAL			BIT(1)
+	#define INPUT_ACTION_MODEFIER_VEC2_SECOND_AXIS		BIT(2)
+	#define INPUT_ACTION_MODEFIER_VEC3_SECOND_AXIS		BIT(3)
+	#define INPUT_ACTION_MODEFIER_AUTO_RESET			BIT(4)
+	*/
 	void player_controller::update_internal(f32 delta) {
 
+		//CORE_LOG(Trace, event.get_keycode());
+		for (u32 x = 0; x < m_input_mapping->get_length(); x++) {
+			input_action* action = m_input_mapping->get_action(x);			// get input_action
 
-		for (u32 x = 0; x < m_input_mapping->get_length(); x++) {					// get input_action
-			input_action* action = m_input_mapping->get_action(x);
+			if (action->modefier_flags & INPUT_ACTION_MODEFIER_SMOOTH_INTERP) {
 
-			for (key_details key_details : action->keys) {							// get key in input_action				
-				if (key_details.modefier_flags & INPUT_ACTION_MODEFIER_SMOOTH_INTERP) {
-				
+			}
+
+			for (u32 x = 0; x < action->get_length(); x++) {	
+				key_details* key_details = action->get_key(x);				// get key
+
+				f32 buffer = (key_details->active) ? 1.f : 0.f;
+
+				// =============================================== modefiers ===============================================
+				if (key_details->modefier_flags & INPUT_ACTION_MODEFIER_NEGATE)
+					buffer *= -1.f;
+
+				if (key_details->modefier_flags & INPUT_ACTION_MODEFIER_SMOOTH_INTERP) {
+
+					//CORE_LOG(Info, "INPUT_ACTION_MODEFIER_SMOOTH_INTERP is not supported yet");
+				}
+
+				switch (action->value) {
+
+					// ==================================================================================================================================
+					case input_value::_bool: {
+
+						action->data.boolean = (buffer >= 0.f);
+					} break;
+
+					// ==================================================================================================================================
+					case input_value::_1D: {
+
+						action->data._1D += buffer;
+					} break;
+
+					// ==================================================================================================================================
+					case input_value::_2D: {
+
+						if (key_details->modefier_flags & INPUT_ACTION_MODEFIER_VEC2_SECOND_AXIS)
+							action->data._2D.y += buffer;
+						else
+							action->data._2D.x += buffer;
+					} break;
+
+					// ==================================================================================================================================
+					case input_value::_3D: {
+
+						if (key_details->modefier_flags & INPUT_ACTION_MODEFIER_VEC2_SECOND_AXIS)
+							action->data._3D.x = std::clamp(action->data._3D.y += buffer, -1.f, 1.f);
+						else if (key_details->modefier_flags & INPUT_ACTION_MODEFIER_VEC3_SECOND_AXIS)
+							action->data._3D.z += buffer;
+						else
+							action->data._3D.x += buffer;
+					} break;
+
+					default:
+						break;
 				}
 			}
 		}
+
+		/*
+		// =============================================== case spacific saving of data ===============================================
+		if (action->value == input_value::_1D) {
+
+			action->data._1D = buffer;
+			// CORE_LOG(Info, "action value: " << action->data.axis_1d);
+		}
+
+		else if (action->value == input_value::_2D) {
+
+			if (key_details->modefier_flags & INPUT_ACTION_MODEFIER_VEC2_SECOND_AXIS)
+				m_input_mapping->get_action(x)->data._2D.y = buffer;
+			else
+				m_input_mapping->get_action(x)->data._2D.x = buffer;
+
+			// CORE_LOG(Info, "action value: [X: " << action->data.axis_2d.x << " Y: " << action->data.axis_2d.y << "]");
+			// CORE_LOG(Info, "action value: [X: " << m_input_mapping->get_action(x)->data.axis_2d.x << " Y: " << m_input_mapping->get_action(x)->data.axis_2d.y << "]");
+		}
+
+		else if (action->value == input_value::_3D) {
+
+			if (key_details->modefier_flags & INPUT_ACTION_MODEFIER_VEC2_SECOND_AXIS)
+				action->data._3D.y = buffer;
+			else if (key_details->modefier_flags & INPUT_ACTION_MODEFIER_VEC3_SECOND_AXIS)
+				action->data._3D.z = buffer;
+			else
+				action->data._3D.x = buffer;
+
+			//CORE_LOG(Info, "action value: [X: " << action->data.axis_2d.x << " Y: " << action->data.axis_2d.y << "]");
+		}
+		*/
+
+
+
+
+
+
+
+
+
+
+
+
+
 		
 		update(delta);
 
@@ -102,114 +213,39 @@ namespace PFF {
 		
 		//CORE_LOG(Trace, event.get_keycode());
 		for (u32 x = 0; x < m_input_mapping->get_length(); x++) {			// get input_action
-
 			input_action* action = m_input_mapping->get_action(x);
 
-			for (key_details key_details : action->keys) {				// get key in input_action
-				if (key_details.key == event.get_keycode()) {					// check if I have an event for that key
+			for (u32 x = 0; x < action->get_length(); x++) {			// get input_action
+				key_details* key_details = action->get_key(x);
+
+				if (key_details->key == event.get_keycode()) {				// check if I have an event for that key
+
 
 					std::chrono::time_point<std::chrono::high_resolution_clock> time_now = std::chrono::high_resolution_clock::now();
-					switch (action->value) {
+					bool buffer = false;
 
-						// ================================================================= bool =================================================================
-						case input_value::_bool: {
+					//LOG(Debug, "Test");
+					// =============================================== triggers ===============================================
+					if (key_details->trigger_flags & INPUT_ACTION_TRIGGER_KEY_DOWN)
+						buffer = (event.m_key_state == key_state::press);
 
-							bool buffer = false;
+					if (key_details->trigger_flags & INPUT_ACTION_TRIGGER_KEY_UP)
+						buffer = (event.m_key_state == key_state::release);
 
-							//LOG(Debug, "Test");
-							// =============================================== triggers ===============================================
-							if (key_details.trigger_flags & INPUT_ACTION_TRIGGER_KEY_DOWN)
-								buffer = (event.m_key_state == key_state::press);
+					if (key_details->trigger_flags & INPUT_ACTION_TRIGGER_KEY_HOLD)
+						buffer = (event.m_key_state == key_state::repeat);
 
-							if (key_details.trigger_flags & INPUT_ACTION_TRIGGER_KEY_UP)
-								buffer = (event.m_key_state == key_state::release);
+					if (key_details->trigger_flags & INPUT_ACTION_TRIGGER_KEY_TAP) {
 
-							if (key_details.trigger_flags & INPUT_ACTION_TRIGGER_KEY_HOLD)
-								buffer = (event.m_key_state == key_state::repeat);
-
-							if (key_details.trigger_flags & INPUT_ACTION_TRIGGER_KEY_TAP) {
-
-
-								action->time_stamp = time_now;
-							}
-
-							// =============================================== modefiers ===============================================
-							if (key_details.modefier_flags & INPUT_ACTION_MODEFIER_NEGATE)
-								buffer = !buffer;
-
-							m_input_mapping->get_action(x)->data.boolean = buffer;
-							//CORE_LOG(Info, "action value: " << bool_to_str(m_input_mapping->get_action(x)->data.boolean) << " key state: " << static_cast<int>(event.m_key_state));
-
-						} break;
-
-						// ================================================================= float & vec2 =================================================================
-						case input_value::_1D:
-						case input_value::_2D:
-						case input_value::_3D: {
-
-							f32 buffer{};
-
-							// =============================================== triggers ===============================================
-							if (key_details.trigger_flags & INPUT_ACTION_TRIGGER_KEY_DOWN)
-								buffer = (event.m_key_state != key_state::release) ? 1.0f : 0.0f;
-
-							if (key_details.trigger_flags & INPUT_ACTION_TRIGGER_KEY_UP)
-								buffer = (event.m_key_state == key_state::release) ? 1.0f : 0.0f;
-
-							if (key_details.trigger_flags & INPUT_ACTION_TRIGGER_KEY_HOLD)
-								buffer = (event.m_key_state == key_state::repeat) ? 1.0f : 0.0f;
-								
-							if (key_details.trigger_flags & INPUT_ACTION_TRIGGER_KEY_TAP) {
-
-								// UNFINISHED
-								buffer = (event.m_key_state == key_state::press) ? 1.0f : 0.0f;
-							}
-
-							// =============================================== modefiers ===============================================
-							if (key_details.modefier_flags & INPUT_ACTION_MODEFIER_NEGATE)
-								buffer *= -1.0f;
-
-							if (key_details.modefier_flags & INPUT_ACTION_MODEFIER_SMOOTH_INTERP) {
-
-								// CORE_LOG(Info, "INPUT_ACTION_MODEFIER_SMOOTH_INTERP is not supported yet");
-							}
-
-
-							// =============================================== case spacific saving of data ===============================================
-							if (action->value == input_value::_1D) {
-
-								action->data._1D = buffer;
-								// CORE_LOG(Info, "action value: " << action->data.axis_1d);
-							}
-
-							else if (action->value == input_value::_2D) {
-
-								if (key_details.modefier_flags & INPUT_ACTION_MODEFIER_VEC2_SECOND_AXIS)
-									m_input_mapping->get_action(x)->data._2D.y = buffer;
-								else
-									m_input_mapping->get_action(x)->data._2D.x = buffer;
-
-								// CORE_LOG(Info, "action value: [X: " << action->data.axis_2d.x << " Y: " << action->data.axis_2d.y << "]");
-								// CORE_LOG(Info, "action value: [X: " << m_input_mapping->get_action(x)->data.axis_2d.x << " Y: " << m_input_mapping->get_action(x)->data.axis_2d.y << "]");
-							}
-
-							else if (action->value == input_value::_3D) {
-
-								if (key_details.modefier_flags & INPUT_ACTION_MODEFIER_VEC2_SECOND_AXIS)
-									action->data._3D.y = buffer;
-								else if (key_details.modefier_flags & INPUT_ACTION_MODEFIER_VEC3_SECOND_AXIS)
-									action->data._3D.z = buffer;
-								else
-									action->data._3D.x = buffer;
-
-								//CORE_LOG(Info, "action value: [X: " << action->data.axis_2d.x << " Y: " << action->data.axis_2d.y << "]");
-							}
-
-						} break;
-
-						default:
-							break;
+						CORE_LOG(Warn, "INPUT_ACTION_TRIGGER_KEY_TAP - not implemented yet")
+						action->time_stamp = time_now;
 					}
+
+					// =============================================== modefiers ===============================================
+					if (key_details->modefier_flags & INPUT_ACTION_MODEFIER_NEGATE)
+						buffer = !buffer;
+
+					key_details->active = buffer;
 				}
 			}
 		}

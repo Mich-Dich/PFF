@@ -6,8 +6,16 @@
 //@brief Registers an input_action and loades/updates its values from input.ini if the player has made modifications to the corresponding values.
 // 		This ensures that the default values are retained unless the player explicitly changes them.
 //@param [action] Reference to the input_action struct to be registered and configured.
+
+
+#if defined(PFF_INSIDE_EDITOR)							
+#define FORCE_OVERRIDE true
+#else 										
+#define FORCE_OVERRIDE false
+#endif						
+
 #define REGISTER_INPUT_ACTION(action)	action.name = #action;								\
-										register_action(&action);
+										register_action(&action, FORCE_OVERRIDE);
 
 namespace PFF {
 
@@ -27,7 +35,7 @@ namespace PFF {
 		// 		This ensures that the default values are retained unless the player explicitly changes them.
 		//@param [name] The name of the input action.
 		//@param [action] Reference to the input_action struct to be registered and configured.
-		void register_action(input_action* action);
+		void register_action(input_action* action, bool force_override);
 
 		std::vector<input_action*>::iterator begin() { return m_actions.begin(); }
 		std::vector<input_action*>::iterator end() { return m_actions.end(); }

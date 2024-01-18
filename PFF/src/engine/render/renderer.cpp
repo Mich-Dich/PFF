@@ -24,7 +24,7 @@ namespace PFF {
 		m_device = std::make_shared<vk_device>(m_window);
 		recreate_swapchian();
 		create_command_buffer();
-		state = system_state::active;
+		m_state = system_state::suspended;
 		CORE_LOG(Trace, "render started");
 
 		// Create Descriptor Pool (ImGui_ImplVulkan_Init)
@@ -53,6 +53,7 @@ namespace PFF {
 
 	renderer::~renderer() {
 
+		m_state = system_state::inactive;
 		m_window.reset();
 		m_render_system.reset();
 
@@ -75,7 +76,7 @@ namespace PFF {
 	//
 	void renderer::draw_frame(f32 delta_time) {
 		
-		if (state == system_state::active) {
+		if (m_state == system_state::active) {
 
 			if (auto commandbuffer = begin_frame()) {
 
@@ -108,11 +109,11 @@ namespace PFF {
 
 		if (width > 0 && height > 0) {
 
-			state = system_state::active;
+			m_state = system_state::active;
 			vkDeviceWaitIdle(m_device->get_device());
 			recreate_swapchian();
 		} else {
-			state = system_state::inactive;
+			m_state = system_state::inactive;
 		}
 	}
 

@@ -34,6 +34,9 @@ namespace PFF {
 		FORCEINLINE void close_application() { m_running = false; }
 		FORCEINLINE /*USE_IN_EDITOR*/ void push_overlay(layer* overlay) { m_layerstack.push_overlay(overlay); }
 
+		FORCEINLINE void capture_cursor();
+		FORCEINLINE void release_cursor();
+
 		void run();
 		virtual bool init();								// to be used by client
 		virtual bool update(f32 delta_time);				// potentally make private - every actor has own function (like UNREAL)

@@ -16,20 +16,23 @@ namespace PFF {
 	struct window_attributes {
 
 		std::string title;
-		u32 width;
-		u32 height;
+		u32 pos_x{};
+		u32 pos_y{};
+		u32 width{};
+		u32 height{};
 		f64 cursor_pos_x{};
 		f64 cursor_pos_y{};
-		bool vsync;
+		bool vsync{};
+
 		EventCallbackFn event_callback;
 
-		window_attributes(const std::string title = "PFF - Sandbox", const u32 width = 800, const  u32 height = 600, const  bool vsync = false, const EventCallbackFn& callback = nullptr)
+		window_attributes(const std::string title = "PFF - Editor", const u32 width = 800, const  u32 height = 600, const  bool vsync = false, const EventCallbackFn& callback = nullptr)
 			: title(title), width(width), height(height), vsync(vsync), event_callback(callback){}
 	};
 
 	class pff_window {
-
 	public:
+
 		using EventCallbackFn = std::function<void(event&)>;
 
 		pff_window(window_attributes attributes = window_attributes());
@@ -50,6 +53,8 @@ namespace PFF {
 		VkExtent2D get_extend();
 		bool should_close();
 		void update();
+		void capture_cursor();
+		void release_cursor();
 		
 	private:
 		

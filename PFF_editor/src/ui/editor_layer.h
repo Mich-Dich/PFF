@@ -28,7 +28,6 @@ namespace PFF {
 
 		void display_value_bool(bool value);
 		void display_value_num(f32 value);
-		void display_value_vec(glm::vec2 value);
 
 		void set_next_window_pos(int16 location);
 		void progressbar_with_text(f32 percent, const char* text, f32 min_size_x = 0.0f, f32 min_size_y = 0.0f);

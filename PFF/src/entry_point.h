@@ -18,14 +18,14 @@ int main() {
 
 
 /*
-
 ToDo:
 
+	- add event to input action (maybe func pointer)
 	- create level editor
 	- add input smoothing
 	- add lighting capability
 	- add modle import
 	- add texture import
-
+	- fix delta-time
 
 */

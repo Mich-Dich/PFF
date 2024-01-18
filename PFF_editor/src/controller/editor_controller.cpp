@@ -2,6 +2,8 @@
 //#include <util/pffpch.h>
 #include <engine/Events/Event.h>
 
+#include "application.h"
+
 #include "editor_inputs.h"
 #include "editor_controller.h"
 #include "engine/layer/world_layer.h"
@@ -36,9 +38,11 @@ namespace PFF {
 
 		if (m_input_mapping->capture_mouse.data.boolean) {
 
+			application::get().capture_cursor();
 			camera_direction.y += m_input_mapping->look.data._2D.x * 0.1f * delta;
 			camera_direction.x += m_input_mapping->look.data._2D.y * 0.1f * delta;
-		}
+		} else
+			application::get().release_cursor();
 
 		//LOG(Trace, vec_to_str(camera_direction, "dir") << vec_to_str(camera_pos, "pos") << vec_to_str(m_input_mapping->move.data._3D, "input"));
 		m_world_layer->get_editor_camera()->set_view_XYZ(camera_pos, camera_direction);

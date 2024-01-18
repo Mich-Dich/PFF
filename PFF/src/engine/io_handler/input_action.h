@@ -35,9 +35,10 @@ namespace PFF {
 	};
 
 	struct key_details {
-		key_code key;
-		u16 trigger_flags;
-		u16 modefier_flags;
+		key_code key{};
+		u16 trigger_flags{};
+		u16 modefier_flags{};
+		bool active = false;
 
 		key_details() : key(key_code::key_unknown), trigger_flags(0), modefier_flags(0) {};
 		key_details(key_code key, u16 trigger_flags = 0, u16 modefier_flags = 0) 
@@ -63,6 +64,9 @@ namespace PFF {
 
 		input_action(bool triger_when_paused = false, u16 modefier_flags = 0, input_value value = input_value::_bool, f32 duration_in_sec = 0.0f, std::vector<key_details> keys = {})
 			: triger_when_paused(triger_when_paused), modefier_flags(modefier_flags), value(value), duration_in_sec(duration_in_sec), keys(keys) {}
+
+		const size_t get_length() const { return keys.size(); }
+		key_details* get_key(u32 index) { return &keys[index]; }
 
 		template <typename T>
 		FORCEINLINE T get_data() const {

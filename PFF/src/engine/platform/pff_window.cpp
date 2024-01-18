@@ -31,7 +31,11 @@ namespace PFF {
 
 	pff_window::~pff_window() {
 
+		int pos_x, pos_y;
+		glfwGetWindowPos(m_Window, &pos_x, &pos_y);
 		config::save(config::file::editor, "window_attributes", "title", m_data.title);
+		//config::save(config::file::editor, "window_attributes", "pos_x", pos_x);
+		//config::save(config::file::editor, "window_attributes", "pos_y", pos_y);
 		config::save(config::file::editor, "window_attributes", "width", m_data.width);
 		config::save(config::file::editor, "window_attributes", "height", m_data.height);
 		config::save(config::file::editor, "window_attributes", "vsync", m_data.vsync);
@@ -47,6 +51,8 @@ namespace PFF {
 	void pff_window::init(window_attributes attributes) {
 
 		config::load(config::file::editor, "window_attributes", "title", attributes.title);
+		//config::load(config::file::editor, "window_attributes", "pos_x", attributes.pos_x);
+		//config::load(config::file::editor, "window_attributes", "pos_y", attributes.pos_y);
 		config::load(config::file::editor, "window_attributes", "width", attributes.width);
 		config::load(config::file::editor, "window_attributes", "height", attributes.height);
 		config::load(config::file::editor, "window_attributes", "vsync", attributes.vsync);
@@ -69,6 +75,10 @@ namespace PFF {
 		glfwSetWindowUserPointer(m_Window, &m_data);
 		glfwGetCursorPos(m_Window, &m_data.cursor_pos_x, &m_data.cursor_pos_y);
 		set_vsync(m_data.vsync);
+
+		GLFWmonitor* primary = glfwGetPrimaryMonitor();
+		const GLFWvidmode* mode = glfwGetVideoMode(primary);
+		//glfwSetWindowMonitor(m_Window, NULL, m_data.pos_x, m_data.pos_y, m_data.width, m_data.height-30, mode->refreshRate);
 
 		CORE_LOG(Info, "bind event callbacks");
 
@@ -142,6 +152,16 @@ namespace PFF {
 	void pff_window::update() {
 
 		glfwPollEvents();
+	}
+
+	void pff_window::capture_cursor() {
+
+		glfwSetInputMode(m_Window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
+	}
+
+	void pff_window::release_cursor() {
+
+		glfwSetInputMode(m_Window, GLFW_CURSOR, GLFW_CURSOR_NORMAL);
 	}
 
 	void pff_window::set_vsync(bool enable) {

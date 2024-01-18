@@ -13,6 +13,9 @@
     <Filter Include="src\ui">
       <UniqueIdentifier>{7A4F661C-66F1-90F2-4FAC-A4463BED1743}</UniqueIdentifier>
     </Filter>
+    <Filter Include="src\ui\panels">
+      <UniqueIdentifier>{AC260384-18E7-7EBA-E121-C8374DA1C396}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="src\controller\editor_controller.h">
@@ -23,6 +26,9 @@
     </ClInclude>
     <ClInclude Include="src\ui\editor_layer.h">
       <Filter>src\ui</Filter>
+    </ClInclude>
+    <ClInclude Include="src\ui\panels\pannel_collection.h">
+      <Filter>src\ui\panels</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

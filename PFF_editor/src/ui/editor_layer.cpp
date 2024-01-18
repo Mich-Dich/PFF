@@ -2,6 +2,11 @@
 #include <imgui.h>
 #include <imgui_impl_glfw.h>
 #include <imgui_impl_vulkan.h>
+#include <imgui_internal.h>
+#include <glm/glm.hpp>
+
+
+#include "ui/panels/pannel_collection.h"
 
 #include "util/pffpch.h"
 #include "editor_layer.h"
@@ -76,6 +81,31 @@ namespace PFF {
 			ImGui::EndMainMenuBar();
 		}
 	}
+	void DrawVerticalSeparator(float thickness, ImVec4 color) {
+		ImGuiWindow* window = ImGui::GetCurrentWindow();
+		ImDrawList* draw_list = window->DrawList;
+
+		ImVec2 window_pos = window->DC.CursorPos;
+		ImVec2 content_max = ImGui::GetWindowContentRegionMax();
+
+		draw_list->AddLine(
+			ImVec2(window_pos.x + content_max.x, window_pos.y),
+			ImVec2(window_pos.x + content_max.x, window_pos.y + content_max.y),
+			IM_COL32(color.x * 255, color.y * 255, color.z * 255, color.w * 255),
+			thickness
+		);
+	}
+
+	void DrawTwoTextsWithVerticalSeparator(const char* text1, const char* text2) {
+		// Draw the first text
+		ImGui::Text("%s", text1);
+
+		// Draw a vertical separator
+		DrawVerticalSeparator(2.0f, ImVec4(1.0f, 1.0f, 1.0f, 1.0f));
+
+		// Draw the second text
+		ImGui::Text("%s", text2);
+	}
 
 	void editor_layer::general_debugger() {
 
@@ -90,34 +120,32 @@ namespace PFF {
 				
 				for (input_action* action : *application::get().get_world_layer()->get_current_player_controller()->get_input_mapping()) {						// get input_action
 					
-					if (ImGui::CollapsingHeader(action->name.c_str())) {
+					switch (action->value) {
 
-						ImGui::Text("%s", action->description.c_str());
-						switch (action->value) {
-						
-							case input_value::_bool: {
+						case input_value::_bool: {
 
-								display_value_bool(action->data.boolean);
-							} break;
-						
-							case input_value::_1D: {
+							display_colum(action->name, action->data.boolean);
+						} break;
 
-								display_value_num(action->data._1D);
-							} break;
-						
-							case input_value::_2D: {
+						case input_value::_1D: {
 
-								display_value_vec(action->data._2D);
-							} break;
+							display_colum(action->name, action->data._1D);
+						} break;
 
-							case input_value::_3D:{
+						case input_value::_2D: {
 
-								display_value_vec(action->data._3D);
-							} break;
-							default:
-								break;
-						}
+							display_colum(action->name, action->data._2D);
+						} break;
+
+						case input_value::_3D: {
+
+							display_colum(action->name, action->data._3D);
+						} break;
+
+						default:
+							break;
 					}
+
 				}
 
 				ImGui::EndTabItem();
@@ -142,8 +170,6 @@ namespace PFF {
 	void editor_layer::display_value_num(f32 value) {
 	}
 
-	void editor_layer::display_value_vec(glm::vec2 value) {
-	}
 
 	void editor_layer::set_next_window_pos(int16 location) {
 	}

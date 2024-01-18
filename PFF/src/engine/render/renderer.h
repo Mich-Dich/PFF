@@ -24,7 +24,7 @@ namespace PFF {
 		FORCEINLINE u32 get_swapchain_image_count() const { return m_swapchain->get_image_count(); }
 		FORCEINLINE float get_aspect_ratio() const { return m_swapchain->get_extentAspectRatio(); }
 		FORCEINLINE VkFramebuffer get_image_view() const { return m_swapchain->getFrameBuffer(m_current_image_index); }
-
+		FORCEINLINE void set_state(system_state state) { CORE_LOG(Debug, "setting renderer state");  m_state = state; }
 		FORCEINLINE u32 get_render_system_pipeline_subpass() const { return m_render_system->get_pipeline_subpass(); }
 		FORCEINLINE VkCommandBuffer get_current_command_buffer() const {	CORE_ASSERT(m_is_frame_started, "", "Cant get command buffer when frame not in progress");
 																			return m_command_buffers[m_current_image_index]; }
@@ -47,7 +47,7 @@ namespace PFF {
 		void free_command_buffers();
 		void recreate_swapchian();
 
-		system_state state;
+		system_state m_state;
 		bool needs_to_resize;
 		u32 m_current_image_index;
 		bool m_is_frame_started = false;

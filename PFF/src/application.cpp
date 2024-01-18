@@ -56,6 +56,7 @@ namespace PFF {
 		m_imgui_layer = new imgui_layer(m_renderer);
 		m_layerstack.push_overlay(m_imgui_layer);
 
+		m_renderer->set_state(system_state::active);
 		init();					// init user code / potentally make every actor have own function (like UNREAL)
 	}
 
@@ -78,6 +79,11 @@ namespace PFF {
 	}
 
 	// ==================================================================== main loop ====================================================================
+
+	void application::capture_cursor() { m_window->capture_cursor(); }
+
+	void application::release_cursor() { m_window->release_cursor(); }
+
 
 	void application::run() {
 

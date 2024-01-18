@@ -81,6 +81,7 @@ namespace PFF {
 
         // helper functions
         bool is_device_suitable(VkPhysicalDevice get_device);
+        int rateDeviceSuitability(VkPhysicalDevice device);
         std::vector<const char*> get_required_extensions();
         bool check_validation_layer_support();
         QueueFamilyIndices find_queue_families(VkPhysicalDevice get_device);
