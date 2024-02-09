@@ -26,13 +26,13 @@ namespace PFF {
 		target_duration = std::chrono::duration<f64>(1.0 / target_fps);
 	}
 
-	void timer::limit_fps(u32& fps, f32& m_delta_time, f64& work_time, f64& sleep_time) {
+	void timer::limit_fps(const bool limit,  u32& fps, f32& m_delta_time, f64& work_time, f64& sleep_time) {
 
 		m_end_time = std::chrono::high_resolution_clock::now();
 		std::chrono::duration<f64> elapsed_time = m_end_time - m_start_time;
 		work_time = elapsed_time.count();
 
-		if (target_duration > elapsed_time) {
+		if (target_duration > elapsed_time && limit) {
 
 			sleep_duration = (target_duration - elapsed_time);
 			std::this_thread::sleep_for(sleep_duration);

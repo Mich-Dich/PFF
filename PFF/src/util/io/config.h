@@ -7,9 +7,8 @@ struct ImVec4;
 namespace PFF {
 
 #define BUILD_CONFIG_PATH(x)	CONFIG_DIR + config::file_type_to_string(x) + FILE_EXTENSION_CONFIG
-	
-	namespace config {
 
+	namespace config {
 
 		enum class file {
 			ui,
@@ -47,40 +46,40 @@ namespace PFF {
 		template <typename T>
 		void access(const file config_file, const std::string& section, const std::string& key, T& value, bool override) {
 
-			std::string buffer = "";
+			std::string m_buffer = "";
 			if constexpr (std::is_arithmetic_v<T>)
-				buffer = std::to_string(value);
+				m_buffer = std::to_string(value);
 			
 			else if constexpr (std::is_same_v<T, bool>)
-				buffer = bool_to_str(value);
+				m_buffer = bool_to_str(value);
 
 			else if constexpr (std::is_convertible_v<T, std::string>)
-				buffer = value;
+				m_buffer = value;
 
 			else if constexpr (std::is_same_v<T, glm::vec4> || std::is_same_v<T, ImVec4>) {
 
 				std::ostringstream oss;
 				oss << value.x << ' ' << value.y << ' ' << value.z << ' ' << value.w;
-				buffer = oss.str();
+				m_buffer = oss.str();
 			}
 
 			else
 				CORE_ASSERT(0 == 1, "", "Input value is not supported");
 
-			PFF::config::check_for_configuration(config_file, section, key, buffer, false);
+			check_for_configuration(config_file, section, key, m_buffer, override);
 
 			if constexpr (std::is_arithmetic_v<T>)
-				value = str_to_num<T>(buffer);
+				value = str_to_num<T>(m_buffer);
 
 			else if constexpr (std::is_same_v<T, bool>)
-				value = str_to_bool(buffer);
+				value = str_to_bool(m_buffer);
 
 			else if constexpr (std::is_convertible_v<T, std::string>)
-				value = buffer;
+				value = m_buffer;
 
 			else if constexpr (std::is_same_v<T, glm::vec4> || std::is_same_v<T, ImVec4>) {
 
-				std::istringstream iss(buffer);
+				std::istringstream iss(m_buffer);
 				iss >> value.x >> value.y >> value.z >> value.w;
 			}
 

@@ -26,8 +26,9 @@
 namespace PFF {
 
 	struct simple_push_constant_data {
+
 		glm::mat4 transform{ 1.0f };
-		alignas(16) glm::vec3 color;
+		glm::mat4 normal_matrix{ 1.0f };
 	};
 
 
@@ -50,11 +51,11 @@ namespace PFF {
 		LOG(Info, "shutdown");
 	}
 
-	void render_system::render_game_objects(f32 delta_time, VkCommandBuffer command_buffer, std::vector<game_object>& game_objects, const camera& camera) {
+	void render_system::render_game_objects(frame_info frame_info, std::vector<game_object>& game_objects) {
 
-		m_vk_pipeline->bind_commnad_buffers(command_buffer);
+		m_vk_pipeline->bind_commnad_buffers(frame_info.command_buffer);
 
-		auto projection_view = camera.get_projection() * camera.get_view();
+		auto projection_view = frame_info.camera->get_projection() * frame_info.camera->get_view();
 
 		/*for (int i = 0; i < 4; ++i) {
 			for (int j = 0; j < 4; ++j) {
@@ -66,13 +67,14 @@ namespace PFF {
 		for (auto& obj : game_objects) {
 			
 			simple_push_constant_data PCD{};
-			PCD.color = obj.color;
-			PCD.transform = projection_view * obj.transform.mat4_XYZ();
+			auto modle_matrix = obj.transform.mat4();
+			PCD.transform = projection_view * modle_matrix;
+			PCD.normal_matrix = obj.transform.normal_matrix();
 
-			vkCmdPushConstants(command_buffer, m_pipeline_layout, VK_SHADER_STAGE_VERTEX_BIT | VK_SHADER_STAGE_FRAGMENT_BIT, 0, sizeof(simple_push_constant_data), &PCD);
+			vkCmdPushConstants(frame_info.command_buffer, m_pipeline_layout, VK_SHADER_STAGE_VERTEX_BIT | VK_SHADER_STAGE_FRAGMENT_BIT, 0, sizeof(simple_push_constant_data), &PCD);
 
-			obj.mesh->bind(command_buffer);
-			obj.mesh->draw(command_buffer);
+			obj.mesh->bind(frame_info.command_buffer);
+			obj.mesh->draw(frame_info.command_buffer);
 		}
 	}
 

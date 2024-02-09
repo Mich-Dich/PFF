@@ -15,7 +15,7 @@ namespace PFF {
 		void end_measurement(u32& fps, f32& delta_time, f64& work_time, f64& sleep_time);
 
 		void set_fps_settings(u32 target_fps);
-		void limit_fps(u32& fps, f32& m_delta_time, f64& work_time, f64& sleep_time);
+		void limit_fps(const bool limit, u32& fps, f32& m_delta_time, f64& work_time, f64& sleep_time);
 
 	private:
 

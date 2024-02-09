@@ -11,3 +11,7 @@
 #include "engine/Events/Event.h"
 #include "engine/game_objects/player_controller.h"
 #include "engine/layer/layer_stack.h"
+
+#include "engine/geometry/basic_mesh.h"
+#include "engine/geometry/dynamic_mesh.h"
+#include "engine/geometry/static_mesh.h"

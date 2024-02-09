@@ -15,6 +15,7 @@
 
 #include "engine/platform/pff_window.h"
 #include "engine/render/renderer.h"
+#include "engine/render/vk_buffer.h"
 #include "engine/map/game_map.h"
 
 // DEV-ONLY:
@@ -56,6 +57,7 @@ namespace PFF {
 		m_imgui_layer = new imgui_layer(m_renderer);
 		m_layerstack.push_overlay(m_imgui_layer);
 
+		m_renderer->set_world_Layer(m_world_layer);
 		m_renderer->set_state(system_state::active);
 		init();					// init user code / potentally make every actor have own function (like UNREAL)
 	}
@@ -102,7 +104,7 @@ namespace PFF {
 			m_renderer->draw_frame(m_delta_time);
 
 			// Simple FPS controller - needs work
-			fps_timer->limit_fps(m_fps, m_delta_time, m_work_time, m_sleep_time);
+			fps_timer->limit_fps(m_limit_fps, m_fps, m_delta_time, m_work_time, m_sleep_time);
 		}
 
 		m_renderer->wait_Idle();
@@ -140,6 +142,12 @@ namespace PFF {
 	bool application::on_window_resize(window_resize_event& event) {
 
 		m_renderer->set_size(event.get_width(), event.get_height());
+
+		// m_camera.set_orthographic_projection(-aspect, aspect, -1, 1, 0, 10);
+		// m_camera.set_view_YXZ(glm::vec3(-1.0f, -2.0f, -3.0f), glm::vec3(0.0f));
+		// m_camera.set_view_direction(glm::vec3{ 0.0f }, glm::vec3{ 0.5f, 0.0f, 1.0f });
+		m_world_layer->get_editor_camera()->set_aspect_ratio(m_renderer->get_aspect_ratio());
+
 		return true;
 	}
 

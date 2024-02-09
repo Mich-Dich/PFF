@@ -6,6 +6,7 @@
 #include "engine/platform/pff_window.h"
 #include "engine/layer/layer_stack.h"
 #include "engine/map/game_map.h"
+#include "engine/layer/world_layer.h"
 
 namespace PFF {
 
@@ -17,6 +18,7 @@ namespace PFF {
 
 		DELETE_COPY(renderer);
 
+		FORCEINLINE void set_world_Layer(world_layer* worldlayer) { m_world_Layer = worldlayer; }
 		FORCEINLINE bool is_frame_started() const { return m_is_frame_started; }
 		FORCEINLINE std::shared_ptr<vk_device> get_device() const { return m_device; }
 		FORCEINLINE VkDescriptorPool get_imgui_descriptor_pool() const { return m_imgui_descriptor_pool; }
@@ -26,8 +28,11 @@ namespace PFF {
 		FORCEINLINE VkFramebuffer get_image_view() const { return m_swapchain->getFrameBuffer(m_current_image_index); }
 		FORCEINLINE void set_state(system_state state) { CORE_LOG(Debug, "setting renderer state");  m_state = state; }
 		FORCEINLINE u32 get_render_system_pipeline_subpass() const { return m_render_system->get_pipeline_subpass(); }
+
 		FORCEINLINE VkCommandBuffer get_current_command_buffer() const {	CORE_ASSERT(m_is_frame_started, "", "Cant get command buffer when frame not in progress");
 																			return m_command_buffers[m_current_image_index]; }
+		FORCEINLINE u32 get_frame_index() const {	CORE_ASSERT(m_is_frame_started, "", "Cant get command buffer when frame not in progress");
+													return m_current_image_index; }
 
 		void add_render_system(std::shared_ptr<vk_device> device, VkRenderPass renderPass);
 		void draw_frame(f32 delta_time);
@@ -51,6 +56,10 @@ namespace PFF {
 		bool needs_to_resize;
 		u32 m_current_image_index;
 		bool m_is_frame_started = false;
+
+		std::vector<std::unique_ptr<vk_buffer>> m_global_UBO_buffer{};
+
+		world_layer* m_world_Layer;// *application::get().get_world_layer();
 
 		std::shared_ptr<pff_window> m_window;
 		std::shared_ptr<vk_device> m_device;

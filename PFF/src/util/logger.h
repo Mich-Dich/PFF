@@ -190,6 +190,12 @@ namespace APP_NAMESPACE {
 						CORE_LOG(Warn, failureMsg);									\
 						ReturnCommand;												\
 					}
+
+	#define CORE_VALIDATE_S(expr, ReturnCommand)									\
+					if (!expr) {													\
+						CORE_LOG(Warn, #expr);										\
+						ReturnCommand;												\
+					}
 #else
 	#define CORE_VALIDATE(expr, successMsg, failureMsg, ReturnCommand)			{expr;}
 #endif // ENABLE_VALIDATION

@@ -22,6 +22,7 @@ ToDo:
 
 	- add event to input action (maybe func pointer)
 	- create level editor
+	- enable switch between dynamic_mesh and static_mesh at runtime
 	- add input smoothing
 	- add lighting capability
 	- add modle import

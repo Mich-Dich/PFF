@@ -102,9 +102,9 @@ namespace APP_NAMESPACE {
         // Use previous Format
         void Use_Format_Backup() {
 
-            std::string buffer = LogMessageFormat;
+            std::string m_buffer = LogMessageFormat;
             LogMessageFormat = LogMessageFormat_BACKUP;
-            LogMessageFormat_BACKUP = buffer;
+            LogMessageFormat_BACKUP = m_buffer;
         }
 
         // deside with messages should be bufferd and witch are written to file instantly

@@ -2,6 +2,8 @@
 #include "util/pffpch.h"
 
 #include "engine/render/render_system.h"
+#include "engine/render/vk_buffer.h"
+
 #include "engine/layer/layer.h"
 #include "application.h"
 #include "engine/map/game_map.h"
@@ -15,6 +17,11 @@
 namespace PFF {
 
 #define IMGUI_LAYER			application::get().get_imgui_layer()
+
+	struct global_ubo {
+		glm::mat4 projectionView{ 1.f };
+		glm::vec3 light_direction = glm::normalize(glm::vec3{ 1.f, -3.f, -1.f });
+	};
 
 	// ==================================================================== setup ====================================================================
 
@@ -49,11 +56,25 @@ namespace PFF {
 		// add first render system
 		add_render_system(get_device(), get_swapchain_render_pass());
 
+		// make global UBO
+
+		m_global_UBO_buffer = std::vector<std::unique_ptr<vk_buffer>>(vk_swapchain::MAX_FRAMES_IN_FLIGHT);
+		for (u16 x = 0; x < m_global_UBO_buffer.size(); x++) {
+
+			m_global_UBO_buffer[x] = std::make_unique<vk_buffer>( m_device, sizeof(global_ubo), 1, VK_BUFFER_USAGE_UNIFORM_BUFFER_BIT, VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT);
+			m_global_UBO_buffer[x]->map();
+		}
+
 	}
 
 	renderer::~renderer() {
 
 		m_state = system_state::inactive;
+
+		for (u16 x = 0; x < m_global_UBO_buffer.size(); x++)
+			m_global_UBO_buffer[x].reset();
+
+		m_global_UBO_buffer.clear();
 		m_window.reset();
 		m_render_system.reset();
 
@@ -80,8 +101,17 @@ namespace PFF {
 
 			if (auto commandbuffer = begin_frame()) {
 
+				frame_info frame_info{ m_current_image_index, delta_time, commandbuffer, m_world_Layer->get_editor_camera() };
+
+				// update
+				global_ubo ubo{};
+				ubo.projectionView = frame_info.camera->get_projection() * frame_info.camera->get_view();
+				m_global_UBO_buffer[m_current_image_index]->write_to_buffer(&ubo);
+				m_global_UBO_buffer[m_current_image_index]->flush();
+
+				// render
 				begin_swapchain_renderpass(commandbuffer);
-				m_render_system->render_game_objects( delta_time, commandbuffer, application::get().get_current_map()->get_all_game_objects(), *application::get().get_world_layer()->get_editor_camera());
+				m_render_system->render_game_objects(frame_info, m_world_Layer->get_current_map()->get_all_game_objects());
 				// application::get().get_imgui_layer()->capture_current_image( ,m_swapchain->get_image_view(m_current_image_index));
 
 				IMGUI_LAYER->begin_frame();

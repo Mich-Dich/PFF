@@ -9,7 +9,7 @@ namespace PFF {
 
     class vk_swapchain {
     public:
-        static constexpr int MAX_FRAMES_IN_FLIGHT = 2;
+        static constexpr int MAX_FRAMES_IN_FLIGHT = 3;
 
         vk_swapchain(std::shared_ptr<vk_device>& device, VkExtent2D window_extent);
         vk_swapchain(std::shared_ptr<vk_device>& device, VkExtent2D window_extent, std::shared_ptr<vk_swapchain> previous);
@@ -21,7 +21,7 @@ namespace PFF {
         VkResult acquireNextImage(u32* imageIndex);
         VkResult submitCommandBuffers(const VkCommandBuffer* buffers, u32* imageIndex);
 
-        FORCEINLINE VkFramebuffer getFrameBuffer(int index)  const { return m_swap_chain_framebuffers[index]; }
+        FORCEINLINE VkFramebuffer getFrameBuffer(const int index)  const { return m_swap_chain_framebuffers[index]; }
         FORCEINLINE VkImageView get_image_view(int index)  const { return m_swap_chain_image_views[index]; }
         FORCEINLINE VkFormat get_swapchain_image_format()  const { return m_swap_chainImage_format; }
         FORCEINLINE VkExtent2D get_swapchain_extent() const { return m_swap_chain_extent; }

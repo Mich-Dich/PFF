@@ -71,6 +71,15 @@
     <ClInclude Include="src\engine\geometry\basic_mesh.h">
       <Filter>engine\geometry</Filter>
     </ClInclude>
+    <ClInclude Include="src\engine\geometry\dynamic_mesh.h">
+      <Filter>engine\geometry</Filter>
+    </ClInclude>
+    <ClInclude Include="src\engine\geometry\static_mesh.h">
+      <Filter>engine\geometry</Filter>
+    </ClInclude>
+    <ClInclude Include="src\engine\io_handler\file_loader.h">
+      <Filter>engine\io_handler</Filter>
+    </ClInclude>
     <ClInclude Include="src\engine\io_handler\input_action.h">
       <Filter>engine\io_handler</Filter>
     </ClInclude>
@@ -99,6 +108,9 @@
       <Filter>engine\render</Filter>
     </ClInclude>
     <ClInclude Include="src\engine\render\renderer.h">
+      <Filter>engine\render</Filter>
+    </ClInclude>
+    <ClInclude Include="src\engine\render\vk_buffer.h">
       <Filter>engine\render</Filter>
     </ClInclude>
     <ClInclude Include="src\engine\render\vk_device.h">
@@ -141,6 +153,8 @@
     <ClInclude Include="src\util\util.h">
       <Filter>util</Filter>
     </ClInclude>
+    <ClInclude Include="src\engine\render\frame_info.h" />
+    <ClInclude Include="src\engine\render\vk_descripters.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="src\application.cpp" />
@@ -158,6 +172,15 @@
     </ClCompile>
     <ClCompile Include="src\engine\geometry\basic_mesh.cpp">
       <Filter>engine\geometry</Filter>
+    </ClCompile>
+    <ClCompile Include="src\engine\geometry\dynamic_mesh.cpp">
+      <Filter>engine\geometry</Filter>
+    </ClCompile>
+    <ClCompile Include="src\engine\geometry\static_mesh.cpp">
+      <Filter>engine\geometry</Filter>
+    </ClCompile>
+    <ClCompile Include="src\engine\io_handler\file_loader.cpp">
+      <Filter>engine\io_handler</Filter>
     </ClCompile>
     <ClCompile Include="src\engine\io_handler\input_mapping.cpp">
       <Filter>engine\io_handler</Filter>
@@ -186,6 +209,9 @@
     <ClCompile Include="src\engine\render\renderer.cpp">
       <Filter>engine\render</Filter>
     </ClCompile>
+    <ClCompile Include="src\engine\render\vk_buffer.cpp">
+      <Filter>engine\render</Filter>
+    </ClCompile>
     <ClCompile Include="src\engine\render\vk_device.cpp">
       <Filter>engine\render</Filter>
     </ClCompile>
@@ -210,5 +236,6 @@
     <ClCompile Include="src\util\timer.cpp">
       <Filter>util</Filter>
     </ClCompile>
+    <ClCompile Include="src\engine\render\vk_descripters.cpp" />
   </ItemGroup>
 </Project>

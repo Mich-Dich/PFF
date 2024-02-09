@@ -4,6 +4,8 @@
 #include "engine/render/vk_pipeline.h"
 #include "engine/game_objects/camera.h"
 
+#include "engine/render/frame_info.h"
+
 namespace PFF {
 
 	class game_object;
@@ -22,7 +24,7 @@ namespace PFF {
 		FORCEINLINE void pipeline_bind_commnad_buffers(VkCommandBuffer command_buffer) const { return m_vk_pipeline->bind_commnad_buffers(command_buffer); }
 		//void bind_commnad_buffers(VkCommandBuffer command_buffer);
 
-		void render_game_objects(f32 delta_time, VkCommandBuffer command_buffer, std::vector<game_object>& game_objects, const camera& camera);
+		void render_game_objects(frame_info frame_info, std::vector<game_object>& game_objects);
 
 	private:
 

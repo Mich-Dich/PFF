@@ -57,9 +57,9 @@ namespace PFF {
         // Buffer Helper Functions
         VkCommandBuffer begin_single_time_commands();
         void end_single_time_commands(VkCommandBuffer commandBuffer);
-        void create_buffer( VkDeviceSize size, VkBufferUsageFlags usage, VkMemoryPropertyFlags properties, VkBuffer& buffer, VkDeviceMemory& bufferMemory);
+        void create_buffer( VkDeviceSize size, VkBufferUsageFlags usage, VkMemoryPropertyFlags properties, VkBuffer& m_buffer, VkDeviceMemory& bufferMemory);
         void copy_buffer(VkBuffer srcBuffer, VkBuffer dstBuffer, VkDeviceSize size);
-        void copy_buffer_to_image( VkBuffer buffer, VkImage image, uint32_t width, uint32_t height, uint32_t layerCount);
+        void copy_buffer_to_image( VkBuffer m_buffer, VkImage image, uint32_t width, uint32_t height, uint32_t layerCount);
         void create_image_with_info(const VkImageCreateInfo& imageInfo, VkMemoryPropertyFlags properties, VkImage& image, VkDeviceMemory& imageMemory);
 
         VkPhysicalDeviceProperties properties;

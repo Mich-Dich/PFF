@@ -504,7 +504,7 @@ namespace PFF {
         throw std::runtime_error("failed to find suitable memory type!");
     }
 
-    void vk_device::create_buffer(VkDeviceSize size, VkBufferUsageFlags usage, VkMemoryPropertyFlags properties, VkBuffer& buffer, VkDeviceMemory& bufferMemory) {
+    void vk_device::create_buffer(VkDeviceSize size, VkBufferUsageFlags usage, VkMemoryPropertyFlags properties, VkBuffer& m_buffer, VkDeviceMemory& bufferMemory) {
 
         VkBufferCreateInfo buffer_CI{};
         buffer_CI.sType = VK_STRUCTURE_TYPE_BUFFER_CREATE_INFO;
@@ -512,10 +512,10 @@ namespace PFF {
         buffer_CI.usage = usage;
         buffer_CI.sharingMode = VK_SHARING_MODE_EXCLUSIVE;
 
-        CORE_ASSERT(vkCreateBuffer(m_device, &buffer_CI, nullptr, &buffer) == VK_SUCCESS, "", "failed to create vertex buffer!");
+        CORE_ASSERT(vkCreateBuffer(m_device, &buffer_CI, nullptr, &m_buffer) == VK_SUCCESS, "", "failed to create vertex buffer!");
 
         VkMemoryRequirements memRequirements;
-        vkGetBufferMemoryRequirements(m_device, buffer, &memRequirements);
+        vkGetBufferMemoryRequirements(m_device, m_buffer, &memRequirements);
 
         VkMemoryAllocateInfo alloc_CI{};
         alloc_CI.sType = VK_STRUCTURE_TYPE_MEMORY_ALLOCATE_INFO;
@@ -524,7 +524,7 @@ namespace PFF {
 
         CORE_ASSERT(vkAllocateMemory(m_device, &alloc_CI, nullptr, &bufferMemory) == VK_SUCCESS, "", "failed to allocate vertex buffer memory!");
 
-        vkBindBufferMemory(m_device, buffer, bufferMemory, 0);
+        vkBindBufferMemory(m_device, m_buffer, bufferMemory, 0);
     }
 
     VkCommandBuffer vk_device::begin_single_time_commands() {
@@ -574,7 +574,7 @@ namespace PFF {
         end_single_time_commands(commandBuffer);
     }
 
-    void vk_device::copy_buffer_to_image( VkBuffer buffer, VkImage image, uint32_t width, uint32_t height, uint32_t layerCount) {
+    void vk_device::copy_buffer_to_image( VkBuffer m_buffer, VkImage image, uint32_t width, uint32_t height, uint32_t layerCount) {
 
         VkCommandBuffer commandBuffer = begin_single_time_commands();
 
@@ -591,7 +591,7 @@ namespace PFF {
         region.imageOffset = { 0, 0, 0 };
         region.imageExtent = { width, height, 1 };
 
-        vkCmdCopyBufferToImage(commandBuffer, buffer, image, VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL, 1, &region);
+        vkCmdCopyBufferToImage(commandBuffer, m_buffer, image, VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL, 1, &region);
         end_single_time_commands(commandBuffer);
     }
 

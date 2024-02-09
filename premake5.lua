@@ -18,6 +18,7 @@ workspace "PFF"
 	IncludeDir = {}
 	IncludeDir["glm"] = "PFF/vendor/glm"
 	IncludeDir["ImGui"] = "PFF/vendor/imgui"
+	IncludeDir["tinyobjloader"] = "PFF/vendor/tinyobjloader"
 
 	include "PFF/vendor/imgui"
 
@@ -56,6 +57,7 @@ project "PFF"
 		"PFF/vendor/glfw-3.3.8.bin.WIN64/include",
 		"%{IncludeDir.ImGui}",
 		"%{IncludeDir.ImGui}/backends/",
+		"%{IncludeDir.tinyobjloader}",
 		
 		vulkan_dir .. "/Include",
 	}

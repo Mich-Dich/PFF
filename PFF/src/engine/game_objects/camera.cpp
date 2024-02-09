@@ -15,6 +15,13 @@ namespace PFF {
 		CORE_LOG(Info, "Shutdown");
 	}
 
+	void camera::set_clipping_dis(const f32 near_dis, const f32 far_dis) {
+
+		
+		m_clipping_near = near_dis;
+		m_clipping_far = far_dis;
+	}
+
 	void camera::set_view_direction(glm::vec3 position, glm::vec3 direction, glm::vec3 up) {
 
 		const glm::vec3 w{ glm::normalize(direction) };
@@ -95,7 +102,10 @@ namespace PFF {
 		view_matrix[3][2] = -glm::dot(w, position);
 	}
 
-	void camera::set_orthographic_projection(f32 left, f32 right, f32 top, f32 bottom, f32 near, f32 far) {
+	void camera::set_orthographic_projection(const f32 left, const  f32 right, const f32 top, const f32 bottom, const f32 near, const f32 far) {
+
+		m_clipping_near = near;
+		m_clipping_far = far;
 
 		m_projection_matrix= glm::mat4{ 1.0f };
 		m_projection_matrix[0][0] = 2.f / (right - left);
@@ -106,7 +116,7 @@ namespace PFF {
 		m_projection_matrix[3][2] = -near / (far - near);
 	}
 
-	void camera::set_perspective_projection(f32 fov_y, f32 aspect_ratio, f32 near, f32 far) {
+	void camera::set_perspective_projection(const f32 fov_y, const f32 aspect_ratio, const f32 near, const f32 far) {
 
 		CORE_ASSERT(glm::abs(aspect_ratio - std::numeric_limits<float>::epsilon()) > 0.0f, "", "Aspect ratio check failed: [aspect_ratio - epsilon] > 0.0f");
 		const float tanHalfFovy = tan(fov_y / 2.f);
@@ -116,6 +126,23 @@ namespace PFF {
 		m_projection_matrix[2][2] = far / (far - near);
 		m_projection_matrix[2][3] = 1.f;
 		m_projection_matrix[3][2] = -(far * near) / (far - near);
+
+		m_perspective_fov_y = fov_y;
+		m_perspective_aspect_ratio = aspect_ratio;
+		m_clipping_near = near;
+		m_clipping_far = far;
+	}
+
+	void camera::set_aspect_ratio(f32 aspect_ratio) {
+
+		m_perspective_aspect_ratio = aspect_ratio;
+		update_perspective_projection();
+	}
+
+	void camera::set_fov_y(f32 fov_y) {
+
+		m_perspective_fov_y = fov_y;
+		update_perspective_projection();
 	}
 
 }

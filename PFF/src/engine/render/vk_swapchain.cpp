@@ -59,9 +59,15 @@ namespace PFF {
 
         vkWaitForFences(m_device->get_device(), 1, &m_in_flight_fences[m_current_frame], VK_TRUE, std::numeric_limits<uint64_t>::max());
 
-        VkResult result = vkAcquireNextImageKHR(m_device->get_device(), m_swap_chain, std::numeric_limits<uint64_t>::max(), m_image_available_semaphores[m_current_frame],  // must be a not signaled semaphore
-            VK_NULL_HANDLE, imageIndex);
+        VkResult result = vkAcquireNextImageKHR(
+            m_device->get_device(), 
+            m_swap_chain, 
+            std::numeric_limits<uint64_t>::max(), 
+            m_image_available_semaphores[m_current_frame],  // must be a not signaled semaphore
+            VK_NULL_HANDLE,
+            imageIndex);
 
+        *imageIndex = *imageIndex % MAX_FRAMES_IN_FLIGHT;
         return result;
     }
 

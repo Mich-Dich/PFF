@@ -56,8 +56,7 @@ namespace PFF {
 	*/
 	void player_controller::update_internal(f32 delta) {
 
-
-		for (u32 x = 0; x < m_input_mapping->get_length(); x++) {					// get input_action
+		for (u32 x = 0; x < m_input_mapping->get_length(); x++) {				// get input_action
 			input_action* action = m_input_mapping->get_action(x);
 
 			if (action->modefier_flags & INPUT_ACTION_MODEFIER_AUTO_RESET || action->modefier_flags & INPUT_ACTION_MODEFIER_AUTO_RESET_ALL)
@@ -67,20 +66,20 @@ namespace PFF {
 
 		//CORE_LOG(Trace, event.get_keycode());
 		for (u32 x = 0; x < m_input_mapping->get_length(); x++) {
-			input_action* action = m_input_mapping->get_action(x);			// get input_action
+			input_action* action = m_input_mapping->get_action(x);				// get input_action
 
 			if (action->modefier_flags & INPUT_ACTION_MODEFIER_SMOOTH_INTERP) {
 
 			}
 
 			for (u32 x = 0; x < action->get_length(); x++) {	
-				key_details* key_details = action->get_key(x);				// get key
+				key_details* key_details = action->get_key(x);					// get key
 
-				f32 buffer = key_details->active;
+				f32 m_buffer = key_details->active;
 
 				// =============================================== modefiers ===============================================
 				if (key_details->modefier_flags & INPUT_ACTION_MODEFIER_NEGATE)
-					buffer *= -1.f;
+					m_buffer *= -1.f;
 
 				if (key_details->modefier_flags & INPUT_ACTION_MODEFIER_SMOOTH_INTERP) {
 
@@ -92,33 +91,33 @@ namespace PFF {
 					// ==================================================================================================================================
 					case input_value::_bool: {
 
-						action->data.boolean = (buffer > 0.f);
+						action->data.boolean = (m_buffer > 0.f);
 					} break;
 
 					// ==================================================================================================================================
 					case input_value::_1D: {
 
-						action->data._1D += buffer;
+						action->data._1D += m_buffer;
 					} break;
 
 					// ==================================================================================================================================
 					case input_value::_2D: {
 
 						if (key_details->modefier_flags & INPUT_ACTION_MODEFIER_AXIS_2)
-							action->data._2D.y += buffer;
+							action->data._2D.y += m_buffer;
 						else
-							action->data._2D.x += buffer;
+							action->data._2D.x += m_buffer;
 					} break;
 
 					// ==================================================================================================================================
 					case input_value::_3D: {
 
 						if (key_details->modefier_flags & INPUT_ACTION_MODEFIER_AXIS_2)
-							action->data._3D.y += buffer;
+							action->data._3D.y += m_buffer;
 						else if (key_details->modefier_flags & INPUT_ACTION_MODEFIER_AXIS_3)
-							action->data._3D.z += buffer;
+							action->data._3D.z += m_buffer;
 						else
-							action->data._3D.x += buffer;
+							action->data._3D.x += m_buffer;
 
 					} break;
 
@@ -139,8 +138,8 @@ namespace PFF {
 					case input_value::_2D: {
 						if (glm::dot(action->data._2D, action->data._2D) > std::numeric_limits<f32>::epsilon()) {
 
-							auto buffer = action->data._2D;
-							action->data._2D = glm::normalize(buffer);
+							auto m_buffer = action->data._2D;
+							action->data._2D = glm::normalize(m_buffer);
 						}
 					} break;
 
@@ -148,8 +147,8 @@ namespace PFF {
 					case input_value::_3D: {
 						if (glm::dot(action->data._3D, action->data._3D) > std::numeric_limits<f32>::epsilon()) {
 
-							auto buffer = action->data._3D;
-							action->data._3D = glm::normalize(buffer);
+							auto m_buffer = action->data._3D;
+							action->data._3D = glm::normalize(m_buffer);
 							//LOG(Trace, vec_to_str(action->data._3D));
 						}
 
@@ -164,7 +163,7 @@ namespace PFF {
 
 		update(delta);
 
-		for (u32 x = 0; x < m_input_mapping->get_length(); x++) {					// get input_action
+		for (u32 x = 0; x < m_input_mapping->get_length(); x++) {				// get input_action
 			input_action* action = m_input_mapping->get_action(x);
 
 			if (action->modefier_flags & INPUT_ACTION_MODEFIER_AUTO_RESET_ALL) {
@@ -191,28 +190,28 @@ namespace PFF {
 	bool player_controller::handle_key_events(key_event& event) {
 		
 		//CORE_LOG(Trace, event.get_keycode());
-		for (u32 x = 0; x < m_input_mapping->get_length(); x++) {			// get input_action
+		for (u32 x = 0; x < m_input_mapping->get_length(); x++) {				// get input_action
 			input_action* action = m_input_mapping->get_action(x);
 
-			for (u32 x = 0; x < action->get_length(); x++) {				// get input_action
+			for (u32 x = 0; x < action->get_length(); x++) {					// get input_action
 				key_details* key_details = action->get_key(x);
 
-				if (key_details->key == event.get_keycode()) {				// check if I have an event for that key
+				if (key_details->key == event.get_keycode()) {					// check if I have an event for that key
 
 
 					std::chrono::time_point<std::chrono::high_resolution_clock> time_now = std::chrono::high_resolution_clock::now();
-					bool buffer = false;
+					bool m_buffer = false;
 
 					//LOG(Debug, "Test");
 					// =============================================== triggers ===============================================
 					if (key_details->trigger_flags & INPUT_ACTION_TRIGGER_KEY_DOWN)
-						buffer = (event.m_key_state != key_state::release);
+						m_buffer = (event.m_key_state != key_state::release);
 
 					if (key_details->trigger_flags & INPUT_ACTION_TRIGGER_KEY_UP)
-						buffer = (event.m_key_state == key_state::release);
+						m_buffer = (event.m_key_state == key_state::release);
 
 					if (key_details->trigger_flags & INPUT_ACTION_TRIGGER_KEY_HOLD)
-						buffer = (event.m_key_state == key_state::repeat);
+						m_buffer = (event.m_key_state == key_state::repeat);
 
 					if (key_details->trigger_flags & INPUT_ACTION_TRIGGER_KEY_TAP) {
 
@@ -220,7 +219,7 @@ namespace PFF {
 						action->time_stamp = time_now;
 					}
 					
-					key_details->active = (buffer) ? 1.f : 0.f;
+					key_details->active = (m_buffer) ? 1 : 0;
 					//LOG(Debug, "Key: " << static_cast<int32>(key_details->key) << " is " << bool_to_str(key_details->active));
 				}
 			}
@@ -244,20 +243,20 @@ namespace PFF {
 
 					std::chrono::time_point<std::chrono::high_resolution_clock> time_now = std::chrono::high_resolution_clock::now();
 
-					bool buffer = false;
+					bool m_buffer = false;
 					f32 event_value = event.get_value();
 
 					// =============================================== triggers ===============================================
 					if (key_details->trigger_flags & INPUT_ACTION_TRIGGER_MOUSE_POS_AND_NEG)
-						buffer = (event_value != 0);
+						m_buffer = (event_value != 0);
 
 					if (key_details->trigger_flags & INPUT_ACTION_TRIGGER_MOUSE_POSITIVE)
-						buffer = (event_value > 0);
+						m_buffer = (event_value > 0);
 
 					if (key_details->trigger_flags & INPUT_ACTION_TRIGGER_MOUSE_NEGATIVE)
-						buffer = (event_value < 0);
+						m_buffer = (event_value < 0);
 
-					key_details->active = (buffer) ? event_value : 0.f;
+					key_details->active = (m_buffer) ? static_cast<int16>(event_value) : 0;
 					//CORE_LOG(Info, "action value: " << bool_to_str(action->data.boolean));
 
 				}

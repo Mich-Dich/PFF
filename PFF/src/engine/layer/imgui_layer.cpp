@@ -113,6 +113,9 @@ namespace PFF {
 		LOAD_IMGUI_SETTING(HeaderHovered, color_00_hover);
 		LOAD_IMGUI_SETTING(HeaderActive, color_00_active);
 
+		LOAD_IMGUI_SETTING(TabUnfocused, color_01_default);
+		LOAD_IMGUI_SETTING(TabUnfocusedActive, color_01_active);
+
 		LOAD_IMGUI_SETTING(Button, color_01_default);
 		LOAD_IMGUI_SETTING(ButtonHovered, color_01_hover);
 		LOAD_IMGUI_SETTING(ButtonActive, color_01_active);
