@@ -35,12 +35,16 @@ namespace PFF {
 	render_system::render_system(std::shared_ptr<vk_device> device, VkRenderPass renderPass, VkDescriptorSetLayout descriptor_set_layout)
 	 : m_device( device ) {
 
+		PFF_PROFILE_FUNCTION();
+
 		create_pipeline_layout(descriptor_set_layout);
 		create_pipeline(renderPass);
 		CORE_LOG(Trace, "render_system started");
 	}
 
 	render_system::~render_system() {
+
+		PFF_PROFILE_FUNCTION();
 
 		vkDestroyPipelineLayout(m_device->get_device(), m_pipeline_layout, nullptr);
 
@@ -52,6 +56,8 @@ namespace PFF {
 	}
 
 	void render_system::render_game_objects(frame_info frame_info, std::vector<game_object>& game_objects) {
+
+		PFF_PROFILE_FUNCTION();
 
 		m_vk_pipeline->bind_commnad_buffers(frame_info.command_buffer);
 
@@ -80,6 +86,8 @@ namespace PFF {
 
 	void render_system::create_pipeline_layout(VkDescriptorSetLayout descriptor_set_layout) {
 
+		PFF_PROFILE_FUNCTION();
+
 		VkPushConstantRange push_constant_range{};
 		push_constant_range.stageFlags = VK_SHADER_STAGE_VERTEX_BIT | VK_SHADER_STAGE_FRAGMENT_BIT;
 		push_constant_range.offset = 0;
@@ -96,6 +104,8 @@ namespace PFF {
 	}
 
 	void render_system::create_pipeline(VkRenderPass renderPass) {
+
+		PFF_PROFILE_FUNCTION();
 
 		CORE_ASSERT(m_pipeline_layout != nullptr, "", "[create_pipeline_layout()] was called bevor [m_pipeline_layout] is set");
 

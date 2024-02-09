@@ -34,6 +34,8 @@ namespace PFF {
 
 	basic_mesh::basic_mesh(const basic_mesh::builder& builder) {
 
+		PFF_PROFILE_FUNCTION();
+
 		m_device = application::get().get_renderer()->get_device();
 		create_vetex_buffers(builder.vertices);
 		create_index_buffers(builder.indices);
@@ -41,11 +43,15 @@ namespace PFF {
 
 	basic_mesh::~basic_mesh() {
 
+		PFF_PROFILE_FUNCTION();
+
 		m_device.reset();
 		CORE_LOG(Info, "Shutdown");
 	}
 
 	std::shared_ptr<basic_mesh> basic_mesh::create_mesh_from_file(const std::string& file_path) {
+
+		PFF_PROFILE_FUNCTION();
 
 		builder loc_builder{};
 		loc_builder.load_mesh(file_path);
@@ -54,6 +60,8 @@ namespace PFF {
 	}
 
 	void basic_mesh::bind(VkCommandBuffer_T* commandBuffer) {
+
+		PFF_PROFILE_FUNCTION();
 
 		VkBuffer buffers[] = { m_vertex_buffer->get_buffer()};
 		VkDeviceSize offsets[] = { 0 };
@@ -65,6 +73,8 @@ namespace PFF {
 
 	void basic_mesh::draw(VkCommandBuffer_T* commandBuffer) {
 
+		PFF_PROFILE_FUNCTION();
+
 		if (m_has_index_buffer)
 			vkCmdDrawIndexed(commandBuffer, m_index_count, 1, 0, 0, 0);
 		else
@@ -73,6 +83,8 @@ namespace PFF {
 
 	// best for use static data
 	void basic_mesh::create_vetex_buffers(const std::vector<vertex>& vertices) {
+
+		PFF_PROFILE_FUNCTION();
 
 		m_vertex_count = static_cast<u32>(vertices.size());
 		CORE_ASSERT(m_vertex_count >= 3, "", "Vertex count must be at least 3");
@@ -90,6 +102,8 @@ namespace PFF {
 
 	// best for use static data
 	void basic_mesh::create_index_buffers(const std::vector<u32>& indices) {
+
+		PFF_PROFILE_FUNCTION();
 
 		m_index_count = static_cast<u32>(indices.size());
 		m_has_index_buffer = (m_index_count > 0);
@@ -109,6 +123,8 @@ namespace PFF {
 
 	std::vector<VkVertexInputBindingDescription> basic_mesh::vertex::get_binding_descriptions() {
 
+		PFF_PROFILE_FUNCTION();
+
 		std::vector<VkVertexInputBindingDescription> binding_desc(1);
 		binding_desc[0].binding = 0;
 		binding_desc[0].stride = sizeof(vertex);
@@ -117,7 +133,9 @@ namespace PFF {
 	}
 
 	std::vector<VkVertexInputAttributeDescription> basic_mesh::vertex::get_attribute_descriptions() {
-		
+
+		PFF_PROFILE_FUNCTION();
+
 		std::vector<VkVertexInputAttributeDescription> attribut_desc{};
 
 		attribut_desc.push_back({ 0, 0, VK_FORMAT_R32G32B32_SFLOAT , offsetof(vertex, position) });
@@ -129,6 +147,8 @@ namespace PFF {
 	}
 
 	void basic_mesh::builder::load_mesh(const std::string& file_path) {
+
+		PFF_PROFILE_FUNCTION();
 
 		tinyobj::attrib_t attrib;
 		std::vector<tinyobj::shape_t> shapes;

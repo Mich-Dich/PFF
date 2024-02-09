@@ -8,10 +8,14 @@ namespace PFF {
 
 	input_mapping::input_mapping() {
 
+		PFF_PROFILE_FUNCTION();
+
 		m_actions.clear();
 	}
 	
 	void input_mapping::register_action(input_action* action, bool force_override) {
+
+		PFF_PROFILE_FUNCTION();
 
 		//  bool triger_when_paused;													// SAVE
 		//  input_value value;															// SAVE

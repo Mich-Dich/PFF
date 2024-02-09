@@ -148,6 +148,7 @@ IF EXIST ..\bin\Release-windows-x86_64\PFF\PFF.dll\ (xcopy /Q /E /Y /I ..\bin\Re
     <ClInclude Include="src\engine\render\vk_pipeline.h" />
     <ClInclude Include="src\engine\render\vk_swapchain.h" />
     <ClInclude Include="src\entry_point.h" />
+    <ClInclude Include="src\util\benchmarking\instrumentor.h" />
     <ClInclude Include="src\util\data_types.h" />
     <ClInclude Include="src\util\io\config.h" />
     <ClInclude Include="src\util\io\io_handler.h" />

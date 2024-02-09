@@ -10,6 +10,8 @@ namespace PFF {
 
 	world_layer::world_layer() {
 
+		PFF_PROFILE_FUNCTION();
+
 		m_current_map = std::make_shared<game_map>();
 		m_editor_camera = std::make_shared<camera>();
 		//m_editor_camera.set_orthographic_projection(-aspect, aspect, -1, 1, 0, 10);
@@ -22,6 +24,8 @@ namespace PFF {
 	}
 
 	world_layer::~world_layer() {
+
+		PFF_PROFILE_FUNCTION();
 
 		m_player_controller.reset();
 		m_editor_camera.reset();
@@ -40,6 +44,8 @@ namespace PFF {
 
 	void world_layer::on_update(f32 delta_time) {
 
+		PFF_PROFILE_FUNCTION();
+
 		m_player_controller->update_internal(delta_time);
 
 		for (auto& obj : m_current_map->get_all_game_objects())
@@ -48,6 +54,8 @@ namespace PFF {
 	}
 
 	void world_layer::on_event(event& event) {
+
+		PFF_PROFILE_FUNCTION();
 
 		if(m_player_controller)
 			m_player_controller->handle_event(event);

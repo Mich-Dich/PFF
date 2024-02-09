@@ -7,11 +7,13 @@ namespace PFF {
 
 	void timer::start_measurement() {
 
+		PFF_PROFILE_FUNCTION();
 		m_start_time = std::chrono::high_resolution_clock::now();
 	}
 
 	void timer::end_measurement(u32& fps, f32& delta_time, f64& work_time, f64& sleep_time) {
 
+		PFF_PROFILE_FUNCTION();
 		// Simple FPS controller - needs work
 		m_end_time = std::chrono::high_resolution_clock::now();
 		std::chrono::duration<f64> elapsed_time = m_end_time - m_start_time;
@@ -23,11 +25,13 @@ namespace PFF {
 
 	void timer::set_fps_settings(u32 target_fps) {
 
+		PFF_PROFILE_FUNCTION();
 		target_duration = std::chrono::duration<f64>(1.0 / target_fps);
 	}
 
 	void timer::limit_fps(const bool limit,  u32& fps, f32& m_delta_time, f64& work_time, f64& sleep_time) {
 
+		PFF_PROFILE_FUNCTION();
 		m_end_time = std::chrono::high_resolution_clock::now();
 		std::chrono::duration<f64> elapsed_time = m_end_time - m_start_time;
 		work_time = elapsed_time.count();

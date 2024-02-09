@@ -29,16 +29,22 @@ namespace PFF {
 	imgui_layer::imgui_layer(std::shared_ptr<renderer> renderer)
 		: layer("ImGuiLayer"), m_renderer(renderer) {
 
+		PFF_PROFILE_FUNCTION();
+
 		LOG(Info, "Init imgui layer");
 	}
 
 	imgui_layer::~imgui_layer() {
+
+		PFF_PROFILE_FUNCTION();
 
 		m_renderer.reset();
 		CORE_LOG(Info, "Shutdown");
 	}
 
 	void imgui_layer::on_attach() {
+
+		PFF_PROFILE_FUNCTION();
 
 		LOG(Info, "attach imgui layer");
 
@@ -165,6 +171,8 @@ namespace PFF {
 
 	void imgui_layer::on_detach() {
 
+		PFF_PROFILE_FUNCTION();
+
 		LOG(Info, "detach imgui layer");
 		
 		config::save(config::file::editor, "UI", "font_size", m_font_size);
@@ -180,6 +188,7 @@ namespace PFF {
 
 	void imgui_layer::on_event(event& event) {
 
+		PFF_PROFILE_FUNCTION();
 
 		ImGuiIO& io = ImGui::GetIO();
 		if (event.is_in_category(EC_Mouse) && io.WantCaptureMouse) {
@@ -190,6 +199,8 @@ namespace PFF {
 	}
 
 	void imgui_layer::on_imgui_render() {
+
+		PFF_PROFILE_FUNCTION();
 
 		ImGui::SetCurrentContext(m_context);
 		// Demonstrate creating a simple static window with no decoration
@@ -271,12 +282,16 @@ namespace PFF {
 
 	void imgui_layer::begin_frame() {
 
+		PFF_PROFILE_FUNCTION();
+
 		ImGui_ImplVulkan_NewFrame();
 		ImGui_ImplGlfw_NewFrame();
 		ImGui::NewFrame();
 	}
 
 	void imgui_layer::end_frame(VkCommandBuffer commandbuffer) {
+
+		PFF_PROFILE_FUNCTION();
 
 		ImGuiIO& io = ImGui::GetIO();
 		application& app = application::get();
@@ -296,11 +311,15 @@ namespace PFF {
 
 	void imgui_layer::capture_current_image(VkImageView frame_buffer) {
 
+		PFF_PROFILE_FUNCTION();
+
 		//m_Dset = ImGui_ImplVulkan_AddTexture(m_TextureSampler, frame_buffer, VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL);
 
 	}
 
 	void imgui_layer::set_next_window_pos(int16 location) {
+
+		PFF_PROFILE_FUNCTION();
 
 		if (location >= 0) {
 
@@ -322,6 +341,8 @@ namespace PFF {
 	}
 
 	void imgui_layer::progressbar_with_text(f32 percent, const char* text, f32 min_size_x, f32 min_size_y) {
+
+		PFF_PROFILE_FUNCTION();
 
 		ImVec2 curser_pos;
 		ImVec2 textSize;

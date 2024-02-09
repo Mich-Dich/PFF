@@ -22,12 +22,21 @@ namespace PFF {
 	}
 
 	void layer::on_update(f32 delta_time) {
+
+		PFF_PROFILE_FUNCTION();
+
 	}
 
 	void layer::on_event(event& event) {
+
+		PFF_PROFILE_FUNCTION();
+
 	}
 
 	void layer::on_imgui_render() {
+
+		PFF_PROFILE_FUNCTION();
+
 	}
 
 

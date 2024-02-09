@@ -23,6 +23,8 @@ namespace PFF {
         //
         void init() {
 
+            PFF_PROFILE_FUNCTION();
+
             io_handler::create_directory(CONFIG_DIR);
 
             for (int i = static_cast<int>(file::editor); i <= static_cast<int>(file::input); ++i) {
@@ -42,6 +44,8 @@ namespace PFF {
 
         // 
         bool check_for_configuration(const file target_config_file, const std::string& section, const std::string& key, std::string& value, const bool override) {
+
+            PFF_PROFILE_FUNCTION();
 
             std::filesystem::path file_path = BUILD_CONFIG_PATH(target_config_file);
             std::ifstream configFile(file_path, std::ios::in | std::ios::binary);
@@ -140,6 +144,8 @@ namespace PFF {
 
         //
         std::string file_type_to_string(file type) {
+
+            PFF_PROFILE_FUNCTION();
 
             static const std::unordered_map<file, std::string> typeStrings{
                 {file::editor, "editor"},

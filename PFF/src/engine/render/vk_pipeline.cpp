@@ -10,6 +10,9 @@
 namespace PFF {
 
 	pipeline_config_info::pipeline_config_info() {
+
+		PFF_PROFILE_FUNCTION();
+
 		/*
 		//pipeline_config_info CI{};
 		pipeline_layout = in_pipeline_layout;
@@ -95,11 +98,15 @@ namespace PFF {
 	vk_pipeline::vk_pipeline(std::shared_ptr<vk_device> device, const pipeline_config_info& config, const std::string& vert_file_path, const std::string& frag_file_path)
 		:m_device{ device } {
 
+		PFF_PROFILE_FUNCTION();
+
 		create_graphics_pipeline(config, vert_file_path, frag_file_path);
 	}
 
 	//
 	vk_pipeline::~vk_pipeline() {
+
+		PFF_PROFILE_FUNCTION();
 
 		vkDestroyShaderModule(m_device->get_device(), m_vert_shader_module, nullptr);
 		vkDestroyShaderModule(m_device->get_device(), m_frag_shader_module, nullptr);
@@ -110,11 +117,16 @@ namespace PFF {
 	}
 
 	void vk_pipeline::bind_commnad_buffers(VkCommandBuffer command_buffer) {
-	
+
+		PFF_PROFILE_FUNCTION();
+
 		vkCmdBindPipeline(command_buffer, VK_PIPELINE_BIND_POINT_GRAPHICS, m_graphics_pipeline);
 	}
 
 	void vk_pipeline::create_graphics_pipeline(const pipeline_config_info& config, const std::string& vert_file_path, const std::string& frag_file_path) {
+
+		PFF_PROFILE_FUNCTION();
+
 		/*
 		auto config = default_pipline_config_info(config.scissor.extent.width, config.scissor.extent.height);
 		config.render_pass = config.render_pass;
@@ -186,6 +198,8 @@ namespace PFF {
 	}
 
 	void vk_pipeline::create_shader_module(const std::vector<char>& code, VkShaderModule* shader_module) {
+
+		PFF_PROFILE_FUNCTION();
 
 		VkShaderModuleCreateInfo SM_CI{};
 		SM_CI.sType = VK_STRUCTURE_TYPE_SHADER_MODULE_CREATE_INFO;

@@ -25,11 +25,15 @@ namespace PFF {
 
 	pff_window::pff_window(window_attributes attributes) :
 		m_data(attributes) {
-		
+
+		PFF_PROFILE_FUNCTION();
+
 		init(attributes);
 	}
 
 	pff_window::~pff_window() {
+
+		PFF_PROFILE_FUNCTION();
 
 		int pos_x, pos_y;
 		glfwGetWindowPos(m_Window, &pos_x, &pos_y);
@@ -49,6 +53,8 @@ namespace PFF {
 	
 
 	void pff_window::init(window_attributes attributes) {
+
+		PFF_PROFILE_FUNCTION();
 
 		config::load(config::file::editor, "window_attributes", "title", attributes.title);
 		//config::load(config::file::editor, "window_attributes", "pos_x", attributes.pos_x);
@@ -150,6 +156,8 @@ namespace PFF {
 	}
 
 	void pff_window::update() {
+
+		PFF_PROFILE_FUNCTION();
 
 		glfwPollEvents();
 	}

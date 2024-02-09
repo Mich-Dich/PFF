@@ -33,10 +33,12 @@ namespace PFF {
 	application* application::s_instance = nullptr;
 
 
-	application::application() :
-		m_delta_time(1), m_running(true) {
+	application::application() 
+		: m_delta_time(1), m_running(true) {
 
-		PFF::Logger::Init("[$B$T:$J$E] [$B$L$X $K - $P:$G$E] $C$Z");
+		PFF_PROFILE_BEGIN_SESSION("startup", "benchmarks", "PFF_benchmark_startup.json");
+		PFF_PROFILE_FUNCTION();
+
 		CORE_LOG(Debug, "application Constructor");
 		CORE_ASSERT(!s_instance, "", "Application already exists");
 		s_instance = this;
@@ -60,10 +62,13 @@ namespace PFF {
 		m_renderer->set_world_Layer(m_world_layer);
 		m_renderer->set_state(system_state::active);
 		init();					// init user code / potentally make every actor have own function (like UNREAL)
+
+		PFF_PROFILE_END_SESSION();
 	}
 
 	application::~application() {
 
+		PFF_PROFILE_BEGIN_SESSION("shutdown", "benchmarks", "PFF_benchmark_shutdown.json");
 		shutdown();
 
 		m_current_map.reset();
@@ -77,7 +82,9 @@ namespace PFF {
 		m_renderer.reset();
 		m_window.reset();
 		fps_timer.reset();
+
 		CORE_LOG(Info, "Shutdown");
+		PFF_PROFILE_END_SESSION();
 	}
 
 	// ==================================================================== main loop ====================================================================
@@ -88,6 +95,8 @@ namespace PFF {
 
 
 	void application::run() {
+
+		PFF_PROFILE_BEGIN_SESSION("runtime", "benchmarks", "PFF_benchmark_runtime.json");
 
 		while (m_running) {
 
@@ -108,11 +117,14 @@ namespace PFF {
 		}
 
 		m_renderer->wait_Idle();
+		PFF_PROFILE_END_SESSION();
 	}
 
 	// ==================================================================== event handling ====================================================================
 
 	void application::on_event(event& event) {
+
+		PFF_PROFILE_FUNCTION();
 
 		// application events
 		event_dispatcher dispatcher(event);
@@ -141,6 +153,8 @@ namespace PFF {
 
 	bool application::on_window_resize(window_resize_event& event) {
 
+		PFF_PROFILE_FUNCTION();
+
 		m_renderer->set_size(event.get_width(), event.get_height());
 
 		// m_camera.set_orthographic_projection(-aspect, aspect, -1, 1, 0, 10);
@@ -152,7 +166,9 @@ namespace PFF {
 	}
 
 	bool application::on_window_refresh(window_refresh_event& event) {
-		
+
+		PFF_PROFILE_FUNCTION();
+
 		fps_timer->end_measurement(m_fps, m_delta_time, m_work_time, m_sleep_time);
 		m_imgui_layer->set_fps_values((m_focus ? m_target_fps : m_nonefocus_fps), m_fps, static_cast<f32>(m_work_time * 1000), static_cast<f32>(m_sleep_time * 1000));
 		m_renderer->refresh(m_delta_time);
@@ -161,6 +177,8 @@ namespace PFF {
 	}
 
 	bool PFF::application::on_window_focus(window_focus_event& event) {
+
+		PFF_PROFILE_FUNCTION();
 
 		m_focus = event.get_focus();
 		if (event.get_focus())

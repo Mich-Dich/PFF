@@ -200,7 +200,7 @@ namespace APP_NAMESPACE {
 	#define CORE_VALIDATE(expr, successMsg, failureMsg, ReturnCommand)			{expr;}
 #endif // ENABLE_VALIDATION
 
-#endif
+#endif //PFF_INSIDE_ENGINE
 
 //  ===================================================================================  Client Logger  ===================================================================================
 

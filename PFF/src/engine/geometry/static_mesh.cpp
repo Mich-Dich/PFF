@@ -16,6 +16,8 @@ namespace PFF {
 	// best for use static data
 	void static_mesh::create_vetex_buffers(const std::vector<vertex>& vertices) {
 
+		PFF_PROFILE_FUNCTION();
+
 		m_vertex_count = static_cast<u32>(vertices.size());
 
 		CORE_ASSERT(m_vertex_count >= 3, "", "Vertex count must be at least 3");
@@ -33,6 +35,8 @@ namespace PFF {
 
 	// best for use static data
 	void static_mesh::create_index_buffers(const std::vector<u32>& indices) {
+
+		PFF_PROFILE_FUNCTION();
 
 		m_index_count = static_cast<u32>(indices.size());
 		m_has_index_buffer = (m_index_count > 0);

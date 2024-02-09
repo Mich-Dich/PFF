@@ -28,6 +28,8 @@ namespace PFF {
 	renderer::renderer(std::shared_ptr<pff_window> window, layer_stack* layerstack)
 		: m_window(window), m_layerstack(layerstack) {
 
+		PFF_PROFILE_FUNCTION();
+
 		m_device = std::make_shared<vk_device>(m_window);
 		recreate_swapchian();
 		create_command_buffer();
@@ -69,6 +71,8 @@ namespace PFF {
 
 	renderer::~renderer() {
 
+		PFF_PROFILE_FUNCTION();
+
 		m_state = system_state::inactive;
 
 		for (u16 x = 0; x < m_global_UBO_buffer.size(); x++)
@@ -91,12 +95,16 @@ namespace PFF {
 
 	void renderer::add_render_system(std::shared_ptr<vk_device> device, VkRenderPass renderPass) {
 
+		PFF_PROFILE_FUNCTION();
+
 		m_render_system = std::make_unique<render_system>(get_device(), get_swapchain_render_pass(), m_descriptor_set_layout);
 	}
 
 	//
 	void renderer::draw_frame(f32 delta_time) {
-		
+
+		PFF_PROFILE_FUNCTION();
+
 		if (m_state == system_state::active) {
 
 			if (auto commandbuffer = begin_frame()) {
@@ -127,12 +135,16 @@ namespace PFF {
 
 	//
 	void renderer::wait_Idle() {
-		
+
+		PFF_PROFILE_FUNCTION();
+
 		vkDeviceWaitIdle(m_device->get_device());
 	}
 
 	//
 	void renderer::set_size(u32 width, u32 height) {
+
+		PFF_PROFILE_FUNCTION();
 
 		CORE_LOG(Trace, "Resize: [" << width << ", " << height << "]");
 		needs_to_resize = true;
@@ -234,6 +246,8 @@ namespace PFF {
 	//
 	VkCommandBuffer renderer::begin_frame() {
 
+		PFF_PROFILE_FUNCTION();
+
 		CORE_ASSERT(!m_is_frame_started, "", "Can not begin frame if frame already in progress");
 
 		auto result = m_swapchain->acquireNextImage(&m_current_image_index);
@@ -259,6 +273,8 @@ namespace PFF {
 	//
 	void renderer::end_frame() {
 
+		PFF_PROFILE_FUNCTION();
+
 		CORE_ASSERT(m_is_frame_started, "", "Can not end frame if not frame was started");
 
 		auto command_buffer = get_current_command_buffer();
@@ -278,6 +294,8 @@ namespace PFF {
 
 	//
 	void renderer::begin_swapchain_renderpass(VkCommandBuffer commandbuffer) {
+
+		PFF_PROFILE_FUNCTION();
 
 		CORE_ASSERT(m_is_frame_started, "", "Can not begin frame if frame already in progress");
 		CORE_ASSERT(commandbuffer == get_current_command_buffer(), "", "Can not begin render pass on command buffer from diffrent frame");
@@ -314,6 +332,8 @@ namespace PFF {
 	//
 	void renderer::end_swapchain_renderpass(VkCommandBuffer commandbuffer) {
 
+		PFF_PROFILE_FUNCTION();
+
 		CORE_ASSERT(m_is_frame_started, "", "Can not end frame if frame already in progress");
 		CORE_ASSERT(commandbuffer == get_current_command_buffer(), "", "Can not end render pass on command buffer from diffrent frame");
 
@@ -323,6 +343,7 @@ namespace PFF {
 	//
 	void renderer::create_command_buffer() {
 
+		PFF_PROFILE_FUNCTION();
 
 		m_command_buffers.resize(m_swapchain->get_image_count());
 
@@ -341,6 +362,8 @@ namespace PFF {
 
 	//
 	void renderer::recreate_swapchian() {
+
+		PFF_PROFILE_FUNCTION();
 
 		// CORE_LOG(Warn, "size: " << m_window->get_extend().width << " / " << m_window->get_extend().height);
 

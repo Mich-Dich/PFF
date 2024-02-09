@@ -9,17 +9,23 @@ namespace PFF {
     vk_swapchain::vk_swapchain(std::shared_ptr<vk_device>& device, VkExtent2D window_extent)
         : m_device{ device }, m_window_extent{ window_extent } {
 
+        PFF_PROFILE_FUNCTION();
+
         init();
     }
 
     vk_swapchain::vk_swapchain(std::shared_ptr<vk_device>& device, VkExtent2D window_extent, std::shared_ptr<vk_swapchain> previous)
         : m_device{ device }, m_window_extent{ window_extent }, m_old_swapchain{ previous } {
 
+        PFF_PROFILE_FUNCTION();
+
         init();
         m_old_swapchain.reset();      // clean up  old swapchain, not needed anymore
     }
 
     vk_swapchain::~vk_swapchain() {
+
+        PFF_PROFILE_FUNCTION();
 
         for (auto imageView : m_swap_chain_image_views) {
             vkDestroyImageView(m_device->get_device(), imageView, nullptr);
@@ -57,6 +63,8 @@ namespace PFF {
 
     VkResult vk_swapchain::acquireNextImage(u32* imageIndex) {
 
+        PFF_PROFILE_FUNCTION();
+
         vkWaitForFences(m_device->get_device(), 1, &m_in_flight_fences[m_current_frame], VK_TRUE, std::numeric_limits<uint64_t>::max());
 
         VkResult result = vkAcquireNextImageKHR(
@@ -72,6 +80,8 @@ namespace PFF {
     }
 
     VkResult vk_swapchain::submitCommandBuffers(const VkCommandBuffer* buffers, u32* imageIndex) {
+
+        PFF_PROFILE_FUNCTION();
 
         if (m_images_in_flight[*imageIndex] != VK_NULL_HANDLE) {
             vkWaitForFences(m_device->get_device(), 1, &m_images_in_flight[*imageIndex], VK_TRUE, UINT64_MAX);
@@ -118,6 +128,8 @@ namespace PFF {
 
     void vk_swapchain::init() {
 
+        PFF_PROFILE_FUNCTION();
+
         createSwapChain();
         createImageViews();
         createRenderPass();
@@ -127,6 +139,9 @@ namespace PFF {
     }
 
     void vk_swapchain::createSwapChain() {
+
+        PFF_PROFILE_FUNCTION();
+
         SwapChainSupportDetails swapChainSupport = m_device->get_swap_chain_support();
 
         VkSurfaceFormatKHR surfaceFormat = chooseSwapSurfaceFormat(swapChainSupport.formats);
@@ -182,6 +197,9 @@ namespace PFF {
     }
 
     void vk_swapchain::createImageViews() {
+
+        PFF_PROFILE_FUNCTION();
+
         m_swap_chain_image_views.resize(m_swap_chain_images.size());
         for (size_t i = 0; i < m_swap_chain_images.size(); i++) {
             VkImageViewCreateInfo viewInfo{};
@@ -200,6 +218,8 @@ namespace PFF {
     }
 
     void vk_swapchain::createRenderPass() {
+
+        PFF_PROFILE_FUNCTION();
 
         VkAttachmentDescription depthAttachment{};
         depthAttachment.format = findDepthFormat();
@@ -258,6 +278,8 @@ namespace PFF {
 
     void vk_swapchain::createFramebuffers() {
 
+        PFF_PROFILE_FUNCTION();
+
         m_swap_chain_framebuffers.resize(get_image_count());
         for (size_t i = 0; i < get_image_count(); i++) {
 
@@ -278,6 +300,8 @@ namespace PFF {
     }
 
     void vk_swapchain::createDepthResources() {
+
+        PFF_PROFILE_FUNCTION();
 
         VkFormat depthFormat = findDepthFormat();
         VkExtent2D m_swap_chain_extent = get_swapchain_extent();
@@ -322,6 +346,8 @@ namespace PFF {
 
     void vk_swapchain::createSyncObjects() {
 
+        PFF_PROFILE_FUNCTION();
+
         m_image_available_semaphores.resize(MAX_FRAMES_IN_FLIGHT);
         m_render_finished_semaphores.resize(MAX_FRAMES_IN_FLIGHT);
         m_in_flight_fences.resize(MAX_FRAMES_IN_FLIGHT);
@@ -343,6 +369,8 @@ namespace PFF {
 
     VkSurfaceFormatKHR vk_swapchain::chooseSwapSurfaceFormat(const std::vector<VkSurfaceFormatKHR>& availableFormats) {
 
+        PFF_PROFILE_FUNCTION();
+
         for (const auto& availableFormat : availableFormats) {
             if (availableFormat.format == VK_FORMAT_B8G8R8A8_UNORM && availableFormat.colorSpace == VK_COLOR_SPACE_SRGB_NONLINEAR_KHR) {
                 return availableFormat;
@@ -353,6 +381,8 @@ namespace PFF {
     }
 
     VkPresentModeKHR vk_swapchain::chooseSwapPresentMode(const std::vector<VkPresentModeKHR>& availablePresentModes) {
+
+        PFF_PROFILE_FUNCTION();
 
         for (const auto& availablePresentMode : availablePresentModes) {
             if (availablePresentMode == VK_PRESENT_MODE_MAILBOX_KHR)
@@ -372,6 +402,8 @@ namespace PFF {
 
     VkExtent2D vk_swapchain::chooseSwapExtent(const VkSurfaceCapabilitiesKHR& capabilities) {
 
+        PFF_PROFILE_FUNCTION();
+
         if (capabilities.currentExtent.width != std::numeric_limits<u32>::max())
             return capabilities.currentExtent;
 
@@ -389,6 +421,9 @@ namespace PFF {
     }
 
     VkFormat vk_swapchain::findDepthFormat() {
+
+        PFF_PROFILE_FUNCTION();
+
         return m_device->find_supported_format(
             { VK_FORMAT_D32_SFLOAT, VK_FORMAT_D32_SFLOAT_S8_UINT, VK_FORMAT_D24_UNORM_S8_UINT },
             VK_IMAGE_TILING_OPTIMAL,

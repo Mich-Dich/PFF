@@ -8,15 +8,21 @@ namespace PFF {
 
 	game_map::game_map() {
 
+		PFF_PROFILE_FUNCTION();
+
 		CORE_LOG(Info, "Init");
 	}
 
 	game_map::~game_map() {
 
+		PFF_PROFILE_FUNCTION();
+
 		CORE_LOG(Info, "Shutdown");
 	}
 
 	game_object* game_map::create_empty_game_object() {
+
+		PFF_PROFILE_FUNCTION();
 
 		m_game_objects.push_back(game_object::create_game_object());
 		return &m_game_objects[m_game_objects.size() - 1];

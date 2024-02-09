@@ -17,12 +17,15 @@ namespace PFF {
 
 	void camera::set_clipping_dis(const f32 near_dis, const f32 far_dis) {
 
+		PFF_PROFILE_FUNCTION();
 		
 		m_clipping_near = near_dis;
 		m_clipping_far = far_dis;
 	}
 
 	void camera::set_view_direction(glm::vec3 position, glm::vec3 direction, glm::vec3 up) {
+
+		PFF_PROFILE_FUNCTION();
 
 		const glm::vec3 w{ glm::normalize(direction) };
 		const glm::vec3 u{ glm::normalize(glm::cross(w, up)) };
@@ -44,11 +47,15 @@ namespace PFF {
 
 	void camera::set_view_target(glm::vec3 position, glm::vec3 target, glm::vec3 up) {
 
+		PFF_PROFILE_FUNCTION();
+
 		CORE_VALIDATE((target - position) != glm::vec3(0.0f, 0.0f, 0.0f), return, "", "Provided position and target are to close")
 		set_view_direction(position, target - position, up);
 	}
 
 	void camera::set_view_YXZ(glm::vec3 position, glm::vec3 rotation) {
+
+		PFF_PROFILE_FUNCTION();
 
 		const float c3 = glm::cos(rotation.z);
 		const float s3 = glm::sin(rotation.z);
@@ -75,6 +82,8 @@ namespace PFF {
 	}
 
 	void camera::set_view_XYZ(glm::vec3 position, glm::vec3 rotation) {
+
+		PFF_PROFILE_FUNCTION();
 
 		const float c1 = glm::cos(rotation.x);
 		const float s1 = glm::sin(rotation.x);
@@ -104,6 +113,8 @@ namespace PFF {
 
 	void camera::set_orthographic_projection(const f32 left, const  f32 right, const f32 top, const f32 bottom, const f32 near, const f32 far) {
 
+		PFF_PROFILE_FUNCTION();
+
 		m_clipping_near = near;
 		m_clipping_far = far;
 
@@ -117,6 +128,8 @@ namespace PFF {
 	}
 
 	void camera::set_perspective_projection(const f32 fov_y, const f32 aspect_ratio, const f32 near, const f32 far) {
+
+		PFF_PROFILE_FUNCTION();
 
 		CORE_ASSERT(glm::abs(aspect_ratio - std::numeric_limits<float>::epsilon()) > 0.0f, "", "Aspect ratio check failed: [aspect_ratio - epsilon] > 0.0f");
 		const float tanHalfFovy = tan(fov_y / 2.f);
@@ -135,11 +148,15 @@ namespace PFF {
 
 	void camera::set_aspect_ratio(f32 aspect_ratio) {
 
+		PFF_PROFILE_FUNCTION();
+
 		m_perspective_aspect_ratio = aspect_ratio;
 		update_perspective_projection();
 	}
 
 	void camera::set_fov_y(f32 fov_y) {
+
+		PFF_PROFILE_FUNCTION();
 
 		m_perspective_fov_y = fov_y;
 		update_perspective_projection();

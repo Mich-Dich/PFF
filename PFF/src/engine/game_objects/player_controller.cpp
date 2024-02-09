@@ -18,17 +18,23 @@
 namespace PFF {
 
 	player_controller::player_controller() {
-		
+
+		PFF_PROFILE_FUNCTION();
+
 		init();
 	}
 
 	player_controller::~player_controller() {
+
+		PFF_PROFILE_FUNCTION();
 
 		m_input_mapping.reset();
 		CORE_LOG(Info, "Shutdown");
 	}
 
 	void player_controller::set_world_layer_ref(world_layer* world_layer) {
+
+		PFF_PROFILE_FUNCTION();
 
 		m_world_layer = world_layer;
 	}
@@ -55,6 +61,8 @@ namespace PFF {
 	#define INPUT_ACTION_MODEFIER_AUTO_RESET			BIT(4)
 	*/
 	void player_controller::update_internal(f32 delta) {
+
+		PFF_PROFILE_FUNCTION();
 
 		for (u32 x = 0; x < m_input_mapping->get_length(); x++) {				// get input_action
 			input_action* action = m_input_mapping->get_action(x);
@@ -179,6 +187,8 @@ namespace PFF {
 
 	void player_controller::handle_event(event& event) {
 
+		PFF_PROFILE_FUNCTION();
+
 		if (event.is_in_category(EC_Input)) {
 
 			event_dispatcher dispatcher(event);
@@ -188,7 +198,9 @@ namespace PFF {
 	}
 
 	bool player_controller::handle_key_events(key_event& event) {
-		
+
+		PFF_PROFILE_FUNCTION();
+
 		//CORE_LOG(Trace, event.get_keycode());
 		for (u32 x = 0; x < m_input_mapping->get_length(); x++) {				// get input_action
 			input_action* action = m_input_mapping->get_action(x);
@@ -229,6 +241,8 @@ namespace PFF {
 
 
 	bool player_controller::handle_mouse_events(mouse_event& event) {
+
+		PFF_PROFILE_FUNCTION();
 
 		CORE_ASSERT(m_input_mapping, "", "m_input_mapping is not set");
 		// CORE_LOG(Trace, event << " key code: [" << std::setw(4) << static_cast<int32>(event.get_keycode()) << "] num of actions: " << m_input_mapping->get_length());

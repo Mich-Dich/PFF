@@ -9,6 +9,8 @@ namespace PFF {
 
     glm::mat4 transform_comp::mat4() {
 
+		PFF_PROFILE_FUNCTION();
+
 		const float c3 = glm::cos(rotation.z);
 		const float s3 = glm::sin(rotation.z);
 		const float c2 = glm::cos(rotation.x);
@@ -39,6 +41,8 @@ namespace PFF {
 	}
 
 	glm::mat4 transform_comp::mat4_XYZ() {
+
+		PFF_PROFILE_FUNCTION();
 
 		const float c1 = glm::cos(rotation.x);
 		const float s1 = glm::sin(rotation.x);
@@ -72,6 +76,8 @@ namespace PFF {
 
 
 	glm::mat3 transform_comp::normal_matrix() {
+
+		PFF_PROFILE_FUNCTION();
 
 		const float c3 = glm::cos(rotation.z);
 		const float s3 = glm::sin(rotation.z);
