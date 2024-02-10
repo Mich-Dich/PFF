@@ -23,7 +23,7 @@ namespace PFF {
 		ImGui::SetNextItemWidth(ImGui::GetColumnWidth());
 
 		if constexpr (std::is_same_v<T, bool>)
-			ImGui::Text("%s", bool_to_str(value));
+			ImGui::Text("%s", util::bool_to_str(value));
 
 		else if constexpr (std::is_arithmetic_v<T>)
 			ImGui::Text("%s", std::to_string(value).c_str());

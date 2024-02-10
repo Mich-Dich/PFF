@@ -236,7 +236,10 @@ namespace PFF {
 
 					ImGui::Text("performance timer");
 					ImGui::Separator();
-					ImGui::Text("current fps [%d/%d]", m_current_fps, m_target_fps);
+					if (m_limit_fps)
+						ImGui::Text("current fps    %d/%d", m_current_fps, m_target_fps);
+					else
+						ImGui::Text("current fps    %4d", m_current_fps);
 
 					// work_time
 					ImGui::Text("work time  ");

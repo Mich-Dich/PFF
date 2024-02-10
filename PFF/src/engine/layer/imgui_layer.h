@@ -28,8 +28,8 @@ namespace PFF {
 		void on_update(f32 delta_time) override;
 		void on_event(event& event) override;
 		void on_imgui_render() override;
-		void set_fps_values(u32 target_fps, u32 current_fps, f32 work_time, f32 sleep_time)
-			{ m_target_fps = target_fps; m_current_fps = current_fps; m_work_time = work_time; m_sleep_time = sleep_time;  }
+		void set_fps_values(bool limit_fps, u32 target_fps, u32 current_fps, f32 work_time, f32 sleep_time)
+			{ m_limit_fps = limit_fps, m_target_fps = target_fps; m_current_fps = current_fps; m_work_time = work_time; m_sleep_time = sleep_time;  }
 
 		void begin_frame();
 		void end_frame(VkCommandBuffer commandbuffer);
@@ -43,6 +43,7 @@ namespace PFF {
 		ImGuiContext* m_context;
 		f32 m_work_time, m_sleep_time;
 		u32 m_target_fps, m_current_fps;
+		bool m_limit_fps;
 		std::shared_ptr<renderer> m_renderer;
 		f32 m_font_size = 14.5f;
 	};

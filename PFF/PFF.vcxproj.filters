@@ -156,6 +156,7 @@
     <ClInclude Include="src\engine\render\frame_info.h" />
     <ClInclude Include="src\engine\render\vk_descripters.h" />
     <ClInclude Include="src\util\benchmarking\instrumentor.h" />
+    <ClInclude Include="src\util\core_config.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="src\application.cpp" />

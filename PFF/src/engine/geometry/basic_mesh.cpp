@@ -24,7 +24,7 @@ namespace std {
 	struct hash<PFF::basic_mesh::vertex> {
 		size_t operator()(PFF::basic_mesh::vertex const& vertex) const {
 			size_t seed = 0;
-			PFF::hash_combine(seed, vertex.position, vertex.color, vertex.normal, vertex.uv);
+			PFF::util::hash_combine(seed, vertex.position, vertex.color, vertex.normal, vertex.uv);
 			return seed;
 		}
 	};

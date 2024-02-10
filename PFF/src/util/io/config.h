@@ -69,10 +69,10 @@ namespace PFF {
 			check_for_configuration(config_file, section, key, m_buffer, override);
 
 			if constexpr (std::is_arithmetic_v<T>)
-				value = str_to_num<T>(m_buffer);
+				value = util::str_to_num<T>(m_buffer);
 
 			else if constexpr (std::is_same_v<T, bool>)
-				value = str_to_bool(m_buffer);
+				value = util::str_to_bool(m_buffer);
 
 			else if constexpr (std::is_convertible_v<T, std::string>)
 				value = m_buffer;

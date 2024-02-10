@@ -109,7 +109,7 @@ namespace PFF {
 			update(m_delta_time);	// potentally make every actor have own function (like UNREAL)
 			render(m_delta_time);	// potentally make every actor have own function (like UNREAL)
 
-			m_imgui_layer->set_fps_values((m_focus ? m_target_fps : m_nonefocus_fps), m_fps, static_cast<f32>(m_work_time * 1000), static_cast<f32>(m_sleep_time * 1000));
+			m_imgui_layer->set_fps_values(m_limit_fps, (m_focus ? m_target_fps : m_nonefocus_fps), m_fps, static_cast<f32>(m_work_time * 1000), static_cast<f32>(m_sleep_time * 1000));
 			m_renderer->draw_frame(m_delta_time);
 
 			// Simple FPS controller - needs work
@@ -169,8 +169,8 @@ namespace PFF {
 
 		PFF_PROFILE_FUNCTION();
 
-		fps_timer->end_measurement(m_fps, m_delta_time, m_work_time, m_sleep_time);
-		m_imgui_layer->set_fps_values((m_focus ? m_target_fps : m_nonefocus_fps), m_fps, static_cast<f32>(m_work_time * 1000), static_cast<f32>(m_sleep_time * 1000));
+		fps_timer->limit_fps(false, m_fps, m_delta_time, m_work_time, m_sleep_time);
+		m_imgui_layer->set_fps_values(m_limit_fps, (m_focus ? m_target_fps : m_nonefocus_fps), m_fps, static_cast<f32>(m_work_time * 1000), static_cast<f32>(m_sleep_time * 1000));
 		m_renderer->refresh(m_delta_time);
 		fps_timer->start_measurement();
 		return true;

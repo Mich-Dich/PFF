@@ -119,6 +119,7 @@ IF EXIST ..\bin\Release-windows-x86_64\PFF\PFF.dll\ (xcopy /Q /E /Y /I ..\bin\Re
   <ItemGroup>
     <ClInclude Include="src\engine\render\frame_info.h" />
     <ClInclude Include="src\engine\render\vk_descripters.h" />
+    <ClInclude Include="src\util\core_config.h" />
     <ClInclude Include="src\PFF.h" />
     <ClInclude Include="src\application.h" />
     <ClInclude Include="src\engine\Events\Event.h" />

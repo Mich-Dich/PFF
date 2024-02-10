@@ -1,6 +1,7 @@
 #pragma once
 #pragma warning(disable: 4251)
 
+#include "util/core_config.h"
 
 #undef ERROR
 
@@ -8,13 +9,8 @@
 	#define DEBUG_BREAK() __debugbreak()
 #endif // !DEBUG_BREAK
 
-
 #define APP_NAMESPACE			PFF
 #define PROJECT_FOLDER			"PFF"
-#define LOGGER_MACRP_PREFIX		PFF
-
-#define ENABLE_VALIDATION
-#define ENABLED_ASSERTS
 
 namespace APP_NAMESPACE {
 
@@ -111,13 +107,6 @@ namespace APP_NAMESPACE {
 //  4    =>   FATAL + ERROR + WARN + INFO + DEBUG + TRACE
 #define LOG_LEVEL_ENABLED 4
 #define CORE_LOG_LEVEL_ENABLED 4
-#define LOG_CLIENT_LEVEL_ENABLED 4
-#define ASSERTS_ENABLED 1
-#define MAX_MEASSGE_SIZE 1024
-
-
-
-#define THROW_ERR(message)						std::abort();
 
 //  ===================================================================================  Core Logger  ===================================================================================
 #ifdef PFF_INSIDE_ENGINE
@@ -162,7 +151,7 @@ namespace APP_NAMESPACE {
 
 	// ---------------------------------------------------------------------------  Assertion & Validation  ---------------------------------------------------------------------------
 
-#ifdef ENABLED_ASSERTS
+#if ENABLED_LOGGING_OF_ASSERTS
 	#define CORE_ASSERT(expr, successMsg, failureMsg)									\
 					if (expr) {														\
 						CORE_LOG(Trace, successMsg);								\
@@ -177,12 +166,11 @@ namespace APP_NAMESPACE {
 						DEBUG_BREAK();												\
 					}
 #else
-	#define CORE_ASSERT(expr, successMsg, failureMsg)								{expr;}
-	#define CORE_ASSERT_S(expr)														{expr;}
-#endif // ASSERTS_ENABLED
+	#define CORE_ASSERT(expr, successMsg, failureMsg)								if (!(expr)) { DEBUG_BREAK(); }
+	#define CORE_ASSERT_S(expr)														if (!(expr)) { DEBUG_BREAK(); }
+#endif // ENABLED_LOGGING_OF_ASSERTS
 
-
-#ifdef ENABLE_VALIDATION
+#if ENABLE_LOGGING_OF_VALIDATION
 	#define CORE_VALIDATE(expr, ReturnCommand, successMsg, failureMsg)				\
 					if (expr) {														\
 						CORE_LOG(Trace, successMsg);								\
@@ -197,8 +185,10 @@ namespace APP_NAMESPACE {
 						ReturnCommand;												\
 					}
 #else
-	#define CORE_VALIDATE(expr, successMsg, failureMsg, ReturnCommand)			{expr;}
-#endif // ENABLE_VALIDATION
+	#define CORE_VALIDATE(expr, ReturnCommand, successMsg, failureMsg)				if (!(expr)) { ReturnCommand; }
+	#define CORE_VALIDATE_S(expr, ReturnCommand)									if (!(expr)) { ReturnCommand; }
+
+#endif // ENABLE_LOGGING_OF_VALIDATION
 
 #endif //PFF_INSIDE_ENGINE
 
@@ -232,3 +222,43 @@ namespace APP_NAMESPACE {
 #endif
 
 #define LOG(severity, message)					LOG_##severity(message)
+
+
+#if ENABLED_LOGGING_OF_CLIENT_ASSERTS
+#define ASSERT(expr, successMsg, failureMsg)										\
+					if (expr) {														\
+						LOG(Trace, successMsg);										\
+					} else {														\
+						LOG(Fatal, failureMsg);										\
+						DEBUG_BREAK();												\
+					}
+
+#define ASSERT_S(expr)																\
+					if (!(expr)) {													\
+						LOG(Fatal, #expr);											\
+						DEBUG_BREAK();												\
+					}
+#else
+#define ASSERT(expr, successMsg, failureMsg)										if (!(expr)) { DEBUG_BREAK(); }
+#define ASSERT_S(expr)																if (!(expr)) { DEBUG_BREAK(); }
+#endif // ENABLED_LOGGING_OF_CLIENT_ASSERTS
+
+#if ENABLE_LOGGING_OF_CLIENT_VALIDATION
+#define VALIDATE(expr, ReturnCommand, successMsg, failureMsg)						\
+					if (expr) {														\
+						LOG(Trace, successMsg);										\
+					} else {														\
+						LOG(Warn, failureMsg);										\
+						ReturnCommand;												\
+					}
+
+#define VALIDATE_S(expr, ReturnCommand)												\
+					if (!expr) {													\
+						LOG(Warn, #expr);											\
+						ReturnCommand;												\
+					}
+#else
+#define VALIDATE(expr, ReturnCommand, successMsg, failureMsg)						if (!(expr)) { ReturnCommand; }
+#define VALIDATE_S(expr, ReturnCommand)												if (!(expr)) { ReturnCommand; }
+
+#endif // ENABLE_LOGGING_OF_CLIENT_VALIDATION

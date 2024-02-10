@@ -1,5 +1,7 @@
 #pragma once
 
+#include "util/core_config.h"
+
 #include "util/data_types.h"
 #include "util/logger.h"
 
@@ -181,68 +183,38 @@ namespace PFF {
 
 	};
 
-	// ==================================================================== InstrumentorUtils ====================================================================
-
-	namespace InstrumentorUtils {
-
-		template <size_t N>
-		struct ChangeResult {
-			char Data[N];
-		};
-
-		template <size_t N, size_t K>
-		constexpr auto CleanupOutputString(const char(&expr)[N], const char(&remove)[K]) {
-			ChangeResult<N> result = {};
-
-			size_t srcIndex = 0;
-			size_t dstIndex = 0;
-			while (srcIndex < N) {
-				size_t matchIndex = 0;
-				while (matchIndex < K - 1 && srcIndex + matchIndex < N - 1 && expr[srcIndex + matchIndex] == remove[matchIndex])
-					matchIndex++;
-				if (matchIndex == K - 1)
-					srcIndex += matchIndex;
-				result.Data[dstIndex++] = expr[srcIndex] == '"' ? '\'' : expr[srcIndex];
-				srcIndex++;
-			}
-			return result;
-		}
-
-	}
-
 }
 
 
-#define PFF_PROFILE 1
 #if PFF_PROFILE
+
 	// Resolve which function signature macro will be used
 	// NOTE: this is only resolved when the (pre)compiler starts, so the syntax highlighting could mark the wrong one in editor!
 	#if defined(__GNUC__) || (defined(__MWERKS__) && (__MWERKS__ >= 0x3000)) || (defined(__ICC) && (__ICC >= 600)) || defined(__ghs__)
-	#define PFF_FUNC_SIG __PRETTY_FUNCTION__
+		#define PFF_FUNC_SIG __PRETTY_FUNCTION__
 	#elif defined(__DMC__) && (__DMC__ >= 0x810)
-	#define PFF_FUNC_SIG __PRETTY_FUNCTION__
+		#define PFF_FUNC_SIG __PRETTY_FUNCTION__
 	#elif (defined(__FUNCSIG__) || (_MSC_VER))
-	#define PFF_FUNC_SIG __FUNCSIG__
+		#define PFF_FUNC_SIG __FUNCSIG__
 	#elif (defined(__INTEL_COMPILER) && (__INTEL_COMPILER >= 600)) || (defined(__IBMCPP__) && (__IBMCPP__ >= 500))
-	#define PFF_FUNC_SIG __FUNCTION__
+		#define PFF_FUNC_SIG __FUNCTION__
 	#elif defined(__BORLANDC__) && (__BORLANDC__ >= 0x550)
-	#define PFF_FUNC_SIG __FUNC__
+		#define PFF_FUNC_SIG __FUNC__
 	#elif defined(__STDC_VERSION__) && (__STDC_VERSION__ >= 199901)
-	#define PFF_FUNC_SIG __func__
+		#define PFF_FUNC_SIG __func__
 	#elif defined(__cplusplus) && (__cplusplus >= 201103)
-	#define PFF_FUNC_SIG __func__
+		#define PFF_FUNC_SIG __func__
 	#else
-	#define PFF_FUNC_SIG "PFF_FUNC_SIG unknown!"
+		#define PFF_FUNC_SIG "PFF_FUNC_SIG unknown!"
 	#endif
 
-	#define PFF_PROFILE_BEGIN_SESSION(name, directory, filename)	::PFF::instrumentor::get().begin_session(name, directory, filename)
-
-	#define PFF_PROFILE_END_SESSION()								::PFF::instrumentor::get().end_session()
-
-	#define PFF_PROFILE_SCOPE_LINE2(name, line)						constexpr auto fixedName##line = ::PFF::InstrumentorUtils::CleanupOutputString(name, "__cdecl ");		\
-																	::PFF::instrumentor_timer benchmark_timer##line(fixedName##line.Data)
-
+	// double abstraction to take line-number into name string
+	#define PFF_PROFILE_SCOPE_LINE2(name, line)						constexpr auto fixedName##line = ::PFF::util::remove_substring(name, "__cdecl ");		\
+																	::PFF::instrumentor_timer benchmark_timer##line(fixedName##line.data)
 	#define PFF_PROFILE_SCOPE_LINE(name, line)						PFF_PROFILE_SCOPE_LINE2(name, line)
+
+	#define PFF_PROFILE_BEGIN_SESSION(name, directory, filename)	::PFF::instrumentor::get().begin_session(name, directory, filename)
+	#define PFF_PROFILE_END_SESSION()								::PFF::instrumentor::get().end_session()
 	#define PFF_PROFILE_SCOPE(name)									PFF_PROFILE_SCOPE_LINE(name, __LINE__)
 	#define PFF_PROFILE_FUNCTION()									PFF_PROFILE_SCOPE(PFF_FUNC_SIG)
 #else

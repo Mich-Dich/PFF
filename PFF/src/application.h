@@ -68,9 +68,9 @@ namespace PFF {
 		bool m_running = true;
 
 		bool m_limit_fps = true;
-		u32 m_target_fps = 60;
+		u32 m_target_fps = 200;
+		u32 m_nonefocus_fps = 35;
 		u32 m_fps = 0;
-		u32 m_nonefocus_fps = 30;
 		f32 m_delta_time = 0.0f;
 		f64 m_work_time = 0, m_sleep_time = 0;
 		std::unique_ptr<timer> fps_timer{};
