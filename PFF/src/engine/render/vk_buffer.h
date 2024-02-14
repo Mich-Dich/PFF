@@ -6,13 +6,9 @@ namespace PFF {
 
     class vk_buffer {
     public:
-        vk_buffer(
-            std::shared_ptr<vk_device> device,
-            VkDeviceSize m_instance_size,
-            u32 m_instance_count,
-            VkBufferUsageFlags m_usage_flags,
-            VkMemoryPropertyFlags m_memory_property_flags,
-            VkDeviceSize minOffsetAlignment = 1);
+        vk_buffer(std::shared_ptr<vk_device> device, VkDeviceSize m_instance_size, u32 m_instance_count, VkBufferUsageFlags m_usage_flags,
+            VkMemoryPropertyFlags m_memory_property_flags, VkDeviceSize minOffsetAlignment = 1);
+
         ~vk_buffer();
 
         DELETE_COPY(vk_buffer);

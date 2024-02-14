@@ -7,28 +7,30 @@ namespace PFF {
 
     // ==================================================================== Descriptor Set Layout Builder ====================================================================
 
-    descriptor_set_layout::builder& descriptor_set_layout::builder::addBinding(u32 binding, VkDescriptorType descriptorType, VkShaderStageFlags stageFlags, u32 count) {
+    vk_descriptor_set_layout::builder& vk_descriptor_set_layout::builder::add_binding(u32 binding, VkDescriptorType descriptorType, VkShaderStageFlags stageFlags, u32 count) {
 
         PFF_PROFILE_FUNCTION();
 
-        assert(bindings.count(binding) == 0 && "Binding already in use");
+        CORE_ASSERT(m_bindings.count(binding) == 0, "", "Binding already in use");
+
         VkDescriptorSetLayoutBinding layoutBinding{};
         layoutBinding.binding = binding;
         layoutBinding.descriptorType = descriptorType;
         layoutBinding.descriptorCount = count;
         layoutBinding.stageFlags = stageFlags;
-        bindings[binding] = layoutBinding;
+        // layoutBinding.pImmutableSamplers = nullptr;
+        m_bindings[binding] = layoutBinding;
         return *this;
     }
 
-    std::unique_ptr<descriptor_set_layout> descriptor_set_layout::builder::build() const {
-        return std::make_unique<descriptor_set_layout>(m_device, bindings);
+    std::unique_ptr<vk_descriptor_set_layout> vk_descriptor_set_layout::builder::build() const {
+        return std::make_unique<vk_descriptor_set_layout>(m_device, m_bindings);
     }
 
     // ==================================================================== Descriptor Set Layout ====================================================================
 
-    descriptor_set_layout::descriptor_set_layout(vk_device& device, std::unordered_map<u32, VkDescriptorSetLayoutBinding> bindings)
-        : m_device{ device }, bindings{ bindings } {
+    vk_descriptor_set_layout::vk_descriptor_set_layout(std::shared_ptr<vk_device> device, std::unordered_map<u32, VkDescriptorSetLayoutBinding> bindings)
+        : m_device{ device }, m_bindings{ bindings } {
 
         PFF_PROFILE_FUNCTION();
 
@@ -37,112 +39,111 @@ namespace PFF {
             setLayoutBindings.push_back(kv.second);
         }
 
-        VkDescriptorSetLayoutCreateInfo descriptorSetLayoutInfo{};
-        descriptorSetLayoutInfo.sType = VK_STRUCTURE_TYPE_DESCRIPTOR_SET_LAYOUT_CREATE_INFO;
-        descriptorSetLayoutInfo.bindingCount = static_cast<u32>(setLayoutBindings.size());
-        descriptorSetLayoutInfo.pBindings = setLayoutBindings.data();
+        VkDescriptorSetLayoutCreateInfo DSL_CI{};
+        DSL_CI.sType = VK_STRUCTURE_TYPE_DESCRIPTOR_SET_LAYOUT_CREATE_INFO;
+        DSL_CI.bindingCount = static_cast<u32>(setLayoutBindings.size());
+        DSL_CI.pBindings = setLayoutBindings.data();
 
-        CORE_ASSERT_S(vkCreateDescriptorSetLayout(m_device.get_device(), &descriptorSetLayoutInfo, nullptr, &descriptorSetLayout) == VK_SUCCESS);
+        CORE_ASSERT_S(vkCreateDescriptorSetLayout(m_device->get_device(), &DSL_CI, nullptr, &m_descriptor_set_layout) == VK_SUCCESS);
     }
 
-    descriptor_set_layout::~descriptor_set_layout() {
-        vkDestroyDescriptorSetLayout(m_device.get_device(), descriptorSetLayout, nullptr);
+    vk_descriptor_set_layout::~vk_descriptor_set_layout() {
+        vkDestroyDescriptorSetLayout(m_device->get_device(), m_descriptor_set_layout, nullptr);
     }
 
     // ==================================================================== Descriptor Pool Builder ====================================================================
 
-    descriptor_pool::builder& descriptor_pool::builder::addPoolSize(VkDescriptorType descriptorType, u32 count) {
+    vk_descriptor_pool::builder& vk_descriptor_pool::builder::addPoolSize(VkDescriptorType descriptorType, u32 count) {
 
-        poolSizes.push_back({ descriptorType, count });
+        m_pool_sizes.push_back({ descriptorType, count });
         return *this;
     }
 
-    descriptor_pool::builder& descriptor_pool::builder::setPoolFlags(VkDescriptorPoolCreateFlags flags) {
+    vk_descriptor_pool::builder& vk_descriptor_pool::builder::setPoolFlags(VkDescriptorPoolCreateFlags flags) {
 
-        poolFlags = flags;
+        m_poolFlags = flags;
         return *this;
     }
-    descriptor_pool::builder& descriptor_pool::builder::setMaxSets(u32 count) {
+    vk_descriptor_pool::builder& vk_descriptor_pool::builder::setMaxSets(u32 count) {
 
-        maxSets = count;
+        m_maxSets = count;
         return *this;
     }
 
-    std::unique_ptr<descriptor_pool> descriptor_pool::builder::build() const {
+    std::unique_ptr<vk_descriptor_pool> vk_descriptor_pool::builder::build() const {
 
-        return std::make_unique<descriptor_pool>(m_device, maxSets, poolFlags, poolSizes);
+        return std::make_unique<vk_descriptor_pool>(m_device, m_maxSets, m_poolFlags, m_pool_sizes);
     }
 
     // ==================================================================== Descriptor Pool ====================================================================
 
-    descriptor_pool::descriptor_pool(vk_device& device, u32 maxSets, VkDescriptorPoolCreateFlags poolFlags, const std::vector<VkDescriptorPoolSize>& poolSizes)
+    vk_descriptor_pool::vk_descriptor_pool(std::shared_ptr<vk_device> device, u32 maxSets, VkDescriptorPoolCreateFlags poolFlags, const std::vector<VkDescriptorPoolSize>& poolSizes)
         : m_device{ device } {
 
         PFF_PROFILE_FUNCTION();
 
-        VkDescriptorPoolCreateInfo descriptorPoolInfo{};
-        descriptorPoolInfo.sType = VK_STRUCTURE_TYPE_DESCRIPTOR_POOL_CREATE_INFO;
-        descriptorPoolInfo.poolSizeCount = static_cast<u32>(poolSizes.size());
-        descriptorPoolInfo.pPoolSizes = poolSizes.data();
-        descriptorPoolInfo.maxSets = maxSets;
-        descriptorPoolInfo.flags = poolFlags;
+        VkDescriptorPoolCreateInfo DP_CI{};
+        DP_CI.sType = VK_STRUCTURE_TYPE_DESCRIPTOR_POOL_CREATE_INFO;
+        DP_CI.poolSizeCount = static_cast<u32>(poolSizes.size());
+        DP_CI.pPoolSizes = poolSizes.data();
+        DP_CI.maxSets = maxSets;
+        DP_CI.flags = poolFlags;
 
-        CORE_ASSERT_S(vkCreateDescriptorPool(m_device.get_device(), &descriptorPoolInfo, nullptr, &descriptorPool) == VK_SUCCESS);
+        CORE_ASSERT_S(vkCreateDescriptorPool(m_device->get_device(), &DP_CI, nullptr, &m_descriptorPool) == VK_SUCCESS);
     }
 
-    descriptor_pool::~descriptor_pool() {
+    vk_descriptor_pool::~vk_descriptor_pool() {
 
         PFF_PROFILE_FUNCTION();
 
-        vkDestroyDescriptorPool(m_device.get_device(), descriptorPool, nullptr);
+        vkDestroyDescriptorPool(m_device->get_device(), m_descriptorPool, nullptr);
     }
 
-    bool descriptor_pool::allocate_descriptor_set( const VkDescriptorSetLayout descriptorSetLayout, VkDescriptorSet& descriptor) const {
+    bool vk_descriptor_pool::allocate_descriptor_set( const VkDescriptorSetLayout descriptorSetLayout, VkDescriptorSet& descriptor) const {
 
         PFF_PROFILE_FUNCTION();
 
-        VkDescriptorSetAllocateInfo allocInfo{};
-        allocInfo.sType = VK_STRUCTURE_TYPE_DESCRIPTOR_SET_ALLOCATE_INFO;
-        allocInfo.descriptorPool = descriptorPool;
-        allocInfo.pSetLayouts = &descriptorSetLayout;
-        allocInfo.descriptorSetCount = 1;
+        VkDescriptorSetAllocateInfo CS_AI{};
+        CS_AI.sType = VK_STRUCTURE_TYPE_DESCRIPTOR_SET_ALLOCATE_INFO;
+        CS_AI.descriptorPool = m_descriptorPool;
+        CS_AI.pSetLayouts = &descriptorSetLayout;
+        CS_AI.descriptorSetCount = 1;
 
-        // Might want to create a "DescriptorPoolManager" class that handles this case, and builds
-        // a new pool whenever an old pool fills up. But this is beyond our current scope
-        CORE_VALIDATE_S(vkAllocateDescriptorSets(m_device.get_device(), &allocInfo, &descriptor) == VK_SUCCESS, return false);
+        // Might want to create a "DescriptorPoolManager" class that handles this case, and builds a new pool whenever an old pool fills up. But this is beyond current scope
+        CORE_VALIDATE_S(vkAllocateDescriptorSets(m_device->get_device(), &CS_AI, &descriptor) == VK_SUCCESS, return false);
         return true;
     }
 
-    void descriptor_pool::freeDescriptors(std::vector<VkDescriptorSet>& descriptors) const {
+    void vk_descriptor_pool::freeDescriptors(std::vector<VkDescriptorSet>& descriptors) const {
 
         PFF_PROFILE_FUNCTION();
 
         vkFreeDescriptorSets(
-            m_device.get_device(),
-            descriptorPool,
+            m_device->get_device(),
+            m_descriptorPool,
             static_cast<u32>(descriptors.size()),
             descriptors.data());
     }
 
-    void descriptor_pool::resetPool() {
+    void vk_descriptor_pool::resetPool() {
 
         PFF_PROFILE_FUNCTION();
 
-        vkResetDescriptorPool(m_device.get_device(), descriptorPool, 0);
+        vkResetDescriptorPool(m_device->get_device(), m_descriptorPool, 0);
     }
 
     // ==================================================================== Descriptor Writer ====================================================================
 
-    descriptor_writer::descriptor_writer(descriptor_set_layout& setLayout, descriptor_pool& pool)
-        : setLayout{ setLayout }, pool{ pool } {}
+    vk_descriptor_writer::vk_descriptor_writer(vk_descriptor_set_layout& setLayout, vk_descriptor_pool& pool)
+        : m_setLayout{ setLayout }, m_pool{ pool } {}
 
-    descriptor_writer& descriptor_writer::writeBuffer(u32 binding, VkDescriptorBufferInfo* bufferInfo) {
+    vk_descriptor_writer& vk_descriptor_writer::write_buffer(u32 binding, VkDescriptorBufferInfo* bufferInfo) {
 
         PFF_PROFILE_FUNCTION();
 
-        CORE_ASSERT(setLayout.bindings.count(binding) == 1, "", "Layout does not contain specified binding");
+        CORE_ASSERT(m_setLayout.m_bindings.count(binding) == 1, "", "Layout does not contain specified binding");
 
-        auto& bindingDescription = setLayout.bindings[binding];
+        auto& bindingDescription = m_setLayout.m_bindings[binding];
         CORE_ASSERT(bindingDescription.descriptorCount == 1, "", "Binding single descriptor info, but binding expects multiple");
 
         VkWriteDescriptorSet write{};
@@ -152,17 +153,17 @@ namespace PFF {
         write.pBufferInfo = bufferInfo;
         write.descriptorCount = 1;
 
-        writes.push_back(write);
+        m_writes.push_back(write);
         return *this;
     }
 
-    descriptor_writer& descriptor_writer::writeImage(u32 binding, VkDescriptorImageInfo* imageInfo) {
+    vk_descriptor_writer& vk_descriptor_writer::write_image(u32 binding, VkDescriptorImageInfo* imageInfo) {
 
         PFF_PROFILE_FUNCTION();
 
-        CORE_ASSERT(setLayout.bindings.count(binding) == 1, "", "Layout does not contain specified binding");
+        CORE_ASSERT(m_setLayout.m_bindings.count(binding) == 1, "", "Layout does not contain specified binding");
 
-        auto& bindingDescription = setLayout.bindings[binding];
+        auto& bindingDescription = m_setLayout.m_bindings[binding];
         CORE_ASSERT(bindingDescription.descriptorCount == 1, "", "Binding single descriptor info, but binding expects multiple");
 
         VkWriteDescriptorSet write{};
@@ -172,15 +173,15 @@ namespace PFF {
         write.pImageInfo = imageInfo;
         write.descriptorCount = 1;
 
-        writes.push_back(write);
+        m_writes.push_back(write);
         return *this;
     }
 
-    bool descriptor_writer::build(VkDescriptorSet& set) {
+    bool vk_descriptor_writer::build(VkDescriptorSet& set) {
 
         PFF_PROFILE_FUNCTION();
 
-        bool success = pool.allocate_descriptor_set(setLayout.getDescriptorSetLayout(), set);
+        bool success = m_pool.allocate_descriptor_set(m_setLayout.get_descriptor_set_layout(), set);
         if (!success) {
             return false;
         }
@@ -188,14 +189,14 @@ namespace PFF {
         return true;
     }
 
-    void descriptor_writer::overwrite(VkDescriptorSet& set) {
+    void vk_descriptor_writer::overwrite(VkDescriptorSet& set) {
 
         PFF_PROFILE_FUNCTION();
 
-        for (auto& write : writes) {
+        for (auto& write : m_writes) {
             write.dstSet = set;
         }
-        vkUpdateDescriptorSets(pool.m_device.get_device(), static_cast<u32>(writes.size()), writes.data(), 0, nullptr);
+        vkUpdateDescriptorSets(m_pool.m_device->get_device(), static_cast<u32>(m_writes.size()), m_writes.data(), 0, nullptr);
     }
 
 }  // namespace lve

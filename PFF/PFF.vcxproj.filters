@@ -31,6 +31,9 @@
     <Filter Include="util">
       <UniqueIdentifier>{43339F7C-2F6A-A00D-D856-8610C46C1C0F}</UniqueIdentifier>
     </Filter>
+    <Filter Include="util\benchmarking">
+      <UniqueIdentifier>{FB59FD75-6770-FB0B-B0E7-862D1C3DCC93}</UniqueIdentifier>
+    </Filter>
     <Filter Include="util\io">
       <UniqueIdentifier>{4AE65B48-B6C5-DAE3-BFDD-65BA2B3C4145}</UniqueIdentifier>
     </Filter>
@@ -104,6 +107,9 @@
     <ClInclude Include="src\engine\platform\pff_window.h">
       <Filter>engine\platform</Filter>
     </ClInclude>
+    <ClInclude Include="src\engine\render\frame_info.h">
+      <Filter>engine\render</Filter>
+    </ClInclude>
     <ClInclude Include="src\engine\render\render_system.h">
       <Filter>engine\render</Filter>
     </ClInclude>
@@ -111,6 +117,9 @@
       <Filter>engine\render</Filter>
     </ClInclude>
     <ClInclude Include="src\engine\render\vk_buffer.h">
+      <Filter>engine\render</Filter>
+    </ClInclude>
+    <ClInclude Include="src\engine\render\vk_descripters.h">
       <Filter>engine\render</Filter>
     </ClInclude>
     <ClInclude Include="src\engine\render\vk_device.h">
@@ -123,6 +132,12 @@
       <Filter>engine\render</Filter>
     </ClInclude>
     <ClInclude Include="src\entry_point.h" />
+    <ClInclude Include="src\util\benchmarking\instrumentor.h">
+      <Filter>util\benchmarking</Filter>
+    </ClInclude>
+    <ClInclude Include="src\util\core_config.h">
+      <Filter>util</Filter>
+    </ClInclude>
     <ClInclude Include="src\util\data_types.h">
       <Filter>util</Filter>
     </ClInclude>
@@ -153,10 +168,6 @@
     <ClInclude Include="src\util\util.h">
       <Filter>util</Filter>
     </ClInclude>
-    <ClInclude Include="src\engine\render\frame_info.h" />
-    <ClInclude Include="src\engine\render\vk_descripters.h" />
-    <ClInclude Include="src\util\benchmarking\instrumentor.h" />
-    <ClInclude Include="src\util\core_config.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="src\application.cpp" />
@@ -214,6 +225,9 @@
     <ClCompile Include="src\engine\render\vk_buffer.cpp">
       <Filter>engine\render</Filter>
     </ClCompile>
+    <ClCompile Include="src\engine\render\vk_descripters.cpp">
+      <Filter>engine\render</Filter>
+    </ClCompile>
     <ClCompile Include="src\engine\render\vk_device.cpp">
       <Filter>engine\render</Filter>
     </ClCompile>
@@ -238,6 +252,5 @@
     <ClCompile Include="src\util\timer.cpp">
       <Filter>util</Filter>
     </ClCompile>
-    <ClCompile Include="src\engine\render\vk_descripters.cpp" />
   </ItemGroup>
 </Project>

@@ -7,14 +7,14 @@ SETLOCAL EnableDelayedExpansion
 
 
 echo.
-echo ===============================================  Building PFF (Procedurally Focused Framework)  ===============================================
+echo ======== Building PFF (Procedurally Focused Framework)
 echo.
 
-echo =================================== Compile VS 2022 Solution:
+echo -------- Compile VS 2022 Solution:
 call vendor\premake\premake5.exe vs2022
 echo.
 
-echo =================================== Compile Result:
+echo -------- Compile Result:
 if %errorlevel% neq 0 (
     echo !ESC![31mBUILD FAILED!ESC![0m the premake script encountered [%errorlevel%] errors
 ) else (

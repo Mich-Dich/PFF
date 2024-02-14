@@ -14,6 +14,7 @@ namespace PFF {
 		PFF::input_action capture_mouse;
 		PFF::input_action change_move_speed;
 		PFF::input_action look;
+		PFF::input_action toggle_fps;
 
 	};
 
@@ -71,6 +72,18 @@ namespace PFF {
 			{key_code::mouse_moved_y, INPUT_ACTION_TRIGGER_MOUSE_POS_AND_NEG , INPUT_ACTION_MODEFIER_AXIS_2 | INPUT_ACTION_MODEFIER_NEGATE},
 		};
 		REGISTER_INPUT_ACTION(look);
+
+
+		toggle_fps = PFF::input_action{};
+		toggle_fps.description = "toggle the fps limiter";
+		toggle_fps.triger_when_paused = false;
+		toggle_fps.modefier_flags = 0;
+		toggle_fps.value = PFF::input_value::_bool;
+		toggle_fps.duration_in_sec = 0.f;
+		toggle_fps.keys = {
+			{key_code::key_P, INPUT_ACTION_TRIGGER_KEY_DOWN},
+		};
+		REGISTER_INPUT_ACTION(toggle_fps);
 
 	}
 

@@ -19,12 +19,12 @@ namespace PFF {
 
 		//  bool triger_when_paused;													// SAVE
 		//  input_value value;															// SAVE
-		//  union {																		// DOESNT NEED TO BE SAVED
-		//  	bool boolean;															// DOESNT NEED TO BE SAVED
-		//  	f32 axis_1d;															// DOESNT NEED TO BE SAVED
-		//  	glm::vec2 axis_2d{};													// DOESNT NEED TO BE SAVED
-		//  } data;																		// DOESNT NEED TO BE SAVED
-		//  std::chrono::time_point<std::chrono::high_resolution_clock> time_stamp;		// DOESNT NEED TO BE SAVED
+		//  union {																		// NO NEED TO SAVE
+		//  	bool boolean;															// NO NEED TO SAVE
+		//  	f32 axis_1d;															// NO NEED TO SAVE
+		//  	glm::vec2 axis_2d{};													// NO NEED TO SAVE
+		//  } data;																		// NO NEED TO SAVE
+		//  std::chrono::time_point<std::chrono::high_resolution_clock> time_stamp;		// NO NEED TO SAVE
 		//  f32 duration_in_sec;														// SAVE
 		//  std::vector<key_details> keys;												// SAVE
 

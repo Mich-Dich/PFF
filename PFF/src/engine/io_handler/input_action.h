@@ -5,14 +5,16 @@ namespace PFF {
 
 	// --------------------------------------------------- trigger and modefier flags ---------------------------------------------------
 
-	#define INPUT_ACTION_TRIGGER_KEY_DOWN				BIT(0)
-	#define INPUT_ACTION_TRIGGER_KEY_UP					BIT(1)
-	#define INPUT_ACTION_TRIGGER_KEY_HOLD				BIT(2)
-	#define INPUT_ACTION_TRIGGER_KEY_TAP				BIT(3)
+	#define INPUT_ACTION_TRIGGER_KEY_DOWN				BIT(0)		// activate input when key is pressed down (can repeat)
+	#define INPUT_ACTION_TRIGGER_KEY_UP					BIT(1)		// activate input when key NOT pressed (can repeat)
+	#define INPUT_ACTION_TRIGGER_KEY_HOLD				BIT(2)		// activate input when key down LONGER than [duration_in_sec] in input_action struct (can repeat)
+	#define INPUT_ACTION_TRIGGER_KEY_TAP				BIT(3)		// activate input when key down SHORTER than [duration_in_sec] in input_action struct (can repeat)
+	#define INPUT_ACTION_TRIGGER_KEY_MOVE_DOWN			BIT(4)		// activate input when starting to press a key (can NOT repeat)
+	#define INPUT_ACTION_TRIGGER_KEY_MOVE_UP			BIT(5)		// activate input when releasing a key (can NOT repeat)
 
-	#define INPUT_ACTION_TRIGGER_MOUSE_POSITIVE			BIT(4)
-	#define INPUT_ACTION_TRIGGER_MOUSE_NEGATIVE			BIT(5)
-	#define INPUT_ACTION_TRIGGER_MOUSE_POS_AND_NEG		BIT(6)
+	#define INPUT_ACTION_TRIGGER_MOUSE_POSITIVE			BIT(10)
+	#define INPUT_ACTION_TRIGGER_MOUSE_NEGATIVE			BIT(11)
+	#define INPUT_ACTION_TRIGGER_MOUSE_POS_AND_NEG		BIT(12)
 
 	#define INPUT_ACTION_MODEFIER_NEGATE				BIT(0)
 	#define INPUT_ACTION_MODEFIER_VEC_NORMAL			BIT(1)

@@ -27,7 +27,7 @@ namespace PFF {
 
 	struct simple_push_constant_data {
 
-		glm::mat4 transform{ 1.0f };
+		glm::mat4 modle_matrix{ 1.0f };
 		glm::mat4 normal_matrix{ 1.0f };
 	};
 
@@ -61,7 +61,7 @@ namespace PFF {
 
 		m_vk_pipeline->bind_commnad_buffers(frame_info.command_buffer);
 
-		auto projection_view = frame_info.camera->get_projection() * frame_info.camera->get_view();
+		vkCmdBindDescriptorSets(frame_info.command_buffer, VK_PIPELINE_BIND_POINT_GRAPHICS, m_pipeline_layout, 0, 1, &frame_info.global_descriptor_set, 0, nullptr);
 
 		/*for (int i = 0; i < 4; ++i) {
 			for (int j = 0; j < 4; ++j) {
@@ -73,8 +73,7 @@ namespace PFF {
 		for (auto& obj : game_objects) {
 			
 			simple_push_constant_data PCD{};
-			auto modle_matrix = obj.transform.mat4();
-			PCD.transform = projection_view * modle_matrix;
+			PCD.modle_matrix = obj.transform.mat4();
 			PCD.normal_matrix = obj.transform.normal_matrix();
 
 			vkCmdPushConstants(frame_info.command_buffer, m_pipeline_layout, VK_SHADER_STAGE_VERTEX_BIT | VK_SHADER_STAGE_FRAGMENT_BIT, 0, sizeof(simple_push_constant_data), &PCD);
@@ -93,10 +92,12 @@ namespace PFF {
 		push_constant_range.offset = 0;
 		push_constant_range.size = sizeof(simple_push_constant_data);
 
+		std::vector<VkDescriptorSetLayout> descriptor_set_layouts{ descriptor_set_layout };
+
 		VkPipelineLayoutCreateInfo pipeline_layout_CI{};
 		pipeline_layout_CI.sType = VK_STRUCTURE_TYPE_PIPELINE_LAYOUT_CREATE_INFO;
-		pipeline_layout_CI.setLayoutCount = 0;
-		pipeline_layout_CI.pSetLayouts = &descriptor_set_layout;
+		pipeline_layout_CI.setLayoutCount = static_cast<u32>(descriptor_set_layouts.size());
+		pipeline_layout_CI.pSetLayouts = descriptor_set_layouts.data();
 		pipeline_layout_CI.pushConstantRangeCount = 1;
 		pipeline_layout_CI.pPushConstantRanges = &push_constant_range;
 

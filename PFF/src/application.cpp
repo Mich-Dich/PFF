@@ -44,7 +44,7 @@ namespace PFF {
 		s_instance = this;
 
 		config::init();
-
+		
 		// init FPS system
 		fps_timer = std::make_unique<timer>();
 		fps_timer->set_fps_settings(m_target_fps);
@@ -61,8 +61,8 @@ namespace PFF {
 
 		m_renderer->set_world_Layer(m_world_layer);
 		m_renderer->set_state(system_state::active);
-		init();					// init user code / potentally make every actor have own function (like UNREAL)
 
+		init();					// init user code / potentally make every actor have own function (like UNREAL)
 		PFF_PROFILE_END_SESSION();
 	}
 

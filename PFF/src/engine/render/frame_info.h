@@ -12,6 +12,7 @@ namespace PFF {
 		f32 frame_time;
 		VkCommandBuffer command_buffer;
 		std::shared_ptr<camera> camera;
+		VkDescriptorSet global_descriptor_set;
 	};
 
 }

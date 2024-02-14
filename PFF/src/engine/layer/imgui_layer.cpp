@@ -81,7 +81,7 @@ namespace PFF {
 		init_info.Device = m_renderer->get_device()->get_device();
 		init_info.QueueFamily = m_renderer->get_device()->find_physical_queue_families().graphicsFamily;
 		init_info.Queue = m_renderer->get_device()->get_graphics_queue();
-		init_info.DescriptorPool = m_renderer->get_imgui_descriptor_pool();
+		init_info.DescriptorPool = m_renderer->get_global_descriptor_pool();
 		init_info.Subpass = m_renderer->get_render_system_pipeline_subpass();
 		init_info.MinImageCount = m_renderer->get_device()->get_swap_chain_support().capabilities.minImageCount;
 		init_info.ImageCount = m_renderer->get_swapchain_image_count();

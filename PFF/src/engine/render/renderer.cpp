@@ -36,36 +36,38 @@ namespace PFF {
 		m_state = system_state::suspended;
 		CORE_LOG(Trace, "render started");
 
-		// Create Descriptor Pool (ImGui_ImplVulkan_Init)
-		// The example only requires a single combined image sampler descriptor for the font image and only uses one descriptor set (for that)
-		// If you wish to load e.g. additional textures you may need to alter pools sizes.
-		std::array<VkDescriptorPoolSize, 2> pool_sizes{};
-		pool_sizes[0].type = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER;
-		pool_sizes[0].descriptorCount = m_swapchain->get_max_frames_in_flight();
-		pool_sizes[1].type = VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER;
-		pool_sizes[1].descriptorCount = m_swapchain->get_max_frames_in_flight() * 2;
-
-		VkDescriptorPoolCreateInfo pool_info = {};
-		pool_info.sType = VK_STRUCTURE_TYPE_DESCRIPTOR_POOL_CREATE_INFO;
-		pool_info.flags = VK_DESCRIPTOR_POOL_CREATE_FREE_DESCRIPTOR_SET_BIT;
-		pool_info.maxSets = m_swapchain->get_max_frames_in_flight() * 2;
-		pool_info.poolSizeCount = (uint32_t)ARRAY_SIZE(pool_sizes);
-		pool_info.pPoolSizes = pool_sizes.data();
-		CORE_ASSERT(vkCreateDescriptorPool(m_device->get_device(), &pool_info, nullptr, &m_imgui_descriptor_pool) == VK_SUCCESS, "", "Failed to create descriptor Pool");
-		
-		createDescriptorSetLayout();
-
-		// add first render system
-		add_render_system(get_device(), get_swapchain_render_pass());
-
 		// make global UBO
-
 		m_global_UBO_buffer = std::vector<std::unique_ptr<vk_buffer>>(vk_swapchain::MAX_FRAMES_IN_FLIGHT);
 		for (u16 x = 0; x < m_global_UBO_buffer.size(); x++) {
 
 			m_global_UBO_buffer[x] = std::make_unique<vk_buffer>( m_device, sizeof(global_ubo), 1, VK_BUFFER_USAGE_UNIFORM_BUFFER_BIT, VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT);
 			m_global_UBO_buffer[x]->map();
 		}
+
+		// make global descriptor pool
+		m_global_descriptor_pool = vk_descriptor_pool::builder(m_device)
+			.setMaxSets(vk_swapchain::MAX_FRAMES_IN_FLIGHT * 2)
+			.addPoolSize(VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER, vk_swapchain::MAX_FRAMES_IN_FLIGHT)
+			.addPoolSize(VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER, vk_swapchain::MAX_FRAMES_IN_FLIGHT * 2)
+			.setPoolFlags(VK_DESCRIPTOR_POOL_CREATE_FREE_DESCRIPTOR_SET_BIT)
+			.build();
+
+		m_global_set_layout = vk_descriptor_set_layout::builder(m_device)
+			.add_binding(0, VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER, VK_SHADER_STAGE_VERTEX_BIT)					// binding for renderer & ImGui
+			.add_binding(1, VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER, VK_SHADER_STAGE_FRAGMENT_BIT)		// for ImGui
+			.build();
+
+		m_global_descriptor_set.resize(vk_swapchain::MAX_FRAMES_IN_FLIGHT);
+		for (int16 x = 0; x < m_global_descriptor_set.size(); x++) {
+
+			auto buffer_info = m_global_UBO_buffer[x]->descriptor_info();
+			vk_descriptor_writer(*m_global_set_layout, *m_global_descriptor_pool)
+				.write_buffer(0, &buffer_info)
+				.build(m_global_descriptor_set[x]);
+		}
+
+		// add first render system
+		add_render_system(get_device(), get_swapchain_render_pass(), m_global_set_layout->get_descriptor_set_layout());
 
 	}
 
@@ -82,8 +84,8 @@ namespace PFF {
 		m_window.reset();
 		m_render_system.reset();
 
-		vkDestroyDescriptorSetLayout(m_device->get_device(), m_descriptor_set_layout, nullptr);
-		vkDestroyDescriptorPool(m_device->get_device(), m_imgui_descriptor_pool, nullptr);
+		//vkDestroyDescriptorSetLayout(m_device->get_device(), m_descriptor_set_layout, nullptr);
+		//vkDestroyDescriptorPool(m_device->get_device(), m_imgui_descriptor_pool, nullptr);		// TODO: free new pool
 		free_command_buffers();
 
 		m_swapchain.reset();
@@ -93,15 +95,15 @@ namespace PFF {
 
 	// ==================================================================== public ====================================================================
 
-	void renderer::add_render_system(std::shared_ptr<vk_device> device, VkRenderPass renderPass) {
+	void renderer::add_render_system(std::shared_ptr<vk_device> device, VkRenderPass renderPass, VkDescriptorSetLayout descriptor_set_layout) {
 
 		PFF_PROFILE_FUNCTION();
 
-		m_render_system = std::make_unique<render_system>(get_device(), get_swapchain_render_pass(), m_descriptor_set_layout);
+		m_render_system = std::make_unique<render_system>(get_device(), get_swapchain_render_pass(), descriptor_set_layout);
 	}
 
 	//
-	void renderer::draw_frame(f32 delta_time) {
+	void renderer::draw_frame(const f32 delta_time) {
 
 		PFF_PROFILE_FUNCTION();
 
@@ -109,7 +111,7 @@ namespace PFF {
 
 			if (auto commandbuffer = begin_frame()) {
 
-				frame_info frame_info{ m_current_image_index, delta_time, commandbuffer, m_world_Layer->get_editor_camera() };
+				frame_info frame_info{ m_current_image_index, delta_time, commandbuffer, m_world_Layer->get_editor_camera(), m_global_descriptor_set[m_current_image_index] };
 
 				// update
 				global_ubo ubo{};
@@ -142,7 +144,7 @@ namespace PFF {
 	}
 
 	//
-	void renderer::set_size(u32 width, u32 height) {
+	void renderer::set_size(const u32 width, const u32 height) {
 
 		PFF_PROFILE_FUNCTION();
 
@@ -160,88 +162,13 @@ namespace PFF {
 	}
 
 	//
-	void renderer::refresh(f32 delta_time) {
+	void renderer::refresh(const f32 delta_time) {
 
 		draw_frame(delta_time);
 	}
 
 
 	// ==================================================================== private ====================================================================
-
-	//
-	void renderer::createDescriptorSetLayout() {
-		
-		VkDescriptorSetLayoutBinding uboLayoutBinding{};
-		uboLayoutBinding.binding = 0;
-		uboLayoutBinding.descriptorType = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER;
-		uboLayoutBinding.descriptorCount = 1;
-		uboLayoutBinding.stageFlags = VK_SHADER_STAGE_VERTEX_BIT;
-		uboLayoutBinding.pImmutableSamplers = nullptr; // Optional
-
-		VkDescriptorSetLayoutBinding samplerLayoutBinding{};
-		samplerLayoutBinding.binding = 1;
-		samplerLayoutBinding.descriptorCount = 1;
-		samplerLayoutBinding.descriptorType = VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER;
-		samplerLayoutBinding.pImmutableSamplers = nullptr;
-		samplerLayoutBinding.stageFlags = VK_SHADER_STAGE_FRAGMENT_BIT;
-
-		std::array<VkDescriptorSetLayoutBinding, 2> bindings = { uboLayoutBinding, samplerLayoutBinding };
-		VkDescriptorSetLayoutCreateInfo layoutInfo{};
-		layoutInfo.sType = VK_STRUCTURE_TYPE_DESCRIPTOR_SET_LAYOUT_CREATE_INFO;
-		layoutInfo.bindingCount = static_cast<uint32_t>(bindings.size());
-		layoutInfo.pBindings = bindings.data();
-
-		CORE_ASSERT(vkCreateDescriptorSetLayout(m_device->get_device(), &layoutInfo, nullptr, &m_descriptor_set_layout) == VK_SUCCESS, "", "Failes to create Descriptor_set_layout")
-	}
-
-	//
-	void renderer::createDescriptorSets() {
-		/*
-		u32 swapchain_image_count = m_swapchain->get_image_count();
-
-		std::vector<VkDescriptorSetLayout> layouts(swapchain_image_count, m_descriptor_set_layout);
-		VkDescriptorSetAllocateInfo allocInfo{};
-		allocInfo.sType = VK_STRUCTURE_TYPE_DESCRIPTOR_SET_ALLOCATE_INFO;
-		allocInfo.descriptorPool = m_imgui_descriptor_pool;
-		allocInfo.descriptorSetCount = static_cast<uint32_t>(swapchain_image_count);
-		allocInfo.pSetLayouts = layouts.data();
-
-		m_DescriptorSets.resize(swapchain_image_count);
-		CORE_ASSERT(vkAllocateDescriptorSets(m_device->get_device(), &allocInfo, m_DescriptorSets.data()) == VK_SUCCESS, "", "failed to allocate descriptor sets!");
-
-		for (size_t i = 0; i < swapchain_image_count; i++) {
-
-			VkDescriptorBufferInfo bufferInfo{};
-			bufferInfo.buffer = m_UniformBuffers[i];
-			bufferInfo.offset = 0;
-			bufferInfo.range = sizeof(UniformBufferObject);
-
-			VkDescriptorImageInfo imageInfo{};
-			imageInfo.imageLayout = VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL;
-			imageInfo.imageView = m_TextureImageView;
-			imageInfo.sampler = m_TextureSampler;
-
-			std::array<VkWriteDescriptorSet, 2> descriptorWrites{};
-
-			descriptorWrites[0].sType = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET;
-			descriptorWrites[0].dstSet = m_DescriptorSets[i];
-			descriptorWrites[0].dstBinding = 0;
-			descriptorWrites[0].dstArrayElement = 0;
-			descriptorWrites[0].descriptorType = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER;
-			descriptorWrites[0].descriptorCount = 1;
-			descriptorWrites[0].pBufferInfo = &bufferInfo;
-
-			descriptorWrites[1].sType = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET;
-			descriptorWrites[1].dstSet = m_DescriptorSets[i];
-			descriptorWrites[1].dstBinding = 1;
-			descriptorWrites[1].dstArrayElement = 0;
-			descriptorWrites[1].descriptorType = VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER;
-			descriptorWrites[1].descriptorCount = 1;
-			descriptorWrites[1].pImageInfo = &imageInfo;
-
-			vkUpdateDescriptorSets(m_device->get_device(), static_cast<uint32_t>(descriptorWrites.size()), descriptorWrites.data(), 0, nullptr);
-		}*/
-	}
 
 	//
 	VkCommandBuffer renderer::begin_frame() {

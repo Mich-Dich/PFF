@@ -29,7 +29,7 @@ namespace PFF {
 		const size_t get_length() const { return m_actions.size(); }
 		input_action* get_action(u32 index) { return m_actions[index]; }
 
-		// DELETE_COPY(input_mapping);
+		DELETE_COPY(input_mapping);
 		
 		//@brief Registers an input_action and loades/updates its values from input.ini if the player has made modifications to the corresponding values.
 		// 		This ensures that the default values are retained unless the player explicitly changes them.

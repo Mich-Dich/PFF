@@ -64,7 +64,7 @@ namespace PFF {
 		test_obj->mesh = model;
 		test_obj->transform.translation = { .0f, 0.f, 10.f };
 		test_obj->transform.scale = glm::vec3(1.f);
-		test_obj->rotation_speed = glm::vec3(0.f, .5f, 0.f);
+		//test_obj->rotation_speed = glm::vec3(0.f, .5f, 0.f);
 #endif // 1
 
 		return true;
