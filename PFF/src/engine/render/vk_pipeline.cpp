@@ -100,6 +100,7 @@ namespace PFF {
 
 		PFF_PROFILE_FUNCTION();
 
+		LOG(Info, "Creating Pipeline");
 		create_graphics_pipeline(config, vert_file_path, frag_file_path);
 	}
 

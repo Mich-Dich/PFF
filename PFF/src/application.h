@@ -33,8 +33,8 @@ namespace PFF {
 		FORCEINLINE std::shared_ptr<game_map> get_current_map() { return m_world_layer->get_current_map(); }
 		FORCEINLINE void close_application() { m_running = false; }
 		FORCEINLINE /*USE_IN_EDITOR*/ void push_overlay(layer* overlay) { m_layerstack.push_overlay(overlay); }
-
-		//FORCEINLINE vk_descriptor_pool& get_global_descriptor_pool() const { return *m_global_descriptor_pool; }
+		FORCEINLINE u32 get_target_fps() const { return m_target_fps; }
+		FORCEINLINE bool get_limit_fps() const { return m_limit_fps; }
 
 		FORCEINLINE void capture_cursor();
 		FORCEINLINE void release_cursor();
@@ -46,6 +46,7 @@ namespace PFF {
 		virtual bool shutdown();							// to be used by client
 		void register_player_controller(std::shared_ptr<player_controller> player_controller) { m_world_layer->register_player_controller(player_controller); }
 
+		void limit_fps(const bool new_value, const u32 new_limit = 60);
 
 	private:
 
@@ -70,8 +71,8 @@ namespace PFF {
 		bool m_focus = true;
 		bool m_running = true;
 
-		bool m_limit_fps = false;
-		u32 m_target_fps = 200;
+		bool m_limit_fps = true;
+		u32 m_target_fps = 120;
 		u32 m_nonefocus_fps = 35;
 		u32 m_fps = 0;
 		f32 m_delta_time = 0.0f;

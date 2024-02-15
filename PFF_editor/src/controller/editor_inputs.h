@@ -77,11 +77,11 @@ namespace PFF {
 		toggle_fps = PFF::input_action{};
 		toggle_fps.description = "toggle the fps limiter";
 		toggle_fps.triger_when_paused = false;
-		toggle_fps.modefier_flags = 0;
+		toggle_fps.modefier_flags = INPUT_ACTION_MODEFIER_AUTO_RESET_ALL;
 		toggle_fps.value = PFF::input_value::_bool;
 		toggle_fps.duration_in_sec = 0.f;
 		toggle_fps.keys = {
-			{key_code::key_P, INPUT_ACTION_TRIGGER_KEY_DOWN},
+			{key_code::key_P, INPUT_ACTION_TRIGGER_KEY_MOVE_DOWN},
 		};
 		REGISTER_INPUT_ACTION(toggle_fps);
 

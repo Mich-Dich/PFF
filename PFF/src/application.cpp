@@ -120,6 +120,13 @@ namespace PFF {
 		PFF_PROFILE_END_SESSION();
 	}
 
+	void application::limit_fps(const bool new_value, const u32 new_limit) {
+
+		m_limit_fps = new_value;
+		fps_timer->set_fps_settings(new_limit);
+	}
+
+	// ==================================================================== PRIVATE ====================================================================
 	// ==================================================================== event handling ====================================================================
 
 	void application::on_event(event& event) {

@@ -12,12 +12,11 @@ namespace PFF {
 
 
 	template<typename T>
-	void display_colum(const std::string& lable, T value) {
+	void display_colum(std::string_view lable, T value) {
 
 		ImGui::Columns(2, nullptr, true);
 
 		ImGui::Text("%s", lable.c_str());
-
 
 		ImGui::NextColumn();
 		ImGui::SetNextItemWidth(ImGui::GetColumnWidth());
@@ -44,6 +43,7 @@ namespace PFF {
 	}
 
 }
+
 
 /*
 // Flags for ImGui::InputText()

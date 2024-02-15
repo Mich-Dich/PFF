@@ -45,14 +45,16 @@ namespace PFF {
 	void player_controller::update(f32 delta) {
 	}
 	/*
-	#define INPUT_ACTION_TRIGGER_KEY_DOWN				BIT(0)
-	#define INPUT_ACTION_TRIGGER_KEY_UP					BIT(1)
-	#define INPUT_ACTION_TRIGGER_KEY_HOLD				BIT(2)
-	#define INPUT_ACTION_TRIGGER_KEY_TAP				BIT(3)
+	#define INPUT_ACTION_TRIGGER_KEY_DOWN				BIT(0)		// activate input when key is pressed down (can repeat)
+	#define INPUT_ACTION_TRIGGER_KEY_UP					BIT(1)		// activate input when key NOT pressed (can repeat)
+	#define INPUT_ACTION_TRIGGER_KEY_HOLD				BIT(2)		// activate input when key down LONGER than [duration_in_sec] in input_action struct (can repeat)
+	#define INPUT_ACTION_TRIGGER_KEY_TAP				BIT(3)		// activate input when key down SHORTER than [duration_in_sec] in input_action struct (can repeat)
+	#define INPUT_ACTION_TRIGGER_KEY_MOVE_DOWN			BIT(4)		// activate input when starting to press a key (can NOT repeat)
+	#define INPUT_ACTION_TRIGGER_KEY_MOVE_UP			BIT(5)		// activate input when releasing a key (can NOT repeat)
 
-	#define INPUT_ACTION_TRIGGER_MOUSE_POSITIVE			BIT(4)
-	#define INPUT_ACTION_TRIGGER_MOUSE_NEGATIVE			BIT(5)
-	#define INPUT_ACTION_TRIGGER_MOUSE_POS_AND_NEG		BIT(6)
+	#define INPUT_ACTION_TRIGGER_MOUSE_POSITIVE			BIT(10)
+	#define INPUT_ACTION_TRIGGER_MOUSE_NEGATIVE			BIT(11)
+	#define INPUT_ACTION_TRIGGER_MOUSE_POS_AND_NEG		BIT(12)
 
 	#define INPUT_ACTION_MODEFIER_NEGATE				BIT(0)
 	#define INPUT_ACTION_MODEFIER_VEC2_NORMAL			BIT(1)
@@ -64,7 +66,7 @@ namespace PFF {
 
 		PFF_PROFILE_FUNCTION();
 
-		for (u32 x = 0; x < m_input_mapping->get_length(); x++) {				// get input_action
+		for (u32 x = 0; x < m_input_mapping->get_length(); x++) {				// reset action->data if needed
 			input_action* action = m_input_mapping->get_action(x);
 
 			if (action->modefier_flags & INPUT_ACTION_MODEFIER_AUTO_RESET || action->modefier_flags & INPUT_ACTION_MODEFIER_AUTO_RESET_ALL)
@@ -100,6 +102,9 @@ namespace PFF {
 					case input_value::_bool: {
 
 						action->data.boolean = (m_buffer > 0.f);
+
+						//if (key_details->trigger_flags & INPUT_ACTION_TRIGGER_KEY_MOVE_DOWN) {}
+
 					} break;
 
 					// ==================================================================================================================================
@@ -144,21 +149,15 @@ namespace PFF {
 
 					// ==================================================================================================================================
 					case input_value::_2D: {
-						if (glm::dot(action->data._2D, action->data._2D) > std::numeric_limits<f32>::epsilon()) {
+						if (glm::dot(action->data._2D, action->data._2D) > std::numeric_limits<f32>::epsilon())
+							action->data._2D = glm::normalize(action->data._2D);
 
-							auto m_buffer = action->data._2D;
-							action->data._2D = glm::normalize(m_buffer);
-						}
 					} break;
 
 					// ==================================================================================================================================
 					case input_value::_3D: {
-						if (glm::dot(action->data._3D, action->data._3D) > std::numeric_limits<f32>::epsilon()) {
-
-							auto m_buffer = action->data._3D;
-							action->data._3D = glm::normalize(m_buffer);
-							//LOG(Trace, vec_to_str(action->data._3D));
-						}
+						if (glm::dot(action->data._3D, action->data._3D) > std::numeric_limits<f32>::epsilon())
+							action->data._3D = glm::normalize(action->data._3D);
 
 					} break;
 
@@ -230,7 +229,16 @@ namespace PFF {
 						CORE_LOG(Warn, "INPUT_ACTION_TRIGGER_KEY_TAP - not implemented yet")
 						action->time_stamp = time_now;
 					}
-					
+
+					if (key_details->trigger_flags & INPUT_ACTION_TRIGGER_KEY_MOVE_DOWN) {
+
+						m_buffer = (event.m_key_state == key_state::press && key_details->active == false);
+						// CORE_LOG(Info, "Current buffer: " << m_buffer << " [" << util::bool_to_str(event.m_key_state == key_state::press) << "/" << util::bool_to_str(key_details->active == false) << "]");
+					}
+
+					if (key_details->trigger_flags & INPUT_ACTION_TRIGGER_KEY_MOVE_UP)
+						m_buffer = (event.m_key_state == key_state::repeat);
+
 					key_details->active = (m_buffer) ? 1 : 0;
 					//LOG(Debug, "Key: " << static_cast<int32>(key_details->key) << " is " << bool_to_str(key_details->active));
 				}

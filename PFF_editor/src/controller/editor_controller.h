@@ -20,7 +20,6 @@ namespace PFF {
 
 		glm::vec3 camera_pos{ 0.0f };
 		glm::vec3 camera_direction{ 0.0f, 0.0f, 0.0f };
-
 	};
 
 }
