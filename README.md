@@ -1,6 +1,11 @@
 # PFF - Procedurally Focused Framework
 
+![Main Logo](/resources/Logo.png?raw=true "mich")
 PFF (Procedurally Focused Framework) is a powerful 2D/3D game engine crafted in C/C++, designed with a primary focus on harnessing the potential of procedural generation. Primarily developed for Windows, PFF is poised to extend its capabilities to Linux in the future, aspiring to offer a versatile and dynamic platform for game development.
+
+Below are images illustrating the current progress of PFF.
+![first_image](/resources/PFF_editor_04trG9AAm9.png?raw=true "image of the editor as it is now")
+![first_image](/resources/PFF_editor_DGOjQlPdSG.png?raw=true "image of the editor as it is now")
 
 ## Getting Started
 To get started with PFF, follow these simple steps:

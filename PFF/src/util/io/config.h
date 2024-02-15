@@ -2,6 +2,9 @@
 
 #include <type_traits>
 
+#include <glm/glm.hpp>
+
+struct ImVec2;
 struct ImVec4;
 
 namespace PFF {
@@ -62,7 +65,14 @@ namespace PFF {
 				oss << value.x << ' ' << value.y;
 				m_buffer = oss.str();
 			}
+			/*
+			else if constexpr (std::is_same_v<T, glm::vec3>) {
 
+				std::ostringstream oss;
+				oss << value.x << ' ' << value.y << ' ' << value.z;
+				m_buffer = oss.str();
+			}
+			*/
 			else if constexpr (std::is_same_v<T, glm::vec4> || std::is_same_v<T, ImVec4>) {
 
 				std::ostringstream oss;
@@ -71,7 +81,7 @@ namespace PFF {
 			}
 
 			else
-				CORE_ASSERT(0 == 1, "", "Input value is not supported");
+				DEBUG_BREAK();		// Input value is not supported
 
 			check_for_configuration(config_file, section, key, m_buffer, override);
 
@@ -89,7 +99,13 @@ namespace PFF {
 				std::istringstream iss(m_buffer);
 				iss >> value.x >> value.y;
 			}
-			
+			/*
+			else if constexpr (std::is_same_v<T, glm::vec3>) {
+
+				std::istringstream iss(m_buffer);
+				iss >> value.x >> value.y >> value.z;
+			}
+			*/
 			else if constexpr (std::is_same_v<T, glm::vec4> || std::is_same_v<T, ImVec4>) {
 
 				std::istringstream iss(m_buffer);
@@ -97,7 +113,7 @@ namespace PFF {
 			}
 
 			else
-				CORE_ASSERT(0 == 1, "", "Input value is not supported");
+				DEBUG_BREAK();		// Input value is not supported
 
 		}
 

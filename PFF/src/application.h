@@ -24,7 +24,7 @@ namespace PFF {
 
 		DELETE_COPY(application);
 
-		FORCEINLINE f32 get_delta_time() { return m_delta_time; }
+		FORCEINLINE f32 get_delta_time() const { return m_delta_time; }
 		FORCEINLINE static application& get() { return *s_instance; }
 		FORCEINLINE imgui_layer* get_imgui_layer() const { return m_imgui_layer; }
 		FORCEINLINE world_layer* get_world_layer() const { return m_world_layer; }
@@ -32,7 +32,7 @@ namespace PFF {
 		FORCEINLINE std::shared_ptr<renderer> get_renderer() const { return m_renderer; }
 		FORCEINLINE std::shared_ptr<game_map> get_current_map() { return m_world_layer->get_current_map(); }
 		FORCEINLINE void close_application() { m_running = false; }
-		FORCEINLINE /*USE_IN_EDITOR*/ void push_overlay(layer* overlay) { m_layerstack.push_overlay(overlay); }
+		FORCEINLINE USE_IN_EDITOR void push_overlay(layer* overlay) { m_layerstack.push_overlay(overlay); }
 		FORCEINLINE u32 get_target_fps() const { return m_target_fps; }
 		FORCEINLINE bool get_limit_fps() const { return m_limit_fps; }
 
