@@ -56,6 +56,13 @@ namespace PFF {
 			else if constexpr (std::is_convertible_v<T, std::string>)
 				m_buffer = value;
 
+			else if constexpr (std::is_same_v<T, glm::vec2> || std::is_same_v<T, ImVec2>) {
+
+				std::ostringstream oss;
+				oss << value.x << ' ' << value.y;
+				m_buffer = oss.str();
+			}
+
 			else if constexpr (std::is_same_v<T, glm::vec4> || std::is_same_v<T, ImVec4>) {
 
 				std::ostringstream oss;
@@ -77,6 +84,12 @@ namespace PFF {
 			else if constexpr (std::is_convertible_v<T, std::string>)
 				value = m_buffer;
 
+			else if constexpr (std::is_same_v<T, glm::vec2> || std::is_same_v<T, ImVec2>) {
+
+				std::istringstream iss(m_buffer);
+				iss >> value.x >> value.y;
+			}
+			
 			else if constexpr (std::is_same_v<T, glm::vec4> || std::is_same_v<T, ImVec4>) {
 
 				std::istringstream iss(m_buffer);

@@ -114,94 +114,127 @@ namespace PFF {
 		
 		ImGuiWindowFlags window_flags{};
 		static bool show_viewport = true;
-		ImGui::Begin("viewport test", &show_viewport, window_flags);
-		if (ImGui::BeginTabBar("##tabs", ImGuiTabBarFlags_None)) {
+		
+		if (ImGui::Begin("Editor Debugger", &show_viewport, window_flags)) {			
+			if (ImGui::BeginTabBar("##tabs", ImGuiTabBarFlags_None)) {
 
-			ImVec2 tab_size(60, 15);
+				f32 tab_width = 60.f;		// TODO: move into [default_tab_width] variable in config-file
 
-			ImGui::SetNextItemWidth(tab_size.x);
-			if (ImGui::BeginTabItem("Inputs")) {
+				ImGui::SetNextItemWidth(tab_width);
+				if (ImGui::BeginTabItem("Inputs")) {
+#if 0
 
-				ImGui::Columns(2, nullptr, true);
+					ImGui::Columns(2, nullptr, true);
 
-				for (input_action* action : *application::get().get_world_layer()->get_current_player_controller()->get_input_mapping()) {						// get input_action
+					for (input_action* action : *application::get().get_world_layer()->get_current_player_controller()->get_input_mapping()) {						// get input_action
 
-					ImGui::Text("%s", action->name.c_str());
-				}
+						ImGui::Text("%s", action->name.c_str());
+					}
 
-				ImGui::NextColumn();
+					ImGui::NextColumn();
 
-				for (input_action* action : *application::get().get_world_layer()->get_current_player_controller()->get_input_mapping()) {						// get input_action
+					for (input_action* action : *application::get().get_world_layer()->get_current_player_controller()->get_input_mapping()) {						// get input_action
 
-					ImGui::SetNextItemWidth(ImGui::GetColumnWidth());
-					switch (action->value) {
+						ImGui::SetNextItemWidth(ImGui::GetColumnWidth());
+						switch (action->value) {
 
-						case input_value::_bool: {
+						case input_value::_bool:
+						{
 
 							ImGui::Text("%s", util::bool_to_str(action->data.boolean));
 						} break;
 
-						case input_value::_1D: {
+						case input_value::_1D:
+						{
 
 							ImGui::DragFloat("##X", &action->data._1D, 0.1f, 0.0f, 0.0f, "%.2f");
 						} break;
 
-						case input_value::_2D: {
+						case input_value::_2D:
+						{
 
 							ImGui::InputFloat2("", &action->data._2D[0], "%.2f");
 						} break;
 
-						case input_value::_3D: {
+						case input_value::_3D:
+						{
 
 							ImGui::InputFloat3("", &action->data._3D[0], "%.2f");
 						} break;
 
 						default:
 							break;
+						}
+
 					}
 
+					ImGui::Columns(1);
+#else
+
+					for (input_action* action : *application::get().get_world_layer()->get_current_player_controller()->get_input_mapping()) {						// get input_action
+
+						switch (action->value) {
+
+						case input_value::_bool:
+						{
+							display_column(action->name, action->data.boolean);
+						} break;
+
+						case input_value::_1D:
+						{
+							display_column(action->name, action->data._1D);
+						} break;
+
+						case input_value::_2D:
+						{
+							display_column(action->name, action->data._2D);
+						} break;
+
+						case input_value::_3D:
+						{
+							display_column(action->name, action->data._3D);
+						} break;
+
+						default:
+							break;
+						}
+					}
+#endif // 0
+
+					ImGui::EndTabItem();
 				}
 
-				ImGui::Columns(1);
-				ImGui::EndTabItem();
-			}
+				ImGui::SetNextItemWidth(tab_width);
+				if (ImGui::BeginTabItem("Test")) {
+					ImGui::EndTabItem();
+				}
 
-			ImGui::SetNextItemWidth(tab_size.x);
-			if (ImGui::BeginTabItem("Test")) {
-				ImGui::EndTabItem();
+				ImGui::SetNextItemWidth(tab_width);
+				if (ImGui::BeginTabItem("Sizes")) {
+					ImGui::EndTabItem();
+				}
+				ImGui::EndTabBar();
 			}
-
-			ImGui::SetNextItemWidth(tab_size.x);
-			if (ImGui::BeginTabItem("Sizes")) {
-				ImGui::EndTabItem();
-			}
-			ImGui::EndTabBar();
 		}
 		ImGui::End();
 
 
-		ImGui::Begin("Multi-column Layout Example");
+		/*
+		if (ImGui::Begin("Outliner", &show_viewport, window_flags)) {
 
-		// Begin a two-column layout
-		ImGui::Columns(2, nullptr, true);
-
-		// Column 1
-		ImGui::Text("Column 1");
-		ImGui::Button("Button 1");
-		ImGui::Text("Some text");
-
-		// Next Column
-		ImGui::NextColumn();
-
-		// Column 2
-		ImGui::Text("Column 2");
-		ImGui::Button("Button 2");
-		ImGui::Text("More text");
-
-		// End the columns
-		ImGui::Columns(1);
-
+		}
 		ImGui::End();
+
+		if (ImGui::Begin("Details", &show_viewport, window_flags)) {
+
+		}
+		ImGui::End();
+
+		if (ImGui::Begin("World Settings", &show_viewport, window_flags)) {
+
+		}
+		ImGui::End();
+		*/
 	}
 
 	void editor_layer::show_current_input() {

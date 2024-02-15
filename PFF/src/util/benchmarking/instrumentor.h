@@ -210,11 +210,11 @@ namespace PFF {
 
 	// double abstraction to take line-number into name string
 	#define PFF_PROFILE_SCOPE_LINE2(name, line)						constexpr auto fixedName##line = ::PFF::util::remove_substring(name, "__cdecl ");		\
-																	::PFF::instrumentor_timer benchmark_timer##line(fixedName##line.data)
+																	PFF::instrumentor_timer benchmark_timer##line(fixedName##line.data)
 	#define PFF_PROFILE_SCOPE_LINE(name, line)						PFF_PROFILE_SCOPE_LINE2(name, line)
 
-	#define PFF_PROFILE_BEGIN_SESSION(name, directory, filename)	::PFF::instrumentor::get().begin_session(name, directory, filename)
-	#define PFF_PROFILE_END_SESSION()								::PFF::instrumentor::get().end_session()
+	#define PFF_PROFILE_BEGIN_SESSION(name, directory, filename)	PFF::instrumentor::get().begin_session(name, directory, filename)
+	#define PFF_PROFILE_END_SESSION()								PFF::instrumentor::get().end_session()
 	#define PFF_PROFILE_SCOPE(name)									PFF_PROFILE_SCOPE_LINE(name, __LINE__)
 	#define PFF_PROFILE_FUNCTION()									PFF_PROFILE_SCOPE(PFF_FUNC_SIG)
 #else
