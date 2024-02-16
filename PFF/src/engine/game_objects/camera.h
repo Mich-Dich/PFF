@@ -14,6 +14,9 @@ namespace PFF {
 		FORCEINLINE const glm::mat4& get_projection() const { return m_projection_matrix; }
 		FORCEINLINE const glm::mat4& get_view() const { return view_matrix; }
 
+		FORCEINLINE void force_set_view_matrix(const glm::mat4& view) { view_matrix = view; }
+		FORCEINLINE void force_set_projection_matrix(const glm::mat4& projection) { m_projection_matrix = projection; }
+
 		void set_clipping_dis(const f32 near_dis, const f32 far_dis);
 		void set_view_direction(glm::vec3 position, glm::vec3 direction, glm::vec3 up = glm::vec3{ 0.0f, -1.0f, 0.0f });
 		void set_view_target(glm::vec3 position, glm::vec3 target, glm::vec3 up = glm::vec3{ 0.0f, -1.0f, 0.0f });

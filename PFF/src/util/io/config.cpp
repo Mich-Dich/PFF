@@ -1,22 +1,22 @@
 
 #include "util/pffpch.h"
 
-#include "io_handler.h"
-#include "util/io/config.h"
-
 #include <filesystem>
 #include <cctype> // for std::isspace
-
 #include <iostream>
 #include <fstream>
 #include <string>
 
+#include "io_handler.h"
+#include "util/io/config.h"
 
 #define REMOVE_WHITE_SPACE(line)                line.erase(std::remove_if(line.begin(), line.end(),                                         \
                                                 [](char c) { return c == '\r' || c == '\n' || c == '\t'; }),                                \
                                                 line.end());
 
 namespace PFF {
+
+#define BUILD_CONFIG_PATH(x)	CONFIG_DIR + config::file_type_to_string(x) + FILE_EXTENSION_CONFIG
 
     namespace config {
 
@@ -41,6 +41,20 @@ namespace PFF {
                 config_file.close();
             }
         }
+
+        /*
+        template<typename T>
+        void load(const file config_file, const std::string& section, const std::string& key, T& value) {
+
+            access(config_file, section, key, value, false);
+        }
+
+        template<typename T>
+        void save(const file config_file, const std::string& section, const std::string& key, T& value) {
+
+            access(config_file, section, key, value, true);
+        }
+        */
 
         // 
         bool check_for_configuration(const file target_config_file, const std::string& section, const std::string& key, std::string& value, const bool override) {
@@ -145,7 +159,7 @@ namespace PFF {
         //
         std::string file_type_to_string(file type) {
 
-            PFF_PROFILE_FUNCTION();
+            //PFF_PROFILE_FUNCTION();
 
             static const std::unordered_map<file, std::string> typeStrings{
                 {file::editor, "editor"},

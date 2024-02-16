@@ -189,12 +189,12 @@ namespace PFF {
 		IMGUI_COLOR_CONFIG(ChildBg, ImVec4(0.11f, 0.11f, 0.11f, 1.0f));
 		IMGUI_COLOR_CONFIG(PopupBg, ImVec4(0.125f, 0.125f, 0.125f, 0.9f));
 
-		ImGui::PushStyleVar(ImGuiStyleVar_FrameRounding, 2.0f);
-		//ImGui::PushStyleVar(ImGuiStyleVar_FramePadding, ImVec2(2.0f, 1.0f));
-
-
+		//ImGui::PushStyleVar(ImGuiStyleVar_FramePadding, ImVec2(2.0f, 1.0f
+		IMGUI_STYLE_CONFIG(f32, FrameRounding, 2);
 		IMGUI_STYLE_CONFIG(f32, WindowBorderSize, 0);
 		IMGUI_STYLE_CONFIG(ImVec2, ItemSpacing, ImVec2(4, 4));
+		IMGUI_STYLE_CONFIG(ImVec2, ItemInnerSpacing, ImVec2(4, 4));
+
 		//	ItemInnerSpacing
 
 	}

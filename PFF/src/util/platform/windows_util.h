@@ -12,7 +12,7 @@
 #elif PFF_INSIDE_EDITOR
 	#define PFF_API_EDITOR __declspec(dllimport)
 #else
-	#define PFF_API_EDITOR
+	#define PFF_API_EDITOR	#error	"Error: Dont use this function outside the engine or editor"
 #endif
 
 #if defined(PFF_INSIDE_ENGINE) || defined(PFF_INSIDE_EDITOR)
@@ -34,7 +34,6 @@
 #define FORCEINLINE						__forceinline					// Force code to be inline
 #define FORCENOINLINE					__declspec(noinline)			// Force code to NOT be inline
 #define FUNCTION_NON_NULL_RETURN_START	_Ret_notnull_					// Indicate that the function never returns nullptr.
-
 
 // Optimization macros (uses __pragma to enable inside a #define).
 #if !defined(__clang__)

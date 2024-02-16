@@ -73,7 +73,7 @@ namespace PFF {
 		for (auto& obj : game_objects) {
 			
 			simple_push_constant_data PCD{};
-			PCD.modle_matrix = obj.transform.mat4();
+			PCD.modle_matrix = obj.transform.mat4_XYZ();
 			PCD.normal_matrix = obj.transform.normal_matrix();
 
 			vkCmdPushConstants(frame_info.command_buffer, m_pipeline_layout, VK_SHADER_STAGE_VERTEX_BIT | VK_SHADER_STAGE_FRAGMENT_BIT, 0, sizeof(simple_push_constant_data), &PCD);

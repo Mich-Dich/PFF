@@ -14,12 +14,17 @@ namespace PFF {
 
 		void update(f32 delta) override;
 
+		FORCEINLINE glm::vec3 get_editor_camera_pos() const { return m_camera_pos; }
+		FORCEINLINE glm::vec3 get_editor_camera_direction() const { return m_camera_direction; }
+		FORCEINLINE void set_editor_camera_pos(const glm::vec3 pos) { m_camera_pos = pos; }
+		FORCEINLINE void set_editor_camera_direction(const glm::vec3 direction) { m_camera_direction = direction; }
+
 	private:
 		
 		std::shared_ptr<editor_inputs> m_input_mapping{};
 
-		glm::vec3 m_camera_pos{ 0.0f };
-		glm::vec3 m_camera_direction{ 0.0f, 0.0f, 0.0f };
+		glm::vec3 m_camera_pos{};
+		glm::vec3 m_camera_direction{};
 	};
 
 }
