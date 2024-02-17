@@ -42,14 +42,13 @@ namespace PFF {
 		CORE_LOG(Info, "Detach");
 	}
 
-	void world_layer::on_update(f32 delta_time) {
+	void world_layer::on_update(const f32 delta_time) {
 
 		PFF_PROFILE_FUNCTION();
 
 		m_player_controller->update_internal(delta_time);
-
 		for (auto& obj : m_current_map->get_all_game_objects())
-			obj.transform.rotation += glm::mod(obj.rotation_speed * delta_time, two_pi<float>());
+			obj.transform.rotation += glm::mod(obj.rotation_speed * delta_time, two_pi<f32>());
 
 	}
 

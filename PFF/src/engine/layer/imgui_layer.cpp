@@ -213,7 +213,7 @@ namespace PFF {
 		CORE_LOG(Info, "detach");
 	}
 
-	void imgui_layer::on_update(f32 delta_time) {
+	void imgui_layer::on_update(const f32 delta_time) {
 	}
 
 	void imgui_layer::on_event(event& event) {

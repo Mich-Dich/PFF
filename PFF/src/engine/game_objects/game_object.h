@@ -30,6 +30,7 @@ namespace PFF {
 		game_object& operator=(game_object&&) = default;
 
 		FORCEINLINE u32 get_ID() const { return m_id; }
+		FORCEINLINE void set_translation(const glm::vec3 translation) { transform.translation = translation; }
 
 		// TODO: remove this 
 		static game_object create_game_object() {

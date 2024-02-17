@@ -106,6 +106,8 @@ namespace PFF {
 			return result;
 		}
 
+		FORCEINLINE constexpr const char* ptr_validity_check(const void* ptr) {return (ptr != nullptr) ? "valid" : "invalid";}
+
 		FORCEINLINE constexpr bool str_to_bool(const std::string& string) { return(string == "true") ? true : false; }
 		FORCEINLINE constexpr const char* bool_to_str(bool boolean) { return boolean ? "true" : "false"; }
 	}

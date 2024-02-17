@@ -21,7 +21,7 @@ namespace PFF {
 	void layer::on_detach() {
 	}
 
-	void layer::on_update(f32 delta_time) {
+	void layer::on_update(const f32 delta_time) {
 
 		PFF_PROFILE_FUNCTION();
 

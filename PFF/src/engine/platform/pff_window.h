@@ -52,7 +52,7 @@ namespace PFF {
 		void create_window_surface(VkInstance_T* instance, VkSurfaceKHR_T** get_surface);
 		VkExtent2D get_extend();
 		bool should_close();
-		void update();
+		void poll_events();
 		void capture_cursor();
 		void release_cursor();
 		

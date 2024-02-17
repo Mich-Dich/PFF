@@ -41,8 +41,8 @@ namespace PFF {
 
 		void run();
 		virtual bool init();								// to be used by client
-		virtual bool update(f32 delta_time);				// potentally make private - every actor has own function (like UNREAL)
-		virtual bool render(f32 delta_time);				// potentally make private - every actor has own function (like UNREAL)
+		virtual bool update(const f32 delta_time);				// potentally make private - every actor has own function (like UNREAL)
+		virtual bool render(const f32 delta_time);				// potentally make private - every actor has own function (like UNREAL)
 		virtual bool shutdown();							// to be used by client
 		void register_player_controller(std::shared_ptr<player_controller> player_controller) { m_world_layer->register_player_controller(player_controller); }
 
@@ -73,10 +73,10 @@ namespace PFF {
 
 		bool m_limit_fps = true;
 		u32 m_target_fps = 120;
-		u32 m_nonefocus_fps = 35;
-		u32 m_fps = 0;
-		f32 m_delta_time = 0.0f;
-		f64 m_work_time = 0, m_sleep_time = 0;
+		u32 m_nonefocus_fps = 30;
+		u32 m_fps{};
+		f32 m_delta_time = 0.f;
+		f64 m_work_time{}, m_sleep_time{};
 		std::unique_ptr<timer> fps_timer{};
 	};
 

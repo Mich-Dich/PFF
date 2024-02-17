@@ -23,10 +23,12 @@ namespace PFF {
 
 		bool init() override;
 		bool shutdown() override;
+		bool update(const f32 delta_time) override;
 
 	private:
 		std::shared_ptr<editor_controller> m_editor_controller{};
 		editor_layer* m_editor_layer;
+		PFF::game_object* m_test_game_object;
 	};
 
 	application* create_application() {
@@ -48,7 +50,7 @@ namespace PFF {
 		register_player_controller(m_editor_controller);
 		
 
-#if 1
+#if 0		// populate scene with grid of meshes
 
 		std::shared_ptr<basic_mesh> model = basic_mesh::create_mesh_from_file("assets/smooth_vase.obj");
 		u32 counter = 0;
@@ -64,14 +66,15 @@ namespace PFF {
 			}
 		}
 		LOG(Info, "Num of objects: " << counter);
+
 #else
 
 		std::shared_ptr<basic_mesh> model = basic_mesh::create_mesh_from_file("assets/untitled.obj");
-		auto test_obj = get_current_map()->create_empty_game_object();
-		test_obj->mesh = model;
-		test_obj->transform.translation = { .0f, 0.f, 0.f };
-		test_obj->transform.scale = glm::vec3(1.f);
-		test_obj->rotation_speed = glm::vec3(0.f, .5f, 0.f);
+		m_test_game_object= get_current_map()->create_empty_game_object();
+		m_test_game_object->mesh = model;
+		m_test_game_object->set_translation({.0f, -10.f, 0.f});
+		m_test_game_object->transform.scale = glm::vec3(1.f);
+		// m_test_game_object->rotation_speed = glm::vec3(0.f, .5f, 0.f);
 
 #endif // 1
 
@@ -104,6 +107,31 @@ namespace PFF {
 		config::save(config::file::editor, "editor_camera", "direction", camera_direction);
 
 		return true;
+	}
+
+	bool PFF_editor::update(const f32 delta_time) {
+
+		static bool move_positive = true;
+
+		//glm::vec3 trans = m_test_game_object->transform.translation;
+		//LOG(Trace, "position: " << trans.x << "/" << trans.y << "/" << trans.z << " delta_time: " << delta_time);
+		//m_test_game_object->transform.translation.x += 1.f;
+		
+		/*
+		if (move_positive)
+			m_test_game_object->transform.translation.y += 1.f;
+		else
+			m_test_game_object->transform.translation.y -= 1.f;
+		*/
+
+		/*
+		if (m_test_game_object->transform.translation.y >= 10.f && move_positive)
+			move_positive = false;
+		if (m_test_game_object->transform.translation.y <= 10.f && !move_positive)
+			move_positive = true;
+		*/
+
+		return false;
 	}
 
 }

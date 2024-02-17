@@ -155,7 +155,7 @@ namespace PFF {
 		CORE_LOG(Info, "finished setup");
 	}
 
-	void pff_window::update() {
+	void pff_window::poll_events() {
 
 		PFF_PROFILE_FUNCTION();
 

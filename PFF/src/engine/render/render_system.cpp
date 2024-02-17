@@ -60,15 +60,7 @@ namespace PFF {
 		PFF_PROFILE_FUNCTION();
 
 		m_vk_pipeline->bind_commnad_buffers(frame_info.command_buffer);
-
 		vkCmdBindDescriptorSets(frame_info.command_buffer, VK_PIPELINE_BIND_POINT_GRAPHICS, m_pipeline_layout, 0, 1, &frame_info.global_descriptor_set, 0, nullptr);
-
-		/*for (int i = 0; i < 4; ++i) {
-			for (int j = 0; j < 4; ++j) {
-				std::cout << std::fixed << std::setprecision(2) << projection_view[i][j] << " ";
-			}
-			std::cout << std::endl;
-		}*/
 
 		for (auto& obj : game_objects) {
 			

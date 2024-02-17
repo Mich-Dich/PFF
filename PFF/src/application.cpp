@@ -33,8 +33,7 @@ namespace PFF {
 	application* application::s_instance = nullptr;
 
 
-	application::application() 
-		: m_delta_time(1), m_running(true) {
+	application::application() {
 
 		PFF_PROFILE_BEGIN_SESSION("startup", "benchmarks", "PFF_benchmark_startup.json");
 		PFF_PROFILE_FUNCTION();
@@ -98,17 +97,18 @@ namespace PFF {
 
 		PFF_PROFILE_BEGIN_SESSION("runtime", "benchmarks", "PFF_benchmark_runtime.json");
 
+		fps_timer->start_measurement();
 		while (m_running) {
 
-			m_window->update();
+			m_window->poll_events();
 
-			// update all layers
-			for (layer* layer : m_layerstack)
+			// update internal state
+			for (layer* layer : m_layerstack)		// update all layers [world_layer, imgui_layer]
 				layer->on_update(m_delta_time);
+			update(m_delta_time);	// update app instance, top most level
 
-			update(m_delta_time);	// potentally make every actor have own function (like UNREAL)
-			render(m_delta_time);	// potentally make every actor have own function (like UNREAL)
-
+			// render
+			render(m_delta_time);	// TODO: REMOVE (indeally app instance doesn't need to render anything)
 			m_imgui_layer->set_fps_values(m_limit_fps, (m_focus ? m_target_fps : m_nonefocus_fps), m_fps, static_cast<f32>(m_work_time * 1000), static_cast<f32>(m_sleep_time * 1000));
 			m_renderer->draw_frame(m_delta_time);
 
@@ -179,7 +179,7 @@ namespace PFF {
 		fps_timer->limit_fps(false, m_fps, m_delta_time, m_work_time, m_sleep_time);
 		m_imgui_layer->set_fps_values(m_limit_fps, (m_focus ? m_target_fps : m_nonefocus_fps), m_fps, static_cast<f32>(m_work_time * 1000), static_cast<f32>(m_sleep_time * 1000));
 		m_renderer->refresh(m_delta_time);
-		fps_timer->start_measurement();
+		// fps_timer->start_measurement();
 		return true;
 	}
 
@@ -203,11 +203,11 @@ namespace PFF {
 		return true;
 	}
 
-	bool application::update(f32 delta_time) {
+	bool application::update(const f32 delta_time) {
 		return true;
 	}
 
-	bool application::render(f32 delta_time) {
+	bool application::render(const f32 delta_time) {
 		return true;
 	}
 
