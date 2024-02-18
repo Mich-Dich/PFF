@@ -16,6 +16,7 @@ namespace PFF {
 			LOG(Debug, "PFF_editor Constructor");
 			init();
 		}
+
 		~PFF_editor() {
 
 			shutdown();
@@ -69,12 +70,6 @@ namespace PFF {
 
 #else
 
-		std::shared_ptr<basic_mesh> model = basic_mesh::create_mesh_from_file("assets/untitled.obj");
-		m_test_game_object= get_current_map()->create_empty_game_object();
-		m_test_game_object->mesh = model;
-		m_test_game_object->set_translation({.0f, -10.f, 0.f});
-		m_test_game_object->transform.scale = glm::vec3(1.f);
-		// m_test_game_object->rotation_speed = glm::vec3(0.f, .5f, 0.f);
 
 #endif // 1
 
@@ -83,6 +78,28 @@ namespace PFF {
 		floor_obj->mesh = floor;
 		floor_obj->transform.translation = { 0.f, 0.f, 0.f };
 		floor_obj->transform.scale = glm::vec3(2.5f);
+
+		std::shared_ptr<basic_mesh> model = basic_mesh::create_mesh_from_file("assets/untitled.obj");
+		auto test_1 = get_current_map()->create_empty_game_object();
+		test_1->mesh = model;
+		test_1->set_translation({ 0.f, -10.f, 0.f });
+		test_1->transform.scale = glm::vec3(1.f);
+
+		auto test_2 = get_current_map()->create_empty_game_object();
+		test_2 ->mesh = model;
+		test_2 ->set_translation({ 0.f, 10.f, 0.f });
+		test_2 ->transform.scale = glm::vec3(1.f);
+
+
+		// std::shared_ptr<basic_mesh> model = basic_mesh::create_mesh_from_file("assets/untitled.obj");
+		m_test_game_object = get_current_map()->create_empty_game_object();
+		m_test_game_object->mesh = model;
+		m_test_game_object->set_translation({ .0f, -10.f, 0.f });
+		m_test_game_object->transform.scale = glm::vec3(1.f);
+		// m_test_game_object->rotation_speed = glm::vec3(0.f, .5f, 0.f);
+
+		LOG(Fatal, "position: " << m_test_game_object->transform.translation.y);
+
 
 		// TODO: load editor camera loc && rot
 		glm::vec3 camera_pos{ 0.0f, 10.0f, 10.0f };
@@ -94,6 +111,7 @@ namespace PFF {
 		m_editor_controller->set_editor_camera_pos(camera_pos);
 		m_editor_controller->set_editor_camera_direction(camera_direction);
 
+		LOG(Fatal, "position: " << m_test_game_object->transform.translation.y);
 		return true;
 	}
 
@@ -111,26 +129,20 @@ namespace PFF {
 
 	bool PFF_editor::update(const f32 delta_time) {
 
-		static bool move_positive = true;
+		static bool move_positive{};
 
-		//glm::vec3 trans = m_test_game_object->transform.translation;
-		//LOG(Trace, "position: " << trans.x << "/" << trans.y << "/" << trans.z << " delta_time: " << delta_time);
-		//m_test_game_object->transform.translation.x += 1.f;
-		
-		/*
-		if (move_positive)
-			m_test_game_object->transform.translation.y += 1.f;
-		else
-			m_test_game_object->transform.translation.y -= 1.f;
-		*/
-
-		/*
-		if (m_test_game_object->transform.translation.y >= 10.f && move_positive)
+		if (m_test_game_object->transform.translation.y >= 10.f)
 			move_positive = false;
-		if (m_test_game_object->transform.translation.y <= 10.f && !move_positive)
-			move_positive = true;
-		*/
 
+		if (m_test_game_object->transform.translation.y <= -10.f)
+			move_positive = true;
+
+
+		if (move_positive)
+			m_test_game_object->transform.translation.y += 10.f * delta_time;
+		else
+			m_test_game_object->transform.translation.y -= 10.f * delta_time;
+		
 		return false;
 	}
 

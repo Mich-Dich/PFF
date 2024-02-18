@@ -20,7 +20,6 @@ namespace PFF {
 
 		PFF_PROFILE_FUNCTION();
 
-		// Simple FPS controller - needs work
 		auto end_timepoint = std::chrono::steady_clock::now();
 		auto high_res_start = std::chrono::duration<double, std::micro>{ m_start_time.time_since_epoch() };
 		auto elapsed_time = std::chrono::time_point_cast<std::chrono::microseconds>(end_timepoint).time_since_epoch() - std::chrono::time_point_cast<std::chrono::microseconds>(m_start_time).time_since_epoch();
