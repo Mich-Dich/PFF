@@ -19,12 +19,7 @@ namespace PFF {
 
 	private:
 
-		std::chrono::time_point<std::chrono::steady_clock>  m_start_time{};
-		std::chrono::time_point<std::chrono::steady_clock>  m_end_time{};
 		f32 target_duration{};
-		std::chrono::duration<f32> sleep_duration{};
-
-
 		f32 m_last_frame_time = 0.f;
 
 	};

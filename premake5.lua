@@ -16,11 +16,13 @@ workspace "PFF"
 	outputs  = "%{cfg.buildcfg}-%{cfg.system}-%{cfg.architecture}"
 
 	IncludeDir = {}
+	IncludeDir["glfw"] = "PFF/vendor/glfw"
 	IncludeDir["glm"] = "PFF/vendor/glm"
 	IncludeDir["ImGui"] = "PFF/vendor/imgui"
 	IncludeDir["tinyobjloader"] = "PFF/vendor/tinyobjloader"
 
 	include "PFF/vendor/imgui"
+	include "PFF/vendor/glfw"
 
 project "PFF"
 	location "PFF"
@@ -49,31 +51,32 @@ project "PFF"
 		"%{prj.name}/src/**.cpp",
 	}
 
+	links 
+	{
+		"glfw",
+		"ImGui",
+		"vulkan-1.lib",
+	}
+
 	includedirs
 	{
 		"%{prj.name}/src",
 		"%{prj.name}/assets",
 		"PFF/vendor/glm",
-		"PFF/vendor/glfw-3.3.8.bin.WIN64/include",
+		"PFF/vendor/glfw/include",
+		"%{IncludeDir.glfw}/include",
 		"%{IncludeDir.ImGui}",
 		"%{IncludeDir.ImGui}/backends/",
 		"%{IncludeDir.tinyobjloader}",
 		
 		vulkan_dir .. "/Include",
 	}
-
-	links 
-	{
-		"ImGui",
-		"vulkan-1.lib",
-		"glfw3.lib",
-	}
 	
 	libdirs 
 	{
 		--"PFF/libs",
 		--"%{IncludeDir.ImGui}/bin/" .. outputs .. "/ImGui",
-		"PFF/vendor/glfw-3.3.8.bin.WIN64/lib-vc2022",
+		--   "PFF/vendor/glfw/lib-vc2022",
 		vulkan_dir .. "/Lib",
 	}
 	

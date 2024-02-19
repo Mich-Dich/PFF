@@ -29,7 +29,7 @@ project "ImGui"
 	{
 		"PFF/vendor/ImGui",
 		"%{prj.name}",
-		"../../vendor/glfw-3.3.8.bin.WIN64/include",
+		"../../vendor/glfw/include",
 		vulkan_dir .. "/Include",
 	}
 

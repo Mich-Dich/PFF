@@ -33,10 +33,7 @@ namespace PFF {
 
 	void timer::end_measurement(f32& work_time) {
 
-		auto end_timepoint = std::chrono::steady_clock::now();
-		// auto high_res_start = std::chrono::duration<double, std::micro>{ m_start_time.time_since_epoch() };
-		auto elapsed_time = std::chrono::time_point_cast<std::chrono::milliseconds>(end_timepoint).time_since_epoch() - std::chrono::time_point_cast<std::chrono::milliseconds>(m_start_time).time_since_epoch();
-		work_time = static_cast<f32>(elapsed_time.count() * 0.001);
+		work_time = static_cast<f32>(glfwGetTime()) - m_last_frame_time;
 	}
 
 	void timer::limit_fps(const bool limit,  u32& fps, f32& delta_time, f32& work_time, f32& sleep_time) {

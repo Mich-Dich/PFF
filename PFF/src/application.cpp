@@ -94,16 +94,14 @@ namespace PFF {
 
 		m_window->poll_events();
 		fps_timer.start_measurement();
-		fps_timer.set_fps_settings(m_target_fps);
 		m_delta_time = 0.f;
 
 		while (m_running) {
 
 			PFF_PROFILE_SCOPE("run");
 
-			m_window->poll_events();
-
 			// update internal state
+			m_window->poll_events();
 			update(m_delta_time);					// update app instance, top most level
 			for (layer* layer : m_layerstack)		// update all layers [world_layer, imgui_layer]
 				layer->on_update(m_delta_time);
