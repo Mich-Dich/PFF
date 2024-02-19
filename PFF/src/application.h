@@ -3,6 +3,7 @@
 #include "engine/layer/layer_stack.h"			// need to include this for some reason
 #include "engine/layer/imgui_layer.h"
 #include "engine/layer/world_layer.h"
+#include "util/timer.h"
 
 namespace PFF {
 
@@ -14,7 +15,6 @@ namespace PFF {
 	class window_refresh_event;
 	class window_focus_event;
 	class game_map;
-	class timer;
 	class camera;
 
 	class PFF_API application {
@@ -24,7 +24,7 @@ namespace PFF {
 
 		DELETE_COPY(application);
 
-		FORCEINLINE f32 get_delta_time() const { return m_delta_time; }
+		FORCEINLINE f64 get_delta_time() const { return m_delta_time; }
 		FORCEINLINE static application& get() { return *s_instance; }
 		FORCEINLINE imgui_layer* get_imgui_layer() const { return m_imgui_layer; }
 		FORCEINLINE world_layer* get_world_layer() const { return m_world_layer; }
@@ -41,8 +41,8 @@ namespace PFF {
 
 		void run();
 		virtual bool init();								// to be used by client
-		virtual bool update(const f32 delta_time);				// potentally make private - every actor has own function (like UNREAL)
-		virtual bool render(const f32 delta_time);				// potentally make private - every actor has own function (like UNREAL)
+		virtual bool update(const f32 delta_time);			// potentally make private - every actor has own function (like UNREAL)
+		virtual bool render(const f32 delta_time);			// potentally make private - every actor has own function (like UNREAL)
 		virtual bool shutdown();							// to be used by client
 		void register_player_controller(std::shared_ptr<player_controller> player_controller) { m_world_layer->register_player_controller(player_controller); }
 
@@ -71,13 +71,15 @@ namespace PFF {
 		bool m_focus = true;
 		bool m_running = true;
 
+		f32 m_last_frame_time = 0.f;
+
 		bool m_limit_fps = true;
-		u32 m_target_fps = 120;
+		u32 m_target_fps = 60;
 		u32 m_nonefocus_fps = 30;
 		u32 m_fps{};
 		f32 m_delta_time = 0.f;
-		f64 m_work_time{}, m_sleep_time{};
-		std::unique_ptr<timer> fps_timer{};
+		f32 m_work_time{}, m_sleep_time{};
+		timer fps_timer;
 	};
 
 

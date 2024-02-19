@@ -12,7 +12,7 @@ namespace PFF {
 		editor_controller();
 		~editor_controller();
 
-		void update(f32 delta) override;
+		void update(const f32 delta) override;
 
 		FORCEINLINE glm::vec3 get_editor_camera_pos() const { return m_camera_pos; }
 		FORCEINLINE glm::vec3 get_editor_camera_direction() const { return m_camera_direction; }

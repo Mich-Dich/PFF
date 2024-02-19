@@ -18,15 +18,16 @@
 #include "engine/render/vk_buffer.h"
 #include "engine/map/game_map.h"
 
-// DEV-ONLY:
-#include "engine/game_objects/camera.h"
-
-
-#include "util/timer.h"
-
 #include "application.h"
 
+
+// DEV-ONLY:
+#include "engine/game_objects/camera.h"
+#include "util/timer.h"
+
+
 namespace PFF {
+
 
 	// ==================================================================== setup ====================================================================
 
@@ -45,8 +46,8 @@ namespace PFF {
 		config::init();
 		
 		// init FPS system
-		fps_timer = std::make_unique<timer>();
-		fps_timer->set_fps_settings(m_target_fps);
+		fps_timer = timer();
+		fps_timer.set_fps_settings(m_target_fps);
 
 		m_window = std::make_shared<pff_window>();			// Can be called after inital setup like [compiling shaders]
 		m_renderer = std::make_shared<renderer>(m_window, &m_layerstack);
@@ -80,7 +81,6 @@ namespace PFF {
 
 		m_renderer.reset();
 		m_window.reset();
-		fps_timer.reset();
 
 		CORE_LOG(Info, "Shutdown");
 		PFF_PROFILE_END_SESSION();
@@ -88,43 +88,49 @@ namespace PFF {
 
 	// ==================================================================== main loop ====================================================================
 
-	void application::capture_cursor() { m_window->capture_cursor(); }
-
-	void application::release_cursor() { m_window->release_cursor(); }
-
-
 	void application::run() {
 
 		PFF_PROFILE_BEGIN_SESSION("runtime", "benchmarks", "PFF_benchmark_runtime.json");
 
-		fps_timer->start_measurement();
+		m_window->poll_events();
+		fps_timer.start_measurement();
+		fps_timer.set_fps_settings(m_target_fps);
+		m_delta_time = 0.f;
+
 		while (m_running) {
+
+			PFF_PROFILE_SCOPE("run");
 
 			m_window->poll_events();
 
 			// update internal state
+			update(m_delta_time);					// update app instance, top most level
 			for (layer* layer : m_layerstack)		// update all layers [world_layer, imgui_layer]
 				layer->on_update(m_delta_time);
-			update(m_delta_time);	// update app instance, top most level
 
 			// render
 			render(m_delta_time);	// TODO: REMOVE (indeally app instance doesn't need to render anything)
-			m_imgui_layer->set_fps_values(m_limit_fps, (m_focus ? m_target_fps : m_nonefocus_fps), m_fps, static_cast<f32>(m_work_time * 1000), static_cast<f32>(m_sleep_time * 1000));
+			m_imgui_layer->set_fps_values(m_limit_fps, (m_focus ? m_target_fps : m_nonefocus_fps), m_fps, m_work_time * 1000, m_sleep_time);
 			m_renderer->draw_frame(m_delta_time);
 
-			// Simple FPS controller - needs work
-			fps_timer->limit_fps(m_limit_fps, m_fps, m_delta_time, m_work_time, m_sleep_time);
+			fps_timer.limit_fps(m_limit_fps, m_fps, m_delta_time, m_work_time, m_sleep_time);
 		}
 
 		m_renderer->wait_Idle();
 		PFF_PROFILE_END_SESSION();
 	}
 
+	// ==================================================================== PUBLIC ====================================================================
+
 	void application::limit_fps(const bool new_value, const u32 new_limit) {
 
 		m_limit_fps = new_value;
-		fps_timer->set_fps_settings(new_limit);
+		fps_timer.set_fps_settings(new_limit);
 	}
+ 
+	void application::capture_cursor() { m_window->capture_cursor(); }
+
+	void application::release_cursor() { m_window->release_cursor(); }
 
 	// ==================================================================== PRIVATE ====================================================================
 	// ==================================================================== event handling ====================================================================
@@ -176,10 +182,10 @@ namespace PFF {
 
 		PFF_PROFILE_FUNCTION();
 
-		fps_timer->limit_fps(false, m_fps, m_delta_time, m_work_time, m_sleep_time);
+		fps_timer.limit_fps(false, m_fps, m_delta_time, m_work_time, m_sleep_time);
 		m_imgui_layer->set_fps_values(m_limit_fps, (m_focus ? m_target_fps : m_nonefocus_fps), m_fps, static_cast<f32>(m_work_time * 1000), static_cast<f32>(m_sleep_time * 1000));
 		m_renderer->refresh(m_delta_time);
-		// fps_timer->start_measurement();
+		// fps_timer.start_measurement();
 		return true;
 	}
 
@@ -189,9 +195,9 @@ namespace PFF {
 
 		m_focus = event.get_focus();
 		if (event.get_focus())
-			fps_timer->set_fps_settings(m_target_fps);
+			fps_timer.set_fps_settings(m_target_fps);
 		else
-			fps_timer->set_fps_settings(m_nonefocus_fps);
+			fps_timer.set_fps_settings(m_nonefocus_fps);
 
 		return true;
 	}

@@ -258,7 +258,7 @@ namespace PFF {
 					// Get the line spacing (vertical padding around text)
 					f32 lineSpacing = style.ItemSpacing.y / 2;
 					f32 fontSize = ImGui::GetFontSize();
-					f32 work_percent = m_work_time / (m_work_time + m_sleep_time);
+					f32 work_percent = static_cast<f32>(m_work_time / (m_work_time + m_sleep_time));
 					f32 sleep_percent = 1 - work_percent;
 					char formattedText[32];
 					ImVec2 curser_pos;
@@ -267,14 +267,14 @@ namespace PFF {
 					ImGui::Text("performance timer");
 					ImGui::Separator();
 					if (m_limit_fps)
-						ImGui::Text("current fps    %d/%d", m_current_fps, m_target_fps);
+						ImGui::Text("current fps    %4d/%4d", m_current_fps, m_target_fps);
 					else
 						ImGui::Text("current fps    %4d", m_current_fps);
 
 					// work_time
 					ImGui::Text("work time  ");
 					ImGui::SameLine();
-					snprintf(formattedText, sizeof(formattedText), " %7.2f ", m_work_time);
+					snprintf(formattedText, sizeof(formattedText), " %8.2f ", m_work_time);
 					progressbar_with_text(work_percent, formattedText);
 					ImGui::SameLine();
 					ImGui::Text("ms");
@@ -282,7 +282,7 @@ namespace PFF {
 					// sleep time
 					ImGui::Text("sleep time ");
 					ImGui::SameLine();
-					snprintf(formattedText, sizeof(formattedText), " %7.2f ", m_sleep_time);
+					snprintf(formattedText, sizeof(formattedText), " %8.2f ", m_sleep_time);
 					progressbar_with_text(sleep_percent, formattedText);
 					ImGui::SameLine();
 					ImGui::Text("ms");

@@ -142,7 +142,7 @@ namespace PFF {
 			m_test_game_object->transform.translation.y += 10.f * delta_time;
 		else
 			m_test_game_object->transform.translation.y -= 10.f * delta_time;
-		
+
 		return false;
 	}
 
