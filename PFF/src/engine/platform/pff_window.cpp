@@ -8,6 +8,7 @@
 #include "engine/events/application_event.h"
 #include "engine/events/mouse_event.h"
 #include "engine/events/key_event.h"
+#include "application.h"
 
 #include "pff_window.h"
 
@@ -62,6 +63,7 @@ namespace PFF {
 		config::load(config::file::editor, "window_attributes", "width", attributes.width);
 		config::load(config::file::editor, "window_attributes", "height", attributes.height);
 		config::load(config::file::editor, "window_attributes", "vsync", attributes.vsync);
+		attributes.app_ref = &application::get();
 		m_data = attributes;
 
 		if (!s_GLFWinitialized) {
@@ -71,6 +73,7 @@ namespace PFF {
 			s_GLFWinitialized = true;
 		}
 
+		glfwWindowHint(GLFW_TITLEBAR, false);
 		glfwWindowHint(GLFW_CLIENT_API, GLFW_NO_API);
 		glfwWindowHint(GLFW_RESIZABLE, GLFW_TRUE);
 
@@ -112,9 +115,16 @@ namespace PFF {
 		});
 
 		glfwSetWindowCloseCallback(m_Window, [](GLFWwindow* window) {
+			
 			window_attributes& Data = *(window_attributes*)glfwGetWindowUserPointer(window);
 			window_close_event event;
 			Data.event_callback(event);
+		});
+
+		glfwSetTitlebarHitTestCallback(m_Window, [](GLFWwindow* window, int x, int y, int* hit) {
+
+			window_attributes& Data = *(window_attributes*)glfwGetWindowUserPointer(window);
+			*hit = Data.app_ref->is_titlebar_hovered();
 		});
 
 		glfwSetScrollCallback(m_Window, [](GLFWwindow* window, double xOffset, double yOffset) {

@@ -35,7 +35,9 @@ namespace PFF {
 	void editor_layer::on_imgui_render() {
 
 		ImGui::SetCurrentContext(m_context);
+		
 		ImGui_window_main_menu_bar();
+
 		ImGui_window_general_debugger();
 		ImGui_window_Outliner();
 		ImGui_window_Details();
@@ -48,7 +50,34 @@ namespace PFF {
 
 	void editor_layer::ImGui_window_main_menu_bar() {
 
+		const float titlebar_height = 58.f;
+		const bool is_maximized = false;				// use is_maximised() function
+		float titlebar_vertical_offset = is_maximized ? -6.f : 0.f;
+		const ImVec2 window_padding = ImGui::GetCurrentWindow()->WindowPadding;
+
+		ImGui::SetCursorPos(ImVec2(window_padding.x, window_padding.y + titlebar_vertical_offset));
+		const ImVec2 titlebar_min = ImGui::GetCursorScreenPos();
+		const ImVec2 titlebar_max = {	ImGui::GetCursorScreenPos().x + ImGui::GetWindowWidth() - window_padding.y * 2.f,
+										ImGui::GetCursorScreenPos().y + titlebar_height };
+
+		auto* bg_draw_list = ImGui::GetBackgroundDrawList();
+		auto* fg_draw_list = ImGui::GetForegroundDrawList();
+		bg_draw_list->AddRectFilled(titlebar_min, titlebar_max, ImU32(0));
+
+		// Debug titlebar bounds
+		fg_draw_list->AddRect(titlebar_min, titlebar_max, ImU32(0));
+
+		// LOGO
+		{
+		
+		}
+
+		// ImGui::BeginHorizontal();
+
+		// application::get().set_titlebar_hovered(ImGui::IsItemHovered());
+		/*
 		if (ImGui::BeginMainMenuBar()) {
+
 			if (ImGui::BeginMenu("File")) {
 
 				ImGui::MenuItem("menu", NULL, false, false);
@@ -95,6 +124,7 @@ namespace PFF {
 			}
 			ImGui::EndMainMenuBar();
 		}
+		*/
 	}
 
 	void editor_layer::ImGui_window_general_debugger() {

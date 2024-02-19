@@ -35,6 +35,8 @@ namespace PFF {
 		FORCEINLINE USE_IN_EDITOR void push_overlay(layer* overlay) { m_layerstack.push_overlay(overlay); }
 		FORCEINLINE u32 get_target_fps() const { return m_target_fps; }
 		FORCEINLINE bool get_limit_fps() const { return m_limit_fps; }
+		FORCEINLINE bool is_titlebar_hovered() const { return m_is_titlebar_hovered; }
+		FORCEINLINE void set_titlebar_hovered(bool value) { m_is_titlebar_hovered = value; LOG(Trace, "title bar hoverd: " << util::bool_to_str(value)); }
 
 		FORCEINLINE void capture_cursor();
 		FORCEINLINE void release_cursor();
@@ -68,6 +70,7 @@ namespace PFF {
 		std::shared_ptr<pff_window> m_window = nullptr;
 		std::shared_ptr<renderer> m_renderer;
 
+		bool m_is_titlebar_hovered = false;
 		bool m_focus = true;
 		bool m_running = true;
 

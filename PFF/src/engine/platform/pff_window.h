@@ -7,7 +7,7 @@ struct VkInstance_T;
 struct VkSurfaceKHR_T;
 
 class event;
-
+class application;
 
 namespace PFF {
 
@@ -23,6 +23,7 @@ namespace PFF {
 		f64 cursor_pos_x{};
 		f64 cursor_pos_y{};
 		bool vsync{};
+		application* app_ref{};
 
 		EventCallbackFn event_callback;
 
