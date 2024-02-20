@@ -1,5 +1,7 @@
 #pragma once
 
+#include "util/pffpch.h"
+
 #include "engine/layer/layer_stack.h"			// need to include this for some reason
 #include "engine/layer/imgui_layer.h"
 #include "engine/layer/world_layer.h"
@@ -36,10 +38,14 @@ namespace PFF {
 		FORCEINLINE u32 get_target_fps() const { return m_target_fps; }
 		FORCEINLINE bool get_limit_fps() const { return m_limit_fps; }
 		FORCEINLINE bool is_titlebar_hovered() const { return m_is_titlebar_hovered; }
-		FORCEINLINE void set_titlebar_hovered(bool value) { m_is_titlebar_hovered = value; LOG(Trace, "title bar hoverd: " << util::bool_to_str(value)); }
+		FORCEINLINE void set_titlebar_hovered(bool value) { m_is_titlebar_hovered = value; /*LOG(Trace, "title bar hoverd: " << util::bool_to_str(value));*/ }
 
 		FORCEINLINE void capture_cursor();
 		FORCEINLINE void release_cursor();
+
+		void minimize_window();
+		void restore_window();
+		void maximize_window();
 
 		void run();
 		virtual bool init();								// to be used by client

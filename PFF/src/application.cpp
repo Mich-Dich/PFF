@@ -130,6 +130,30 @@ namespace PFF {
 
 	void application::release_cursor() { m_window->release_cursor(); }
 
+	void application::minimize_window() {
+
+		m_renderer->set_state(system_state::inactive);
+		m_window->minimize_window();
+		on_window_refresh(window_refresh_event());
+		m_renderer->set_state(system_state::active);
+	}
+
+	void application::restore_window() {
+
+		m_renderer->set_state(system_state::inactive);
+		m_window->restore_window();
+		// on_window_refresh(window_refresh_event());
+		// m_renderer->set_state(system_state::active);
+	}
+
+	void application::maximize_window() {
+
+		m_renderer->set_state(system_state::inactive);
+		m_window->maximize_window();
+		// on_window_resize(window_resize_event());
+		m_renderer->set_state(system_state::active);
+	}
+
 	// ==================================================================== PRIVATE ====================================================================
 	// ==================================================================== event handling ====================================================================
 

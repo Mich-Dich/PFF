@@ -198,6 +198,24 @@ namespace PFF {
 		return glfwWindowShouldClose(m_Window);
 	}
 
+	void pff_window::minimize_window() {
+		
+		glfwIconifyWindow(m_Window);
+		m_window_size_state = window_size_state::minimised; 
+	}
+
+	void pff_window::restore_window() {
+		
+		glfwRestoreWindow(m_Window); 
+		m_window_size_state = window_size_state::windowed;
+	}
+
+	void pff_window::maximize_window() { 
+		
+		glfwMaximizeWindow(m_Window); 
+		m_window_size_state = window_size_state::fullscreen_windowed; 
+	}
+
 	void pff_window::create_window_surface(VkInstance_T* instance, VkSurfaceKHR_T** get_surface) {
 
 		CORE_ASSERT(glfwCreateWindowSurface(instance, m_Window, nullptr, get_surface) == VK_SUCCESS, "", "Failed to create awindow surface");

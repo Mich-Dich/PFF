@@ -119,7 +119,7 @@ namespace PFF {
 		// Use any command queue
 		VkCommandBuffer command_buffer = m_renderer->get_device()->begin_single_time_commands();
 		io.FontDefault = io.Fonts->AddFontFromFileTTF("../PFF/assets/fonts/Open_Sans/static/OpenSans-Regular.ttf", m_font_size);
-		ImGui_ImplVulkan_CreateFontsTexture();
+		ImGui_ImplVulkan_CreateFontsTexture(command_buffer);
 		m_renderer->get_device()->end_single_time_commands(command_buffer);
 
 		CORE_ASSERT(vkDeviceWaitIdle(m_renderer->get_device()->get_device()) == VK_SUCCESS, "", "Failed wait idle");
@@ -194,9 +194,13 @@ namespace PFF {
 		IMGUI_STYLE_CONFIG(f32, WindowBorderSize, 0);
 		IMGUI_STYLE_CONFIG(ImVec2, ItemSpacing, ImVec2(4, 4));
 		IMGUI_STYLE_CONFIG(ImVec2, ItemInnerSpacing, ImVec2(4, 4));
+		IMGUI_STYLE_CONFIG(ImVec2, WindowPadding, ImVec2(4, 4));
 
-		//	ItemInnerSpacing
-
+		// ItemInnerSpacing
+		
+		ImGui::PushStyleColor(ImGuiCol_MenuBarBg, ImVec4(0.0f, 0.2f, 0.0f, 1.0f));
+		ImGui::PopStyleColor();
+		// MenuBarBg
 	}
 
 	void imgui_layer::on_detach() {
@@ -232,12 +236,17 @@ namespace PFF {
 
 		PFF_PROFILE_FUNCTION();
 
+		//show_performance();
+	}
+
+	void imgui_layer::show_performance() {
+
 		ImGui::SetCurrentContext(m_context);
 		// Demonstrate creating a simple static window with no decoration
 		// + a context-menu to choose which corner of the screen to use.
 		static int location = 1;
 		{
-			 ImGuiWindowFlags window_flags = (ImGuiWindowFlags_NoDecoration |
+			ImGuiWindowFlags window_flags = (ImGuiWindowFlags_NoDecoration |
 				ImGuiWindowFlags_NoDocking |
 				ImGuiWindowFlags_AlwaysAutoResize |
 				ImGuiWindowFlags_NoSavedSettings |
@@ -309,8 +318,6 @@ namespace PFF {
 				ImGui::End();
 			}
 		}
-
-		// ImGui::ShowDemoWindow(&showdemo_window);
 	}
 
 	void imgui_layer::begin_frame() {
@@ -381,7 +388,7 @@ namespace PFF {
 		ImVec2 textSize;
 
 		curser_pos = ImGui::GetCursorScreenPos();
-		ImGui::SetNextItemAllowOverlap();
+		ImGui::SetItemAllowOverlap();
 
 		textSize = ImGui::CalcTextSize(text);
 		textSize.x = std::max<f32>(textSize.x, min_size_x);

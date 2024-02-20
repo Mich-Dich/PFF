@@ -18,10 +18,10 @@ workspace "PFF"
 	IncludeDir = {}
 	IncludeDir["glfw"] = "PFF/vendor/glfw"
 	IncludeDir["glm"] = "PFF/vendor/glm"
-	IncludeDir["ImGui"] = "PFF/vendor/imgui"
+	IncludeDir["ImGui"] = "PFF/vendor/imgui_new"
 	IncludeDir["tinyobjloader"] = "PFF/vendor/tinyobjloader"
 
-	include "PFF/vendor/imgui"
+	include "PFF/vendor/imgui_new"
 	include "PFF/vendor/glfw"
 
 project "PFF"

@@ -135,6 +135,9 @@
     <ClInclude Include="src\util\benchmarking\instrumentor.h">
       <Filter>util\benchmarking</Filter>
     </ClInclude>
+    <ClInclude Include="src\engine\color_theme.h">
+      <Filter>util</Filter>
+    </ClInclude>
     <ClInclude Include="src\util\core_config.h">
       <Filter>util</Filter>
     </ClInclude>

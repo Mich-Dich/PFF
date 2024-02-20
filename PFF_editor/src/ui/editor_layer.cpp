@@ -7,6 +7,8 @@
 
 #include "ui/panels/pannel_collection.h"
 #include "util/pffpch.h"
+#include "engine/platform/pff_window.h"
+#include "engine/color_theme.h"
 #include "application.h"
 
 #include "editor_layer.h"
@@ -48,33 +50,164 @@ namespace PFF {
 		ImGui::ShowDemoWindow();				// DEV-ONLY
 	}
 
+
 	void editor_layer::ImGui_window_main_menu_bar() {
 
-		const float titlebar_height = 58.f;
+		const f32 titlebar_height = 60.f;
+
+		ImGuiWindowFlags window_flags = ImGuiWindowFlags_NoDocking;
+		ImGuiViewport* viewport = ImGui::GetMainViewport();
+		ImGui::SetNextWindowPos(viewport->Pos);
+		ImGui::SetNextWindowSize(ImVec2(viewport->Size.x, titlebar_height));
+		ImGui::SetNextWindowViewport(viewport->ID);
+		// ImGui::PushStyleVar(ImGuiStyleVar_WindowRounding, 0.0f);
+		// ImGui::PushStyleVar(ImGuiStyleVar_WindowBorderSize, 0.0f);
+		window_flags |= ImGuiWindowFlags_NoTitleBar | ImGuiWindowFlags_NoCollapse | ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoMove | ImGuiWindowFlags_NoScrollbar | ImGuiWindowFlags_NoScrollWithMouse;
+		window_flags |= ImGuiWindowFlags_NoBringToFrontOnFocus | ImGuiWindowFlags_NoNavFocus | ImGuiWindowFlags_NoDecoration | ImGuiWindowFlags_NoNav | ImGuiWindowFlags_NoDocking;
+		// window_flags |= ImGuiWindowFlags_MenuBar;
+
+		ImGui::Begin("DockSpaceWindow", nullptr, window_flags);
+
 		const bool is_maximized = false;				// use is_maximised() function
 		float titlebar_vertical_offset = is_maximized ? -6.f : 0.f;
 		const ImVec2 window_padding = ImGui::GetCurrentWindow()->WindowPadding;
 
 		ImGui::SetCursorPos(ImVec2(window_padding.x, window_padding.y + titlebar_vertical_offset));
 		const ImVec2 titlebar_min = ImGui::GetCursorScreenPos();
-		const ImVec2 titlebar_max = {	ImGui::GetCursorScreenPos().x + ImGui::GetWindowWidth() - window_padding.y * 2.f,
-										ImGui::GetCursorScreenPos().y + titlebar_height };
+		const ImVec2 titlebar_max = {	ImGui::GetCursorScreenPos().x + ImGui::GetWindowWidth() - window_padding.x * 2.f,
+										ImGui::GetCursorScreenPos().y + titlebar_height - window_padding.y * 2.f};
 
 		auto* bg_draw_list = ImGui::GetBackgroundDrawList();
 		auto* fg_draw_list = ImGui::GetForegroundDrawList();
-		bg_draw_list->AddRectFilled(titlebar_min, titlebar_max, ImU32(0));
-
+		// bg_draw_list->AddRectFilled(titlebar_min, titlebar_max, IM_COL32(21, 251, 21, 255));
+		
 		// Debug titlebar bounds
-		fg_draw_list->AddRect(titlebar_min, titlebar_max, ImU32(0));
+		//fg_draw_list->AddRect(titlebar_min, titlebar_max, IM_COL32(222, 43, 43, 255));
 
 		// LOGO
 		{
-		
+
 		}
 
-		// ImGui::BeginHorizontal();
 
-		// application::get().set_titlebar_hovered(ImGui::IsItemHovered());
+		static f32 move_offset_y;
+		static f32 move_offset_x;
+		const f32 w = ImGui::GetContentRegionAvail().x;
+		const f32 button_width = 30.f;
+		const f32 button_area_width = (button_width * 3) + (window_padding.y * 2);
+
+		// tilebar drag area
+		ImGui::SetCursorPos(ImVec2(window_padding.x, window_padding.y + titlebar_vertical_offset));
+
+		// debug Drab bounds
+		//fg_draw_list->AddRect(ImGui::GetCursorScreenPos(), ImVec2(w - button_area_width, titlebar_height), IM_COL32(222, 43, 43, 255));
+
+#if 1	// FOR DEBUG VIAUL
+		ImGui::InvisibleButton("##titlebar_drag_zone", ImVec2(w - button_area_width, titlebar_height - window_padding.y * 2));
+#else
+		ImGui::Button("##titlebar_drag_zone", ImVec2(w - button_area_width, titlebar_height - window_padding.y * 2));
+#endif // 1
+
+		application::get().set_titlebar_hovered(ImGui::IsItemHovered());
+		ImGui::SetItemAllowOverlap();
+
+		// ImGui::Spring();
+		ImGui::SetCursorPos(ImVec2(w - button_area_width + window_padding.x*2, window_padding.y));
+		{
+
+			if (ImGui::Button("Min", ImVec2(30.f, 30.f))) {
+
+				application::get().minimize_window();
+			}
+
+			// UI::DrawButtonImage(m_IconMinimize, buttonColN, buttonColH, buttonColP, UI::RectExpanded(UI::GetItemRect(), 0.0f, -padY));
+		}
+
+		ImGui::SetCursorPos(ImVec2(w - button_area_width + window_padding.x * 3 + button_width, window_padding.y));
+		{
+
+			if (ImGui::Button("Max", ImVec2(30.f, 30.f))) {
+
+				application::get().maximize_window();		// TODO: Queue event for later manipulation
+			}
+
+			// UI::DrawButtonImage(m_IconMinimize, buttonColN, buttonColH, buttonColP, UI::RectExpanded(UI::GetItemRect(), 0.0f, -padY));
+		}
+
+		ImGui::SetCursorPos(ImVec2(w - button_area_width + window_padding.x * 4 + button_width*2, window_padding.y));
+		{
+
+			if (ImGui::Button("Close", ImVec2(30.f, 30.f))) {
+
+				application::get().close_application();
+			}
+
+			// UI::DrawButtonImage(m_IconMinimize, buttonColN, buttonColH, buttonColP, UI::RectExpanded(UI::GetItemRect(), 0.0f, -padY));
+		}
+
+
+		ImGui::SetCursorPos(ImVec2(window_padding.x + 120, window_padding.y + titlebar_height/2));
+		ImGui::BeginHorizontal("titlebar", { ImGui::GetWindowWidth() - 0.f, ImGui::GetFrameHeightWithSpacing() });
+
+		if (ImGui::BeginTabBar("##tabs", ImGuiTabBarFlags_None)) {
+
+			f32 tab_width = 100.f;		// TODO: move into [default_tab_width] variable in config-file
+			ImGui::SetNextItemWidth(tab_width);
+			if (ImGui::BeginTabItem("Main Viewport")) {
+				ImGui::EndTabItem();
+			}
+
+			ImGui::SetNextItemWidth(tab_width);
+			if (ImGui::BeginTabItem("Mesh Editor")) {
+				ImGui::EndTabItem();
+			}
+
+			ImGui::SetNextItemWidth(tab_width);
+			if (ImGui::BeginTabItem("Material Editor")) {
+				ImGui::EndTabItem();
+			}
+			ImGui::EndTabBar();
+		}
+
+		ImGui::EndHorizontal();
+		ImGui::End();
+
+		/*
+		static f32 move_offset_y;
+		static f32 move_offset_x;
+		const f32 w = ImGui::GetContentRegionAvail().x;
+		const f32 button_area_width = 94;
+
+		// tilebar drag area
+		ImGui::SetCursorPos(ImVec2(window_padding.x, window_padding.y + titlebar_vertical_offset));
+
+		// debug Drab bounds
+		//fg_draw_list->AddRect(ImGui::GetCursorScreenPos(), ImVec2(w - button_area_width, titlebar_height), IM_COL32(222, 43, 43, 255));
+
+		ImGui::InvisibleButton("##titlebar_drag_zone", ImVec2(w - button_area_width, titlebar_height));
+		application::get().set_titlebar_hovered(ImGui::IsItemHovered());
+		*/
+		
+		//const ImRect menuBarRect = { ImGui::GetCursorPos(), { ImGui::GetContentRegionAvail().x + ImGui::GetCursorScreenPos().x, ImGui::GetFrameHeightWithSpacing() } };
+
+		/*
+		ImGui::Spring();
+		UI::ShiftCursorY(8.0f);
+		{
+			const int iconWidth = m_IconMinimize->GetWidth();
+			const int iconHeight = m_IconMinimize->GetHeight();
+			const float padY = (buttonHeight - (float)iconHeight) / 2.0f;
+			if (ImGui::InvisibleButton("Minimize", ImVec2(buttonWidth, buttonHeight))) {
+				// TODO: move this stuff to a better place, like Window class
+				if (m_WindowHandle) {
+					Application::Get().QueueEvent([windowHandle = m_WindowHandle]() { glfwIconifyWindow(windowHandle); });
+				}
+			}
+
+			UI::DrawButtonImage(m_IconMinimize, buttonColN, buttonColH, buttonColP, UI::RectExpanded(UI::GetItemRect(), 0.0f, -padY));
+		}
+		*/
+
 		/*
 		if (ImGui::BeginMainMenuBar()) {
 
@@ -125,6 +258,7 @@ namespace PFF {
 			ImGui::EndMainMenuBar();
 		}
 		*/
+
 	}
 
 	void editor_layer::ImGui_window_general_debugger() {

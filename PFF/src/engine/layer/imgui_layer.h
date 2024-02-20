@@ -28,6 +28,7 @@ namespace PFF {
 		void on_update(const f32 delta_time) override;
 		void on_event(event& event) override;
 		void on_imgui_render() override;
+		void show_performance();
 		void set_fps_values(const bool limit_fps, const  u32 target_fps, const u32 current_fps, const f32 work_time, const f32 sleep_time)
 			{ m_limit_fps = limit_fps, m_target_fps = target_fps; m_current_fps = current_fps; m_work_time = work_time; m_sleep_time = sleep_time;  }
 

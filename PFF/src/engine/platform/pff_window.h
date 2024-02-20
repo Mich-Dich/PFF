@@ -1,6 +1,5 @@
 #pragma once
 
-
 struct GLFWwindow;
 struct VkExtent2D;
 struct VkInstance_T;
@@ -31,6 +30,13 @@ namespace PFF {
 			: title(title), width(width), height(height), vsync(vsync), event_callback(callback){}
 	};
 
+	enum class window_size_state {
+		windowed,
+		minimised,
+		fullscreen,
+		fullscreen_windowed,
+	};
+
 	class pff_window {
 	public:
 
@@ -50,6 +56,10 @@ namespace PFF {
 		FORCEINLINE f64 get_cursor_pos_x() const { return m_data.cursor_pos_x; }
 		FORCEINLINE f64 get_cursor_pos_y() const { return m_data.cursor_pos_y; }
 
+		PFF_API_EDITOR void minimize_window();
+		PFF_API_EDITOR void restore_window();
+		PFF_API_EDITOR void maximize_window();
+
 		void create_window_surface(VkInstance_T* instance, VkSurfaceKHR_T** get_surface);
 		VkExtent2D get_extend();
 		bool should_close();
@@ -62,6 +72,7 @@ namespace PFF {
 		void init(window_attributes attributes);
 		void set_vsync(bool enable);
 
+		window_size_state m_window_size_state = window_size_state::windowed;		
 		window_attributes m_data;
 		GLFWwindow* m_Window;
 	};
