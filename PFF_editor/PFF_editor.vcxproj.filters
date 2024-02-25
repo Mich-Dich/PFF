@@ -49,6 +49,5 @@
     <None Include="shaders\default.vert">
       <Filter>shaders</Filter>
     </None>
-    <None Include="src\ui\embeded\window_images.embed" />
   </ItemGroup>
 </Project>

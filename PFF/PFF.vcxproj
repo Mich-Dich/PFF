@@ -123,6 +123,7 @@ IF EXIST ..\bin\Release-windows-x86_64\PFF\PFF.dll\ (xcopy /Q /E /Y /I ..\bin\Re
     <ClInclude Include="src\engine\Events\application_event.h" />
     <ClInclude Include="src\engine\Events\key_event.h" />
     <ClInclude Include="src\engine\Events\mouse_event.h" />
+    <ClInclude Include="src\engine\color_theme.h" />
     <ClInclude Include="src\engine\game_objects\camera.h" />
     <ClInclude Include="src\engine\game_objects\game_manager.h" />
     <ClInclude Include="src\engine\game_objects\game_object.h" />
@@ -149,7 +150,6 @@ IF EXIST ..\bin\Release-windows-x86_64\PFF\PFF.dll\ (xcopy /Q /E /Y /I ..\bin\Re
     <ClInclude Include="src\engine\render\vk_swapchain.h" />
     <ClInclude Include="src\entry_point.h" />
     <ClInclude Include="src\util\benchmarking\instrumentor.h" />
-    <ClInclude Include="src\engine\color_theme.h" />
     <ClInclude Include="src\util\core_config.h" />
     <ClInclude Include="src\util\data_types.h" />
     <ClInclude Include="src\util\io\config.h" />

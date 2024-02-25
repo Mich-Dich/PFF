@@ -116,7 +116,6 @@
   <ItemGroup>
     <None Include="shaders\default.frag" />
     <None Include="shaders\default.vert" />
-    <None Include="src\ui\embeded\window_images.embed" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\PFF\vendor\imgui_new\ImGui.vcxproj">

@@ -23,13 +23,14 @@ namespace PFF {
 	private:
 
 		// ImGui windows
-		void ImGui_window_main_menu_bar();
-		void ImGui_window_general_debugger();
-		void ImGui_window_Outliner();
-		void ImGui_window_Details();
-		void ImGui_window_World_Settings();
-		void ImGui_window_ContentBrowser_0();
-		void ImGui_window_ContentBrowser_1();
+		void window_main_menu_bar();
+		void window_general_debugger();
+		void window_main_content();
+		void window_outliner();
+		void window_details();
+		void window_world_settings();
+		void window_content_browser_0();
+		void window_content_browser_1();
 
 		void set_next_window_pos(int16 location);
 		void progressbar_with_text(f32 percent, const char* text, f32 min_size_x = 0.0f, f32 min_size_y = 0.0f);
@@ -38,11 +39,11 @@ namespace PFF {
 		bool m_show_options = false;
 		bool m_show_general_debugger = true;
 		bool m_show_main_menu_bar = false;
-		bool m_show_Outliner = false;
-		bool m_show_Details = false;
-		bool m_show_World_Settings = false;
-		bool m_show_ContentBrowser_0 = false;
-		bool m_show_ContentBrowser_1 = false;
+		bool m_show_outliner = false;
+		bool m_show_details = false;
+		bool m_show_world_settings = true;
+		bool m_show_content_browser_0 = false;
+		bool m_show_content_browser_1 = false;
 
 		ImGuiContext* m_context;
 		f32 m_font_size = 14.5f;

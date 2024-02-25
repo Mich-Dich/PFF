@@ -16,7 +16,10 @@ namespace PFF {
 
 		ImGuiStyle& style = ImGui::GetStyle();
 		ImVec2 current_item_spacing = style.ItemSpacing;
+
 		// ImGui::PushStyleVar(ImGuiStyleVar_ItemInnerSpacing, ImVec2(0, 0));
+		//ImGui::PushStyleVar(ImGuiStyleVar_ItemSpacing, ImVec2(4,-1));
+		//ImGui::TableSetupColumn();
 
 		ImGui::Columns(2, nullptr, true);
 
@@ -62,8 +65,8 @@ namespace PFF {
 			ImGui::InputFloat4("", &value[0], "%.2f");
 		}
 
-		// ImGui::PopStyleVar(1);
 		ImGui::Columns(1);
+		//ImGui::PopStyleVar();
 	}
 
 	template<typename T>

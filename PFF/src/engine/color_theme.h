@@ -3,6 +3,8 @@
 #include "util/pffpch.h"
 #include <imgui.h>
 
+#define PFF_UI_ACTIVE_THEME			PFF::UI::THEME::current_theme
+
 namespace PFF::UI::THEME {
 
 	struct theme {
@@ -20,7 +22,7 @@ namespace PFF::UI::THEME {
 	};
 
 	theme theme_default{
-		ImVec4(0.8f, 0.8f, 0.8f, 1.0f),			// main_bg_color
+		ImVec4(0.095f, 0.095f, 0.095f, 1.0f),			// main_bg_color
 		ImVec4(0.0f, 0.25f, 0.0f, 1.0f),
 		ImVec4(0.0f, 0.36f, 0.0f, 1.0f),
 		ImVec4(0.0f, 0.32f, 0.0f, 1.0f),
