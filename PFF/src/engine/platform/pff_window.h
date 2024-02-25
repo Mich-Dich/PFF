@@ -55,6 +55,7 @@ namespace PFF {
 		FORCEINLINE void set_event_callback(const EventCallbackFn& callback) { m_data.event_callback = callback; }
 		FORCEINLINE f64 get_cursor_pos_x() const { return m_data.cursor_pos_x; }
 		FORCEINLINE f64 get_cursor_pos_y() const { return m_data.cursor_pos_y; }
+		FORCEINLINE window_size_state get_window_size_state() const { return m_window_size_state; }
 
 		PFF_API_EDITOR void minimize_window();
 		PFF_API_EDITOR void restore_window();
@@ -66,9 +67,23 @@ namespace PFF {
 		void poll_events();
 		void capture_cursor();
 		void release_cursor();
-		
+
+		template<typename Func>
+		void queue_event(Func&& func) {
+
+			m_event_queue.push(func);
+		}
+
+		//template<typename Func>
+		//void QueueEvent(Func&& func) {
+		//	m_EventQueue.push(func);
+		//}
+
 	private:
-		
+
+		std::mutex m_event_queue_mutex;
+		std::queue<std::function<void()>> m_event_queue;
+
 		void init(window_attributes attributes);
 		void set_vsync(bool enable);
 

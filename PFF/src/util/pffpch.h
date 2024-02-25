@@ -20,6 +20,7 @@
 #include <unordered_map>
 #include <unordered_set>
 
+#include <queue>
 #include <list>
 #include <map>
 #include <deque>

@@ -11,12 +11,12 @@
 #include "engine/color_theme.h"
 #include "application.h"
 #include "engine/layer/imgui_layer.h"
+#include "engine/platform/pff_window.h"
 
 #include "editor_layer.h"
 
 
 namespace PFF {
-
 
 	editor_layer::~editor_layer() {
 
@@ -40,7 +40,7 @@ namespace PFF {
 		ImGui::SetCurrentContext(m_context);
 
 		window_main_menu_bar();
-		window_main_content();
+		// window_main_content();
 
 		window_general_debugger();
 		window_outliner();
@@ -49,7 +49,7 @@ namespace PFF {
 		window_content_browser_0();
 		window_content_browser_1();
 
-		// ImGui::ShowDemoWindow();				// DEV-ONLY
+		ImGui::ShowDemoWindow();				// DEV-ONLY
 	}
 
 
@@ -69,13 +69,14 @@ namespace PFF {
 		window_flags |= ImGuiWindowFlags_NoBringToFrontOnFocus | ImGuiWindowFlags_NoNavFocus | ImGuiWindowFlags_NoDecoration | ImGuiWindowFlags_NoNav | ImGuiWindowFlags_NoDocking;
 		// window_flags |= ImGuiWindowFlags_MenuBar;
 		
-		ImGui::PushStyleColor(ImGuiCol_WindowBg, PFF_UI_ACTIVE_THEME->main_bg_color);
+		ImGui::PushStyleColor(ImGuiCol_WindowBg, PFF_UI_ACTIVE_THEME->WindowBg);
 		if (ImGui::Begin("DockSpaceWindow", nullptr, window_flags)) {
 
 			ImGui::PopStyleColor();
 
-			const bool is_maximized = false;				// use is_maximised() function
-			float titlebar_vertical_offset = is_maximized ? -6.f : 0.f;
+			const auto window_sie_buf = application::get().get_window()->get_window_size_state();
+			const bool is_maximized = (window_sie_buf == window_size_state::fullscreen);
+			float titlebar_vertical_offset = is_maximized ? -100.f : 0.f;
 			const ImVec2 window_padding = ImGui::GetCurrentWindow()->WindowPadding;
 
 			ImGui::SetCursorPos(ImVec2(window_padding.x, window_padding.y + titlebar_vertical_offset));
@@ -119,37 +120,19 @@ namespace PFF {
 
 			// ImGui::Spring();
 			ImGui::SetCursorPos(ImVec2(w - button_area_width + window_padding.x * 2, window_padding.y));
-			{
-
-				if (ImGui::Button("Min", ImVec2(30.f, 30.f))) {
-
-					application::get().minimize_window();
-				}
-
-				// UI::DrawButtonImage(m_IconMinimize, buttonColN, buttonColH, buttonColP, UI::RectExpanded(UI::GetItemRect(), 0.0f, -padY));
-			}
+			if (ImGui::Button("Min", ImVec2(30.f, 30.f)))
+				application::get().minimize_window();
+			// UI::DrawButtonImage(m_IconMinimize, buttonColN, buttonColH, buttonColP, UI::RectExpanded(UI::GetItemRect(), 0.0f, -padY));
 
 			ImGui::SetCursorPos(ImVec2(w - button_area_width + window_padding.x * 3 + button_width, window_padding.y));
-			{
-
-				if (ImGui::Button("Max", ImVec2(30.f, 30.f))) {
-
-					application::get().maximize_window();		// TODO: Queue event for later manipulation
-				}
-
-				// UI::DrawButtonImage(m_IconMinimize, buttonColN, buttonColH, buttonColP, UI::RectExpanded(UI::GetItemRect(), 0.0f, -padY));
-			}
+			if (ImGui::Button("Max", ImVec2(30.f, 30.f)))
+				application::get().maximize_window();
+			// UI::DrawButtonImage(m_IconMinimize, buttonColN, buttonColH, buttonColP, UI::RectExpanded(UI::GetItemRect(), 0.0f, -padY));
 
 			ImGui::SetCursorPos(ImVec2(w - button_area_width + window_padding.x * 4 + button_width * 2, window_padding.y));
-			{
-
-				if (ImGui::Button("Close", ImVec2(30.f, 30.f))) {
-
-					application::get().close_application();
-				}
-
-				// UI::DrawButtonImage(m_IconMinimize, buttonColN, buttonColH, buttonColP, UI::RectExpanded(UI::GetItemRect(), 0.0f, -padY));
-			}
+			if (ImGui::Button("Close", ImVec2(30.f, 30.f)))
+				application::get().close_application();
+			// UI::DrawButtonImage(m_IconMinimize, buttonColN, buttonColH, buttonColP, UI::RectExpanded(UI::GetItemRect(), 0.0f, -padY));
 
 
 			ImGui::SetCursorPos(ImVec2(window_padding.x + 120, window_padding.y));
@@ -199,8 +182,6 @@ namespace PFF {
 			}
 
 			ImGui::SetCursorPos(ImVec2(window_padding.x + 120, window_padding.y + titlebar_height / 2));
-			ImGui::BeginHorizontal("titlebar", { ImGui::GetWindowWidth() - 0.f, ImGui::GetFrameHeightWithSpacing() });
-
 			if (ImGui::BeginTabBar("##tabs", ImGuiTabBarFlags_None)) {
 
 				f32 tab_width = 100.f;		// TODO: move into [default_tab_width] variable in config-file
@@ -220,8 +201,6 @@ namespace PFF {
 				}
 				ImGui::EndTabBar();
 			}
-
-			ImGui::EndHorizontal();
 
 		} else {
 
@@ -298,92 +277,51 @@ namespace PFF {
 		if (!m_show_general_debugger)
 			return;
 		
-		ImGuiWindowFlags window_flags{};		
+		ImGuiWindowFlags window_flags = ImGuiWindowFlags_NoTitleBar;
 		if (ImGui::Begin("Editor Debugger", &m_show_general_debugger, window_flags)) {
 			if (ImGui::BeginTabBar("##tabs", ImGuiTabBarFlags_None)) {
 
 				f32 tab_width = 60.f;		// TODO: move into [default_tab_width] variable in config-file
 				ImGui::SetNextItemWidth(tab_width);
 				if (ImGui::BeginTabItem("Inputs")) {
-#if 0
-
-					ImGui::Columns(2, nullptr, true);
-
-					for (input_action* action : *application::get().get_world_layer()->get_current_player_controller()->get_input_mapping()) {						// get input_action
-
-						ImGui::Text("%s", action->name.c_str());
-					}
-
-					ImGui::NextColumn();
-
-					for (input_action* action : *application::get().get_world_layer()->get_current_player_controller()->get_input_mapping()) {						// get input_action
-
-						ImGui::SetNextItemWidth(ImGui::GetColumnWidth());
-						switch (action->value) {
-
-						case input_value::_bool:
-						{
-
-							ImGui::Text("%s", util::bool_to_str(action->data.boolean));
-						} break;
-
-						case input_value::_1D:
-						{
-
-							ImGui::DragFloat("##X", &action->data._1D, 0.1f, 0.0f, 0.0f, "%.2f");
-						} break;
-
-						case input_value::_2D:
-						{
-
-							ImGui::InputFloat2("", &action->data._2D[0], "%.2f");
-						} break;
-
-						case input_value::_3D:
-						{
-
-							ImGui::InputFloat3("", &action->data._3D[0], "%.2f");
-						} break;
-
-						default:
-							break;
-						}
-
-					}
-
-					ImGui::Columns(1);
-#else
 
 					for (input_action* action : *application::get().get_world_layer()->get_current_player_controller()->get_input_mapping()) {						// get input_action
 
 						switch (action->value) {
 						case input_value::_bool:
-							display_column(action->name, action->data.boolean);
+							display_column(action->name, action->data.boolean, ImGuiInputTextFlags_ReadOnly);
 							break;
 
 						case input_value::_1D:
-							display_column(action->name, action->data._1D);
+							display_column(action->name, action->data._1D, ImGuiInputTextFlags_ReadOnly);
 							break;
 
 						case input_value::_2D:
-							display_column(action->name, action->data._2D);
+							display_column(action->name, action->data._2D, ImGuiInputTextFlags_ReadOnly);
 							break;
 
 						case input_value::_3D:
-							display_column(action->name, action->data._3D);
+							display_column(action->name, action->data._3D, ImGuiInputTextFlags_ReadOnly);
 							break;
 
 						default:
 							break;
 						}
 					}
-#endif // 0
 
 					ImGui::EndTabItem();
 				}
 
 				ImGui::SetNextItemWidth(tab_width);
 				if (ImGui::BeginTabItem("Test")) {
+
+					// camera pos and dir
+					if (ImGui::CollapsingHeader("Camera", ImGuiTreeNodeFlags_DefaultOpen)) {
+
+						display_column("Position", glm::vec3(), 0);
+						display_column("Direction", glm::vec2(), 0);
+					}
+
 					ImGui::EndTabItem();
 				}
 

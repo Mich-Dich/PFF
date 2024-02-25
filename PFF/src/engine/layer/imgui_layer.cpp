@@ -24,18 +24,18 @@ namespace PFF {
 		return map.find(key) != map.end();
 	}
 
-#define LOAD_IMGUI_COLOR_SETTING(key, value)			{ImVec4 buffer_vec = value;																\
+#define LOAD_IMGUI_COLOR_SETTING(key, value)			{ImVec4 buffer_vec = PFF_UI_ACTIVE_THEME->value;										\
 														config::load(config::file::editor, "color_scheme", #key, buffer_vec);					\
 														ImGui::PushStyleColor(ImGuiCol_##key, buffer_vec);}
 
-#define SAVE_IMGUI_COLOR_SETTING(key, value)			{ImVec4 buffer_vec = value;																\
+#define SAVE_IMGUI_COLOR_SETTING(key, value)			{ImVec4 buffer_vec = PFF_UI_ACTIVE_THEME->value;										\
 														config::save(config::file::editor, "color_scheme", #key, buffer_vec);					\
 														ImGui::PushStyleColor(ImGuiCol_##key, buffer_vec);}
 
 #ifdef PFF_DEBUG
-	#define	IMGUI_COLOR_CONFIG(key, value)				SAVE_IMGUI_COLOR_SETTING(key, value)
+	#define	IMGUI_COLOR_CONFIG(key)						SAVE_IMGUI_COLOR_SETTING(key, key)
 #else
-	#define	IMGUI_COLOR_CONFIG(key, value)				LOAD_IMGUI_COLOR_SETTING(key, value)
+	#define	IMGUI_COLOR_CONFIG(key)						LOAD_IMGUI_COLOR_SETTING(key, key)
 #endif // PFF_DEBUG
 
 
@@ -146,54 +146,55 @@ namespace PFF {
 		// Modify the color of the progress bar
 		ImGui::PushStyleColor(ImGuiCol_PlotHistogram, ImVec4(0.05f, 0.5f, 0.05f, 1.0f));
 
-		IMGUI_COLOR_CONFIG(Header, PFF_UI_ACTIVE_THEME->color_00_default);
-		IMGUI_COLOR_CONFIG(HeaderHovered, PFF_UI_ACTIVE_THEME->color_00_hover);
-		IMGUI_COLOR_CONFIG(HeaderActive, PFF_UI_ACTIVE_THEME->color_00_active);
+		IMGUI_COLOR_CONFIG(Header);
+		IMGUI_COLOR_CONFIG(HeaderHovered);
+		IMGUI_COLOR_CONFIG(HeaderActive);
 		
-		IMGUI_COLOR_CONFIG(TabUnfocused, PFF_UI_ACTIVE_THEME->color_01_default);
-		IMGUI_COLOR_CONFIG(TabUnfocusedActive, PFF_UI_ACTIVE_THEME->color_01_active);
+		IMGUI_COLOR_CONFIG(TabUnfocused);
+		IMGUI_COLOR_CONFIG(TabUnfocusedActive);
 		
-		IMGUI_COLOR_CONFIG(Button, PFF_UI_ACTIVE_THEME->color_01_default);
-		IMGUI_COLOR_CONFIG(ButtonHovered, PFF_UI_ACTIVE_THEME->color_01_hover);
-		IMGUI_COLOR_CONFIG(ButtonActive, PFF_UI_ACTIVE_THEME->color_01_active);
+		IMGUI_COLOR_CONFIG(Button);
+		IMGUI_COLOR_CONFIG(ButtonHovered);
+		IMGUI_COLOR_CONFIG(ButtonActive);
 		
-		IMGUI_COLOR_CONFIG(Tab, PFF_UI_ACTIVE_THEME->color_02_default);
-		IMGUI_COLOR_CONFIG(TabHovered, PFF_UI_ACTIVE_THEME->color_02_hover);
-		IMGUI_COLOR_CONFIG(TabActive, PFF_UI_ACTIVE_THEME->color_02_active);
+		IMGUI_COLOR_CONFIG(Tab);
+		IMGUI_COLOR_CONFIG(TabHovered);
+		IMGUI_COLOR_CONFIG(TabActive);
+
+		IMGUI_COLOR_CONFIG(FrameBg);
+		IMGUI_COLOR_CONFIG(FrameBgHovered);
+		IMGUI_COLOR_CONFIG(FrameBgActive);
 		
-		IMGUI_COLOR_CONFIG(FrameBg, ImVec4(0.f, 0.f, 0.f, 1.0f));
-		IMGUI_COLOR_CONFIG(FrameBgHovered, ImVec4(0.1f, 0.4f, 0.1f, 1.0f));
-		IMGUI_COLOR_CONFIG(FrameBgActive, ImVec4(0.1f, 0.3f, 0.1f, 1.0f));
+		IMGUI_COLOR_CONFIG(ResizeGrip);
+		IMGUI_COLOR_CONFIG(ResizeGripHovered);
+		IMGUI_COLOR_CONFIG(ResizeGripActive);
+
+		IMGUI_COLOR_CONFIG(Separator);
+		IMGUI_COLOR_CONFIG(SeparatorHovered);
+		IMGUI_COLOR_CONFIG(SeparatorActive);
 		
-		IMGUI_COLOR_CONFIG(ResizeGrip, PFF_UI_ACTIVE_THEME->color_01_default);
-		IMGUI_COLOR_CONFIG(ResizeGripHovered, PFF_UI_ACTIVE_THEME->color_01_hover);
-		IMGUI_COLOR_CONFIG(ResizeGripActive, PFF_UI_ACTIVE_THEME->color_01_active);
+		IMGUI_COLOR_CONFIG(TitleBg);
+		IMGUI_COLOR_CONFIG(TitleBgActive);
+		IMGUI_COLOR_CONFIG(TitleBgCollapsed);
+
+		IMGUI_COLOR_CONFIG(DockingPreview);
+		IMGUI_COLOR_CONFIG(MenuBarBg);
+		IMGUI_COLOR_CONFIG(CheckMark);
+
+		IMGUI_COLOR_CONFIG(SliderGrab);
+		IMGUI_COLOR_CONFIG(SliderGrabActive);
 		
-		IMGUI_COLOR_CONFIG(Separator, ImVec4(0.45f, 0.45f, 0.45f, 1.0f));
-		IMGUI_COLOR_CONFIG(SeparatorHovered, ImVec4(0.45f, 0.45f, 0.45f, 1.0f));
-		IMGUI_COLOR_CONFIG(SeparatorActive, ImVec4(0.45f, 0.45f, 0.45f, 1.0f));
+		IMGUI_COLOR_CONFIG(ScrollbarBg);
+		IMGUI_COLOR_CONFIG(ScrollbarGrab);
+		IMGUI_COLOR_CONFIG(ScrollbarGrabHovered);
+		IMGUI_COLOR_CONFIG(ScrollbarGrabActive);
 		
-		IMGUI_COLOR_CONFIG(TitleBg, ImVec4(.0f, 0.25f, .0f, 1.0f));
-		IMGUI_COLOR_CONFIG(TitleBgActive, ImVec4(.0f, 0.45f, .0f, 1.0f));
-		IMGUI_COLOR_CONFIG(TitleBgCollapsed, ImVec4(.0f, 0.1f, .0f, 1.0f));
-		
-		IMGUI_COLOR_CONFIG(DockingPreview, ImVec4(0.1f, 0.4f, 0.1f, 1.0f));
-		IMGUI_COLOR_CONFIG(MenuBarBg, ImVec4(0.1f, 0.1f, 0.1f, 1.0f));
-		IMGUI_COLOR_CONFIG(CheckMark, ImVec4(.0f, .625f, .0f, 1.0f));
-		
-		IMGUI_COLOR_CONFIG(SliderGrab, PFF_UI_ACTIVE_THEME->color_01_default);
-		IMGUI_COLOR_CONFIG(SliderGrabActive, PFF_UI_ACTIVE_THEME->color_01_active);
-		
-		IMGUI_COLOR_CONFIG(ScrollbarBg, PFF_UI_ACTIVE_THEME->color_backbround);
-		IMGUI_COLOR_CONFIG(ScrollbarGrab, PFF_UI_ACTIVE_THEME->color_01_default);
-		IMGUI_COLOR_CONFIG(ScrollbarGrabHovered, PFF_UI_ACTIVE_THEME->color_01_hover);
-		IMGUI_COLOR_CONFIG(ScrollbarGrabActive, PFF_UI_ACTIVE_THEME->color_01_active);
-		
-		IMGUI_COLOR_CONFIG(TextSelectedBg, ImVec4(0.0f, 0.2f, 0.0f, 1.0f));
-		IMGUI_COLOR_CONFIG(Border, ImVec4(0.33f, 0.33f, 0.33f, 1.0f));
-		IMGUI_COLOR_CONFIG(WindowBg, ImVec4(0.085f, 0.085f, 0.085f, 1.0f));
-		IMGUI_COLOR_CONFIG(ChildBg, ImVec4(0.11f, 0.11f, 0.11f, 1.0f));
-		IMGUI_COLOR_CONFIG(PopupBg, ImVec4(0.125f, 0.125f, 0.125f, 0.9f));
+		IMGUI_COLOR_CONFIG(TextSelectedBg);
+		IMGUI_COLOR_CONFIG(Border);
+		IMGUI_COLOR_CONFIG(WindowBg);
+		IMGUI_COLOR_CONFIG(ChildBg);
+		IMGUI_COLOR_CONFIG(PopupBg);
+
 
 		//ImGui::PushStyleVar(ImGuiStyleVar_FramePadding, ImVec2(2.0f, 1.0f
 		IMGUI_STYLE_CONFIG(f32, FrameRounding, 2);

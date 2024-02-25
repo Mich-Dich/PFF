@@ -170,6 +170,17 @@ namespace PFF {
 		PFF_PROFILE_FUNCTION();
 
 		glfwPollEvents();
+
+		// prossess constom queue
+		{
+			std::scoped_lock<std::mutex> lock(m_event_queue_mutex);
+			while (m_event_queue.size() > 0) {
+
+				auto& func = m_event_queue.front();
+				func();
+				m_event_queue.pop();
+			}
+		}
 	}
 
 	void pff_window::capture_cursor() {
@@ -201,7 +212,7 @@ namespace PFF {
 	void pff_window::minimize_window() {
 		
 		glfwIconifyWindow(m_Window);
-		m_window_size_state = window_size_state::minimised; 
+		m_window_size_state = window_size_state::minimised;
 	}
 
 	void pff_window::restore_window() {
