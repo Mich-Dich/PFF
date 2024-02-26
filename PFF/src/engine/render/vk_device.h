@@ -25,10 +25,10 @@ namespace PFF {
 
     public:
 
-#ifdef NDEBUG
-        const bool enableValidationLayers = false;
+#ifdef PFF_DEBUG
+        const bool c_enable_validation_layers = true;
 #else
-        const bool enableValidationLayers = true;
+        const bool c_enable_validation_layers = false;
 #endif
 
         vk_device(std::shared_ptr<pff_window>& m_window);

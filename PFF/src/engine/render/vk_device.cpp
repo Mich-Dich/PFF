@@ -3,7 +3,8 @@
 
 #include "engine/platform/pff_window.h"
 
-#define GLFW_INCLUDE_VULKAN
+//#define GLFW_INCLUDE_VULKAN
+#include <vulkan/vulkan.h>
 #include <GLFW/glfw3.h>
 
 #include "vk_device.h"
@@ -14,8 +15,7 @@ namespace PFF {
     // ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
     // - - - - - Setup
     // ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
-
-
+    
     // class member functions
     vk_device::vk_device(std::shared_ptr<pff_window>& m_window) : m_window{ m_window } {
 
@@ -37,7 +37,7 @@ namespace PFF {
         vkDestroyCommandPool(m_device, m_commandPool, nullptr);
         vkDestroyDevice(m_device, nullptr);
 
-        if (enableValidationLayers) {
+        if (c_enable_validation_layers) {
             destroy_debug_utils_messengerEXT(m_VkInstance, m_debug_messanger, nullptr);
         }
 
@@ -57,7 +57,7 @@ namespace PFF {
 
         PFF_PROFILE_FUNCTION();
 
-        if (!enableValidationLayers) return;
+        if (!c_enable_validation_layers) return;
 
         VkDebugUtilsMessengerCreateInfoEXT createInfo{};
         populate_debug_messenger_CI(createInfo);
@@ -163,39 +163,48 @@ namespace PFF {
 
         PFF_PROFILE_FUNCTION();
 
-        CORE_ASSERT(!(enableValidationLayers && !check_validation_layer_support()),"", "validation layers requested, but not available!");
+        CORE_ASSERT(!(c_enable_validation_layers && !check_validation_layer_support()),"", "validation layers requested, but not available!");
+
+        u32 version{};
+        vkEnumerateInstanceVersion(&version);
+        version &= ~(0xFFFU);
+        CORE_LOG(Fatal, "System supports VULKAN version: " << VK_API_VERSION_VARIANT(version)
+            << "." << VK_API_VERSION_MAJOR(version) 
+            << "." << VK_API_VERSION_MINOR(version) 
+            << "." << VK_API_VERSION_PATCH(version));
+
 
         VkApplicationInfo appInfo = {};
         appInfo.sType = VK_STRUCTURE_TYPE_APPLICATION_INFO;
-        appInfo.pApplicationName = "LittleVulkanEngine App";
-        appInfo.applicationVersion = VK_MAKE_VERSION(1, 0, 0);
-        appInfo.pEngineName = "No Engine";
-        appInfo.engineVersion = VK_MAKE_VERSION(1, 0, 0);
-        appInfo.apiVersion = VK_API_VERSION_1_0;
-
-        VkInstanceCreateInfo createInfo = {};
-        createInfo.sType = VK_STRUCTURE_TYPE_INSTANCE_CREATE_INFO;
-        createInfo.pApplicationInfo = &appInfo;
+        appInfo.pApplicationName = "PFF_Engine";
+        appInfo.applicationVersion = version;
+        appInfo.pEngineName = "PFF Vulkan Engine";
+        appInfo.engineVersion = version;
+        appInfo.apiVersion = version;
 
         auto extensions = get_required_extensions();
-        createInfo.enabledExtensionCount = static_cast<u32>(extensions.size());
-        createInfo.ppEnabledExtensionNames = extensions.data();
+
+        VkInstanceCreateInfo instance_CI = {};
+        instance_CI.sType = VK_STRUCTURE_TYPE_INSTANCE_CREATE_INFO;
+        instance_CI.pApplicationInfo = &appInfo;
+        instance_CI.enabledExtensionCount = static_cast<u32>(extensions.size());
+        instance_CI.ppEnabledExtensionNames = extensions.data();
 
         VkDebugUtilsMessengerCreateInfoEXT debugCreateInfo;
-        if (enableValidationLayers) {
+        if (c_enable_validation_layers) {
 
-            createInfo.enabledLayerCount = static_cast<u32>(m_validation_layers.size());
-            createInfo.ppEnabledLayerNames = m_validation_layers.data();
+            instance_CI.enabledLayerCount = static_cast<u32>(m_validation_layers.size());
+            instance_CI.ppEnabledLayerNames = m_validation_layers.data();
             populate_debug_messenger_CI(debugCreateInfo);
-            createInfo.pNext = (VkDebugUtilsMessengerCreateInfoEXT*)&debugCreateInfo;
+            instance_CI.pNext = (VkDebugUtilsMessengerCreateInfoEXT*)&debugCreateInfo;
 
         } else {
 
-            createInfo.enabledLayerCount = 0;
-            createInfo.pNext = nullptr;
+            instance_CI.enabledLayerCount = 0;
+            instance_CI.pNext = nullptr;
         }
 
-        CORE_ASSERT(vkCreateInstance(&createInfo, nullptr, &m_VkInstance) == VK_SUCCESS, "", "failed to create m_VkInstance!");
+        CORE_ASSERT(vkCreateInstance(&instance_CI, nullptr, &m_VkInstance) == VK_SUCCESS, "", "failed to create m_VkInstance!");
        
         has_gflw_required_iInstance_extensions();
     }
@@ -281,7 +290,7 @@ namespace PFF {
 
         // might not really be necessary anymore because device specific validation layers
         // have been deprecated
-        if (enableValidationLayers) {
+        if (c_enable_validation_layers) {
             createInfo.enabledLayerCount = static_cast<u32>(m_validation_layers.size());
             createInfo.ppEnabledLayerNames = m_validation_layers.data();
         } else {
@@ -399,7 +408,16 @@ namespace PFF {
 
         std::vector<const char*> extensions(glfwExtensions, glfwExtensions + glfwExtensionCount);
 
-        if (enableValidationLayers) {
+#ifdef PFF_DEBUG
+
+        CORE_LOG(Info, "Number of extenstions required for GLFW: " << extensions.size());
+        for (const char* name : extensions) {
+            CORE_LOG(Trace, CONSOLE_LIST_BEGIN << name << "\"");
+        }
+
+#endif
+
+        if (c_enable_validation_layers) {
             extensions.push_back(VK_EXT_DEBUG_UTILS_EXTENSION_NAME);
         }
 
@@ -419,7 +437,7 @@ namespace PFF {
         std::unordered_set<std::string> available;
         for (const auto& extension : extensions) {
 
-            LOG(Trace, std::setw(40) << extension.extensionName);
+            LOG(Trace, CONSOLE_LIST_BEGIN << extension.extensionName);
             available.insert(extension.extensionName);
         }
 
@@ -427,7 +445,7 @@ namespace PFF {
         auto requiredExtensions = get_required_extensions();
         for (const auto& required : requiredExtensions) {
 
-            LOG(Trace, std::setw(40) << required);
+            LOG(Trace, CONSOLE_LIST_BEGIN << required);
             CORE_ASSERT(available.find(required) != available.end(), "", "Missing required glfw extension");
         }
     }

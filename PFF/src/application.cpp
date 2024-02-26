@@ -102,9 +102,6 @@ namespace PFF {
 
 			// update internal state
 			m_window->poll_events();
-
-
-
 			update(m_delta_time);					// update app instance, top most level
 			for (layer* layer : m_layerstack)		// update all layers [world_layer, imgui_layer]
 				layer->on_update(m_delta_time);

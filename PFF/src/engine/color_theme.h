@@ -75,7 +75,7 @@ namespace PFF::UI::THEME {
 
 	};
 
-	static ImVec4 target_color = { 0.f, .5f, 1.f, 1.f };		// TODO: expose to user with a submenu in MainMenuBar()
+	static ImVec4 target_color = { 0.2f, .7f, 1.f, 1.f };		// TODO: expose to user with a submenu in MainMenuBar()
 
 	static theme theme_default{
 

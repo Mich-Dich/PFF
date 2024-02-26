@@ -115,6 +115,94 @@ project "PFF"
 		runtime "Release"
 		optimize "on"
 
+		filter "configurations:Dist"
+		buildoptions "/MD"
+		defines "PFF_DIST"
+		runtime "Release"
+		optimize "speed"
+        symbols "off"
+
+		project "PFF_editor"
+		location "PFF_editor"
+		kind "ConsoleApp"
+		language "C++"
+		cppdialect "C++17"
+		staticruntime "off"
+	
+		targetdir ("bin/" .. outputs  .. "/%{prj.name}")
+		objdir ("bin-int/" .. outputs  .. "/%{prj.name}")
+	
+		glslc = "../PFF/vendor/vulkan-glslc/glslc.exe"
+	
+		defines
+		{
+			"ENGINE_NAME=PFF",
+			"PROJECT_NAME=PFF_editor",
+			"PFF_INSIDE_EDITOR",
+		}
+	
+		files
+		{
+			"%{prj.name}/src/**.h",
+			"%{prj.name}/src/**.cpp",
+			"%{prj.name}/**.vert",
+			"%{prj.name}/**.frag",
+		}
+	
+		includedirs
+		{
+			"PFF/vendor/glm",
+			"PFF/src",
+			"PFF/vendor/glm",
+			"%{IncludeDir.ImGui}",
+			"%{IncludeDir.ImGui}/backends/",
+			"%{prj.name}/src",
+			"%{prj.name}/assets",
+			
+			vulkan_dir .. "/Include",
+		}
+	
+		links
+		{
+			"ImGui",
+			"PFF",
+		}
+	
+		filter "system:windows"
+			systemversion "latest"
+	
+			defines
+			{
+				"PFF_PLATFORM_WINDOWS",
+			}
+	
+			postbuildcommands
+			{
+				'"%{glslc}" shaders/default.vert -o shaders/default.vert.spv',
+				'"%{glslc}" shaders/default.frag -o shaders/default.frag.spv',
+			}
+	
+		filter "configurations:Debug"
+			buildoptions "/MDd"
+			defines "EDITOR_DEBUG"
+			runtime "Debug"
+			symbols "on"
+	
+		filter "configurations:Release"
+			buildoptions "/MD"
+			defines "EDITOR_RELEASE"
+			runtime "Release"
+			optimize "on"
+			
+		filter "configurations:Dist"
+			buildoptions "/MD"
+			defines "EDITOR_DIST"
+			runtime "Release"
+			optimize "speed"
+			symbols "off"
+
+
+------------------------------------ CLIENT GAME ------------------------------------
 project (client_project_name)
 	location (client_project_name)
 	kind "ConsoleApp"
@@ -178,75 +266,10 @@ project (client_project_name)
 		defines "GAME_RELEASE"
 		runtime "Release"
 		optimize "on"
-
-project "PFF_editor"
-	location "PFF_editor"
-	kind "ConsoleApp"
-	language "C++"
-	cppdialect "C++17"
-	staticruntime "off"
-
-	targetdir ("bin/" .. outputs  .. "/%{prj.name}")
-	objdir ("bin-int/" .. outputs  .. "/%{prj.name}")
-
-	glslc = "../PFF/vendor/vulkan-glslc/glslc.exe"
-
-	defines
-	{
-		"ENGINE_NAME=PFF",
-		"PROJECT_NAME=PFF_editor",
-		"PFF_INSIDE_EDITOR",
-	}
-
-	files
-	{
-		"%{prj.name}/src/**.h",
-		"%{prj.name}/src/**.cpp",
-		"%{prj.name}/**.vert",
-		"%{prj.name}/**.frag",
-	}
-
-	includedirs
-	{
-		"PFF/vendor/glm",
-		"PFF/src",
-		"PFF/vendor/glm",
-		"%{IncludeDir.ImGui}",
-		"%{IncludeDir.ImGui}/backends/",
-		"%{prj.name}/src",
-		"%{prj.name}/assets",
-		
-		vulkan_dir .. "/Include",
-	}
-
-	links
-	{
-		"ImGui",
-		"PFF",
-	}
-
-	filter "system:windows"
-		systemversion "latest"
-
-		defines
-		{
-			"PFF_PLATFORM_WINDOWS",
-		}
-
-		postbuildcommands
-		{
-			'"%{glslc}" shaders/default.vert -o shaders/default.vert.spv',
-			'"%{glslc}" shaders/default.frag -o shaders/default.frag.spv',
-		}
-
-	filter "configurations:Debug"
-		buildoptions "/MDd"
-		defines "GAME_DEBUG"
-		runtime "Debug"
-		symbols "on"
-
-	filter "configurations:Release"
+			
+	filter "configurations:Dist"
 		buildoptions "/MD"
-		defines "GAME_RELEASE"
+		defines "GAME_DIST"
 		runtime "Release"
-		optimize "on"
+		optimize "speed"
+		symbols "off"
