@@ -10,12 +10,13 @@
 #include "engine/platform/pff_window.h"
 #include "engine/color_theme.h"
 #include "application.h"
+#include "engine/layer/imgui_layer.h"
+#include "engine/platform/pff_window.h"
 
 #include "editor_layer.h"
 
 
 namespace PFF {
-
 
 	editor_layer::~editor_layer() {
 
@@ -37,140 +38,198 @@ namespace PFF {
 	void editor_layer::on_imgui_render() {
 
 		ImGui::SetCurrentContext(m_context);
-		
-		ImGui_window_main_menu_bar();
 
-		ImGui_window_general_debugger();
-		ImGui_window_Outliner();
-		ImGui_window_Details();
-		ImGui_window_World_Settings();
-		ImGui_window_ContentBrowser_0();
-		ImGui_window_ContentBrowser_1();
+		window_main_menu_bar();
+		// window_main_content();
+
+		window_general_debugger();
+		window_outliner();
+		window_details();
+		window_world_settings();
+		window_content_browser_0();
+		window_content_browser_1();
 
 		ImGui::ShowDemoWindow();				// DEV-ONLY
 	}
 
 
-	void editor_layer::ImGui_window_main_menu_bar() {
+	void editor_layer::window_main_menu_bar() {
 
 		const f32 titlebar_height = 60.f;
 
-		ImGuiWindowFlags window_flags = ImGuiWindowFlags_NoDocking;
 		ImGuiViewport* viewport = ImGui::GetMainViewport();
 		ImGui::SetNextWindowPos(viewport->Pos);
 		ImGui::SetNextWindowSize(ImVec2(viewport->Size.x, titlebar_height));
 		ImGui::SetNextWindowViewport(viewport->ID);
+
+		ImGuiWindowFlags window_flags = ImGuiWindowFlags_NoDocking;
 		// ImGui::PushStyleVar(ImGuiStyleVar_WindowRounding, 0.0f);
 		// ImGui::PushStyleVar(ImGuiStyleVar_WindowBorderSize, 0.0f);
 		window_flags |= ImGuiWindowFlags_NoTitleBar | ImGuiWindowFlags_NoCollapse | ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoMove | ImGuiWindowFlags_NoScrollbar | ImGuiWindowFlags_NoScrollWithMouse;
 		window_flags |= ImGuiWindowFlags_NoBringToFrontOnFocus | ImGuiWindowFlags_NoNavFocus | ImGuiWindowFlags_NoDecoration | ImGuiWindowFlags_NoNav | ImGuiWindowFlags_NoDocking;
 		// window_flags |= ImGuiWindowFlags_MenuBar;
-
-		ImGui::Begin("DockSpaceWindow", nullptr, window_flags);
-
-		const bool is_maximized = false;				// use is_maximised() function
-		float titlebar_vertical_offset = is_maximized ? -6.f : 0.f;
-		const ImVec2 window_padding = ImGui::GetCurrentWindow()->WindowPadding;
-
-		ImGui::SetCursorPos(ImVec2(window_padding.x, window_padding.y + titlebar_vertical_offset));
-		const ImVec2 titlebar_min = ImGui::GetCursorScreenPos();
-		const ImVec2 titlebar_max = {	ImGui::GetCursorScreenPos().x + ImGui::GetWindowWidth() - window_padding.x * 2.f,
-										ImGui::GetCursorScreenPos().y + titlebar_height - window_padding.y * 2.f};
-
-		auto* bg_draw_list = ImGui::GetBackgroundDrawList();
-		auto* fg_draw_list = ImGui::GetForegroundDrawList();
-		// bg_draw_list->AddRectFilled(titlebar_min, titlebar_max, IM_COL32(21, 251, 21, 255));
 		
-		// Debug titlebar bounds
-		//fg_draw_list->AddRect(titlebar_min, titlebar_max, IM_COL32(222, 43, 43, 255));
+		ImGui::PushStyleColor(ImGuiCol_WindowBg, PFF_UI_ACTIVE_THEME->WindowBg);
+		if (ImGui::Begin("DockSpaceWindow", nullptr, window_flags)) {
 
-		// LOGO
-		{
+			ImGui::PopStyleColor();
 
-		}
+			const auto window_sie_buf = application::get().get_window()->get_window_size_state();
+			const bool is_maximized = (window_sie_buf == window_size_state::fullscreen);
+			float titlebar_vertical_offset = is_maximized ? -100.f : 0.f;
+			const ImVec2 window_padding = ImGui::GetCurrentWindow()->WindowPadding;
+
+			ImGui::SetCursorPos(ImVec2(window_padding.x, window_padding.y + titlebar_vertical_offset));
+			const ImVec2 titlebar_min = ImGui::GetCursorScreenPos();
+			const ImVec2 titlebar_max = { ImGui::GetCursorScreenPos().x + ImGui::GetWindowWidth() - window_padding.x * 2.f,
+											ImGui::GetCursorScreenPos().y + titlebar_height - window_padding.y * 2.f };
+
+			auto* bg_draw_list = ImGui::GetBackgroundDrawList();
+			auto* fg_draw_list = ImGui::GetForegroundDrawList();
+			// bg_draw_list->AddRectFilled(titlebar_min, titlebar_max, IM_COL32(21, 251, 21, 255));
+
+			// Debug titlebar bounds
+			//fg_draw_list->AddRect(titlebar_min, titlebar_max, IM_COL32(222, 43, 43, 255));
+
+			// LOGO
+			{
+
+			}
 
 
-		static f32 move_offset_y;
-		static f32 move_offset_x;
-		const f32 w = ImGui::GetContentRegionAvail().x;
-		const f32 button_width = 30.f;
-		const f32 button_area_width = (button_width * 3) + (window_padding.y * 2);
+			static f32 move_offset_y;
+			static f32 move_offset_x;
+			const f32 w = ImGui::GetContentRegionAvail().x;
+			const f32 button_width = 30.f;
+			const f32 button_area_width = (button_width * 3) + (window_padding.x * 4);
 
-		// tilebar drag area
-		ImGui::SetCursorPos(ImVec2(window_padding.x, window_padding.y + titlebar_vertical_offset));
+			// tilebar drag area
+			ImGui::SetCursorPos(ImVec2(window_padding.x, window_padding.y + titlebar_vertical_offset));
 
-		// debug Drab bounds
-		//fg_draw_list->AddRect(ImGui::GetCursorScreenPos(), ImVec2(w - button_area_width, titlebar_height), IM_COL32(222, 43, 43, 255));
+			// debug Drab bounds
+			//fg_draw_list->AddRect(ImGui::GetCursorScreenPos(), ImVec2(w - button_area_width, titlebar_height), IM_COL32(222, 43, 43, 255));
 
 #if 1	// FOR DEBUG VIAUL
-		ImGui::InvisibleButton("##titlebar_drag_zone", ImVec2(w - button_area_width, titlebar_height - window_padding.y * 2));
+			ImGui::InvisibleButton("##titlebar_drag_zone", ImVec2(w - button_area_width, titlebar_height - window_padding.y * 2));
 #else
-		ImGui::Button("##titlebar_drag_zone", ImVec2(w - button_area_width, titlebar_height - window_padding.y * 2));
+			ImGui::Button("##titlebar_drag_zone", ImVec2(w - button_area_width, titlebar_height - window_padding.y * 2));
 #endif // 1
 
-		application::get().set_titlebar_hovered(ImGui::IsItemHovered());
-		ImGui::SetItemAllowOverlap();
+			application::get().set_titlebar_hovered(ImGui::IsItemHovered());
+			ImGui::SetItemAllowOverlap();
 
-		// ImGui::Spring();
-		ImGui::SetCursorPos(ImVec2(w - button_area_width + window_padding.x*2, window_padding.y));
-		{
-
-			if (ImGui::Button("Min", ImVec2(30.f, 30.f))) {
-
+			// ImGui::Spring();
+			ImGui::SetCursorPos(ImVec2(w - button_area_width + window_padding.x * 2, window_padding.y));
+			if (ImGui::Button("Min", ImVec2(30.f, 30.f)))
 				application::get().minimize_window();
-			}
-
 			// UI::DrawButtonImage(m_IconMinimize, buttonColN, buttonColH, buttonColP, UI::RectExpanded(UI::GetItemRect(), 0.0f, -padY));
-		}
 
-		ImGui::SetCursorPos(ImVec2(w - button_area_width + window_padding.x * 3 + button_width, window_padding.y));
-		{
-
-			if (ImGui::Button("Max", ImVec2(30.f, 30.f))) {
-
-				application::get().maximize_window();		// TODO: Queue event for later manipulation
-			}
-
+			ImGui::SetCursorPos(ImVec2(w - button_area_width + window_padding.x * 3 + button_width, window_padding.y));
+			if (ImGui::Button("Max", ImVec2(30.f, 30.f)))
+				application::get().maximize_window();
 			// UI::DrawButtonImage(m_IconMinimize, buttonColN, buttonColH, buttonColP, UI::RectExpanded(UI::GetItemRect(), 0.0f, -padY));
-		}
 
-		ImGui::SetCursorPos(ImVec2(w - button_area_width + window_padding.x * 4 + button_width*2, window_padding.y));
-		{
-
-			if (ImGui::Button("Close", ImVec2(30.f, 30.f))) {
-
+			ImGui::SetCursorPos(ImVec2(w - button_area_width + window_padding.x * 4 + button_width * 2, window_padding.y));
+			if (ImGui::Button("Close", ImVec2(30.f, 30.f)))
 				application::get().close_application();
-			}
-
 			// UI::DrawButtonImage(m_IconMinimize, buttonColN, buttonColH, buttonColP, UI::RectExpanded(UI::GetItemRect(), 0.0f, -padY));
+
+
+			ImGui::SetCursorPos(ImVec2(window_padding.x + 120, window_padding.y));
+			if (ImGui::BeginMenuBar()) {
+
+				if (ImGui::BeginMenu("File")) {
+
+					ImGui::MenuItem("menu", NULL, false, false);
+					if (ImGui::MenuItem("New")) {}
+					if (ImGui::MenuItem("Open", "Ctrl+O")) {}
+					if (ImGui::BeginMenu("Open Recent")) {
+						ImGui::MenuItem("not implemented yet");
+						ImGui::EndMenu();
+					}
+					if (ImGui::MenuItem("Save", "Ctrl+S")) {}
+					if (ImGui::MenuItem("Save As..")) {}
+
+					ImGui::Separator();
+					if (ImGui::MenuItem("Options"), NULL, m_show_options)
+						m_show_options = true;
+					ImGui::Separator();
+					if (ImGui::MenuItem("Quit", "Alt+F4"))
+						application::get().close_application();
+					ImGui::EndMenu();
+				}
+				if (ImGui::BeginMenu("Edit")) {
+					if (ImGui::MenuItem("Undo", "CTRL+Z")) {}
+					if (ImGui::MenuItem("Redo", "CTRL+Y", false, false)) {}  // Disabled item
+					ImGui::Separator();
+					if (ImGui::MenuItem("Cut", "CTRL+X")) {}
+					if (ImGui::MenuItem("Copy", "CTRL+C")) {}
+					if (ImGui::MenuItem("Paste", "CTRL+V")) {}
+					ImGui::EndMenu();
+				}
+				if (ImGui::BeginMenu("settings")) {
+					if (ImGui::MenuItem("General Settings")) {}
+					if (ImGui::MenuItem("Editor Settings", false, false)) {}  // Disabled item
+					ImGui::Separator();
+					if (ImGui::BeginMenu("Color Theme")) {
+						ImGui::MenuItem("Dark/Green (default)");
+						ImGui::MenuItem("Dark/Blue");
+						ImGui::EndMenu();
+					}
+					ImGui::EndMenu();
+				}
+				ImGui::EndMenuBar();
+			}
+
+			ImGui::SetCursorPos(ImVec2(window_padding.x + 120, window_padding.y + titlebar_height / 2));
+			if (ImGui::BeginTabBar("##tabs", ImGuiTabBarFlags_None)) {
+
+				f32 tab_width = 100.f;		// TODO: move into [default_tab_width] variable in config-file
+				ImGui::SetNextItemWidth(tab_width);
+				if (ImGui::BeginTabItem("Main Viewport")) {
+					ImGui::EndTabItem();
+				}
+
+				ImGui::SetNextItemWidth(tab_width);
+				if (ImGui::BeginTabItem("Mesh Editor")) {
+					ImGui::EndTabItem();
+				}
+
+				ImGui::SetNextItemWidth(tab_width);
+				if (ImGui::BeginTabItem("Material Editor")) {
+					ImGui::EndTabItem();
+				}
+				ImGui::EndTabBar();
+			}
+
+		} else {
+
+			ImGui::PopStyleColor();
 		}
 
-
-		ImGui::SetCursorPos(ImVec2(window_padding.x + 120, window_padding.y + titlebar_height/2));
-		ImGui::BeginHorizontal("titlebar", { ImGui::GetWindowWidth() - 0.f, ImGui::GetFrameHeightWithSpacing() });
-
-		if (ImGui::BeginTabBar("##tabs", ImGuiTabBarFlags_None)) {
-
-			f32 tab_width = 100.f;		// TODO: move into [default_tab_width] variable in config-file
-			ImGui::SetNextItemWidth(tab_width);
-			if (ImGui::BeginTabItem("Main Viewport")) {
-				ImGui::EndTabItem();
-			}
-
-			ImGui::SetNextItemWidth(tab_width);
-			if (ImGui::BeginTabItem("Mesh Editor")) {
-				ImGui::EndTabItem();
-			}
-
-			ImGui::SetNextItemWidth(tab_width);
-			if (ImGui::BeginTabItem("Material Editor")) {
-				ImGui::EndTabItem();
-			}
-			ImGui::EndTabBar();
-		}
-
-		ImGui::EndHorizontal();
 		ImGui::End();
+
+
+		/*
+		
+		ImGui::SetNextWindowViewport(viewport->ID);
+
+		ImGuiWindowFlags main_window_flags = 0;
+		// main_window_flags |= ImGuiWindowFlags_NoBringToFrontOnFocus | ImGuiWindowFlags_NoNavFocus;
+		// main_window_flags |= ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoMove;
+		// window_flags |= ImGuiWindowFlags_MenuBar;
+
+		// ImGui::PushStyleVar(ImGuiStyleVar_FramePadding, ImVec2(100, 4));
+		ImGui::SetNextWindowPos(ImVec2(viewport->Pos.x, viewport->Pos.y + 70));
+		ImGui::SetNextWindowSize(ImVec2(viewport->Size.x - 400, 400));
+		if (ImGui::Begin("Main_window_Area", nullptr, 0)) {
+
+
+		}
+		ImGui::End();
+		*/
+
+
 
 		/*
 		static f32 move_offset_y;
@@ -209,149 +268,60 @@ namespace PFF {
 		*/
 
 		/*
-		if (ImGui::BeginMainMenuBar()) {
-
-			if (ImGui::BeginMenu("File")) {
-
-				ImGui::MenuItem("menu", NULL, false, false);
-				if (ImGui::MenuItem("New"))
-					{}
-				if (ImGui::MenuItem("Open", "Ctrl+O"))
-					{}
-				if (ImGui::BeginMenu("Open Recent")) {
-					ImGui::MenuItem("not implemented yet");
-					ImGui::EndMenu();
-				}
-				if (ImGui::MenuItem("Save", "Ctrl+S"))
-					{}
-				if (ImGui::MenuItem("Save As.."))
-					{}
-
-				ImGui::Separator();
-				if (ImGui::MenuItem("Options"), NULL, m_show_options)
-					m_show_options = true;
-				ImGui::Separator();
-				if (ImGui::MenuItem("Quit", "Alt+F4"))
-					application::get().close_application();
-				ImGui::EndMenu();
-			}
-			if (ImGui::BeginMenu("Edit")) {
-				if (ImGui::MenuItem("Undo", "CTRL+Z")) {}
-				if (ImGui::MenuItem("Redo", "CTRL+Y", false, false)) {}  // Disabled item
-				ImGui::Separator();
-				if (ImGui::MenuItem("Cut", "CTRL+X")) {}
-				if (ImGui::MenuItem("Copy", "CTRL+C")) {}
-				if (ImGui::MenuItem("Paste", "CTRL+V")) {}
-				ImGui::EndMenu();
-			}
-			if (ImGui::BeginMenu("settings")) {
-				if (ImGui::MenuItem("General Settings")) {}
-				if (ImGui::MenuItem("Editor Settings", false, false)) {}  // Disabled item
-				ImGui::Separator();
-				if (ImGui::BeginMenu("Color Theme")) {
-					ImGui::MenuItem("Dark/Green (default)");
-					ImGui::MenuItem("Dark/Blue");
-					ImGui::EndMenu();
-				}
-				ImGui::EndMenu();
-			}
-			ImGui::EndMainMenuBar();
-		}
 		*/
 
 	}
 
-	void editor_layer::ImGui_window_general_debugger() {
+	void editor_layer::window_general_debugger() {
 
 		if (!m_show_general_debugger)
 			return;
 		
-		ImGuiWindowFlags window_flags{};		
+		ImGuiWindowFlags window_flags = ImGuiWindowFlags_NoTitleBar;
 		if (ImGui::Begin("Editor Debugger", &m_show_general_debugger, window_flags)) {
 			if (ImGui::BeginTabBar("##tabs", ImGuiTabBarFlags_None)) {
 
 				f32 tab_width = 60.f;		// TODO: move into [default_tab_width] variable in config-file
 				ImGui::SetNextItemWidth(tab_width);
 				if (ImGui::BeginTabItem("Inputs")) {
-#if 0
-
-					ImGui::Columns(2, nullptr, true);
-
-					for (input_action* action : *application::get().get_world_layer()->get_current_player_controller()->get_input_mapping()) {						// get input_action
-
-						ImGui::Text("%s", action->name.c_str());
-					}
-
-					ImGui::NextColumn();
-
-					for (input_action* action : *application::get().get_world_layer()->get_current_player_controller()->get_input_mapping()) {						// get input_action
-
-						ImGui::SetNextItemWidth(ImGui::GetColumnWidth());
-						switch (action->value) {
-
-						case input_value::_bool:
-						{
-
-							ImGui::Text("%s", util::bool_to_str(action->data.boolean));
-						} break;
-
-						case input_value::_1D:
-						{
-
-							ImGui::DragFloat("##X", &action->data._1D, 0.1f, 0.0f, 0.0f, "%.2f");
-						} break;
-
-						case input_value::_2D:
-						{
-
-							ImGui::InputFloat2("", &action->data._2D[0], "%.2f");
-						} break;
-
-						case input_value::_3D:
-						{
-
-							ImGui::InputFloat3("", &action->data._3D[0], "%.2f");
-						} break;
-
-						default:
-							break;
-						}
-
-					}
-
-					ImGui::Columns(1);
-#else
 
 					for (input_action* action : *application::get().get_world_layer()->get_current_player_controller()->get_input_mapping()) {						// get input_action
 
 						switch (action->value) {
 						case input_value::_bool:
-							display_column(action->name, action->data.boolean);
+							display_column(action->name, action->data.boolean, ImGuiInputTextFlags_ReadOnly);
 							break;
 
 						case input_value::_1D:
-							display_column(action->name, action->data._1D);
+							display_column(action->name, action->data._1D, ImGuiInputTextFlags_ReadOnly);
 							break;
 
 						case input_value::_2D:
-							display_column(action->name, action->data._2D);
+							display_column(action->name, action->data._2D, ImGuiInputTextFlags_ReadOnly);
 							break;
 
 						case input_value::_3D:
-							display_column(action->name, action->data._3D);
+							display_column(action->name, action->data._3D, ImGuiInputTextFlags_ReadOnly);
 							break;
 
 						default:
 							break;
 						}
 					}
-#endif // 0
 
 					ImGui::EndTabItem();
 				}
 
 				ImGui::SetNextItemWidth(tab_width);
 				if (ImGui::BeginTabItem("Test")) {
+
+					// camera pos and dir
+					if (ImGui::CollapsingHeader("Camera", ImGuiTreeNodeFlags_DefaultOpen)) {
+
+						display_column("Position", glm::vec3(), 0);
+						display_column("Direction", glm::vec2(), 0);
+					}
+
 					ImGui::EndTabItem();
 				}
 
@@ -365,57 +335,71 @@ namespace PFF {
 		ImGui::End();
 	}
 
-	void editor_layer::ImGui_window_Outliner() {
+	void editor_layer::window_main_content() {
 
-		if (!m_show_Outliner)
+		ImGuiViewport* viewport = ImGui::GetMainViewport();
+		ImGui::SetNextWindowPos(ImVec2(viewport->Pos.x, viewport->Pos.y + 100), ImGuiCond_Once);
+		ImGui::SetNextWindowSize(ImVec2(viewport->Size.x - 100, 350));
+		ImGui::SetNextWindowViewport(viewport->ID);
+
+		ImGuiWindowFlags window_flags = ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoMove | ImGuiWindowFlags_NoScrollbar | ImGuiWindowFlags_NoScrollWithMouse | ImGuiWindowFlags_NoCollapse;
+		if (ImGui::Begin("Viewport", nullptr, window_flags)) {
+		
+		}
+		ImGui::End();
+	}
+
+	void editor_layer::window_outliner() {
+
+		if (!m_show_outliner)
 			return;
 
 		ImGuiWindowFlags window_flags{};
-		if (ImGui::Begin("Outliner", &m_show_Outliner, window_flags)) {}
+		if (ImGui::Begin("Outliner", &m_show_outliner, window_flags)) {}
 
 		ImGui::End();
 	}
 
-	void editor_layer::ImGui_window_Details() {
+	void editor_layer::window_details() {
 
-		if (!m_show_Details)
+		if (!m_show_details)
 			return;
 
 		ImGuiWindowFlags window_flags{};
-		if (ImGui::Begin("Details", &m_show_Details, window_flags)) {}
+		if (ImGui::Begin("Details", &m_show_details, window_flags)) {}
 
 		ImGui::End();
 	}
 
-	void editor_layer::ImGui_window_World_Settings() {
+	void editor_layer::window_world_settings() {
 
-		if (!m_show_World_Settings)
+		if (!m_show_world_settings)
 			return;
 
 		ImGuiWindowFlags window_flags{};
-		if (ImGui::Begin("World Settings", &m_show_World_Settings, window_flags)) {}
+		if (ImGui::Begin("World Settings", &m_show_world_settings, window_flags)) {}
 
 		ImGui::End();
 	}
 
-	void editor_layer::ImGui_window_ContentBrowser_0() {
+	void editor_layer::window_content_browser_0() {
 
-		if (!m_show_ContentBrowser_0)
+		if (!m_show_content_browser_0)
 			return;
 
 		ImGuiWindowFlags window_flags{};
-		if (ImGui::Begin("Content Browser", &m_show_ContentBrowser_0, window_flags)) {}
+		if (ImGui::Begin("Content Browser", &m_show_content_browser_0, window_flags)) {}
 
 		ImGui::End();
 	}
 
-	void editor_layer::ImGui_window_ContentBrowser_1() {
+	void editor_layer::window_content_browser_1() {
 
-		if (!m_show_ContentBrowser_1)
+		if (!m_show_content_browser_1)
 			return;
 
 		ImGuiWindowFlags window_flags{};
-		if (ImGui::Begin("Content Browser 2", &m_show_ContentBrowser_1, window_flags)) {}
+		if (ImGui::Begin("Content Browser 2", &m_show_content_browser_1, window_flags)) {}
 
 		ImGui::End();
 	}

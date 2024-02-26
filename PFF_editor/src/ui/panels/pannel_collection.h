@@ -12,11 +12,14 @@
 namespace PFF {
 
 	template<typename T>
-	void display_column(const std::string& label, T value) {
+	void display_column(const std::string& label, T value, ImGuiInputTextFlags flags) {
 
 		ImGuiStyle& style = ImGui::GetStyle();
 		ImVec2 current_item_spacing = style.ItemSpacing;
+
 		// ImGui::PushStyleVar(ImGuiStyleVar_ItemInnerSpacing, ImVec2(0, 0));
+		//ImGui::PushStyleVar(ImGuiStyleVar_ItemSpacing, ImVec2(4,-1));
+		//ImGui::TableSetupColumn();
 
 		ImGui::Columns(2, nullptr, true);
 
@@ -41,29 +44,29 @@ namespace PFF {
 		else if constexpr (std::is_arithmetic_v<T>) {
 
 			ImGui::SetNextItemWidth(ImGui::GetColumnWidth() - (current_item_spacing.x + 1));
-			ImGui::InputFloat("", &value, 0.0f, 0.0f, "%.2f");
+			ImGui::InputFloat("", &value, 0.0f, 0.0f, "%.2f", flags);
 		}
 
 		else if constexpr (std::is_same_v<T, glm::vec2>) {
 
 			ImGui::SetNextItemWidth(ImGui::GetColumnWidth() - (current_item_spacing.x + 1));
-			ImGui::InputFloat2("", &value[0], "%.2f");
+			ImGui::InputFloat2("", &value[0], "%.2f", flags);
 		}
 
 		else if constexpr (std::is_same_v<T, glm::vec3>) {
 
 			ImGui::SetNextItemWidth(ImGui::GetColumnWidth() - (current_item_spacing.x + 1));
-			ImGui::InputFloat3("", &value[0], "%.2f");
+			ImGui::InputFloat3("", &value[0], "%.2f", flags);
 		}
 
 		else if constexpr (std::is_same_v<T, glm::vec4> || std::is_same_v<T, ImVec4>) {
 
 			ImGui::SetNextItemWidth(ImGui::GetColumnWidth() - (current_item_spacing.x + 1));
-			ImGui::InputFloat4("", &value[0], "%.2f");
+			ImGui::InputFloat4("", &value[0], "%.2f", flags);
 		}
 
-		// ImGui::PopStyleVar(1);
 		ImGui::Columns(1);
+		//ImGui::PopStyleVar();
 	}
 
 	template<typename T>

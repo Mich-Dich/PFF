@@ -58,7 +58,7 @@
     <ClCompile>
       <PrecompiledHeader>NotUsing</PrecompiledHeader>
       <WarningLevel>Level3</WarningLevel>
-      <PreprocessorDefinitions>ENGINE_NAME=PFF;PROJECT_NAME=PFF_editor;PFF_INSIDE_EDITOR;PFF_PLATFORM_WINDOWS;GAME_DEBUG;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions>ENGINE_NAME=PFF;PROJECT_NAME=PFF_editor;PFF_INSIDE_EDITOR;PFF_PLATFORM_WINDOWS;EDITOR_DEBUG;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <AdditionalIncludeDirectories>..\PFF\src;..\PFF\vendor\glm;..\PFF\vendor\imgui_new;..\PFF\vendor\imgui_new\backends;src;assets;C:\VulkanSDK\1.3.250.1\Include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <DebugInformationFormat>EditAndContinue</DebugInformationFormat>
       <Optimization>Disabled</Optimization>
@@ -80,7 +80,7 @@
     <ClCompile>
       <PrecompiledHeader>NotUsing</PrecompiledHeader>
       <WarningLevel>Level3</WarningLevel>
-      <PreprocessorDefinitions>ENGINE_NAME=PFF;PROJECT_NAME=PFF_editor;PFF_INSIDE_EDITOR;PFF_PLATFORM_WINDOWS;GAME_RELEASE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions>ENGINE_NAME=PFF;PROJECT_NAME=PFF_editor;PFF_INSIDE_EDITOR;PFF_PLATFORM_WINDOWS;EDITOR_RELEASE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <AdditionalIncludeDirectories>..\PFF\src;..\PFF\vendor\glm;..\PFF\vendor\imgui_new;..\PFF\vendor\imgui_new\backends;src;assets;C:\VulkanSDK\1.3.250.1\Include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <Optimization>Full</Optimization>
       <FunctionLevelLinking>true</FunctionLevelLinking>
@@ -116,7 +116,6 @@
   <ItemGroup>
     <None Include="shaders\default.frag" />
     <None Include="shaders\default.vert" />
-    <None Include="src\ui\embeded\window_images.embed" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\PFF\vendor\imgui_new\ImGui.vcxproj">

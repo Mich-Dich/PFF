@@ -1,35 +1,41 @@
 
 #include "util/pffpch.h"
 
+#include <vulkan/vulkan.h>
+#define GLFW_INCLUDE_VULKAN
+#include <GLFW/glfw3.h>
+#include <imgui.h>
+#include <imgui_impl_glfw.h>
+#include <imgui_impl_vulkan.h>
+
 #include "layer.h"
-#include "imgui_layer.h"
 #include "application.h"
 #include "engine/platform/pff_window.h"
 #include "engine/render/renderer.h"
+#include "engine/color_theme.h"
 
-#define GLFW_INCLUDE_VULKAN
-#include "GLFW/glfw3.h"
-
-#include "imgui.h"
-#include "imgui_impl_glfw.h"
-#include "imgui_impl_vulkan.h"
-
-#include <vulkan/vulkan.h>
+#include "imgui_layer.h"
 
 namespace PFF {
 
-#define LOAD_IMGUI_COLOR_SETTING(key, value)			{ImVec4 buffer_vec = value;																\
+	template<typename key_type, typename value_type>
+	bool contains(const std::unordered_map<key_type, value_type>& map, const key_type& key) {
+
+		return map.find(key) != map.end();
+	}
+
+#define LOAD_IMGUI_COLOR_SETTING(key, value)			{ImVec4 buffer_vec = PFF_UI_ACTIVE_THEME->value;										\
 														config::load(config::file::editor, "color_scheme", #key, buffer_vec);					\
 														ImGui::PushStyleColor(ImGuiCol_##key, buffer_vec);}
 
-#define SAVE_IMGUI_COLOR_SETTING(key, value)			{ImVec4 buffer_vec = value;																\
+#define SAVE_IMGUI_COLOR_SETTING(key, value)			{ImVec4 buffer_vec = PFF_UI_ACTIVE_THEME->value;										\
 														config::save(config::file::editor, "color_scheme", #key, buffer_vec);					\
 														ImGui::PushStyleColor(ImGuiCol_##key, buffer_vec);}
 
 #ifdef PFF_DEBUG
-	#define	IMGUI_COLOR_CONFIG(key, value)				SAVE_IMGUI_COLOR_SETTING(key, value)
+	#define	IMGUI_COLOR_CONFIG(key)						SAVE_IMGUI_COLOR_SETTING(key, key)
 #else
-	#define	IMGUI_COLOR_CONFIG(key, value)				LOAD_IMGUI_COLOR_SETTING(key, value)
+	#define	IMGUI_COLOR_CONFIG(key)						LOAD_IMGUI_COLOR_SETTING(key, key)
 #endif // PFF_DEBUG
 
 
@@ -118,76 +124,77 @@ namespace PFF {
 
 		// Use any command queue
 		VkCommandBuffer command_buffer = m_renderer->get_device()->begin_single_time_commands();
-		io.FontDefault = io.Fonts->AddFontFromFileTTF("../PFF/assets/fonts/Open_Sans/static/OpenSans-Regular.ttf", m_font_size);
+		
+		ImFontConfig fontConfig;
+		fontConfig.FontDataOwnedByAtlas = false;
+		m_fonts["default"] = io.Fonts->AddFontFromFileTTF("../PFF/assets/fonts/Open_Sans/static/OpenSans-Regular.ttf", m_font_size);;
+		m_fonts["bold"] = io.Fonts->AddFontFromFileTTF("../PFF/assets/fonts/Open_Sans/static/OpenSans-Bold.ttf", m_font_size);
+		m_fonts["italic"] = io.Fonts->AddFontFromFileTTF("../PFF/assets/fonts/Open_Sans/static/OpenSans-Italic.ttf", m_font_size);
+
+		m_fonts["regular_big"] = io.Fonts->AddFontFromFileTTF("../PFF/assets/fonts/Open_Sans/static/OpenSans-Regular.ttf", m_big_font_size);
+		m_fonts["bold_big"] = io.Fonts->AddFontFromFileTTF("../PFF/assets/fonts/Open_Sans/static/OpenSans-Bold.ttf", m_big_font_size);
+		m_fonts["italic_big"] = io.Fonts->AddFontFromFileTTF("../PFF/assets/fonts/Open_Sans/static/OpenSans-Italic.ttf", m_big_font_size);
+		io.FontDefault = m_fonts["default"];
+
 		ImGui_ImplVulkan_CreateFontsTexture(command_buffer);
 		m_renderer->get_device()->end_single_time_commands(command_buffer);
+		ImGui_ImplVulkan_DestroyFontUploadObjects();
+
 
 		CORE_ASSERT(vkDeviceWaitIdle(m_renderer->get_device()->get_device()) == VK_SUCCESS, "", "Failed wait idle");
 
 		// Modify the color of the progress bar
 		ImGui::PushStyleColor(ImGuiCol_PlotHistogram, ImVec4(0.05f, 0.5f, 0.05f, 1.0f));
 
-		ImVec4 color_00_default = { 0.0f, 0.25f, 0.0f, 1.0f };
-		ImVec4 color_00_hover = { 0.0f, 0.36f, 0.0f, 1.0f };
-		ImVec4 color_00_active = { 0.0f, 0.32f, 0.0f, 1.0f };
+		IMGUI_COLOR_CONFIG(Header);
+		IMGUI_COLOR_CONFIG(HeaderHovered);
+		IMGUI_COLOR_CONFIG(HeaderActive);
+		
+		IMGUI_COLOR_CONFIG(TabUnfocused);
+		IMGUI_COLOR_CONFIG(TabUnfocusedActive);
+		
+		IMGUI_COLOR_CONFIG(Button);
+		IMGUI_COLOR_CONFIG(ButtonHovered);
+		IMGUI_COLOR_CONFIG(ButtonActive);
+		
+		IMGUI_COLOR_CONFIG(Tab);
+		IMGUI_COLOR_CONFIG(TabHovered);
+		IMGUI_COLOR_CONFIG(TabActive);
 
-		ImVec4 color_01_default = { 0.0f, 0.2f, 0.0f, 1.0f };
-		ImVec4 color_01_hover = { 0.0f, 0.38f, 0.0f, 1.0f };
-		ImVec4 color_01_active = { 0.0f, 0.29f, 0.0f, 1.0f };
+		IMGUI_COLOR_CONFIG(FrameBg);
+		IMGUI_COLOR_CONFIG(FrameBgHovered);
+		IMGUI_COLOR_CONFIG(FrameBgActive);
+		
+		IMGUI_COLOR_CONFIG(ResizeGrip);
+		IMGUI_COLOR_CONFIG(ResizeGripHovered);
+		IMGUI_COLOR_CONFIG(ResizeGripActive);
 
-		ImVec4 color_02_default = { 0.0f, 0.35f, 0.0f, 1.0f };
-		ImVec4 color_02_hover = { 0.0f, 0.75f, 0.0f, 1.0f };
-		ImVec4 color_02_active = { 0.0f, 0.6f, 0.0f, 1.0f };
-		ImVec4 color_backbround = {0.058f, 0.058f, 0.058f, 1.0f};
+		IMGUI_COLOR_CONFIG(Separator);
+		IMGUI_COLOR_CONFIG(SeparatorHovered);
+		IMGUI_COLOR_CONFIG(SeparatorActive);
+		
+		IMGUI_COLOR_CONFIG(TitleBg);
+		IMGUI_COLOR_CONFIG(TitleBgActive);
+		IMGUI_COLOR_CONFIG(TitleBgCollapsed);
 
-		IMGUI_COLOR_CONFIG(Header, color_00_default);
-		IMGUI_COLOR_CONFIG(HeaderHovered, color_00_hover);
-		IMGUI_COLOR_CONFIG(HeaderActive, color_00_active);
+		IMGUI_COLOR_CONFIG(DockingPreview);
+		IMGUI_COLOR_CONFIG(MenuBarBg);
+		IMGUI_COLOR_CONFIG(CheckMark);
+
+		IMGUI_COLOR_CONFIG(SliderGrab);
+		IMGUI_COLOR_CONFIG(SliderGrabActive);
 		
-		IMGUI_COLOR_CONFIG(TabUnfocused, color_01_default);
-		IMGUI_COLOR_CONFIG(TabUnfocusedActive, color_01_active);
+		IMGUI_COLOR_CONFIG(ScrollbarBg);
+		IMGUI_COLOR_CONFIG(ScrollbarGrab);
+		IMGUI_COLOR_CONFIG(ScrollbarGrabHovered);
+		IMGUI_COLOR_CONFIG(ScrollbarGrabActive);
 		
-		IMGUI_COLOR_CONFIG(Button, color_01_default);
-		IMGUI_COLOR_CONFIG(ButtonHovered, color_01_hover);
-		IMGUI_COLOR_CONFIG(ButtonActive, color_01_active);
-		
-		IMGUI_COLOR_CONFIG(Tab, color_02_default);
-		IMGUI_COLOR_CONFIG(TabHovered, color_02_hover);
-		IMGUI_COLOR_CONFIG(TabActive, color_02_active);
-		
-		IMGUI_COLOR_CONFIG(FrameBg, ImVec4(0.f, 0.f, 0.f, 1.0f));
-		IMGUI_COLOR_CONFIG(FrameBgHovered, ImVec4(0.1f, 0.4f, 0.1f, 1.0f));
-		IMGUI_COLOR_CONFIG(FrameBgActive, ImVec4(0.1f, 0.3f, 0.1f, 1.0f));
-		
-		IMGUI_COLOR_CONFIG(ResizeGrip, color_01_default);
-		IMGUI_COLOR_CONFIG(ResizeGripHovered, color_01_hover);
-		IMGUI_COLOR_CONFIG(ResizeGripActive, color_01_active);
-		
-		IMGUI_COLOR_CONFIG(Separator, ImVec4(0.45f, 0.45f, 0.45f, 1.0f));
-		IMGUI_COLOR_CONFIG(SeparatorHovered, ImVec4(0.45f, 0.45f, 0.45f, 1.0f));
-		IMGUI_COLOR_CONFIG(SeparatorActive, ImVec4(0.45f, 0.45f, 0.45f, 1.0f));
-		
-		IMGUI_COLOR_CONFIG(TitleBg, ImVec4(.0f, 0.25f, .0f, 1.0f));
-		IMGUI_COLOR_CONFIG(TitleBgActive, ImVec4(.0f, 0.45f, .0f, 1.0f));
-		IMGUI_COLOR_CONFIG(TitleBgCollapsed, ImVec4(.0f, 0.1f, .0f, 1.0f));
-		
-		IMGUI_COLOR_CONFIG(DockingPreview, ImVec4(0.1f, 0.4f, 0.1f, 1.0f));
-		IMGUI_COLOR_CONFIG(MenuBarBg, ImVec4(0.1f, 0.1f, 0.1f, 1.0f));
-		IMGUI_COLOR_CONFIG(CheckMark, ImVec4(.0f, .625f, .0f, 1.0f));
-		
-		IMGUI_COLOR_CONFIG(SliderGrab, color_01_default);
-		IMGUI_COLOR_CONFIG(SliderGrabActive, color_01_active);
-		
-		IMGUI_COLOR_CONFIG(ScrollbarBg, color_backbround);
-		IMGUI_COLOR_CONFIG(ScrollbarGrab, color_01_default);
-		IMGUI_COLOR_CONFIG(ScrollbarGrabHovered, color_01_hover);
-		IMGUI_COLOR_CONFIG(ScrollbarGrabActive, color_01_active);
-		
-		IMGUI_COLOR_CONFIG(TextSelectedBg, ImVec4(0.0f, 0.2f, 0.0f, 1.0f));
-		IMGUI_COLOR_CONFIG(Border, ImVec4(0.33f, 0.33f, 0.33f, 1.0f));
-		IMGUI_COLOR_CONFIG(WindowBg, ImVec4(0.11f, 0.11f, 0.11f, 1.0f));
-		IMGUI_COLOR_CONFIG(ChildBg, ImVec4(0.11f, 0.11f, 0.11f, 1.0f));
-		IMGUI_COLOR_CONFIG(PopupBg, ImVec4(0.125f, 0.125f, 0.125f, 0.9f));
+		IMGUI_COLOR_CONFIG(TextSelectedBg);
+		IMGUI_COLOR_CONFIG(Border);
+		IMGUI_COLOR_CONFIG(WindowBg);
+		IMGUI_COLOR_CONFIG(ChildBg);
+		IMGUI_COLOR_CONFIG(PopupBg);
+
 
 		//ImGui::PushStyleVar(ImGuiStyleVar_FramePadding, ImVec2(2.0f, 1.0f
 		IMGUI_STYLE_CONFIG(f32, FrameRounding, 2);
@@ -197,9 +204,9 @@ namespace PFF {
 		IMGUI_STYLE_CONFIG(ImVec2, WindowPadding, ImVec2(4, 4));
 
 		// ItemInnerSpacing
-		
-		ImGui::PushStyleColor(ImGuiCol_MenuBarBg, ImVec4(0.0f, 0.2f, 0.0f, 1.0f));
-		ImGui::PopStyleColor();
+
+		ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, ImVec2(4, 4));
+
 		// MenuBarBg
 	}
 
@@ -318,6 +325,14 @@ namespace PFF {
 				ImGui::End();
 			}
 		}
+	}
+
+	ImFont* imgui_layer::get_font(const std::string& name) {
+
+		if (!contains(m_fonts, name))
+			return nullptr;
+
+		return m_fonts.at(name);
 	}
 
 	void imgui_layer::begin_frame() {
