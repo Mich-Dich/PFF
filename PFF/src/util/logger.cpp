@@ -13,9 +13,9 @@
 #include "logger.h"
 
 
-#define SHORTEN_FILE_PATH(file)         (strstr(file, PROJECT_FOLDER) ? strstr(file, PROJECT_FOLDER) + strlen(PROJECT_FOLDER) + 1 : file)
-#define SHORT_FILE(fileName)            (strrchr(fileName, '/') ? strrchr(fileName, '/') + 1 : fileName)
-#define SHORTEN_FUNC_NAME(name)         (strrchr(name, '::') ? strrchr(name, '::') + 1 : name)
+#define SHORTEN_FILE_PATH(text)         (strstr(text, PROJECT_FOLDER) ? strstr(text, PROJECT_FOLDER) + strlen(PROJECT_FOLDER) + 1 : text)
+#define SHORT_FILE(text)                (strrchr(text, '\\') ? strrchr(text, '\\') + 1 : text)
+#define SHORTEN_FUNC_NAME(text)         (strrchr(text, '::') ? strrchr(text, '::') + 1 : text)
 
 
 namespace APP_NAMESPACE {

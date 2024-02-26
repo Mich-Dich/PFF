@@ -5,6 +5,11 @@
 
 namespace PFF {
 
+
+    static const char* vk_debug_message_type_to_string(VkDebugUtilsMessageTypeFlagsEXT flag);
+    static const char* physical_device_type_to_string(VkPhysicalDeviceType type);
+
+
     class pff_window;
 
     struct SwapChainSupportDetails {
@@ -14,8 +19,8 @@ namespace PFF {
     };
 
     struct QueueFamilyIndices {
-        uint32_t graphicsFamily;
-        uint32_t presentFamily;
+        u32 graphicsFamily;
+        u32 presentFamily;
         bool graphicsFamilyHasValue = false;
         bool presentFamilyHasValue = false;
         bool isComplete() { return graphicsFamilyHasValue && presentFamilyHasValue; }
@@ -71,7 +76,7 @@ namespace PFF {
         void create_logical_device();
         void create_command_pool();
 
-        // - - - - - - - - - - - - -  Debug messenger functions  - - - - - - - - - - - - - 
+        // - - - - - - - - - - - - - Debug messenger - - - - - - - - - - - - - 
         void setup_debug_messenger();
         VkResult create_debug_utils_messengerEXT(VkInstance instance, const VkDebugUtilsMessengerCreateInfoEXT* pCreateInfo, const VkAllocationCallbacks* pAllocator, VkDebugUtilsMessengerEXT* pDebugMessenger);
         void destroy_debug_utils_messengerEXT(VkInstance instance, VkDebugUtilsMessengerEXT debugMessenger, const VkAllocationCallbacks* pAllocator);
@@ -82,10 +87,13 @@ namespace PFF {
         // helper functions
         bool is_device_suitable(VkPhysicalDevice get_device);
         int rateDeviceSuitability(VkPhysicalDevice device);
+
+        // @brief Retrieves the required Vulkan_Instance extension_names for GLFW and Validation_Layer (if enabled)
+        // @return A vector containing the names fo the required extensions
         std::vector<const char*> get_required_extensions();
         bool check_validation_layer_support();
         QueueFamilyIndices find_queue_families(VkPhysicalDevice get_device);
-        void has_gflw_required_iInstance_extensions();
+        void has_required_Instance_extensions(const std::vector<const char*>& extentions);
         bool check_device_extension_support(VkPhysicalDevice get_device);
         SwapChainSupportDetails query_swapchain_support(VkPhysicalDevice get_device);
 

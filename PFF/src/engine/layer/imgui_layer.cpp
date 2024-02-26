@@ -40,11 +40,11 @@ namespace PFF {
 
 
 #define LOAD_IMGUI_STYLE_SETTING(type, key, value)		{type buffer_vec = value;																\
-														config::load(config::file::editor, "color_scheme", #key, buffer_vec);					\
+														config::load(config::file::editor, "ImGui_style", #key, buffer_vec);					\
 														ImGui::PushStyleVar(ImGuiStyleVar_##key, buffer_vec);}
 
 #define SAVE_IMGUI_STYLE_SETTING(type, key, value)		{type buffer_vec = value;																\
-														config::save(config::file::editor, "color_scheme", #key, buffer_vec);					\
+														config::save(config::file::editor, "ImGui_style", #key, buffer_vec);					\
 														ImGui::PushStyleVar(ImGuiStyleVar_##key, buffer_vec);}
 
 #ifdef PFF_DEBUG
@@ -146,6 +146,13 @@ namespace PFF {
 		// Modify the color of the progress bar
 		ImGui::PushStyleColor(ImGuiCol_PlotHistogram, ImVec4(0.05f, 0.5f, 0.05f, 1.0f));
 
+
+		// load [main_color] and then set theme
+		config::load(config::file::editor, "color_theme", "main_color", PFF::UI::THEME::main_color);
+		config::load(config::file::editor, "color_theme", "theme", PFF::UI::THEME::theme);
+		PFF::UI::THEME::theme_colors_dark(PFF::UI::THEME::theme);
+
+		/*
 		IMGUI_COLOR_CONFIG(Header);
 		IMGUI_COLOR_CONFIG(HeaderHovered);
 		IMGUI_COLOR_CONFIG(HeaderActive);
@@ -195,6 +202,8 @@ namespace PFF {
 		IMGUI_COLOR_CONFIG(ChildBg);
 		IMGUI_COLOR_CONFIG(PopupBg);
 
+		IMGUI_COLOR_CONFIG(Text);
+		*/
 
 		//ImGui::PushStyleVar(ImGuiStyleVar_FramePadding, ImVec2(2.0f, 1.0f
 		IMGUI_STYLE_CONFIG(f32, FrameRounding, 2);

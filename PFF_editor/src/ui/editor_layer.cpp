@@ -69,10 +69,9 @@ namespace PFF {
 		window_flags |= ImGuiWindowFlags_NoBringToFrontOnFocus | ImGuiWindowFlags_NoNavFocus | ImGuiWindowFlags_NoDecoration | ImGuiWindowFlags_NoNav | ImGuiWindowFlags_NoDocking;
 		// window_flags |= ImGuiWindowFlags_MenuBar;
 		
-		ImGui::PushStyleColor(ImGuiCol_WindowBg, PFF_UI_ACTIVE_THEME->WindowBg);
+		// ImGui::PushStyleColor(ImGuiCol_WindowBg, PFF_UI_ACTIVE_THEME->WindowBg);
 		if (ImGui::Begin("DockSpaceWindow", nullptr, window_flags)) {
 
-			ImGui::PopStyleColor();
 
 			const auto window_sie_buf = application::get().get_window()->get_window_size_state();
 			const bool is_maximized = (window_sie_buf == window_size_state::fullscreen);
@@ -202,11 +201,7 @@ namespace PFF {
 				ImGui::EndTabBar();
 			}
 
-		} else {
-
-			ImGui::PopStyleColor();
 		}
-
 		ImGui::End();
 
 

@@ -44,25 +44,25 @@ namespace PFF {
 		else if constexpr (std::is_arithmetic_v<T>) {
 
 			ImGui::SetNextItemWidth(ImGui::GetColumnWidth() - (current_item_spacing.x + 1));
-			ImGui::InputFloat("", &value, 0.0f, 0.0f, "%.2f", flags);
+			ImGui::InputFloat(label.c_str(), &value, 0.0f, 0.0f, "%.2f", flags);
 		}
 
 		else if constexpr (std::is_same_v<T, glm::vec2>) {
 
 			ImGui::SetNextItemWidth(ImGui::GetColumnWidth() - (current_item_spacing.x + 1));
-			ImGui::InputFloat2("", &value[0], "%.2f", flags);
+			ImGui::InputFloat2(label.c_str(), &value[0], "%.2f", flags);
 		}
 
 		else if constexpr (std::is_same_v<T, glm::vec3>) {
 
 			ImGui::SetNextItemWidth(ImGui::GetColumnWidth() - (current_item_spacing.x + 1));
-			ImGui::InputFloat3("", &value[0], "%.2f", flags);
+			ImGui::InputFloat3(label.c_str(), &value[0], "%.2f", flags);
 		}
 
 		else if constexpr (std::is_same_v<T, glm::vec4> || std::is_same_v<T, ImVec4>) {
 
 			ImGui::SetNextItemWidth(ImGui::GetColumnWidth() - (current_item_spacing.x + 1));
-			ImGui::InputFloat4("", &value[0], "%.2f", flags);
+			ImGui::InputFloat4(label.c_str(), &value[0], "%.2f", flags);
 		}
 
 		ImGui::Columns(1);

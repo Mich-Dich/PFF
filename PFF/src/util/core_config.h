@@ -9,8 +9,8 @@
 
 // log assert and validation behaviour?
 // NOTE - expr in assert/validation will still be executed
-#define ENABLE_LOGGING_OF_VALIDATION			0
-#define ENABLED_LOGGING_OF_ASSERTS				0
+#define ENABLE_LOGGING_OF_VALIDATION			1
+#define ENABLED_LOGGING_OF_ASSERTS				1
 
 // log client assert and validation behaviour?
 // NOTE - expr in assert/validation will still be executed

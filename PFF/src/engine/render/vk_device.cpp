@@ -108,6 +108,14 @@ namespace PFF {
 
         PFF_PROFILE_FUNCTION();
 
+        // typedef enum VkDebugUtilsMessageTypeFlagBitsEXT {
+        //     VK_DEBUG_UTILS_MESSAGE_TYPE_GENERAL_BIT_EXT = 0x00000001,
+        //     VK_DEBUG_UTILS_MESSAGE_TYPE_VALIDATION_BIT_EXT = 0x00000002,
+        //     VK_DEBUG_UTILS_MESSAGE_TYPE_PERFORMANCE_BIT_EXT = 0x00000004,
+        //     VK_DEBUG_UTILS_MESSAGE_TYPE_DEVICE_ADDRESS_BINDING_BIT_EXT = 0x00000008,
+        //     VK_DEBUG_UTILS_MESSAGE_TYPE_FLAG_BITS_MAX_ENUM_EXT = 0x7FFFFFFF
+        // } VkDebugUtilsMessageTypeFlagBitsEXT;
+        // 
         //		Possible Levels for [messageSeverity]
         //	VK_DEBUG_UTILS_MESSAGE_SEVERITY_VERBOSE_BIT_EXT		=> Diagnostic message
         //	VK_DEBUG_UTILS_MESSAGE_SEVERITY_INFO_BIT_EXT		=> Informational message like the creation of a resource
@@ -123,12 +131,30 @@ namespace PFF {
         //	pMessage											=> The debug message as a null-terminated string
         //	pObjects											=> Array of Vulkan object handles related to the message
         //	objectCount											=> Number of objects in array
-        if (msgSeverity >= VK_DEBUG_UTILS_MESSAGE_SEVERITY_VERBOSE_BIT_EXT) {
 
-            if (msgSeverity & VK_DEBUG_UTILS_MESSAGE_SEVERITY_VERBOSE_BIT_EXT)		CORE_LOG(Trace, "Validation Layer: " << Callback->pMessage);
-            if (msgSeverity & VK_DEBUG_UTILS_MESSAGE_SEVERITY_INFO_BIT_EXT)			CORE_LOG(Debug, "Validation Layer: " << Callback->pMessage);
-            if (msgSeverity & VK_DEBUG_UTILS_MESSAGE_SEVERITY_WARNING_BIT_EXT)		CORE_LOG(Warn, "Validation Layer: " << Callback->pMessage);
-            if (msgSeverity & VK_DEBUG_UTILS_MESSAGE_SEVERITY_ERROR_BIT_EXT)		CORE_LOG(Error, "Validation Layer: " << Callback->pMessage);
+        switch (msgSeverity) {
+
+            case VK_DEBUG_UTILS_MESSAGE_SEVERITY_VERBOSE_BIT_EXT:
+                CORE_LOG(Trace, "Validation Layer: " << vk_debug_message_type_to_string(msgType) << Callback->pMessage)
+                break;
+
+            case VK_DEBUG_UTILS_MESSAGE_SEVERITY_INFO_BIT_EXT:
+                CORE_LOG(Debug, "Validation Layer: " << vk_debug_message_type_to_string(msgType) << Callback->pMessage)
+                break;
+
+            case VK_DEBUG_UTILS_MESSAGE_SEVERITY_WARNING_BIT_EXT:
+                CORE_LOG(Warn, "Validation Layer: " << vk_debug_message_type_to_string(msgType) << Callback->pMessage)
+                break;
+
+            case VK_DEBUG_UTILS_MESSAGE_SEVERITY_ERROR_BIT_EXT:
+                CORE_LOG(Error, "Validation Layer: " << vk_debug_message_type_to_string(msgType) << Callback->pMessage)
+                break;
+
+            case VK_DEBUG_UTILS_MESSAGE_SEVERITY_FLAG_BITS_MAX_ENUM_EXT:
+                CORE_LOG(Fatal, "Validation Layer: " << vk_debug_message_type_to_string(msgType) << Callback->pMessage)
+                break;
+            default:
+                break;
         }
 
         return VK_FALSE;
@@ -168,7 +194,7 @@ namespace PFF {
         u32 version{};
         vkEnumerateInstanceVersion(&version);
         version &= ~(0xFFFU);
-        CORE_LOG(Fatal, "System supports VULKAN version: " << VK_API_VERSION_VARIANT(version)
+        CORE_LOG(Trace, "System supports VULKAN version: " << VK_API_VERSION_VARIANT(version)
             << "." << VK_API_VERSION_MAJOR(version) 
             << "." << VK_API_VERSION_MINOR(version) 
             << "." << VK_API_VERSION_PATCH(version));
@@ -206,7 +232,7 @@ namespace PFF {
 
         CORE_ASSERT(vkCreateInstance(&instance_CI, nullptr, &m_VkInstance) == VK_SUCCESS, "", "failed to create m_VkInstance!");
        
-        has_gflw_required_iInstance_extensions();
+        has_required_Instance_extensions(extensions);
     }
 
     void vk_device::pick_physical_device() {
@@ -215,24 +241,25 @@ namespace PFF {
 
         u32 deviceCount = 0;
         vkEnumeratePhysicalDevices(m_VkInstance, &deviceCount, nullptr);
-        CORE_ASSERT(deviceCount > 0, "Num of GPUs supporting Vulkan: " << deviceCount, "No GPUs found suporting Vulkan");
+        CORE_ASSERT(deviceCount > 0, "", "No GPUs found suporting Vulkan");
 
         std::vector<VkPhysicalDevice> devices(deviceCount);
         vkEnumeratePhysicalDevices(m_VkInstance, &deviceCount, devices.data());
 
         std::multimap<int, VkPhysicalDevice> candidates;
 
+        CORE_LOG(Info, "Num of GPUs supporting Vulkan: " << deviceCount)
         for (int16 x = 0; x < devices.size(); x++) {
 
             if (!is_device_suitable(devices[x])) {
 
-                CORE_LOG(Warn, "device [" << x << "] is NOT SUTABLE");
+                CORE_LOG(Warn, CONSOLE_LIST_BEGIN << "device [" << x << "] is NOT SUTABLE");
                 continue;
             }
 
             int score = rateDeviceSuitability(devices[x]);
             candidates.insert(std::make_pair(score, devices[x]));
-            CORE_LOG(Trace, "device [" << x << "] has a Score of [" << score << "]");
+            CORE_LOG(Trace, CONSOLE_LIST_BEGIN << "device [" << x << "] has a Score of [" << score << "]");
         }
 
         if (candidates.rbegin()->first > 0) {
@@ -252,7 +279,8 @@ namespace PFF {
         
         CORE_ASSERT(m_physical_device != VK_NULL_HANDLE, "", "failed to find a suitable GPU!");
         vkGetPhysicalDeviceProperties(m_physical_device, &properties);
-        LOG(Info, "physical get_device: " << properties.deviceName);
+        LOG(Info, "physical device: " << properties.deviceName);
+        LOG(Info, "device type: " << physical_device_type_to_string(properties.deviceType));
     }
 
 
@@ -405,16 +433,19 @@ namespace PFF {
         u32 glfwExtensionCount = 0;
         const char** glfwExtensions;
         glfwExtensions = glfwGetRequiredInstanceExtensions(&glfwExtensionCount);
-
         std::vector<const char*> extensions(glfwExtensions, glfwExtensions + glfwExtensionCount);
 
 #ifdef PFF_DEBUG
-
         CORE_LOG(Info, "Number of extenstions required for GLFW: " << extensions.size());
         for (const char* name : extensions) {
             CORE_LOG(Trace, CONSOLE_LIST_BEGIN << name << "\"");
         }
 
+        if (c_enable_validation_layers) {
+
+            CORE_LOG(Info, "Number of extenstions required for validation_layer: " << 1);
+            CORE_LOG(Trace, CONSOLE_LIST_BEGIN << VK_EXT_DEBUG_UTILS_EXTENSION_NAME << "\"");
+        }
 #endif
 
         if (c_enable_validation_layers) {
@@ -424,26 +455,38 @@ namespace PFF {
         return extensions;
     }
 
-    void vk_device::has_gflw_required_iInstance_extensions() {
+
+    void vk_device::has_required_Instance_extensions(const std::vector<const char*>& extentions) {
 
         PFF_PROFILE_FUNCTION();
 
-        u32 extensionCount = 0;
-        vkEnumerateInstanceExtensionProperties(nullptr, &extensionCount, nullptr);
-        std::vector<VkExtensionProperties> extensions(extensionCount);
-        vkEnumerateInstanceExtensionProperties(nullptr, &extensionCount, extensions.data());
+        u32 extension_count = 0;
+        vkEnumerateInstanceExtensionProperties(nullptr, &extension_count, nullptr);
+        std::vector<VkExtensionProperties> extensions(extension_count);
+        vkEnumerateInstanceExtensionProperties(nullptr, &extension_count, extensions.data());
 
         LOG(Info, "available extensions:")
         std::unordered_set<std::string> available;
         for (const auto& extension : extensions) {
 
-            LOG(Trace, CONSOLE_LIST_BEGIN << extension.extensionName);
             available.insert(extension.extensionName);
+            LOG(Trace, CONSOLE_LIST_BEGIN << extension.extensionName);
         }
 
-        LOG(Info, "required extensions:")
-        auto requiredExtensions = get_required_extensions();
-        for (const auto& required : requiredExtensions) {
+        u32 layer_count = 0;
+        vkEnumerateInstanceExtensionProperties(nullptr, &layer_count, nullptr);
+        std::vector<VkExtensionProperties> layers(layer_count);
+        vkEnumerateInstanceExtensionProperties(nullptr, &layer_count, layers.data());
+
+        LOG(Info, "available layers:")
+        for (const auto& extension : layers) {
+
+            available.insert(extension.extensionName);
+            LOG(Trace, CONSOLE_LIST_BEGIN << extension.extensionName);
+        }
+
+        LOG(Info, "required extensions/layers:")
+        for (const auto& required : extentions) {
 
             LOG(Trace, CONSOLE_LIST_BEGIN << required);
             CORE_ASSERT(available.find(required) != available.end(), "", "Missing required glfw extension");
@@ -485,10 +528,12 @@ namespace PFF {
 
         int i = 0;
         for (const auto& queueFamily : queueFamilies) {
+
             if (queueFamily.queueCount > 0 && queueFamily.queueFlags & VK_QUEUE_GRAPHICS_BIT) {
                 m_queue_family_indices.graphicsFamily = i;
                 m_queue_family_indices.graphicsFamilyHasValue = true;
             }
+
             VkBool32 presentSupport = false;
             vkGetPhysicalDeviceSurfaceSupportKHR(get_device, i, m_surface, &presentSupport);
             if (queueFamily.queueCount > 0 && presentSupport) {
@@ -688,4 +733,63 @@ namespace PFF {
         CORE_ASSERT(vkBindImageMemory(m_device, image, imageMemory, 0) == VK_SUCCESS, "", "failed to bind image memory!");
     }
 
+    const char* vk_debug_message_type_to_string(VkDebugUtilsMessageTypeFlagsEXT flag) {
+
+        switch (flag) {
+        case VK_DEBUG_UTILS_MESSAGE_TYPE_GENERAL_BIT_EXT:
+            return "[general info] ";
+
+        case VK_DEBUG_UTILS_MESSAGE_TYPE_VALIDATION_BIT_EXT:
+            return "[validation info] ";
+
+        case VK_DEBUG_UTILS_MESSAGE_TYPE_PERFORMANCE_BIT_EXT:
+            return "[performance info] ";
+
+        case VK_DEBUG_UTILS_MESSAGE_TYPE_DEVICE_ADDRESS_BINDING_BIT_EXT:
+            return "[device adress binding info] ";
+
+        case VK_DEBUG_UTILS_MESSAGE_TYPE_FLAG_BITS_MAX_ENUM_EXT:
+            return "[MAX ENUM VALUE] ";
+
+        default:
+            return "[Unknown type] ";
+        }
+
+    }
+
+    const char* physical_device_type_to_string(VkPhysicalDeviceType type) {
+
+        switch (type) {
+        case VK_PHYSICAL_DEVICE_TYPE_OTHER:
+            return "[other]";
+
+        case VK_PHYSICAL_DEVICE_TYPE_INTEGRATED_GPU:
+            return "[integrated GPU]";
+
+        case VK_PHYSICAL_DEVICE_TYPE_DISCRETE_GPU:
+            return "[discrete GPU]";
+
+        case VK_PHYSICAL_DEVICE_TYPE_VIRTUAL_GPU:
+            return "[virtual GPU]";
+
+        case VK_PHYSICAL_DEVICE_TYPE_CPU:
+            return "[CPU]";
+
+        default:
+            return "[no type found]";
+        }
+
+    }
+
 }
+
+/*
+typedef enum VkPhysicalDeviceType {
+    VK_PHYSICAL_DEVICE_TYPE_OTHER = 0,
+    VK_PHYSICAL_DEVICE_TYPE_INTEGRATED_GPU = 1,
+    VK_PHYSICAL_DEVICE_TYPE_DISCRETE_GPU = 2,
+    VK_PHYSICAL_DEVICE_TYPE_VIRTUAL_GPU = 3,
+    VK_PHYSICAL_DEVICE_TYPE_CPU = 4,
+    VK_PHYSICAL_DEVICE_TYPE_MAX_ENUM = 0x7FFFFFFF
+} VkPhysicalDeviceType;
+*/

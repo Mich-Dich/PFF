@@ -7,7 +7,7 @@ extern PFF::application* PFF::create_application();
 
 int main() {
 
-	PFF::Logger::Init("[$B$T:$J$E] [$B$L$X $K - $P:$G$E] $C$Z");
+	PFF::Logger::Init("[$B$T:$J$E] [$B$L$X $I - $P:$G$E] $C$Z");
 
 	auto app = PFF::create_application();
 	app->run();
