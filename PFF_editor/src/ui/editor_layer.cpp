@@ -127,35 +127,36 @@ namespace PFF {
 			static f32 move_offset_y;
 			static f32 move_offset_x;
 			const f32 w = ImGui::GetContentRegionAvail().x;
-			const f32 button_width = 30.f;
-			const f32 button_area_width = (button_width * 3) + (window_padding.x * 3);
+			const f32 button_width = 25.f;
+			const f32 button_spaccing = 8.f;
+			const f32 button_area_width = viewport->Size.x - ((window_padding.x * 2) + (button_spaccing * 3) + (button_width * 3));
 
 			// tilebar drag area
 			ImGui::SetCursorPos(ImVec2(window_padding.x, window_padding.y + titlebar_vertical_offset));
 
 			// debug Drab bounds
-			//fg_draw_list->AddRect(ImGui::GetCursorScreenPos(), ImVec2(w - button_area_width, titlebar_height), IM_COL32(222, 43, 43, 255));
+			//fg_draw_list->AddRect(ImGui::GetCursorScreenPos(), ImVec2(button_area_width, titlebar_height), IM_COL32(222, 43, 43, 255));
 
 #if 1	// FOR DEBUG VISAUL
-			ImGui::InvisibleButton("##titlebar_drag_zone", ImVec2(w - button_area_width, titlebar_height - window_padding.y * 2));
-#elif 0
-			ImGui::Button("##titlebar_drag_zone", ImVec2(w - button_area_width, titlebar_height - window_padding.y * 2));
+			ImGui::InvisibleButton("##titlebar_drag_zone", ImVec2(button_area_width, titlebar_height - window_padding.y * 2));
+#else
+			ImGui::Button("##titlebar_drag_zone", ImVec2(button_area_width, titlebar_height - window_padding.y * 2));
 #endif // 1
 
 			application::get().set_titlebar_hovered(ImGui::IsItemHovered());
 			ImGui::SetItemAllowOverlap();
 
 
-			ImGui::SetCursorPos(ImVec2(w - button_area_width + window_padding.x * 2, window_padding.y));
-			if (ImGui::Button("Min", ImVec2(30.f, 30.f)))
+			ImGui::SetCursorPos(ImVec2(viewport->Size.x - (window_padding.x + (button_spaccing * 2) + (button_width * 3)), window_padding.y));
+			if (ImGui::Button("_##Min", ImVec2(button_width, button_width)))
 				application::get().minimize_window();
 
-			ImGui::SetCursorPos(ImVec2(w - button_area_width + window_padding.x * 3 + button_width, window_padding.y));
-			if (ImGui::Button("Max", ImVec2(30.f, 30.f)))
+			ImGui::SetCursorPos(ImVec2(viewport->Size.x - (window_padding.x + (button_spaccing * 1) + (button_width * 2)), window_padding.y));
+			if (ImGui::Button("O##Max", ImVec2(button_width, button_width)))
 				application::get().maximize_window();
 
-			ImGui::SetCursorPos(ImVec2(w - button_area_width + window_padding.x * 4 + button_width * 2, window_padding.y));
-			if (ImGui::Button("Close", ImVec2(30.f, 30.f)))
+			ImGui::SetCursorPos(ImVec2(viewport->Size.x - (window_padding.x + button_width), window_padding.y));
+			if (ImGui::Button("X##Close", ImVec2(button_width, button_width)))
 				application::get().close_application();
 
 
@@ -610,68 +611,6 @@ namespace PFF {
 
 		}
 
-		/*
-		
-		"immediate"
-		;
-		
-
-		"mailbox"
-		
-		"the presentation engine waits for the next vertical blanking period to update the current image. "
-		"Tearing cannot be observed. An internal single-entry queue is used to hold pending presentation requests. "
-		"If the queue is full when a new presentation request is received, the new request replaces the existing entry, "
-		"and any images associated with the prior entry become available for re-use by the application. One request is "
-		"removed from the queue and processed during each vertical blanking period in which the queue is non-empty.";
-		
-
-		"FiFo"
-
-		"the presentation engine waits for the next vertical blanking" 
-		"period to update the current image. Tearing cannot be observed. An internal queue is used to"
-		"hold pending presentation requests. New requests are appended to the end of the queue, and one" 
-		"request is removed from the beginning of the queue and processed during each vertical blanking" 
-		"period in which the queue is non-empty. This is the only value of presentMode that is required" 
-		"to be supported."
-
-
-		"Relaxed FiFo"
-
-		"the presentation engine generally waits for the next vertical "
-		"blanking period to update the current image. If a vertical blanking period has already passed "
-		"since the last update of the current image then the presentation engine does not wait for "
-		"another vertical blanking period for the update, meaning this mode may result in visible tearing "
-		"in this case. This mode is useful for reducing visual stutter with an application that will "
-		"mostly present a new image before the next vertical blanking period, but may occasionally be "
-		"late, and present a new image just after the next vertical blanking period. An internal queue "
-		"is used to hold pending presentation requests. New requests are appended to the end of the queue, "
-		"and one request is removed from the beginning of the queue and processed during or after each "
-		"vertical blanking period in which the queue is non-empty"
-		
-
-		"Shared Demand Refresh"
-
-		"the presentation engine and application have "
-		"concurrent access to a single image, which is referred to as a shared presentable image. "
-		"The presentation engine is only required to update the current image after a new presentation "
-		"request is received. Therefore the application must make a presentation request whenever an "
-		"update is required. However, the presentation engine may update the current image at any point, "
-		"meaning this mode may result in visible tearing."
-
-
-		"shared continuous refresh"
-		
-		"The presentation engine and application have "
-		"concurrent access to a single image, which is referred to as a shared presentable image. The "
-		"presentation engine periodically updates the current image on its regular refresh cycle. The "
-		"application is only required to make one initial presentation request, after which the "
-		"presentation engine must update the current image without any need for further presentation "
-		"requests. The application can indicate the image contents have been updated by making a "
-		"presentation request, but this does not guarantee the timing of when it will be updated. "
-		"This mode may result in visible tearing if rendering to the image is not timed correctly."
-		
-		*/
-		
 		
 		ImGui::End();
 	}

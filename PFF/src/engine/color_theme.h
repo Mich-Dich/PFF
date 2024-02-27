@@ -106,8 +106,8 @@ namespace PFF::UI::THEME {
 				colors[ImGuiCol_DockingEmptyBg]					= LERP_GRAY(0.2f);
 				colors[ImGuiCol_PlotLines]						= ImVec4(0.61f, 0.61f, 0.61f, 1.00f);
 				colors[ImGuiCol_PlotLinesHovered]				= ImVec4(1.00f, 0.43f, 0.35f, 1.00f);
-				colors[ImGuiCol_PlotHistogram]					= ImVec4(0.90f, 0.70f, 0.00f, 1.00f);
-				colors[ImGuiCol_PlotHistogramHovered]			= ImVec4(1.00f, 0.60f, 0.00f, 1.00f);
+				colors[ImGuiCol_PlotHistogram]					= LERP_MAIN_COLOR(.75f);
+				colors[ImGuiCol_PlotHistogramHovered]			= LERP_MAIN_COLOR(1.f);
 				colors[ImGuiCol_TableHeaderBg]					= ImVec4(0.19f, 0.19f, 0.20f, 1.00f);
 				colors[ImGuiCol_TableBorderStrong]				= ImVec4(0.31f, 0.31f, 0.35f, 1.00f);   // Prefer using Alpha=1.0 here
 				colors[ImGuiCol_TableBorderLight]				= ImVec4(0.23f, 0.23f, 0.25f, 1.00f);   // Prefer using Alpha=1.0 here
@@ -166,8 +166,8 @@ namespace PFF::UI::THEME {
 				colors[ImGuiCol_DockingEmptyBg]					= LERP_GRAY(.2f);
 				colors[ImGuiCol_PlotLines]						= ImVec4(0.61f, 0.61f, 0.61f, 1.00f);
 				colors[ImGuiCol_PlotLinesHovered]				= ImVec4(1.00f, 0.43f, 0.35f, 1.00f);
-				colors[ImGuiCol_PlotHistogram]					= ImVec4(0.90f, 0.70f, 0.00f, 1.00f);
-				colors[ImGuiCol_PlotHistogramHovered]			= ImVec4(1.00f, 0.60f, 0.00f, 1.00f);
+				colors[ImGuiCol_PlotHistogram]					= LERP_MAIN_COLOR(.75f);
+				colors[ImGuiCol_PlotHistogramHovered]			= LERP_MAIN_COLOR(1.f);
 				colors[ImGuiCol_TableHeaderBg]					= ImVec4(0.19f, 0.19f, 0.20f, 1.00f);
 				colors[ImGuiCol_TableBorderStrong]				= ImVec4(0.31f, 0.31f, 0.35f, 1.00f);   // Prefer using Alpha=1.0 here
 				colors[ImGuiCol_TableBorderLight]				= ImVec4(0.23f, 0.23f, 0.25f, 1.00f);   // Prefer using Alpha=1.0 here
