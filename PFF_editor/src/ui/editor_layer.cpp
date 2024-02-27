@@ -63,15 +63,18 @@ namespace PFF {
 		ImGui::SetNextWindowViewport(viewport->ID);
 
 		ImGuiWindowFlags window_flags = ImGuiWindowFlags_NoDocking;
-		// ImGui::PushStyleVar(ImGuiStyleVar_WindowRounding, 0.0f);
-		// ImGui::PushStyleVar(ImGuiStyleVar_WindowBorderSize, 0.0f);
 		window_flags |= ImGuiWindowFlags_NoTitleBar | ImGuiWindowFlags_NoCollapse | ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoMove | ImGuiWindowFlags_NoScrollbar | ImGuiWindowFlags_NoScrollWithMouse;
-		window_flags |= ImGuiWindowFlags_NoBringToFrontOnFocus | ImGuiWindowFlags_NoNavFocus | ImGuiWindowFlags_NoDecoration | ImGuiWindowFlags_NoNav | ImGuiWindowFlags_NoDocking;
+		window_flags |= ImGuiWindowFlags_NoBringToFrontOnFocus | ImGuiWindowFlags_NoNavFocus | ImGuiWindowFlags_NoDecoration | ImGuiWindowFlags_NoNav;
 		// window_flags |= ImGuiWindowFlags_MenuBar;
 		
 		// ImGui::PushStyleColor(ImGuiCol_WindowBg, PFF_UI_ACTIVE_THEME->WindowBg);
-		if (ImGui::Begin("DockSpaceWindow", nullptr, window_flags)) {
+		ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, ImVec2(4, 4));
+		ImGui::PushStyleVar(ImGuiStyleVar_WindowRounding, 0.f);
+		ImGui::PushStyleVar(ImGuiStyleVar_WindowBorderSize, 0.f);
+		ImGui::Begin("appliaction_titlebar", nullptr, window_flags);
+		{
 
+			ImGui::PopStyleVar(3);
 
 			const auto window_sie_buf = application::get().get_window()->get_window_size_state();
 			const bool is_maximized = (window_sie_buf == window_size_state::fullscreen);
@@ -95,12 +98,11 @@ namespace PFF {
 
 			}
 
-
 			static f32 move_offset_y;
 			static f32 move_offset_x;
 			const f32 w = ImGui::GetContentRegionAvail().x;
 			const f32 button_width = 30.f;
-			const f32 button_area_width = (button_width * 3) + (window_padding.x * 4);
+			const f32 button_area_width = (button_width * 3) + (window_padding.x * 3);
 
 			// tilebar drag area
 			ImGui::SetCursorPos(ImVec2(window_padding.x, window_padding.y + titlebar_vertical_offset));
@@ -108,105 +110,193 @@ namespace PFF {
 			// debug Drab bounds
 			//fg_draw_list->AddRect(ImGui::GetCursorScreenPos(), ImVec2(w - button_area_width, titlebar_height), IM_COL32(222, 43, 43, 255));
 
-#if 1	// FOR DEBUG VIAUL
+#if 1	// FOR DEBUG VISAUL
 			ImGui::InvisibleButton("##titlebar_drag_zone", ImVec2(w - button_area_width, titlebar_height - window_padding.y * 2));
-#else
+#elif 0
 			ImGui::Button("##titlebar_drag_zone", ImVec2(w - button_area_width, titlebar_height - window_padding.y * 2));
 #endif // 1
 
 			application::get().set_titlebar_hovered(ImGui::IsItemHovered());
 			ImGui::SetItemAllowOverlap();
 
-			// ImGui::Spring();
+
 			ImGui::SetCursorPos(ImVec2(w - button_area_width + window_padding.x * 2, window_padding.y));
 			if (ImGui::Button("Min", ImVec2(30.f, 30.f)))
 				application::get().minimize_window();
-			// UI::DrawButtonImage(m_IconMinimize, buttonColN, buttonColH, buttonColP, UI::RectExpanded(UI::GetItemRect(), 0.0f, -padY));
 
 			ImGui::SetCursorPos(ImVec2(w - button_area_width + window_padding.x * 3 + button_width, window_padding.y));
 			if (ImGui::Button("Max", ImVec2(30.f, 30.f)))
 				application::get().maximize_window();
-			// UI::DrawButtonImage(m_IconMinimize, buttonColN, buttonColH, buttonColP, UI::RectExpanded(UI::GetItemRect(), 0.0f, -padY));
 
 			ImGui::SetCursorPos(ImVec2(w - button_area_width + window_padding.x * 4 + button_width * 2, window_padding.y));
 			if (ImGui::Button("Close", ImVec2(30.f, 30.f)))
 				application::get().close_application();
-			// UI::DrawButtonImage(m_IconMinimize, buttonColN, buttonColH, buttonColP, UI::RectExpanded(UI::GetItemRect(), 0.0f, -padY));
 
 
-			ImGui::SetCursorPos(ImVec2(window_padding.x + 120, window_padding.y));
-			if (ImGui::BeginMenuBar()) {
+			ImGuiWindowFlags menubar_flags = ImGuiWindowFlags_NoDocking;
+			menubar_flags |= ImGuiWindowFlags_NoTitleBar | ImGuiWindowFlags_NoCollapse | ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoMove | ImGuiWindowFlags_NoScrollbar | ImGuiWindowFlags_NoScrollWithMouse;
+			menubar_flags |= ImGuiWindowFlags_MenuBar | ImGuiWindowFlags_AlwaysAutoResize;
 
-				if (ImGui::BeginMenu("File")) {
+			ImGuiStyle* style = &ImGui::GetStyle();
+			ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, ImVec2(4, 4));
+			ImGui::PushStyleVar(ImGuiStyleVar_WindowRounding, 0.f);
+			ImGui::PushStyleVar(ImGuiStyleVar_WindowBorderSize, 0.f);
+			ImGui::PushStyleColor(ImGuiCol_MenuBarBg, style->Colors[ImGuiCol_WindowBg]);
 
-					ImGui::MenuItem("menu", NULL, false, false);
-					if (ImGui::MenuItem("New")) {}
-					if (ImGui::MenuItem("Open", "Ctrl+O")) {}
-					if (ImGui::BeginMenu("Open Recent")) {
-						ImGui::MenuItem("not implemented yet");
+			ImGui::SetNextWindowPos(ImVec2(viewport->Pos.x + 160, viewport->Pos.y + window_padding.y));
+			ImGui::SetNextWindowViewport(viewport->ID);
+			ImGui::Begin("Test", nullptr, menubar_flags);
+			{
+				ImGui::PopStyleColor();
+				ImGui::PopStyleVar(3);
+				if (ImGui::BeginMenuBar()) {
+
+					if (ImGui::BeginMenu("File")) {
+
+						ImGui::MenuItem("menu", NULL, false, false);
+						if (ImGui::MenuItem("New")) {}
+						if (ImGui::MenuItem("Open", "Ctrl+O")) {}
+						if (ImGui::BeginMenu("Open Recent")) {
+							ImGui::MenuItem("not implemented yet");
+							ImGui::EndMenu();
+						}
+						if (ImGui::MenuItem("Save", "Ctrl+S")) {}
+						if (ImGui::MenuItem("Save As..")) {}
+
+						ImGui::Separator();
+						if (ImGui::MenuItem("Options"), NULL, m_show_options)
+							m_show_options = true;
+						ImGui::Separator();
+						if (ImGui::MenuItem("Quit", "Alt+F4"))
+							application::get().close_application();
 						ImGui::EndMenu();
 					}
-					if (ImGui::MenuItem("Save", "Ctrl+S")) {}
-					if (ImGui::MenuItem("Save As..")) {}
-
-					ImGui::Separator();
-					if (ImGui::MenuItem("Options"), NULL, m_show_options)
-						m_show_options = true;
-					ImGui::Separator();
-					if (ImGui::MenuItem("Quit", "Alt+F4"))
-						application::get().close_application();
-					ImGui::EndMenu();
-				}
-				if (ImGui::BeginMenu("Edit")) {
-					if (ImGui::MenuItem("Undo", "CTRL+Z")) {}
-					if (ImGui::MenuItem("Redo", "CTRL+Y", false, false)) {}  // Disabled item
-					ImGui::Separator();
-					if (ImGui::MenuItem("Cut", "CTRL+X")) {}
-					if (ImGui::MenuItem("Copy", "CTRL+C")) {}
-					if (ImGui::MenuItem("Paste", "CTRL+V")) {}
-					ImGui::EndMenu();
-				}
-				if (ImGui::BeginMenu("settings")) {
-					if (ImGui::MenuItem("General Settings")) {}
-					if (ImGui::MenuItem("Editor Settings", false, false)) {}  // Disabled item
-					ImGui::Separator();
-					if (ImGui::BeginMenu("Color Theme")) {
-						ImGui::MenuItem("Dark/Green (default)");
-						ImGui::MenuItem("Dark/Blue");
+					if (ImGui::BeginMenu("Edit")) {
+						if (ImGui::MenuItem("Undo", "CTRL+Z")) {}
+						if (ImGui::MenuItem("Redo", "CTRL+Y", false, false)) {}  // Disabled item
+						ImGui::Separator();
+						if (ImGui::MenuItem("Cut", "CTRL+X")) {}
+						if (ImGui::MenuItem("Copy", "CTRL+C")) {}
+						if (ImGui::MenuItem("Paste", "CTRL+V")) {}
 						ImGui::EndMenu();
 					}
-					ImGui::EndMenu();
+					if (ImGui::BeginMenu("settings")) {
+						if (ImGui::MenuItem("General Settings")) {}
+						if (ImGui::MenuItem("Editor Settings")) {}
+						if (ImGui::BeginMenu("Color Theme")) {
+
+							ImGui::Text("Select Theme");
+
+							const char* items[] = { "Dark", "Light" };
+							static int item_current_idx = 0;
+							ImGui::PushStyleVar(ImGuiStyleVar_FramePadding, ImVec2(0, 0));
+							if (ImGui::BeginListBox("##Theme_selector", ImVec2(350, 2 * ImGui::GetTextLineHeightWithSpacing()))) {
+								for (int n = 0; n < ARRAY_SIZE(items); n++) {
+									const bool is_selected = (item_current_idx == n);
+									if (ImGui::Selectable(items[n], is_selected)) {
+
+										item_current_idx = n;
+										UI::THEME::UI_theme = static_cast<UI::THEME::theme_selection>(item_current_idx);
+										UI::THEME::update_UI_theme();
+									}
+								}
+								ImGui::EndListBox();
+							}
+							ImGui::PopStyleVar();
+
+							ImGui::Separator();
+							ImGui::Text("change main-color");
+
+							ImGuiColorEditFlags misc_flags = 0;
+							static bool backup_color_init = false;
+							static ImVec4 backup_color;
+							if (!backup_color_init) {
+
+								backup_color = UI::THEME::main_color;
+								ImGui::SetColorEditOptions(ImGuiColorEditFlags_Float | ImGuiColorEditFlags_HDR | ImGuiColorEditFlags_PickerHueWheel);
+								backup_color_init = true;
+							}
+
+
+							// Generate a default palette. The palette will persist and can be edited.
+							static bool saved_palette_init = true;
+							static ImVec4 saved_palette[32] = {};
+							if (saved_palette_init) {
+								for (int n = 0; n < ARRAY_SIZE(saved_palette); n++) {
+									ImGui::ColorConvertHSVtoRGB((n / 31.f), .8f, .8f,
+										saved_palette[n].x, saved_palette[n].y, saved_palette[n].z);
+									saved_palette[n].w = 1.0f; // Alpha
+								}
+								saved_palette_init = false;
+							}
+
+							if (ImGui::ColorPicker4("##picker", (float*)&UI::THEME::main_color, ImGuiColorEditFlags_NoSidePreview | ImGuiColorEditFlags_NoSmallPreview)) {
+								UI::THEME::update_UI_colors(UI::THEME::main_color);
+								UI::THEME::update_UI_theme();
+							}
+
+							ImGui::SameLine();
+
+							ImGui::BeginGroup(); // Lock X position
+
+								ImGui::BeginGroup(); // Lock X position
+									ImGui::Text("Current");
+									ImGui::ColorButton("##current", UI::THEME::main_color, ImGuiColorEditFlags_NoPicker | ImGuiColorEditFlags_AlphaPreviewHalf, ImVec2(60, 40));
+								ImGui::EndGroup();
+
+								ImGui::SameLine();
+
+								ImGui::BeginGroup(); // Lock X position
+									ImGui::Text("Previous");
+									if (ImGui::ColorButton("##previous", backup_color, ImGuiColorEditFlags_NoPicker | ImGuiColorEditFlags_AlphaPreviewHalf, ImVec2(60, 40)))
+										UI::THEME::update_UI_colors(backup_color);
+								ImGui::EndGroup();
+
+								ImGui::Separator();
+								ImGui::Text("Palette");
+								for (int n = 0; n < ARRAY_SIZE(saved_palette); n++) {
+									ImGui::PushID(n);
+									if ((n % 5) != 0)
+										ImGui::SameLine(0.0f, ImGui::GetStyle().ItemSpacing.y);
+
+									ImGuiColorEditFlags palette_button_flags = ImGuiColorEditFlags_NoAlpha | ImGuiColorEditFlags_NoPicker | ImGuiColorEditFlags_NoTooltip;
+									if (ImGui::ColorButton("##palette", saved_palette[n], palette_button_flags, ImVec2(21, 21))) {
+
+										UI::THEME::update_UI_colors(ImVec4(saved_palette[n].x, saved_palette[n].y, saved_palette[n].z, UI::THEME::main_color.w));
+										UI::THEME::update_UI_theme();
+									}
+
+									// Allow user to drop colors into each palette entry. Note that ColorButton() is already a
+									// drag source by default, unless specifying the ImGuiColorEditFlags_NoDragDrop flag.
+									if (ImGui::BeginDragDropTarget()) {
+										if (const ImGuiPayload* payload = ImGui::AcceptDragDropPayload(IMGUI_PAYLOAD_TYPE_COLOR_3F))
+											memcpy((float*)&saved_palette[n], payload->Data, sizeof(float) * 3);
+										if (const ImGuiPayload* payload = ImGui::AcceptDragDropPayload(IMGUI_PAYLOAD_TYPE_COLOR_4F))
+											memcpy((float*)&saved_palette[n], payload->Data, sizeof(float) * 4);
+										ImGui::EndDragDropTarget();
+									}
+
+									ImGui::PopID();
+								}
+							ImGui::EndGroup();
+							ImGui::EndMenu();
+						}
+						ImGui::EndMenu();
+					}
+					ImGui::EndMenuBar();
 				}
-				ImGui::EndMenuBar();
 			}
-
-			ImGui::SetCursorPos(ImVec2(window_padding.x + 120, window_padding.y + titlebar_height / 2));
-			if (ImGui::BeginTabBar("##tabs", ImGuiTabBarFlags_None)) {
-
-				f32 tab_width = 100.f;		// TODO: move into [default_tab_width] variable in config-file
-				ImGui::SetNextItemWidth(tab_width);
-				if (ImGui::BeginTabItem("Main Viewport")) {
-					ImGui::EndTabItem();
-				}
-
-				ImGui::SetNextItemWidth(tab_width);
-				if (ImGui::BeginTabItem("Mesh Editor")) {
-					ImGui::EndTabItem();
-				}
-
-				ImGui::SetNextItemWidth(tab_width);
-				if (ImGui::BeginTabItem("Material Editor")) {
-					ImGui::EndTabItem();
-				}
-				ImGui::EndTabBar();
-			}
+			ImGui::End();
 
 		}
 		ImGui::End();
 
 
+
+
+
+
 		/*
-		
 		ImGui::SetNextWindowViewport(viewport->ID);
 
 		ImGuiWindowFlags main_window_flags = 0;
@@ -223,48 +313,6 @@ namespace PFF {
 		}
 		ImGui::End();
 		*/
-
-
-
-		/*
-		static f32 move_offset_y;
-		static f32 move_offset_x;
-		const f32 w = ImGui::GetContentRegionAvail().x;
-		const f32 button_area_width = 94;
-
-		// tilebar drag area
-		ImGui::SetCursorPos(ImVec2(window_padding.x, window_padding.y + titlebar_vertical_offset));
-
-		// debug Drab bounds
-		//fg_draw_list->AddRect(ImGui::GetCursorScreenPos(), ImVec2(w - button_area_width, titlebar_height), IM_COL32(222, 43, 43, 255));
-
-		ImGui::InvisibleButton("##titlebar_drag_zone", ImVec2(w - button_area_width, titlebar_height));
-		application::get().set_titlebar_hovered(ImGui::IsItemHovered());
-		*/
-		
-		//const ImRect menuBarRect = { ImGui::GetCursorPos(), { ImGui::GetContentRegionAvail().x + ImGui::GetCursorScreenPos().x, ImGui::GetFrameHeightWithSpacing() } };
-
-		/*
-		ImGui::Spring();
-		UI::ShiftCursorY(8.0f);
-		{
-			const int iconWidth = m_IconMinimize->GetWidth();
-			const int iconHeight = m_IconMinimize->GetHeight();
-			const float padY = (buttonHeight - (float)iconHeight) / 2.0f;
-			if (ImGui::InvisibleButton("Minimize", ImVec2(buttonWidth, buttonHeight))) {
-				// TODO: move this stuff to a better place, like Window class
-				if (m_WindowHandle) {
-					Application::Get().QueueEvent([windowHandle = m_WindowHandle]() { glfwIconifyWindow(windowHandle); });
-				}
-			}
-
-			UI::DrawButtonImage(m_IconMinimize, buttonColN, buttonColH, buttonColP, UI::RectExpanded(UI::GetItemRect(), 0.0f, -padY));
-		}
-		*/
-
-		/*
-		*/
-
 	}
 
 	void editor_layer::window_general_debugger() {
@@ -272,8 +320,9 @@ namespace PFF {
 		if (!m_show_general_debugger)
 			return;
 		
-		ImGuiWindowFlags window_flags = ImGuiWindowFlags_NoTitleBar;
+		ImGuiWindowFlags window_flags = ImGuiWindowFlags_NoTitleBar ;
 		if (ImGui::Begin("Editor Debugger", &m_show_general_debugger, window_flags)) {
+			
 			if (ImGui::BeginTabBar("##tabs", ImGuiTabBarFlags_None)) {
 
 				f32 tab_width = 60.f;		// TODO: move into [default_tab_width] variable in config-file
@@ -326,6 +375,7 @@ namespace PFF {
 				}
 				ImGui::EndTabBar();
 			}
+
 		}
 		ImGui::End();
 	}

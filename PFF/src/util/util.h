@@ -49,36 +49,131 @@ namespace PFF {
 			return num;
 		}
 
-		template <typename T>
-		std::string num_to_str(const T& num) {
-			std::ostringstream oss;
-			oss << num;
-			return oss.str();
-		}
+        template <typename T>
+        std::string num_to_str(const T& num) {
+            std::ostringstream oss;
+            oss << num;
+            return oss.str();
+        }
 
-		template <typename T>
-		T convert_from_string(const std::string& str) {
-			std::istringstream iss(str);
-			T result;
-			iss >> result;
-			return result;
-		}
+        // @brief Converts a value of type T to its string representation.
+        // @brief Can handle conversion from various types such as: arithmetic types, boolean, glm::vec2, glm::vec3, glm::vec4, ImVec2, ImVec4, and glm::mat4
+        // @brief If the input value type is not supported, a DEBUG_BREAK() is triggered.
+        // 
+        // @param [value] The value to be converted.
+        // @tparam T The type of the value to be converted.
+        // @return A string representing the input value.
+        template<typename T>
+        constexpr void convert_to_string(std::string& string, T& value) {
 
-		template <typename VecType>
-		std::string vec_to_str(const VecType& vec, std::string_view name = "") {
-			std::stringstream ss;
-			ss << name << ": [" << std::fixed << std::setprecision(2);
+            if constexpr (std::is_arithmetic_v<T>)
+                string = std::to_string(value);
 
-			for (int i = 0; i < VecType::length(); ++i) {
-				ss << std::setw(9) << vec[i];
-				if (i < VecType::length() - 1) {
-					ss << ", ";
-				}
-			}
+            else if constexpr (std::is_same_v<T, bool>)
+                string = bool_to_str(value);
 
-			ss << "]";
-			return ss.str();
-		}
+            else if constexpr (std::is_convertible_v<T, std::string>)
+                string = value;
+
+            else if constexpr (std::is_same_v<T, glm::vec2> || std::is_same_v<T, ImVec2>) {
+
+                std::ostringstream oss;
+                oss << value.x << ' ' << value.y;
+                string = oss.str();
+            }
+
+            else if constexpr (std::is_same_v<T, glm::vec3>) {
+
+                std::ostringstream oss;
+                oss << value.x << ' ' << value.y << ' ' << value.z;
+                string = oss.str();
+            }
+
+            else if constexpr (std::is_same_v<T, glm::vec4> || std::is_same_v<T, ImVec4>) {
+
+                std::ostringstream oss;
+                oss << value.x << ' ' << value.y << ' ' << value.z << ' ' << value.w;
+                string = oss.str();
+            }
+
+            else if constexpr (std::is_enum_v<T>)
+                string = std::to_string(static_cast<std::underlying_type_t<T>>(value));
+
+            // Matrix of size 4         TODO: move into seperate template for all matrixes
+            else if constexpr (std::is_same_v<T, glm::mat4>) {
+
+                std::ostringstream oss;
+                for (int i = 0; i < 4; ++i) {
+                    for (int j = 0; j < 4; ++j) {
+                        oss << value[i][j];
+                        if (i != 3 || j != 3) // Not the last element
+                            oss << ' ';
+                    }
+                }
+                string = oss.str();
+            }
+
+            else
+                DEBUG_BREAK();		// Input value is not supported
+        }
+
+
+        // @brief Converts a string representation to a value of type T.
+        // @brief Can handle conversion into various types such as: arithmetic types, boolean, glm::vec2, glm::vec3, glm::vec4, ImVec2, ImVec4, and glm::mat4.
+        // @brief If the input value type is not supported, a DEBUG_BREAK() is triggered.
+        // 
+        // @param [string] The string to be converted.
+        // @param [value] Reference to the variable that will store the converted value.
+        // @tparam T The type of the value [string] should be converted to.
+        template<typename T>
+        constexpr void convert_from_string(const std::string& string, T& value) {
+
+            if constexpr (std::is_arithmetic_v<T>)
+                value = util::str_to_num<T>(string);
+
+            else if constexpr (std::is_same_v<T, bool>)
+                value = util::str_to_bool(string);
+
+            else if constexpr (std::is_convertible_v<T, std::string>)
+                value = string;
+
+            else if constexpr (std::is_same_v<T, glm::vec2> || std::is_same_v<T, ImVec2>) {
+
+                std::istringstream iss(string);
+                iss >> value.x >> value.y;
+            }
+
+            else if constexpr (std::is_same_v<T, glm::vec3>) {
+
+                std::istringstream iss(string);
+                iss >> value.x >> value.y >> value.z;
+            }
+
+            else if constexpr (std::is_same_v<T, glm::vec4> || std::is_same_v<T, ImVec4>) {
+
+                std::istringstream iss(string);
+                iss >> value.x >> value.y >> value.z >> value.w;
+            }
+
+            else if constexpr (std::is_enum_v<T>)
+                value = static_cast<T>(std::stoi(string));
+
+            // Matrix of size 4         TODO: move into seperate template for all matrixes
+            else if constexpr (std::is_same_v<T, glm::mat4>) {
+                std::istringstream iss(string);
+                for (int i = 0; i < 4; ++i) {
+                    for (int j = 0; j < 4; ++j) {
+                        iss >> value[i][j];
+                    }
+                }
+            }
+
+
+            else
+                DEBUG_BREAK();		// Input value is not supported
+        }
+
+
 
 		// from: https://stackoverflow.com/a/57595105
 		template <typename T, typename... Rest>

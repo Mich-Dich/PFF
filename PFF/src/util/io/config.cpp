@@ -151,7 +151,7 @@ namespace PFF {
                 }
 
                 outFile.close();
-                CORE_LOG(Trace, "File [" << file_path << "] updated with [" << std::setw(20) << std::left << section << " / " << std::setw(25) << std::left << key << "]: [" << value << "]");
+                // CORE_LOG(Trace, "File [" << file_path << "] updated with [" << std::setw(20) << std::left << section << " / " << std::setw(25) << std::left << key << "]: [" << value << "]");
             }
             return false; // Key not found
         }

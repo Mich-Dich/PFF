@@ -24,35 +24,6 @@ namespace PFF {
 		return map.find(key) != map.end();
 	}
 
-#define LOAD_IMGUI_COLOR_SETTING(key, value)			{ImVec4 buffer_vec = PFF_UI_ACTIVE_THEME->value;										\
-														config::load(config::file::editor, "color_scheme", #key, buffer_vec);					\
-														ImGui::PushStyleColor(ImGuiCol_##key, buffer_vec);}
-
-#define SAVE_IMGUI_COLOR_SETTING(key, value)			{ImVec4 buffer_vec = PFF_UI_ACTIVE_THEME->value;										\
-														config::save(config::file::editor, "color_scheme", #key, buffer_vec);					\
-														ImGui::PushStyleColor(ImGuiCol_##key, buffer_vec);}
-
-#ifdef PFF_DEBUG
-	#define	IMGUI_COLOR_CONFIG(key)						SAVE_IMGUI_COLOR_SETTING(key, key)
-#else
-	#define	IMGUI_COLOR_CONFIG(key)						LOAD_IMGUI_COLOR_SETTING(key, key)
-#endif // PFF_DEBUG
-
-
-#define LOAD_IMGUI_STYLE_SETTING(type, key, value)		{type buffer_vec = value;																\
-														config::load(config::file::editor, "ImGui_style", #key, buffer_vec);					\
-														ImGui::PushStyleVar(ImGuiStyleVar_##key, buffer_vec);}
-
-#define SAVE_IMGUI_STYLE_SETTING(type, key, value)		{type buffer_vec = value;																\
-														config::save(config::file::editor, "ImGui_style", #key, buffer_vec);					\
-														ImGui::PushStyleVar(ImGuiStyleVar_##key, buffer_vec);}
-
-#ifdef PFF_DEBUG
-#define	IMGUI_STYLE_CONFIG(type, key, value)			SAVE_IMGUI_STYLE_SETTING(type, key, value)
-#else
-#define	IMGUI_STYLE_CONFIG(type, key, value)			LOAD_IMGUI_STYLE_SETTING(type, key, value)
-#endif // PFF_DEBUG
-
 
 	static bool showdemo_window = true;
 	static bool show_fps = true;
@@ -103,6 +74,7 @@ namespace PFF {
 
 		application& app = application::get();
 		config::load(config::file::editor, "UI", "font_size", m_font_size);
+		config::load(config::file::editor, "UI", "big_font_size", m_big_font_size);
 
 		// Setup Platform/Renderer backends
 		ImGui_ImplGlfw_InitForVulkan(app.get_window()->get_window(), true);
@@ -139,84 +111,12 @@ namespace PFF {
 		ImGui_ImplVulkan_CreateFontsTexture(command_buffer);
 		m_renderer->get_device()->end_single_time_commands(command_buffer);
 		ImGui_ImplVulkan_DestroyFontUploadObjects();
-
-
 		CORE_ASSERT(vkDeviceWaitIdle(m_renderer->get_device()->get_device()) == VK_SUCCESS, "", "Failed wait idle");
 
-		// Modify the color of the progress bar
-		ImGui::PushStyleColor(ImGuiCol_PlotHistogram, ImVec4(0.05f, 0.5f, 0.05f, 1.0f));
-
-
-		// load [main_color] and then set theme
-		config::load(config::file::editor, "color_theme", "main_color", PFF::UI::THEME::main_color);
-		config::load(config::file::editor, "color_theme", "theme", PFF::UI::THEME::theme);
-		PFF::UI::THEME::theme_colors_dark(PFF::UI::THEME::theme);
-
-		/*
-		IMGUI_COLOR_CONFIG(Header);
-		IMGUI_COLOR_CONFIG(HeaderHovered);
-		IMGUI_COLOR_CONFIG(HeaderActive);
-		
-		IMGUI_COLOR_CONFIG(TabUnfocused);
-		IMGUI_COLOR_CONFIG(TabUnfocusedActive);
-		
-		IMGUI_COLOR_CONFIG(Button);
-		IMGUI_COLOR_CONFIG(ButtonHovered);
-		IMGUI_COLOR_CONFIG(ButtonActive);
-		
-		IMGUI_COLOR_CONFIG(Tab);
-		IMGUI_COLOR_CONFIG(TabHovered);
-		IMGUI_COLOR_CONFIG(TabActive);
-
-		IMGUI_COLOR_CONFIG(FrameBg);
-		IMGUI_COLOR_CONFIG(FrameBgHovered);
-		IMGUI_COLOR_CONFIG(FrameBgActive);
-		
-		IMGUI_COLOR_CONFIG(ResizeGrip);
-		IMGUI_COLOR_CONFIG(ResizeGripHovered);
-		IMGUI_COLOR_CONFIG(ResizeGripActive);
-
-		IMGUI_COLOR_CONFIG(Separator);
-		IMGUI_COLOR_CONFIG(SeparatorHovered);
-		IMGUI_COLOR_CONFIG(SeparatorActive);
-		
-		IMGUI_COLOR_CONFIG(TitleBg);
-		IMGUI_COLOR_CONFIG(TitleBgActive);
-		IMGUI_COLOR_CONFIG(TitleBgCollapsed);
-
-		IMGUI_COLOR_CONFIG(DockingPreview);
-		IMGUI_COLOR_CONFIG(MenuBarBg);
-		IMGUI_COLOR_CONFIG(CheckMark);
-
-		IMGUI_COLOR_CONFIG(SliderGrab);
-		IMGUI_COLOR_CONFIG(SliderGrabActive);
-		
-		IMGUI_COLOR_CONFIG(ScrollbarBg);
-		IMGUI_COLOR_CONFIG(ScrollbarGrab);
-		IMGUI_COLOR_CONFIG(ScrollbarGrabHovered);
-		IMGUI_COLOR_CONFIG(ScrollbarGrabActive);
-		
-		IMGUI_COLOR_CONFIG(TextSelectedBg);
-		IMGUI_COLOR_CONFIG(Border);
-		IMGUI_COLOR_CONFIG(WindowBg);
-		IMGUI_COLOR_CONFIG(ChildBg);
-		IMGUI_COLOR_CONFIG(PopupBg);
-
-		IMGUI_COLOR_CONFIG(Text);
-		*/
-
-		//ImGui::PushStyleVar(ImGuiStyleVar_FramePadding, ImVec2(2.0f, 1.0f
-		IMGUI_STYLE_CONFIG(f32, FrameRounding, 2);
-		IMGUI_STYLE_CONFIG(f32, WindowBorderSize, 0);
-		IMGUI_STYLE_CONFIG(ImVec2, ItemSpacing, ImVec2(4, 4));
-		IMGUI_STYLE_CONFIG(ImVec2, ItemInnerSpacing, ImVec2(4, 4));
-		IMGUI_STYLE_CONFIG(ImVec2, WindowPadding, ImVec2(4, 4));
-
-		// ItemInnerSpacing
-
-		ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, ImVec2(4, 4));
-
-		// MenuBarBg
+		// load [main_color] and [theme]
+		config::load(config::file::editor, "UI", "main_color", UI::THEME::main_color);
+		config::load(config::file::editor, "UI", "theme", UI::THEME::UI_theme);
+		UI::THEME::update_UI_theme();
 	}
 
 	void imgui_layer::on_detach() {
@@ -224,8 +124,10 @@ namespace PFF {
 		PFF_PROFILE_FUNCTION();
 
 		LOG(Info, "detach imgui layer");
-		
+		LOG(Trace, "bevor save: " << static_cast<int>(UI::THEME::UI_theme));
+	
 		config::save(config::file::editor, "UI", "font_size", m_font_size);
+		config::save(config::file::editor, "UI", "big_font_size", m_big_font_size);
 		ImGui_ImplVulkan_Shutdown();
 		ImGui_ImplGlfw_Shutdown();
 		ImGui::DestroyContext();
