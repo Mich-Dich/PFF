@@ -7,8 +7,17 @@ namespace PFF {
 
     class vk_device;
 
+    PFF_API_EDITOR const char* present_mode_to_str(const VkPresentModeKHR mode);
+
+    struct SwapChainSupportDetails {
+        VkSurfaceCapabilitiesKHR capabilities;
+        std::vector<VkSurfaceFormatKHR> formats;
+        std::vector<VkPresentModeKHR> presentModes;
+    };
+
     class vk_swapchain {
     public:
+
         static constexpr int MAX_FRAMES_IN_FLIGHT = 3;
 
         vk_swapchain(std::shared_ptr<vk_device>& device, VkExtent2D window_extent);
@@ -21,6 +30,7 @@ namespace PFF {
         VkResult acquireNextImage(u32* imageIndex);
         VkResult submitCommandBuffers(const VkCommandBuffer* buffers, u32* imageIndex);
 
+        FORCEINLINE std::vector<VkPresentModeKHR> get_suported_present_modes() const { return m_swapchain_support.presentModes; }
         FORCEINLINE VkFramebuffer getFrameBuffer(const int index)  const { return m_swap_chain_framebuffers[index]; }
         FORCEINLINE VkImageView get_image_view(int index)  const { return m_swap_chain_image_views[index]; }
         FORCEINLINE VkFormat get_swapchain_image_format()  const { return m_swap_chainImage_format; }
@@ -62,6 +72,7 @@ namespace PFF {
         std::shared_ptr<vk_device> m_device;
         VkExtent2D m_window_extent;
 
+        SwapChainSupportDetails m_swapchain_support{};
         VkSwapchainKHR m_swap_chain;
         std::shared_ptr<vk_swapchain> m_old_swapchain;
 

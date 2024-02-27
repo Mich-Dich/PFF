@@ -19,7 +19,7 @@ namespace PFF::UI::THEME {
 	};
 
 	static theme_selection UI_theme = theme_selection::default;
-	static ImVec4 main_color = {.5f,	.5f,	1.2f,	1.f };
+	static ImVec4 main_color = {.5f,	.0f,	.0f,	1.f };
 
 	void update_UI_colors(ImVec4 new_color) {
 

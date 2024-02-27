@@ -22,6 +22,7 @@ namespace PFF {
 		FORCEINLINE void set_world_Layer(world_layer* worldlayer) { m_world_Layer = worldlayer; }
 		FORCEINLINE bool is_frame_started() const { return m_is_frame_started; }
 		FORCEINLINE std::shared_ptr<vk_device> get_device() const { return m_device; }
+		FORCEINLINE std::vector<VkPresentModeKHR> get_swapchain_suported_present_modes() const { return m_swapchain->get_suported_present_modes(); }
 		FORCEINLINE VkRenderPass get_swapchain_render_pass() const { return m_swapchain->get_render_pass(); }
 		FORCEINLINE u32 get_swapchain_image_count() const { return m_swapchain->get_image_count(); }
 		FORCEINLINE float get_aspect_ratio() const { return m_swapchain->get_extentAspectRatio(); }

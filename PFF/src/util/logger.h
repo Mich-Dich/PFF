@@ -109,7 +109,7 @@ namespace APP_NAMESPACE {
 #define CORE_LOG_LEVEL_ENABLED 4
 
 //  ===================================================================================  Core Logger  ===================================================================================
-#ifdef PFF_INSIDE_ENGINE
+#if defined(PFF_INSIDE_ENGINE) || defined(PFF_INSIDE_EDITOR)
 
 	#define CORE_LOG_Fatal(message)				{ APP_NAMESPACE::Logger::LogMessage(APP_NAMESPACE::Logger::LogMsgSeverity::Fatal,__FILE__,__FUNCTION__,__LINE__).flush() << message; }
 	#define CORE_LOG_Error(message)				{ APP_NAMESPACE::Logger::LogMessage(APP_NAMESPACE::Logger::LogMsgSeverity::Error,__FILE__,__FUNCTION__,__LINE__).flush() << message; }

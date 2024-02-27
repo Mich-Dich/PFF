@@ -113,6 +113,9 @@
     <ClInclude Include="src\engine\render\frame_info.h">
       <Filter>engine\render</Filter>
     </ClInclude>
+    <ClInclude Include="src\engine\render\queue_families.h">
+      <Filter>engine\render</Filter>
+    </ClInclude>
     <ClInclude Include="src\engine\render\render_system.h">
       <Filter>engine\render</Filter>
     </ClInclude>

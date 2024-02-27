@@ -122,7 +122,7 @@ project "PFF"
 		optimize "speed"
         symbols "off"
 
-		project "PFF_editor"
+project "PFF_editor"
 		location "PFF_editor"
 		kind "ConsoleApp"
 		language "C++"

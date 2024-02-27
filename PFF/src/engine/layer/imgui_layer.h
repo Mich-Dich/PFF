@@ -47,8 +47,8 @@ namespace PFF {
 		u32 m_target_fps, m_current_fps;
 		bool m_limit_fps;
 		std::shared_ptr<renderer> m_renderer;
-		f32 m_font_size = 14.5f;
-		f32 m_big_font_size = 16.f;
+		f32 m_font_size = 15.f;
+		f32 m_big_font_size = 17.f;
 		std::unordered_map<std::string, ImFont*> m_fonts{};
 
 	};

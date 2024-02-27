@@ -3,6 +3,7 @@
 
 #include "vk_swapchain.h"
 #include "engine/render/vk_device.h"
+#include "engine/render/queue_families.h"
 
 namespace PFF {
 
@@ -126,6 +127,7 @@ namespace PFF {
         return result;
     }
 
+
     void vk_swapchain::init() {
 
         PFF_PROFILE_FUNCTION();
@@ -142,15 +144,14 @@ namespace PFF {
 
         PFF_PROFILE_FUNCTION();
 
-        SwapChainSupportDetails swapChainSupport = m_device->get_swap_chain_support();
+        m_swapchain_support = m_device->get_swap_chain_support();
+        VkSurfaceFormatKHR surfaceFormat = chooseSwapSurfaceFormat(m_swapchain_support.formats);
+        VkPresentModeKHR presentMode = chooseSwapPresentMode(m_swapchain_support.presentModes);
+        VkExtent2D extent = chooseSwapExtent(m_swapchain_support.capabilities);
 
-        VkSurfaceFormatKHR surfaceFormat = chooseSwapSurfaceFormat(swapChainSupport.formats);
-        VkPresentModeKHR presentMode = chooseSwapPresentMode(swapChainSupport.presentModes);
-        VkExtent2D extent = chooseSwapExtent(swapChainSupport.capabilities);
-
-        u32 imageCount = swapChainSupport.capabilities.minImageCount + 1;
-        if (swapChainSupport.capabilities.maxImageCount > 0 && imageCount > swapChainSupport.capabilities.maxImageCount)
-            imageCount = swapChainSupport.capabilities.maxImageCount;
+        u32 imageCount = m_swapchain_support.capabilities.minImageCount + 1;
+        if (m_swapchain_support.capabilities.maxImageCount > 0 && imageCount > m_swapchain_support.capabilities.maxImageCount)
+            imageCount = m_swapchain_support.capabilities.maxImageCount;
 
         VkSwapchainCreateInfoKHR createInfo = {};
         createInfo.sType = VK_STRUCTURE_TYPE_SWAPCHAIN_CREATE_INFO_KHR;
@@ -163,20 +164,20 @@ namespace PFF {
         createInfo.imageArrayLayers = 1;
         createInfo.imageUsage = VK_IMAGE_USAGE_COLOR_ATTACHMENT_BIT;
 
-        QueueFamilyIndices indices = m_device->find_physical_queue_families();
+        vk_util::QueueFamilyIndices indices = m_device->find_physical_queue_families();
 
         u32 queueFamilyIndices[] = { indices.graphicsFamily, indices.presentFamily };
-        if (indices.graphicsFamily != indices.presentFamily) {
+        if (indices.graphicsFamily != indices.presentFamily) {                          // graphics and present are diffrent queues
+
             createInfo.imageSharingMode = VK_SHARING_MODE_CONCURRENT;
             createInfo.queueFamilyIndexCount = 2;
             createInfo.pQueueFamilyIndices = queueFamilyIndices;
-        } else {
+        } else {                                                                        // graphics and present are the same queue
+            
             createInfo.imageSharingMode = VK_SHARING_MODE_EXCLUSIVE;
-            createInfo.queueFamilyIndexCount = 0;      // Optional
-            createInfo.pQueueFamilyIndices = nullptr;  // Optional
         }
 
-        createInfo.preTransform = swapChainSupport.capabilities.currentTransform;
+        createInfo.preTransform = m_swapchain_support.capabilities.currentTransform;
         createInfo.compositeAlpha = VK_COMPOSITE_ALPHA_OPAQUE_BIT_KHR;
         createInfo.presentMode = presentMode;
         createInfo.clipped = VK_TRUE;
@@ -202,6 +203,7 @@ namespace PFF {
 
         m_swap_chain_image_views.resize(m_swap_chain_images.size());
         for (size_t i = 0; i < m_swap_chain_images.size(); i++) {
+              
             VkImageViewCreateInfo viewInfo{};
             viewInfo.sType = VK_STRUCTURE_TYPE_IMAGE_VIEW_CREATE_INFO;
             viewInfo.image = m_swap_chain_images[i];
@@ -385,19 +387,51 @@ namespace PFF {
         PFF_PROFILE_FUNCTION();
 
         for (const auto& availablePresentMode : availablePresentModes) {
-            if (availablePresentMode == VK_PRESENT_MODE_MAILBOX_KHR)
+            if (availablePresentMode == VK_PRESENT_MODE_MAILBOX_KHR) {
+
+                LOG(Trace, "Present mode: Mailbox");
                 return availablePresentMode;
+            }
             
         }
+        
+        /*
+        auto mode = availablePresentModes[0];
 
-        //for (const auto& availablePresentMode : availablePresentModes) {
-        //    if (availablePresentMode == VK_PRESENT_MODE_IMMEDIATE_KHR) {
-        //        LOG(Trace, "Present mode: Immediate");
-        //        return availablePresentMode;
-        //    }
-        //}
+        switch (mode) {
+        case VK_PRESENT_MODE_IMMEDIATE_KHR:
+            CORE_LOG(Trace, "Present Modes: Immediat Mode")
+                break;
 
-        return VK_PRESENT_MODE_FIFO_KHR;
+        case VK_PRESENT_MODE_MAILBOX_KHR:
+            CORE_LOG(Trace, "Present Modes: Mailbox")
+                break;
+        case VK_PRESENT_MODE_FIFO_KHR:
+            CORE_LOG(Trace, "Present Modes: FiFo")
+                break;
+
+        case VK_PRESENT_MODE_FIFO_RELAXED_KHR:
+            CORE_LOG(Trace, "Present Modes: FiFo relaxed")
+                break;
+
+        case VK_PRESENT_MODE_SHARED_DEMAND_REFRESH_KHR:
+            CORE_LOG(Trace, "Present Modes: Shared Demand Refresh")
+                break;
+
+        case VK_PRESENT_MODE_SHARED_CONTINUOUS_REFRESH_KHR:
+            CORE_LOG(Trace, "Present Modes: Shared Continues Refresh")
+                break;
+
+        case VK_PRESENT_MODE_MAX_ENUM_KHR:
+            CORE_LOG(Trace, "Present Modes: MAX ENUM")
+                break;
+
+        default:
+            break;
+        }
+        */
+
+        return VK_PRESENT_MODE_FIFO_KHR;        // Must alwais be suported
     }
 
     VkExtent2D vk_swapchain::chooseSwapExtent(const VkSurfaceCapabilitiesKHR& capabilities) {
@@ -428,6 +462,32 @@ namespace PFF {
             { VK_FORMAT_D32_SFLOAT, VK_FORMAT_D32_SFLOAT_S8_UINT, VK_FORMAT_D24_UNORM_S8_UINT },
             VK_IMAGE_TILING_OPTIMAL,
             VK_FORMAT_FEATURE_DEPTH_STENCIL_ATTACHMENT_BIT);
+    }
+
+    const char* present_mode_to_str(const VkPresentModeKHR mode) {
+
+        switch (mode) {
+        case VK_PRESENT_MODE_IMMEDIATE_KHR:
+            return "Immediat";
+
+        case VK_PRESENT_MODE_MAILBOX_KHR:
+            return "Mailbox";
+
+        case VK_PRESENT_MODE_FIFO_KHR:
+            return "FiFo";
+
+        case VK_PRESENT_MODE_FIFO_RELAXED_KHR:
+            return "Fifo Relaxed";
+
+        case VK_PRESENT_MODE_SHARED_DEMAND_REFRESH_KHR:
+            return "Shared Demand Refresh";
+
+        case VK_PRESENT_MODE_SHARED_CONTINUOUS_REFRESH_KHR:
+            return "Shared Continues Refresh";
+
+        default:
+            return "Unknown";
+        }
     }
 
 }

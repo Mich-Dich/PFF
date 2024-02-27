@@ -13,10 +13,27 @@
 #include "engine/layer/imgui_layer.h"
 #include "engine/platform/pff_window.h"
 
+// TEST 
+#include "application.h"
+#include "engine/render/renderer.h"
+#include "engine/render/vk_swapchain.h"
+
 #include "editor_layer.h"
 
 
 namespace PFF {
+
+	static void help_marker(const char* desc) {
+
+		ImGui::TextDisabled(" ? ");
+		if (ImGui::IsItemHovered(ImGuiHoveredFlags_DelayShort)) {
+			ImGui::BeginTooltip();
+			ImGui::PushTextWrapPos(ImGui::GetFontSize() * 35.0f);
+			ImGui::TextUnformatted(desc);
+			ImGui::PopTextWrapPos();
+			ImGui::EndTooltip();
+		}
+	}
 
 	editor_layer::~editor_layer() {
 
@@ -24,6 +41,11 @@ namespace PFF {
 	}
 
 	void editor_layer::on_attach() {
+
+		m_swapchain_supported_presentmodes = application::get().get_renderer()->get_swapchain_suported_present_modes();
+		for (auto mode : m_swapchain_supported_presentmodes)
+			m_swapchain_supported_presentmodes_str.push_back(present_mode_to_str(mode));
+
 	}
 
 	void editor_layer::on_detach() {
@@ -48,6 +70,10 @@ namespace PFF {
 		window_world_settings();
 		window_content_browser_0();
 		window_content_browser_1();
+
+		window_graphics_engine_settings();
+		window_editor_settings();
+		window_general_settings();
 
 		ImGui::ShowDemoWindow();				// DEV-ONLY
 	}
@@ -133,9 +159,8 @@ namespace PFF {
 				application::get().close_application();
 
 
-			ImGuiWindowFlags menubar_flags = ImGuiWindowFlags_NoDocking;
-			menubar_flags |= ImGuiWindowFlags_NoTitleBar | ImGuiWindowFlags_NoCollapse | ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoMove | ImGuiWindowFlags_NoScrollbar | ImGuiWindowFlags_NoScrollWithMouse;
-			menubar_flags |= ImGuiWindowFlags_MenuBar | ImGuiWindowFlags_AlwaysAutoResize;
+			window_flags = ImGuiWindowFlags_NoTitleBar | ImGuiWindowFlags_NoCollapse | ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoMove | ImGuiWindowFlags_NoScrollbar | ImGuiWindowFlags_NoScrollWithMouse;
+			window_flags |= ImGuiWindowFlags_NoDocking | ImGuiWindowFlags_MenuBar | ImGuiWindowFlags_AlwaysAutoResize;
 
 			ImGuiStyle* style = &ImGui::GetStyle();
 			ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, ImVec2(4, 4));
@@ -143,9 +168,11 @@ namespace PFF {
 			ImGui::PushStyleVar(ImGuiStyleVar_WindowBorderSize, 0.f);
 			ImGui::PushStyleColor(ImGuiCol_MenuBarBg, style->Colors[ImGuiCol_WindowBg]);
 
+			// make new window with menubar because I dont know how to limit the extend of a MenuBar
+			// just ImGui::MenuBar() would bo over the entire width of [appliaction_titlebar]
 			ImGui::SetNextWindowPos(ImVec2(viewport->Pos.x + 160, viewport->Pos.y + window_padding.y));
 			ImGui::SetNextWindowViewport(viewport->ID);
-			ImGui::Begin("Test", nullptr, menubar_flags);
+			ImGui::Begin("application_title_menubar", nullptr, window_flags);
 			{
 				ImGui::PopStyleColor();
 				ImGui::PopStyleVar(3);
@@ -181,16 +208,26 @@ namespace PFF {
 						ImGui::EndMenu();
 					}
 					if (ImGui::BeginMenu("settings")) {
-						if (ImGui::MenuItem("General Settings")) {}
-						if (ImGui::MenuItem("Editor Settings")) {}
+						if (ImGui::MenuItem("General Settings"))
+							m_show_general_settings = true;
+
+						if (ImGui::MenuItem("Editor Settings"))
+							m_show_editor_settings = true;
+
+						if (ImGui::MenuItem("Graphics Engine Settings")) {
+
+							m_show_graphics_engine_settings = true;
+							LOG(Trace, "start GES window")
+						}
+
 						if (ImGui::BeginMenu("Color Theme")) {
 
 							ImGui::Text("Select Theme");
 
 							const char* items[] = { "Dark", "Light" };
 							static int item_current_idx = 0;
-							ImGui::PushStyleVar(ImGuiStyleVar_FramePadding, ImVec2(0, 0));
-							if (ImGui::BeginListBox("##Theme_selector", ImVec2(350, 2 * ImGui::GetTextLineHeightWithSpacing()))) {
+							ImGui::PushStyleVar(ImGuiStyleVar_ItemSpacing, ImVec2(10, 10));
+							if (ImGui::BeginListBox("##Theme_selector", ImVec2(350, (ARRAY_SIZE(items) * ImGui::GetTextLineHeightWithSpacing()) - 1) )) {
 								for (int n = 0; n < ARRAY_SIZE(items); n++) {
 									const bool is_selected = (item_current_idx == n);
 									if (ImGui::Selectable(items[n], is_selected)) {
@@ -220,10 +257,10 @@ namespace PFF {
 
 							// Generate a default palette. The palette will persist and can be edited.
 							static bool saved_palette_init = true;
-							static ImVec4 saved_palette[32] = {};
+							static ImVec4 saved_palette[35] = {};
 							if (saved_palette_init) {
 								for (int n = 0; n < ARRAY_SIZE(saved_palette); n++) {
-									ImGui::ColorConvertHSVtoRGB((n / 31.f), .8f, .8f,
+									ImGui::ColorConvertHSVtoRGB((n / 34.f), .8f, .8f,
 										saved_palette[n].x, saved_palette[n].y, saved_palette[n].z);
 									saved_palette[n].w = 1.0f; // Alpha
 								}
@@ -236,20 +273,21 @@ namespace PFF {
 							}
 
 							ImGui::SameLine();
+							ImGui::BeginGroup();
 
-							ImGui::BeginGroup(); // Lock X position
-
-								ImGui::BeginGroup(); // Lock X position
+								ImGui::BeginGroup();
 									ImGui::Text("Current");
 									ImGui::ColorButton("##current", UI::THEME::main_color, ImGuiColorEditFlags_NoPicker | ImGuiColorEditFlags_AlphaPreviewHalf, ImVec2(60, 40));
 								ImGui::EndGroup();
 
 								ImGui::SameLine();
-
-								ImGui::BeginGroup(); // Lock X position
+								ImGui::BeginGroup();
 									ImGui::Text("Previous");
-									if (ImGui::ColorButton("##previous", backup_color, ImGuiColorEditFlags_NoPicker | ImGuiColorEditFlags_AlphaPreviewHalf, ImVec2(60, 40)))
+									if (ImGui::ColorButton("##previous", backup_color, ImGuiColorEditFlags_NoPicker | ImGuiColorEditFlags_AlphaPreviewHalf, ImVec2(60, 40))) {
+
 										UI::THEME::update_UI_colors(backup_color);
+										UI::THEME::update_UI_theme();
+									}
 								ImGui::EndGroup();
 
 								ImGui::Separator();
@@ -447,6 +485,201 @@ namespace PFF {
 		if (ImGui::Begin("Content Browser 2", &m_show_content_browser_1, window_flags)) {}
 
 		ImGui::End();
+	}
+
+	void editor_layer::window_graphics_engine_settings() {
+
+		if (!m_show_graphics_engine_settings)
+			return;
+
+		ImVec2 topic_button_size = { 150, 30 };
+		f32 default_item_width = 250;
+
+		ImGuiViewport* viewport = ImGui::GetMainViewport();
+		ImGui::SetNextWindowPos(ImGui::GetMainViewport()->GetCenter(), ImGuiCond_Once, ImVec2(0.5f, 0.5f));
+		ImGui::SetNextWindowSize(ImVec2(viewport->Size.x - 500, viewport->Size.y - 300), ImGuiCond_Once);
+		ImGui::SetNextWindowViewport(viewport->ID);
+
+		ImGuiWindowFlags window_flags = ImGuiWindowFlags_MenuBar;
+		if (ImGui::Begin("Graphics Engine Settings", &m_show_graphics_engine_settings, window_flags)) {}
+
+		const char* items[] = { "General_settings", "General_settings 02", "General_settings 03" };
+		static u32 item_current_idx = 0;
+
+		ImGuiStyle* style = &ImGui::GetStyle();
+		ImGui::PushStyleVar(ImGuiStyleVar_ItemSpacing, ImVec2(10, 10));
+		ImGui::PushStyleColor(ImGuiCol_FrameBg, style->Colors[ImGuiCol_WindowBg]);
+		if (ImGui::BeginListBox("##Topic_selector", ImVec2(200, (ARRAY_SIZE(items) * ImGui::GetTextLineHeightWithSpacing()) - 1))) {
+
+			ImGui::PopStyleColor();
+			for (u32 n = 0; n < ARRAY_SIZE(items); n++) {
+
+				const bool is_selected = (item_current_idx == n);
+				if (ImGui::Selectable(items[n], is_selected))
+					item_current_idx = n;
+			}
+			ImGui::EndListBox();
+
+		}
+		ImGui::PopStyleVar();
+
+		ImGui::SameLine();
+		ImGui::SeparatorEx(ImGuiSeparatorFlags_Vertical);
+		ImGui::SameLine();
+		ImGui::Spacing();
+		ImGui::SameLine();
+
+		if (item_current_idx == 0) {		// [General_settings] in array [items]
+
+			ImGui::BeginGroup();
+			static u32 present_mode_selected = 0;
+			if (ImGui::CollapsingHeader("Swapchain##GraphicsSettings", ImGuiTreeNodeFlags_DefaultOpen)) {
+
+				static int selected = 1;
+
+				if(ImGui::Button("?##Present_mode_popup"))
+					ImGui::OpenPopup("present_mode_explanations");
+
+				ImGui::SameLine();
+				ImGui::SetNextItemWidth(default_item_width);
+				if (ImGui::Combo("##Present_mode_selector", &selected, m_swapchain_supported_presentmodes_str.data(), m_swapchain_supported_presentmodes_str.size())) {
+
+					LOG(Fatal, "NOT IMPLEMENTED YET")
+				}
+				ImGui::SameLine();
+				ImGui::Text("Choose swapchain present mode of the [swapchain] for optimal performance and visual quality");
+
+
+			}
+
+			if (ImGui::BeginPopup("present_mode_explanations")) {
+
+				ImGui::Text("Explenations for possible present modes:");
+				ImGui::Separator();
+
+				ImGui::Text("Immediate");
+				ImGui::Indent(10.f);
+				ImGui::Text("The presentation engine does not wait for a vertical blanking period to update the current image,");
+				ImGui::Text("meaning this mode may result in visible tearing. No internal queuing of presentation requests is needed,");
+				ImGui::Text("as the requests are applied immediately.");
+				ImGui::Indent(-10.f);
+
+				ImGui::Text("Mailbox");
+				ImGui::Indent(10.f);
+				ImGui::Text("The presentation engine waits for the next vertical blanking period to update the current image,");
+				ImGui::Text("preventing tearing. It maintains a single-entry queue for pending presentation requests.");
+				ImGui::Text("If the queue is full, new requests replace existing ones, ensuring timely processing during each vertical blanking period.");
+				ImGui::Indent(-10.f);
+
+				ImGui::Text("FiFo (First-In, First-Out)");
+				ImGui::Indent(10.f);
+				ImGui::Text("Similar to Mailbox, the presentation engine waits for the next vertical blanking period to update the current image,");
+				ImGui::Text("avoiding tearing. Pending presentation requests are queued, with new requests added to the end and processed in order");
+				ImGui::Text("during each non-empty blanking period.");
+				ImGui::Indent(-10.f);
+
+				ImGui::Text("Relaxed FiFo");
+				ImGui::Indent(10.f);
+				ImGui::Text("The presentation engine typically waits for the next vertical blanking period to update the current image.");
+				ImGui::Text("However, if a blanking period has passed since the last update, it may update immediately, potentially resulting in tearing.");
+				ImGui::Text("It uses a queue for pending presentation requests, ensuring timely processing.");
+				ImGui::Indent(-10.f);
+
+				ImGui::Text("Shared Demand Refresh");
+				ImGui::Indent(10.f);
+				ImGui::Text("The presentation engine and application share access to a single image.");
+				ImGui::Text("The engine updates the image only after receiving a presentation request,");
+				ImGui::Text("while the application must request updates as needed. Tearing may occur since updates can happen at any point.");
+				ImGui::Indent(-10.f);
+
+				ImGui::Text("Shared Continuous Refresh");
+				ImGui::Indent(10.f);
+				ImGui::Text("Both the presentation engine and application have access to a shared image.");
+				ImGui::Text("The engine periodically updates the image on its regular refresh cycle without needing additional requests from the application.");
+				ImGui::Text("However, if rendering is not timed correctly, tearing may occur.");
+				ImGui::Indent(-10.f);
+
+				ImGui::EndPopup();
+			}
+
+
+			ImGui::EndGroup();
+		}
+
+		if (item_current_idx == 0) {		// [General_settings] in array [items]
+
+		}
+
+		/*
+		
+		"immediate"
+		;
+		
+
+		"mailbox"
+		
+		"the presentation engine waits for the next vertical blanking period to update the current image. "
+		"Tearing cannot be observed. An internal single-entry queue is used to hold pending presentation requests. "
+		"If the queue is full when a new presentation request is received, the new request replaces the existing entry, "
+		"and any images associated with the prior entry become available for re-use by the application. One request is "
+		"removed from the queue and processed during each vertical blanking period in which the queue is non-empty.";
+		
+
+		"FiFo"
+
+		"the presentation engine waits for the next vertical blanking" 
+		"period to update the current image. Tearing cannot be observed. An internal queue is used to"
+		"hold pending presentation requests. New requests are appended to the end of the queue, and one" 
+		"request is removed from the beginning of the queue and processed during each vertical blanking" 
+		"period in which the queue is non-empty. This is the only value of presentMode that is required" 
+		"to be supported."
+
+
+		"Relaxed FiFo"
+
+		"the presentation engine generally waits for the next vertical "
+		"blanking period to update the current image. If a vertical blanking period has already passed "
+		"since the last update of the current image then the presentation engine does not wait for "
+		"another vertical blanking period for the update, meaning this mode may result in visible tearing "
+		"in this case. This mode is useful for reducing visual stutter with an application that will "
+		"mostly present a new image before the next vertical blanking period, but may occasionally be "
+		"late, and present a new image just after the next vertical blanking period. An internal queue "
+		"is used to hold pending presentation requests. New requests are appended to the end of the queue, "
+		"and one request is removed from the beginning of the queue and processed during or after each "
+		"vertical blanking period in which the queue is non-empty"
+		
+
+		"Shared Demand Refresh"
+
+		"the presentation engine and application have "
+		"concurrent access to a single image, which is referred to as a shared presentable image. "
+		"The presentation engine is only required to update the current image after a new presentation "
+		"request is received. Therefore the application must make a presentation request whenever an "
+		"update is required. However, the presentation engine may update the current image at any point, "
+		"meaning this mode may result in visible tearing."
+
+
+		"shared continuous refresh"
+		
+		"The presentation engine and application have "
+		"concurrent access to a single image, which is referred to as a shared presentable image. The "
+		"presentation engine periodically updates the current image on its regular refresh cycle. The "
+		"application is only required to make one initial presentation request, after which the "
+		"presentation engine must update the current image without any need for further presentation "
+		"requests. The application can indicate the image contents have been updated by making a "
+		"presentation request, but this does not guarantee the timing of when it will be updated. "
+		"This mode may result in visible tearing if rendering to the image is not timed correctly."
+		
+		*/
+		
+		
+		ImGui::End();
+	}
+
+	void editor_layer::window_editor_settings() {
+	}
+
+	void editor_layer::window_general_settings() {
 	}
 
 

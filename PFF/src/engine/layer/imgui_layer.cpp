@@ -34,6 +34,8 @@ namespace PFF {
 		PFF_PROFILE_FUNCTION();
 
 		LOG(Info, "Init imgui layer");
+		config::load(config::file::editor, "UI", "main_color", UI::THEME::main_color);
+		config::load(config::file::editor, "UI", "theme", UI::THEME::UI_theme);
 	}
 
 	imgui_layer::~imgui_layer() {
@@ -113,9 +115,6 @@ namespace PFF {
 		ImGui_ImplVulkan_DestroyFontUploadObjects();
 		CORE_ASSERT(vkDeviceWaitIdle(m_renderer->get_device()->get_device()) == VK_SUCCESS, "", "Failed wait idle");
 
-		// load [main_color] and [theme]
-		config::load(config::file::editor, "UI", "main_color", UI::THEME::main_color);
-		config::load(config::file::editor, "UI", "theme", UI::THEME::UI_theme);
 		UI::THEME::update_UI_theme();
 	}
 

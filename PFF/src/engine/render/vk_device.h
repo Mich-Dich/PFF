@@ -1,30 +1,17 @@
 #pragma once
 
 #include <vulkan/vulkan.h>
-
+#include "engine/render/queue_families.h"
+#include "engine/render/vk_swapchain.h"
 
 namespace PFF {
-
 
     static const char* vk_debug_message_type_to_string(VkDebugUtilsMessageTypeFlagsEXT flag);
     static const char* physical_device_type_to_string(VkPhysicalDeviceType type);
 
-
     class pff_window;
+    // struct SwapChainSupportDetails;
 
-    struct SwapChainSupportDetails {
-        VkSurfaceCapabilitiesKHR capabilities;
-        std::vector<VkSurfaceFormatKHR> formats;
-        std::vector<VkPresentModeKHR> presentModes;
-    };
-
-    struct QueueFamilyIndices {
-        u32 graphicsFamily;
-        u32 presentFamily;
-        bool graphicsFamilyHasValue = false;
-        bool presentFamilyHasValue = false;
-        bool isComplete() { return graphicsFamilyHasValue && presentFamilyHasValue; }
-    };
 
     class vk_device {
 
@@ -55,7 +42,7 @@ namespace PFF {
 
 
         SwapChainSupportDetails get_swap_chain_support() { return query_swapchain_support(m_physical_device); }
-        QueueFamilyIndices find_physical_queue_families() { return find_queue_families(m_physical_device); }
+        vk_util::QueueFamilyIndices find_physical_queue_families() { return find_queue_families(m_physical_device); }
         uint32_t find_memory_type(uint32_t typeFilter, VkMemoryPropertyFlags properties);
         VkFormat find_supported_format(const std::vector<VkFormat>& candidates, VkImageTiling tiling, VkFormatFeatureFlags features);
 
@@ -92,12 +79,12 @@ namespace PFF {
         // @return A vector containing the names fo the required extensions
         std::vector<const char*> get_required_extensions();
         bool check_validation_layer_support();
-        QueueFamilyIndices find_queue_families(VkPhysicalDevice get_device);
+        vk_util::QueueFamilyIndices find_queue_families(VkPhysicalDevice get_device);
         void has_required_Instance_extensions(const std::vector<const char*>& extentions);
         bool check_device_extension_support(VkPhysicalDevice get_device);
         SwapChainSupportDetails query_swapchain_support(VkPhysicalDevice get_device);
 
-        QueueFamilyIndices m_queue_family_indices;
+        vk_util::QueueFamilyIndices m_queue_family_indices;
         VkInstance m_VkInstance;
         VkDebugUtilsMessengerEXT m_debug_messanger;
         VkPhysicalDevice m_physical_device = VK_NULL_HANDLE;

@@ -141,6 +141,7 @@ IF EXIST ..\bin\Release-windows-x86_64\PFF\PFF.dll\ (xcopy /Q /E /Y /I ..\bin\Re
     <ClInclude Include="src\engine\map\game_map.h" />
     <ClInclude Include="src\engine\platform\pff_window.h" />
     <ClInclude Include="src\engine\render\frame_info.h" />
+    <ClInclude Include="src\engine\render\queue_families.h" />
     <ClInclude Include="src\engine\render\render_system.h" />
     <ClInclude Include="src\engine\render\renderer.h" />
     <ClInclude Include="src\engine\render\vk_buffer.h" />

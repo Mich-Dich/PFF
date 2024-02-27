@@ -44,7 +44,7 @@ namespace PFF {
 		s_instance = this;
 
 		config::init();
-		
+
 		// init FPS system
 		fps_timer = timer();
 		fps_timer.set_fps_settings(m_target_fps);

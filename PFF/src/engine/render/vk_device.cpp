@@ -1,11 +1,10 @@
 
 #include "util/pffpch.h"
 
-#include "engine/platform/pff_window.h"
-
-//#define GLFW_INCLUDE_VULKAN
 #include <vulkan/vulkan.h>
 #include <GLFW/glfw3.h>
+
+#include "engine/platform/pff_window.h"
 
 #include "vk_device.h"
 
@@ -57,7 +56,8 @@ namespace PFF {
 
         PFF_PROFILE_FUNCTION();
 
-        if (!c_enable_validation_layers) return;
+        if (!c_enable_validation_layers) 
+            return;
 
         VkDebugUtilsMessengerCreateInfoEXT createInfo{};
         populate_debug_messenger_CI(createInfo);
@@ -199,6 +199,9 @@ namespace PFF {
             << "." << VK_API_VERSION_MINOR(version) 
             << "." << VK_API_VERSION_PATCH(version));
 
+        // ============= TEST ==============================
+        version = VK_MAKE_API_VERSION(0, 1, 2, 0);
+        // ============= TEST ==============================
 
         VkApplicationInfo appInfo = {};
         appInfo.sType = VK_STRUCTURE_TYPE_APPLICATION_INFO;
@@ -288,44 +291,44 @@ namespace PFF {
 
         PFF_PROFILE_FUNCTION();
 
-        QueueFamilyIndices indices = find_queue_families(m_physical_device);
+        vk_util::QueueFamilyIndices indices = find_queue_families(m_physical_device);
 
-        std::vector<VkDeviceQueueCreateInfo> queueCreateInfos;
-        std::set<u32> uniqueQueueFamilies = { indices.graphicsFamily, indices.presentFamily };
+        std::vector<VkDeviceQueueCreateInfo> device_queues_CI;
+        std::set<u32> unique_queue_families = { indices.graphicsFamily, indices.presentFamily };
 
-        float queuePriority = 1.0f;
-        for (u32 queueFamily : uniqueQueueFamilies) {
-            VkDeviceQueueCreateInfo queueCreateInfo = {};
-            queueCreateInfo.sType = VK_STRUCTURE_TYPE_DEVICE_QUEUE_CREATE_INFO;
-            queueCreateInfo.queueFamilyIndex = queueFamily;
-            queueCreateInfo.queueCount = 1;
-            queueCreateInfo.pQueuePriorities = &queuePriority;
-            queueCreateInfos.push_back(queueCreateInfo);
+        float queue_priority = 1.0f;
+        for (u32 queue_family : unique_queue_families) {
+            VkDeviceQueueCreateInfo queue_CI = {};
+            queue_CI.sType = VK_STRUCTURE_TYPE_DEVICE_QUEUE_CREATE_INFO;
+            queue_CI.queueFamilyIndex = queue_family;
+            queue_CI.queueCount = 1;
+            queue_CI.pQueuePriorities = &queue_priority;
+            device_queues_CI.push_back(queue_CI);
         }
 
         VkPhysicalDeviceFeatures deviceFeatures = {};
         deviceFeatures.samplerAnisotropy = VK_TRUE;
 
-        VkDeviceCreateInfo createInfo = {};
-        createInfo.sType = VK_STRUCTURE_TYPE_DEVICE_CREATE_INFO;
+        VkDeviceCreateInfo device_CI = {};
+        device_CI.sType = VK_STRUCTURE_TYPE_DEVICE_CREATE_INFO;
 
-        createInfo.queueCreateInfoCount = static_cast<u32>(queueCreateInfos.size());
-        createInfo.pQueueCreateInfos = queueCreateInfos.data();
+        device_CI.queueCreateInfoCount = static_cast<u32>(device_queues_CI.size());
+        device_CI.pQueueCreateInfos = device_queues_CI.data();
 
-        createInfo.pEnabledFeatures = &deviceFeatures;
-        createInfo.enabledExtensionCount = static_cast<u32>(m_device_extensions.size());
-        createInfo.ppEnabledExtensionNames = m_device_extensions.data();
+        device_CI.pEnabledFeatures = &deviceFeatures;
+        device_CI.enabledExtensionCount = static_cast<u32>(m_device_extensions.size());
+        device_CI.ppEnabledExtensionNames = m_device_extensions.data();
 
         // might not really be necessary anymore because device specific validation layers
         // have been deprecated
         if (c_enable_validation_layers) {
-            createInfo.enabledLayerCount = static_cast<u32>(m_validation_layers.size());
-            createInfo.ppEnabledLayerNames = m_validation_layers.data();
-        } else {
-            createInfo.enabledLayerCount = 0;
-        }
 
-        CORE_ASSERT(vkCreateDevice(m_physical_device, &createInfo, nullptr, &m_device) == VK_SUCCESS, "", "failed to create logical get_device!");
+            device_CI.enabledLayerCount = static_cast<u32>(m_validation_layers.size());
+            device_CI.ppEnabledLayerNames = m_validation_layers.data();
+        } else 
+            device_CI.enabledLayerCount = 0;
+        
+        CORE_ASSERT(vkCreateDevice(m_physical_device, &device_CI, nullptr, &m_device) == VK_SUCCESS, "", "failed to create logical get_device!");
 
         vkGetDeviceQueue(m_device, indices.graphicsFamily, 0, &m_graphics_queue);
         vkGetDeviceQueue(m_device, indices.presentFamily, 0, &m_present_queue);
@@ -336,7 +339,7 @@ namespace PFF {
 
         PFF_PROFILE_FUNCTION();
 
-        QueueFamilyIndices queueFamilyIndices = find_physical_queue_families();
+        vk_util::QueueFamilyIndices queueFamilyIndices = find_physical_queue_families();
 
         VkCommandPoolCreateInfo poolInfo = {};
         poolInfo.sType = VK_STRUCTURE_TYPE_COMMAND_POOL_CREATE_INFO;
@@ -354,12 +357,11 @@ namespace PFF {
 
         PFF_PROFILE_FUNCTION();
 
-        QueueFamilyIndices indices = find_queue_families(device);
-
+        vk_util::QueueFamilyIndices indices = find_queue_families(device);
         bool extensionsSupported = check_device_extension_support(device);
-
         bool swapChainAdequate = false;
         if (extensionsSupported) {
+
             SwapChainSupportDetails swapChainSupport = query_swapchain_support(device);
             swapChainAdequate = !swapChainSupport.formats.empty() && !swapChainSupport.presentModes.empty() && swapChainSupport.capabilities.minImageCount >= 2;
         }
@@ -516,7 +518,7 @@ namespace PFF {
         return requiredExtensions.empty();
     }
 
-    QueueFamilyIndices vk_device::find_queue_families(VkPhysicalDevice get_device) {
+    vk_util::QueueFamilyIndices vk_device::find_queue_families(VkPhysicalDevice get_device) {
 
         PFF_PROFILE_FUNCTION();
 
@@ -540,9 +542,9 @@ namespace PFF {
                 m_queue_family_indices.presentFamily = i;
                 m_queue_family_indices.presentFamilyHasValue = true;
             }
-            if (m_queue_family_indices.isComplete()) {
+
+            if (m_queue_family_indices.isComplete())
                 break;
-            }
 
             i++;
         }
@@ -557,24 +559,20 @@ namespace PFF {
         SwapChainSupportDetails details;
         vkGetPhysicalDeviceSurfaceCapabilitiesKHR(get_device, m_surface, &details.capabilities);
 
-        u32 formatCount;
-        vkGetPhysicalDeviceSurfaceFormatsKHR(get_device, m_surface, &formatCount, nullptr);
+        u32 format_count;
+        vkGetPhysicalDeviceSurfaceFormatsKHR(get_device, m_surface, &format_count, nullptr);
 
-        if (formatCount != 0) {
-            details.formats.resize(formatCount);
-            vkGetPhysicalDeviceSurfaceFormatsKHR(get_device, m_surface, &formatCount, details.formats.data());
+        if (format_count != 0) {
+            details.formats.resize(format_count);
+            vkGetPhysicalDeviceSurfaceFormatsKHR(get_device, m_surface, &format_count, details.formats.data());
         }
 
-        u32 presentModeCount;
-        vkGetPhysicalDeviceSurfacePresentModesKHR(get_device, m_surface, &presentModeCount, nullptr);
+        u32 present_mode_count;
+        vkGetPhysicalDeviceSurfacePresentModesKHR(get_device, m_surface, &present_mode_count, nullptr);
 
-        if (presentModeCount != 0) {
-            details.presentModes.resize(presentModeCount);
-            vkGetPhysicalDeviceSurfacePresentModesKHR(
-                get_device,
-                m_surface,
-                &presentModeCount,
-                details.presentModes.data());
+        if (present_mode_count != 0) {
+            details.presentModes.resize(present_mode_count);
+            vkGetPhysicalDeviceSurfacePresentModesKHR(get_device, m_surface, &present_mode_count, details.presentModes.data());
         }
         return details;
     }
