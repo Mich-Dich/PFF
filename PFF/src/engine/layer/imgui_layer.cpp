@@ -18,6 +18,9 @@
 
 namespace PFF {
 
+	static ImGui_ImplVulkanH_Window g_MainWindowData;
+
+
 	template<typename key_type, typename value_type>
 	bool contains(const std::unordered_map<key_type, value_type>& map, const key_type& key) {
 
@@ -49,27 +52,35 @@ namespace PFF {
 	void imgui_layer::on_attach() {
 
 		PFF_PROFILE_FUNCTION();
-
 		LOG(Info, "attach imgui layer");
+
+		/*
+		// Create Framebuffers
+		int width, height;
+		application::get().get_window()->get_framebuffer_size(&width, &height);
+		ImGui_ImplVulkanH_Window* window_data = &g_MainWindowData;
+		Setup_vulkan_window(window_data, width, height);
+		*/
 
 		// Setup Dear ImGui context
 		IMGUI_CHECKVERSION();
 		m_context = ImGui::CreateContext();
 		ImGuiIO& io = ImGui::GetIO();
-		io.ConfigFlags |= ImGuiConfigFlags_NavEnableKeyboard;     // Enable Keyboard Controls
-		io.ConfigFlags |= ImGuiConfigFlags_NavEnableGamepad;      // Enable Gamepad Controls
-		io.ConfigFlags |= ImGuiConfigFlags_DockingEnable;         // IF using Docking Branch
-		io.ConfigFlags |= ImGuiConfigFlags_ViewportsEnable;
+		io.ConfigFlags |= ImGuiConfigFlags_NavEnableKeyboard;		// Enable Keyboard Controls
+		io.ConfigFlags |= ImGuiConfigFlags_NavEnableGamepad;		// Enable Gamepad Controls
+		io.ConfigFlags |= ImGuiConfigFlags_DockingEnable;           // Enable Docking
+		io.ConfigFlags |= ImGuiConfigFlags_ViewportsEnable;         // Enable Multi-Viewport / Platform Windows
 		//io.ConfigFlags |= ImGuiConfigFlags_ViewportsNoTaskBarIcons;
 		//io.ConfigFlags |= ImGuiConfigFlags_ViewportsNoMerge;
 		io.IniFilename = "./config/imgui.ini";
 		ImGui::SetCurrentContext(m_context);
 
-		ImGui::StyleColorsDark();
+		// ImGui::StyleColorsDark();
 
 		// When viewports are enabled we tweak WindowRounding/WindowBg so platform windows can look identical to regular ones.
 		ImGuiStyle& style = ImGui::GetStyle();
 		if (io.ConfigFlags & ImGuiConfigFlags_ViewportsEnable) {
+
 			style.WindowRounding = 0.0f;
 			style.Colors[ImGuiCol_WindowBg].w = 1.0f;
 		}
@@ -96,9 +107,7 @@ namespace PFF {
 		//init_info.CheckVkResultFn = check_vk_result;
 		CORE_ASSERT(ImGui_ImplVulkan_Init(&init_info, m_renderer->get_swapchain_render_pass()), "", "");
 
-		// Use any command queue
-		VkCommandBuffer command_buffer = m_renderer->get_device()->begin_single_time_commands();
-		
+		// Load fonts		
 		ImFontConfig fontConfig;
 		fontConfig.FontDataOwnedByAtlas = false;
 		m_fonts["default"] = io.Fonts->AddFontFromFileTTF("../PFF/assets/fonts/Open_Sans/static/OpenSans-Regular.ttf", m_font_size);;
@@ -110,6 +119,8 @@ namespace PFF {
 		m_fonts["italic_big"] = io.Fonts->AddFontFromFileTTF("../PFF/assets/fonts/Open_Sans/static/OpenSans-Italic.ttf", m_big_font_size);
 		io.FontDefault = m_fonts["default"];
 
+		// Use any command queue
+		VkCommandBuffer command_buffer = m_renderer->get_device()->begin_single_time_commands();
 		ImGui_ImplVulkan_CreateFontsTexture(command_buffer);
 		m_renderer->get_device()->end_single_time_commands(command_buffer);
 		ImGui_ImplVulkan_DestroyFontUploadObjects();
@@ -322,6 +333,37 @@ namespace PFF {
 		ImGui::ProgressBar(percent, textSize, "");
 		ImGui::SetCursorScreenPos(curser_pos);
 		ImGui::Text("%s", text);
+	}
+	
+	// All the ImGui_ImplVulkanH_XXX structures/functions are optional helpers used by the demo.
+	// Your real engine/app may not use them.
+	static void Setup_vulkan_window(ImGui_ImplVulkanH_Window* vulkan_window, int width, int height) {
+
+		auto vk_device = application::get().get_renderer()->get_device();
+		
+		vulkan_window->Surface = vk_device->get_surface();
+		VkPhysicalDevice physical_device = vk_device->get_physical_device();
+		VkDevice device = vk_device->get_device();
+
+		// Select Surface Format
+		const VkFormat requestSurfaceImageFormat[] = { VK_FORMAT_B8G8R8A8_UNORM, VK_FORMAT_R8G8B8A8_UNORM, VK_FORMAT_B8G8R8_UNORM, VK_FORMAT_R8G8B8_UNORM };
+		const VkColorSpaceKHR requestSurfaceColorSpace = VK_COLORSPACE_SRGB_NONLINEAR_KHR;
+		vulkan_window->SurfaceFormat = ImGui_ImplVulkanH_SelectSurfaceFormat(physical_device, vulkan_window->Surface, requestSurfaceImageFormat, (size_t)IM_ARRAYSIZE(requestSurfaceImageFormat), requestSurfaceColorSpace);
+
+		// Select Present Mode
+#ifdef IMGUI_UNLIMITED_FRAME_RATE
+		VkPresentModeKHR present_modes[] = { VK_PRESENT_MODE_MAILBOX_KHR, VK_PRESENT_MODE_IMMEDIATE_KHR, VK_PRESENT_MODE_FIFO_KHR };
+#else
+		VkPresentModeKHR present_modes[] = { VK_PRESENT_MODE_FIFO_KHR };
+#endif
+
+		vulkan_window->PresentMode = ImGui_ImplVulkanH_SelectPresentMode(physical_device, vulkan_window->Surface, &present_modes[0], IM_ARRAYSIZE(present_modes));
+		//printf("[vulkan] Selected PresentMode = %d\n", vulkan_window->PresentMode);
+
+		// Create SwapChain, RenderPass, Framebuffer, etc.
+		// IM_ASSERT(g_MinImageCount >= 2);
+		ImGui_ImplVulkanH_CreateOrResizeWindow(vk_device->get_instance(), physical_device, device, vulkan_window, vk_device->get_queue_families().presentFamily, nullptr, width, height, 3);
+		
 	}
 
 }

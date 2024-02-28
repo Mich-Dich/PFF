@@ -6,9 +6,9 @@ namespace PFF::vk_util {
     struct QueueFamilyIndices {
         u32 graphicsFamily;
         u32 presentFamily;
-        bool graphicsFamilyHasValue = false;
-        bool presentFamilyHasValue = false;
-        bool isComplete() { return graphicsFamilyHasValue && presentFamilyHasValue; }
+        bool graphics_family_has_value = false;
+        bool present_family_has_value = false;
+        FORCEINLINE bool isComplete() const { return graphics_family_has_value && present_family_has_value; }
     };
 
 }

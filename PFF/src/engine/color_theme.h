@@ -21,10 +21,13 @@ namespace PFF::UI::THEME {
 	static theme_selection UI_theme = theme_selection::default;
 	static ImVec4 main_color = {.5f,	.0f,	.0f,	1.f };
 
-	void update_UI_colors(ImVec4 new_color) {
+	void enable_window_border(bool enable) {
 
-		main_color = new_color;
-		config::save(config::file::editor, "UI", "main_color", UI::THEME::main_color);
+		bool loc_enable = enable;
+		config::save(config::file::editor, "UI", "window_border", loc_enable);
+
+		ImGuiStyle* style = &ImGui::GetStyle();
+		style->WindowBorderSize = loc_enable ? 1.f : 0.f;
 	}
 
 	void update_UI_theme() {
@@ -46,7 +49,7 @@ namespace PFF::UI::THEME {
 		style->GrabMinSize				= 14.f;
 
 		// border
-		style->WindowBorderSize			= 0.0f;
+		style->WindowBorderSize			= 1.0f;
 		style->ChildBorderSize			= 0.0f;
 		style->PopupBorderSize			= 0.0f;
 		style->FrameBorderSize			= 0.0f;
@@ -186,4 +189,12 @@ namespace PFF::UI::THEME {
 				break;
 		}
 	}
+
+	void update_UI_colors(ImVec4 new_color) {
+
+		main_color = new_color;
+		config::save(config::file::editor, "UI", "main_color", UI::THEME::main_color);
+		update_UI_theme();
+	}
+
 }

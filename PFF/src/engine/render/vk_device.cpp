@@ -350,7 +350,10 @@ namespace PFF {
     }
 
 
-    void vk_device::create_surface() { m_window->create_window_surface(m_VkInstance, &m_surface); }
+    void vk_device::create_surface() {
+        
+        m_window->create_window_surface(m_VkInstance, &m_surface);
+    }
 
 
     bool vk_device::is_device_suitable(VkPhysicalDevice device) {
@@ -518,29 +521,31 @@ namespace PFF {
         return requiredExtensions.empty();
     }
 
-    vk_util::QueueFamilyIndices vk_device::find_queue_families(VkPhysicalDevice get_device) {
+    vk_util::QueueFamilyIndices vk_device::find_queue_families(VkPhysicalDevice device) {
 
         PFF_PROFILE_FUNCTION();
 
         u32 queueFamilyCount = 0;
-        vkGetPhysicalDeviceQueueFamilyProperties(get_device, &queueFamilyCount, nullptr);
+        vkGetPhysicalDeviceQueueFamilyProperties(device, &queueFamilyCount, nullptr);
 
         std::vector<VkQueueFamilyProperties> queueFamilies(queueFamilyCount);
-        vkGetPhysicalDeviceQueueFamilyProperties(get_device, &queueFamilyCount, queueFamilies.data());
+        vkGetPhysicalDeviceQueueFamilyProperties(device, &queueFamilyCount, queueFamilies.data());
 
         int i = 0;
         for (const auto& queueFamily : queueFamilies) {
 
             if (queueFamily.queueCount > 0 && queueFamily.queueFlags & VK_QUEUE_GRAPHICS_BIT) {
+
                 m_queue_family_indices.graphicsFamily = i;
-                m_queue_family_indices.graphicsFamilyHasValue = true;
+                m_queue_family_indices.graphics_family_has_value = true;
             }
 
             VkBool32 presentSupport = false;
-            vkGetPhysicalDeviceSurfaceSupportKHR(get_device, i, m_surface, &presentSupport);
+            vkGetPhysicalDeviceSurfaceSupportKHR(device, i, m_surface, &presentSupport);
             if (queueFamily.queueCount > 0 && presentSupport) {
+
                 m_queue_family_indices.presentFamily = i;
-                m_queue_family_indices.presentFamilyHasValue = true;
+                m_queue_family_indices.present_family_has_value = true;
             }
 
             if (m_queue_family_indices.isComplete())

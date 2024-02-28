@@ -2,20 +2,14 @@
 
 #include "engine/layer/layer.h"
 
-struct VkCommandBuffer_T;
-typedef VkCommandBuffer_T* VkCommandBuffer;
-
-struct VkImageView_T;
-typedef VkImageView_T* VkImageView;
-
-typedef int ImGuiWindowFlags;
-
-struct ImGuiContext;
-struct ImFont;
+#include <vulkan/vulkan.h>
+#include <imgui.h>
+#include "imgui_impl_vulkan.h"
 
 namespace PFF {
 
 	class renderer;
+	static void Setup_vulkan_window(ImGui_ImplVulkanH_Window* wd, int width, int height);
 
 	class imgui_layer : public layer {
 	public:

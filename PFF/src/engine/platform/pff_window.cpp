@@ -10,6 +10,9 @@
 #include "engine/events/key_event.h"
 #include "application.h"
 
+#define STB_IMAGE_IMPLEMENTATION
+#include "stb_image.h"
+
 #include "pff_window.h"
 
 
@@ -89,8 +92,15 @@ namespace PFF {
 		const GLFWvidmode* mode = glfwGetVideoMode(primary);
 		//glfwSetWindowMonitor(m_Window, NULL, m_data.pos_x, m_data.pos_y, m_data.width, m_data.height-30, mode->refreshRate);
 
-		CORE_LOG(Info, "bind event callbacks");
+		// Set icon
+		GLFWimage icon;
+		int channels;
+		std::string iconPathStr = m_icon_path.string();
+		icon.pixels = stbi_load(iconPathStr.c_str(), &icon.width, &icon.height, &channels, 4);
+		glfwSetWindowIcon(m_Window, 1, &icon);
+		stbi_image_free(icon.pixels);
 
+		CORE_LOG(Info, "bind event callbacks");
 		glfwSetWindowRefreshCallback(m_Window, [](GLFWwindow* window) {
 			
 			window_attributes& data = *(window_attributes*)glfwGetWindowUserPointer(window);
@@ -207,6 +217,11 @@ namespace PFF {
 	bool pff_window::should_close() {
 	
 		return glfwWindowShouldClose(m_Window);
+	}
+
+	PFF_API_EDITOR void pff_window::get_framebuffer_size(int* width, int* height) {
+
+		glfwGetFramebufferSize(m_Window, width, height);
 	}
 
 	void pff_window::minimize_window() {

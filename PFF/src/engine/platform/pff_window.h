@@ -57,6 +57,8 @@ namespace PFF {
 		FORCEINLINE f64 get_cursor_pos_y() const { return m_data.cursor_pos_y; }
 		FORCEINLINE window_size_state get_window_size_state() const { return m_window_size_state; }
 
+		FORCEINLINE PFF_API_EDITOR void get_framebuffer_size(int* width, int* height);
+
 		PFF_API_EDITOR void minimize_window();
 		PFF_API_EDITOR void restore_window();
 		PFF_API_EDITOR void maximize_window();
@@ -83,6 +85,7 @@ namespace PFF {
 
 		std::mutex m_event_queue_mutex;
 		std::queue<std::function<void()>> m_event_queue;
+		std::filesystem::path m_icon_path = "./Logo.png";
 
 		void init(window_attributes attributes);
 		void set_vsync(bool enable);

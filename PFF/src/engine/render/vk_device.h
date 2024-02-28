@@ -34,11 +34,11 @@ namespace PFF {
         FORCEINLINE VkSurfaceKHR get_surface() const { return m_surface; }
         FORCEINLINE VkQueue get_graphics_queue() const { return m_graphics_queue; }
         FORCEINLINE VkQueue get_present_queue() const { return m_present_queue; }
+        FORCEINLINE vk_util::QueueFamilyIndices get_queue_families() const { return m_queue_family_indices; }
 
         // TEMPORARY
         FORCEINLINE VkInstance get_instance() const { return m_VkInstance; }
         FORCEINLINE VkPhysicalDevice get_physical_device() const { return m_physical_device; }
-
 
 
         SwapChainSupportDetails get_swap_chain_support() { return query_swapchain_support(m_physical_device); }

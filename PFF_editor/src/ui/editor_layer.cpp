@@ -228,7 +228,7 @@ namespace PFF {
 							const char* items[] = { "Dark", "Light" };
 							static int item_current_idx = 0;
 							ImGui::PushStyleVar(ImGuiStyleVar_ItemSpacing, ImVec2(10, 10));
-							if (ImGui::BeginListBox("##Theme_selector", ImVec2(350, (ARRAY_SIZE(items) * ImGui::GetTextLineHeightWithSpacing()) - 1) )) {
+							if (ImGui::BeginListBox("##Theme_selector", ImVec2(350, (ARRAY_SIZE(items) * ImGui::GetTextLineHeightWithSpacing()) - 1))) {
 								for (int n = 0; n < ARRAY_SIZE(items); n++) {
 									const bool is_selected = (item_current_idx == n);
 									if (ImGui::Selectable(items[n], is_selected)) {
@@ -242,19 +242,24 @@ namespace PFF {
 							}
 							ImGui::PopStyleVar();
 
-							ImGui::Separator();
-							ImGui::Text("change main-color");
-
+							// =============================== Init all vars just once ===============================
 							ImGuiColorEditFlags misc_flags = 0;
 							static bool backup_color_init = false;
+							static bool window_border = false;
 							static ImVec4 backup_color;
-							if (!backup_color_init) {
+							if (!backup_color_init) {		
 
+								config::load(config::file::editor, "UI", "window_border", window_border);
 								backup_color = UI::THEME::main_color;
 								ImGui::SetColorEditOptions(ImGuiColorEditFlags_Float | ImGuiColorEditFlags_HDR | ImGuiColorEditFlags_PickerHueWheel);
 								backup_color_init = true;
 							}
 
+							if (ImGui::Checkbox("Window Border", &window_border))
+								UI::THEME::enable_window_border(window_border);
+
+							ImGui::Separator();
+							ImGui::Text("change main-color");
 
 							// Generate a default palette. The palette will persist and can be edited.
 							static bool saved_palette_init = true;
@@ -268,10 +273,8 @@ namespace PFF {
 								saved_palette_init = false;
 							}
 
-							if (ImGui::ColorPicker4("##picker", (float*)&UI::THEME::main_color, ImGuiColorEditFlags_NoSidePreview | ImGuiColorEditFlags_NoSmallPreview)) {
+							if (ImGui::ColorPicker4("##picker", (float*)&UI::THEME::main_color, ImGuiColorEditFlags_NoSidePreview | ImGuiColorEditFlags_NoSmallPreview))
 								UI::THEME::update_UI_colors(UI::THEME::main_color);
-								UI::THEME::update_UI_theme();
-							}
 
 							ImGui::SameLine();
 							ImGui::BeginGroup();
@@ -284,11 +287,9 @@ namespace PFF {
 								ImGui::SameLine();
 								ImGui::BeginGroup();
 									ImGui::Text("Previous");
-									if (ImGui::ColorButton("##previous", backup_color, ImGuiColorEditFlags_NoPicker | ImGuiColorEditFlags_AlphaPreviewHalf, ImVec2(60, 40))) {
-
+									if (ImGui::ColorButton("##previous", backup_color, ImGuiColorEditFlags_NoPicker | ImGuiColorEditFlags_AlphaPreviewHalf, ImVec2(60, 40)))
 										UI::THEME::update_UI_colors(backup_color);
-										UI::THEME::update_UI_theme();
-									}
+
 								ImGui::EndGroup();
 
 								ImGui::Separator();
@@ -299,11 +300,8 @@ namespace PFF {
 										ImGui::SameLine(0.0f, ImGui::GetStyle().ItemSpacing.y);
 
 									ImGuiColorEditFlags palette_button_flags = ImGuiColorEditFlags_NoAlpha | ImGuiColorEditFlags_NoPicker | ImGuiColorEditFlags_NoTooltip;
-									if (ImGui::ColorButton("##palette", saved_palette[n], palette_button_flags, ImVec2(21, 21))) {
-
+									if (ImGui::ColorButton("##palette", saved_palette[n], palette_button_flags, ImVec2(21, 21)))
 										UI::THEME::update_UI_colors(ImVec4(saved_palette[n].x, saved_palette[n].y, saved_palette[n].z, UI::THEME::main_color.w));
-										UI::THEME::update_UI_theme();
-									}
 
 									// Allow user to drop colors into each palette entry. Note that ColorButton() is already a
 									// drag source by default, unless specifying the ImGuiColorEditFlags_NoDragDrop flag.
@@ -543,7 +541,7 @@ namespace PFF {
 
 				ImGui::SameLine();
 				ImGui::SetNextItemWidth(default_item_width);
-				if (ImGui::Combo("##Present_mode_selector", &selected, m_swapchain_supported_presentmodes_str.data(), m_swapchain_supported_presentmodes_str.size())) {
+				if (ImGui::Combo("##Present_mode_selector", &selected, m_swapchain_supported_presentmodes_str.data(), static_cast<int>(m_swapchain_supported_presentmodes_str.size()) )) {
 
 					LOG(Fatal, "NOT IMPLEMENTED YET")
 				}
@@ -560,44 +558,44 @@ namespace PFF {
 
 				ImGui::Text("Immediate");
 				ImGui::Indent(10.f);
-				ImGui::Text("The presentation engine does not wait for a vertical blanking period to update the current image,");
-				ImGui::Text("meaning this mode may result in visible tearing. No internal queuing of presentation requests is needed,");
-				ImGui::Text("as the requests are applied immediately.");
+				ImGui::Text("The presentation engine does not wait for a vertical blanking period to update the current image,\n"
+					"meaning this mode may result in visible tearing. No internal queuing of presentation requests is needed,\n"
+					"as the requests are applied immediately.");
 				ImGui::Indent(-10.f);
 
 				ImGui::Text("Mailbox");
 				ImGui::Indent(10.f);
-				ImGui::Text("The presentation engine waits for the next vertical blanking period to update the current image,");
-				ImGui::Text("preventing tearing. It maintains a single-entry queue for pending presentation requests.");
-				ImGui::Text("If the queue is full, new requests replace existing ones, ensuring timely processing during each vertical blanking period.");
+				ImGui::Text("The presentation engine waits for the next vertical blanking period to update the current image,\n"
+					"preventing tearing. It maintains a single-entry queue for pending presentation requests.\n"
+					"If the queue is full, new requests replace existing ones, ensuring timely processing during each vertical blanking period.");
 				ImGui::Indent(-10.f);
 
 				ImGui::Text("FiFo (First-In, First-Out)");
 				ImGui::Indent(10.f);
-				ImGui::Text("Similar to Mailbox, the presentation engine waits for the next vertical blanking period to update the current image,");
-				ImGui::Text("avoiding tearing. Pending presentation requests are queued, with new requests added to the end and processed in order");
-				ImGui::Text("during each non-empty blanking period.");
+				ImGui::Text("Similar to Mailbox, the presentation engine waits for the next vertical blanking period to update the current image,\n"
+					"avoiding tearing. Pending presentation requests are queued, with new requests added to the end and processed in order\n"
+					"during each non-empty blanking period.");
 				ImGui::Indent(-10.f);
 
 				ImGui::Text("Relaxed FiFo");
 				ImGui::Indent(10.f);
-				ImGui::Text("The presentation engine typically waits for the next vertical blanking period to update the current image.");
-				ImGui::Text("However, if a blanking period has passed since the last update, it may update immediately, potentially resulting in tearing.");
-				ImGui::Text("It uses a queue for pending presentation requests, ensuring timely processing.");
+				ImGui::Text("The presentation engine typically waits for the next vertical blanking period to update the current image.\n"
+					"However, if a blanking period has passed since the last update, it may update immediately, potentially resulting in tearing.\n"
+					"It uses a queue for pending presentation requests, ensuring timely processing.");
 				ImGui::Indent(-10.f);
 
 				ImGui::Text("Shared Demand Refresh");
 				ImGui::Indent(10.f);
-				ImGui::Text("The presentation engine and application share access to a single image.");
-				ImGui::Text("The engine updates the image only after receiving a presentation request,");
-				ImGui::Text("while the application must request updates as needed. Tearing may occur since updates can happen at any point.");
+				ImGui::Text("The presentation engine and application share access to a single image.\n"
+					"The engine updates the image only after receiving a presentation request,\n"
+					"while the application must request updates as needed. Tearing may occur since updates can happen at any point.");
 				ImGui::Indent(-10.f);
 
 				ImGui::Text("Shared Continuous Refresh");
 				ImGui::Indent(10.f);
-				ImGui::Text("Both the presentation engine and application have access to a shared image.");
-				ImGui::Text("The engine periodically updates the image on its regular refresh cycle without needing additional requests from the application.");
-				ImGui::Text("However, if rendering is not timed correctly, tearing may occur.");
+				ImGui::Text("Both the presentation engine and application have access to a shared image.\n"
+					"The engine periodically updates the image on its regular refresh cycle without needing additional requests from the application.\n"
+					"However, if rendering is not timed correctly, tearing may occur.");
 				ImGui::Indent(-10.f);
 
 				ImGui::EndPopup();

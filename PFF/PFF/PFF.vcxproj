@@ -1,0 +1,130 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup Label="ProjectConfigurations">
+    <ProjectConfiguration Include="Debug|x64">
+      <Configuration>Debug</Configuration>
+      <Platform>x64</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="Release|x64">
+      <Configuration>Release</Configuration>
+      <Platform>x64</Platform>
+    </ProjectConfiguration>
+  </ItemGroup>
+  <PropertyGroup Label="Globals">
+    <ProjectGuid>{8110880B-ED19-887C-7695-9E7CE29D937C}</ProjectGuid>
+    <IgnoreWarnCompileDuplicatedFilename>true</IgnoreWarnCompileDuplicatedFilename>
+    <Keyword>Win32Proj</Keyword>
+    <RootNamespace>PFF</RootNamespace>
+    <WindowsTargetPlatformVersion>10.0</WindowsTargetPlatformVersion>
+  </PropertyGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'" Label="Configuration">
+    <ConfigurationType>DynamicLibrary</ConfigurationType>
+    <UseDebugLibraries>true</UseDebugLibraries>
+    <CharacterSet>Unicode</CharacterSet>
+    <PlatformToolset>v143</PlatformToolset>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'" Label="Configuration">
+    <ConfigurationType>DynamicLibrary</ConfigurationType>
+    <UseDebugLibraries>false</UseDebugLibraries>
+    <CharacterSet>Unicode</CharacterSet>
+    <PlatformToolset>v143</PlatformToolset>
+  </PropertyGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.props" />
+  <ImportGroup Label="ExtensionSettings">
+  </ImportGroup>
+  <ImportGroup Label="PropertySheets" Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+  </ImportGroup>
+  <ImportGroup Label="PropertySheets" Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+  </ImportGroup>
+  <PropertyGroup Label="UserMacros" />
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
+    <LinkIncremental>true</LinkIncremental>
+    <OutDir>..\bin\Debug-windows-x86_64\PFF\</OutDir>
+    <IntDir>..\bin-int\Debug-windows-x86_64\PFF\</IntDir>
+    <TargetName>PFF</TargetName>
+    <TargetExt>.dll</TargetExt>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
+    <LinkIncremental>false</LinkIncremental>
+    <OutDir>..\bin\Release-windows-x86_64\PFF\</OutDir>
+    <IntDir>..\bin-int\Release-windows-x86_64\PFF\</IntDir>
+    <TargetName>PFF</TargetName>
+    <TargetExt>.dll</TargetExt>
+  </PropertyGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
+    <ClCompile>
+      <PrecompiledHeader>Use</PrecompiledHeader>
+      <PrecompiledHeaderFile>util/pffpch.h</PrecompiledHeaderFile>
+      <WarningLevel>Level3</WarningLevel>
+      <PreprocessorDefinitions>ENGINE_NAME=PFF;PROJECT_NAME="Sandbox";PFF_INSIDE_ENGINE;GLFW_INCLUDE_NONE;PFF_PLATFORM_WINDOWS;PFF_DEBUG;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <AdditionalIncludeDirectories>src;assets;vendor\glm;vendor\glfw\include;vendor\imgui_new;vendor\imgui_new\backends;vendor\tinyobjloader;C:\VulkanSDK\1.3.250.1\Include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <DebugInformationFormat>EditAndContinue</DebugInformationFormat>
+      <Optimization>Disabled</Optimization>
+      <RuntimeLibrary>MultiThreadedDebugDLL</RuntimeLibrary>
+      <AdditionalOptions>/MDd %(AdditionalOptions)</AdditionalOptions>
+      <LanguageStandard>stdcpp17</LanguageStandard>
+      <ExternalWarningLevel>Level3</ExternalWarningLevel>
+    </ClCompile>
+    <Link>
+      <SubSystem>Windows</SubSystem>
+      <GenerateDebugInformation>true</GenerateDebugInformation>
+      <AdditionalDependencies>vulkan-1.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalLibraryDirectories>C:\VulkanSDK\1.3.250.1\Lib;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <ImportLibrary>..\bin\Debug-windows-x86_64\PFF\PFF.lib</ImportLibrary>
+      <AdditionalOptions>/NODEFAULTLIB:LIBCMTD /NODEFAULTLIB:MSVCRT %(AdditionalOptions)</AdditionalOptions>
+    </Link>
+    <PostBuildEvent>
+      <Command>IF NOT EXIST ..\..\bin\Debug-windows-x86_64\Sandbox (mkdir ..\..\bin\Debug-windows-x86_64\Sandbox)
+IF EXIST ..\bin\Debug-windows-x86_64\PFF\PFF.dll\ (xcopy /Q /E /Y /I ..\bin\Debug-windows-x86_64\PFF\PFF.dll ..\..\bin\Debug-windows-x86_64\Sandbox &gt; nul) ELSE (xcopy /Q /Y /I ..\bin\Debug-windows-x86_64\PFF\PFF.dll ..\..\bin\Debug-windows-x86_64\Sandbox &gt; nul)
+IF NOT EXIST ..\..\bin\Debug-windows-x86_64\PFF_editor (mkdir ..\..\bin\Debug-windows-x86_64\PFF_editor)
+IF EXIST ..\bin\Debug-windows-x86_64\PFF\PFF.dll\ (xcopy /Q /E /Y /I ..\bin\Debug-windows-x86_64\PFF\PFF.dll ..\..\bin\Debug-windows-x86_64\PFF_editor &gt; nul) ELSE (xcopy /Q /Y /I ..\bin\Debug-windows-x86_64\PFF\PFF.dll ..\..\bin\Debug-windows-x86_64\PFF_editor &gt; nul)</Command>
+    </PostBuildEvent>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
+    <ClCompile>
+      <PrecompiledHeader>Use</PrecompiledHeader>
+      <PrecompiledHeaderFile>util/pffpch.h</PrecompiledHeaderFile>
+      <WarningLevel>Level3</WarningLevel>
+      <PreprocessorDefinitions>ENGINE_NAME=PFF;PROJECT_NAME="Sandbox";PFF_INSIDE_ENGINE;GLFW_INCLUDE_NONE;PFF_PLATFORM_WINDOWS;PFF_RELEASE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <AdditionalIncludeDirectories>src;assets;vendor\glm;vendor\glfw\include;vendor\imgui_new;vendor\imgui_new\backends;vendor\tinyobjloader;C:\VulkanSDK\1.3.250.1\Include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <Optimization>Full</Optimization>
+      <FunctionLevelLinking>true</FunctionLevelLinking>
+      <IntrinsicFunctions>true</IntrinsicFunctions>
+      <MinimalRebuild>false</MinimalRebuild>
+      <StringPooling>true</StringPooling>
+      <RuntimeLibrary>MultiThreadedDLL</RuntimeLibrary>
+      <AdditionalOptions>/MD %(AdditionalOptions)</AdditionalOptions>
+      <LanguageStandard>stdcpp17</LanguageStandard>
+      <ExternalWarningLevel>Level3</ExternalWarningLevel>
+    </ClCompile>
+    <Link>
+      <SubSystem>Windows</SubSystem>
+      <EnableCOMDATFolding>true</EnableCOMDATFolding>
+      <OptimizeReferences>true</OptimizeReferences>
+      <AdditionalDependencies>vulkan-1.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalLibraryDirectories>C:\VulkanSDK\1.3.250.1\Lib;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <ImportLibrary>..\bin\Release-windows-x86_64\PFF\PFF.lib</ImportLibrary>
+      <AdditionalOptions>/NODEFAULTLIB:LIBCMTD /NODEFAULTLIB:MSVCRT %(AdditionalOptions)</AdditionalOptions>
+    </Link>
+    <PostBuildEvent>
+      <Command>IF NOT EXIST ..\..\bin\Release-windows-x86_64\Sandbox (mkdir ..\..\bin\Release-windows-x86_64\Sandbox)
+IF EXIST ..\bin\Release-windows-x86_64\PFF\PFF.dll\ (xcopy /Q /E /Y /I ..\bin\Release-windows-x86_64\PFF\PFF.dll ..\..\bin\Release-windows-x86_64\Sandbox &gt; nul) ELSE (xcopy /Q /Y /I ..\bin\Release-windows-x86_64\PFF\PFF.dll ..\..\bin\Release-windows-x86_64\Sandbox &gt; nul)
+IF NOT EXIST ..\..\bin\Release-windows-x86_64\PFF_editor (mkdir ..\..\bin\Release-windows-x86_64\PFF_editor)
+IF EXIST ..\bin\Release-windows-x86_64\PFF\PFF.dll\ (xcopy /Q /E /Y /I ..\bin\Release-windows-x86_64\PFF\PFF.dll ..\..\bin\Release-windows-x86_64\PFF_editor &gt; nul) ELSE (xcopy /Q /Y /I ..\bin\Release-windows-x86_64\PFF\PFF.dll ..\..\bin\Release-windows-x86_64\PFF_editor &gt; nul)</Command>
+    </PostBuildEvent>
+  </ItemDefinitionGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\vendor\glfw\GLFW.vcxproj">
+      <Project>{154B857C-0182-860D-AA6E-6C109684020F}</Project>
+    </ProjectReference>
+    <ProjectReference Include="..\vendor\imgui_new\ImGui.vcxproj">
+      <Project>{C0FF640D-2C14-8DBE-F595-301E616989EF}</Project>
+    </ProjectReference>
+  </ItemGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
+  <ImportGroup Label="ExtensionTargets">
+  </ImportGroup>
+</Project>

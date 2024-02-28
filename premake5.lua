@@ -1,16 +1,17 @@
 -- premake5.lua
 
 client_project_name = "Sandbox"						-- This is the name of your project
-vulkan_dir = "C:/VulkanSDK/1.3.250.1"			-- CHANGE THIS
+vulkan_dir = "C:/VulkanSDK/1.3.250.1"				-- CHANGE THIS
 
 workspace "PFF"
 	platforms "x64"
-    startproject "PFF_editor"
+	startproject "PFF_editor"
 
 	configurations
 	{
 		"Debug",
-		"Release"
+		"RelWithDebInfo",
+		"Release",
 	}
 
 	outputs  = "%{cfg.buildcfg}-%{cfg.system}-%{cfg.architecture}"
@@ -46,7 +47,7 @@ project "PFF"
 	}
 
 	files
-    {
+	{
 		"%{prj.name}/src/**.h",
 		"%{prj.name}/src/**.cpp",
 	}
@@ -68,6 +69,7 @@ project "PFF"
 		"%{IncludeDir.ImGui}",
 		"%{IncludeDir.ImGui}/backends/",
 		"%{IncludeDir.tinyobjloader}",
+		"PFF/vendor/stb_image",
 		
 		vulkan_dir .. "/Include",
 	}
@@ -83,7 +85,7 @@ project "PFF"
 	filter "system:windows"
 		systemversion "latest"
 		
-        linkoptions 
+		linkoptions 
 		{
 			 "/NODEFAULTLIB:LIBCMTD",
 			 "/NODEFAULTLIB:MSVCRT",
@@ -109,18 +111,18 @@ project "PFF"
 		runtime "Debug"
 		symbols "on"
 
+	filter "configurations:RelWithDebInfo"
+		buildoptions "/MD"
+		defines "PFF_RELEASE_WITH_DEBUG_INFO"
+		runtime "Release"
+		symbols "on"
+		optimize "speed"
+
 	filter "configurations:Release"
 		buildoptions "/MD"
 		defines "PFF_RELEASE"
 		runtime "Release"
 		optimize "on"
-
-		filter "configurations:Dist"
-		buildoptions "/MD"
-		defines "PFF_DIST"
-		runtime "Release"
-		optimize "speed"
-        symbols "off"
 
 project "PFF_editor"
 		location "PFF_editor"
@@ -188,19 +190,19 @@ project "PFF_editor"
 			runtime "Debug"
 			symbols "on"
 	
+		filter "configurations:RelWithDebInfo"
+			buildoptions "/MD"
+			defines "PFF_RELEASE_WITH_DEBUG_INFO"
+			runtime "Release"
+			symbols "on"
+			optimize "speed"
+
 		filter "configurations:Release"
 			buildoptions "/MD"
 			defines "EDITOR_RELEASE"
 			runtime "Release"
 			optimize "on"
 			
-		filter "configurations:Dist"
-			buildoptions "/MD"
-			defines "EDITOR_DIST"
-			runtime "Release"
-			optimize "speed"
-			symbols "off"
-
 
 ------------------------------------ CLIENT GAME ------------------------------------
 project (client_project_name)
@@ -267,9 +269,9 @@ project (client_project_name)
 		runtime "Release"
 		optimize "on"
 			
-	filter "configurations:Dist"
+	filter "configurations:RelWithDebInfo"
 		buildoptions "/MD"
-		defines "GAME_DIST"
+		defines "PFF_RELEASE_WITH_DEBUG_INFO"
 		runtime "Release"
+		symbols "on"
 		optimize "speed"
-		symbols "off"
