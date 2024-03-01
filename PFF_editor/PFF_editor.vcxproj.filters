@@ -30,6 +30,7 @@
     <ClInclude Include="src\ui\panels\pannel_collection.h">
       <Filter>src\ui\panels</Filter>
     </ClInclude>
+    <ClInclude Include="src\PFF_editor.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="src\controller\editor_controller.cpp">
@@ -41,6 +42,7 @@
     <ClCompile Include="src\ui\editor_layer.cpp">
       <Filter>src\ui</Filter>
     </ClCompile>
+    <ClCompile Include="src\PFF_editor.cpp" />
   </ItemGroup>
   <ItemGroup>
     <None Include="shaders\default.frag">

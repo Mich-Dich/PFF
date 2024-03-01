@@ -36,9 +36,8 @@ namespace PFF {
         vkDestroyCommandPool(m_device, m_commandPool, nullptr);
         vkDestroyDevice(m_device, nullptr);
 
-        if (c_enable_validation_layers) {
+        if (c_enable_validation_layers)
             destroy_debug_utils_messengerEXT(m_VkInstance, m_debug_messanger, nullptr);
-        }
 
         vkDestroySurfaceKHR(m_VkInstance, m_surface, nullptr);
         vkDestroyInstance(m_VkInstance, nullptr);
@@ -343,8 +342,8 @@ namespace PFF {
 
         VkCommandPoolCreateInfo poolInfo = {};
         poolInfo.sType = VK_STRUCTURE_TYPE_COMMAND_POOL_CREATE_INFO;
-        poolInfo.queueFamilyIndex = queueFamilyIndices.graphicsFamily;
         poolInfo.flags = VK_COMMAND_POOL_CREATE_TRANSIENT_BIT | VK_COMMAND_POOL_CREATE_RESET_COMMAND_BUFFER_BIT;
+        poolInfo.queueFamilyIndex = queueFamilyIndices.graphicsFamily;
 
         CORE_ASSERT(vkCreateCommandPool(m_device, &poolInfo, nullptr, &m_commandPool) == VK_SUCCESS, "", "failed to create command pool!");
     }
@@ -785,14 +784,3 @@ namespace PFF {
     }
 
 }
-
-/*
-typedef enum VkPhysicalDeviceType {
-    VK_PHYSICAL_DEVICE_TYPE_OTHER = 0,
-    VK_PHYSICAL_DEVICE_TYPE_INTEGRATED_GPU = 1,
-    VK_PHYSICAL_DEVICE_TYPE_DISCRETE_GPU = 2,
-    VK_PHYSICAL_DEVICE_TYPE_VIRTUAL_GPU = 3,
-    VK_PHYSICAL_DEVICE_TYPE_CPU = 4,
-    VK_PHYSICAL_DEVICE_TYPE_MAX_ENUM = 0x7FFFFFFF
-} VkPhysicalDeviceType;
-*/

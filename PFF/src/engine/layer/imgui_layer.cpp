@@ -27,10 +27,6 @@ namespace PFF {
 		return map.find(key) != map.end();
 	}
 
-
-	static bool showdemo_window = true;
-	static bool show_fps = true;
-
 	imgui_layer::imgui_layer(std::shared_ptr<renderer> renderer)
 		: layer("ImGuiLayer"), m_renderer(renderer) {
 
@@ -117,6 +113,8 @@ namespace PFF {
 		m_fonts["regular_big"] = io.Fonts->AddFontFromFileTTF("../PFF/assets/fonts/Open_Sans/static/OpenSans-Regular.ttf", m_big_font_size);
 		m_fonts["bold_big"] = io.Fonts->AddFontFromFileTTF("../PFF/assets/fonts/Open_Sans/static/OpenSans-Bold.ttf", m_big_font_size);
 		m_fonts["italic_big"] = io.Fonts->AddFontFromFileTTF("../PFF/assets/fonts/Open_Sans/static/OpenSans-Italic.ttf", m_big_font_size);
+
+		m_fonts["giant"] = io.Fonts->AddFontFromFileTTF("../PFF/assets/fonts/Open_Sans/static/OpenSans-Bold.ttf", 25.f);
 		io.FontDefault = m_fonts["default"];
 
 		// Use any command queue
@@ -146,6 +144,9 @@ namespace PFF {
 	}
 
 	void imgui_layer::on_update(const f32 delta_time) {
+
+		if(m_show_performance_window)
+			application::get().get_fps_values(m_limit_fps, m_target_fps, m_current_fps, m_work_time, m_sleep_time);
 	}
 
 	void imgui_layer::on_event(event& event) {
@@ -183,11 +184,11 @@ namespace PFF {
 			if (location != -1)
 				window_flags |= ImGuiWindowFlags_NoMove;
 
-			if (show_fps) {
+			if (m_show_performance_window) {
 
 				set_next_window_pos(location);
 				ImGui::SetNextWindowBgAlpha(0.8f); // Transparent background
-				if (ImGui::Begin("performance_timer", &show_fps, window_flags)) {
+				if (ImGui::Begin("performance_timer", &m_show_performance_window, window_flags)) {
 
 					// Get the current style
 					ImGuiStyle& style = ImGui::GetStyle();
@@ -209,20 +210,12 @@ namespace PFF {
 						ImGui::Text("current fps    %4d", m_current_fps);
 
 					// work_time
-					ImGui::Text("work time  ");
-					ImGui::SameLine();
-					snprintf(formattedText, sizeof(formattedText), " %8.2f ", m_work_time);
-					progressbar_with_text(work_percent, formattedText);
-					ImGui::SameLine();
-					ImGui::Text("ms");
+					snprintf(formattedText, sizeof(formattedText), "%5.2f ms", m_work_time);
+					progressbar_with_text("work time:", formattedText, work_percent, 70.f, 70.f);
 
 					// sleep time
-					ImGui::Text("sleep time ");
-					ImGui::SameLine();
-					snprintf(formattedText, sizeof(formattedText), " %8.2f ", m_sleep_time);
-					progressbar_with_text(sleep_percent, formattedText);
-					ImGui::SameLine();
-					ImGui::Text("ms");
+					snprintf(formattedText, sizeof(formattedText), "%5.2f ms", m_sleep_time);
+					progressbar_with_text("sleep time ", formattedText, sleep_percent, 70.f, 70.f);
 
 
 					if (ImGui::BeginPopupContextWindow()) {
@@ -238,8 +231,8 @@ namespace PFF {
 							location = 2;
 						if (ImGui::MenuItem("bottom-right", NULL, location == 3))
 							location = 3;
-						if (&show_fps && ImGui::MenuItem("close"))
-							show_fps = false;
+						if (&m_show_performance_window && ImGui::MenuItem("close"))
+							m_show_performance_window = false;
 						ImGui::EndPopup();
 					}
 				}
@@ -316,23 +309,32 @@ namespace PFF {
 		}
 	}
 
-	void imgui_layer::progressbar_with_text(f32 percent, const char* text, f32 min_size_x, f32 min_size_y) {
+	void imgui_layer::progressbar_with_text(const char* lable, const char* progress_bar_text, f32 percent, f32 lable_size, f32 progressbar_size_x, f32 progressbar_size_y) {
 
 		PFF_PROFILE_FUNCTION();
 
 		ImVec2 curser_pos;
-		ImVec2 textSize;
+		ImVec2 progressbar_size;
+		ImVec2 text_size;
+		f32 loc_lable_size;
 
-		curser_pos = ImGui::GetCursorScreenPos();
-		ImGui::SetItemAllowOverlap();
+		ImGuiStyle* style = &ImGui::GetStyle();
+		curser_pos = ImGui::GetCursorPos();
 
-		textSize = ImGui::CalcTextSize(text);
-		textSize.x = std::max<f32>(textSize.x, min_size_x);
-		textSize.y = std::max<f32>(textSize.y, min_size_y);
+		loc_lable_size = ImGui::CalcTextSize(lable).x;
+		loc_lable_size = std::max<f32>(loc_lable_size, lable_size);
+		ImGui::Text("%s", lable);
+		ImGui::SetCursorPos({ curser_pos .x + loc_lable_size, curser_pos .y});
 
-		ImGui::ProgressBar(percent, textSize, "");
-		ImGui::SetCursorScreenPos(curser_pos);
-		ImGui::Text("%s", text);
+		text_size = ImGui::CalcTextSize(progress_bar_text);
+		progressbar_size = text_size;
+		progressbar_size.x = std::max<f32>(progressbar_size.x, progressbar_size_x);
+		progressbar_size.y = std::max<f32>(progressbar_size.y, progressbar_size_y);
+
+		curser_pos = ImGui::GetCursorPos();
+		ImGui::ProgressBar(percent, progressbar_size, "");
+		ImGui::SetCursorPos({ curser_pos.x + progressbar_size.x - (text_size.x + style->ItemSpacing.x), curser_pos.y });
+		ImGui::Text("%s", progress_bar_text);
 	}
 	
 	// All the ImGui_ImplVulkanH_XXX structures/functions are optional helpers used by the demo.

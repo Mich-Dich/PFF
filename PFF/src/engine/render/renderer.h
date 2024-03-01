@@ -3,13 +3,16 @@
 #include "engine/render/vk_device.h"
 #include "engine/render/vk_swapchain.h"
 #include "engine/render/render_system.h"
-#include "engine/platform/pff_window.h"
+// #include "engine/platform/pff_window.h"
 #include "engine/layer/layer_stack.h"
 #include "engine/map/game_map.h"
 #include "engine/layer/world_layer.h"
 #include "engine/render/vk_descripters.h"
 
 namespace PFF {
+
+	class pff_window;
+
 
 	class renderer {
 	public:

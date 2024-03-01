@@ -8,8 +8,15 @@
 #include <imgui_internal.h>
 #include <glm/glm.hpp>
 
+#include "application.h"
+
 
 namespace PFF {
+	
+	void seperation_vertical();
+	void draw_big_text(const char* text);
+	void help_marker(const char* desc);
+	void shift_cursor_pos(const f32 shift_x = 0.0f, const f32 shift_y = 0.0f);
 
 	template<typename T>
 	void display_column(const std::string& label, T value, ImGuiInputTextFlags flags) {
@@ -136,6 +143,43 @@ namespace PFF {
 		ImGui::Columns(1);
 		ImGui::PopID();
 	}
+
+	// ----------------------------------------- static funcs -----------------------------------------
+	static void seperation_vertical() {
+
+		ImGui::SameLine();
+		shift_cursor_pos(5,0);
+		ImGui::SeparatorEx(ImGuiSeparatorFlags_Vertical);
+
+		ImGui::SameLine();
+		shift_cursor_pos(5,0);
+	}
+
+	static void draw_big_text(const char* text) {
+
+		ImGui::PushFont(application::get().get_imgui_layer()->get_font("regular_big"));
+		ImGui::Text(text);
+		ImGui::PopFont();
+	}
+
+	static void help_marker(const char* desc) {
+
+		ImGui::TextDisabled(" ? ");
+		if (ImGui::IsItemHovered(ImGuiHoveredFlags_DelayShort)) {
+			ImGui::BeginTooltip();
+			ImGui::PushTextWrapPos(ImGui::GetFontSize() * 35.0f);
+			ImGui::TextUnformatted(desc);
+			ImGui::PopTextWrapPos();
+			ImGui::EndTooltip();
+		}
+	}
+
+	static void shift_cursor_pos(const f32 shift_x, const f32 shift_y) {
+
+		auto current_pos = ImGui::GetCursorPos();
+		ImGui::SetCursorPos({ current_pos.x + shift_x, current_pos.y + shift_y });
+	}
+
 }
 
 

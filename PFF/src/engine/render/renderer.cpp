@@ -3,7 +3,7 @@
 
 #include "engine/render/render_system.h"
 #include "engine/render/vk_buffer.h"
-
+#include "engine/platform/pff_window.h"
 #include "engine/layer/layer.h"
 #include "application.h"
 #include "engine/map/game_map.h"
@@ -285,6 +285,8 @@ namespace PFF {
 
 	//
 	void renderer::free_command_buffers() {
+
+		vkFreeCommandBuffers(m_device->get_device(), m_device->get_command_pool(), static_cast<int>(m_command_buffers.size()), m_command_buffers.data());
 	}
 
 	//

@@ -25,7 +25,7 @@ namespace PFF {
         ~vk_swapchain();
 
         DELETE_COPY(vk_swapchain);
-
+        
         VkFormat findDepthFormat();
         VkResult acquireNextImage(u32* imageIndex);
         VkResult submitCommandBuffers(const VkCommandBuffer* buffers, u32* imageIndex);

@@ -226,20 +226,31 @@ namespace PFF {
 
 	void pff_window::minimize_window() {
 		
+		LOG(Fatal, "minimizing window");
 		glfwIconifyWindow(m_Window);
 		m_window_size_state = window_size_state::minimised;
+		application::set_render_state(system_state::inactive);
 	}
 
 	void pff_window::restore_window() {
 		
+		LOG(Fatal, "restoring window");
 		glfwRestoreWindow(m_Window); 
 		m_window_size_state = window_size_state::windowed;
+		application::set_render_state(system_state::active);
 	}
 
 	void pff_window::maximize_window() { 
 		
-		glfwMaximizeWindow(m_Window); 
+		LOG(Fatal, "maximising window");
+		glfwMaximizeWindow(m_Window);
 		m_window_size_state = window_size_state::fullscreen_windowed; 
+		application::set_render_state(system_state::active);
+	}
+
+	bool pff_window::is_maximized() {
+
+		return static_cast<bool>(glfwGetWindowAttrib(m_Window, GLFW_MAXIMIZED));
 	}
 
 	void pff_window::create_window_surface(VkInstance_T* instance, VkSurfaceKHR_T** get_surface) {

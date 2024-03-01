@@ -32,6 +32,12 @@ namespace PFF {
 	// ==================================================================== setup ====================================================================
 
 	application* application::s_instance = nullptr;
+	std::shared_ptr<renderer> application::m_renderer;
+	std::shared_ptr<pff_window> application::m_window;
+	imgui_layer* application::m_imgui_layer;
+	world_layer* application::m_world_layer;
+	bool application::m_is_titlebar_hovered;
+	bool application::m_running;
 
 
 	application::application() {
@@ -61,6 +67,9 @@ namespace PFF {
 
 		m_renderer->set_world_Layer(m_world_layer);
 		m_renderer->set_state(system_state::active);
+
+		m_is_titlebar_hovered = false;
+		m_running = true;
 
 		init();					// init user code / potentally make every actor have own function (like UNREAL)
 		PFF_PROFILE_END_SESSION();
@@ -107,8 +116,8 @@ namespace PFF {
 				layer->on_update(m_delta_time);
 
 			// render
-			render(m_delta_time);	// TODO: REMOVE (indeally app instance doesn't need to render anything)
-			m_imgui_layer->set_fps_values(m_limit_fps, (m_focus ? m_target_fps : m_nonefocus_fps), m_fps, m_work_time * 1000, m_sleep_time);
+			render(m_delta_time);					// TODO: REMOVE (indeally app instance doesn't need to render anything)
+			// m_imgui_layer->set_fps_values(m_limit_fps, (m_focus ? m_target_fps : m_nonefocus_fps), m_fps, m_work_time * 1000, m_sleep_time);
 			m_renderer->draw_frame(m_delta_time);
 
 			fps_timer.limit_fps(m_limit_fps, m_fps, m_delta_time, m_work_time, m_sleep_time);
@@ -125,25 +134,25 @@ namespace PFF {
 		m_limit_fps = new_value;
 		fps_timer.set_fps_settings(new_limit);
 	}
+
+	void application::get_fps_values(bool& limit_fps, u32& target_fps, u32& current_fps, f32& work_time, f32& sleep_time) {
+
+		limit_fps = m_limit_fps;
+		target_fps = (m_focus ? m_target_fps : m_nonefocus_fps);
+		current_fps = m_fps;
+		work_time = m_work_time * 1000;
+		sleep_time = m_sleep_time;
+	}
  
 	void application::capture_cursor() { m_window->capture_cursor(); }
 
 	void application::release_cursor() { m_window->release_cursor(); }
 
-	void application::minimize_window() {
+	void application::minimize_window() { m_window->queue_event([window = m_window] { window->minimize_window(); }); }
 
-		m_window->queue_event([window = m_window] { window->minimize_window(); });
-	}
+	void application::restore_window() { m_window->queue_event([window = m_window] { window->restore_window(); }); }
 
-	void application::restore_window() {
-
-		m_window->queue_event([window = m_window] { window->restore_window(); });
-	}
-
-	void application::maximize_window() {
-
-		m_window->queue_event([window = m_window] { window->maximize_window(); });
-	}
+	void application::maximize_window() { m_window->queue_event([window = m_window] { window->maximize_window(); }); }
 
 	// ==================================================================== PRIVATE ====================================================================
 	// ==================================================================== event handling ====================================================================
@@ -161,10 +170,9 @@ namespace PFF {
 
 		// none application events
 		if (!event.handled) {
+			for (auto layer = m_layerstack.end(); layer != m_layerstack.begin(); ) {
 
-			for (auto it = m_layerstack.end(); it != m_layerstack.begin(); ) {
-
-				(*--it)->on_event(event);
+				(*--layer)->on_event(event);
 				if (event.handled)
 					break;
 			}
@@ -195,10 +203,10 @@ namespace PFF {
 
 		PFF_PROFILE_FUNCTION();
 
+		CORE_LOG(Trace, "Test")
 		fps_timer.limit_fps(false, m_fps, m_delta_time, m_work_time, m_sleep_time);
-		m_imgui_layer->set_fps_values(m_limit_fps, (m_focus ? m_target_fps : m_nonefocus_fps), m_fps, static_cast<f32>(m_work_time * 1000), static_cast<f32>(m_sleep_time * 1000));
+		// m_imgui_layer->set_fps_values(m_limit_fps, (m_focus ? m_target_fps : m_nonefocus_fps), m_fps, static_cast<f32>(m_work_time * 1000), static_cast<f32>(m_sleep_time * 1000));
 		m_renderer->refresh(m_delta_time);
-		// fps_timer.start_measurement();
 		return true;
 	}
 

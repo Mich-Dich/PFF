@@ -204,18 +204,18 @@ namespace PFF {
         m_swap_chain_image_views.resize(m_swap_chain_images.size());
         for (size_t i = 0; i < m_swap_chain_images.size(); i++) {
               
-            VkImageViewCreateInfo viewInfo{};
-            viewInfo.sType = VK_STRUCTURE_TYPE_IMAGE_VIEW_CREATE_INFO;
-            viewInfo.image = m_swap_chain_images[i];
-            viewInfo.viewType = VK_IMAGE_VIEW_TYPE_2D;
-            viewInfo.format = m_swap_chainImage_format;
-            viewInfo.subresourceRange.aspectMask = VK_IMAGE_ASPECT_COLOR_BIT;
-            viewInfo.subresourceRange.baseMipLevel = 0;
-            viewInfo.subresourceRange.levelCount = 1;
-            viewInfo.subresourceRange.baseArrayLayer = 0;
-            viewInfo.subresourceRange.layerCount = 1;
+            VkImageViewCreateInfo image_view_CI{};
+            image_view_CI.sType = VK_STRUCTURE_TYPE_IMAGE_VIEW_CREATE_INFO;
+            image_view_CI.image = m_swap_chain_images[i];
+            image_view_CI.viewType = VK_IMAGE_VIEW_TYPE_2D;
+            image_view_CI.format = m_swap_chainImage_format;
+            image_view_CI.subresourceRange.aspectMask = VK_IMAGE_ASPECT_COLOR_BIT;
+            image_view_CI.subresourceRange.baseMipLevel = 0;
+            image_view_CI.subresourceRange.levelCount = 1;
+            image_view_CI.subresourceRange.baseArrayLayer = 0;
+            image_view_CI.subresourceRange.layerCount = 1;
 
-            CORE_ASSERT(vkCreateImageView(m_device->get_device(), &viewInfo, nullptr, &m_swap_chain_image_views[i]) == VK_SUCCESS, "", "failed to create texture image view!");
+            CORE_ASSERT(vkCreateImageView(m_device->get_device(), &image_view_CI, nullptr, &m_swap_chain_image_views[i]) == VK_SUCCESS, "", "failed to create texture image view!");
         }
     }
 

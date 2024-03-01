@@ -153,12 +153,14 @@
   <ItemGroup>
     <ClInclude Include="src\controller\editor_controller.h" />
     <ClInclude Include="src\controller\editor_inputs.h" />
+    <ClInclude Include="src\PFF_editor.h" />
     <ClInclude Include="src\ui\editor_layer.h" />
     <ClInclude Include="src\ui\panels\pannel_collection.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="src\controller\editor_controller.cpp" />
     <ClCompile Include="src\entry.cpp" />
+    <ClCompile Include="src\PFF_editor.cpp" />
     <ClCompile Include="src\ui\editor_layer.cpp" />
   </ItemGroup>
   <ItemGroup>

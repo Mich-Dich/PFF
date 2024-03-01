@@ -13,6 +13,9 @@ config/
 /bin
 /bin-int
 
+# benchmarks
+PFF_editor/benchmarks
+
 # User-specific files
 *.rsuser
 *.suo

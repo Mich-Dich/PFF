@@ -59,9 +59,10 @@ namespace PFF {
 
 		FORCEINLINE PFF_API_EDITOR void get_framebuffer_size(int* width, int* height);
 
-		PFF_API_EDITOR void minimize_window();
-		PFF_API_EDITOR void restore_window();
-		PFF_API_EDITOR void maximize_window();
+		PFF_API void minimize_window();
+		PFF_API void restore_window();
+		PFF_API void maximize_window();
+		PFF_API bool is_maximized();
 
 		void create_window_surface(VkInstance_T* instance, VkSurfaceKHR_T** get_surface);
 		VkExtent2D get_extend();
