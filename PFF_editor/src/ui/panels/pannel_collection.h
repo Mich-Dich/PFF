@@ -1,6 +1,7 @@
 #pragma once
 
 #include "util/pffpch.h"
+#include "engine/color_theme.h"
 
 #include <imgui.h>
 #include <imgui_impl_glfw.h>
@@ -18,133 +19,9 @@ namespace PFF {
 	void help_marker(const char* desc);
 	void shift_cursor_pos(const f32 shift_x = 0.0f, const f32 shift_y = 0.0f);
 
-	template<typename T>
-	void display_column(const std::string& label, T value, ImGuiInputTextFlags flags) {
-
-		ImGuiStyle& style = ImGui::GetStyle();
-		ImVec2 current_item_spacing = style.ItemSpacing;
-
-		// ImGui::PushStyleVar(ImGuiStyleVar_ItemInnerSpacing, ImVec2(0, 0));
-		//ImGui::PushStyleVar(ImGuiStyleVar_ItemSpacing, ImVec2(4,-1));
-		//ImGui::TableSetupColumn();
-
-		ImGui::Columns(2, nullptr, true);
-
-		ImGui::Spacing();
-		ImGui::Text("%s", label.c_str());
-
-		ImGui::NextColumn();
-		ImGui::Spacing();
-		//ImGui::SetNextItemWidth(ImGui::GetColumnWidth()-10);
-
-
-		if constexpr (std::is_same_v<T, bool>) {
-
-			ImGui::Text("%s", util::bool_to_str(value));
-		}
-
-		else if constexpr (std::is_convertible_v<T, std::string>) {
-
-			ImGui::Text("%s", std::to_string(value).c_str());
-		}
-
-		else if constexpr (std::is_arithmetic_v<T>) {
-
-			ImGui::SetNextItemWidth(ImGui::GetColumnWidth() - (current_item_spacing.x + 1));
-			ImGui::InputFloat(label.c_str(), &value, 0.0f, 0.0f, "%.2f", flags);
-		}
-
-		else if constexpr (std::is_same_v<T, glm::vec2>) {
-
-			ImGui::SetNextItemWidth(ImGui::GetColumnWidth() - (current_item_spacing.x + 1));
-			ImGui::InputFloat2(label.c_str(), &value[0], "%.2f", flags);
-		}
-
-		else if constexpr (std::is_same_v<T, glm::vec3>) {
-
-			ImGui::SetNextItemWidth(ImGui::GetColumnWidth() - (current_item_spacing.x + 1));
-			ImGui::InputFloat3(label.c_str(), &value[0], "%.2f", flags);
-		}
-
-		else if constexpr (std::is_same_v<T, glm::vec4> || std::is_same_v<T, ImVec4>) {
-
-			ImGui::SetNextItemWidth(ImGui::GetColumnWidth() - (current_item_spacing.x + 1));
-			ImGui::InputFloat4(label.c_str(), &value[0], "%.2f", flags);
-		}
-
-		ImGui::Columns(1);
-		//ImGui::PopStyleVar();
-	}
-
-	template<typename T>
-	void display_column_interactive(const std::string& label, T value) {
-
-		ImGuiStyle& style = ImGui::GetStyle();
-		ImVec2 current_item_spacing = style.ItemSpacing;
-		ImGui::PushID(label.c_str());
-
-		ImGui::Columns(2, nullptr, true);
-
-		ImGui::Spacing();
-		ImGui::Text("%s", label.c_str());
-
-		ImGui::NextColumn();
-		ImGui::Spacing();
-
-		ImGui::PushStyleVar(ImGuiStyleVar_ItemInnerSpacing, ImVec2(0, 0));
-
-		if constexpr (std::is_same_v<T, bool>) {
-
-			ImGui::Text("%s", util::bool_to_str(value));
-		}
-
-		else if constexpr (std::is_convertible_v<T, std::string>) {
-
-			ImGui::Text("%s", std::to_string(value).c_str());
-		}
-
-		else if constexpr (std::is_arithmetic_v<T>) {
-
-			ImGui::SetNextItemWidth(ImGui::GetColumnWidth() - (current_item_spacing.x + 1));
-			ImGui::DragFloat("##X", &value, 0.1f, 0.0f, 0.0f, "%.2f", ImGuiSliderFlags_Logarithmic);
-		}
-
-		else if constexpr (std::is_same_v<T, glm::vec2>) {
-
-			ImGui::PushMultiItemsWidths(2, ImGui::GetColumnWidth() - (current_item_spacing.x) * 2);
-			ImGui::DragFloat("##X", &value.x, 0.1f, 0.0f, 0.0f, "%.2f", ImGuiSliderFlags_Logarithmic);
-			ImGui::SameLine();
-			ImGui::DragFloat("##Y", &value.y, 0.1f, 0.0f, 0.0f, "%.2f", ImGuiSliderFlags_Logarithmic);
-		}
-
-		else if constexpr (std::is_same_v<T, glm::vec3>) {
-
-			ImGui::PushMultiItemsWidths(3, ImGui::GetColumnWidth() - (current_item_spacing.x) * 3);
-			ImGui::DragFloat("##X", &value.x, 0.1f, 0.0f, 0.0f, "%.2f", ImGuiSliderFlags_Logarithmic);
-			ImGui::SameLine();
-			ImGui::DragFloat("##Y", &value.y, 0.1f, 0.0f, 0.0f, "%.2f", ImGuiSliderFlags_Logarithmic);
-			ImGui::SameLine();
-			ImGui::DragFloat("##Z", &value.z, 0.1f, 0.0f, 0.0f, "%.2f", ImGuiSliderFlags_Logarithmic);
-		}
-
-		else if constexpr (std::is_same_v<T, glm::vec4> || std::is_same_v<T, ImVec4>) {
-
-			ImGui::PushMultiItemsWidths(4, ImGui::GetColumnWidth() - (current_item_spacing.x) * 4);
-			ImGui::DragFloat("##X", &value.x, 0.1f, 0.0f, 0.0f, "%.2f", ImGuiSliderFlags_Logarithmic);
-			ImGui::SameLine();
-			ImGui::DragFloat("##Y", &value.y, 0.1f, 0.0f, 0.0f, "%.2f", ImGuiSliderFlags_Logarithmic);
-			ImGui::SameLine();
-			ImGui::DragFloat("##Z", &value.z, 0.1f, 0.0f, 0.0f, "%.2f", ImGuiSliderFlags_Logarithmic);
-			ImGui::SameLine();
-			ImGui::DragFloat("##W", &value.w, 0.1f, 0.0f, 0.0f, "%.2f", ImGuiSliderFlags_Logarithmic);
-		}
-
-		ImGui::PopStyleVar(1);
-		ImGui::Columns(1);
-		ImGui::PopID();
-	}
-
 	// ----------------------------------------- static funcs -----------------------------------------
+
+	// @brief Draws a vertical separation line.
 	static void seperation_vertical() {
 
 		ImGui::SameLine();
@@ -155,6 +32,8 @@ namespace PFF {
 		shift_cursor_pos(5,0);
 	}
 
+	// @brief Draws text using a larger font.
+	// @param [text] The text to be drawn.
 	static void draw_big_text(const char* text) {
 
 		ImGui::PushFont(application::get().get_imgui_layer()->get_font("regular_big"));
@@ -162,6 +41,8 @@ namespace PFF {
 		ImGui::PopFont();
 	}
 
+	// @brief Displays a help marker with tooltip containing the provided description.
+	// @param [desc] The description text to be displayed in the tooltip.
 	static void help_marker(const char* desc) {
 
 		ImGui::TextDisabled(" ? ");
@@ -174,10 +55,137 @@ namespace PFF {
 		}
 	}
 
+	// @brief Adjusts the current ImGui cursor position by adding the specified horizontal and vertical shift offsets.
+	// @param [shift_x] The horizontal shift offset.
+	// @param [shift_y] The vertical shift offset.
 	static void shift_cursor_pos(const f32 shift_x, const f32 shift_y) {
 
 		auto current_pos = ImGui::GetCursorPos();
 		ImGui::SetCursorPos({ current_pos.x + shift_x, current_pos.y + shift_y });
+	}
+
+	namespace UI {
+
+		// @brief Adds a row to an ImGui table with a label and corresponding value input field.
+		// @tparam [T] The type of the value.
+		// @param [label] The label for the row.
+		// @param [value] The value to be displayed or edited.
+		// @param [flags] Flags controlling the behavior of the input field.
+		template<typename T>
+		void add_table_row(const std::string& label, T value, ImGuiInputTextFlags flags) {
+
+			ImGuiStyle& style = ImGui::GetStyle();
+			ImVec2 current_item_spacing = style.ItemSpacing;
+			flags |= ImGuiInputTextFlags_AllowTabInput;
+
+			ImGui::TableNextRow();
+			ImGui::TableSetColumnIndex(0);
+			ImGui::Text("%s", label.c_str());
+
+			ImGui::TableSetColumnIndex(1);
+
+			if constexpr (std::is_same_v<T, bool>) {
+
+				ImGui::Text("%s", util::bool_to_str(value));
+			}
+
+			else if constexpr (std::is_convertible_v<T, std::string>) {
+
+				ImGui::Text("%s", std::to_string(value).c_str());
+			}
+
+			else if constexpr (std::is_arithmetic_v<T>) {
+
+				ImGui::SetNextItemWidth(ImGui::GetColumnWidth());
+				ImGui::InputFloat(label.c_str(), &value, 0.0f, 0.0f, "%.2f", flags);
+			}
+
+			else if constexpr (std::is_same_v<T, glm::vec2>) {
+
+				ImGui::SetNextItemWidth(ImGui::GetColumnWidth());
+				ImGui::InputFloat2(label.c_str(), &value[0], "%.2f", flags);
+			}
+
+			else if constexpr (std::is_same_v<T, glm::vec3>) {
+
+				ImGui::SetNextItemWidth(ImGui::GetColumnWidth());
+				ImGui::InputFloat3(label.c_str(), &value[0], "%.2f", flags);
+			}
+
+			else if constexpr (std::is_same_v<T, glm::vec4> || std::is_same_v<T, ImVec4>) {
+
+				ImGui::SetNextItemWidth(ImGui::GetColumnWidth());
+				ImGui::InputFloat4(label.c_str(), &value[0], "%.2f", flags);
+			}
+
+			//ImGui::PopStyleVar();
+		}
+
+		// @brief This function sets up an ImGui table with two columns, where the first column is resizable and the second column fills the remaining available area and not resizable
+		// @brief CAUTION - you slao need to call UI::end_default_table() at the end of table;
+		// @param [lable] Is used to identify the table
+		static void begin_default_table(const char* lable) {
+
+			// setup table
+			ImGuiTableFlags flags = ImGuiTableFlags_Resizable;
+			ImGui::BeginTable(lable, 2, flags);
+
+			// setup column
+			ImGui::TableSetupColumn("##one", ImGuiTableColumnFlags_NoHeaderLabel);
+			ImGui::TableSetupColumn("##two", ImGuiTableColumnFlags_NoHeaderLabel | ImGuiTableColumnFlags_NoResize);
+		}
+		
+		// @brief Ends the table started with UI::begin_default_table("example").
+		static void end_default_table() {
+
+			ImGui::EndTable();
+		}
+
+		// @brief This function draws a custom frame with two separate sections: [left_side] and [right_side].
+		//          The width of the first column is specified by [width_left_side]. Both sections are contained within
+		//          the same ImGui table. Each section's content is drawn using the provided function callbacks (lamdas or functions)
+		// @param [width_left_side] The fixed width of the first column.
+		// @param [left_side] The function representing the content of the left side.
+		// @param [right_side] The function representing the content of the right side.
+		static void custom_frame(const f32 width_left_side, std::function<void()> left_side, std::function<void()> right_side) {
+
+			// SETUP
+			ImGuiTableFlags flags = ImGuiTableFlags_None;
+			ImGui::PushStyleVar(ImGuiStyleVar_CellPadding, ImVec2(0, 0));
+			if (ImGui::BeginTable("test_master_divider", 2, flags)) {
+
+				ImGui::PopStyleVar();
+
+				// setup column
+				ImGui::TableSetupColumn("##one", ImGuiTableColumnFlags_WidthFixed, width_left_side);
+				ImGui::TableSetupColumn("##two", ImGuiTableColumnFlags_WidthFixed | ImGuiTableColumnFlags_NoResize, ImGui::GetWindowWidth() - (width_left_side + 10.f));
+
+				// enter first column
+				ImGui::TableNextRow();
+				ImGui::TableSetColumnIndex(0);
+
+				// draw background
+				const ImVec4 color = UI::THEME::highlited_window_bg;
+				const ImVec2 uperleft_corner = ImGui::GetCursorScreenPos();
+				const ImVec2 lowerright_corner = { uperleft_corner.x + width_left_side ,uperleft_corner.y + ImGui::GetWindowHeight() };
+				ImGui::GetWindowDrawList()->AddRectFilled(uperleft_corner, lowerright_corner, PFF::convert_color_to_int(color));
+
+				shift_cursor_pos(0, ImGui::GetTextLineHeight());
+				ImGui::BeginGroup();
+				left_side();
+				ImGui::EndGroup();
+
+				ImGui::TableSetColumnIndex(1);
+				shift_cursor_pos(10, 10);
+
+				ImGui::BeginGroup();
+				right_side();
+				ImGui::EndGroup();
+
+				ImGui::EndTable();
+			}
+		}
+
 	}
 
 }

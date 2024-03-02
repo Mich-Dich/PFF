@@ -34,8 +34,9 @@ namespace PFF {
 
 		static theme_selection UI_theme = theme_selection::default;
 		static ImVec4 main_color = { .5f,	.0f,	.0f,	1.f };
-		static ImVec4 highlited_window_bg = LERP_GRAY(0.19f);
+		static ImVec4 highlited_window_bg = LERP_GRAY(0.17f);
 		static ImVec4 main_titlebar_color = LERP_MAIN_COLOR_DARK(.5f);
+		static f32 default_item_width = 200.f;
 
 		void enable_window_border(bool enable) {
 
