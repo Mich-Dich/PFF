@@ -75,6 +75,7 @@ namespace PFF {
 
 		const f32 titlebar_height = 60.f;
 
+		ImGuiStyle* style = &ImGui::GetStyle();
 		ImGuiViewport* viewport = ImGui::GetMainViewport();
 		ImGui::SetNextWindowPos(viewport->Pos);
 		ImGui::SetNextWindowSize(ImVec2(viewport->Size.x, titlebar_height));
@@ -95,12 +96,11 @@ namespace PFF {
 
 		const bool is_maximized = application::get_window()->is_maximized();
 		float titlebar_vertical_offset = is_maximized ? 6.f : 0.f;
-		const ImVec2 window_padding = ImGui::GetCurrentWindow()->WindowPadding;
-
-		ImGui::SetCursorPos(ImVec2(window_padding.x, window_padding.y + titlebar_vertical_offset));
+		
+		ImGui::SetCursorPos(ImVec2(0.f, titlebar_vertical_offset));
 		ImVec2 titlebar_min = ImGui::GetCursorScreenPos();
-		const ImVec2 titlebar_max = { ImGui::GetCursorScreenPos().x + ImGui::GetWindowWidth() - window_padding.x * 2.f,
-										ImGui::GetCursorScreenPos().y + titlebar_height - window_padding.y * 2.f };
+		const ImVec2 titlebar_max = { ImGui::GetCursorScreenPos().x + ImGui::GetWindowWidth(),
+										ImGui::GetCursorScreenPos().y + titlebar_height };
 
 		auto* bg_draw_list = ImGui::GetBackgroundDrawList();
 		auto* fg_draw_list = ImGui::GetForegroundDrawList();
@@ -109,9 +109,8 @@ namespace PFF {
 		auto* window_draw_list = ImGui::GetWindowDrawList();
 		//window_draw_list->AddRectFilled(uperleft_corner, lowerright_corner, IM_COL32(51, 255, 51, 255));
 
-		ImGuiStyle* style = &ImGui::GetStyle();
 		auto color_buf = style->Colors[ImGuiCol_Button];
-		ImVec4 bufsd = LERP_MAIN_COLOR_DARK(.5f);
+		ImVec4 bufsd = UI::THEME::main_titlebar_color;
 		auto main_color = IM_COL32(color_buf.x * 255, color_buf.y * 255, color_buf.z * 255, color_buf.w * 255);
 
 		window_draw_list->AddRectFilled(titlebar_min, { titlebar_min.x + 200.f, titlebar_max.y }, main_color);
@@ -126,15 +125,15 @@ namespace PFF {
 		const f32 w = ImGui::GetContentRegionAvail().x;
 		const f32 button_width = 25.f;
 		const f32 button_spaccing = 8.f;
-		const f32 button_area_width = viewport->Size.x - ((window_padding.x * 2) + (button_spaccing * 3) + (button_width * 3));
+		const f32 button_area_width = viewport->Size.x - ((button_spaccing * 3) + (button_width * 3));
 
 		// tilebar drag area
-		ImGui::SetCursorPos(ImVec2(window_padding.x, window_padding.y + titlebar_vertical_offset));
+		ImGui::SetCursorPos(ImVec2(0.f, titlebar_vertical_offset));
 
 #if 1	// FOR DEBUG VISAUL
-		ImGui::InvisibleButton("##titlebar_drag_zone", ImVec2(button_area_width, titlebar_height - window_padding.y * 2));
+		ImGui::InvisibleButton("##titlebar_drag_zone", ImVec2(button_area_width, titlebar_height ));
 #else
-		ImGui::Button("##titlebar_drag_zone", ImVec2(button_area_width, titlebar_height - window_padding.y * 2));
+		ImGui::Button("##titlebar_drag_zone", ImVec2(button_area_width, titlebar_height ));
 #endif // 1
 
 		application::get().set_titlebar_hovered(ImGui::IsItemHovered());
@@ -145,9 +144,7 @@ namespace PFF {
 
 		}
 
-		// (((titlebar_height / 2) - ImGui::GetFontSize()))
-
-		const f32 button_offset_x = 3.f;
+		const ImVec2 window_padding = { style->WindowPadding.x / 2,style->WindowPadding.y + 3.f};
 
 		ImGui::SetItemAllowOverlap();
 		ImGui::PushFont(application::get().get_imgui_layer()->get_font("giant"));
@@ -155,21 +152,17 @@ namespace PFF {
 		ImGui::Text("PFF Editor");
 		ImGui::PopFont();
 
-		ImGui::SetCursorPos(ImVec2(viewport->Size.x - (window_padding.x + (button_spaccing * 2) + (button_width * 3)), window_padding.y + titlebar_vertical_offset + button_offset_x));
+		ImGui::SetCursorPos(ImVec2(viewport->Size.x - (window_padding.x + (button_spaccing * 2) + (button_width * 3)), window_padding.y + titlebar_vertical_offset ));
 		if (ImGui::Button("_##Min", ImVec2(button_width, button_width)))
 			application::get().minimize_window();
 
-		ImGui::SetCursorPos(ImVec2(viewport->Size.x - (window_padding.x + (button_spaccing * 1) + (button_width * 2)), window_padding.y + titlebar_vertical_offset + button_offset_x));
+		ImGui::SetCursorPos(ImVec2(viewport->Size.x - (window_padding.x + (button_spaccing * 1) + (button_width * 2)), window_padding.y + titlebar_vertical_offset ));
 		if (ImGui::Button("O##Max", ImVec2(button_width, button_width)))
 			application::get().maximize_window();
 
-		ImGui::SetCursorPos(ImVec2(viewport->Size.x - (window_padding.x + button_width), window_padding.y + titlebar_vertical_offset + button_offset_x));
+		ImGui::SetCursorPos(ImVec2(viewport->Size.x - (window_padding.x + button_width), window_padding.y + titlebar_vertical_offset ));
 		if (ImGui::Button("X##Close", ImVec2(button_width, button_width)))
 			application::get().close_application();
-
-
-		window_flags = ImGuiWindowFlags_NoTitleBar | ImGuiWindowFlags_NoCollapse | ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoMove | ImGuiWindowFlags_NoScrollbar | ImGuiWindowFlags_NoScrollWithMouse;
-		window_flags |= ImGuiWindowFlags_NoDocking | ImGuiWindowFlags_MenuBar | ImGuiWindowFlags_AlwaysAutoResize;
 
 		//ImGuiStyle* style = &ImGui::GetStyle();
 		ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, ImVec2(4, 4));
@@ -184,6 +177,8 @@ namespace PFF {
 		ImGui::SetNextWindowSize({ 0,0 });
 		ImGui::SetNextWindowViewport(viewport->ID);
 		{
+			window_flags = ImGuiWindowFlags_NoTitleBar | ImGuiWindowFlags_NoCollapse | ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoMove | ImGuiWindowFlags_NoScrollbar | ImGuiWindowFlags_NoScrollWithMouse;
+			window_flags |= ImGuiWindowFlags_NoDocking | ImGuiWindowFlags_MenuBar | ImGuiWindowFlags_AlwaysAutoResize;
 			ImGui::Begin("application_title_menubar", nullptr, window_flags);
 
 			ImGui::PopStyleColor(2);
@@ -474,97 +469,112 @@ namespace PFF {
 
 		ImGuiStyle* style = &ImGui::GetStyle();
 		ImGuiWindowFlags window_flags{};
-		ImVec2 window_padding = style->WindowPadding;
-		window_padding.y += 10.f;
-		window_padding.x += 10.f;
+		const ImVec2 window_padding = { style->WindowPadding.x + 10.f, style->WindowPadding.y + 35.f};
 
 		ImGuiViewport* viewport = ImGui::GetMainViewport();
 		ImGui::SetNextWindowPos(ImGui::GetMainViewport()->GetCenter(), ImGuiCond_Appearing, ImVec2(0.5f, 0.5f));
 		ImGui::SetNextWindowSize(ImVec2(viewport->Size.x - 500, viewport->Size.y - 300), ImGuiCond_Appearing);
 		ImGui::SetNextWindowViewport(viewport->ID);
 
-		ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, window_padding);
+		ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, ImVec2(0,0));
 		if (ImGui::Begin("ToDo List", &m_show_todo_list, window_flags)) {
 
-			{
-				ImVec2 uperleft_corner = ImGui::GetCursorScreenPos();
-				uperleft_corner.x -= 50.f;
+			//ImGui::PushStyleVar(ImGuiStyleVar_ItemSpacing, ImVec2(0, 10));
+			ImGui::PushStyleVar(ImGuiStyleVar_CellPadding, ImVec2(0, 0));
+			if (ImGui::BeginTable("test_master_divider", 2, 0)) {
 
-				const ImVec2 lowerright_corner = { uperleft_corner.x + 200 ,
-												uperleft_corner.y + ImGui::GetWindowHeight() - 150.f };
+				ImGui::PopStyleVar();
 
-				auto* window_draw_list = ImGui::GetWindowDrawList();
-				//window_draw_list->AddRectFilled(uperleft_corner, lowerright_corner, IM_COL32(51, 255, 51, 255));
-				window_draw_list->AddRectFilledMultiColor(uperleft_corner, lowerright_corner, IM_COL32(51, 255, 51, 255), IM_COL32(51, 255, 51, 255), IM_COL32(255, 51, 51, 255), IM_COL32(51, 51, 255, 255));
+				// setup column
+				const f32 first_width = 250.f;
+				ImGui::TableSetupColumn("##one", ImGuiTableColumnFlags_WidthFixed, first_width);
+				ImGui::TableSetupColumn("##two", ImGuiTableColumnFlags_WidthFixed, ImGui::GetWindowWidth() - (first_width + 10.f));
+
+				// enter first column
+				ImGui::TableNextRow();
+				ImGui::TableSetColumnIndex(0);
+
+				// draw background
+				const ImVec4 color = UI::THEME::highlited_window_bg;
+				const ImVec2 uperleft_corner = ImGui::GetCursorScreenPos();
+				const ImVec2 lowerright_corner = { uperleft_corner.x + first_width ,uperleft_corner.y + ImGui::GetWindowHeight() };
+				ImGui::GetWindowDrawList()->AddRectFilled(uperleft_corner, lowerright_corner, convert_color_to_int(color));
+
+				ImGui::BeginGroup();
+				{	// MAKE INTO MAKRO LIKE PARAM
+
+					shift_cursor_pos(10, 10);
+					draw_big_text("Topics");
+
+					const char* items[] = { "General_settings", "General_settings 02", "General_settings 03" };
+					static u32 item_current_idx = 0;
+
+					ImGuiStyle* style = &ImGui::GetStyle();
+					ImGui::PushStyleVar(ImGuiStyleVar_ItemSpacing, ImVec2(10, 10));
+					ImGui::PushStyleVar(ImGuiStyleVar_FramePadding, ImVec2(25, style->FramePadding.y));
+					ImGui::PushStyleVar(ImGuiStyleVar_SelectableTextAlign, ImVec2(.5f, .5f));
+					ImGui::PushStyleColor(ImGuiCol_FrameBg, color);
+					if (ImGui::BeginListBox("##Topic_selector", ImVec2(first_width, (ARRAY_SIZE(items) * ImGui::GetTextLineHeightWithSpacing()) - 1))) {
+
+						for (u32 n = 0; n < ARRAY_SIZE(items); n++) {
+
+							const bool is_selected = (item_current_idx == n);
+							if (ImGui::Selectable(items[n], is_selected))
+								item_current_idx = n;
+						}
+						ImGui::EndListBox();
+
+					}
+					ImGui::PopStyleColor();
+					ImGui::PopStyleVar(3);
+
+				}	// MAKE INTO MAKRO LIKE PARAM
+				ImGui::EndGroup();
+
+				ImGui::TableSetColumnIndex(1);
+
+				shift_cursor_pos(10, 10);
+				ImGui::BeginGroup();
+				{	// MAKE INTO MAKRO LIKE PARAM
+
+					if (ImGui::CollapsingHeader("Open Items", ImGuiTreeNodeFlags_DefaultOpen)) {
+
+						for (u32 x = 0; x < 3; x++) {
+
+							bool test = false;
+
+							ImGui::Checkbox("##xx", &test);
+							ImGui::SameLine();
+							draw_big_text("Test Title");
+							ImGui::Text("test description of todo item");
+						}
+					}
+
+					ImGui::Spacing();
+
+					if (ImGui::CollapsingHeader("done Items")) {
+						for (u32 x = 0; x < 3; x++) {
+
+							bool test = false;
+							ImGui::Checkbox("##xx", &test);
+
+							ImGui::SameLine();
+							ImGui::BeginGroup();
+
+							draw_big_text("Test Title");
+							ImGui::Text("test description of todo item");
+
+							ImGui::EndGroup();
+
+						}
+					}
+
+				}	// MAKE INTO MAKRO LIKE PARAM
+				ImGui::EndGroup();
+
+				ImGui::EndTable();
 			}
 
-			ImGui::BeginGroup();
-			
-			//shift_cursor_pos(20, 0);
-			draw_big_text("Topics");
-
-			const char* items[] = { "General_settings", "General_settings 02", "General_settings 03" };
-			static u32 item_current_idx = 0;
-
-			ImGuiStyle* style = &ImGui::GetStyle();
-			ImGui::PushStyleVar(ImGuiStyleVar_ItemSpacing, ImVec2(10, 10));
-			ImGui::PushStyleColor(ImGuiCol_FrameBg, style->Colors[ImGuiCol_WindowBg]);
-			if (ImGui::BeginListBox("##Topic_selector", ImVec2(200, (ARRAY_SIZE(items) * ImGui::GetTextLineHeightWithSpacing()) - 1))) {
-
-				ImGui::PopStyleColor();
-				for (u32 n = 0; n < ARRAY_SIZE(items); n++) {
-
-					const bool is_selected = (item_current_idx == n);
-					if (ImGui::Selectable(items[n], is_selected))
-						item_current_idx = n;
-				}
-				ImGui::EndListBox();
-
-			}
-			ImGui::PopStyleVar();
-			ImGui::EndGroup();
-
-			ImGui::SameLine();
-			shift_cursor_pos(10, 0);
-
-			ImGui::BeginGroup();
-			if (ImGui::CollapsingHeader("Open Items", ImGuiTreeNodeFlags_DefaultOpen)) {
-
-				for (u32 x = 0; x < 3; x++) {
-
-					bool test = false;
-
-					ImGui::Checkbox("##xx", &test);
-					ImGui::SameLine();
-					draw_big_text("Test Title");
-					ImGui::Text("test description of todo item");
-
-					ImGui::Separator();
-
-				}
-			}
-
-			 ImGui::Spacing();
-
-			if (ImGui::CollapsingHeader("done Items")) {
-				for (u32 x = 0; x < 3; x++) {
-
-					bool test = false;
-					ImGui::Checkbox("##xx", &test);
-
-					ImGui::SameLine();
-					ImGui::BeginGroup();
-
-					draw_big_text("Test Title");
-					ImGui::Text("test description of todo item");
-
-					ImGui::EndGroup();
-					ImGui::Separator();
-
-				}
-			}
-
-			ImGui::EndGroup();
 		}
 		ImGui::End();
 		ImGui::PopStyleVar();
