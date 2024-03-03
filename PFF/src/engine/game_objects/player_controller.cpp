@@ -69,7 +69,7 @@ namespace PFF {
 		for (u32 x = 0; x < m_input_mapping->get_length(); x++) {				// reset action->data if needed
 			input_action* action = m_input_mapping->get_action(x);
 
-			if (action->modefier_flags & INPUT_ACTION_MODEFIER_AUTO_RESET || action->modefier_flags & INPUT_ACTION_MODEFIER_AUTO_RESET_ALL)
+			if (action->flags & INPUT_ACTION_MODEFIER_AUTO_RESET || action->flags & INPUT_ACTION_MODEFIER_AUTO_RESET_ALL)
 				action->data = {};
 
 		}
@@ -78,7 +78,7 @@ namespace PFF {
 		for (u32 x = 0; x < m_input_mapping->get_length(); x++) {
 			input_action* action = m_input_mapping->get_action(x);				// get input_action
 
-			if (action->modefier_flags & INPUT_ACTION_MODEFIER_SMOOTH_INTERP) {
+			if (action->flags & INPUT_ACTION_MODEFIER_SMOOTH_INTERP) {
 
 			}
 
@@ -99,7 +99,7 @@ namespace PFF {
 				switch (action->value) {
 
 					// ==================================================================================================================================
-					case input_value::_bool: {
+					case input_value::boolean: {
 
 						action->data.boolean = (m_buffer > 0.f);
 
@@ -108,13 +108,13 @@ namespace PFF {
 					} break;
 
 					// ==================================================================================================================================
-					case input_value::_1D: {
+					case input_value::vec_1D: {
 
 						action->data._1D += m_buffer;
 					} break;
 
 					// ==================================================================================================================================
-					case input_value::_2D: {
+					case input_value::vec_2D: {
 
 						if (key_details->modefier_flags & INPUT_ACTION_MODEFIER_AXIS_2)
 							action->data._2D.y += m_buffer;
@@ -123,7 +123,7 @@ namespace PFF {
 					} break;
 
 					// ==================================================================================================================================
-					case input_value::_3D: {
+					case input_value::vec_3D: {
 
 						if (key_details->modefier_flags & INPUT_ACTION_MODEFIER_AXIS_2)
 							action->data._3D.y += m_buffer;
@@ -139,23 +139,23 @@ namespace PFF {
 				}
 			}
 
-			if (action->modefier_flags & INPUT_ACTION_MODEFIER_VEC_NORMAL) {
+			if (action->flags & INPUT_ACTION_MODEFIER_USE_VEC_NORMAL) {
 				switch (action->value) {
 
 					// ==================================================================================================================================
-					case input_value::_1D: {
+					case input_value::vec_1D: {
 						action->data._1D = std::clamp(action->data._1D, -1.f, 1.f);
 					} break;
 
 					// ==================================================================================================================================
-					case input_value::_2D: {
+					case input_value::vec_2D: {
 						if (glm::dot(action->data._2D, action->data._2D) > std::numeric_limits<f32>::epsilon())
 							action->data._2D = glm::normalize(action->data._2D);
 
 					} break;
 
 					// ==================================================================================================================================
-					case input_value::_3D: {
+					case input_value::vec_3D: {
 						if (glm::dot(action->data._3D, action->data._3D) > std::numeric_limits<f32>::epsilon())
 							action->data._3D = glm::normalize(action->data._3D);
 
@@ -173,7 +173,7 @@ namespace PFF {
 		for (u32 x = 0; x < m_input_mapping->get_length(); x++) {				// get input_action
 			input_action* action = m_input_mapping->get_action(x);
 
-			if (action->modefier_flags & INPUT_ACTION_MODEFIER_AUTO_RESET_ALL) {
+			if (action->flags & INPUT_ACTION_MODEFIER_AUTO_RESET_ALL) {
 
 				for (u32 x = 0; x < action->get_length(); x++) {
 					key_details* key_details = action->get_key(x);				// get key
@@ -210,7 +210,7 @@ namespace PFF {
 				if (key_details->key == event.get_keycode()) {					// check if I have an event for that key
 
 
-					std::chrono::time_point<std::chrono::high_resolution_clock> time_now = std::chrono::high_resolution_clock::now();
+					std::chrono::time_point<std::chrono::steady_clock> time_now = std::chrono::steady_clock::now();
 					bool m_buffer = false;
 
 					//LOG(Debug, "Test");
@@ -263,7 +263,7 @@ namespace PFF {
 
 				if (key_details->key == event.get_keycode()) {						// check if I have an event for that key
 
-					std::chrono::time_point<std::chrono::high_resolution_clock> time_now = std::chrono::high_resolution_clock::now();
+					std::chrono::time_point<std::chrono::steady_clock> time_now = std::chrono::steady_clock::now();
 
 					bool m_buffer = false;
 					f32 event_value = event.get_value();

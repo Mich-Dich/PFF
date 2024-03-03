@@ -1,5 +1,5 @@
 
-#include <util/pffpch.h>
+#include <util/pch_editor.h>
 //#include <engine/Events/Event.h>
 
 #include "application.h"
@@ -29,6 +29,7 @@ namespace PFF {
 			move_speed = std::clamp(move_speed += (move_speed * 0.1f * m_input_mapping->change_move_speed.data._1D), 10.0f, 1000.0f);
 
 		if (m_input_mapping->capture_mouse.data.boolean) {
+		//if (m_input_mapping->capture_mouse.get_data<bool>()) {
 
 			application::get().capture_cursor();
 			m_camera_direction.y += m_input_mapping->look.data._2D.x * 0.1f * delta;

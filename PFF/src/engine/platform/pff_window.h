@@ -26,7 +26,7 @@ namespace PFF {
 
 		EventCallbackFn event_callback;
 
-		window_attributes(const std::string title = "PFF - Editor", const u32 width = 800, const  u32 height = 600, const  bool vsync = false, const EventCallbackFn& callback = nullptr)
+		window_attributes(const std::string title = "PFF - Editor", const u32 width = 1600, const  u32 height = 900, const  bool vsync = false, const EventCallbackFn& callback = nullptr)
 			: title(title), width(width), height(height), vsync(vsync), event_callback(callback){}
 	};
 

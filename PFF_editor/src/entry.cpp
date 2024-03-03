@@ -1,4 +1,5 @@
 
+#include <util/pch_editor.h>
 #include <PFF.h>
 
 #include "PFF_editor.h"

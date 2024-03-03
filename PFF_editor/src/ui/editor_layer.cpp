@@ -1,25 +1,25 @@
 
+#include <util/pch_editor.h>
+
 #include <imgui.h>
 #include <imgui_impl_glfw.h>
 #include <imgui_impl_vulkan.h>
 #include <imgui_internal.h>
 #include <glm/glm.hpp>
 
-#include "ui/panels/pannel_collection.h"
+#include "util/ui/panels/pannel_collection.h"
 #include "util/pffpch.h"
 #include "engine/platform/pff_window.h"
+
 #include "engine/color_theme.h"
-#include "application.h"
 #include "engine/layer/imgui_layer.h"
 #include "engine/platform/pff_window.h"
 
 //#include "PFF_editor.h"
-
 // TEST 
 #include "application.h"
 #include "engine/render/renderer.h"
 #include "engine/render/vk_swapchain.h"
-#include "ui/panels/pannel_collection.h"
 
 #include "editor_layer.h"
 
@@ -65,6 +65,7 @@ namespace PFF {
 		window_graphics_engine_settings();
 		window_editor_settings();
 		window_general_settings();
+		
 		window_todo_list();
 
 		ImGui::ShowDemoWindow();				// DEV-ONLY
@@ -210,20 +211,20 @@ namespace PFF {
 					for (input_action* action : *application::get().get_world_layer()->get_current_player_controller()->get_input_mapping()) {						// get input_action
 
 						switch (action->value) {
-						case input_value::_bool:
-							UI::add_table_row(action->name, action->data.boolean, ImGuiInputTextFlags_ReadOnly);
+						case input_value::boolean:
+							UI::add_table_row(action->get_name(), action->data.boolean, ImGuiInputTextFlags_ReadOnly);
 							break;
 
-						case input_value::_1D:
-							UI::add_table_row(action->name, action->data._1D, ImGuiInputTextFlags_ReadOnly);
+						case input_value::vec_1D:
+							UI::add_table_row(action->get_name(), action->data._1D, ImGuiInputTextFlags_ReadOnly);
 							break;
 
-						case input_value::_2D:
-							UI::add_table_row(action->name, action->data._2D, ImGuiInputTextFlags_ReadOnly);
+						case input_value::vec_2D:
+							UI::add_table_row(action->get_name(), action->data._2D, ImGuiInputTextFlags_ReadOnly);
 							break;
 
-						case input_value::_3D:
-							UI::add_table_row(action->name, action->data._3D, ImGuiInputTextFlags_ReadOnly);
+						case input_value::vec_3D:
+							UI::add_table_row(action->get_name(), action->data._3D, ImGuiInputTextFlags_ReadOnly);
 							break;
 
 						default:
@@ -467,11 +468,7 @@ namespace PFF {
 
 	void editor_layer::window_general_settings() {
 	}
-
-	void draw_todo_item(const char* title, const char* description) {
-
-	}
-
+	
 	void editor_layer::window_todo_list() {
 
 		if (!m_show_todo_list)
@@ -479,14 +476,14 @@ namespace PFF {
 
 		ImGuiStyle* style = &ImGui::GetStyle();
 		ImGuiWindowFlags window_flags{};
-		const ImVec2 window_padding = { style->WindowPadding.x + 10.f, style->WindowPadding.y + 35.f};
+		const ImVec2 window_padding = { style->WindowPadding.x + 10.f, style->WindowPadding.y + 35.f };
 
 		ImGuiViewport* viewport = ImGui::GetMainViewport();
 		ImGui::SetNextWindowPos(ImGui::GetMainViewport()->GetCenter(), ImGuiCond_Appearing, ImVec2(0.5f, 0.5f));
 		ImGui::SetNextWindowSize(ImVec2(viewport->Size.x - 500, viewport->Size.y - 300), ImGuiCond_Appearing);
 		ImGui::SetNextWindowViewport(viewport->ID);
 
-		ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, ImVec2(0,0));
+		ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, ImVec2(0, 0));
 		if (ImGui::Begin("ToDo List", &m_show_todo_list, window_flags)) {
 
 			const f32 first_width = 250.f;
@@ -518,7 +515,7 @@ namespace PFF {
 				ImGui::PopStyleVar(3);
 
 			}
-			, [] {	
+			, [] {
 
 				if (ImGui::CollapsingHeader("Open Items", ImGuiTreeNodeFlags_DefaultOpen)) {
 
@@ -559,15 +556,9 @@ namespace PFF {
 		ImGui::PopStyleVar();
 	}
 
+	void draw_todo_item(const char* title, const char* description) {
 
-
-	// call it like this:
-
-
-	// CLEANUP
-	/*
-	Internal code
-	*/
+	}
 
 	void editor_layer::set_next_window_pos(int16 location) {
 	}

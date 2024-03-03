@@ -10,39 +10,75 @@
     <Filter Include="src\controller">
       <UniqueIdentifier>{C0646EF6-AC32-62FC-95C6-D22281333E61}</UniqueIdentifier>
     </Filter>
+    <Filter Include="src\toolkit">
+      <UniqueIdentifier>{C2705FF9-2E26-D8EE-B71A-D2C523CFCEF2}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="src\toolkit\todo_list">
+      <UniqueIdentifier>{426A2C2E-AED6-E728-77CA-7F86E3F50991}</UniqueIdentifier>
+    </Filter>
     <Filter Include="src\ui">
       <UniqueIdentifier>{7A4F661C-66F1-90F2-4FAC-A4463BED1743}</UniqueIdentifier>
     </Filter>
-    <Filter Include="src\ui\panels">
-      <UniqueIdentifier>{AC260384-18E7-7EBA-E121-C8374DA1C396}</UniqueIdentifier>
+    <Filter Include="src\util">
+      <UniqueIdentifier>{BA5238CF-A61F-93DA-CF38-8182BB64C868}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="src\util\ui">
+      <UniqueIdentifier>{E7E79551-539D-0E47-DC91-081E4846054B}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="src\util\ui\panels">
+      <UniqueIdentifier>{7962BFDC-6546-8032-CEA6-7A85BAA96AB4}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="src\PFF_editor.h">
+      <Filter>src</Filter>
+    </ClInclude>
     <ClInclude Include="src\controller\editor_controller.h">
       <Filter>src\controller</Filter>
     </ClInclude>
     <ClInclude Include="src\controller\editor_inputs.h">
       <Filter>src\controller</Filter>
     </ClInclude>
+    <ClInclude Include="src\toolkit\todo_list\todo_list.h">
+      <Filter>src\toolkit\todo_list</Filter>
+    </ClInclude>
     <ClInclude Include="src\ui\editor_layer.h">
       <Filter>src\ui</Filter>
     </ClInclude>
-    <ClInclude Include="src\ui\panels\pannel_collection.h">
-      <Filter>src\ui\panels</Filter>
+    <ClInclude Include="src\util\pch_editor.h">
+      <Filter>src\util</Filter>
     </ClInclude>
-    <ClInclude Include="src\PFF_editor.h" />
+    <ClInclude Include="src\util\ui\panels\pannel_collection.h">
+      <Filter>src\util\ui\panels</Filter>
+    </ClInclude>
+    <ClInclude Include="src\util\util_editor.h">
+      <Filter>src\util</Filter>
+    </ClInclude>
+    <ClInclude Include="src\toolkit\graphics_engine_settings\graphics_engine_settings.h" />
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="src\PFF_editor.cpp">
+      <Filter>src</Filter>
+    </ClCompile>
     <ClCompile Include="src\controller\editor_controller.cpp">
       <Filter>src\controller</Filter>
     </ClCompile>
     <ClCompile Include="src\entry.cpp">
       <Filter>src</Filter>
     </ClCompile>
+    <ClCompile Include="src\toolkit\todo_list\todo_list.cpp">
+      <Filter>src\toolkit\todo_list</Filter>
+    </ClCompile>
     <ClCompile Include="src\ui\editor_layer.cpp">
       <Filter>src\ui</Filter>
     </ClCompile>
-    <ClCompile Include="src\PFF_editor.cpp" />
+    <ClCompile Include="src\util\pch_editor.cpp">
+      <Filter>src\util</Filter>
+    </ClCompile>
+    <ClCompile Include="src\util\ui\panels\pannel_collection.cpp">
+      <Filter>src\util\ui\panels</Filter>
+    </ClCompile>
+    <ClCompile Include="src\toolkit\graphics_engine_settings\graphics_engine_settings.cpp" />
   </ItemGroup>
   <ItemGroup>
     <None Include="shaders\default.frag">

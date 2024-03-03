@@ -3,7 +3,6 @@
 #include "util/pffpch.h"
 #include <imgui.h>
 
-
 #define PFF_UI_ACTIVE_THEME				PFF::UI::THEME::current_theme
 
 #define LERP_MAIN_COLOR_DARK(value)			{PFF::UI::THEME::main_color.x * value, PFF::UI::THEME::main_color.y * value, PFF::UI::THEME::main_color.z * value, 1.f }		// Set [w] to be [1.f] to disable accidental transparency

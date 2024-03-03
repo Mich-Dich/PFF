@@ -14,7 +14,7 @@
 #define FORCE_OVERRIDE false
 #endif						
 
-#define REGISTER_INPUT_ACTION(action)	action.name = #action;								\
+#define REGISTER_INPUT_ACTION(action)	action.set_name(#action);								\
 										register_action(&action, FORCE_OVERRIDE);
 
 namespace PFF {

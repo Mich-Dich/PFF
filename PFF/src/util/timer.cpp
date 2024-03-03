@@ -36,7 +36,7 @@ namespace PFF {
 		work_time = static_cast<f32>(glfwGetTime()) - m_last_frame_time;
 	}
 
-	void timer::limit_fps(const bool limit,  u32& fps, f32& delta_time, f32& work_time, f32& sleep_time) {
+	void timer::limit_fps(const bool limit, u32& fps, f32& delta_time, f32& work_time, f32& sleep_time) {
 
 		PFF_PROFILE_FUNCTION();
 
@@ -52,8 +52,7 @@ namespace PFF {
 		f32 time = static_cast<f32>(glfwGetTime());
 		delta_time = time - m_last_frame_time;
 		m_last_frame_time = time;
-		fps = static_cast<u32>(1 / (work_time + (sleep_time * 0.001)));
-
+		fps = static_cast<u32>(1.0 / (work_time + (sleep_time * 0.001)) + 0.5); // Round to nearest integer
 	}
 
 }

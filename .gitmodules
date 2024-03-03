@@ -7,3 +7,6 @@
 [submodule "PFF/vendor/imgui_new"]
 	path = PFF/vendor/imgui_new
 	url = https://github.com/Mich-Dich/imgui
+[submodule "PFF/vendor/yaml-cpp"]
+	path = PFF/vendor/yaml-cpp
+	url = https://github.com/Mich-Dich/yaml-cpp
