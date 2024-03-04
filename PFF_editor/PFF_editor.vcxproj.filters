@@ -13,6 +13,9 @@
     <Filter Include="src\toolkit">
       <UniqueIdentifier>{C2705FF9-2E26-D8EE-B71A-D2C523CFCEF2}</UniqueIdentifier>
     </Filter>
+    <Filter Include="src\toolkit\graphics_engine_settings">
+      <UniqueIdentifier>{47372309-331E-E500-DC6E-4B1EC8345E67}</UniqueIdentifier>
+    </Filter>
     <Filter Include="src\toolkit\todo_list">
       <UniqueIdentifier>{426A2C2E-AED6-E728-77CA-7F86E3F50991}</UniqueIdentifier>
     </Filter>
@@ -39,6 +42,9 @@
     <ClInclude Include="src\controller\editor_inputs.h">
       <Filter>src\controller</Filter>
     </ClInclude>
+    <ClInclude Include="src\toolkit\graphics_engine_settings\graphics_engine_settings.h">
+      <Filter>src\toolkit\graphics_engine_settings</Filter>
+    </ClInclude>
     <ClInclude Include="src\toolkit\todo_list\todo_list.h">
       <Filter>src\toolkit\todo_list</Filter>
     </ClInclude>
@@ -54,7 +60,6 @@
     <ClInclude Include="src\util\util_editor.h">
       <Filter>src\util</Filter>
     </ClInclude>
-    <ClInclude Include="src\toolkit\graphics_engine_settings\graphics_engine_settings.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="src\PFF_editor.cpp">
@@ -66,8 +71,8 @@
     <ClCompile Include="src\entry.cpp">
       <Filter>src</Filter>
     </ClCompile>
-    <ClCompile Include="src\toolkit\todo_list\todo_list.cpp">
-      <Filter>src\toolkit\todo_list</Filter>
+    <ClCompile Include="src\toolkit\graphics_engine_settings\graphics_engine_settings.cpp">
+      <Filter>src\toolkit\graphics_engine_settings</Filter>
     </ClCompile>
     <ClCompile Include="src\ui\editor_layer.cpp">
       <Filter>src\ui</Filter>
@@ -78,7 +83,6 @@
     <ClCompile Include="src\util\ui\panels\pannel_collection.cpp">
       <Filter>src\util\ui\panels</Filter>
     </ClCompile>
-    <ClCompile Include="src\toolkit\graphics_engine_settings\graphics_engine_settings.cpp" />
   </ItemGroup>
   <ItemGroup>
     <None Include="shaders\default.frag">

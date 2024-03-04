@@ -35,7 +35,7 @@ namespace PFF {
 		void window_graphics_engine_settings();
 		void window_editor_settings();
 		void window_general_settings();
-		void window_todo_list();
+		//void window_todo_list();
 
 		void set_next_window_pos(int16 location);
 		void progressbar_with_text(f32 percent, const char* text, f32 min_size_x = 0.0f, f32 min_size_y = 0.0f);
@@ -53,7 +53,7 @@ namespace PFF {
 		bool m_show_graphics_engine_settings = false;
 		bool m_show_editor_settings = false;
 		bool m_show_general_settings = false;
-		bool m_show_todo_list = false;
+		//bool m_show_todo_list = false;
 
 		std::vector<VkPresentModeKHR> m_swapchain_supported_presentmodes;
 		std::vector<const char*> m_swapchain_supported_presentmodes_str;

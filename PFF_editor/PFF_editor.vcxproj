@@ -159,7 +159,6 @@
     <ClCompile Include="src\controller\editor_controller.cpp" />
     <ClCompile Include="src\entry.cpp" />
     <ClCompile Include="src\toolkit\graphics_engine_settings\graphics_engine_settings.cpp" />
-    <ClCompile Include="src\toolkit\todo_list\todo_list.cpp" />
     <ClCompile Include="src\ui\editor_layer.cpp" />
     <ClCompile Include="src\util\pch_editor.cpp">
       <PrecompiledHeader>Create</PrecompiledHeader>
