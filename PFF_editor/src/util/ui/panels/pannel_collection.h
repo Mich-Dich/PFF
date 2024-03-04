@@ -32,6 +32,18 @@ namespace PFF::UI {
 		shift_cursor_pos(5, 0);
 	}
 
+	static bool add_gray_button(const char* lable, const ImVec2& size = { 0, 0 }) {
+
+		ImGui::PushStyleColor(ImGuiCol_Button, UI::THEME::action_color_gray_default);
+		ImGui::PushStyleColor(ImGuiCol_ButtonHovered, UI::THEME::action_color_gray_hover);
+		ImGui::PushStyleColor(ImGuiCol_ButtonActive, UI::THEME::action_color_gray_active);
+
+		const bool result = ImGui::Button(lable, size);
+
+		ImGui::PopStyleColor(3);
+		return result;
+	}
+
 	// @brief Draws text using a larger font.
 	// @param [text] The text to be drawn.
 	static void draw_big_text(const char* text) {
