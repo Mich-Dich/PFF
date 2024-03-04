@@ -13,8 +13,6 @@ Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "GLFW", "PFF\vendor\glfw\GLF
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "ImGui", "PFF\vendor\imgui_new\ImGui.vcxproj", "{C0FF640D-2C14-8DBE-F595-301E616989EF}"
 EndProject
-Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "yaml-cpp", "PFF\vendor\yaml-cpp\yaml-cpp.vcxproj", "{88F1A057-74BE-FB62-9DD7-E90A890331F1}"
-EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|x64 = Debug|x64
@@ -52,12 +50,6 @@ Global
 		{C0FF640D-2C14-8DBE-F595-301E616989EF}.Release|x64.Build.0 = Release|x64
 		{C0FF640D-2C14-8DBE-F595-301E616989EF}.RelWithDebInfo|x64.ActiveCfg = RelWithDebInfo|x64
 		{C0FF640D-2C14-8DBE-F595-301E616989EF}.RelWithDebInfo|x64.Build.0 = RelWithDebInfo|x64
-		{88F1A057-74BE-FB62-9DD7-E90A890331F1}.Debug|x64.ActiveCfg = Debug|x64
-		{88F1A057-74BE-FB62-9DD7-E90A890331F1}.Debug|x64.Build.0 = Debug|x64
-		{88F1A057-74BE-FB62-9DD7-E90A890331F1}.Release|x64.ActiveCfg = Release|x64
-		{88F1A057-74BE-FB62-9DD7-E90A890331F1}.Release|x64.Build.0 = Release|x64
-		{88F1A057-74BE-FB62-9DD7-E90A890331F1}.RelWithDebInfo|x64.ActiveCfg = RelWithDebInfo|x64
-		{88F1A057-74BE-FB62-9DD7-E90A890331F1}.RelWithDebInfo|x64.Build.0 = RelWithDebInfo|x64
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -65,6 +57,5 @@ Global
 	GlobalSection(NestedProjects) = preSolution
 		{154B857C-0182-860D-AA6E-6C109684020F} = {7390E460-5F74-A5B6-C8D4-9F09B4D78F38}
 		{C0FF640D-2C14-8DBE-F595-301E616989EF} = {7390E460-5F74-A5B6-C8D4-9F09B4D78F38}
-		{88F1A057-74BE-FB62-9DD7-E90A890331F1} = {7390E460-5F74-A5B6-C8D4-9F09B4D78F38}
 	EndGlobalSection
 EndGlobal

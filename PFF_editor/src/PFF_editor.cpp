@@ -54,7 +54,7 @@ namespace PFF {
 
 #else
 		// untitled / thruster
-		std::shared_ptr<basic_mesh> model = basic_mesh::create_mesh_from_file("assets/thruster.obj");
+		std::shared_ptr<basic_mesh> model = basic_mesh::create_mesh_from_file("assets/untitled.obj");
 		m_test_game_object = get_current_map()->create_empty_game_object();
 		m_test_game_object->mesh = model;
 		m_test_game_object->set_translation({ .0f, 0.f, 2.f });

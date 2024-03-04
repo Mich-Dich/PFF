@@ -42,10 +42,10 @@ namespace PFF::io_handler {
 
 		// Check if the directory exists
 		if (!(std::filesystem::exists(path) && std::filesystem::is_directory(path))) {
-			// Create the directory
-			if (!std::filesystem::create_directory(path)) {
+			
+			if (!std::filesystem::create_directory(path))		// Create the directory
 				return false;
-			}
+
 		}
 		return true;
 	}

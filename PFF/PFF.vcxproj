@@ -212,6 +212,7 @@ IF EXIST ..\bin\Release-windows-x86_64\PFF\PFF.dll\ (xcopy /Q /E /Y /I ..\bin\Re
     <ClInclude Include="src\util\data_types.h" />
     <ClInclude Include="src\util\io\config.h" />
     <ClInclude Include="src\util\io\io_handler.h" />
+    <ClInclude Include="src\util\io\serializer.h" />
     <ClInclude Include="src\util\logger.h" />
     <ClInclude Include="src\util\math\constance.h" />
     <ClInclude Include="src\util\math\random.h" />
@@ -246,6 +247,7 @@ IF EXIST ..\bin\Release-windows-x86_64\PFF\PFF.dll\ (xcopy /Q /E /Y /I ..\bin\Re
     <ClCompile Include="src\engine\render\vk_swapchain.cpp" />
     <ClCompile Include="src\util\io\config.cpp" />
     <ClCompile Include="src\util\io\io_handler.cpp" />
+    <ClCompile Include="src\util\io\serializer.cpp" />
     <ClCompile Include="src\util\logger.cpp" />
     <ClCompile Include="src\util\pffpch.cpp">
       <PrecompiledHeader>Create</PrecompiledHeader>

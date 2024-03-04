@@ -71,14 +71,14 @@ namespace PFF {
 
 		if (!s_GLFWinitialized) {
 
-			CORE_ASSERT(glfwInit(), "GLFW initialized", "Could not initialize GLFW");
 			glfwSetErrorCallback(GLFW_error_callback);
+			CORE_ASSERT(glfwInit(), "GLFW initialized", "Could not initialize GLFW");
 			s_GLFWinitialized = true;
 		}
 
-		glfwWindowHint(GLFW_TITLEBAR, false);
 		glfwWindowHint(GLFW_CLIENT_API, GLFW_NO_API);
 		glfwWindowHint(GLFW_RESIZABLE, GLFW_TRUE);
+		glfwWindowHint(GLFW_TITLEBAR, false);
 
 		m_Window = glfwCreateWindow(static_cast<int>(m_data.width), static_cast<int>(m_data.height), m_data.title.c_str(), nullptr, nullptr);
 		CORE_ASSERT(glfwVulkanSupported(), "", "GLFW: Vulkan Not Supported");

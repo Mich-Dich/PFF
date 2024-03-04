@@ -73,11 +73,20 @@ namespace PFF::toolkit::todo {
 	private:
 		std::vector<topic> m_topics{};
 		u64 m_selected_topic = 0;
+
+		friend class todo_serializer;
 	};
+
+	//	class todo_serializer {
+	//	
+	//		void serialize(const std::string& filepath) {};
+	//		bool deserialize(const std::string& filepath) {};
+	//	
+	//	};
 
 	todo_list::todo_list() {
 
-		m_topics.push_back({ "Editor", false, false, {{"Serialize ToDo-List", "Serialize Content into yaml-file for readability"}} });
+		m_topics.push_back({ "Editor", true, false, {{"Serialize ToDo-List", "Serialize Content into yaml-file for readability"}} });
 		m_topics.push_back({ "Renderer", false, false, {{"Test", "Descr"}} });
 		m_topics.push_back({ "Asset Manager", false, false, {{"Test", "Descr"}} });
 	}
@@ -256,9 +265,9 @@ namespace PFF::toolkit::todo {
 						if (m_topics[x].selected) {
 
 							m_topics[x].add_task(task_buf);
-							task_buf.reset();
 						}
 					}
+					task_buf.reset();
 				}
 
 				if (show_hint_descr) {
@@ -325,4 +334,6 @@ namespace PFF::toolkit::todo {
 		ASSERT(index >= 0 && index < m_topics.size(), "", "Tried to remove a nonvalid index")
 		m_topics.erase(m_topics.begin() + index);
 	}
+
+
 }

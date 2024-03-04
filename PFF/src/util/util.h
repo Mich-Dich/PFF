@@ -34,6 +34,30 @@
 
 namespace PFF {
 
+    // =================================================  smart pointers  =================================================
+
+    template<typename T>
+    // @brief [ref] is a smart pointer to a resource [T]
+    using ref = std::shared_ptr<T>;
+
+    template<typename T, typename ... args>
+    constexpr ref<T> create_ref(args&& ... arguments) {
+
+        return std::make_shared<T>(std::forward<args>(arguments)...);
+    }
+
+    template<typename T>
+    // @brief [scope_ref] is a [ref] for a scope
+    using scope_ref = std::unique_ptr<T>;
+
+    template<typename T, typename ... args>
+    constexpr scope_ref<T> create_scoped_ref(args&& ... arguments) {
+
+        return std::make_unique<T>(std::forward<args>(arguments)...);
+    }
+    
+    // =================================================  utilitys =================================================
+
 	namespace util {
 
 		template <size_t N>
@@ -173,10 +197,13 @@ namespace PFF {
                 DEBUG_BREAK();		// Input value is not supported
         }
 
-
-
-		// from: https://stackoverflow.com/a/57595105
 		template <typename T, typename... Rest>
+        // @brief Combines hash values. from: https://stackoverflow.com/a/57595105
+        // @tparam T The type of the value to hash.
+        // @tparam Rest Additional types to hash.
+        // @param seed The seed value for the hash.
+        // @param v The value to hash.
+        // @param rest Additional values to hash.
         constexpr void hash_combine(std::size_t& seed, const T& v, const Rest&... rest) {
 
 			seed ^= std::hash<T>{}(v)+0x9e3779b9 + (seed << 6) + (seed >> 2);
@@ -184,6 +211,12 @@ namespace PFF {
 		}
 
 		template <size_t N, size_t K>
+        // @brief Removes a substring from a character array.
+        // @tparam N The size of the source character array.
+        // @tparam K The size of the remove character array.
+        // @param source The source character array.
+        // @param remove The substring to remove.
+        // @return A character array with the specified substring removed.
 		constexpr auto remove_substring(const char(&source)[N], const char(&remove)[K]) {
 
 			char_array<N> result = {};
@@ -203,10 +236,20 @@ namespace PFF {
 			}
 			return result;
 		}
-
+        
+        //@brief Checks the validity of a pointer.
+        //@param [ptr] Pointer to check.
+        //@return [conat char*] "valid" if the pointer is not null, "invalid" otherwise.
 		FORCEINLINE constexpr const char* ptr_validity_check(const void* ptr) {return (ptr != nullptr) ? "valid" : "invalid";}
-
+        
+        //@brief Converts a string to a boolean value.
+        //@param [string] The string to convert.
+        //@return true if the string is "true", false otherwise.
 		FORCEINLINE constexpr bool str_to_bool(const std::string& string) { return(string == "true") ? true : false; }
+                
+        //@brief Converts a boolean value to a string.
+        //@param [boolean] The boolean value to convert.
+        //@return [conat char*] "true" if the boolean value is true, "false" otherwise.
 		FORCEINLINE constexpr const char* bool_to_str(bool boolean) { return boolean ? "true" : "false"; }
 	}
 }

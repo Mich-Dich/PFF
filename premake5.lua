@@ -21,9 +21,9 @@ workspace "PFF"
 	outputs  = "%{cfg.buildcfg}-%{cfg.system}-%{cfg.architecture}"
 
 group "dependencies"
+	-- include "vendor/premake"
 	include "PFF/vendor/imgui_new"
 	include "PFF/vendor/glfw"
-	include "PFF/vendor/yaml-cpp"
 group ""
 
 

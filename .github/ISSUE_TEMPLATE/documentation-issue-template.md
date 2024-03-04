@@ -1,6 +1,6 @@
 ---
 name: Documentation Issue Template
-about: Help us provide better Documentation
+about: Help us keep up-to-date with the documentation
 title: "[documentation]"
 labels: documentation
 assignees: ''

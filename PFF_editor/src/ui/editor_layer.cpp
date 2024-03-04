@@ -3,6 +3,7 @@
 
 #include <imgui.h>
 
+//#include "util/io/serializer.h"
 #include "util/ui/panels/pannel_collection.h"
 #include "engine/platform/pff_window.h"
 #include "engine/color_theme.h"
@@ -167,8 +168,8 @@ namespace PFF {
 		ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, ImVec2(4, 4));
 		ImGui::PushStyleVar(ImGuiStyleVar_WindowRounding, 0.f);
 		ImGui::PushStyleVar(ImGuiStyleVar_WindowBorderSize, 0.f);
-		ImGui::PushStyleColor(ImGuiCol_MenuBarBg, ImVec4{0,0,0,0});
-		ImGui::PushStyleColor(ImGuiCol_WindowBg, ImVec4{0,0,0,0});
+		ImGui::PushStyleColor(ImGuiCol_MenuBarBg, ImVec4{ 0, 0, 0, 0 });
+		ImGui::PushStyleColor(ImGuiCol_WindowBg, ImVec4{ 0, 0, 0, 0 });
 
 		// make new window with menubar because I dont know how to limit the extend of a MenuBar
 		// just ImGui::MenuBar() would bo over the entire width of [appliaction_titlebar]

@@ -9,7 +9,6 @@ IncludeDir["ImGui"]             = "%{wks.location}/PFF/vendor/imgui_new"
 IncludeDir["tinyobjloader"]     = "%{wks.location}/PFF/vendor/tinyobjloader"
 IncludeDir["stb_image"]         = "%{wks.location}/PFF/vendor/stb_image"
 IncludeDir["VulkanSDK"]         = "%{VULKAN_SDK}/Include"
-IncludeDir["yaml_cpp"]          = "%{wks.location}/PFF/vendor/yaml-cpp/include"
 
 
 LibraryDir = {}
