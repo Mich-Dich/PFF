@@ -42,13 +42,14 @@ namespace PFF {
         FORCEINLINE u32 get_height() const { return m_swap_chain_extent.height; }
         FORCEINLINE f32 get_extentAspectRatio() const { return static_cast<float>(m_swap_chain_extent.width) / static_cast<float>(m_swap_chain_extent.height); }
 
+        void createRenderPass(VkDevice device, const VkAllocationCallbacks* allocator, VkRenderPass render_pass);
+
     private:
 
         void init();
         void createSwapChain();
         void createImageViews();
         void createDepthResources();
-        void createRenderPass();
         void createFramebuffers();
         void createSyncObjects();
 

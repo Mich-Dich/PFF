@@ -13,10 +13,12 @@ namespace PFF {
 
 	class imgui_layer : public layer {
 	public:
+
 		imgui_layer(std::shared_ptr<renderer> renderer);
 		~imgui_layer();
 
 		FORCEINLINE ImGuiContext* get_context() const { return m_context; }
+		PFF_API_EDITOR ImFont* get_font(const std::string& name);
 
 		void on_attach() override;
 		void on_detach() override;
@@ -25,7 +27,6 @@ namespace PFF {
 		void on_imgui_render() override;
 		void show_performance();
 
-		PFF_API_EDITOR ImFont* get_font(const std::string& name);
 		void begin_frame();
 		void end_frame(VkCommandBuffer commandbuffer);
 		void capture_current_image(VkImageView frame_buffer);

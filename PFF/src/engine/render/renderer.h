@@ -9,10 +9,23 @@
 #include "engine/layer/world_layer.h"
 #include "engine/render/vk_descripters.h"
 
+// Define global function pointer 
+typedef void (*FunctionPtr)(VkDevice device, const VkAllocationCallbacks* allocator, VkRenderPass render_pass);
+
 namespace PFF {
 
 	class pff_window;
 
+
+	static void check_vk_result(VkResult err) {
+
+		if (err == 0)
+			return;
+
+		LOG(Error, "[vulkan] Error: VkResult = " << err);
+		if (err < 0)
+			abort();
+	}
 
 	class renderer {
 	public:
@@ -25,6 +38,7 @@ namespace PFF {
 		FORCEINLINE void set_world_Layer(world_layer* worldlayer) { m_world_Layer = worldlayer; }
 		FORCEINLINE bool is_frame_started() const { return m_is_frame_started; }
 		FORCEINLINE std::shared_ptr<vk_device> get_device() const { return m_device; }
+
 		FORCEINLINE std::vector<VkPresentModeKHR> get_swapchain_suported_present_modes() const { return m_swapchain->get_suported_present_modes(); }
 		FORCEINLINE VkRenderPass get_swapchain_render_pass() const { return m_swapchain->get_render_pass(); }
 		FORCEINLINE u32 get_swapchain_image_count() const { return m_swapchain->get_image_count(); }
@@ -39,7 +53,7 @@ namespace PFF {
 		FORCEINLINE u32 get_frame_index() const {							CORE_ASSERT(m_is_frame_started, "", "Cant get command buffer when frame not in progress");
 																			return m_current_image_index; }
 
-		void add_render_system(std::shared_ptr<vk_device> device, VkRenderPass renderPass, VkDescriptorSetLayout descriptor_set_layout);
+		void add_render_system(VkDescriptorSetLayout descriptor_set_layout);
 		void draw_frame(const f32 delta_time);
 		void wait_Idle();
 		void set_size(const u32 width, const u32 height);
@@ -64,7 +78,7 @@ namespace PFF {
 
 		std::shared_ptr<pff_window> m_window;
 		std::shared_ptr<vk_device> m_device;
-		std::unique_ptr<vk_swapchain> m_swapchain{};
+		std::shared_ptr<vk_swapchain> m_swapchain{};
 		std::unique_ptr<render_system> m_render_system{};
 		layer_stack* m_layerstack;
 		std::vector<game_object> m_game_objects{};				// move into map class

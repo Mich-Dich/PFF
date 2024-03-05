@@ -18,7 +18,10 @@
 
 namespace PFF {
 
+
 	static ImGui_ImplVulkanH_Window g_MainWindowData;
+	static VkPipelineCache          g_PipelineCache = VK_NULL_HANDLE;
+	static VkRenderPass				g_RenderPass = VK_NULL_HANDLE;
 
 
 	template<typename key_type, typename value_type>
@@ -41,6 +44,8 @@ namespace PFF {
 
 		PFF_PROFILE_FUNCTION();
 
+		vkDestroyRenderPass(m_renderer->get_device()->get_device(), g_RenderPass, nullptr);
+		
 		m_renderer.reset();
 		CORE_LOG(Info, "Shutdown");
 	}
@@ -50,36 +55,27 @@ namespace PFF {
 		PFF_PROFILE_FUNCTION();
 		LOG(Info, "attach imgui layer");
 
-		/*
+
 		// Create Framebuffers
 		int width, height;
 		application::get().get_window()->get_framebuffer_size(&width, &height);
 		ImGui_ImplVulkanH_Window* window_data = &g_MainWindowData;
-		Setup_vulkan_window(window_data, width, height);
-		*/
+		// Setup_vulkan_window(window_data, width, height);
+
+		// ImGui_set_create_render_pass_func(&application::get_renderer()->get_swapchain()->createRenderPass);
 
 		// Setup Dear ImGui context
 		IMGUI_CHECKVERSION();
 		m_context = ImGui::CreateContext();
 		ImGuiIO& io = ImGui::GetIO();
 		io.ConfigFlags |= ImGuiConfigFlags_NavEnableKeyboard;		// Enable Keyboard Controls
-		io.ConfigFlags |= ImGuiConfigFlags_NavEnableGamepad;		// Enable Gamepad Controls
+		//io.ConfigFlags |= ImGuiConfigFlags_NavEnableGamepad;		// Enable Gamepad Controls
 		io.ConfigFlags |= ImGuiConfigFlags_DockingEnable;           // Enable Docking
 		io.ConfigFlags |= ImGuiConfigFlags_ViewportsEnable;         // Enable Multi-Viewport / Platform Windows
 		//io.ConfigFlags |= ImGuiConfigFlags_ViewportsNoTaskBarIcons;
 		//io.ConfigFlags |= ImGuiConfigFlags_ViewportsNoMerge;
 		io.IniFilename = "./config/imgui.ini";
 		ImGui::SetCurrentContext(m_context);
-
-		// ImGui::StyleColorsDark();
-
-		// When viewports are enabled we tweak WindowRounding/WindowBg so platform windows can look identical to regular ones.
-		ImGuiStyle& style = ImGui::GetStyle();
-		if (io.ConfigFlags & ImGuiConfigFlags_ViewportsEnable) {
-
-			style.WindowRounding = 0.0f;
-			style.Colors[ImGuiCol_WindowBg].w = 1.0f;
-		}
 
 		application& app = application::get();
 		config::load(config::file::editor, "UI", "font_size", m_font_size);
@@ -97,10 +93,10 @@ namespace PFF {
 		init_info.Subpass = m_renderer->get_render_system_pipeline_subpass();
 		init_info.MinImageCount = m_renderer->get_device()->get_swap_chain_support().capabilities.minImageCount;
 		init_info.ImageCount = m_renderer->get_swapchain_image_count();
-		//init_info.PipelineCache = g_PipelineCache;
-		//init_info.MSAASamples = VK_SAMPLE_COUNT_1_BIT;
-		//init_info.Allocator = nullptr;
-		//init_info.CheckVkResultFn = check_vk_result;
+		init_info.MSAASamples = VK_SAMPLE_COUNT_1_BIT;
+		init_info.CheckVkResultFn = check_vk_result;
+		init_info.PipelineCache = g_PipelineCache;
+		init_info.Allocator = nullptr;
 		CORE_ASSERT(ImGui_ImplVulkan_Init(&init_info, m_renderer->get_swapchain_render_pass()), "", "");
 
 		// Load fonts		
@@ -256,6 +252,7 @@ namespace PFF {
 		ImGui_ImplVulkan_NewFrame();
 		ImGui_ImplGlfw_NewFrame();
 		ImGui::NewFrame();
+
 	}
 
 	void imgui_layer::end_frame(VkCommandBuffer commandbuffer) {

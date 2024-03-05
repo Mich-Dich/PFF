@@ -46,11 +46,22 @@ namespace PFF {
 
 		// make global descriptor pool
 		m_global_descriptor_pool = vk_descriptor_pool::builder(m_device)
-			.setMaxSets(vk_swapchain::MAX_FRAMES_IN_FLIGHT * 2)
-			.addPoolSize(VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER, vk_swapchain::MAX_FRAMES_IN_FLIGHT)
-			.addPoolSize(VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER, vk_swapchain::MAX_FRAMES_IN_FLIGHT * 2)
+			.addPoolSize(VK_DESCRIPTOR_TYPE_SAMPLER, 1000)
+			.addPoolSize(VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER, 1000)
+			.addPoolSize(VK_DESCRIPTOR_TYPE_SAMPLED_IMAGE, 1000)
+			.addPoolSize(VK_DESCRIPTOR_TYPE_STORAGE_IMAGE, 1000)
+			.addPoolSize(VK_DESCRIPTOR_TYPE_UNIFORM_TEXEL_BUFFER, 1000)
+			.addPoolSize(VK_DESCRIPTOR_TYPE_STORAGE_TEXEL_BUFFER, 1000)
+			.addPoolSize(VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER, 1000)
+			.addPoolSize(VK_DESCRIPTOR_TYPE_STORAGE_BUFFER, 1000)
+			.addPoolSize(VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER_DYNAMIC, 1000)
+			.addPoolSize(VK_DESCRIPTOR_TYPE_STORAGE_BUFFER_DYNAMIC, 1000)
+			.addPoolSize(VK_DESCRIPTOR_TYPE_INPUT_ATTACHMENT, 1000)
+
+			.setMaxSets(1000)
 			.setPoolFlags(VK_DESCRIPTOR_POOL_CREATE_FREE_DESCRIPTOR_SET_BIT)
 			.build();
+
 
 		m_global_set_layout = vk_descriptor_set_layout::builder(m_device)
 			.add_binding(0, VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER, VK_SHADER_STAGE_VERTEX_BIT)					// binding for renderer & ImGui
@@ -67,7 +78,7 @@ namespace PFF {
 		}
 
 		// add first render system
-		add_render_system(get_device(), get_swapchain_render_pass(), m_global_set_layout->get_descriptor_set_layout());
+		add_render_system(m_global_set_layout->get_descriptor_set_layout());
 
 	}
 
@@ -95,7 +106,7 @@ namespace PFF {
 
 	// ==================================================================== public ====================================================================
 
-	void renderer::add_render_system(std::shared_ptr<vk_device> device, VkRenderPass renderPass, VkDescriptorSetLayout descriptor_set_layout) {
+	void renderer::add_render_system(VkDescriptorSetLayout descriptor_set_layout) {
 
 		PFF_PROFILE_FUNCTION();
 
@@ -227,6 +238,9 @@ namespace PFF {
 		CORE_ASSERT(m_is_frame_started, "", "Can not begin frame if frame already in progress");
 		CORE_ASSERT(commandbuffer == get_current_command_buffer(), "", "Can not begin render pass on command buffer from diffrent frame");
 
+		std::array<VkClearValue, 2> clear_values{};
+		clear_values[0].color = { 0.01f, 0.01f, 0.01f, 1.0f };
+		clear_values[1].depthStencil = { 1.0f,0 };
 
 		VkRenderPassBeginInfo render_pass_BI{};
 		render_pass_BI.sType = VK_STRUCTURE_TYPE_RENDER_PASS_BEGIN_INFO;
@@ -234,10 +248,6 @@ namespace PFF {
 		render_pass_BI.framebuffer = m_swapchain->getFrameBuffer(m_current_image_index);
 		render_pass_BI.renderArea.offset = { 0,0 };
 		render_pass_BI.renderArea.extent = m_swapchain->get_swapchain_extent();
-
-		std::array<VkClearValue, 2> clear_values{};
-		clear_values[0].color = { 0.01f, 0.01f, 0.01f, 1.0f };
-		clear_values[1].depthStencil = { 1.0f,0 };
 		render_pass_BI.clearValueCount = static_cast<u32>(clear_values.size());
 		render_pass_BI.pClearValues = clear_values.data();
 
@@ -298,12 +308,12 @@ namespace PFF {
 
 		if (m_swapchain == nullptr) {
 
-			m_swapchain = std::make_unique<vk_swapchain>(m_device, m_window->get_extend());
+			m_swapchain = std::make_shared<vk_swapchain>(m_device, m_window->get_extend());
 			create_command_buffer();
 
 		} else {
 
-			m_swapchain = std::make_unique<vk_swapchain>(m_device, m_window->get_extend(), std::move(m_swapchain));
+			m_swapchain = std::make_shared<vk_swapchain>(m_device, m_window->get_extend(), std::move(m_swapchain));
 			if (m_swapchain->get_image_count() != m_command_buffers.size()) {
 
 				free_command_buffers();

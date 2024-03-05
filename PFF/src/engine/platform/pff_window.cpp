@@ -81,7 +81,7 @@ namespace PFF {
 		glfwWindowHint(GLFW_RESIZABLE, GLFW_TRUE);
 
 		m_Window = glfwCreateWindow(static_cast<int>(m_data.width), static_cast<int>(m_data.height), m_data.title.c_str(), nullptr, nullptr);
-		CORE_ASSERT(glfwVulkanSupported(), "", "GLFW: Vulkan Not Supported");
+		CORE_ASSERT(glfwVulkanSupported(), "", "GLFW does not support Vulkan");
 		CORE_LOG(Trace, "Creating window [" << m_data.title << " width: " << m_data.width << "  height: " << m_data.height << "]");
 
 		glfwSetWindowUserPointer(m_Window, &m_data);
@@ -172,6 +172,7 @@ namespace PFF {
 			Data.event_callback(event);
 		});
 
+		glfwShowWindow(m_Window);
 		CORE_LOG(Info, "finished setup");
 	}
 
@@ -182,14 +183,12 @@ namespace PFF {
 		glfwPollEvents();
 
 		// prossess constom queue
-		{
-			std::scoped_lock<std::mutex> lock(m_event_queue_mutex);
-			while (m_event_queue.size() > 0) {
+		std::scoped_lock<std::mutex> lock(m_event_queue_mutex);
+		while (m_event_queue.size() > 0) {
 
-				auto& func = m_event_queue.front();
-				func();
-				m_event_queue.pop();
-			}
+			auto& func = m_event_queue.front();
+			func();
+			m_event_queue.pop();
 		}
 	}
 
@@ -219,7 +218,7 @@ namespace PFF {
 		return glfwWindowShouldClose(m_Window);
 	}
 
-	PFF_API_EDITOR void pff_window::get_framebuffer_size(int* width, int* height) {
+	void pff_window::get_framebuffer_size(int* width, int* height) {
 
 		glfwGetFramebufferSize(m_Window, width, height);
 	}

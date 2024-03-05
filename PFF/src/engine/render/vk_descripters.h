@@ -48,7 +48,7 @@ namespace PFF {
 
             builder(std::shared_ptr<vk_device> device) : m_device{ device } {}
 
-            builder& addPoolSize(VkDescriptorType descriptorType, u32 count);
+            builder& addPoolSize(VkDescriptorType descriptor_type, u32 count);
             builder& setPoolFlags(VkDescriptorPoolCreateFlags flags);
             builder& setMaxSets(u32 count);
             std::unique_ptr<vk_descriptor_pool> build() const;
@@ -57,23 +57,23 @@ namespace PFF {
             std::shared_ptr<vk_device> m_device;
             std::vector<VkDescriptorPoolSize> m_pool_sizes{};
             u32 m_maxSets = 1000;
-            VkDescriptorPoolCreateFlags m_poolFlags = 0;
+            VkDescriptorPoolCreateFlags m_pool_flags = 0;
         };
 
-        vk_descriptor_pool(std::shared_ptr<vk_device> device, u32 maxSets, VkDescriptorPoolCreateFlags poolFlags, const std::vector<VkDescriptorPoolSize>& poolSizes);
+        vk_descriptor_pool(std::shared_ptr<vk_device> device, u32 max_sets, VkDescriptorPoolCreateFlags pool_flags, const std::vector<VkDescriptorPoolSize>& pool_sizes);
         ~vk_descriptor_pool();
 
         DELETE_COPY(vk_descriptor_pool);
 
-        FORCEINLINE VkDescriptorPool get_descriptorPool() const { return m_descriptorPool; }
+        FORCEINLINE VkDescriptorPool get_descriptorPool() const { return m_descriptor_pool; }
 
-        bool allocate_descriptor_set(const VkDescriptorSetLayout descriptorSetLayout, VkDescriptorSet& descriptor) const;
+        bool allocate_descriptor_set(const VkDescriptorSetLayout descriptor_set_layout, VkDescriptorSet& descriptor) const;
         void freeDescriptors(std::vector<VkDescriptorSet>& descriptors) const;
         void resetPool();
 
     private:
         std::shared_ptr<vk_device> m_device;
-        VkDescriptorPool m_descriptorPool;
+        VkDescriptorPool m_descriptor_pool;
 
         friend class vk_descriptor_writer;
     };
@@ -85,8 +85,8 @@ namespace PFF {
 
         vk_descriptor_writer(vk_descriptor_set_layout& setLayout, vk_descriptor_pool& pool);
 
-        vk_descriptor_writer& write_buffer(u32 binding, VkDescriptorBufferInfo* bufferInfo);
-        vk_descriptor_writer& write_image(u32 binding, VkDescriptorImageInfo* imageInfo);
+        vk_descriptor_writer& write_buffer(u32 binding, VkDescriptorBufferInfo* buffer_info);
+        vk_descriptor_writer& write_image(u32 binding, VkDescriptorImageInfo* image_info);
 
         // Create a DescriptorSet and store handle into [set] var then cann [overwrite()] to update the resources the descripter should point to
         bool build(VkDescriptorSet& set);
@@ -95,7 +95,7 @@ namespace PFF {
         void overwrite(VkDescriptorSet& set);
 
     private:
-        vk_descriptor_set_layout& m_setLayout;
+        vk_descriptor_set_layout& m_set_layout;
         vk_descriptor_pool& m_pool;
         std::vector<VkWriteDescriptorSet> m_writes;
     };
