@@ -17,7 +17,7 @@ namespace PFF {
 
     public:
 
-#ifdef PFF_DEBUG
+#if defined(PFF_DEBUG) || defined(PFF_RELEASE_WITH_DEBUG_INFO)
         const bool c_enable_validation_layers = true;
 #else
         const bool c_enable_validation_layers = false;
@@ -83,6 +83,8 @@ namespace PFF {
         void has_required_Instance_extensions(const std::vector<const char*>& extentions);
         bool check_device_extension_support(VkPhysicalDevice get_device);
         SwapChainSupportDetails query_swapchain_support(VkPhysicalDevice get_device);
+
+        bool check_for_WSI_support();
 
         vk_util::QueueFamilyIndices m_queue_family_indices;
         VkInstance m_VkInstance;

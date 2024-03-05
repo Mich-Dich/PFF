@@ -265,20 +265,12 @@ namespace PFF {
         }
 
         if (candidates.rbegin()->first > 0) {
+
             m_physical_device = candidates.rbegin()->second;
             CORE_LOG(Debug, "Fount Device is sutable");
-        } else {
+        } else 
             CORE_LOG(Error, "FAILED to find autable Device");
-        }
-        /*
-        for (const auto& get_device : devices) {
-            if (is_device_suitable(get_device)) {
-                m_physical_device = get_device;
-                break;
-            }
-        }
-        */
-        
+                
         CORE_ASSERT(m_physical_device != VK_NULL_HANDLE, "", "failed to find a suitable GPU!");
         vkGetPhysicalDeviceProperties(m_physical_device, &properties);
         LOG(Info, "physical device: " << properties.deviceName);
@@ -297,6 +289,7 @@ namespace PFF {
 
         float queue_priority = 1.0f;
         for (u32 queue_family : unique_queue_families) {
+
             VkDeviceQueueCreateInfo queue_CI = {};
             queue_CI.sType = VK_STRUCTURE_TYPE_DEVICE_QUEUE_CREATE_INFO;
             queue_CI.queueFamilyIndex = queue_family;
@@ -310,16 +303,13 @@ namespace PFF {
 
         VkDeviceCreateInfo device_CI = {};
         device_CI.sType = VK_STRUCTURE_TYPE_DEVICE_CREATE_INFO;
-
         device_CI.queueCreateInfoCount = static_cast<u32>(device_queues_CI.size());
         device_CI.pQueueCreateInfos = device_queues_CI.data();
-
         device_CI.pEnabledFeatures = &deviceFeatures;
         device_CI.enabledExtensionCount = static_cast<u32>(m_device_extensions.size());
         device_CI.ppEnabledExtensionNames = m_device_extensions.data();
 
-        // might not really be necessary anymore because device specific validation layers
-        // have been deprecated
+        // might not really be necessary anymore because device specific validation layers have been deprecated
         if (c_enable_validation_layers) {
 
             device_CI.enabledLayerCount = static_cast<u32>(m_validation_layers.size());
@@ -391,7 +381,7 @@ namespace PFF {
 
             int locScore = 0;
         if (deviceProps.deviceType == VK_PHYSICAL_DEVICE_TYPE_DISCRETE_GPU)
-            locScore += 1000;
+            locScore += 3000;
 
         find_queue_families(device);
 
@@ -439,17 +429,21 @@ namespace PFF {
         glfwExtensions = glfwGetRequiredInstanceExtensions(&glfwExtensionCount);
         std::vector<const char*> extensions(glfwExtensions, glfwExtensions + glfwExtensionCount);
 
-#ifdef PFF_DEBUG
-        CORE_LOG(Info, "Number of extenstions required for GLFW: " << extensions.size());
+#if defined(PFF_DEBUG) || defined(PFF_RELEASE_WITH_DEBUG_INFO)
+
+        extensions.push_back("VK_EXT_debug_report");
+
+        CORE_LOG(Info, "Number of extenstions required: " << extensions.size());
         for (const char* name : extensions) {
-            CORE_LOG(Trace, CONSOLE_LIST_BEGIN << name << "\"");
+            CORE_LOG(Trace, CONSOLE_LIST_BEGIN << name );
         }
 
         if (c_enable_validation_layers) {
 
             CORE_LOG(Info, "Number of extenstions required for validation_layer: " << 1);
-            CORE_LOG(Trace, CONSOLE_LIST_BEGIN << VK_EXT_DEBUG_UTILS_EXTENSION_NAME << "\"");
+            CORE_LOG(Trace, CONSOLE_LIST_BEGIN << VK_EXT_DEBUG_UTILS_EXTENSION_NAME );
         }
+
 #endif
 
         if (c_enable_validation_layers) {
@@ -553,6 +547,8 @@ namespace PFF {
             i++;
         }
 
+        CORE_ASSERT(m_queue_family_indices.graphics_family_has_value && m_queue_family_indices.present_family_has_value, "", "Failed to select [graphics family] or [present family]");
+
         return m_queue_family_indices;
     }
 
@@ -589,12 +585,12 @@ namespace PFF {
             VkFormatProperties props;
             vkGetPhysicalDeviceFormatProperties(m_physical_device, format, &props);
 
-            if (tiling == VK_IMAGE_TILING_LINEAR && (props.linearTilingFeatures & features) == features) {
+            if (tiling == VK_IMAGE_TILING_LINEAR && (props.linearTilingFeatures & features) == features)
                 return format;
-            } else if (
-                tiling == VK_IMAGE_TILING_OPTIMAL && (props.optimalTilingFeatures & features) == features) {
+            
+            else if (tiling == VK_IMAGE_TILING_OPTIMAL && (props.optimalTilingFeatures & features) == features)
                 return format;
-            }
+
         }
         throw std::runtime_error("failed to find supported format!");
     }

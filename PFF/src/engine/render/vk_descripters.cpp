@@ -53,15 +53,15 @@ namespace PFF {
 
     // ==================================================================== Descriptor Pool Builder ====================================================================
 
-    vk_descriptor_pool::builder& vk_descriptor_pool::builder::addPoolSize(VkDescriptorType descriptorType, u32 count) {
+    vk_descriptor_pool::builder& vk_descriptor_pool::builder::addPoolSize(VkDescriptorType descriptor_type, u32 count) {
 
-        m_pool_sizes.push_back({ descriptorType, count });
+        m_pool_sizes.push_back({ descriptor_type, count });
         return *this;
     }
 
     vk_descriptor_pool::builder& vk_descriptor_pool::builder::setPoolFlags(VkDescriptorPoolCreateFlags flags) {
 
-        m_poolFlags = flags;
+        m_pool_flags = flags;
         return *this;
     }
     vk_descriptor_pool::builder& vk_descriptor_pool::builder::setMaxSets(u32 count) {
@@ -72,41 +72,41 @@ namespace PFF {
 
     std::unique_ptr<vk_descriptor_pool> vk_descriptor_pool::builder::build() const {
 
-        return std::make_unique<vk_descriptor_pool>(m_device, m_maxSets, m_poolFlags, m_pool_sizes);
+        return std::make_unique<vk_descriptor_pool>(m_device, m_maxSets, m_pool_flags, m_pool_sizes);
     }
 
     // ==================================================================== Descriptor Pool ====================================================================
 
-    vk_descriptor_pool::vk_descriptor_pool(std::shared_ptr<vk_device> device, u32 maxSets, VkDescriptorPoolCreateFlags poolFlags, const std::vector<VkDescriptorPoolSize>& poolSizes)
+    vk_descriptor_pool::vk_descriptor_pool(std::shared_ptr<vk_device> device, u32 max_sets, VkDescriptorPoolCreateFlags pool_flags, const std::vector<VkDescriptorPoolSize>& pool_sizes)
         : m_device{ device } {
 
         PFF_PROFILE_FUNCTION();
 
         VkDescriptorPoolCreateInfo DP_CI{};
         DP_CI.sType = VK_STRUCTURE_TYPE_DESCRIPTOR_POOL_CREATE_INFO;
-        DP_CI.poolSizeCount = static_cast<u32>(poolSizes.size());
-        DP_CI.pPoolSizes = poolSizes.data();
-        DP_CI.maxSets = maxSets;
-        DP_CI.flags = poolFlags;
+        DP_CI.poolSizeCount = static_cast<u32>(pool_sizes.size());
+        DP_CI.pPoolSizes = pool_sizes.data();
+        DP_CI.maxSets = max_sets * static_cast<u32>(pool_sizes.size());
+        DP_CI.flags = pool_flags;
 
-        CORE_ASSERT_S(vkCreateDescriptorPool(m_device->get_device(), &DP_CI, nullptr, &m_descriptorPool) == VK_SUCCESS);
+        CORE_ASSERT_S(vkCreateDescriptorPool(m_device->get_device(), &DP_CI, nullptr, &m_descriptor_pool) == VK_SUCCESS);
     }
 
     vk_descriptor_pool::~vk_descriptor_pool() {
 
         PFF_PROFILE_FUNCTION();
 
-        vkDestroyDescriptorPool(m_device->get_device(), m_descriptorPool, nullptr);
+        vkDestroyDescriptorPool(m_device->get_device(), m_descriptor_pool, nullptr);
     }
 
-    bool vk_descriptor_pool::allocate_descriptor_set( const VkDescriptorSetLayout descriptorSetLayout, VkDescriptorSet& descriptor) const {
+    bool vk_descriptor_pool::allocate_descriptor_set( const VkDescriptorSetLayout descriptor_set_layout, VkDescriptorSet& descriptor) const {
 
         PFF_PROFILE_FUNCTION();
 
         VkDescriptorSetAllocateInfo CS_AI{};
         CS_AI.sType = VK_STRUCTURE_TYPE_DESCRIPTOR_SET_ALLOCATE_INFO;
-        CS_AI.descriptorPool = m_descriptorPool;
-        CS_AI.pSetLayouts = &descriptorSetLayout;
+        CS_AI.descriptorPool = m_descriptor_pool;
+        CS_AI.pSetLayouts = &descriptor_set_layout;
         CS_AI.descriptorSetCount = 1;
 
         // Might want to create a "DescriptorPoolManager" class that handles this case, and builds a new pool whenever an old pool fills up. But this is beyond current scope
@@ -120,7 +120,7 @@ namespace PFF {
 
         vkFreeDescriptorSets(
             m_device->get_device(),
-            m_descriptorPool,
+            m_descriptor_pool,
             static_cast<u32>(descriptors.size()),
             descriptors.data());
     }
@@ -129,48 +129,48 @@ namespace PFF {
 
         PFF_PROFILE_FUNCTION();
 
-        vkResetDescriptorPool(m_device->get_device(), m_descriptorPool, 0);
+        vkResetDescriptorPool(m_device->get_device(), m_descriptor_pool, 0);
     }
 
     // ==================================================================== Descriptor Writer ====================================================================
 
     vk_descriptor_writer::vk_descriptor_writer(vk_descriptor_set_layout& setLayout, vk_descriptor_pool& pool)
-        : m_setLayout{ setLayout }, m_pool{ pool } {}
+        : m_set_layout{ setLayout }, m_pool{ pool } {}
 
-    vk_descriptor_writer& vk_descriptor_writer::write_buffer(u32 binding, VkDescriptorBufferInfo* bufferInfo) {
+    vk_descriptor_writer& vk_descriptor_writer::write_buffer(u32 binding, VkDescriptorBufferInfo* buffer_info) {
 
         PFF_PROFILE_FUNCTION();
 
-        CORE_ASSERT(m_setLayout.m_bindings.count(binding) == 1, "", "Layout does not contain specified binding");
+        CORE_ASSERT(m_set_layout.m_bindings.count(binding) == 1, "", "Layout does not contain specified binding");
 
-        auto& bindingDescription = m_setLayout.m_bindings[binding];
+        auto& bindingDescription = m_set_layout.m_bindings[binding];
         CORE_ASSERT(bindingDescription.descriptorCount == 1, "", "Binding single descriptor info, but binding expects multiple");
 
         VkWriteDescriptorSet write{};
         write.sType = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET;
         write.descriptorType = bindingDescription.descriptorType;
         write.dstBinding = binding;
-        write.pBufferInfo = bufferInfo;
+        write.pBufferInfo = buffer_info;
         write.descriptorCount = 1;
 
         m_writes.push_back(write);
         return *this;
     }
 
-    vk_descriptor_writer& vk_descriptor_writer::write_image(u32 binding, VkDescriptorImageInfo* imageInfo) {
+    vk_descriptor_writer& vk_descriptor_writer::write_image(u32 binding, VkDescriptorImageInfo* image_info) {
 
         PFF_PROFILE_FUNCTION();
 
-        CORE_ASSERT(m_setLayout.m_bindings.count(binding) == 1, "", "Layout does not contain specified binding");
+        CORE_ASSERT(m_set_layout.m_bindings.count(binding) == 1, "", "Layout does not contain specified binding");
 
-        auto& bindingDescription = m_setLayout.m_bindings[binding];
+        auto& bindingDescription = m_set_layout.m_bindings[binding];
         CORE_ASSERT(bindingDescription.descriptorCount == 1, "", "Binding single descriptor info, but binding expects multiple");
 
         VkWriteDescriptorSet write{};
         write.sType = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET;
         write.descriptorType = bindingDescription.descriptorType;
         write.dstBinding = binding;
-        write.pImageInfo = imageInfo;
+        write.pImageInfo = image_info;
         write.descriptorCount = 1;
 
         m_writes.push_back(write);
@@ -181,7 +181,7 @@ namespace PFF {
 
         PFF_PROFILE_FUNCTION();
 
-        bool success = m_pool.allocate_descriptor_set(m_setLayout.get_descriptor_set_layout(), set);
+        bool success = m_pool.allocate_descriptor_set(m_set_layout.get_descriptor_set_layout(), set);
         if (!success) {
             return false;
         }
