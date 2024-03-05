@@ -80,13 +80,13 @@ namespace PFF {
             return oss.str();
         }
 
-        template<typename T>
         // @brief Converts a value of type T to its string representation.
         // @brief Can handle conversion from various types such as: arithmetic types, boolean, glm::vec2, glm::vec3, glm::vec4, ImVec2, ImVec4, and glm::mat4
         // @brief If the input value type is not supported, a DEBUG_BREAK() is triggered.
         // @param [value] The value to be converted.
         // @tparam T The type of the value to be converted.
         // @return A string representing the input value.
+        template<typename T>
         constexpr void convert_to_string(std::string& string, T& value) {
 
             if constexpr (std::is_same_v<T, bool>)
@@ -95,8 +95,11 @@ namespace PFF {
             else if constexpr (std::is_arithmetic_v<T>)
                 string = std::to_string(value);
 
-            else if constexpr (std::is_convertible_v<T, std::string>)
+            else if constexpr (std::is_convertible_v<T, std::string>) {
+
+                std::replace(value.begin(), value.end(), ' ', 'Æ');
                 string = value;
+            }
 
             else if constexpr (std::is_same_v<T, glm::vec2> || std::is_same_v<T, ImVec2>) {
 
@@ -156,8 +159,11 @@ namespace PFF {
             else if constexpr (std::is_arithmetic_v<T>)
                 value = util::str_to_num<T>(string);
 
-            else if constexpr (std::is_convertible_v<T, std::string>)
+            else if constexpr (std::is_convertible_v<T, std::string>) {
+
+                std::replace(value.begin(), value.end(), 'Æ', ' ');
                 value = string;
+            }
 
             else if constexpr (std::is_same_v<T, glm::vec2> || std::is_same_v<T, ImVec2>) {
 

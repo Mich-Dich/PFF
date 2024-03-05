@@ -34,10 +34,9 @@ namespace PFF {
 
 		PFF_PROFILE_FUNCTION();
 
-		window_attr_serialiser serializer(&m_data, "./testdirectory", "window_attributes.txt");
-		serializer.serialize();
+		window_attr_serialiser(&m_data, "./config/window_attributes.txt").deserialize();
 
-		init(attributes);
+		init(m_data);
 	}
 
 	pff_window::~pff_window() {
@@ -46,12 +45,12 @@ namespace PFF {
 
 		int pos_x, pos_y;
 		glfwGetWindowPos(m_Window, &pos_x, &pos_y);
-		config::save(config::file::editor, "window_attrib", "title", m_data.title);
+		//config::save(config::file::editor, "window_attrib", "title", m_data.title);
 		//config::save(config::file::editor, "window_attrib", "pos_x", pos_x);
 		//config::save(config::file::editor, "window_attrib", "pos_y", pos_y);
-		config::save(config::file::editor, "window_attrib", "width", m_data.width);
-		config::save(config::file::editor, "window_attrib", "height", m_data.height);
-		config::save(config::file::editor, "window_attrib", "vsync", m_data.vsync);
+		//config::save(config::file::editor, "window_attrib", "width", m_data.width);
+		//config::save(config::file::editor, "window_attrib", "height", m_data.height);
+		//config::save(config::file::editor, "window_attrib", "vsync", m_data.vsync);
 
 		glfwDestroyWindow(m_Window);
 		glfwTerminate();
@@ -65,12 +64,12 @@ namespace PFF {
 
 		PFF_PROFILE_FUNCTION();
 
-		config::load(config::file::editor, "window_attrib", "title", attributes.title);
+		//config::load(config::file::editor, "window_attrib", "title", attributes.title);
 		//config::load(config::file::editor, "window_attrib", "pos_x", attributes.pos_x);
 		//config::load(config::file::editor, "window_attrib", "pos_y", attributes.pos_y);
-		config::load(config::file::editor, "window_attrib", "width", attributes.width);
-		config::load(config::file::editor, "window_attrib", "height", attributes.height);
-		config::load(config::file::editor, "window_attrib", "vsync", attributes.vsync);
+		//config::load(config::file::editor, "window_attrib", "width", attributes.width);
+		//config::load(config::file::editor, "window_attrib", "height", attributes.height);
+		//config::load(config::file::editor, "window_attrib", "vsync", attributes.vsync);
 		attributes.app_ref = &application::get();
 		m_data = attributes;
 
@@ -266,18 +265,8 @@ namespace PFF {
 
 	// =============================================================================  serializer  =============================================================================
 
-	//	std::string			title;
-	//	u32					pos_x{};
-	//	u32					pos_y{};
-	//	f64					cursor_pos_x{};
-	//	f64					cursor_pos_y{};
-	//	u32					width{};
-	//	u32					height{};
-	//	bool				vsync{};
-	//	window_size_state	window_size_state;
-
-	window_attr_serialiser::window_attr_serialiser(window_attrib* window_attributes, const std::string& path, const std::string& filename)
-		: m_window_attrib(window_attributes), m_path(path), m_filename(filename) {
+	window_attr_serialiser::window_attr_serialiser(window_attrib* window_attributes, const std::string& filename)
+		: m_window_attrib(window_attributes), m_filename(filename) {
 	
 	}
 
@@ -315,35 +304,56 @@ namespace PFF {
 		};
 
 		auto it = state_map.find(string);
-		if (it != state_map.end()) {
+		if (it != state_map.end())
 			return it->second;
-		} else {
-			return window_size_state::windowed; // Default value or any other error handling
-		}
+		
+		return window_size_state::windowed; // Default value or any other error handling
 	}
+
+	//std::string				title;
+	//u32						pos_x{};
+	//u32						pos_y{};
+	//f64						cursor_pos_x{};
+	//f64						cursor_pos_y{};
+	//u32						width{};
+	//u32						height{};
+	//bool						vsync{};
+	//application*				app_ref{};
+	//window_size_state			window_size_state = window_size_state::windowed;
+	//EventCallbackFn			event_callback;
+
 
 	void window_attr_serialiser::serialize() {
 
-		serializer::yaml serializer(m_path, m_filename, serializer::serializer_option::save_to_file);
-
-		serializer.serialize_struct_begining("window_attributes");
-		serializer.serialize_key_value("title", m_window_attrib->title);
-		serializer.serialize_key_value("pos_x", m_window_attrib->pos_x);
-		serializer.serialize_key_value("pos_y", m_window_attrib->pos_y);
-		serializer.serialize_key_value("cursor_pos_x", m_window_attrib->cursor_pos_x);
-		serializer.serialize_key_value("cursor_pos_y", m_window_attrib->cursor_pos_y);
-		serializer.serialize_key_value("width", m_window_attrib->width);
-		serializer.serialize_key_value("height", m_window_attrib->height);
-		serializer.serialize_key_value("vsync", m_window_attrib->vsync);
-
-		std::string window_size_state_str = window_size_state_to_string(m_window_attrib->window_size_state);
-		serializer.serialize_key_value("window_size_state", window_size_state_str);
-
+		serializer::yaml(m_filename, serializer::serializer_option::save_to_file)
+			.struct_name("window_attributes")
+			.set(KEY_VALUE(m_window_attrib->title))
+			.set(KEY_VALUE(m_window_attrib->pos_x))
+			.set(KEY_VALUE(m_window_attrib->pos_y))
+			.set(KEY_VALUE(m_window_attrib->width))
+			.set(KEY_VALUE(m_window_attrib->height))
+			.set(KEY_VALUE(m_window_attrib->vsync))
+			.serialize();
+		
+		LOG(Fatal, TEST_NAME_CONVERTION(window_size_state));
 	}
 
-	bool window_attr_serialiser::deserialize(const std::string& path, const std::string& filename) {
+	bool window_attr_serialiser::deserialize() {
 
-		serializer::yaml serializer("./data", "window_attributes", serializer::serializer_option::load_from_file);
+		window_attrib test{};
+		LOG(Trace, "test struct: title: " << test.title);
+
+		serializer::yaml(m_filename, serializer::serializer_option::load_from_file)
+			.deserialize()
+			.struct_name("window_attributes")
+			.get(KEY_VALUE(m_window_attrib->title))
+			.get(KEY_VALUE(m_window_attrib->pos_x))
+			.get(KEY_VALUE(m_window_attrib->pos_y))
+			.get(KEY_VALUE(m_window_attrib->width))
+			.get(KEY_VALUE(m_window_attrib->height))
+			.get(KEY_VALUE(m_window_attrib->vsync));
+
+		// serializer.deserialize_key_value(m_filename, serializer::serializer_option::load_from_file);
 
 		return false;
 	}

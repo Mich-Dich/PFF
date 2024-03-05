@@ -15,7 +15,6 @@
 namespace PFF::UI {
 
 	void seperation_vertical();
-	void draw_big_text(const char* text);
 	void help_marker(const char* desc);
 	void shift_cursor_pos(const f32 shift_x = 0.0f, const f32 shift_y = 0.0f);
 
@@ -46,10 +45,15 @@ namespace PFF::UI {
 
 	// @brief Draws text using a larger font.
 	// @param [text] The text to be drawn.
-	static void draw_big_text(const char* text) {
+	static void draw_big_text(const char* text, bool wrapped = false) {
 
 		ImGui::PushFont(application::get().get_imgui_layer()->get_font("regular_big"));
-		ImGui::Text(text);
+
+		if(wrapped)
+			ImGui::TextWrapped(text);
+		else
+			ImGui::Text(text);
+
 		ImGui::PopFont();
 	}
 

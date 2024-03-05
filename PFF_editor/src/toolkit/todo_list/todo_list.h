@@ -89,6 +89,7 @@ namespace PFF::toolkit::todo {
 		m_topics.push_back({ "Editor", true, false, {{"Serialize ToDo-List", "Serialize Content into yaml-file for readability"}} });
 		m_topics.push_back({ "Renderer", false, false, {{"Test", "Descr"}} });
 		m_topics.push_back({ "Asset Manager", false, false, {{"Test", "Descr"}} });
+		m_topics.push_back({ "Procedural Generator", false, false, {{"Sub-mesh buffer for procedural generator", "Add a sub-mesh buffer array to procedural generator to enable fast copy past of already generated meshes (copy/past around axis to make turbine blades, along spline to make extruded mesh)"}} });
 	}
 
 	todo_list::~todo_list() {
@@ -229,9 +230,9 @@ namespace PFF::toolkit::todo {
 							sprintf_s(buf, 32, "##topic_%llutask_%llu", x, y);
 							ImGui::Checkbox(buf, &m_topics[x].tasks[y].done);
 							ImGui::SameLine();
-							UI::draw_big_text(m_topics[x].tasks[y].title.c_str());
+							UI::draw_big_text(m_topics[x].tasks[y].title.c_str(), true);
 							UI::shift_cursor_pos(inner_offset_x + 5, 0);
-							ImGui::Text(m_topics[x].tasks[y].description.c_str());
+							ImGui::TextWrapped(m_topics[x].tasks[y].description.c_str());
 						}
 					}
 				}
