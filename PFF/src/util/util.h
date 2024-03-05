@@ -80,21 +80,20 @@ namespace PFF {
             return oss.str();
         }
 
+        template<typename T>
         // @brief Converts a value of type T to its string representation.
         // @brief Can handle conversion from various types such as: arithmetic types, boolean, glm::vec2, glm::vec3, glm::vec4, ImVec2, ImVec4, and glm::mat4
         // @brief If the input value type is not supported, a DEBUG_BREAK() is triggered.
-        // 
         // @param [value] The value to be converted.
         // @tparam T The type of the value to be converted.
         // @return A string representing the input value.
-        template<typename T>
         constexpr void convert_to_string(std::string& string, T& value) {
 
-            if constexpr (std::is_arithmetic_v<T>)
-                string = std::to_string(value);
-
-            else if constexpr (std::is_same_v<T, bool>)
+            if constexpr (std::is_same_v<T, bool>)
                 string = bool_to_str(value);
+
+            else if constexpr (std::is_arithmetic_v<T>)
+                string = std::to_string(value);
 
             else if constexpr (std::is_convertible_v<T, std::string>)
                 string = value;
@@ -142,21 +141,20 @@ namespace PFF {
         }
 
 
+        template<typename T>
         // @brief Converts a string representation to a value of type T.
         // @brief Can handle conversion into various types such as: arithmetic types, boolean, glm::vec2, glm::vec3, glm::vec4, ImVec2, ImVec4, and glm::mat4.
         // @brief If the input value type is not supported, a DEBUG_BREAK() is triggered.
-        // 
         // @param [string] The string to be converted.
         // @param [value] Reference to the variable that will store the converted value.
         // @tparam T The type of the value [string] should be converted to.
-        template<typename T>
         constexpr void convert_from_string(const std::string& string, T& value) {
 
-            if constexpr (std::is_arithmetic_v<T>)
-                value = util::str_to_num<T>(string);
-
-            else if constexpr (std::is_same_v<T, bool>)
+            if constexpr (std::is_same_v<T, bool>)
                 value = util::str_to_bool(string);
+
+            else if constexpr (std::is_arithmetic_v<T>)
+                value = util::str_to_num<T>(string);
 
             else if constexpr (std::is_convertible_v<T, std::string>)
                 value = string;
