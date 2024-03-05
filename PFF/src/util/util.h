@@ -87,43 +87,57 @@ namespace PFF {
         // @tparam T The type of the value to be converted.
         // @return A string representing the input value.
         template<typename T>
-        constexpr void convert_to_string(std::string& string, T& value) {
+        constexpr void convert_to_string(const T& src_value, std::string& dest_string) {
 
-            if constexpr (std::is_same_v<T, bool>)
-                string = bool_to_str(value);
+            if constexpr (std::is_same_v<T, bool>) {
 
-            else if constexpr (std::is_arithmetic_v<T>)
-                string = std::to_string(value);
+                dest_string = bool_to_str(src_value);
+                return;
+            }
+
+            else if constexpr (std::is_arithmetic_v<T>) {
+
+                dest_string = std::to_string(src_value);
+                return;
+            }
 
             else if constexpr (std::is_convertible_v<T, std::string>) {
 
-                std::replace(value.begin(), value.end(), ' ', 'Æ');
-                string = value;
+                //LOG(Fatal, "called: convert_to_string() with string");
+                dest_string = src_value;
+                std::replace(dest_string.begin(), dest_string.end(), ' ', '_');
+                return;
             }
 
             else if constexpr (std::is_same_v<T, glm::vec2> || std::is_same_v<T, ImVec2>) {
 
                 std::ostringstream oss;
-                oss << value.x << ' ' << value.y;
-                string = oss.str();
+                oss << src_value.x << ' ' << src_value.y;
+                dest_string = oss.str();
+                return;
             }
 
             else if constexpr (std::is_same_v<T, glm::vec3>) {
 
                 std::ostringstream oss;
-                oss << value.x << ' ' << value.y << ' ' << value.z;
-                string = oss.str();
+                oss << src_value.x << ' ' << src_value.y << ' ' << src_value.z;
+                dest_string = oss.str();
+                return;
             }
 
             else if constexpr (std::is_same_v<T, glm::vec4> || std::is_same_v<T, ImVec4>) {
 
                 std::ostringstream oss;
-                oss << value.x << ' ' << value.y << ' ' << value.z << ' ' << value.w;
-                string = oss.str();
+                oss << src_value.x << ' ' << src_value.y << ' ' << src_value.z << ' ' << src_value.w;
+                dest_string = oss.str();
+                return;
             }
 
-            else if constexpr (std::is_enum_v<T>)
-                string = std::to_string(static_cast<std::underlying_type_t<T>>(value));
+            else if constexpr (std::is_enum_v<T>) {
+
+                dest_string = std::to_string(static_cast<std::underlying_type_t<T>>(src_value));
+                return;
+            }
 
             // Matrix of size 4         TODO: move into seperate template for all matrixes
             else if constexpr (std::is_same_v<T, glm::mat4>) {
@@ -131,12 +145,13 @@ namespace PFF {
                 std::ostringstream oss;
                 for (int i = 0; i < 4; ++i) {
                     for (int j = 0; j < 4; ++j) {
-                        oss << value[i][j];
+                        oss << src_value[i][j];
                         if (i != 3 || j != 3) // Not the last element
                             oss << ' ';
                     }
                 }
-                string = oss.str();
+                dest_string = oss.str();
+                return;
             }
 
             else
@@ -151,49 +166,63 @@ namespace PFF {
         // @param [string] The string to be converted.
         // @param [value] Reference to the variable that will store the converted value.
         // @tparam T The type of the value [string] should be converted to.
-        constexpr void convert_from_string(const std::string& string, T& value) {
+        constexpr void convert_from_string(const std::string& src_string, T& dest_value) {
 
-            if constexpr (std::is_same_v<T, bool>)
-                value = util::str_to_bool(string);
+            if constexpr (std::is_same_v<T, bool>) {
 
-            else if constexpr (std::is_arithmetic_v<T>)
-                value = util::str_to_num<T>(string);
+                dest_value = util::str_to_bool(src_string);
+                return;
+            }
+
+            else if constexpr (std::is_arithmetic_v<T>) {
+
+                dest_value = util::str_to_num<T>(src_string);
+                return;
+            }
 
             else if constexpr (std::is_convertible_v<T, std::string>) {
 
-                std::replace(value.begin(), value.end(), 'Æ', ' ');
-                value = string;
+                dest_value = src_string;
+                std::replace(dest_value.begin(), dest_value.end(), '_', ' ');
+                return;
             }
 
             else if constexpr (std::is_same_v<T, glm::vec2> || std::is_same_v<T, ImVec2>) {
 
-                std::istringstream iss(string);
-                iss >> value.x >> value.y;
+                std::istringstream iss(src_string);
+                iss >> dest_value.x >> dest_value.y;
+                return;
             }
 
             else if constexpr (std::is_same_v<T, glm::vec3>) {
 
-                std::istringstream iss(string);
-                iss >> value.x >> value.y >> value.z;
+                std::istringstream iss(src_string);
+                iss >> dest_value.x >> dest_value.y >> dest_value.z;
+                return;
             }
 
             else if constexpr (std::is_same_v<T, glm::vec4> || std::is_same_v<T, ImVec4>) {
 
-                std::istringstream iss(string);
-                iss >> value.x >> value.y >> value.z >> value.w;
+                std::istringstream iss(src_string);
+                iss >> dest_value.x >> dest_value.y >> dest_value.z >> dest_value.w;
+                return;
             }
 
-            else if constexpr (std::is_enum_v<T>)
-                value = static_cast<T>(std::stoi(string));
+            else if constexpr (std::is_enum_v<T>) {
+
+                dest_value = static_cast<T>(std::stoi(src_string));
+                return;
+            }
 
             // Matrix of size 4         TODO: move into seperate template for all matrixes
             else if constexpr (std::is_same_v<T, glm::mat4>) {
-                std::istringstream iss(string);
+                std::istringstream iss(src_string);
                 for (int i = 0; i < 4; ++i) {
                     for (int j = 0; j < 4; ++j) {
-                        iss >> value[i][j];
+                        iss >> dest_value[i][j];
                     }
                 }
+                return;
             }
 
 

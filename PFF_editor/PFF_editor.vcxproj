@@ -163,7 +163,6 @@
     <ClCompile Include="src\util\pch_editor.cpp">
       <PrecompiledHeader>Create</PrecompiledHeader>
     </ClCompile>
-    <ClCompile Include="src\util\ui\panels\pannel_collection.cpp" />
   </ItemGroup>
   <ItemGroup>
     <None Include="shaders\default.frag" />

@@ -53,7 +53,7 @@ namespace PFF {
         void load(const file config_file, const std::string& section, const std::string& key, T& value) {
 
             std::string buffer;
-			util::convert_to_string(buffer, value);
+			util::convert_to_string(value, buffer);
             check_for_configuration(config_file, section, key, buffer, false);
 			util::convert_from_string(buffer, value);
         }
@@ -68,7 +68,7 @@ namespace PFF {
         void save(const file config_file, const std::string& section, const std::string& key, T& value) {
 
             std::string buffer;
-            util::convert_to_string(buffer, value);
+			util::convert_to_string(value, buffer);
             check_for_configuration(config_file, section, key, buffer, true);
 			util::convert_from_string(buffer, value);
         }

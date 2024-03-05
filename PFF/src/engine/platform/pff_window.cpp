@@ -13,8 +13,6 @@
 #define STB_IMAGE_IMPLEMENTATION
 #include "stb_image.h"
 
-#include "util/io/serializer.h"
-
 #include "pff_window.h"
 
 
@@ -34,7 +32,7 @@ namespace PFF {
 
 		PFF_PROFILE_FUNCTION();
 
-		window_attr_serialiser(&m_data, "./config/window_attributes.txt").deserialize();
+		window_attrib_serializer(&m_data, "./config/window_attributes.txt").deserialize();
 
 		init(m_data);
 	}
@@ -43,15 +41,10 @@ namespace PFF {
 
 		PFF_PROFILE_FUNCTION();
 
+		window_attrib_serializer(&m_data, "./config/window_attributes.txt").serialize();
+
 		int pos_x, pos_y;
 		glfwGetWindowPos(m_Window, &pos_x, &pos_y);
-		//config::save(config::file::editor, "window_attrib", "title", m_data.title);
-		//config::save(config::file::editor, "window_attrib", "pos_x", pos_x);
-		//config::save(config::file::editor, "window_attrib", "pos_y", pos_y);
-		//config::save(config::file::editor, "window_attrib", "width", m_data.width);
-		//config::save(config::file::editor, "window_attrib", "height", m_data.height);
-		//config::save(config::file::editor, "window_attrib", "vsync", m_data.vsync);
-
 		glfwDestroyWindow(m_Window);
 		glfwTerminate();
 		LOG(Info, "shutdown");
@@ -64,12 +57,6 @@ namespace PFF {
 
 		PFF_PROFILE_FUNCTION();
 
-		//config::load(config::file::editor, "window_attrib", "title", attributes.title);
-		//config::load(config::file::editor, "window_attrib", "pos_x", attributes.pos_x);
-		//config::load(config::file::editor, "window_attrib", "pos_y", attributes.pos_y);
-		//config::load(config::file::editor, "window_attrib", "width", attributes.width);
-		//config::load(config::file::editor, "window_attrib", "height", attributes.height);
-		//config::load(config::file::editor, "window_attrib", "vsync", attributes.vsync);
 		attributes.app_ref = &application::get();
 		m_data = attributes;
 
@@ -265,14 +252,14 @@ namespace PFF {
 
 	// =============================================================================  serializer  =============================================================================
 
-	window_attr_serialiser::window_attr_serialiser(window_attrib* window_attributes, const std::string& filename)
+	window_attrib_serializer::window_attrib_serializer(window_attrib* window_attributes, const std::string& filename)
 		: m_window_attrib(window_attributes), m_filename(filename) {
 	
 	}
 
-	window_attr_serialiser::~window_attr_serialiser() {}
+	window_attrib_serializer::~window_attrib_serializer() {}
 
-	std::string window_attr_serialiser::window_size_state_to_string(window_size_state state) {
+	std::string window_attrib_serializer::window_size_state_to_string(window_size_state state) {
 
 		switch (state) {
 		case PFF::window_size_state::windowed:
@@ -294,7 +281,7 @@ namespace PFF {
 		return "unknown";
 	}
 
-	window_size_state window_attr_serialiser::string_to_window_size_state(const std::string& string) {
+	window_size_state window_attrib_serializer::string_to_window_size_state(const std::string& string) {
 
 		const std::unordered_map<std::string, window_size_state> state_map{
 			{"windowed", window_size_state::windowed},
@@ -318,12 +305,9 @@ namespace PFF {
 	//u32						width{};
 	//u32						height{};
 	//bool						vsync{};
-	//application*				app_ref{};
 	//window_size_state			window_size_state = window_size_state::windowed;
-	//EventCallbackFn			event_callback;
 
-
-	void window_attr_serialiser::serialize() {
+	void window_attrib_serializer::serialize() {
 
 		serializer::yaml(m_filename, serializer::serializer_option::save_to_file)
 			.struct_name("window_attributes")
@@ -334,11 +318,9 @@ namespace PFF {
 			.set(KEY_VALUE(m_window_attrib->height))
 			.set(KEY_VALUE(m_window_attrib->vsync))
 			.serialize();
-		
-		LOG(Fatal, TEST_NAME_CONVERTION(window_size_state));
 	}
 
-	bool window_attr_serialiser::deserialize() {
+	bool window_attrib_serializer::deserialize() {
 
 		window_attrib test{};
 		LOG(Trace, "test struct: title: " << test.title);
@@ -353,9 +335,7 @@ namespace PFF {
 			.get(KEY_VALUE(m_window_attrib->height))
 			.get(KEY_VALUE(m_window_attrib->vsync));
 
-		// serializer.deserialize_key_value(m_filename, serializer::serializer_option::load_from_file);
-
-		return false;
+		return true;
 	}
 
 }

@@ -38,11 +38,11 @@ namespace PFF {
 			: title(title), width(width), height(height), vsync(vsync), event_callback(callback){}
 	};
 
-	class window_attr_serialiser {
+	class window_attrib_serializer {
 	public:
 
-		window_attr_serialiser(window_attrib* window_attributes, const std::string& filename = "testlog.txt");
-		~window_attr_serialiser();
+		window_attrib_serializer(window_attrib* window_attributes, const std::string& filename = "testlog.txt");
+		~window_attrib_serializer();
 
 		std::string window_size_state_to_string(window_size_state state);
 		window_size_state string_to_window_size_state(const std::string& string);

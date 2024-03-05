@@ -31,10 +31,18 @@ namespace PFF::serializer {
 		yaml& set(const std::string& name, T& value) {
 
 			std::string buffer{};
-			PFF::util::convert_to_string<T>(buffer, value);
+			PFF::util::convert_to_string<T>(value, buffer);
 			m_key_value_pares.insert({ name, buffer });
 
 			LOG(Trace, "called: yaml& add(const std::string& name, T& value) with: " << name << " - " << buffer);
+			return *this;
+		}
+
+		template<typename T>
+		yaml& set_vector(const std::string& name, T& value) {
+
+			// NOT FINISHED
+
 			return *this;
 		}
 

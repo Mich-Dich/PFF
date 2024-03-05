@@ -4,6 +4,40 @@ namespace PFF::toolkit::todo {
 
 #define CHAR_BUFFER_DEFAULT_SIZE 64
 
+	// forward declareation
+	class todo_list;
+
+
+	// ============================================= serializer =============================================
+
+	class todo_list_serializer{
+	public:
+
+		todo_list_serializer(todo_list* todo_list, const std::string & file = "testlog.txt")
+			: m_todo_list(todo_list), m_filename(file) {}
+		~todo_list_serializer() {}
+
+		std::string window_size_state_to_string(window_size_state state);
+		window_size_state string_to_window_size_state(const std::string & string);
+
+		void serialize() {
+		
+			serializer::yaml(m_filename, serializer::serializer_option::save_to_file);
+
+			// add vector be using => .set_vector( - LAMDA() - )
+		}
+
+		bool deserialize() {
+		
+			return false;
+		}
+
+	private:
+		todo_list* m_todo_list;
+		std::string m_filename;
+
+	};
+
 	namespace buffer {
 
 		struct topic {
@@ -57,7 +91,6 @@ namespace PFF::toolkit::todo {
 		}
 	};
 
-
 	class todo_list {
 	public:
 
@@ -74,17 +107,15 @@ namespace PFF::toolkit::todo {
 		std::vector<topic> m_topics{};
 		u64 m_selected_topic = 0;
 
-		friend class todo_serializer;
+		friend class todo_list_serializer;
 	};
 
-	//	class todo_serializer {
-	//	
-	//		void serialize(const std::string& filepath) {};
-	//		bool deserialize(const std::string& filepath) {};
-	//	
-	//	};
+	// ============================================= implementation =============================================
 
 	todo_list::todo_list() {
+
+		todo_list_serializer(this, "./config/todo_list").deserialize();
+		//SERIALIZER(todo_list, "./config/todo_list").serialize();
 
 		m_topics.push_back({ "Editor", true, false, {{"Serialize ToDo-List", "Serialize Content into yaml-file for readability"}} });
 		m_topics.push_back({ "Renderer", false, false, {{"Test", "Descr"}} });
@@ -93,8 +124,9 @@ namespace PFF::toolkit::todo {
 	}
 
 	todo_list::~todo_list() {
-	}
 
+		todo_list_serializer(this, "./config/todo_list").serialize();
+	}
 
 	void todo_list::window_todo_list() {
 
@@ -320,10 +352,6 @@ namespace PFF::toolkit::todo {
 		ImGui::PopStyleVar();
 	}
 
-	// bool topic::add_task(const buffer::task& task) {
-	// 
-	// }
-
 	void todo_list::add_topic(buffer::topic buffer) {
 
 		LOG(Trace, "Adding a new topic to ToDo-list");
@@ -338,3 +366,5 @@ namespace PFF::toolkit::todo {
 
 
 }
+
+// , const std::string& filename = "testlog.txt"
