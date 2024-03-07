@@ -32,9 +32,7 @@ namespace PFF {
 
 		PFF_PROFILE_FUNCTION();
 
-		window_attrib_serializer(&m_data, "./config/window_attributes.txt").deserialize();
-		window_attrib_serializer(&m_data, "./config/window_attributes.txt").serialize();
-
+		window_attrib_serializer(&m_data, serializer::option::load_from_file, "./config/window_attributes.txt");
 		init(m_data);
 	}
 
@@ -42,9 +40,7 @@ namespace PFF {
 
 		PFF_PROFILE_FUNCTION();
 
-
-		int pos_x, pos_y;
-		glfwGetWindowPos(m_Window, &pos_x, &pos_y);
+		window_attrib_serializer(&m_data, serializer::option::save_to_file, "./config/window_attributes.txt");
 		glfwDestroyWindow(m_Window);
 		glfwTerminate();
 		LOG(Info, "shutdown");
@@ -252,177 +248,16 @@ namespace PFF {
 
 	// =============================================================================  serializer  =============================================================================
 
-	window_attrib_serializer::window_attrib_serializer(window_attrib* window_attributes, const std::string& filename)
-		: m_window_attrib(window_attributes), m_filename(filename) {
-	
-	}
+	window_attrib_serializer::window_attrib_serializer(window_attrib* window_attributes, const PFF::serializer::option option, const std::string& filename) {
 
-	window_attrib_serializer::~window_attrib_serializer() {}
-
-	std::string window_attrib_serializer::window_size_state_to_string(window_size_state state) {
-
-		switch (state) {
-		case PFF::window_size_state::windowed:
-			return "windowed";
-
-		case PFF::window_size_state::minimised:
-			return "minimised";
-
-		case PFF::window_size_state::fullscreen:
-			return "fullscreen";
-
-		case PFF::window_size_state::fullscreen_windowed:
-			return "fullscreen_windowed";
-
-		default:
-			break;
-		}
-
-		return "unknown";
-	}
-
-	window_size_state window_attrib_serializer::string_to_window_size_state(const std::string& string) {
-
-		const std::unordered_map<std::string, window_size_state> state_map{
-			{"windowed", window_size_state::windowed},
-			{"minimised", window_size_state::minimised},
-			{"fullscreen", window_size_state::fullscreen},
-			{"fullscreen_windowed", window_size_state::fullscreen_windowed}
-		};
-
-		auto it = state_map.find(string);
-		if (it != state_map.end())
-			return it->second;
-		
-		return window_size_state::windowed; // Default value or any other error handling
-	}
-
-	//std::string				title;
-	//u32						pos_x{};
-	//u32						pos_y{};
-	//f64						cursor_pos_x{};
-	//f64						cursor_pos_y{};
-	//u32						width{};
-	//u32						height{};
-	//bool						vsync{};
-	//window_size_state			window_size_state = window_size_state::windowed;
-
-	void window_attrib_serializer::serialize() {
-
-#if 0		// old API - DEPRECATED
-
-		serializer::yaml(m_filename, serializer::serializer_option::save_to_file)
-			.struct_name("window_attributes")
-			.set(KEY_VALUE(m_window_attrib->title))
-			.set(KEY_VALUE(m_window_attrib->pos_x))
-			.set(KEY_VALUE(m_window_attrib->pos_y))
-			.set(KEY_VALUE(m_window_attrib->width))
-			.set(KEY_VALUE(m_window_attrib->height))
-			.set(KEY_VALUE(m_window_attrib->vsync));
-
-#elif 0		// new API - no subsection (actually used in this case)
-
-		serializer::yaml(m_filename, "window_attributes", serializer::option::save_to_file)
-			.entry(KEY_VALUE(m_window_attrib->title))
-			.entry(KEY_VALUE(m_window_attrib->pos_x))
-			.entry(KEY_VALUE(m_window_attrib->pos_y))
-			.entry(KEY_VALUE(m_window_attrib->width))
-			.entry(KEY_VALUE(m_window_attrib->height))
-			.entry(KEY_VALUE(m_window_attrib->vsync));
-
-#else		// new API - with subsection (DEV-ONLY)
-
-		int32 test_int = -42;
-		f32 test_float = 3.1415f;
-		std::vector<int32> test_vector = { 2, 42, 64, 21, -152, 24, -41, -16 };
-
-		/*		
-		auto serializer = serializer::yaml(m_filename, "window_attributes", serializer::option::save_to_file);
-		serializer.entry(KEY_VALUE(m_window_attrib->title));
-		serializer.entry(KEY_VALUE(m_window_attrib->vsync));
-		serializer.sub_section("attributes", [&]() {
-				
-			serializer.entry("TestValue_float", test_float);
-			serializer.entry("TestValue_int", test_int);
-		});
-		*/
-
-		serializer::yaml(m_filename, "window_attributes", serializer::option::save_to_file)
-			.entry(KEY_VALUE(m_window_attrib->title))
-			.entry(KEY_VALUE(m_window_attrib->vsync))
-			.sub_section("attributes", [&](serializer::yaml& serializer) {
-
-				serializer.entry(KEY_VALUE(test_float));		// like this
-				serializer.entry(KEY_VALUE(m_window_attrib->vsync));
-				serializer.entry(KEY_VALUE(test_vector));
-			});
-			//.entry(KEY_VALUE(test_vector));
-
-		/*		TEST ARRAY FUNTION => .array / .vactor
-		for (size_t i = 0; i < 5; i++) {
-
-		}
-		*/
-
-		LOG(Trace, "Serialized to file !!");
-
-#endif // 0
-	}
-
-	bool window_attrib_serializer::deserialize() {
-
-#if 0
-
-		serializer::yaml(m_filename, serializer::serializer_option::load_from_file)
-			.struct_name("window_attributes")
-			.get(KEY_VALUE(m_window_attrib->title))
-			.get(KEY_VALUE(m_window_attrib->pos_x))
-			.get(KEY_VALUE(m_window_attrib->pos_y))
-			.get(KEY_VALUE(m_window_attrib->width))
-			.get(KEY_VALUE(m_window_attrib->height))
-			.get(KEY_VALUE(m_window_attrib->vsync));
-
-		LOG(Info, "hopefully after destructor");
-#else
-		std::string title{};
-		bool vsync = true;
-		int32 test_int{};
-		f32 test_float{};
-		std::vector<int32> test_vector{};
-
-		serializer::yaml(m_filename, "window_attributes", serializer::option::load_from_file)
-			.entry(KEY_VALUE(title))
-			.entry(KEY_VALUE(vsync))
-			.sub_section("attributes", [&](serializer::yaml& serializer) {
-
-				serializer.entry(KEY_VALUE(test_float));		// like this
-				serializer.entry(KEY_VALUE(vsync));
-				serializer.entry(KEY_VALUE(test_vector));
-			});
-			//.entry(KEY_VALUE(test_vector));
-
-		LOG(Trace, "Deserialized from file !!");
-
-		/*
-		// option is currently useless, so this is the updated version:
-		serializer::yaml(m_filename, "window_attributes", serializer::option::load_from_file)
-			.entry(KEY_VALUE(m_window_attrib->title))
-			.entry(KEY_VALUE(m_window_attrib->vsync))
-			.entry(KEY_VALUE(m_window_attrib->vsync));
-			//.sub_section("attributes")
-
-		// option is currently useless, so this is the updated version:
-		serializer::yaml(m_filename, "window_attributes", serializer::option::load_from_file)
-			.entry(KEY_VALUE(m_window_attrib->title))
-			.entry(KEY_VALUE(m_window_attrib->vsync));
-			//.entry("attributes", KEY_VALUE(m_window_attrib->vsync))
-			//.entry("attributes", KEY_VALUE(m_window_attrib->vsync));
-		*/
-
-#endif // DEV-TEST
-
-
-		return true;
+		serializer::yaml(filename, "window_attributes", option)
+			.entry(KEY_VALUE(window_attributes->title))
+			.entry(KEY_VALUE(window_attributes->pos_x))
+			.entry(KEY_VALUE(window_attributes->pos_y))
+			.entry(KEY_VALUE(window_attributes->width))
+			.entry(KEY_VALUE(window_attributes->height))
+			.entry(KEY_VALUE(window_attributes->vsync))
+			.entry(KEY_VALUE(window_attributes->window_size_state));
 	}
 
 }

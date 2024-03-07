@@ -41,18 +41,8 @@ namespace PFF {
 	class window_attrib_serializer {
 	public:
 
-		window_attrib_serializer(window_attrib* window_attributes, const std::string& filename = "testlog.txt");
-		~window_attrib_serializer();
-
-		std::string window_size_state_to_string(window_size_state state);
-		window_size_state string_to_window_size_state(const std::string& string);
-
-		void serialize();
-		bool deserialize();
-
-	private:
-		window_attrib* m_window_attrib;
-		std::string m_filename;
+		window_attrib_serializer(window_attrib* window_attributes, const PFF::serializer::option option, const std::string& filename = "testlog.txt");
+		~window_attrib_serializer() {};
 
 	};
 

@@ -2,6 +2,8 @@
 
 // =================================================================================  includes  ==================================================================================
 
+#include <type_traits> // For std::is_vector
+
 #include "util/logger.h"
 #include "util/io/io_handler.h"
 #include "util/io/config.h"
@@ -79,6 +81,13 @@ namespace PFF {
             oss << num;
             return oss.str();
         }
+
+        template<typename T>
+        struct is_vector : std::false_type {};
+
+        template<typename T, typename Alloc>
+        struct is_vector<std::vector<T, Alloc>> : std::true_type {};
+
 
         // @brief Converts a value of type T to its string representation.
         // @brief Can handle conversion from various types such as: arithmetic types, boolean, glm::vec2, glm::vec3, glm::vec4, ImVec2, ImVec4, and glm::mat4

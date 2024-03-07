@@ -5,38 +5,9 @@ namespace PFF::toolkit::todo {
 #define CHAR_BUFFER_DEFAULT_SIZE 64
 
 	// forward declareation
-	class todo_list;
-
+	class todo_list_serializer;
 
 	// ============================================= serializer =============================================
-
-	class todo_list_serializer{
-	public:
-
-		todo_list_serializer(todo_list* todo_list, const std::string & file = "testlog.txt")
-			: m_todo_list(todo_list), m_filename(file) {}
-		~todo_list_serializer() {}
-
-		std::string window_size_state_to_string(window_size_state state);
-		window_size_state string_to_window_size_state(const std::string & string);
-
-		void serialize() {
-		
-			// serializer::yaml(m_filename, serializer::serializer_option::save_to_file);
-
-			// add vector be using => .set_vector( - LAMDA() - )
-		}
-
-		bool deserialize() {
-		
-			return false;
-		}
-
-	private:
-		todo_list* m_todo_list;
-		std::string m_filename;
-
-	};
 
 	namespace buffer {
 
@@ -110,6 +81,18 @@ namespace PFF::toolkit::todo {
 		friend class todo_list_serializer;
 	};
 
+	class todo_list_serializer {
+	public:
+		
+		todo_list_serializer() {}
+		~todo_list_serializer() {}
+
+	private:
+
+		todo_list* m_todolist;
+		std::string m_filename;
+
+	};
 	// ============================================= implementation =============================================
 
 	todo_list::todo_list() {

@@ -10,62 +10,26 @@ namespace PFF::serializer {
 	yaml::yaml(const std::string& filename, const std::string& section_name, option option)
 		: m_filename(filename), m_name(section_name), m_option(option) {
 
-		LOG(Info, "called yaml() constructor");
-		extract_part_befor_delimiter(m_path, filename, "/");
+		std::string path{};
+		extract_part_befor_delimiter(path, filename, "/");
+		CORE_ASSERT(io_handler::create_directory(path), "", "Could not create file-path");
 
-		CORE_ASSERT(io_handler::create_directory(m_path), "", "Could not create file-path");
-
-		if (m_option == option::load_from_file) {
-
+		if (m_option == option::load_from_file)
 			deserialize();
-		} else {
+		
+		else {
 
-			m_content_buffer << section_name << ":\n";
+			m_file_content << section_name << ":\n";
 			m_level_of_indention = 1;
 		}
 
-		/*
-		switch (option) {
-		case serializer_option::save_to_file:
-
-			m_ostream = std::ofstream(m_filename);
-			break;
-
-		case serializer_option::load_from_file:
-
-			CORE_VALIDATE(std::filesystem::exists(m_filename), , "", "file: [" << m_filename << "] does not exist");
-			m_istream = std::ifstream(m_filename);
-			break;
-
-		default:
-			DEBUG_BREAK();
-			break;
-		}*/
 	}
 
 	yaml::~yaml() {
 
-		LOG(Info, "called yaml() destructor");
-
 		if (m_option == option::save_to_file)
 			serialize();
 	}
-
-	/*
-	yaml& yaml::section_name(const std::string& name) {
-
-		m_name = name;
-
-		LOG(Debug, "called yaml::section_name()");
-
-		if (m_option == serializer::serializer_option::load_from_file) {
-
-			m_is_correct_struct = (m_name == name);
-		}
-
-		return *this;
-	}
-	*/
 
 	void yaml::serialize() {
 
@@ -78,15 +42,8 @@ namespace PFF::serializer {
 		std::ostringstream updated_file;
 
 		// todo::write to corrent place (copy beginning && end)
-		m_ostream << m_content_buffer.str();
+		m_ostream << m_file_content.str();
 
-		/*
-		for (auto it = m_key_value_pares.begin(); it != m_key_value_pares.end(); it++) {
-
-			m_ostream << "  " << it->first << ": " << it->second << "\n";
-			LOG(Info, "  " << it->first << ": " << it->second);
-		}
-		*/
 	}
 
 	yaml& yaml::deserialize() {
@@ -130,7 +87,7 @@ namespace PFF::serializer {
 					m_key_value_pares[key] = value;
 				}
 
-				LOG(Debug, "END OF SECTION");
+				//LOG(Debug, "END OF SECTION");
 			}
 
 			// exit outer loop if inner-loop already done
@@ -139,7 +96,88 @@ namespace PFF::serializer {
 
 		}
 
-		LOG(Trace, "Filished parting file")
+		//LOG(Trace, "Filished parting file")
+		return *this;
+	}
+
+	yaml& yaml::sub_section(const std::string& section_name, std::function<void(PFF::serializer::yaml&)> sub_section_function) {
+
+		m_level_of_indention++;
+
+		if (m_option == PFF::serializer::option::save_to_file) {
+
+			m_file_content << add_spaces(m_level_of_indention - 1) << section_name << ":\n";
+			sub_section_function(*this);
+
+		} else {	// load from file
+
+			// buffer [m_key_value_pares] for duration of function
+			std::unordered_map<std::string, std::string> key_value_pares_buffer = m_key_value_pares;
+			m_key_value_pares = {};
+
+			// buffer [m_file_content] for duration of function
+			std::stringstream file_content_buffer;
+			file_content_buffer << m_file_content.str();
+			m_file_content = {};
+
+
+			// deserialize content of subsections				
+			const u32 section_indentation = 0;
+			bool found_section = false;
+			std::string line;
+			//m_level_of_indention++;
+			while (std::getline(file_content_buffer, line)) {
+
+				// skip empty lines or comments
+				if (line.empty() || line.front() == '#')
+					continue;
+
+				// if line contains desired section enter inner-loop
+				//   has correct indentaion                                 has correct section_name                          ends with double-point
+				if ((measure_indentation(line) == 0) && (line.find(section_name) != std::string::npos) && (line.back() == ':')) {
+
+					found_section = true;
+					//m_level_of_indention++;
+					//LOG(Debug, "sub_section() found section => line: [" << line << "]");
+
+					//     not end of content
+					while (std::getline(file_content_buffer, line)) {
+
+						line = line.substr(NUM_OF_INDENTING_SPACES);
+
+						//  more indented                                        beginning of new sub-section
+						if (measure_indentation(line) != 0 || line.back() == ':') {
+
+							m_file_content << line << "\n";
+							continue;
+						}
+
+						line.erase(std::remove(line.begin(), line.end(), ' '), line.end());
+						std::istringstream iss(line);
+						std::string key, value;
+						std::getline(iss, key, ':');
+						std::getline(iss, value);
+						m_key_value_pares[key] = value;
+					}
+
+					//LOG(Debug, "END OF SUB-SECTION");
+				}
+
+				// skip rest of content if section found
+				if (found_section)
+					break;
+			}
+			//m_level_of_indention--;
+
+			sub_section_function(*this);
+
+			// restore [m_key_value_pares]
+			//LOG(Fatal, "Reseting values");
+			m_key_value_pares = key_value_pares_buffer;
+			m_file_content << file_content_buffer.str();
+		}
+
+		m_level_of_indention--;
 		return *this;
 	}
 
