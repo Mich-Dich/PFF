@@ -33,6 +33,7 @@ namespace PFF {
 		PFF_PROFILE_FUNCTION();
 
 		window_attrib_serializer(&m_data, "./config/window_attributes.txt").deserialize();
+		window_attrib_serializer(&m_data, "./config/window_attributes.txt").serialize();
 
 		init(m_data);
 	}
@@ -41,7 +42,6 @@ namespace PFF {
 
 		PFF_PROFILE_FUNCTION();
 
-		window_attrib_serializer(&m_data, "./config/window_attributes.txt").serialize();
 
 		int pos_x, pos_y;
 		glfwGetWindowPos(m_Window, &pos_x, &pos_y);
@@ -309,6 +309,8 @@ namespace PFF {
 
 	void window_attrib_serializer::serialize() {
 
+#if 0		// old API - DEPRECATED
+
 		serializer::yaml(m_filename, serializer::serializer_option::save_to_file)
 			.struct_name("window_attributes")
 			.set(KEY_VALUE(m_window_attrib->title))
@@ -316,17 +318,62 @@ namespace PFF {
 			.set(KEY_VALUE(m_window_attrib->pos_y))
 			.set(KEY_VALUE(m_window_attrib->width))
 			.set(KEY_VALUE(m_window_attrib->height))
-			.set(KEY_VALUE(m_window_attrib->vsync))
-			.serialize();
+			.set(KEY_VALUE(m_window_attrib->vsync));
+
+#elif 0		// new API - no subsection (actually used in this case)
+
+		serializer::yaml(m_filename, "window_attributes", serializer::option::save_to_file)
+			.entry(KEY_VALUE(m_window_attrib->title))
+			.entry(KEY_VALUE(m_window_attrib->pos_x))
+			.entry(KEY_VALUE(m_window_attrib->pos_y))
+			.entry(KEY_VALUE(m_window_attrib->width))
+			.entry(KEY_VALUE(m_window_attrib->height))
+			.entry(KEY_VALUE(m_window_attrib->vsync));
+
+#else		// new API - with subsection (DEV-ONLY)
+
+		int32 test_int = -42;
+		f32 test_float = 3.1415f;
+		std::vector<int32> test_vector = { 2, 42, 64, 21, -152, 24, -41, -16 };
+
+		/*		
+		auto serializer = serializer::yaml(m_filename, "window_attributes", serializer::option::save_to_file);
+		serializer.entry(KEY_VALUE(m_window_attrib->title));
+		serializer.entry(KEY_VALUE(m_window_attrib->vsync));
+		serializer.sub_section("attributes", [&]() {
+				
+			serializer.entry("TestValue_float", test_float);
+			serializer.entry("TestValue_int", test_int);
+		});
+		*/
+
+		serializer::yaml(m_filename, "window_attributes", serializer::option::save_to_file)
+			.entry(KEY_VALUE(m_window_attrib->title))
+			.entry(KEY_VALUE(m_window_attrib->vsync))
+			.sub_section("attributes", [&](serializer::yaml& serializer) {
+
+				serializer.entry(KEY_VALUE(test_float));		// like this
+				serializer.entry(KEY_VALUE(m_window_attrib->vsync));
+				serializer.entry(KEY_VALUE(test_vector));
+			});
+			//.entry(KEY_VALUE(test_vector));
+
+		/*		TEST ARRAY FUNTION => .array / .vactor
+		for (size_t i = 0; i < 5; i++) {
+
+		}
+		*/
+
+		LOG(Trace, "Serialized to file !!");
+
+#endif // 0
 	}
 
 	bool window_attrib_serializer::deserialize() {
 
-		window_attrib test{};
-		LOG(Trace, "test struct: title: " << test.title);
+#if 0
 
 		serializer::yaml(m_filename, serializer::serializer_option::load_from_file)
-			.deserialize()
 			.struct_name("window_attributes")
 			.get(KEY_VALUE(m_window_attrib->title))
 			.get(KEY_VALUE(m_window_attrib->pos_x))
@@ -334,6 +381,46 @@ namespace PFF {
 			.get(KEY_VALUE(m_window_attrib->width))
 			.get(KEY_VALUE(m_window_attrib->height))
 			.get(KEY_VALUE(m_window_attrib->vsync));
+
+		LOG(Info, "hopefully after destructor");
+#else
+		std::string title{};
+		bool vsync = true;
+		int32 test_int{};
+		f32 test_float{};
+		std::vector<int32> test_vector{};
+
+		serializer::yaml(m_filename, "window_attributes", serializer::option::load_from_file)
+			.entry(KEY_VALUE(title))
+			.entry(KEY_VALUE(vsync))
+			.sub_section("attributes", [&](serializer::yaml& serializer) {
+
+				serializer.entry(KEY_VALUE(test_float));		// like this
+				serializer.entry(KEY_VALUE(vsync));
+				serializer.entry(KEY_VALUE(test_vector));
+			});
+			//.entry(KEY_VALUE(test_vector));
+
+		LOG(Trace, "Deserialized from file !!");
+
+		/*
+		// option is currently useless, so this is the updated version:
+		serializer::yaml(m_filename, "window_attributes", serializer::option::load_from_file)
+			.entry(KEY_VALUE(m_window_attrib->title))
+			.entry(KEY_VALUE(m_window_attrib->vsync))
+			.entry(KEY_VALUE(m_window_attrib->vsync));
+			//.sub_section("attributes")
+
+		// option is currently useless, so this is the updated version:
+		serializer::yaml(m_filename, "window_attributes", serializer::option::load_from_file)
+			.entry(KEY_VALUE(m_window_attrib->title))
+			.entry(KEY_VALUE(m_window_attrib->vsync));
+			//.entry("attributes", KEY_VALUE(m_window_attrib->vsync))
+			//.entry("attributes", KEY_VALUE(m_window_attrib->vsync));
+		*/
+
+#endif // DEV-TEST
+
 
 		return true;
 	}

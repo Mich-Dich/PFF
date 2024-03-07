@@ -22,7 +22,7 @@ namespace PFF::toolkit::todo {
 
 		void serialize() {
 		
-			serializer::yaml(m_filename, serializer::serializer_option::save_to_file);
+			// serializer::yaml(m_filename, serializer::serializer_option::save_to_file);
 
 			// add vector be using => .set_vector( - LAMDA() - )
 		}
@@ -114,7 +114,7 @@ namespace PFF::toolkit::todo {
 
 	todo_list::todo_list() {
 
-		todo_list_serializer(this, "./config/todo_list").deserialize();
+		//todo_list_serializer(this, "./config/todo_list").deserialize();
 		//SERIALIZER(todo_list, "./config/todo_list").serialize();
 
 		m_topics.push_back({ "Editor", true, false, {{"Serialize ToDo-List", "Serialize Content into yaml-file for readability"}} });
@@ -125,7 +125,7 @@ namespace PFF::toolkit::todo {
 
 	todo_list::~todo_list() {
 
-		todo_list_serializer(this, "./config/todo_list").serialize();
+		//todo_list_serializer(this, "./config/todo_list").serialize();
 	}
 
 	void todo_list::window_todo_list() {
