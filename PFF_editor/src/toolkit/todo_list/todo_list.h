@@ -72,11 +72,10 @@ namespace PFF::toolkit::todo {
 		void add_topic(buffer::topic buffer);
 		void remove_topic(const u64 index);
 
-		bool m_show_todo_list = false;
+		bool m_show_todo_list = true;			// DEV-ONLY
 
 	private:
 		std::vector<topic> m_topics{};
-		u64 m_selected_topic = 0;
 
 		friend class todo_list_serializer;
 	};
@@ -84,21 +83,37 @@ namespace PFF::toolkit::todo {
 	class todo_list_serializer {
 	public:
 		
-		todo_list_serializer() {}
+		// can deine here because header is only included in editor_layer.cpp file
+		todo_list_serializer(todo_list* todo_list, serializer::option option, const std::string& filename = "./config/todo_list.txt") {
+
+			std::vector<u32> test_vec;
+
+			serializer::yaml(filename, "todo_list", option)
+				.vector_of_structs(KEY_VALUE(todo_list->m_topics), [&](serializer::yaml& yaml, const u64 x) {
+				
+					yaml.entry(KEY_VALUE(todo_list->m_topics[x].name));
+					yaml.entry(KEY_VALUE(todo_list->m_topics[x].selected));
+				});
+		}
+
+		/*		Recursive calling doent work yet
+		yaml.vector_of_structs(KEY_VALUE(todo_list->m_topics[x].tasks), [&](serializer::yaml& yaml_inner, const u64 y) {
+
+			yaml_inner.entry(KEY_VALUE(todo_list->m_topics[x].tasks[y].title));
+			yaml_inner.entry(KEY_VALUE(todo_list->m_topics[x].tasks[y].description));
+			yaml_inner.entry(KEY_VALUE(todo_list->m_topics[x].tasks[y].done));
+		});
+		*/
+
 		~todo_list_serializer() {}
 
-	private:
-
-		todo_list* m_todolist;
-		std::string m_filename;
-
 	};
+
 	// ============================================= implementation =============================================
 
 	todo_list::todo_list() {
 
-		//todo_list_serializer(this, "./config/todo_list").deserialize();
-		//SERIALIZER(todo_list, "./config/todo_list").serialize();
+		todo_list_serializer(this, serializer::option::load_from_file);
 
 		m_topics.push_back({ "Editor", true, false, {{"Serialize ToDo-List", "Serialize Content into yaml-file for readability"}} });
 		m_topics.push_back({ "Renderer", false, false, {{"Test", "Descr"}} });
@@ -108,7 +123,7 @@ namespace PFF::toolkit::todo {
 
 	todo_list::~todo_list() {
 
-		//todo_list_serializer(this, "./config/todo_list").serialize();
+		todo_list_serializer(this, serializer::option::save_to_file);
 	}
 
 	void todo_list::window_todo_list() {
@@ -183,7 +198,6 @@ namespace PFF::toolkit::todo {
 			ImGui::PushStyleVar(ImGuiStyleVar_SelectableTextAlign, ImVec2(.5f, .5f));
 			for (u64 n = 0; n < m_topics.size(); n++) {
 
-				const bool is_selected = (m_selected_topic == n);
 				if (ImGui::Selectable(m_topics[n].name.c_str(), m_topics[n].selected, 0, { inner_width - 10 - style->ItemSpacing.x, 20})) {
 
 					if (!ImGui::GetIO().KeyCtrl) {			// Clear selection when CTRL is not held
@@ -346,7 +360,6 @@ namespace PFF::toolkit::todo {
 		ASSERT(index >= 0 && index < m_topics.size(), "", "Tried to remove a nonvalid index")
 		m_topics.erase(m_topics.begin() + index);
 	}
-
 
 }
 

@@ -13,7 +13,6 @@ namespace PFF::serializer {
 		load_from_file,
 	};
 	
-	// comment for test
 	class PFF_API yaml {
 	public:
 
@@ -53,20 +52,18 @@ namespace PFF::serializer {
 
 					//LOG(Info, "T is a std::vector.");
 
-					m_file_content << add_spaces(m_level_of_indention) << key_name << ":\n";
-					//m_level_of_indention++;
+					m_file_content << add_spaces(m_level_of_indention) << m_prefix << key_name << ":\n";
 					for (auto interation : value) {
 
 						//LOG(Info, "interation: "<< interation)
 						PFF::util::convert_to_string<T::value_type>(interation, buffer);
 						m_file_content << add_spaces(m_level_of_indention + 1) << "- " << buffer << "\n";
 					}
-					//m_level_of_indention--;
 
 				} else {
 
 					PFF::util::convert_to_string<T>(value, buffer);
-					m_file_content << add_spaces(m_level_of_indention) << key_name << ": " << buffer <<"\n";
+					m_file_content << add_spaces(m_level_of_indention) << m_prefix << key_name << ": " << buffer << "\n";
 
 					//LOG(Trace, "called: entry() to set: " << key_name << " - " << buffer);
 				}
@@ -98,7 +95,7 @@ namespace PFF::serializer {
 
 								// remove indentation                       remove "- " (array element marker)
 								line = line.substr(NUM_OF_INDENTING_SPACES + 2);
-								PFF:util::convert_from_string(line, buffer);
+							PFF:util::convert_from_string(line, buffer);
 								value.push_back(buffer);
 							}
 
@@ -122,22 +119,111 @@ namespace PFF::serializer {
 				}
 			}
 
+			m_prefix = m_prefix_fallback;
 			return *this;
 		}
 
-		yaml& vector_of_structs(const std::string& vector_name, const u32 vector_size, std::function<void(PFF::serializer::yaml&)> vector_function) {
+		template<typename T>
+		yaml& vector_of_structs(const std::string& vector_name, std::vector<T>& vector, std::function<void(PFF::serializer::yaml&, const u64 iteration)> vector_function) {
 
-			m_file_content << add_spaces(m_level_of_indention) << vector_name << ":\n";
-			m_level_of_indention++;
+			if (m_option == PFF::serializer::option::save_to_file) {			// save to file
 
-			if (m_option == PFF::serializer::option::save_to_file) {
+				m_file_content << add_spaces(m_level_of_indention) << m_prefix << vector_name << ":\n";
+				m_level_of_indention++;
 
-				for (u32 x = 0; x < vector_size; x++) {
+				for (u64 x = 0; x < vector.size(); x++) {
 
-					vector_function(*this);
+					// start of array element
+					m_prefix = "- ";
+					m_prefix_fallback = "  ";
+					vector_function(*this, x);
 				}
+
+				m_level_of_indention--;
+				m_prefix = "";
+				m_prefix_fallback = "";
+
+			} else {		// load from file
+				m_level_of_indention++;
+
+				// buffer [m_key_value_pares] for duration of function
+				std::unordered_map<std::string, std::string> key_value_pares_buffer = m_key_value_pares;
+				std::vector<std::unordered_map<std::string, std::string>> vector_of_key_value_pares{};
+				m_key_value_pares = {};
+
+				// buffer [m_file_content] for duration of function
+				std::stringstream file_content_buffer;
+				std::vector<std::stringstream> vector_of_file_content{};		// for array element in file
+				file_content_buffer << m_file_content.str();
+				m_file_content = {};
+
+				// deserialize content of subsections				
+				u64 index = -1;
+				bool found_section = false;
+				const u32 section_indentation = 0;
+				std::string line;
+				while (std::getline(file_content_buffer, line)) {
+
+					// skip empty lines or comments
+					if (line.empty() || line.front() == '#')
+						continue;
+
+					// if line contains desired section enter inner-loop
+					//   has correct indentaion              has correct vector_name                          ends with double-point
+					if ((measure_indentation(line) == 0) && (line.find(vector_name) != std::string::npos) && (line.back() == ':')) {
+
+						found_section = true;
+
+						//     not end of content
+						while (std::getline(file_content_buffer, line)) {
+
+							// ckeck for indentation
+							if (measure_indentation(line) == 1) {
+
+								vector_of_key_value_pares.push_back({});
+								vector_of_file_content.push_back({});
+								index++;
+							}
+
+							// remove array-prefix "- " or "  "
+							line = line.substr(NUM_OF_INDENTING_SPACES * 2);
+
+							//  more indented                                        beginning of new sub-section
+							if (measure_indentation(line) != 0 || line.back() == ':' || line.front() == '-') {
+
+								//m_file_content << line << "\n";
+								vector_of_file_content[index] << line << "\n";
+								continue;
+							}
+
+							line.erase(std::remove(line.begin(), line.end(), ' '), line.end());
+							std::istringstream iss(line);
+							std::string key, value;
+							std::getline(iss, key, ':');
+							std::getline(iss, value);
+							vector_of_key_value_pares[index][key] = value;
+							//m_key_value_pares[key] = value;
+						}
+					}
+
+					// skip rest of content if section found
+					if (found_section)
+						break;
+				}
+
+				ASSERT(vector_of_key_value_pares.size() == vector_of_file_content.size(), "", "two buffers are of diffrent size");
+
+				vector.resize(vector_of_key_value_pares.size());
+				for (u64 x = 0; x < vector.size(); x++) {
+
+					m_key_value_pares = vector_of_key_value_pares[x];
+					std::string temp_buffer = vector_of_file_content[x].str();
+					m_file_content << temp_buffer;
+					vector_function(*this, x);
+				}
+
+				m_level_of_indention--;
 			}
-			m_level_of_indention--;
 			return *this;
 		}
 
@@ -152,6 +238,9 @@ namespace PFF::serializer {
 		u32 measure_indentation(const std::string& str);
 
 		u32 m_level_of_indention = 0;
+		
+		std::string m_prefix{};				// can maybe be a [char*]
+		std::string m_prefix_fallback{};	// can maybe be a [char*]
 
 		// content data
 		bool m_is_correct_struct = false;

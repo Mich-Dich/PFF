@@ -77,6 +77,9 @@ namespace PFF {
 
 	bool PFF_editor::shutdown() {
 
+		pop_overlay(m_editor_layer);
+		delete m_editor_layer;
+
 		// save camera position
 		glm::vec3 camera_pos = m_editor_controller->get_editor_camera_pos();
 		glm::vec3 camera_direction = m_editor_controller->get_editor_camera_direction();

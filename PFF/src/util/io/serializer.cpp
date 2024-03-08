@@ -14,6 +14,13 @@ namespace PFF::serializer {
 		extract_part_befor_delimiter(path, filename, "/");
 		CORE_ASSERT(io_handler::create_directory(path), "", "Could not create file-path");
 
+		// make shure the file exists
+		if (!std::filesystem::exists(m_filename)) {
+
+			auto file = std::ofstream(m_filename);
+			file.close();
+		}
+
 		if (m_option == option::load_from_file)
 			deserialize();
 		
@@ -51,7 +58,7 @@ namespace PFF::serializer {
 		CORE_ASSERT(!m_name.empty(), "called yaml::deserialize()", "name of section to find is empty");
 
 		m_istream = std::ifstream(m_filename);
-		CORE_ASSERT(m_istream.is_open(), "", "file-stream is not open");
+		CORE_VALIDATE(m_istream.is_open(), return *this,"", "file-stream is not open");
 
 		const u32 SECTION_INDENTATION = 0;
 		bool found_section = false;
@@ -120,7 +127,6 @@ namespace PFF::serializer {
 			file_content_buffer << m_file_content.str();
 			m_file_content = {};
 
-
 			// deserialize content of subsections				
 			const u32 section_indentation = 0;
 			bool found_section = false;
@@ -133,7 +139,7 @@ namespace PFF::serializer {
 					continue;
 
 				// if line contains desired section enter inner-loop
-				//   has correct indentaion                                 has correct section_name                          ends with double-point
+				//   has correct indentaion              has correct section_name                          ends with double-point
 				if ((measure_indentation(line) == 0) && (line.find(section_name) != std::string::npos) && (line.back() == ':')) {
 
 					found_section = true;
@@ -196,7 +202,7 @@ namespace PFF::serializer {
 			if (ch == ' ')
 				count++;
 			else
-				break; // Stop counting when a non-space character is encountered			
+				break; // Stop counting on non-space characters
 		}
 
 		return count / NUM_OF_INDENTING_SPACES;

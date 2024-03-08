@@ -29,6 +29,7 @@ namespace PFF {
 
 		FORCEINLINE f64 get_delta_time() const							{ return m_delta_time; }
 		FORCEINLINE USE_IN_EDITOR void push_overlay(layer* overlay)		{ m_layerstack.push_overlay(overlay); }
+		FORCEINLINE USE_IN_EDITOR void pop_overlay(layer* overlay)		{ m_layerstack.pop_overlay(overlay); }
 		FORCEINLINE u32 get_target_fps() const							{ return m_target_fps; }
 		FORCEINLINE bool get_limit_fps() const							{ return m_limit_fps; }
 		FORCEINLINE void set_titlebar_hovered(bool value)				{ m_is_titlebar_hovered = value; }

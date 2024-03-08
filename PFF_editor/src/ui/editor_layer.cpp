@@ -22,7 +22,6 @@ namespace PFF {
 
 	static toolkit::todo::todo_list* s_todo_list;
 
-
 	editor_layer::~editor_layer() {
 
 		LOG(Info, "Shutdown");
@@ -39,6 +38,9 @@ namespace PFF {
 	}
 
 	void editor_layer::on_detach() {
+
+		LOG(Fatal, "Detaching editor_layer");
+		delete s_todo_list;
 	}
 
 	void editor_layer::on_update(f32 delta_time) {

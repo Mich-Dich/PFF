@@ -249,7 +249,7 @@ namespace PFF {
 	// =============================================================================  serializer  =============================================================================
 
 	window_attrib_serializer::window_attrib_serializer(window_attrib* window_attributes, const PFF::serializer::option option, const std::string& filename) {
-
+		/*
 		serializer::yaml(filename, "window_attributes", option)
 			.entry(KEY_VALUE(window_attributes->title))
 			.entry(KEY_VALUE(window_attributes->pos_x))
@@ -258,6 +258,7 @@ namespace PFF {
 			.entry(KEY_VALUE(window_attributes->height))
 			.entry(KEY_VALUE(window_attributes->vsync))
 			.entry(KEY_VALUE(window_attributes->window_size_state));
+		*/
 	}
 
 }
