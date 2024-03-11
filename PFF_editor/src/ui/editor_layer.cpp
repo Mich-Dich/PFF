@@ -3,6 +3,7 @@
 
 #include <imgui.h>
 
+//#include "util/io/serializer.h"
 #include "util/ui/panels/pannel_collection.h"
 #include "engine/platform/pff_window.h"
 #include "engine/color_theme.h"
@@ -19,8 +20,7 @@
 
 namespace PFF {
 
-	static toolkit::todo::todo_list* s_todo_list;
-
+	//static toolkit::todo::todo_list* s_todo_list;
 
 	editor_layer::~editor_layer() {
 
@@ -34,10 +34,14 @@ namespace PFF {
 			m_swapchain_supported_presentmodes_str.push_back(present_mode_to_str(mode));
 
 
-		s_todo_list = new toolkit::todo::todo_list();
+		//s_todo_list = new toolkit::todo::todo_list();
 	}
 
 	void editor_layer::on_detach() {
+
+		LOG(Fatal, "Detaching editor_layer");
+		toolkit::todo::shutdown();					// only need to cal shutdown() to kill todo_list if editor shutsdown
+		//delete s_todo_list;
 	}
 
 	void editor_layer::on_update(f32 delta_time) {
@@ -64,7 +68,7 @@ namespace PFF {
 		window_editor_settings();
 		window_general_settings();
 		
-		s_todo_list->window_todo_list();
+		PFF::toolkit::todo::window_todo_list();
 
 		ImGui::ShowDemoWindow();				// DEV-ONLY
 	}
@@ -167,8 +171,8 @@ namespace PFF {
 		ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, ImVec2(4, 4));
 		ImGui::PushStyleVar(ImGuiStyleVar_WindowRounding, 0.f);
 		ImGui::PushStyleVar(ImGuiStyleVar_WindowBorderSize, 0.f);
-		ImGui::PushStyleColor(ImGuiCol_MenuBarBg, ImVec4{0,0,0,0});
-		ImGui::PushStyleColor(ImGuiCol_WindowBg, ImVec4{0,0,0,0});
+		ImGui::PushStyleColor(ImGuiCol_MenuBarBg, ImVec4{ 0, 0, 0, 0 });
+		ImGui::PushStyleColor(ImGuiCol_WindowBg, ImVec4{ 0, 0, 0, 0 });
 
 		// make new window with menubar because I dont know how to limit the extend of a MenuBar
 		// just ImGui::MenuBar() would bo over the entire width of [appliaction_titlebar]
@@ -630,7 +634,7 @@ namespace PFF {
 			
 			if (ImGui::BeginMenu("Windows")) {
 
-				ImGui::MenuItem("ToDo List", "", &s_todo_list->m_show_todo_list);
+				ImGui::MenuItem("ToDo List", "", &PFF::toolkit::todo::s_show_todo_list);
 
 				ImGui::EndMenu();
 			}

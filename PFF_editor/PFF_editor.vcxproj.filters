@@ -80,9 +80,6 @@
     <ClCompile Include="src\util\pch_editor.cpp">
       <Filter>src\util</Filter>
     </ClCompile>
-    <ClCompile Include="src\util\ui\panels\pannel_collection.cpp">
-      <Filter>src\util\ui\panels</Filter>
-    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <None Include="shaders\default.frag">

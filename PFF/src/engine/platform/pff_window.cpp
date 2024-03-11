@@ -27,27 +27,20 @@ namespace PFF {
 
 	// ================================================================================== setup ==================================================================================
 
-	pff_window::pff_window(window_attributes attributes) :
+	pff_window::pff_window(window_attrib attributes) :
 		m_data(attributes) {
 
 		PFF_PROFILE_FUNCTION();
 
-		init(attributes);
+		window_attrib_serializer(&m_data, serializer::option::load_from_file, "./config/window_attributes.txt");
+		init(m_data);
 	}
 
 	pff_window::~pff_window() {
 
 		PFF_PROFILE_FUNCTION();
 
-		int pos_x, pos_y;
-		glfwGetWindowPos(m_Window, &pos_x, &pos_y);
-		config::save(config::file::editor, "window_attributes", "title", m_data.title);
-		//config::save(config::file::editor, "window_attributes", "pos_x", pos_x);
-		//config::save(config::file::editor, "window_attributes", "pos_y", pos_y);
-		config::save(config::file::editor, "window_attributes", "width", m_data.width);
-		config::save(config::file::editor, "window_attributes", "height", m_data.height);
-		config::save(config::file::editor, "window_attributes", "vsync", m_data.vsync);
-
+		window_attrib_serializer(&m_data, serializer::option::save_to_file, "./config/window_attributes.txt");
 		glfwDestroyWindow(m_Window);
 		glfwTerminate();
 		LOG(Info, "shutdown");
@@ -56,29 +49,23 @@ namespace PFF {
 	// ============================================================================== inplemantation ==============================================================================
 	
 
-	void pff_window::init(window_attributes attributes) {
+	void pff_window::init(window_attrib attributes) {
 
 		PFF_PROFILE_FUNCTION();
 
-		config::load(config::file::editor, "window_attributes", "title", attributes.title);
-		//config::load(config::file::editor, "window_attributes", "pos_x", attributes.pos_x);
-		//config::load(config::file::editor, "window_attributes", "pos_y", attributes.pos_y);
-		config::load(config::file::editor, "window_attributes", "width", attributes.width);
-		config::load(config::file::editor, "window_attributes", "height", attributes.height);
-		config::load(config::file::editor, "window_attributes", "vsync", attributes.vsync);
 		attributes.app_ref = &application::get();
 		m_data = attributes;
 
 		if (!s_GLFWinitialized) {
 
-			CORE_ASSERT(glfwInit(), "GLFW initialized", "Could not initialize GLFW");
 			glfwSetErrorCallback(GLFW_error_callback);
+			CORE_ASSERT(glfwInit(), "GLFW initialized", "Could not initialize GLFW");
 			s_GLFWinitialized = true;
 		}
 
-		glfwWindowHint(GLFW_TITLEBAR, false);
 		glfwWindowHint(GLFW_CLIENT_API, GLFW_NO_API);
 		glfwWindowHint(GLFW_RESIZABLE, GLFW_TRUE);
+		glfwWindowHint(GLFW_TITLEBAR, false);
 
 		m_Window = glfwCreateWindow(static_cast<int>(m_data.width), static_cast<int>(m_data.height), m_data.title.c_str(), nullptr, nullptr);
 		CORE_ASSERT(glfwVulkanSupported(), "", "GLFW does not support Vulkan");
@@ -103,14 +90,14 @@ namespace PFF {
 		CORE_LOG(Info, "bind event callbacks");
 		glfwSetWindowRefreshCallback(m_Window, [](GLFWwindow* window) {
 			
-			window_attributes& data = *(window_attributes*)glfwGetWindowUserPointer(window);
+			window_attrib& data = *(window_attrib*)glfwGetWindowUserPointer(window);
 			window_refresh_event event;
 			data.event_callback(event);
 		});
 
 		glfwSetWindowSizeCallback(m_Window, [](GLFWwindow* window, int width, int height) {
 
-			window_attributes& Data = *(window_attributes*)glfwGetWindowUserPointer(window);
+			window_attrib& Data = *(window_attrib*)glfwGetWindowUserPointer(window);
 			Data.width = static_cast<u32>(width);
 			Data.height = static_cast<u32>(height);
 			window_resize_event event(Data.width, Data.height);
@@ -119,27 +106,27 @@ namespace PFF {
 
 		glfwSetWindowFocusCallback(m_Window, [](GLFWwindow* window, int focused) {
 
-			window_attributes& data = *(window_attributes*)glfwGetWindowUserPointer(window);
+			window_attrib& data = *(window_attrib*)glfwGetWindowUserPointer(window);
 			window_focus_event event(focused == GLFW_TRUE);
 			data.event_callback(event);
 		});
 
 		glfwSetWindowCloseCallback(m_Window, [](GLFWwindow* window) {
 			
-			window_attributes& Data = *(window_attributes*)glfwGetWindowUserPointer(window);
+			window_attrib& Data = *(window_attrib*)glfwGetWindowUserPointer(window);
 			window_close_event event;
 			Data.event_callback(event);
 		});
 
 		glfwSetTitlebarHitTestCallback(m_Window, [](GLFWwindow* window, int x, int y, int* hit) {
 
-			window_attributes& Data = *(window_attributes*)glfwGetWindowUserPointer(window);
+			window_attrib& Data = *(window_attrib*)glfwGetWindowUserPointer(window);
 			*hit = Data.app_ref->is_titlebar_hovered();
 		});
 
 		glfwSetScrollCallback(m_Window, [](GLFWwindow* window, double xOffset, double yOffset) {
 
-			window_attributes& Data = *(window_attributes*)glfwGetWindowUserPointer(window);
+			window_attrib& Data = *(window_attrib*)glfwGetWindowUserPointer(window);
 			mouse_event event_x(key_code::mouse_scrolled_x, static_cast<f32>(xOffset));
 			mouse_event event_y(key_code::mouse_scrolled_y, static_cast<f32>(yOffset));
 			Data.event_callback(event_x);
@@ -148,7 +135,7 @@ namespace PFF {
 
 		glfwSetCursorPosCallback(m_Window, [](GLFWwindow* window, double xPos, double yPos) {
 
-			window_attributes& Data = *(window_attributes*)glfwGetWindowUserPointer(window);
+			window_attrib& Data = *(window_attrib*)glfwGetWindowUserPointer(window);
 			mouse_event event_x(key_code::mouse_moved_x, static_cast<f32>(Data.cursor_pos_x - xPos));
 			mouse_event event_y(key_code::mouse_moved_y, static_cast<f32>(Data.cursor_pos_y - yPos));
 			Data.event_callback(event_x);
@@ -160,14 +147,14 @@ namespace PFF {
 
 		glfwSetKeyCallback(m_Window, [](GLFWwindow* window, int key, int scancode, int action, int mods) {
 
-			window_attributes& Data = *(window_attributes*)glfwGetWindowUserPointer(window);
+			window_attrib& Data = *(window_attrib*)glfwGetWindowUserPointer(window);
 			key_event event(static_cast<key_code>(key), static_cast<key_state>(action));
 			Data.event_callback(event);
 		});
 
 		glfwSetMouseButtonCallback(m_Window, [](GLFWwindow* window, int button, int action, int mods) {
 
-			window_attributes& Data = *(window_attributes*)glfwGetWindowUserPointer(window);
+			window_attrib& Data = *(window_attrib*)glfwGetWindowUserPointer(window);
 			key_event event(static_cast<key_code>(button), static_cast<key_state>(action));
 			Data.event_callback(event);
 		});
@@ -227,7 +214,7 @@ namespace PFF {
 		
 		LOG(Fatal, "minimizing window");
 		glfwIconifyWindow(m_Window);
-		m_window_size_state = window_size_state::minimised;
+		m_data.window_size_state = window_size_state::minimised;
 		application::set_render_state(system_state::inactive);
 	}
 
@@ -235,7 +222,7 @@ namespace PFF {
 		
 		LOG(Fatal, "restoring window");
 		glfwRestoreWindow(m_Window); 
-		m_window_size_state = window_size_state::windowed;
+		m_data.window_size_state = window_size_state::windowed;
 		application::set_render_state(system_state::active);
 	}
 
@@ -243,7 +230,7 @@ namespace PFF {
 		
 		LOG(Fatal, "maximising window");
 		glfwMaximizeWindow(m_Window);
-		m_window_size_state = window_size_state::fullscreen_windowed; 
+		m_data.window_size_state = window_size_state::fullscreen_windowed;
 		application::set_render_state(system_state::active);
 	}
 
@@ -256,6 +243,21 @@ namespace PFF {
 
 		CORE_ASSERT(glfwCreateWindowSurface(instance, m_Window, nullptr, get_surface) == VK_SUCCESS, "", "Failed to create awindow surface");
 
+	}
+
+	// =============================================================================  serializer  =============================================================================
+
+	window_attrib_serializer::window_attrib_serializer(window_attrib* window_attributes, const PFF::serializer::option option, const std::string& filename) {
+		/*
+		serializer::yaml(filename, "window_attributes", option)
+			.entry(KEY_VALUE(window_attributes->title))
+			.entry(KEY_VALUE(window_attributes->pos_x))
+			.entry(KEY_VALUE(window_attributes->pos_y))
+			.entry(KEY_VALUE(window_attributes->width))
+			.entry(KEY_VALUE(window_attributes->height))
+			.entry(KEY_VALUE(window_attributes->vsync))
+			.entry(KEY_VALUE(window_attributes->window_size_state));
+		*/
 	}
 
 }

@@ -7,11 +7,8 @@
 
 namespace PFF {
 
-	//
-	layer_stack::layer_stack() {
-	}
+	layer_stack::layer_stack() {}
 	
-	//
 	layer_stack::~layer_stack() {
 
 		PFF_PROFILE_FUNCTION();
@@ -22,7 +19,6 @@ namespace PFF {
 		CORE_LOG(Info, "Shutdown");
 	}
 
-	//
 	void layer_stack::push_layer(layer* layer) {
 
 		PFF_PROFILE_FUNCTION();
@@ -33,7 +29,6 @@ namespace PFF {
 		layer->on_attach();
 	}
 	
-	//
 	void layer_stack::pop_layer(layer* layer) {
 
 		PFF_PROFILE_FUNCTION();
@@ -48,7 +43,6 @@ namespace PFF {
 		}
 	}
 
-	//
 	void layer_stack::push_overlay(layer* overlay) {
 
 		PFF_PROFILE_FUNCTION();
@@ -57,7 +51,6 @@ namespace PFF {
 		overlay->on_attach();
 	}
 
-	//
 	void layer_stack::pop_overlay(layer* overlay) {
 
 		PFF_PROFILE_FUNCTION();
@@ -70,6 +63,7 @@ namespace PFF {
 		}
 
 	}
+
 	void layer_stack::delete_all_layers() {
 
 		PFF_PROFILE_FUNCTION();

@@ -2,7 +2,7 @@
 
 ![Main Logo](/resources/Logo2.png?raw=true "mich")
 
-PFF (Procedurally Focused Framework) is a powerful 2D/3D game engine crafted in C/C++, designed with a primary focus on harnessing the potential of procedural generation. Primarily developed for Windows, PFF is poised to extend its capabilities to Linux in the future, aspiring to offer a versatile and dynamic platform for game development.
+PFF (Procedurally Focused Framework) is a 3D game engine crafted in C/C++, designed with a primary focus on harnessing the potential of procedural generation. Primarily developed for Windows, PFF is poised to extend its capabilities to Linux in the future, aspiring to offer a versatile and dynamic platform for game development.
 
 ### Here are screenshots that show the current state of PFF.
 
@@ -10,7 +10,7 @@ This shows a mesh with 3.5 million vertices
 ![first_image](/resources/PFF_editor_vHol9hqUU4.png?raw=true "image of the editor as it is now")
 
 Contains a ToDo-List by default
-![first_image](/resources/PFF_editor_zXmikPE9jC.png?raw=true "image of the editor as it is now")
+![second_image](/resources/PFF_editor_zXmikPE9jC.png?raw=true "image of the editor as it is now")
 
 (UI is not finished yet, e.g. Logo missing)
 
@@ -22,12 +22,7 @@ To get started with PFF, follow these simple steps:
    git clone --recursive https://github.com/Mich-Dich/PFF
    ```
 
-3. in [premake5.lua] change line [4] to point to your Vulkan-SDK location
-   ```
-   4  vulkan_dir = "C:/VulkanSDK/1.3.250.1"			-- CHANGE THIS
-   ```
-   
-3. Execute the following file to create a VS 2022 solution:
+2. Execute the following file to create a VS 2022 solution:
    ```
    AutoGenerateSolution.bat
    ```
@@ -41,12 +36,12 @@ PFF relies on the following dependencies:
 - [ImGui](https://github.com/ocornut/imgui)
 - [glm](https://github.com/icaven/glm)
 
--[Vulkan]
+- [Vulkan](https://www.lunarg.com/vulkan-sdk/)
 Make sure you install Vulkan SDK and update the path in [premake5.lua]
 
 ## Usage
 You can start using PFF by either utilizing the provided project, [Sandbox], or creating your own project and linking it by adjusting the `premake5.lua` file. 
-Your game (main class) has to inherit from the [application] class.
+Your game (main class) has to inherit from the `application` class.
 
 ## Procedural Generation Unleashed
 

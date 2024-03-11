@@ -55,4 +55,5 @@
 #include "util/math/constance.h"
 #include "util/math/random.h"
 #include "util/benchmarking/instrumentor.h"
+#include "util/io/serializer.h"
 //#include "util/math/random.h"

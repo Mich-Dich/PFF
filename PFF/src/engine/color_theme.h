@@ -97,6 +97,9 @@ namespace PFF {
 				action_color_gray_hover					= LERP_GRAY(0.3f);
 				action_color_gray_active				= LERP_GRAY(0.35f);
 
+				highlited_window_bg						= LERP_GRAY(0.17f);
+				main_titlebar_color						= LERP_MAIN_COLOR_DARK(.5f);
+
 				colors[ImGuiCol_Text]					= LERP_GRAY(1.f);
 				colors[ImGuiCol_TextDisabled]			= LERP_GRAY(.7f);
 				colors[ImGuiCol_WindowBg]				= LERP_GRAY(.14f);
@@ -164,6 +167,9 @@ namespace PFF {
 				action_color_gray_default				= LERP_GRAY(0.2f);
 				action_color_gray_hover					= LERP_GRAY(0.27f);
 				action_color_gray_active				= LERP_GRAY(0.35f);
+				
+				highlited_window_bg						= LERP_GRAY(0.8f);
+				main_titlebar_color						= LERP_MAIN_COLOR_LIGHT(.5f);
 
 				colors[ImGuiCol_Text]					= LERP_GRAY(.0f);
 				colors[ImGuiCol_TextDisabled]			= LERP_GRAY(.3f);

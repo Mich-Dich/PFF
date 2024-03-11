@@ -28,7 +28,6 @@
 
 namespace PFF {
 
-
 	// ==================================================================== setup ====================================================================
 
 	application* application::s_instance = nullptr;
@@ -42,10 +41,11 @@ namespace PFF {
 
 	application::application() {
 
+		PFF::Logger::Init("[$B$T:$J$E] [$B$L$X $I - $P:$G$E] $C$Z");
+
 		PFF_PROFILE_BEGIN_SESSION("startup", "benchmarks", "PFF_benchmark_startup.json");
 		PFF_PROFILE_FUNCTION();
 
-		CORE_LOG(Debug, "application Constructor");
 		CORE_ASSERT(!s_instance, "", "Application already exists");
 		s_instance = this;
 
@@ -71,7 +71,7 @@ namespace PFF {
 		m_is_titlebar_hovered = false;
 		m_running = true;
 
-		init();					// init user code / potentally make every actor have own function (like UNREAL)
+		init();												// init user code / potentally make every actor have own function (like UNREAL)
 		PFF_PROFILE_END_SESSION();
 	}
 

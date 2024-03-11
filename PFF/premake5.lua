@@ -1,7 +1,7 @@
 
 project "PFF"
 	location "%{wks.location}/PFF"
-	kind "SharedLib"	
+	kind "SharedLib"
 	staticruntime "off"
 	language "C++"
 	cppdialect "C++17"
@@ -45,7 +45,6 @@ project "PFF"
 	{
 		"glfw",
 		"ImGui",
-        
         "%{Library.Vulkan}"
 	}
 

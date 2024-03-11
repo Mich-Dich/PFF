@@ -115,80 +115,82 @@ namespace APP_NAMESPACE {
 	#define CORE_LOG_Error(message)				{ APP_NAMESPACE::Logger::LogMessage(APP_NAMESPACE::Logger::LogMsgSeverity::Error,__FILE__,__FUNCTION__,__LINE__).flush() << message; }
 
 	#if CORE_LOG_LEVEL_ENABLED >= 1
-	#define CORE_LOG_Warn(message)				{ APP_NAMESPACE::Logger::LogMessage(APP_NAMESPACE::Logger::LogMsgSeverity::Warn,__FILE__,__FUNCTION__,__LINE__).flush() << message; }
+		#define CORE_LOG_Warn(message)				{ APP_NAMESPACE::Logger::LogMessage(APP_NAMESPACE::Logger::LogMsgSeverity::Warn,__FILE__,__FUNCTION__,__LINE__).flush() << message; }
 	#else
-	#define CORE_LOG_Warn(message)				{;}
+		#define CORE_LOG_Warn(message)				{;}
 	#endif
 
 	#if CORE_LOG_LEVEL_ENABLED >= 2
-	#define CORE_LOG_Info(message)				{ APP_NAMESPACE::Logger::LogMessage(APP_NAMESPACE::Logger::LogMsgSeverity::Info,__FILE__,__FUNCTION__,__LINE__).flush() << message; }
+		#define CORE_LOG_Info(message)				{ APP_NAMESPACE::Logger::LogMessage(APP_NAMESPACE::Logger::LogMsgSeverity::Info,__FILE__,__FUNCTION__,__LINE__).flush() << message; }
 	#else
-	#define CORE_LOG_Info(message)				{;}
+		#define CORE_LOG_Info(message)				{;}
 	#endif
 
 	#if CORE_LOG_LEVEL_ENABLED >= 3
-	#define CORE_LOG_Debug(message)				{ APP_NAMESPACE::Logger::LogMessage(APP_NAMESPACE::Logger::LogMsgSeverity::Debug,__FILE__,__FUNCTION__,__LINE__).flush() << message; }
+		#define CORE_LOG_Debug(message)				{ APP_NAMESPACE::Logger::LogMessage(APP_NAMESPACE::Logger::LogMsgSeverity::Debug,__FILE__,__FUNCTION__,__LINE__).flush() << message; }
 	#else
-	#define CORE_LOG_Debug(message)				{;}
+		#define CORE_LOG_Debug(message)				{;}
 	#endif
 
 	#if CORE_LOG_LEVEL_ENABLED >= 4
-	#define CORE_LOG_Trace(message)				{ APP_NAMESPACE::Logger::LogMessage(APP_NAMESPACE::Logger::LogMsgSeverity::Trace,__FILE__,__FUNCTION__,__LINE__).flush() << message; }
-	#define CORE_LOG_SEPERATOR					APP_NAMESPACE::Logger::Set_Format("$C$Z");										\
-													CORE_LOG_Trace(APP_NAMESPACE::Logger::SeperatorStringSmall)				\
-													APP_NAMESPACE::Logger::Use_Format_Backup();
+		#define CORE_LOG_Trace(message)				{ APP_NAMESPACE::Logger::LogMessage(APP_NAMESPACE::Logger::LogMsgSeverity::Trace,__FILE__,__FUNCTION__,__LINE__).flush() << message; }
+		#define CORE_LOG_SEPERATOR					APP_NAMESPACE::Logger::Set_Format("$C$Z");									\
+														CORE_LOG_Trace(APP_NAMESPACE::Logger::SeperatorStringSmall)				\
+														APP_NAMESPACE::Logger::Use_Format_Backup();
 
-	#define CORE_LOG_SEPERATOR_BIG				APP_NAMESPACE::Logger::Set_Format("$C$Z");										\
-													CORE_LOG_Trace(APP_NAMESPACE::Logger::SeperatorStringBig)				\
-													APP_NAMESPACE::Logger::Use_Format_Backup();
+		#define CORE_LOG_SEPERATOR_BIG				APP_NAMESPACE::Logger::Set_Format("$C$Z");									\
+														CORE_LOG_Trace(APP_NAMESPACE::Logger::SeperatorStringBig)				\
+														APP_NAMESPACE::Logger::Use_Format_Backup();
 	#else
-	#define CORE_LOG_Trace(message, ...)		{;}
-	#define CORE_LOG_SEPERATOR					{;}
-	#define CORE_LOG_SEPERATOR_BIG				{;}
+		#define CORE_LOG_Trace(message, ...)		{;}
+		#define CORE_LOG_SEPERATOR					{;}
+		#define CORE_LOG_SEPERATOR_BIG				{;}
 	#endif
 
 	#define CORE_LOG(severity, message)			CORE_LOG_##severity(message)
 
-	// ---------------------------------------------------------------------------  Assertion & Validation  ---------------------------------------------------------------------------
+		// ---------------------------------------------------------------------------  Assertion & Validation  ---------------------------------------------------------------------------
 
-#if ENABLED_LOGGING_OF_ASSERTS
-	#define CORE_ASSERT(expr, successMsg, failureMsg)									\
-					if (expr) {														\
-						CORE_LOG(Trace, successMsg);								\
-					} else {														\
-						CORE_LOG(Fatal, failureMsg);								\
-						DEBUG_BREAK();												\
-					}
+	#if ENABLED_LOGGING_OF_ASSERTS
+		#define CORE_ASSERT(expr, successMsg, failureMsg)								\
+						if (expr) {														\
+							CORE_LOG(Trace, successMsg);								\
+						} else {														\
+							CORE_LOG(Fatal, failureMsg);								\
+							DEBUG_BREAK();												\
+						}
 
-	#define CORE_ASSERT_S(expr)														\
-					if (!(expr)) {													\
-						CORE_LOG(Fatal, #expr);										\
-						DEBUG_BREAK();												\
-					}
-#else
-	#define CORE_ASSERT(expr, successMsg, failureMsg)								if (!(expr)) { DEBUG_BREAK(); }
-	#define CORE_ASSERT_S(expr)														if (!(expr)) { DEBUG_BREAK(); }
-#endif // ENABLED_LOGGING_OF_ASSERTS
+		#define CORE_ASSERT_S(expr)														\
+						if (!(expr)) {													\
+							CORE_LOG(Fatal, #expr);										\
+							DEBUG_BREAK();												\
+						}
+	#else
+		#define CORE_ASSERT(expr, successMsg, failureMsg)								if (!(expr)) { DEBUG_BREAK(); }
+		#define CORE_ASSERT_S(expr)														if (!(expr)) { DEBUG_BREAK(); }
+	#endif // ENABLED_LOGGING_OF_ASSERTS
 
-#if ENABLE_LOGGING_OF_VALIDATION
-	#define CORE_VALIDATE(expr, ReturnCommand, successMsg, failureMsg)				\
-					if (expr) {														\
-						CORE_LOG(Trace, successMsg);								\
-					} else {														\
-						CORE_LOG(Warn, failureMsg);									\
-						ReturnCommand;												\
-					}
+	#if ENABLE_LOGGING_OF_VALIDATION
+		#define CORE_VALIDATE(expr, ReturnCommand, successMsg, failureMsg)				\
+						if (expr) {														\
+							CORE_LOG(Trace, successMsg);								\
+						} else {														\
+							CORE_LOG(Warn, failureMsg);									\
+							ReturnCommand;												\
+						}
 
-	#define CORE_VALIDATE_S(expr, ReturnCommand)									\
-					if (!expr) {													\
-						CORE_LOG(Warn, #expr);										\
-						ReturnCommand;												\
-					}
-#else
-	#define CORE_VALIDATE(expr, ReturnCommand, successMsg, failureMsg)				if (!(expr)) { ReturnCommand; }
-	#define CORE_VALIDATE_S(expr, ReturnCommand)									if (!(expr)) { ReturnCommand; }
+		#define CORE_VALIDATE_S(expr, ReturnCommand)									\
+						if (!expr) {													\
+							CORE_LOG(Warn, #expr);										\
+							ReturnCommand;												\
+						}
+	#else
+		#define CORE_VALIDATE(expr, ReturnCommand, successMsg, failureMsg)				if (!(expr)) { ReturnCommand; }
+		#define CORE_VALIDATE_S(expr, ReturnCommand)									if (!(expr)) { ReturnCommand; }
 
-#endif // ENABLE_LOGGING_OF_VALIDATION
+	#endif // ENABLE_LOGGING_OF_VALIDATION
+
+	#define STOP(msg) 							CORE_LOG(Fatal, msg);	DEBUG_BREAK();
 
 #endif //PFF_INSIDE_ENGINE
 
@@ -225,40 +227,39 @@ namespace APP_NAMESPACE {
 
 
 #if ENABLED_LOGGING_OF_CLIENT_ASSERTS
-#define ASSERT(expr, successMsg, failureMsg)										\
-					if (expr) {														\
-						LOG(Trace, successMsg);										\
-					} else {														\
-						LOG(Fatal, failureMsg);										\
-						DEBUG_BREAK();												\
-					}
+	#define ASSERT(expr, successMsg, failureMsg)										\
+						if (expr) {														\
+							LOG(Trace, successMsg);										\
+						} else {														\
+							LOG(Fatal, failureMsg);										\
+							DEBUG_BREAK();												\
+						}
 
-#define ASSERT_S(expr)																\
-					if (!(expr)) {													\
-						LOG(Fatal, #expr);											\
-						DEBUG_BREAK();												\
-					}
+	#define ASSERT_S(expr)																\
+						if (!(expr)) {													\
+							LOG(Fatal, #expr);											\
+							DEBUG_BREAK();												\
+						}
 #else
-#define ASSERT(expr, successMsg, failureMsg)										if (!(expr)) { DEBUG_BREAK(); }
-#define ASSERT_S(expr)																if (!(expr)) { DEBUG_BREAK(); }
+	#define ASSERT(expr, successMsg, failureMsg)										if (!(expr)) { DEBUG_BREAK(); }
+	#define ASSERT_S(expr)																if (!(expr)) { DEBUG_BREAK(); }
 #endif // ENABLED_LOGGING_OF_CLIENT_ASSERTS
 
 #if ENABLE_LOGGING_OF_CLIENT_VALIDATION
-#define VALIDATE(expr, ReturnCommand, successMsg, failureMsg)						\
-					if (expr) {														\
-						LOG(Trace, successMsg);										\
-					} else {														\
-						LOG(Warn, failureMsg);										\
-						ReturnCommand;												\
-					}
+	#define VALIDATE(expr, ReturnCommand, successMsg, failureMsg)						\
+						if (expr) {														\
+							LOG(Trace, successMsg);										\
+						} else {														\
+							LOG(Warn, failureMsg);										\
+							ReturnCommand;												\
+						}
 
-#define VALIDATE_S(expr, ReturnCommand)												\
-					if (!expr) {													\
-						LOG(Warn, #expr);											\
-						ReturnCommand;												\
-					}
+	#define VALIDATE_S(expr, ReturnCommand)												\
+						if (!expr) {													\
+							LOG(Warn, #expr);											\
+							ReturnCommand;												\
+						}
 #else
-#define VALIDATE(expr, ReturnCommand, successMsg, failureMsg)						if (!(expr)) { ReturnCommand; }
-#define VALIDATE_S(expr, ReturnCommand)												if (!(expr)) { ReturnCommand; }
-
+	#define VALIDATE(expr, ReturnCommand, successMsg, failureMsg)						if (!(expr)) { ReturnCommand; }
+	#define VALIDATE_S(expr, ReturnCommand)												if (!(expr)) { ReturnCommand; }
 #endif // ENABLE_LOGGING_OF_CLIENT_VALIDATION
