@@ -6,6 +6,12 @@ namespace PFF::toolkit::todo {
 
 	// forward declareation
 	class todo_list_serializer;
+	class todo_list;
+
+	//static vars
+	static bool s_init = false;
+	static bool s_show_todo_list = false;
+	static todo_list* s_todo_list;
 
 	// ============================================= serializer =============================================
 
@@ -68,14 +74,13 @@ namespace PFF::toolkit::todo {
 		todo_list();
 		~todo_list();
 
-		void window_todo_list();
+		//void window_todo_list();
 		void add_topic(buffer::topic buffer);
 		void remove_topic(const u64 index);
 
-		bool m_show_todo_list = false;			// DEV-ONLY
+		std::vector<topic> m_topics{};
 
 	private:
-		std::vector<topic> m_topics{};
 
 		friend class todo_list_serializer;
 	};
@@ -87,16 +92,16 @@ namespace PFF::toolkit::todo {
 		todo_list_serializer(todo_list* todo_list, serializer::option option, const std::string& filename = "./config/todo_list.txt") {
 
 			serializer::yaml(filename, "todo_list", option)
-				.vector_of_structs(KEY_VALUE(todo_list->m_topics), [&](serializer::yaml& yaml, const u64 x) {
+				.vector(KEY_VALUE(todo_list->m_topics), [&](serializer::yaml& yaml, const u64 x) {
 
 					yaml.entry(KEY_VALUE(todo_list->m_topics[x].name));
-					yaml.vector_of_structs(KEY_VALUE(todo_list->m_topics[x].tasks), [&](serializer::yaml& inner, const u64 y) {
+					yaml.entry(KEY_VALUE(todo_list->m_topics[x].selected));
+					yaml.vector(KEY_VALUE(todo_list->m_topics[x].tasks), [&](serializer::yaml& inner, const u64 y) {
 
 						inner.entry(KEY_VALUE(todo_list->m_topics[x].tasks[y].title));
 						inner.entry(KEY_VALUE(todo_list->m_topics[x].tasks[y].description));
 						inner.entry(KEY_VALUE(todo_list->m_topics[x].tasks[y].done));
-						});
-					yaml.entry(KEY_VALUE(todo_list->m_topics[x].selected));
+					});
 				});
 
 		}
@@ -109,23 +114,44 @@ namespace PFF::toolkit::todo {
 
 	todo_list::todo_list() {
 
+		LOG(Info, "Init todo_list");
 		todo_list_serializer(this, serializer::option::load_from_file);
-
-		//m_topics.push_back({ "Editor", true, false, {{"Serialize ToDo-List", "Serialize Content into yaml-file for readability"}} });
-		//m_topics.push_back({ "Renderer", false, false, {{"Test", "Descr"}} });
-		//m_topics.push_back({ "Asset Manager", false, false, {{"Test", "Descr"}} });
-		//m_topics.push_back({ "Procedural Generator", false, false, {{"Sub-mesh buffer for procedural generator", "Add a sub-mesh buffer array to procedural generator to enable fast copy past of already generated meshes (copy/past around axis to make turbine blades, along spline to make extruded mesh)"}} });
 	}
 
 	todo_list::~todo_list() {
 
+		LOG(Info, "Shutdown todo_list");
 		todo_list_serializer(this, serializer::option::save_to_file);
 	}
 
-	void todo_list::window_todo_list() {
+	void init() {
 
-		if (!m_show_todo_list)
+		if (!s_init) {
+
+			s_todo_list = new toolkit::todo::todo_list();
+			s_init = true;
+		}
+	}
+
+	void shutdown() {
+
+		if (s_init) {
+
+			delete s_todo_list;
+			s_init = false;		
+		}
+
+	}
+
+	static void window_todo_list() {
+
+		if (!s_show_todo_list) {
+
+			shutdown();
 			return;
+		}
+
+		init();
 
 		ImGuiStyle* style = &ImGui::GetStyle();
 		ImGuiWindowFlags window_flags{};
@@ -137,7 +163,7 @@ namespace PFF::toolkit::todo {
 		ImGui::SetNextWindowViewport(viewport->ID);
 
 		ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, ImVec2(0, 0));
-		ImGui::Begin("ToDo List", &m_show_todo_list, window_flags);
+		ImGui::Begin("ToDo List", &s_show_todo_list, window_flags);
 
 		static buffer::topic topic_buf{};
 		static buffer::task task_buf{};
@@ -175,7 +201,7 @@ namespace PFF::toolkit::todo {
 					
 				if (ImGui::Button("Add##todo_add_topic")) {
 
-					add_topic(topic_buf);
+					s_todo_list->add_topic(topic_buf);
 					topic_buf.reset();
 				};
 
@@ -192,31 +218,31 @@ namespace PFF::toolkit::todo {
 			ImGui::PopStyleColor();
 
 			ImGui::PushStyleVar(ImGuiStyleVar_SelectableTextAlign, ImVec2(.5f, .5f));
-			for (u64 n = 0; n < m_topics.size(); n++) {
+			for (u64 n = 0; n < s_todo_list->m_topics.size(); n++) {
 
-				if (ImGui::Selectable(m_topics[n].name.c_str(), m_topics[n].selected, 0, { inner_width - 10 - style->ItemSpacing.x, 20})) {
+				if (ImGui::Selectable(s_todo_list->m_topics[n].name.c_str(), s_todo_list->m_topics[n].selected, 0, { inner_width - 10 - style->ItemSpacing.x, 20})) {
 
 					if (!ImGui::GetIO().KeyCtrl) {			// Clear selection when CTRL is not held
-						for (u64 x = 0; x < m_topics.size(); x++)
-							m_topics[x].selected = false;
+						for (u64 x = 0; x < s_todo_list->m_topics.size(); x++)
+							s_todo_list->m_topics[x].selected = false;
 					}
-					m_topics[n].selected ^= 1;
+					s_todo_list->m_topics[n].selected ^= 1;
 				}
 
 				char buf[32];
 				sprintf_s(buf, 32, "X##kill_%llu", n);
 
 				ImGui::SameLine();
-				if (m_topics[n].hovered) {
+				if (s_todo_list->m_topics[n].hovered) {
 
 					if (UI::add_gray_button(buf, { inner_padding, 22 }))
-						remove_topic(n);
+						s_todo_list->remove_topic(n);
 					else
-						m_topics[n].hovered = ImGui::IsItemHovered();
+						s_todo_list->m_topics[n].hovered = ImGui::IsItemHovered();
 
 				} else {
 					ImGui::InvisibleButton(buf, { inner_padding, 22 });
-					m_topics[n].hovered = ImGui::IsItemHovered();
+					s_todo_list->m_topics[n].hovered = ImGui::IsItemHovered();
 				}
 					
 
@@ -244,20 +270,20 @@ namespace PFF::toolkit::todo {
 			char buf[32];
 
 			UI::shift_cursor_pos(0, 10);
-			for (u64 x = 0; x < m_topics.size(); x++) {
+			for (u64 x = 0; x < s_todo_list->m_topics.size(); x++) {
 
-				if (m_topics[x].selected) {
+				if (s_todo_list->m_topics[x].selected) {
 
-					for (u64 y = 0; y < m_topics[x].tasks.size(); y++) {
+					for (u64 y = 0; y < s_todo_list->m_topics[x].tasks.size(); y++) {
 
-						if (!m_topics[x].tasks[y].done) {
+						if (!s_todo_list->m_topics[x].tasks[y].done) {
 
 							sprintf_s(buf, 32, "##topic_%llutask_%llu", x, y);
-							ImGui::Checkbox(buf, &m_topics[x].tasks[y].done);
+							ImGui::Checkbox(buf, &s_todo_list->m_topics[x].tasks[y].done);
 							ImGui::SameLine();
-							UI::draw_big_text(m_topics[x].tasks[y].title.c_str(), true);
+							UI::draw_big_text(s_todo_list->m_topics[x].tasks[y].title.c_str(), true);
 							UI::shift_cursor_pos(inner_offset_x + 5, 0);
-							ImGui::TextWrapped(m_topics[x].tasks[y].description.c_str());
+							ImGui::TextWrapped(s_todo_list->m_topics[x].tasks[y].description.c_str());
 						}
 					}
 				}
@@ -286,12 +312,10 @@ namespace PFF::toolkit::todo {
 				ImGui::SameLine();
 				if (ImGui::Button("Add##new_task_to_todo", button_size_small)) {
 
-					for (u64 x = 0; x < m_topics.size(); x++) {
+					for (u64 x = 0; x < s_todo_list->m_topics.size(); x++) {
 
-						if (m_topics[x].selected) {
-
-							m_topics[x].add_task(task_buf);
-						}
+						if (s_todo_list->m_topics[x].selected)
+							s_todo_list->m_topics[x].add_task(task_buf);
 					}
 					task_buf.reset();
 				}
@@ -317,20 +341,20 @@ namespace PFF::toolkit::todo {
 			if (ImGui::CollapsingHeader("done Items")) {
 
 				ImGui::Indent();
-				for (u64 x = 0; x < m_topics.size(); x++) {
+				for (u64 x = 0; x < s_todo_list->m_topics.size(); x++) {
 
-					if (m_topics[x].selected) {
+					if (s_todo_list->m_topics[x].selected) {
 
-						for (u64 y = 0; y < m_topics[x].tasks.size(); y++) {
+						for (u64 y = 0; y < s_todo_list->m_topics[x].tasks.size(); y++) {
 
-							if (m_topics[x].tasks[y].done) {
+							if (s_todo_list->m_topics[x].tasks[y].done) {
 
 								sprintf_s(buf, 32, "##topic_%llutask_%llu", x, y);
-								ImGui::Checkbox(buf, &m_topics[x].tasks[y].done);
+								ImGui::Checkbox(buf, &s_todo_list->m_topics[x].tasks[y].done);
 								ImGui::SameLine();
-								UI::draw_big_text(m_topics[x].tasks[y].title.c_str());
+								UI::draw_big_text(s_todo_list->m_topics[x].tasks[y].title.c_str());
 								UI::shift_cursor_pos(inner_offset_x + 5, 0);
-								ImGui::Text(m_topics[x].tasks[y].description.c_str());
+								ImGui::Text(s_todo_list->m_topics[x].tasks[y].description.c_str());
 							}
 						}
 					}

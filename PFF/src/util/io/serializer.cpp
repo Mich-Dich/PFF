@@ -40,8 +40,6 @@ namespace PFF::serializer {
 
 	void yaml::serialize() {
 
-		LOG(Info, "called yaml::serialize()");
-
 		m_ostream = std::ofstream(m_filename);
 		CORE_ASSERT(m_ostream.is_open(), "", "file-stream is not open");
 
@@ -55,7 +53,7 @@ namespace PFF::serializer {
 
 	yaml& yaml::deserialize() {
 
-		CORE_ASSERT(!m_name.empty(), "called yaml::deserialize()", "name of section to find is empty");
+		CORE_ASSERT(!m_name.empty(), "", "name of section to find is empty");
 
 		m_istream = std::ifstream(m_filename);
 		CORE_VALIDATE(m_istream.is_open(), return *this,"", "file-stream is not open");

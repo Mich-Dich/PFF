@@ -123,9 +123,20 @@ namespace PFF::serializer {
 			return *this;
 		}
 		
-
+		// @brief This function is responsible for serializing or deserializing a vector variable to or from
+		//          the YAML file based on the specified serialization option. If the option is set to save to file,
+		//          it serializes each element of the vector individually and writes them to the YAML file. If the option
+		//          is set to load from file, it reads each element of the vector from the YAML file and deserializes them
+		//          back into the vector. Additionally, it executes a provided function for each element of the vector during
+		//          serialization or deserialization.
+		// @param [vector_name] The name of the vector variable in the YAML file.
+		// @param [vector] Reference to the vector variable to be serialized or deserialized.
+		// @param [vector_function] The function to be executed for each element of the vector during serialization
+		//                           or deserialization. The function should accept a reference to a yaml object and
+		//                           the current iteration index as parameters.
+		// @return A reference to the YAML object for chaining function calls.
 		template<typename T>
-		yaml& vector_of_structs(const std::string& vector_name, std::vector<T>& vector, std::function<void(PFF::serializer::yaml&, const u64 iteration)> vector_function) {
+		yaml& vector(const std::string& vector_name, std::vector<T>& vector, std::function<void(PFF::serializer::yaml&, const u64 iteration)> vector_function) {
 
 			vector_func_index++;
 
