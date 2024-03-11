@@ -79,8 +79,8 @@ namespace PFF::serializer {
 
 					line = line.substr(NUM_OF_INDENTING_SPACES);
 
-					//  more indented                                          beginning of sub-section
-					if ((measure_indentation(line) != SECTION_INDENTATION) || (line.back() == ':')) {
+					//  more indented                                         is sub-section        is array-element
+					if ((measure_indentation(line) != SECTION_INDENTATION) || line.back() == ':' || line.front() == '-') {
 
 						m_file_content << line << "\n";
 						continue;

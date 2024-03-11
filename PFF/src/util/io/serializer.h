@@ -95,7 +95,7 @@ namespace PFF::serializer {
 
 								// remove indentation                       remove "- " (array element marker)
 								line = line.substr(NUM_OF_INDENTING_SPACES + 2);
-							PFF:util::convert_from_string(line, buffer);
+								PFF:util::convert_from_string(line, buffer);
 								value.push_back(buffer);
 							}
 
@@ -122,15 +122,20 @@ namespace PFF::serializer {
 			m_prefix = m_prefix_fallback;
 			return *this;
 		}
+		
 
 		template<typename T>
 		yaml& vector_of_structs(const std::string& vector_name, std::vector<T>& vector, std::function<void(PFF::serializer::yaml&, const u64 iteration)> vector_function) {
 
-			if (m_option == PFF::serializer::option::save_to_file) {			// save to file
+			vector_func_index++;
 
-				m_file_content << add_spaces(m_level_of_indention) << m_prefix << vector_name << ":\n";
+			if (vector_func_index != 1) 
 				m_level_of_indention++;
 
+			if (m_option == PFF::serializer::option::save_to_file) {			// save to file
+
+				const u32 indent_buffer = vector_func_index != 1 ? m_level_of_indention - 1 : m_level_of_indention;
+				m_file_content << add_spaces(indent_buffer) << m_prefix << vector_name << ":\n";
 				for (u64 x = 0; x < vector.size(); x++) {
 
 					// start of array element
@@ -138,13 +143,11 @@ namespace PFF::serializer {
 					m_prefix_fallback = "  ";
 					vector_function(*this, x);
 				}
-
-				m_level_of_indention--;
+		
 				m_prefix = "";
 				m_prefix_fallback = "";
 
 			} else {		// load from file
-				m_level_of_indention++;
 
 				// buffer [m_key_value_pares] for duration of function
 				std::unordered_map<std::string, std::string> key_value_pares_buffer = m_key_value_pares;
@@ -177,8 +180,7 @@ namespace PFF::serializer {
 						//     not end of content
 						while (std::getline(file_content_buffer, line)) {
 
-							// ckeck for indentation
-							if (measure_indentation(line) == 1) {
+							if (line.front() == '-') {
 
 								vector_of_key_value_pares.push_back({});
 								vector_of_file_content.push_back({});
@@ -186,7 +188,7 @@ namespace PFF::serializer {
 							}
 
 							// remove array-prefix "- " or "  "
-							line = line.substr(NUM_OF_INDENTING_SPACES * 2);
+							line = line.substr(NUM_OF_INDENTING_SPACES);
 
 							//  more indented                                        beginning of new sub-section
 							if (measure_indentation(line) != 0 || line.back() == ':' || line.front() == '-') {
@@ -202,30 +204,39 @@ namespace PFF::serializer {
 							std::getline(iss, key, ':');
 							std::getline(iss, value);
 							vector_of_key_value_pares[index][key] = value;
-							//m_key_value_pares[key] = value;
 						}
 					}
-
-					// skip rest of content if section found
-					if (found_section)
-						break;
 				}
 
 				ASSERT(vector_of_key_value_pares.size() == vector_of_file_content.size(), "", "two buffers are of diffrent size");
 
-				vector.resize(vector_of_key_value_pares.size());
-				for (u64 x = 0; x < vector.size(); x++) {
+				if (vector_of_key_value_pares.size() > 0) {
 
-					m_key_value_pares = vector_of_key_value_pares[x];
-					std::string temp_buffer = vector_of_file_content[x].str();
-					m_file_content << temp_buffer;
-					vector_function(*this, x);
+					vector.resize(vector_of_key_value_pares.size());
+					for (u64 x = 0; x < vector.size(); x++) {
+
+						m_key_value_pares = vector_of_key_value_pares[x];
+						m_file_content = {};
+						auto temp_buffer = vector_of_file_content[x].str();
+						m_file_content << temp_buffer;
+						vector_function(*this, x);
+					}
 				}
 
-				m_level_of_indention--;
+				// restore
+				m_key_value_pares = key_value_pares_buffer;
+				auto temp_buffer = file_content_buffer.str();
+				m_file_content << temp_buffer;
+
 			}
+
+			if (vector_func_index != 1)
+				m_level_of_indention--;
+
+			vector_func_index--;
 			return *this;
 		}
+
 
 	private:
 
@@ -238,7 +249,7 @@ namespace PFF::serializer {
 		u32 measure_indentation(const std::string& str);
 
 		u32 m_level_of_indention = 0;
-		
+		u64 vector_func_index = 0;
 		std::string m_prefix{};				// can maybe be a [char*]
 		std::string m_prefix_fallback{};	// can maybe be a [char*]
 

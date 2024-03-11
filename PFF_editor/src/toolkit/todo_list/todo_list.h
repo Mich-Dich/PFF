@@ -72,7 +72,7 @@ namespace PFF::toolkit::todo {
 		void add_topic(buffer::topic buffer);
 		void remove_topic(const u64 index);
 
-		bool m_show_todo_list = true;			// DEV-ONLY
+		bool m_show_todo_list = false;			// DEV-ONLY
 
 	private:
 		std::vector<topic> m_topics{};
@@ -86,24 +86,20 @@ namespace PFF::toolkit::todo {
 		// can deine here because header is only included in editor_layer.cpp file
 		todo_list_serializer(todo_list* todo_list, serializer::option option, const std::string& filename = "./config/todo_list.txt") {
 
-			std::vector<u32> test_vec;
-
 			serializer::yaml(filename, "todo_list", option)
 				.vector_of_structs(KEY_VALUE(todo_list->m_topics), [&](serializer::yaml& yaml, const u64 x) {
-				
+
 					yaml.entry(KEY_VALUE(todo_list->m_topics[x].name));
+					yaml.vector_of_structs(KEY_VALUE(todo_list->m_topics[x].tasks), [&](serializer::yaml& inner, const u64 y) {
+
+						inner.entry(KEY_VALUE(todo_list->m_topics[x].tasks[y].title));
+						inner.entry(KEY_VALUE(todo_list->m_topics[x].tasks[y].description));
+						inner.entry(KEY_VALUE(todo_list->m_topics[x].tasks[y].done));
+						});
 					yaml.entry(KEY_VALUE(todo_list->m_topics[x].selected));
 				});
+
 		}
-
-		/*		Recursive calling doent work yet
-		yaml.vector_of_structs(KEY_VALUE(todo_list->m_topics[x].tasks), [&](serializer::yaml& yaml_inner, const u64 y) {
-
-			yaml_inner.entry(KEY_VALUE(todo_list->m_topics[x].tasks[y].title));
-			yaml_inner.entry(KEY_VALUE(todo_list->m_topics[x].tasks[y].description));
-			yaml_inner.entry(KEY_VALUE(todo_list->m_topics[x].tasks[y].done));
-		});
-		*/
 
 		~todo_list_serializer() {}
 
@@ -115,10 +111,10 @@ namespace PFF::toolkit::todo {
 
 		todo_list_serializer(this, serializer::option::load_from_file);
 
-		m_topics.push_back({ "Editor", true, false, {{"Serialize ToDo-List", "Serialize Content into yaml-file for readability"}} });
-		m_topics.push_back({ "Renderer", false, false, {{"Test", "Descr"}} });
-		m_topics.push_back({ "Asset Manager", false, false, {{"Test", "Descr"}} });
-		m_topics.push_back({ "Procedural Generator", false, false, {{"Sub-mesh buffer for procedural generator", "Add a sub-mesh buffer array to procedural generator to enable fast copy past of already generated meshes (copy/past around axis to make turbine blades, along spline to make extruded mesh)"}} });
+		//m_topics.push_back({ "Editor", true, false, {{"Serialize ToDo-List", "Serialize Content into yaml-file for readability"}} });
+		//m_topics.push_back({ "Renderer", false, false, {{"Test", "Descr"}} });
+		//m_topics.push_back({ "Asset Manager", false, false, {{"Test", "Descr"}} });
+		//m_topics.push_back({ "Procedural Generator", false, false, {{"Sub-mesh buffer for procedural generator", "Add a sub-mesh buffer array to procedural generator to enable fast copy past of already generated meshes (copy/past around axis to make turbine blades, along spline to make extruded mesh)"}} });
 	}
 
 	todo_list::~todo_list() {
