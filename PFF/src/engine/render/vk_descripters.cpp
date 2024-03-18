@@ -23,13 +23,13 @@ namespace PFF {
         return *this;
     }
 
-    std::unique_ptr<vk_descriptor_set_layout> vk_descriptor_set_layout::builder::build() const {
+    scope_ref<vk_descriptor_set_layout> vk_descriptor_set_layout::builder::build() const {
         return std::make_unique<vk_descriptor_set_layout>(m_device, m_bindings);
     }
 
     // ==================================================================== Descriptor Set Layout ====================================================================
 
-    vk_descriptor_set_layout::vk_descriptor_set_layout(std::shared_ptr<vk_device> device, std::unordered_map<u32, VkDescriptorSetLayoutBinding> bindings)
+    vk_descriptor_set_layout::vk_descriptor_set_layout(ref<vk_device> device, std::unordered_map<u32, VkDescriptorSetLayoutBinding> bindings)
         : m_device{ device }, m_bindings{ bindings } {
 
         PFF_PROFILE_FUNCTION();
@@ -70,14 +70,14 @@ namespace PFF {
         return *this;
     }
 
-    std::unique_ptr<vk_descriptor_pool> vk_descriptor_pool::builder::build() const {
+    scope_ref<vk_descriptor_pool> vk_descriptor_pool::builder::build() const {
 
         return std::make_unique<vk_descriptor_pool>(m_device, m_maxSets, m_pool_flags, m_pool_sizes);
     }
 
     // ==================================================================== Descriptor Pool ====================================================================
 
-    vk_descriptor_pool::vk_descriptor_pool(std::shared_ptr<vk_device> device, u32 max_sets, VkDescriptorPoolCreateFlags pool_flags, const std::vector<VkDescriptorPoolSize>& pool_sizes)
+    vk_descriptor_pool::vk_descriptor_pool(ref<vk_device> device, u32 max_sets, VkDescriptorPoolCreateFlags pool_flags, const std::vector<VkDescriptorPoolSize>& pool_sizes)
         : m_device{ device } {
 
         PFF_PROFILE_FUNCTION();

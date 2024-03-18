@@ -31,8 +31,8 @@ namespace PFF {
 	// ==================================================================== setup ====================================================================
 
 	application* application::s_instance = nullptr;
-	std::shared_ptr<renderer> application::m_renderer;
-	std::shared_ptr<pff_window> application::m_window;
+	ref<renderer> application::m_renderer;
+	ref<pff_window> application::m_window;
 	imgui_layer* application::m_imgui_layer;
 	world_layer* application::m_world_layer;
 	bool application::m_is_titlebar_hovered;
@@ -91,7 +91,7 @@ namespace PFF {
 		m_renderer.reset();
 		m_window.reset();
 
-		CORE_LOG(Info, "Shutdown");
+		CORE_LOG(Info, "shutdown");
 		PFF_PROFILE_END_SESSION();
 	}
 
@@ -111,13 +111,18 @@ namespace PFF {
 
 			// update internal state
 			m_window->poll_events();
+
+			// client update
 			update(m_delta_time);					// update app instance, top most level
+			
+			// engine update
 			for (layer* layer : m_layerstack)		// update all layers [world_layer, imgui_layer]
 				layer->on_update(m_delta_time);
 
-			// render
+			// client render
 			render(m_delta_time);					// TODO: REMOVE (indeally app instance doesn't need to render anything)
-			// m_imgui_layer->set_fps_values(m_limit_fps, (m_focus ? m_target_fps : m_nonefocus_fps), m_fps, m_work_time * 1000, m_sleep_time);
+
+			// engine render
 			m_renderer->draw_frame(m_delta_time);
 
 			fps_timer.limit_fps(m_limit_fps, m_fps, m_delta_time, m_work_time, m_sleep_time);
@@ -203,7 +208,6 @@ namespace PFF {
 
 		PFF_PROFILE_FUNCTION();
 
-		CORE_LOG(Trace, "Test")
 		fps_timer.limit_fps(false, m_fps, m_delta_time, m_work_time, m_sleep_time);
 		// m_imgui_layer->set_fps_values(m_limit_fps, (m_focus ? m_target_fps : m_nonefocus_fps), m_fps, static_cast<f32>(m_work_time * 1000), static_cast<f32>(m_sleep_time * 1000));
 		m_renderer->refresh(m_delta_time);

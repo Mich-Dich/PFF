@@ -31,7 +31,7 @@ namespace PFF {
 		m_editor_camera.reset();
 		m_current_map.reset();
 
-		CORE_LOG(Info, "Shutdown");
+		CORE_LOG(Trace, "Shutdown");
 	}
 
 	void world_layer::on_attach() {
@@ -39,7 +39,7 @@ namespace PFF {
 
 	void world_layer::on_detach() {
 
-		CORE_LOG(Info, "Detach");
+		CORE_LOG(Trace, "Detach");
 	}
 
 	void world_layer::on_update(const f32 delta_time) {

@@ -95,12 +95,12 @@ namespace PFF {
 
 
 	//
-	vk_pipeline::vk_pipeline(std::shared_ptr<vk_device> device, const pipeline_config_info& config, const std::string& vert_file_path, const std::string& frag_file_path)
+	vk_pipeline::vk_pipeline(ref<vk_device> device, const pipeline_config_info& config, const std::string& vert_file_path, const std::string& frag_file_path)
 		:m_device{ device } {
 
 		PFF_PROFILE_FUNCTION();
 
-		LOG(Info, "Creating Pipeline");
+		LOG(Fatal, "Creating Pipeline");
 		create_graphics_pipeline(config, vert_file_path, frag_file_path);
 	}
 
@@ -114,12 +114,10 @@ namespace PFF {
 		vkDestroyPipeline(m_device->get_device(), m_graphics_pipeline, nullptr);
 
 		m_device.reset();
-		LOG(Info, "shutdown");
+		LOG(Fatal, "shutdown");
 	}
 
 	void vk_pipeline::bind_commnad_buffers(VkCommandBuffer command_buffer) {
-
-		PFF_PROFILE_FUNCTION();
 
 		vkCmdBindPipeline(command_buffer, VK_PIPELINE_BIND_POINT_GRAPHICS, m_graphics_pipeline);
 	}

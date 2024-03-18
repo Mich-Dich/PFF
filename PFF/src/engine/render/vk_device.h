@@ -23,7 +23,7 @@ namespace PFF {
         const bool c_enable_validation_layers = false;
 #endif
 
-        vk_device(std::shared_ptr<pff_window>& m_window);
+        vk_device(ref<pff_window>& m_window);
         ~vk_device();
 
         // Not copyable or movable
@@ -90,7 +90,7 @@ namespace PFF {
         VkInstance m_VkInstance;
         VkDebugUtilsMessengerEXT m_debug_messanger;
         VkPhysicalDevice m_physical_device = VK_NULL_HANDLE;
-        std::shared_ptr<pff_window> m_window;
+        ref<pff_window> m_window;
         VkCommandPool m_commandPool;
 
         VkDevice m_device;

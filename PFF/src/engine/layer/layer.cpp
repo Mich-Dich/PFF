@@ -10,10 +10,7 @@ namespace PFF {
 	layer::layer(const std::string& name) 
 		: m_debugname(name), m_enabled(false) {}
 
-	layer::~layer() {
-
-		CORE_LOG(Info, "Shutdown");
-	}
+	layer::~layer() {}
 
 	void layer::on_attach() {
 	}

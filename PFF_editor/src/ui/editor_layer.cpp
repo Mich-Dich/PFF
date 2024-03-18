@@ -39,7 +39,7 @@ namespace PFF {
 
 	void editor_layer::on_detach() {
 
-		LOG(Fatal, "Detaching editor_layer");
+		LOG(Trace, "Detaching editor_layer");
 		toolkit::todo::shutdown();					// only need to cal shutdown() to kill todo_list if editor shutsdown
 		//delete s_todo_list;
 	}
@@ -160,8 +160,12 @@ namespace PFF {
 			application::get().minimize_window();
 
 		ImGui::SetCursorPos(ImVec2(viewport->Size.x - (window_padding.x + (button_spaccing * 1) + (button_width * 2)), window_padding.y + titlebar_vertical_offset ));
-		if (ImGui::Button("O##Max", ImVec2(button_width, button_width)))
-			application::get().maximize_window();
+		if (ImGui::Button("O##Max", ImVec2(button_width, button_width))) {
+			if (is_maximized)
+				application::get().restore_window();
+			else
+				application::get().maximize_window();
+		}
 
 		ImGui::SetCursorPos(ImVec2(viewport->Size.x - (window_padding.x + button_width), window_padding.y + titlebar_vertical_offset ));
 		if (ImGui::Button("X##Close", ImVec2(button_width, button_width)))

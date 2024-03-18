@@ -16,7 +16,7 @@ namespace PFF {
     // ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
     
     // class member functions
-    vk_device::vk_device(std::shared_ptr<pff_window>& m_window) : m_window{ m_window } {
+    vk_device::vk_device(ref<pff_window>& m_window) : m_window{ m_window } {
 
         PFF_PROFILE_FUNCTION();
 
@@ -32,7 +32,6 @@ namespace PFF {
 
         PFF_PROFILE_FUNCTION();
 
-        LOG(Info, "start shutdown");
         vkDestroyCommandPool(m_device, m_commandPool, nullptr);
         vkDestroyDevice(m_device, nullptr);
 
@@ -43,7 +42,7 @@ namespace PFF {
         vkDestroyInstance(m_VkInstance, nullptr);
 
         m_window.reset();
-        LOG(Info, "shutdown");
+        LOG(Trace, "shutdown");
     }
 
     // ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
@@ -146,6 +145,9 @@ namespace PFF {
                 break;
 
             case VK_DEBUG_UTILS_MESSAGE_SEVERITY_ERROR_BIT_EXT:
+                if (Callback->sType == VK_STRUCTURE_TYPE_DEBUG_UTILS_MESSENGER_CALLBACK_DATA_EXT)              // TODO: Fix RenderPass compadibility issue
+                    break;
+
                 CORE_LOG(Error, "Validation Layer: " << vk_debug_message_type_to_string(msgType) << Callback->pMessage)
                 break;
 

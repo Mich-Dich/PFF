@@ -30,12 +30,12 @@ namespace PFF {
 		return map.find(key) != map.end();
 	}
 
-	imgui_layer::imgui_layer(std::shared_ptr<renderer> renderer)
+	imgui_layer::imgui_layer(ref<renderer> renderer)
 		: layer("ImGuiLayer"), m_renderer(renderer) {
 
 		PFF_PROFILE_FUNCTION();
 
-		LOG(Info, "Init imgui layer");
+		LOG(Trace, "Init imgui layer");
 		config::load(config::file::editor, "UI", "main_color", UI::THEME::main_color);
 		config::load(config::file::editor, "UI", "theme", UI::THEME::UI_theme);
 	}
@@ -47,13 +47,13 @@ namespace PFF {
 		vkDestroyRenderPass(m_renderer->get_device()->get_device(), g_RenderPass, nullptr);
 		
 		m_renderer.reset();
-		CORE_LOG(Info, "Shutdown");
+		CORE_LOG(Trace, "Shutdown");
 	}
 
 	void imgui_layer::on_attach() {
 
 		PFF_PROFILE_FUNCTION();
-		LOG(Info, "attach imgui layer");
+		LOG(Trace, "attach imgui layer");
 
 
 		// Create Framebuffers
@@ -127,16 +127,13 @@ namespace PFF {
 
 		PFF_PROFILE_FUNCTION();
 
-		LOG(Info, "detach imgui layer");
-		LOG(Trace, "bevor save: " << static_cast<int>(UI::THEME::UI_theme));
-	
 		config::save(config::file::editor, "UI", "font_size", m_font_size);
 		config::save(config::file::editor, "UI", "big_font_size", m_big_font_size);
 		ImGui_ImplVulkan_Shutdown();
 		ImGui_ImplGlfw_Shutdown();
 		ImGui::DestroyContext();
 
-		CORE_LOG(Info, "detach");
+		LOG(Trace, "detach imgui layer");
 	}
 
 	void imgui_layer::on_update(const f32 delta_time) {
@@ -179,6 +176,8 @@ namespace PFF {
 				ImGuiWindowFlags_NoNav);
 			if (location != -1)
 				window_flags |= ImGuiWindowFlags_NoMove;
+
+			m_clear_enabled = (window_flags & ImGuiViewportFlags_NoRendererClear) ? false : true;
 
 			if (m_show_performance_window) {
 

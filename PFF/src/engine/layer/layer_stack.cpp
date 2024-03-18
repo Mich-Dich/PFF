@@ -15,8 +15,6 @@ namespace PFF {
 
 		for (layer* layer : m_layers)
 			delete layer;
-
-		CORE_LOG(Info, "Shutdown");
 	}
 
 	void layer_stack::push_layer(layer* layer) {

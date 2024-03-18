@@ -31,7 +31,7 @@ namespace PFF {
 
 	public:
 
-		vk_pipeline(std::shared_ptr<vk_device> device, const pipeline_config_info& config, const std::string& vert_file_path, const std::string& frag_file_path);
+		vk_pipeline(ref<vk_device> device, const pipeline_config_info& config, const std::string& vert_file_path, const std::string& frag_file_path);
 		~vk_pipeline();
 
 		DELETE_COPY(vk_pipeline);
@@ -45,7 +45,7 @@ namespace PFF {
 		void create_graphics_pipeline(const pipeline_config_info& config, const std::string& vert_file_path, const std::string& frag_file_path);
 		void create_shader_module(const std::vector<char>& code, VkShaderModule* shader_module);
 
-		std::shared_ptr<vk_device> m_device;
+		ref<vk_device> m_device;
 
 		u32 m_subpass = 0;
 		VkPipeline m_graphics_pipeline;

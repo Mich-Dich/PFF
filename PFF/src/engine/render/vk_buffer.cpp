@@ -8,7 +8,7 @@ namespace PFF {
     // ==================================================================== setup ====================================================================
 
     //
-    vk_buffer::vk_buffer(std::shared_ptr<vk_device> device, VkDeviceSize m_instance_size, u32 m_instance_count, VkBufferUsageFlags m_usage_flags, VkMemoryPropertyFlags m_memory_property_flags, VkDeviceSize minOffsetAlignment)
+    vk_buffer::vk_buffer(ref<vk_device> device, VkDeviceSize m_instance_size, u32 m_instance_count, VkBufferUsageFlags m_usage_flags, VkMemoryPropertyFlags m_memory_property_flags, VkDeviceSize minOffsetAlignment)
         : m_device{ device }, m_instance_size{ m_instance_size }, m_instance_count{ m_instance_count }, m_usage_flags{ m_usage_flags }, m_memory_property_flags{ m_memory_property_flags } {
 
         PFF_PROFILE_FUNCTION();

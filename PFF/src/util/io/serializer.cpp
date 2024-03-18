@@ -46,7 +46,7 @@ namespace PFF::serializer {
 		// make new stream to buffer updated file
 		std::ostringstream updated_file;
 
-		// todo::write to corrent place (copy beginning && end)
+		// todo::write to current place (copy beginning && end)
 		m_ostream << m_file_content.str();
 
 	}

@@ -20,7 +20,7 @@ namespace PFF {
 		DELETE_COPY(player_controller);
 
 		USE_IN_EDITOR void set_world_layer_ref(world_layer* world_layer);
-		USE_IN_EDITOR FORCEINLINE const std::shared_ptr<input_mapping> get_input_mapping() const { return m_input_mapping; }
+		USE_IN_EDITOR FORCEINLINE const ref<input_mapping> get_input_mapping() const { return m_input_mapping; }
 
 		virtual void init();
 		virtual void update(f32 delta);
@@ -28,9 +28,10 @@ namespace PFF {
 		void handle_event(event& event);
 
 		template <typename T>
-		std::shared_ptr<T> register_mapping() {
-			
-			std::shared_ptr<T> mapping = std::make_shared<T>();
+		ref<T> register_mapping() {
+
+			LOG(Trace, "register Input mapping");
+			ref<T> mapping = create_ref<T>();
 			m_input_mapping = std::static_pointer_cast<input_mapping>(mapping);
 			return mapping;
 		}
@@ -38,7 +39,7 @@ namespace PFF {
 		world_layer* m_world_layer{};
 	private:
 
-		std::shared_ptr<input_mapping> m_input_mapping{};
+		ref<input_mapping> m_input_mapping{};
 
 		bool handle_key_events(key_event& event);
 		bool handle_mouse_events(mouse_event& event);

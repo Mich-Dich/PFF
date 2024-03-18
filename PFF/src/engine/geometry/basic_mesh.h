@@ -42,7 +42,7 @@ namespace PFF {
 		basic_mesh(const basic_mesh::builder& builder);
 		~basic_mesh();
 
-		static std::shared_ptr<basic_mesh> create_mesh_from_file(const std::string& file_path);
+		static ref<basic_mesh> create_mesh_from_file(const std::string& file_path);
 
 		void bind(VkCommandBuffer_T* commandBuffer);
 		void draw(VkCommandBuffer_T* commandBuffer);
@@ -51,13 +51,13 @@ namespace PFF {
 
 	protected:
 
-		std::shared_ptr<vk_device> m_device{};
+		ref<vk_device> m_device{};
 
-		std::unique_ptr<vk_buffer> m_vertex_buffer{};
+		scope_ref<vk_buffer> m_vertex_buffer{};
 		u32 m_vertex_count{};
 
 		bool m_has_index_buffer = false;
-		std::unique_ptr<vk_buffer> m_index_buffer{};
+		scope_ref<vk_buffer> m_index_buffer{};
 		u32 m_index_count{};
 		
 	private:

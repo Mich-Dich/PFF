@@ -14,9 +14,10 @@ namespace PFF {
 	class imgui_layer : public layer {
 	public:
 
-		imgui_layer(std::shared_ptr<renderer> renderer);
+		imgui_layer(ref<renderer> renderer);
 		~imgui_layer();
 
+		FORCEINLINE bool is_render_clear_enabled() const { return m_clear_enabled; }
 		FORCEINLINE ImGuiContext* get_context() const { return m_context; }
 		PFF_API_EDITOR ImFont* get_font(const std::string& name);
 
@@ -37,10 +38,11 @@ namespace PFF {
 		void imgui_layer::progressbar_with_text(const char* lable, const char* progress_bar_text, f32 percent, f32 lable_size = 50.f, f32 progressbar_size_x = 50.f, f32 progressbar_size_y = 1.f);
 
 		ImGuiContext* m_context;
-		f32 m_work_time, m_sleep_time;
-		u32 m_target_fps, m_current_fps;
-		bool m_limit_fps;
-		std::shared_ptr<renderer> m_renderer;
+		f32 m_work_time = 0.f, m_sleep_time = 0.f;
+		u32 m_target_fps = 0, m_current_fps = 0;
+		bool m_limit_fps = false;
+		bool m_clear_enabled = false;
+		ref<renderer> m_renderer;
 		f32 m_font_size = 15.f;
 		f32 m_big_font_size = 18.f;
 		std::unordered_map<std::string, ImFont*> m_fonts{};

@@ -16,7 +16,7 @@
 #include "backends/imgui_impl_glfw.h"
 #include "backends/imgui_impl_vulkan.h"
 */
-#include "render_system.h"
+#include "mesh_render_system.h"
 
 #define GLM_FORCE_RADIANS
 #define GLM_FORCE_DEPTH_ZERO_TO_ONE
@@ -32,30 +32,35 @@ namespace PFF {
 	};
 
 
-	render_system::render_system(std::shared_ptr<vk_device> device, VkRenderPass renderPass, VkDescriptorSetLayout descriptor_set_layout)
+	mesh_render_system::mesh_render_system(ref<vk_device> device, VkRenderPass renderPass, VkDescriptorSetLayout descriptor_set_layout)
 	 : m_device( device ) {
 
 		PFF_PROFILE_FUNCTION();
 
 		create_pipeline_layout(descriptor_set_layout);
 		create_pipeline(renderPass);
-		CORE_LOG(Trace, "render_system started");
+
+		CORE_LOG(Trace, "init mesh_render_system");
 	}
 
-	render_system::~render_system() {
+	mesh_render_system::~mesh_render_system() {
 
 		PFF_PROFILE_FUNCTION();
 
 		vkDestroyPipelineLayout(m_device->get_device(), m_pipeline_layout, nullptr);
-
 		m_renderer.reset();
 		m_vk_pipeline.reset();
 		m_device.reset();
 
-		LOG(Info, "shutdown");
+		LOG(Trace, "shutdown mesh_render_system");
 	}
 
-	void render_system::render_game_objects(frame_info frame_info, std::vector<game_object>& game_objects) {
+	void mesh_render_system::render(frame_info frame_info) {
+
+
+	}
+
+	void mesh_render_system::render_game_objects(frame_info frame_info, std::vector<game_object>& game_objects) {
 
 		PFF_PROFILE_FUNCTION();
 
@@ -75,7 +80,7 @@ namespace PFF {
 		}
 	}
 
-	void render_system::create_pipeline_layout(VkDescriptorSetLayout descriptor_set_layout) {
+	void mesh_render_system::create_pipeline_layout(VkDescriptorSetLayout descriptor_set_layout) {
 
 		PFF_PROFILE_FUNCTION();
 
@@ -96,7 +101,7 @@ namespace PFF {
 		CORE_ASSERT_S(vkCreatePipelineLayout(m_device->get_device(), &pipeline_layout_CI, nullptr, &m_pipeline_layout) == VK_SUCCESS);
 	}
 
-	void render_system::create_pipeline(VkRenderPass renderPass) {
+	void mesh_render_system::create_pipeline(VkRenderPass renderPass) {
 
 		PFF_PROFILE_FUNCTION();
 
@@ -107,7 +112,7 @@ namespace PFF {
 		m_pipeline_config.render_pass = renderPass;
 		m_pipeline_config.subpass = 0;
 
-		m_vk_pipeline = std::make_unique<vk_pipeline>(m_device, m_pipeline_config, "shaders/default.vert.spv", "shaders/default.frag.spv");
+		m_vk_pipeline = create_scoped_ref<vk_pipeline>(m_device, m_pipeline_config, "shaders/default.vert.spv", "shaders/default.frag.spv");
 	}
 
 }

@@ -2,7 +2,7 @@
 
 namespace PFF::toolkit::todo {
 
-#define CHAR_BUFFER_DEFAULT_SIZE 64
+#define CHAR_BUFFER_DEFAULT_SIZE 256
 
 	// forward declareation
 	class todo_list_serializer;
@@ -79,16 +79,12 @@ namespace PFF::toolkit::todo {
 		void remove_topic(const u64 index);
 
 		std::vector<topic> m_topics{};
-
-	private:
-
-		friend class todo_list_serializer;
 	};
 
 	class todo_list_serializer {
 	public:
-		
-		// can deine here because header is only included in editor_layer.cpp file
+
+		// can define here because header is only included in editor_layer.cpp file
 		todo_list_serializer(todo_list* todo_list, serializer::option option, const std::string& filename = "./config/todo_list.txt") {
 
 			serializer::yaml(filename, "todo_list", option)
@@ -327,7 +323,7 @@ namespace PFF::toolkit::todo {
 					ImGui::Text("Description");
 					ImGui::SetCursorPos(start_pos);
 				}
-				ImGui::InputTextEx("##new_task_description", NULL, task_buf.description, CHAR_BUFFER_DEFAULT_SIZE, input_size, 0);
+				ImGui::InputTextEx("##new_task_description", NULL, task_buf.description, CHAR_BUFFER_DEFAULT_SIZE * 4, input_size, 0);
 				show_hint_descr = strlen(task_buf.description) == 0;
 
 				ImGui::SameLine();

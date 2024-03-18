@@ -39,7 +39,7 @@ namespace PFF {
 			return game_object(current_id++);
 		}
 
-		std::shared_ptr<basic_mesh> mesh{};
+		ref<basic_mesh> mesh{};
 		glm::vec3 color{};
 		transform_comp transform{};
 		glm::vec3 rotation_speed = {};

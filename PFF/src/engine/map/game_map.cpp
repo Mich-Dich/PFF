@@ -10,14 +10,14 @@ namespace PFF {
 
 		PFF_PROFILE_FUNCTION();
 
-		CORE_LOG(Info, "Init");
+		CORE_LOG(Trace, "Init");
 	}
 
 	game_map::~game_map() {
 
 		PFF_PROFILE_FUNCTION();
 
-		CORE_LOG(Info, "Shutdown");
+		CORE_LOG(Trace, "Shutdown");
 	}
 
 	game_object* game_map::create_empty_game_object() {

@@ -7,7 +7,7 @@
 
 namespace PFF {
 
-    vk_swapchain::vk_swapchain(std::shared_ptr<vk_device>& device, VkExtent2D window_extent)
+    vk_swapchain::vk_swapchain(ref<vk_device>& device, VkExtent2D window_extent)
         : m_device{ device }, m_window_extent{ window_extent } {
 
         PFF_PROFILE_FUNCTION();
@@ -15,13 +15,14 @@ namespace PFF {
         init();
     }
 
-    vk_swapchain::vk_swapchain(std::shared_ptr<vk_device>& device, VkExtent2D window_extent, std::shared_ptr<vk_swapchain> previous)
+    vk_swapchain::vk_swapchain(ref<vk_device>& device, VkExtent2D window_extent, ref<vk_swapchain> previous)
         : m_device{ device }, m_window_extent{ window_extent }, m_old_swapchain{ previous } {
 
         PFF_PROFILE_FUNCTION();
 
         init();
         m_old_swapchain.reset();      // clean up  old swapchain, not needed anymore
+        LOG(Trace, "init");
     }
 
     vk_swapchain::~vk_swapchain() {
@@ -59,7 +60,7 @@ namespace PFF {
 
         m_old_swapchain.reset();
         m_device.reset();
-        LOG(Info, "shutdown");
+        LOG(Trace, "shutdown");
     }
 
     VkResult vk_swapchain::acquireNextImage(u32* imageIndex) {
@@ -134,7 +135,8 @@ namespace PFF {
 
         createSwapChain();
         createImageViews();
-        createRenderPass(m_device->get_device(), nullptr, m_render_pass);
+        create_main_render_pass(m_device->get_device(), nullptr);
+        create_ui_render_pass(m_device->get_device(), nullptr);
         createDepthResources();
         createFramebuffers();
         createSyncObjects();
@@ -219,7 +221,7 @@ namespace PFF {
         }
     }
 
-    void vk_swapchain::createRenderPass(VkDevice device, const VkAllocationCallbacks* allocator, VkRenderPass render_pass) {
+    void vk_swapchain::create_main_render_pass(VkDevice device, const VkAllocationCallbacks* allocator) {
 
         PFF_PROFILE_FUNCTION();
 
@@ -276,6 +278,48 @@ namespace PFF {
         renderPassInfo.pDependencies = &dependency;
 
         CORE_ASSERT(vkCreateRenderPass(m_device->get_device(), &renderPassInfo, nullptr, &m_render_pass) == VK_SUCCESS, "", "failed to create render pass!");
+    }
+
+    void vk_swapchain::create_ui_render_pass(VkDevice device, const VkAllocationCallbacks* allocator) {
+
+        PFF_PROFILE_FUNCTION();
+
+        VkAttachmentDescription attachment = {};
+        attachment.format = get_swapchain_image_format();
+        attachment.samples = VK_SAMPLE_COUNT_1_BIT;
+        attachment.loadOp = VK_ATTACHMENT_LOAD_OP_DONT_CARE;
+        attachment.storeOp = VK_ATTACHMENT_STORE_OP_STORE;
+        attachment.stencilLoadOp = VK_ATTACHMENT_LOAD_OP_DONT_CARE;
+        attachment.stencilStoreOp = VK_ATTACHMENT_STORE_OP_DONT_CARE;
+        attachment.initialLayout = VK_IMAGE_LAYOUT_UNDEFINED;
+        attachment.finalLayout = VK_IMAGE_LAYOUT_PRESENT_SRC_KHR;
+        VkAttachmentReference color_attachment = {};
+        color_attachment.attachment = 0;
+        color_attachment.layout = VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL;
+
+        VkSubpassDescription subpass = {};
+        subpass.pipelineBindPoint = VK_PIPELINE_BIND_POINT_GRAPHICS;
+        subpass.colorAttachmentCount = 1;
+        subpass.pColorAttachments = &color_attachment;
+
+        VkSubpassDependency dependency = {};
+        dependency.srcSubpass = VK_SUBPASS_EXTERNAL;
+        dependency.dstSubpass = 0;
+        dependency.srcStageMask = VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT | VK_PIPELINE_STAGE_EARLY_FRAGMENT_TESTS_BIT;
+        dependency.dstStageMask = VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT | VK_PIPELINE_STAGE_EARLY_FRAGMENT_TESTS_BIT;
+        dependency.srcAccessMask = 0;
+        dependency.dstAccessMask = VK_ACCESS_COLOR_ATTACHMENT_WRITE_BIT | VK_ACCESS_DEPTH_STENCIL_ATTACHMENT_WRITE_BIT;
+
+        VkRenderPassCreateInfo renderPassInfo = {};
+        renderPassInfo.sType = VK_STRUCTURE_TYPE_RENDER_PASS_CREATE_INFO;
+        renderPassInfo.attachmentCount = 1;
+        renderPassInfo.pAttachments = &attachment;
+        renderPassInfo.subpassCount = 1;
+        renderPassInfo.pSubpasses = &subpass;
+        renderPassInfo.dependencyCount = 1;
+        renderPassInfo.pDependencies = &dependency;
+
+        CORE_ASSERT(vkCreateRenderPass(m_device->get_device(), &renderPassInfo, nullptr, &m_ui_render_pass) == VK_SUCCESS, "", "failed to create render pass!");
     }
 
     void vk_swapchain::createFramebuffers() {

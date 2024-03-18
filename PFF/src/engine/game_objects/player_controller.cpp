@@ -29,7 +29,7 @@ namespace PFF {
 		PFF_PROFILE_FUNCTION();
 
 		m_input_mapping.reset();
-		CORE_LOG(Info, "Shutdown");
+		CORE_LOG(Trace, "Shutdown");
 	}
 
 	void player_controller::set_world_layer_ref(world_layer* world_layer) {

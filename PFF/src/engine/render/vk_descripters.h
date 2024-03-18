@@ -13,17 +13,17 @@ namespace PFF {
         class builder {
         public:
 
-            builder(std::shared_ptr<vk_device> device) : m_device{ device } {}
+            builder(ref<vk_device> device) : m_device{ device } {}
 
             builder& add_binding(u32 binding, VkDescriptorType descriptorType, VkShaderStageFlags stageFlags, u32 count = 1);
-            std::unique_ptr<vk_descriptor_set_layout> build() const;
+            scope_ref<vk_descriptor_set_layout> build() const;
 
         private:
-            std::shared_ptr<vk_device> m_device;
+            ref<vk_device> m_device;
             std::unordered_map<u32, VkDescriptorSetLayoutBinding> m_bindings{};
         };
 
-        vk_descriptor_set_layout(std::shared_ptr<vk_device> device, std::unordered_map<u32, VkDescriptorSetLayoutBinding> bindings);
+        vk_descriptor_set_layout(ref<vk_device> device, std::unordered_map<u32, VkDescriptorSetLayoutBinding> bindings);
         ~vk_descriptor_set_layout();
 
         DELETE_COPY(vk_descriptor_set_layout);
@@ -31,7 +31,7 @@ namespace PFF {
         VkDescriptorSetLayout get_descriptor_set_layout() const { return m_descriptor_set_layout; }
 
     private:
-        std::shared_ptr<vk_device> m_device;
+        ref<vk_device> m_device;
         VkDescriptorSetLayout m_descriptor_set_layout;
         std::unordered_map<u32, VkDescriptorSetLayoutBinding> m_bindings;
 
@@ -46,21 +46,21 @@ namespace PFF {
         class builder {
         public:
 
-            builder(std::shared_ptr<vk_device> device) : m_device{ device } {}
+            builder(ref<vk_device> device) : m_device{ device } {}
 
             builder& addPoolSize(VkDescriptorType descriptor_type, u32 count);
             builder& setPoolFlags(VkDescriptorPoolCreateFlags flags);
             builder& setMaxSets(u32 count);
-            std::unique_ptr<vk_descriptor_pool> build() const;
+            scope_ref<vk_descriptor_pool> build() const;
 
         private:
-            std::shared_ptr<vk_device> m_device;
+            ref<vk_device> m_device;
             std::vector<VkDescriptorPoolSize> m_pool_sizes{};
             u32 m_maxSets = 1000;
             VkDescriptorPoolCreateFlags m_pool_flags = 0;
         };
 
-        vk_descriptor_pool(std::shared_ptr<vk_device> device, u32 max_sets, VkDescriptorPoolCreateFlags pool_flags, const std::vector<VkDescriptorPoolSize>& pool_sizes);
+        vk_descriptor_pool(ref<vk_device> device, u32 max_sets, VkDescriptorPoolCreateFlags pool_flags, const std::vector<VkDescriptorPoolSize>& pool_sizes);
         ~vk_descriptor_pool();
 
         DELETE_COPY(vk_descriptor_pool);
@@ -72,7 +72,7 @@ namespace PFF {
         void resetPool();
 
     private:
-        std::shared_ptr<vk_device> m_device;
+        ref<vk_device> m_device;
         VkDescriptorPool m_descriptor_pool;
 
         friend class vk_descriptor_writer;

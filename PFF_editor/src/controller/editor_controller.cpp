@@ -13,13 +13,13 @@ namespace PFF {
 
 	editor_controller::editor_controller() {
 
-		LOG(Debug, "register Input mapping");
+		LOG(Trace, "init");
 		m_input_mapping = register_mapping<editor_inputs>();
 	}
 
 	editor_controller::~editor_controller() {
 
-		LOG(Info, "Shutdown");
+		LOG(Trace, "shutdown");
 	}
 
 	void editor_controller::update(const f32 delta) {

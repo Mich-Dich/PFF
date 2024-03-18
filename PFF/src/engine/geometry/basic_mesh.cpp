@@ -47,10 +47,10 @@ namespace PFF {
 		PFF_PROFILE_FUNCTION();
 
 		m_device.reset();
-		CORE_LOG(Info, "Shutdown");
+		CORE_LOG(Trace, "Shutdown");
 	}
 
-	std::shared_ptr<basic_mesh> basic_mesh::create_mesh_from_file(const std::string& file_path) {
+	ref<basic_mesh> basic_mesh::create_mesh_from_file(const std::string& file_path) {
 
 		PFF_PROFILE_FUNCTION();
 

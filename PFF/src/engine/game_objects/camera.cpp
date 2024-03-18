@@ -12,7 +12,7 @@ namespace PFF {
 
 	camera::~camera() {
 
-		CORE_LOG(Info, "Shutdown");
+		CORE_LOG(Trace, "Shutdown");
 	}
 
 	void camera::set_clipping_dis(const f32 near_dis, const f32 far_dis) {

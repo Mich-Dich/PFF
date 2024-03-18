@@ -2,7 +2,8 @@
 
 #include "engine/render/vk_device.h"
 #include "engine/render/vk_swapchain.h"
-#include "engine/render/render_system.h"
+#include "engine/render/render_system/mesh_render_system.h"
+#include "engine/render/render_system/ui_render_system.h"
 // #include "engine/platform/pff_window.h"
 #include "engine/layer/layer_stack.h"
 #include "engine/map/game_map.h"
@@ -30,14 +31,14 @@ namespace PFF {
 	class renderer {
 	public:
 
-		renderer(std::shared_ptr<pff_window> window, layer_stack* layerstack);
+		renderer(ref<pff_window> window, layer_stack* layerstack);
 		~renderer();
 
 		DELETE_COPY(renderer);
 
 		FORCEINLINE void set_world_Layer(world_layer* worldlayer) { m_world_Layer = worldlayer; }
 		FORCEINLINE bool is_frame_started() const { return m_is_frame_started; }
-		FORCEINLINE std::shared_ptr<vk_device> get_device() const { return m_device; }
+		FORCEINLINE ref<vk_device> get_device() const { return m_device; }
 
 		FORCEINLINE std::vector<VkPresentModeKHR> get_swapchain_suported_present_modes() const { return m_swapchain->get_suported_present_modes(); }
 		FORCEINLINE VkRenderPass get_swapchain_render_pass() const { return m_swapchain->get_render_pass(); }
@@ -45,7 +46,7 @@ namespace PFF {
 		FORCEINLINE float get_aspect_ratio() const { return m_swapchain->get_extentAspectRatio(); }
 		FORCEINLINE VkFramebuffer get_image_view() const { return m_swapchain->getFrameBuffer(m_current_image_index); }
 		FORCEINLINE void set_state(system_state state) { CORE_LOG(Debug, "setting renderer state");  m_state = state; }
-		FORCEINLINE u32 get_render_system_pipeline_subpass() const { return m_render_system->get_pipeline_subpass(); }
+		FORCEINLINE u32 get_render_system_pipeline_subpass() const { return m_mesh_render_system->get_pipeline_subpass(); }
 		FORCEINLINE VkDescriptorPool get_global_descriptor_pool() const { return m_global_descriptor_pool->get_descriptorPool(); }
 
 		FORCEINLINE VkCommandBuffer get_current_command_buffer() const {	CORE_ASSERT(m_is_frame_started, "", "Cant get command buffer when frame not in progress");
@@ -76,17 +77,20 @@ namespace PFF {
 
 		world_layer* m_world_Layer;								// *application::get().get_world_layer();
 
-		std::shared_ptr<pff_window> m_window;
-		std::shared_ptr<vk_device> m_device;
-		std::shared_ptr<vk_swapchain> m_swapchain{};
-		std::unique_ptr<render_system> m_render_system{};
+		ref<pff_window> m_window;
+		ref<vk_device> m_device;
+		ref<vk_swapchain> m_swapchain{};
 		layer_stack* m_layerstack;
 		std::vector<game_object> m_game_objects{};				// move into map class
 
-		std::vector<std::unique_ptr<vk_buffer>> m_global_UBO_buffer{};
+		// mandatory render systems
+		scope_ref<mesh_render_system> m_mesh_render_system{};
+		scope_ref<ui_render_system> m_ui_render_system{};
+
+		std::vector<scope_ref<vk_buffer>> m_global_UBO_buffer{};
 		std::vector<VkCommandBuffer> m_command_buffers{};
-		std::unique_ptr<vk_descriptor_pool> m_global_descriptor_pool;
-		std::unique_ptr<vk_descriptor_set_layout> m_global_set_layout;
+		scope_ref<vk_descriptor_pool> m_global_descriptor_pool;
+		scope_ref<vk_descriptor_set_layout> m_global_set_layout;
 		std::vector<VkDescriptorSet> m_global_descriptor_set{};
 
 	};

@@ -16,10 +16,10 @@ namespace PFF {
 		DELETE_COPY(world_layer);
 
 		//FORCEINLINE camera get_camera() const { return m_camera; }
-		FORCEINLINE std::shared_ptr<camera> get_editor_camera() const { return m_editor_camera; }
-		FORCEINLINE std::shared_ptr<game_map> get_current_map() const { return m_current_map; }
-		FORCEINLINE std::shared_ptr<player_controller> get_current_player_controller() const { return m_player_controller; }
-		void register_player_controller(std::shared_ptr<player_controller> player_controller) {
+		FORCEINLINE ref<camera> get_editor_camera() const { return m_editor_camera; }
+		FORCEINLINE ref<game_map> get_current_map() const { return m_current_map; }
+		FORCEINLINE ref<player_controller> get_current_player_controller() const { return m_player_controller; }
+		void register_player_controller(ref<player_controller> player_controller) {
 
 			m_player_controller = player_controller;
 			m_player_controller->set_world_layer_ref(this);
@@ -34,9 +34,9 @@ namespace PFF {
 	private:
 
 		//camera m_camera{};
-		std::shared_ptr<camera> m_editor_camera{};
-		std::shared_ptr<player_controller> m_player_controller{};
-		std::shared_ptr<game_map> m_current_map{};
+		ref<camera> m_editor_camera{};
+		ref<player_controller> m_player_controller{};
+		ref<game_map> m_current_map{};
 
 	};
 

@@ -1,7 +1,7 @@
 
 #include "util/pffpch.h"
 
-#include "engine/render/render_system.h"
+#include "engine/render/render_system/mesh_render_system.h"
 #include "engine/render/vk_buffer.h"
 #include "engine/platform/pff_window.h"
 #include "engine/layer/layer.h"
@@ -25,7 +25,7 @@ namespace PFF {
 
 	// ==================================================================== setup ====================================================================
 
-	renderer::renderer(std::shared_ptr<pff_window> window, layer_stack* layerstack)
+	renderer::renderer(ref<pff_window> window, layer_stack* layerstack)
 		: m_window(window), m_layerstack(layerstack) {
 
 		PFF_PROFILE_FUNCTION();
@@ -37,7 +37,7 @@ namespace PFF {
 		CORE_LOG(Trace, "render started");
 
 		// make global UBO
-		m_global_UBO_buffer = std::vector<std::unique_ptr<vk_buffer>>(vk_swapchain::MAX_FRAMES_IN_FLIGHT);
+		m_global_UBO_buffer = std::vector<scope_ref<vk_buffer>>(vk_swapchain::MAX_FRAMES_IN_FLIGHT);
 		for (u16 x = 0; x < m_global_UBO_buffer.size(); x++) {
 
 			m_global_UBO_buffer[x] = std::make_unique<vk_buffer>( m_device, sizeof(global_ubo), 1, VK_BUFFER_USAGE_UNIFORM_BUFFER_BIT, VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT);
@@ -45,6 +45,7 @@ namespace PFF {
 		}
 
 		// make global descriptor pool
+		CORE_LOG(Trace, "build descriptor pool");
 		m_global_descriptor_pool = vk_descriptor_pool::builder(m_device)
 			.addPoolSize(VK_DESCRIPTOR_TYPE_SAMPLER, 1000)
 			.addPoolSize(VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER, 1000)
@@ -62,12 +63,13 @@ namespace PFF {
 			.setPoolFlags(VK_DESCRIPTOR_POOL_CREATE_FREE_DESCRIPTOR_SET_BIT)
 			.build();
 
-
+		CORE_LOG(Trace, "build descriptor_set layout");
 		m_global_set_layout = vk_descriptor_set_layout::builder(m_device)
 			.add_binding(0, VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER, VK_SHADER_STAGE_VERTEX_BIT)					// binding for renderer & ImGui
 			.add_binding(1, VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER, VK_SHADER_STAGE_FRAGMENT_BIT)		// for ImGui
 			.build();
 
+		CORE_LOG(Trace, "Resize swapchain");
 		m_global_descriptor_set.resize(vk_swapchain::MAX_FRAMES_IN_FLIGHT);
 		for (int16 x = 0; x < m_global_descriptor_set.size(); x++) {
 
@@ -77,9 +79,14 @@ namespace PFF {
 				.build(m_global_descriptor_set[x]);
 		}
 
-		// add first render system
-		add_render_system(m_global_set_layout->get_descriptor_set_layout());
+		// render system for: game objects
+		CORE_LOG(Trace, "add mesh render system");
+		m_mesh_render_system = create_scoped_ref<mesh_render_system>(get_device(), get_swapchain_render_pass(), m_global_set_layout->get_descriptor_set_layout());
 
+		// render system for: ImGui
+		//CORE_LOG(Trace, "add ImGui render system");
+		//m_ui_render_system = create_scoped_ref<ui_render_system>(get_device(), get_swapchain_render_pass(), m_global_set_layout->get_descriptor_set_layout());
+		//application::get().get_imgui_layer()->
 	}
 
 	renderer::~renderer() {
@@ -91,16 +98,18 @@ namespace PFF {
 		for (u16 x = 0; x < m_global_UBO_buffer.size(); x++)
 			m_global_UBO_buffer[x].reset();
 
-		m_global_UBO_buffer.clear();
-		m_window.reset();
-		m_render_system.reset();
-
-		//vkDestroyDescriptorSetLayout(m_device->get_device(), m_descriptor_set_layout, nullptr);
-		//vkDestroyDescriptorPool(m_device->get_device(), m_imgui_descriptor_pool, nullptr);		// TODO: free new pool
 		free_command_buffers();
 
+		m_ui_render_system.reset();
+		m_mesh_render_system.reset();
+		m_global_set_layout.reset();
+		m_global_descriptor_pool.reset();
+		m_global_UBO_buffer.clear();
+		m_window.reset();
 		m_swapchain.reset();
 		m_device.reset();
+
+
 		LOG(Info, "shutdown");
 	}
 
@@ -110,7 +119,8 @@ namespace PFF {
 
 		PFF_PROFILE_FUNCTION();
 
-		m_render_system = std::make_unique<render_system>(get_device(), get_swapchain_render_pass(), descriptor_set_layout);
+		CORE_LOG(Error, "Not implemented yet!");
+		//m_mesh_render_system = std::make_unique<render_system>(get_device(), get_swapchain_render_pass(), descriptor_set_layout);
 	}
 
 	//
@@ -118,31 +128,32 @@ namespace PFF {
 
 		PFF_PROFILE_FUNCTION();
 
-		if (m_state == system_state::active) {
+		if (m_state != system_state::active)
+			return;
 
-			if (auto commandbuffer = begin_frame()) {
+		if (auto commandbuffer = begin_frame()) {
 
-				frame_info frame_info{ m_current_image_index, delta_time, commandbuffer, m_world_Layer->get_editor_camera(), m_global_descriptor_set[m_current_image_index] };
+			frame_info frame_info{ m_current_image_index, delta_time, commandbuffer, m_world_Layer->get_editor_camera(), m_global_descriptor_set[m_current_image_index] };
 
-				// update
-				global_ubo ubo{};
-				ubo.projectionView = frame_info.camera->get_projection() * frame_info.camera->get_view();
-				m_global_UBO_buffer[m_current_image_index]->write_to_buffer(&ubo);
-				m_global_UBO_buffer[m_current_image_index]->flush();
+			// update
+			global_ubo ubo{};
+			ubo.projectionView = frame_info.camera->get_projection() * frame_info.camera->get_view();
+			m_global_UBO_buffer[m_current_image_index]->write_to_buffer(&ubo);
+			m_global_UBO_buffer[m_current_image_index]->flush();
 
-				// render
-				begin_swapchain_renderpass(commandbuffer);
-				m_render_system->render_game_objects(frame_info, m_world_Layer->get_current_map()->get_all_game_objects());
-				// application::get().get_imgui_layer()->capture_current_image( ,m_swapchain->get_image_view(m_current_image_index));
+			// render
+			begin_swapchain_renderpass(commandbuffer);
+			m_mesh_render_system->render_game_objects(frame_info, m_world_Layer->get_current_map()->get_all_game_objects());
+			// application::get().get_imgui_layer()->capture_current_image( ,m_swapchain->get_image_view(m_current_image_index));
 
-				IMGUI_LAYER->begin_frame();
-				for (layer* target : *m_layerstack)
-					target->on_imgui_render();
-				IMGUI_LAYER->end_frame(commandbuffer);
+			//m_ui_render_system->bind_pipeline(frame_info);
+			IMGUI_LAYER->begin_frame();
+			for (layer* target : *m_layerstack)
+				target->on_imgui_render();
+			IMGUI_LAYER->end_frame(commandbuffer);
 
-				end_swapchain_renderpass(commandbuffer);
-				end_frame();
-			}
+			end_swapchain_renderpass(commandbuffer);
+			end_frame();
 		}
 	}
 

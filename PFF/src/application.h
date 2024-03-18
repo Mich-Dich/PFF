@@ -38,9 +38,9 @@ namespace PFF {
 		FORCEINLINE static application& get()							{ return *s_instance; }
 		FORCEINLINE static imgui_layer* get_imgui_layer()				{ return m_imgui_layer; }
 		FORCEINLINE static world_layer* get_world_layer()				{ return m_world_layer; }
-		FORCEINLINE static std::shared_ptr<game_map> get_current_map()	{ return m_world_layer->get_current_map(); }
-		FORCEINLINE static std::shared_ptr<pff_window> get_window()		{ return m_window; }
-		FORCEINLINE static std::shared_ptr<renderer> get_renderer()		{ return m_renderer; }
+		FORCEINLINE static ref<game_map> get_current_map()	{ return m_world_layer->get_current_map(); }
+		FORCEINLINE static ref<pff_window> get_window()		{ return m_window; }
+		FORCEINLINE static ref<renderer> get_renderer()		{ return m_renderer; }
 		FORCEINLINE static void  set_render_state(system_state state)	{ return m_renderer->set_state(state); }
 		FORCEINLINE static void close_application()						{ m_running = false; }
 		FORCEINLINE static bool is_titlebar_hovered()					{ return m_is_titlebar_hovered; }
@@ -53,7 +53,7 @@ namespace PFF {
 		FORCEINLINE void restore_window();
 		FORCEINLINE void maximize_window();
 
-		void register_player_controller(std::shared_ptr<player_controller> player_controller) { m_world_layer->register_player_controller(player_controller); }
+		void register_player_controller(ref<player_controller> player_controller) { m_world_layer->register_player_controller(player_controller); }
 		void get_fps_values(bool& limit_fps, u32& target_fps, u32& current_fps, f32& work_time, f32& sleep_time);
 
 		virtual bool init();								// to be used by client
@@ -69,11 +69,11 @@ namespace PFF {
 		bool on_window_refresh(window_refresh_event& event);
 		bool on_window_focus(window_focus_event& event);
 
-		//std::unique_ptr<basic_mesh> createCubeModel(glm::vec3 offset);
+		//scope_ref<basic_mesh> createCubeModel(glm::vec3 offset);
 
 		static application* s_instance;
-		static std::shared_ptr<renderer> m_renderer;
-		static std::shared_ptr<pff_window> m_window;
+		static ref<renderer> m_renderer;
+		static ref<pff_window> m_window;
 		static bool m_is_titlebar_hovered;
 		static bool m_running;
 		static imgui_layer* m_imgui_layer;
@@ -81,7 +81,7 @@ namespace PFF {
 
 		layer_stack m_layerstack{};
 		std::vector<event> m_event_queue;		// TODO: change to queue
-		std::shared_ptr<game_map> m_current_map = nullptr;
+		ref<game_map> m_current_map = nullptr;
 
 		bool m_focus = true;
 		f32 m_last_frame_time = 0.f;

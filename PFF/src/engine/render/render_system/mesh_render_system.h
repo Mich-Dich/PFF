@@ -12,18 +12,19 @@ namespace PFF {
 	class renderer;
 	class vk_device;
 
-	class render_system {
+	class mesh_render_system {
 	public:
 
-		render_system(std::shared_ptr<vk_device> device, VkRenderPass renderPass, VkDescriptorSetLayout descriptor_set_layout);
-		~render_system();
+		mesh_render_system(ref<vk_device> device, VkRenderPass renderPass, VkDescriptorSetLayout descriptor_set_layout);
+		~mesh_render_system();
 		
-		DELETE_COPY(render_system);
+		DELETE_COPY(mesh_render_system);
 
 		FORCEINLINE u32 get_pipeline_subpass() const { return m_vk_pipeline->get_subpass(); }
 		FORCEINLINE void pipeline_bind_commnad_buffers(VkCommandBuffer command_buffer) const { return m_vk_pipeline->bind_commnad_buffers(command_buffer); }
 		//void bind_commnad_buffers(VkCommandBuffer command_buffer);
 
+		virtual void render(frame_info frame_info);
 		void render_game_objects(frame_info frame_info, std::vector<game_object>& game_objects);
 
 	private:
@@ -34,10 +35,10 @@ namespace PFF {
 		bool m_active;
 		bool needs_to_resize;
 
-		std::shared_ptr<vk_device> m_device;
-		std::shared_ptr<renderer> m_renderer;
+		ref<vk_device> m_device;
+		ref<renderer> m_renderer;
 
-		std::unique_ptr<vk_pipeline> m_vk_pipeline;
+		scope_ref<vk_pipeline> m_vk_pipeline;
 		VkPipelineLayout m_pipeline_layout;
 		pipeline_config_info m_pipeline_config;
 	};

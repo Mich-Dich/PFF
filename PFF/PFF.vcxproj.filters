@@ -116,7 +116,7 @@
     <ClInclude Include="src\engine\render\queue_families.h">
       <Filter>engine\render</Filter>
     </ClInclude>
-    <ClInclude Include="src\engine\render\render_system.h">
+    <ClInclude Include="src\engine\render\render_system\mesh_render_system.h">
       <Filter>engine\render</Filter>
     </ClInclude>
     <ClInclude Include="src\engine\render\renderer.h">
@@ -177,6 +177,7 @@
     <ClInclude Include="src\util\util.h">
       <Filter>util</Filter>
     </ClInclude>
+    <ClInclude Include="src\engine\render\render_system\ui_render_system.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="src\application.cpp" />
@@ -225,7 +226,7 @@
     <ClCompile Include="src\engine\platform\pff_window.cpp">
       <Filter>engine\platform</Filter>
     </ClCompile>
-    <ClCompile Include="src\engine\render\render_system.cpp">
+    <ClCompile Include="src\engine\render\render_system\mesh_render_system.cpp">
       <Filter>engine\render</Filter>
     </ClCompile>
     <ClCompile Include="src\engine\render\renderer.cpp">
@@ -264,5 +265,6 @@
     <ClCompile Include="src\util\timer.cpp">
       <Filter>util</Filter>
     </ClCompile>
+    <ClCompile Include="src\engine\render\render_system\ui_render_system.cpp" />
   </ItemGroup>
 </Project>
