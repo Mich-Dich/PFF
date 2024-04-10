@@ -6,9 +6,9 @@
 #define PFF_UI_ACTIVE_THEME				PFF::UI::THEME::current_theme
 
 #define LERP_MAIN_COLOR_DARK(value)			{PFF::UI::THEME::main_color.x * value, PFF::UI::THEME::main_color.y * value, PFF::UI::THEME::main_color.z * value, 1.f }		// Set [w] to be [1.f] to disable accidental transparency
-#define LERP_MAIN_COLOR_LIGHT(value)		{	(1.f - value) * 1.f + value * main_color.x, \
-												(1.f - value) * 1.f + value * main_color.y, \
-												(1.f - value) * 1.f + value * main_color.z, \
+#define LERP_MAIN_COLOR_LIGHT(value)		{	(1.f - value) * 1.f + value * PFF::UI::THEME::main_color.x, \
+												(1.f - value) * 1.f + value * PFF::UI::THEME::main_color.y, \
+												(1.f - value) * 1.f + value * PFF::UI::THEME::main_color.z, \
 												1.f }																		// Set [w] to be [1.f] to disable accidental transparency
 
 #define LERP_GRAY(value)				{value, value, value, 1.f }
@@ -31,6 +31,7 @@ namespace PFF {
 
 		static theme_selection UI_theme = theme_selection::default;
 		static ImVec4 main_color = { .5f,	.0f,	.0f,	1.f };
+		static bool enable_window_forder = false;
 		static ImVec4 highlited_window_bg = LERP_GRAY(0.17f);
 		static ImVec4 main_titlebar_color = LERP_MAIN_COLOR_DARK(.5f);
 		static f32 default_item_width = 200.f;
@@ -43,18 +44,41 @@ namespace PFF {
 		static ImVec4 action_color_gray_hover	= LERP_GRAY(0.27f);
 		static ImVec4 action_color_gray_active	= LERP_GRAY(0.35f);
 
+
+		void serialize_data(serializer::option option) {
+
+			serializer::yaml(config::get_filepath_from_configtype(config::file::ui), "theme", option)
+				.entry(KEY_VALUE(UI_theme))
+				.entry(KEY_VALUE(main_color))
+				.entry(KEY_VALUE(enable_window_forder))
+				.entry(KEY_VALUE(highlited_window_bg))
+				.entry(KEY_VALUE(main_titlebar_color))
+				.entry(KEY_VALUE(default_item_width))
+
+				// color heightlight
+				.entry(KEY_VALUE(action_color_00_default))
+				.entry(KEY_VALUE(action_color_00_hover))
+				.entry(KEY_VALUE(action_color_00_active))
+
+				// gray
+				.entry(KEY_VALUE(action_color_gray_default))
+				.entry(KEY_VALUE(action_color_gray_hover))
+				.entry(KEY_VALUE(action_color_gray_active));
+		}
+
+
 		void enable_window_border(bool enable) {
 
-			bool loc_enable = enable;
-			config::save(config::file::editor, "UI", "window_border", loc_enable);
+			enable_window_forder = enable;
+			serialize_data(serializer::option::save_to_file);
 
 			ImGuiStyle* style = &ImGui::GetStyle();
-			style->WindowBorderSize = loc_enable ? 1.f : 0.f;
+			style->WindowBorderSize = enable ? 1.f : 0.f;
 		}
 
 		void update_UI_theme() {
 
-			config::save(config::file::editor, "UI", "theme", UI::THEME::UI_theme);
+			serialize_data(serializer::option::load_from_file);
 
 			ImGuiStyle* style = &ImGui::GetStyle();
 			ImVec4* colors = style->Colors;
@@ -237,7 +261,7 @@ namespace PFF {
 		void update_UI_colors(ImVec4 new_color) {
 
 			main_color = new_color;
-			config::save(config::file::editor, "UI", "main_color", UI::THEME::main_color);
+			serialize_data(serializer::option::save_to_file);
 			update_UI_theme();
 		}
 

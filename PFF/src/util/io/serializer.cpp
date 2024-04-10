@@ -40,15 +40,52 @@ namespace PFF::serializer {
 
 	void yaml::serialize() {
 
-		m_ostream = std::ofstream(m_filename);
-		CORE_ASSERT(m_ostream.is_open(), "", "file-stream is not open");
+		auto istream = std::ifstream(m_filename);
+		CORE_ASSERT(istream.is_open(), "", "input-file-stream is not open");
 
 		// make new stream to buffer updated file
 		std::ostringstream updated_file;
 
-		// todo::write to current place (copy beginning && end)
-		m_ostream << m_file_content.str();
+		// copy content of file that is not the focus of this serialization
+		bool found = false;				// ensure only one section can be skipped
+		std::string line = "";
+		while (std::getline(istream, line)) {
 
+			// is correct section
+			if (!found && (line.find(m_name + ":") != std::string::npos) && (measure_indentation(line) == 0)) {
+
+				found = true;
+
+				// override section with new content
+				updated_file << m_file_content.str();
+
+				// SKIP CONTENT
+				while (std::getline(istream, line)) {
+
+					if (line.back() == ':' && measure_indentation(line) == 0) {	// still in section ??
+
+						updated_file << line + "\n";
+						break;
+					}
+				}
+
+			}
+
+			else 
+				updated_file << line + "\n";
+		}
+
+		// apend if section not found
+		if (!found)
+			updated_file << m_file_content.str();
+
+		istream.close();
+
+		auto ostream = std::ofstream(m_filename);
+		CORE_ASSERT(ostream.is_open(), "", "output-file-stream is not open");
+
+		ostream << updated_file.str();
+		ostream.close();
 	}
 
 	yaml& yaml::deserialize() {

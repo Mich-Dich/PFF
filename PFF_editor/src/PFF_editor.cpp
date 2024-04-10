@@ -59,18 +59,20 @@ namespace PFF {
 		m_test_game_object->mesh = model;
 		m_test_game_object->set_translation({ .0f, 0.f, 2.f });
 		m_test_game_object->transform.scale = glm::vec3(1.f);
-		// m_test_game_object->rotation_speed = glm::vec3(0.f, .5f, 0.f);
+		m_test_game_object->rotation_speed = glm::vec3(0.f, 3.5f, 0.f);
 
 #endif // 1
 
 		// load editor camera loc && rot
-		glm::vec3 camera_pos{ 0.0f, 10.0f, 10.0f };
-		glm::vec3 camera_direction{};
-		config::load(config::file::editor, "editor_camera", "pos", camera_pos);
-		config::load(config::file::editor, "editor_camera", "direction", camera_direction);
-		m_editor_controller->set_editor_camera_pos(camera_pos);
-		m_editor_controller->set_editor_camera_direction(camera_direction);
+		glm::vec3 position = { -16, -19, -30 };
+		glm::vec3 look_direction = { .5f, -.4f, 0 };
 
+		serializer::yaml(config::get_filepath_from_configtype(config::file::editor), "editor_camera", serializer::option::load_from_file)
+			.entry(KEY_VALUE(position))
+			.entry(KEY_VALUE(look_direction));
+
+		m_editor_controller->set_editor_camera_pos(position);
+		m_editor_controller->set_editor_camera_direction(look_direction);
 
 		return true;
 	}
@@ -81,18 +83,19 @@ namespace PFF {
 		delete m_editor_layer;
 
 		// save camera position
-		glm::vec3 camera_pos = m_editor_controller->get_editor_camera_pos();
-		glm::vec3 camera_direction = m_editor_controller->get_editor_camera_direction();
+		glm::vec3 position = m_editor_controller->get_editor_camera_pos();
+		glm::vec3 look_direction = m_editor_controller->get_editor_camera_direction();
 
-		config::save(config::file::editor, "editor_camera", "pos", camera_pos);
-		config::save(config::file::editor, "editor_camera", "direction", camera_direction);
+		serializer::yaml(config::get_filepath_from_configtype(config::file::editor), "editor_camera", serializer::option::save_to_file)
+			.entry(KEY_VALUE(position))
+			.entry(KEY_VALUE(look_direction));
 
 		return true;
 	}
 
 	bool PFF_editor::update(const f32 delta_time) {
 
-		/*
+
 		static bool move_positive{};
 
 		if (m_test_game_object->transform.translation.y >= 10.f)
@@ -106,6 +109,8 @@ namespace PFF {
 			m_test_game_object->transform.translation.y += 10.f * delta_time;
 		else
 			m_test_game_object->transform.translation.y -= 10.f * delta_time;
+
+		/*
 			*/
 
 		return false;

@@ -564,7 +564,10 @@ namespace PFF {
 					static ImVec4 backup_color;
 					if (!backup_color_init) {
 
-						config::load(config::file::editor, "UI", "window_border", window_border);
+						serializer::yaml(config::get_filepath_from_configtype(config::file::ui), "window_border", serializer::option::load_from_file)
+							.entry(KEY_VALUE(window_border));
+						//config::load(config::file::editor, "UI", "window_border", window_border);
+
 						backup_color = UI::THEME::main_color;
 						ImGui::SetColorEditOptions(ImGuiColorEditFlags_Float | ImGuiColorEditFlags_HDR | ImGuiColorEditFlags_PickerHueWheel);
 						backup_color_init = true;

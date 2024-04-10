@@ -171,7 +171,7 @@ namespace PFF {
                 {file::engine, "engine"},
                 {file::game, "game"},
                 {file::input, "input"},
-                {file::ui, "imgui" },
+                {file::ui, "ui" },
             };
 
             auto it = typeStrings.find(type);

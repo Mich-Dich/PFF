@@ -26,7 +26,7 @@ namespace PFF {
 
 		static f32 move_speed = 50.0f;
 
-		//if (m_input_mapping->capture_mouse.get_data<bool>()) {
+		//if (m_input_mapping->capture_mouse.get_data<bool>()) { }
 		if (m_input_mapping->capture_mouse.data.boolean) {
 
 			application::get().capture_cursor();

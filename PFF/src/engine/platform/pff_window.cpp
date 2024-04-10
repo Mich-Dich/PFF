@@ -41,7 +41,7 @@ namespace PFF {
 		PFF_PROFILE_FUNCTION();
 
 		const bool is_maximized = this->is_maximized();
-		int titlebar_vertical_offset = is_maximized ? 12.f : 6.f;
+		int titlebar_vertical_offset = is_maximized ? 12 : 6;
 
 		int loc_pos_x;
 		int loc_pos_y;

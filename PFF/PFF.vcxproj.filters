@@ -28,6 +28,9 @@
     <Filter Include="engine\render">
       <UniqueIdentifier>{2A265F8D-96E6-DAC3-5F21-2441CBA01FA0}</UniqueIdentifier>
     </Filter>
+    <Filter Include="engine\render\render_system">
+      <UniqueIdentifier>{BDAE0EA7-29BC-3C8D-B2A2-38781EAF0844}</UniqueIdentifier>
+    </Filter>
     <Filter Include="util">
       <UniqueIdentifier>{43339F7C-2F6A-A00D-D856-8610C46C1C0F}</UniqueIdentifier>
     </Filter>
@@ -117,7 +120,10 @@
       <Filter>engine\render</Filter>
     </ClInclude>
     <ClInclude Include="src\engine\render\render_system\mesh_render_system.h">
-      <Filter>engine\render</Filter>
+      <Filter>engine\render\render_system</Filter>
+    </ClInclude>
+    <ClInclude Include="src\engine\render\render_system\ui_render_system.h">
+      <Filter>engine\render\render_system</Filter>
     </ClInclude>
     <ClInclude Include="src\engine\render\renderer.h">
       <Filter>engine\render</Filter>
@@ -177,7 +183,6 @@
     <ClInclude Include="src\util\util.h">
       <Filter>util</Filter>
     </ClInclude>
-    <ClInclude Include="src\engine\render\render_system\ui_render_system.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="src\application.cpp" />
@@ -227,7 +232,10 @@
       <Filter>engine\platform</Filter>
     </ClCompile>
     <ClCompile Include="src\engine\render\render_system\mesh_render_system.cpp">
-      <Filter>engine\render</Filter>
+      <Filter>engine\render\render_system</Filter>
+    </ClCompile>
+    <ClCompile Include="src\engine\render\render_system\ui_render_system.cpp">
+      <Filter>engine\render\render_system</Filter>
     </ClCompile>
     <ClCompile Include="src\engine\render\renderer.cpp">
       <Filter>engine\render</Filter>
@@ -265,6 +273,5 @@
     <ClCompile Include="src\util\timer.cpp">
       <Filter>util</Filter>
     </ClCompile>
-    <ClCompile Include="src\engine\render\render_system\ui_render_system.cpp" />
   </ItemGroup>
 </Project>

@@ -70,23 +70,6 @@ namespace PFF {
 				: key(key), trigger_flags(trigger_flags), modefier_flags(modefier_flags) {};
 		};
 
-		// Im programming in C++, and I have two namespaces in diffrent namespaces, but I want to make one of them into a friend class of the other
-		// 
-		// namespace PFF {
-		//     class mapping {}
-		// }
-		// 
-		// namespace PFF::input {
-		//     class action {
-		//          friend class PFF::mapping;
-		// 
-		//     private:
-		//          string name = "";
-		//     }
-		// }
-		// 
-		// but I get an error => "cannot access private menber declared in calss PFF::input::action"
-
 		// --------------------------------------------------- Input Action ---------------------------------------------------
 	}
 

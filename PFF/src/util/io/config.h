@@ -45,36 +45,6 @@ namespace PFF {
 		// @return [bool] True if the configuration is found and updated, false otherwise.
         PFF_API_EDITOR bool check_for_configuration(const file target_config_file, const std::string& section, const std::string& key, std::string& value, const bool override);
 
-		// @brief load a value from specified config file (save if not found)
-		// @param [config_file] The type of configuration file to be checked/updated.
-		// @param [section] The section within the configuration file where the key-value pair is located.
-		// @param [key] The key of the configuration to be loaded.
-		// @tparam [value] Reference to the variable that will store the configuration value.
-		// @see check_for_configuration
-		template <typename T>
-        void load(const file config_file, const std::string& section, const std::string& key, T& value) {
-
-            std::string buffer;
-			util::convert_to_string(value, buffer);
-            check_for_configuration(config_file, section, key, buffer, false);
-			util::convert_from_string(buffer, value);
-        }
-
-		// @brief save a value to specified config file (create if not found)
-		// @param [config_file] The type of configuration file to be checked/updated.
-		// @param [section] The section within the configuration file where the key-value pair is located.
-		// @param [key] The key of the configuration to be loaded.
-		// @tparam [value] Reference to the variable that will be stored in the configuration falie.
-		// @see check_for_configuration
-		template <typename T>
-        void save(const file config_file, const std::string& section, const std::string& key, T& value) {
-
-            std::string buffer;
-			util::convert_to_string(value, buffer);
-            check_for_configuration(config_file, section, key, buffer, true);
-			util::convert_from_string(buffer, value);
-        }
-
     }
 
 }

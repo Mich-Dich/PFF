@@ -1,6 +1,7 @@
 #pragma once
 
 #include "engine/layer/layer.h"
+//#include "util/io/serializer.h"
 
 #include <vulkan/vulkan.h>
 #include <imgui.h>
@@ -36,6 +37,7 @@ namespace PFF {
 
 		void set_next_window_pos(int16 location);
 		void imgui_layer::progressbar_with_text(const char* lable, const char* progress_bar_text, f32 percent, f32 lable_size = 50.f, f32 progressbar_size_x = 50.f, f32 progressbar_size_y = 1.f);
+		void serialize(serializer::option option);
 
 		ImGuiContext* m_context;
 		f32 m_work_time = 0.f, m_sleep_time = 0.f;

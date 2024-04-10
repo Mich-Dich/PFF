@@ -18,6 +18,12 @@ workspace "PFF"
 		"MultiProcessorCompile"
 	}
 
+	-- TODO: PFF_USING_EDITOR should not be defined in the backaged builds of game
+	defines
+	{
+		"PFF_USING_EDITOR",
+	}
+
 	outputs  = "%{cfg.buildcfg}-%{cfg.system}-%{cfg.architecture}"
 
 group "dependencies"

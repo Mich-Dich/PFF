@@ -36,8 +36,13 @@ namespace PFF {
 		PFF_PROFILE_FUNCTION();
 
 		LOG(Trace, "Init imgui layer");
-		config::load(config::file::editor, "UI", "main_color", UI::THEME::main_color);
-		config::load(config::file::editor, "UI", "theme", UI::THEME::UI_theme);
+
+		serializer::yaml(config::get_filepath_from_configtype(config::file::editor), "UI", serializer::option::load_from_file)
+			.entry(KEY_VALUE(UI::THEME::main_color))
+			.entry(KEY_VALUE(UI::THEME::UI_theme));
+
+		//config::load(config::file::editor, "UI", "main_color", UI::THEME::main_color);
+		//config::load(config::file::editor, "UI", "theme", UI::THEME::UI_theme);
 	}
 
 	imgui_layer::~imgui_layer() {
@@ -78,8 +83,10 @@ namespace PFF {
 		ImGui::SetCurrentContext(m_context);
 
 		application& app = application::get();
-		config::load(config::file::editor, "UI", "font_size", m_font_size);
-		config::load(config::file::editor, "UI", "big_font_size", m_big_font_size);
+		serialize(serializer::option::load_from_file);
+
+		//config::load(config::file::editor, "UI", "font_size", m_font_size);
+		//config::load(config::file::editor, "UI", "big_font_size", m_big_font_size);
 
 		// Setup Platform/Renderer backends
 		ImGui_ImplGlfw_InitForVulkan(app.get_window()->get_window(), true);
@@ -127,8 +134,10 @@ namespace PFF {
 
 		PFF_PROFILE_FUNCTION();
 
-		config::save(config::file::editor, "UI", "font_size", m_font_size);
-		config::save(config::file::editor, "UI", "big_font_size", m_big_font_size);
+		serialize(serializer::option::save_to_file);
+
+		//config::save(config::file::editor, "UI", "font_size", m_font_size);
+		//config::save(config::file::editor, "UI", "big_font_size", m_big_font_size);
 		ImGui_ImplVulkan_Shutdown();
 		ImGui_ImplGlfw_Shutdown();
 		ImGui::DestroyContext();
@@ -331,6 +340,13 @@ namespace PFF {
 		ImGui::ProgressBar(percent, progressbar_size, "");
 		ImGui::SetCursorPos({ curser_pos.x + progressbar_size.x - (text_size.x + style->ItemSpacing.x), curser_pos.y });
 		ImGui::Text("%s", progress_bar_text);
+	}
+
+	void imgui_layer::serialize(serializer::option option) {
+
+		serializer::yaml(config::get_filepath_from_configtype(config::file::editor), "UI", option)
+			.entry(KEY_VALUE(m_font_size))
+			.entry(KEY_VALUE(m_big_font_size));
 	}
 	
 	// All the ImGui_ImplVulkanH_XXX structures/functions are optional helpers used by the demo.
