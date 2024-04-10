@@ -11,7 +11,7 @@
 
 
 // !! CAUTION !! not implemented yet
-// defines the min diffrence between the input_value (in smooth input mode) and the target value
+// defines the min diffrence between the input::action_type (in smooth input mode) and the target value
 #define INPUT_ACTION_MODEFIER_MIN_DIF_BETWEEN_SMOOTH_INPUT_AND_TARGET		0.08
 
 
@@ -39,11 +39,10 @@ namespace PFF {
 		m_world_layer = world_layer;
 	}
 
-	void player_controller::init() {
-	}
+	void player_controller::init() { }
 
-	void player_controller::update(f32 delta) {
-	}
+	void player_controller::update(f32 delta) { }
+
 	/*
 	#define INPUT_ACTION_TRIGGER_KEY_DOWN				BIT(0)		// activate input when key is pressed down (can repeat)
 	#define INPUT_ACTION_TRIGGER_KEY_UP					BIT(1)		// activate input when key NOT pressed (can repeat)
@@ -83,7 +82,7 @@ namespace PFF {
 			}
 
 			for (u32 x = 0; x < action->get_length(); x++) {	
-				key_details* key_details = action->get_key(x);					// get key
+				input::key_details* key_details = action->get_key(x);					// get key
 
 				f32 m_buffer = key_details->active;
 
@@ -99,7 +98,7 @@ namespace PFF {
 				switch (action->value) {
 
 					// ==================================================================================================================================
-					case input_value::boolean: {
+					case input::action_type::boolean: {
 
 						action->data.boolean = (m_buffer > 0.f);
 
@@ -108,13 +107,13 @@ namespace PFF {
 					} break;
 
 					// ==================================================================================================================================
-					case input_value::vec_1D: {
+					case input::action_type::vec_1D: {
 
 						action->data._1D += m_buffer;
 					} break;
 
 					// ==================================================================================================================================
-					case input_value::vec_2D: {
+					case input::action_type::vec_2D: {
 
 						if (key_details->modefier_flags & INPUT_ACTION_MODEFIER_AXIS_2)
 							action->data._2D.y += m_buffer;
@@ -123,7 +122,7 @@ namespace PFF {
 					} break;
 
 					// ==================================================================================================================================
-					case input_value::vec_3D: {
+					case input::action_type::vec_3D: {
 
 						if (key_details->modefier_flags & INPUT_ACTION_MODEFIER_AXIS_2)
 							action->data._3D.y += m_buffer;
@@ -143,19 +142,19 @@ namespace PFF {
 				switch (action->value) {
 
 					// ==================================================================================================================================
-					case input_value::vec_1D: {
+					case input::action_type::vec_1D: {
 						action->data._1D = std::clamp(action->data._1D, -1.f, 1.f);
 					} break;
 
 					// ==================================================================================================================================
-					case input_value::vec_2D: {
+					case input::action_type::vec_2D: {
 						if (glm::dot(action->data._2D, action->data._2D) > std::numeric_limits<f32>::epsilon())
 							action->data._2D = glm::normalize(action->data._2D);
 
 					} break;
 
 					// ==================================================================================================================================
-					case input_value::vec_3D: {
+					case input::action_type::vec_3D: {
 						if (glm::dot(action->data._3D, action->data._3D) > std::numeric_limits<f32>::epsilon())
 							action->data._3D = glm::normalize(action->data._3D);
 
@@ -176,7 +175,7 @@ namespace PFF {
 			if (action->flags & INPUT_ACTION_MODEFIER_AUTO_RESET_ALL) {
 
 				for (u32 x = 0; x < action->get_length(); x++) {
-					key_details* key_details = action->get_key(x);				// get key
+					input::key_details* key_details = action->get_key(x);				// get key
 
 					key_details->active = {};
 				}
@@ -205,7 +204,7 @@ namespace PFF {
 			input_action* action = m_input_mapping->get_action(x);
 
 			for (u32 x = 0; x < action->get_length(); x++) {					// get input_action
-				key_details* key_details = action->get_key(x);
+				input::key_details* key_details = action->get_key(x);
 
 				if (key_details->key == event.get_keycode()) {					// check if I have an event for that key
 
@@ -247,7 +246,6 @@ namespace PFF {
 		return true;
 	}
 
-
 	bool player_controller::handle_mouse_events(mouse_event& event) {
 
 		PFF_PROFILE_FUNCTION();
@@ -259,7 +257,7 @@ namespace PFF {
 			input_action* action = m_input_mapping->get_action(x);
 
 			for (u32 x = 0; x < action->get_length(); x++) {				// get input_action
-				key_details* key_details = action->get_key(x);
+				input::key_details* key_details = action->get_key(x);
 
 				if (key_details->key == event.get_keycode()) {						// check if I have an event for that key
 

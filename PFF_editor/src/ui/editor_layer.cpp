@@ -217,19 +217,19 @@ namespace PFF {
 					for (input_action* action : *application::get().get_world_layer()->get_current_player_controller()->get_input_mapping()) {						// get input_action
 
 						switch (action->value) {
-						case input_value::boolean:
+						case input::action_type::boolean:
 							UI::add_table_row(action->get_name(), action->data.boolean, ImGuiInputTextFlags_ReadOnly);
 							break;
 
-						case input_value::vec_1D:
+						case input::action_type::vec_1D:
 							UI::add_table_row(action->get_name(), action->data._1D, ImGuiInputTextFlags_ReadOnly);
 							break;
 
-						case input_value::vec_2D:
+						case input::action_type::vec_2D:
 							UI::add_table_row(action->get_name(), action->data._2D, ImGuiInputTextFlags_ReadOnly);
 							break;
 
-						case input_value::vec_3D:
+						case input::action_type::vec_3D:
 							UI::add_table_row(action->get_name(), action->data._3D, ImGuiInputTextFlags_ReadOnly);
 							break;
 

@@ -28,6 +28,8 @@ namespace PFF {
 		// @param [config_dir] The directory where configuration files will be stored.
 		// @return [void] This function does not have a return value.
         PFF_API_EDITOR void init();
+			
+		PFF_API_EDITOR std::string get_filepath_from_configtype(file type);
 
 		// @brief Converts a configuration file type enum to its corresponding string representation.
 		// @param [type] The configuration file type to be converted.

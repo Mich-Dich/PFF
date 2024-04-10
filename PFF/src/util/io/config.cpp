@@ -27,7 +27,7 @@ namespace PFF {
 
             io_handler::create_directory(CONFIG_DIR);
 
-            for (int i = static_cast<int>(file::editor); i <= static_cast<int>(file::input); ++i) {
+            for (int i = 0; i <= static_cast<int>(file::input); ++i) {
 
                 std::filesystem::path file_path = BUILD_CONFIG_PATH(static_cast<file>(i));
                 std::ofstream config_file(file_path, std::ios::app);
@@ -156,10 +156,15 @@ namespace PFF {
             return false; // Key not found
         }
 
+        // ----------------------------------------------- file path resolution ----------------------------------------------- 
+
+        PFF_API_EDITOR std::string get_filepath_from_configtype(file type) {
+
+            return CONFIG_DIR + config::file_type_to_string(type) + FILE_EXTENSION_CONFIG;
+        }
+
         //
         std::string file_type_to_string(file type) {
-
-            //PFF_PROFILE_FUNCTION();
 
             static const std::unordered_map<file, std::string> typeStrings{
                 {file::editor, "editor"},
@@ -170,7 +175,7 @@ namespace PFF {
             };
 
             auto it = typeStrings.find(type);
-            return (it != typeStrings.end()) ? it->second : "Unknown";
+            return (it != typeStrings.end()) ? it->second : "unknown";
         }
 
     }

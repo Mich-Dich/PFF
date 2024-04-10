@@ -31,6 +31,7 @@ namespace PFF {
 
 		DELETE_COPY(input_mapping);
 		
+		//@brief CAUTION - use REGISTER_INPUT_ACTION() instead 
 		//@brief Registers an input_action and loades/updates its values from input.ini if the player has made modifications to the corresponding values.
 		// 		This ensures that the default values are retained unless the player explicitly changes them.
 		//@param [name] The name of the input action.

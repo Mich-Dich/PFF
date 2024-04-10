@@ -76,6 +76,15 @@ namespace PFF {
 		glfwWindowHint(GLFW_RESIZABLE, GLFW_TRUE);
 		glfwWindowHint(GLFW_TITLEBAR, false);
 
+		auto loc_monitor = glfwGetPrimaryMonitor();
+		const auto loc_mode = glfwGetVideoMode(loc_monitor);
+		CORE_LOG(Trace, "Width: " << loc_mode->width << " height: " << loc_mode->height <<
+			"      || new width: " << loc_mode->width - m_data.pos_x << " new height: " << loc_mode->height - m_data.pos_y);
+
+		const u16 size_reduction = 30;
+		m_data.width = std::min((loc_mode->width - m_data.pos_x) - size_reduction, m_data.width);
+		m_data.height = std::min((loc_mode->height - m_data.pos_y) - size_reduction, m_data.height);
+
 		m_Window = glfwCreateWindow(static_cast<int>(m_data.width), static_cast<int>(m_data.height), m_data.title.c_str(), nullptr, nullptr);
 		// glfwHideWindow(m_Window);
 

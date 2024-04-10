@@ -18,7 +18,7 @@ namespace PFF {
 		PFF_PROFILE_FUNCTION();
 
 		//  bool triger_when_paused;													// SAVE
-		//  input_value value;															// SAVE
+		//  input_action_type value;													// SAVE
 		//  union {																		// NO NEED TO SAVE
 		//  	bool boolean;															// NO NEED TO SAVE
 		//  	f32 axis_1d;															// NO NEED TO SAVE
@@ -34,7 +34,7 @@ namespace PFF {
 			config::save(config::file::input, action->name, "duration_in_sec", action->duration_in_sec);
 
 			u32 buffer_input_val = static_cast<u32>(action->value);
-			config::save(config::file::input, action->name, "input_value", buffer_input_val);
+			config::save(config::file::input, action->name, "input_action_type", buffer_input_val);
 
 			size_t buffer_array_size = action->keys.size();
 			config::save(config::file::input, action->name, "key_details_size", buffer_array_size);
@@ -50,14 +50,24 @@ namespace PFF {
 			// m_actions.push_back(action);
 			m_actions.emplace_back(action);
 
+			//serializer::yaml(config::get_filepath_from_configtype(config::file::input), action->name, serializer::option::save_to_file)
+			//	.entry(KEY_VALUE(action->triger_when_paused))
+			//	.entry(KEY_VALUE(action->duration_in_sec))
+			//	.entry(KEY_VALUE(action->value))
+			//	.vector(KEY_VALUE(action->keys), [&](serializer::yaml& yaml, const u64 x) {
+			//		yaml.entry(KEY_VALUE(action->keys[x].key));
+			//		yaml.entry(KEY_VALUE(action->keys[x].modefier_flags));
+			//		yaml.entry(KEY_VALUE(action->keys[x].trigger_flags));
+			//	});
+
 		} else {
 
 			config::load(config::file::input, action->name, "triger_when_paused", action->triger_when_paused);
 			config::load(config::file::input, action->name, "duration_in_sec", action->duration_in_sec);
 
 			u32 buffer_input_val = static_cast<u32>(action->value);
-			config::load(config::file::input, action->name, "input_value", buffer_input_val);
-			action->value = static_cast<input_value>(buffer_input_val);
+			config::load(config::file::input, action->name, "input_action_type", buffer_input_val);
+			action->value = static_cast<input::action_type>(buffer_input_val);
 
 			size_t buffer_array_size = action->keys.size();
 			config::load(config::file::input, action->name, "key_details_size", buffer_array_size);
