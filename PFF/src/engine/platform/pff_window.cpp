@@ -32,7 +32,7 @@ namespace PFF {
 
 		PFF_PROFILE_FUNCTION();
 
-		window_attrib_serializer(&m_data, serializer::option::load_from_file, "./config/window_attributes.txt");
+		window_attrib_serializer(&m_data, serializer::option::load_from_file);
 		init(m_data);
 	}
 
@@ -49,7 +49,7 @@ namespace PFF {
 		m_data.pos_x = loc_pos_x + 4;								// window padding
 		m_data.pos_y = loc_pos_y + 25 + titlebar_vertical_offset;	// [custom titlebar height offset] + [aximize offset]
 
-		window_attrib_serializer(&m_data, serializer::option::save_to_file, "./config/window_attributes.txt");
+		window_attrib_serializer(&m_data, serializer::option::save_to_file);
 		glfwDestroyWindow(m_Window);
 		glfwTerminate();
 		CORE_LOG(Trace, "shutdown");
@@ -286,12 +286,12 @@ namespace PFF {
 
 	// =============================================================================  serializer  =============================================================================
 
-	window_attrib_serializer::window_attrib_serializer(window_attrib* window_attributes, const PFF::serializer::option option, const std::string& filename) {
+	window_attrib_serializer::window_attrib_serializer(window_attrib* window_attributes, const PFF::serializer::option option) {
 
 		if (option == serializer::option::save_to_file && window_attributes->window_size_state == window_size_state::minimised)
 			window_attributes->window_size_state = window_size_state::windowed;
 		
-		serializer::yaml(filename, "window_attributes", option)
+		serializer::yaml(config::get_filepath_from_configtype(config::file::editor), "window_attributes", option)
 			.entry(KEY_VALUE(window_attributes->title))
 			.entry(KEY_VALUE(window_attributes->pos_x))
 			.entry(KEY_VALUE(window_attributes->pos_y))

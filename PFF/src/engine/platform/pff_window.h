@@ -41,7 +41,7 @@ namespace PFF {
 	class window_attrib_serializer {
 	public:
 
-		window_attrib_serializer(window_attrib* window_attributes, const PFF::serializer::option option, const std::string& filename = "testlog.txt");
+		window_attrib_serializer(window_attrib* window_attributes, const PFF::serializer::option option);
 		~window_attrib_serializer() {};
 
 	};
