@@ -4,6 +4,8 @@
 #include "engine/game_objects/camera.h"
 #include <vulkan/vulkan.h>
 
+#include "engine/game_objects/game_object.h"
+
 namespace PFF {
 
 	struct frame_info {
@@ -13,6 +15,7 @@ namespace PFF {
 		VkCommandBuffer command_buffer;
 		ref<camera> camera;
 		VkDescriptorSet global_descriptor_set;
+		std::vector<game_object>& game_objects;
 	};
 
 }

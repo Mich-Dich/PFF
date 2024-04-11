@@ -22,6 +22,12 @@ namespace PFF {
 
 	//static toolkit::todo::todo_list* s_todo_list;
 
+	editor_layer::editor_layer(ImGuiContext* context)
+		: m_context(context) {
+
+		//UI::THEME::update_UI_theme();
+	}
+
 	editor_layer::~editor_layer() {
 
 		LOG(Info, "Shutdown");
@@ -32,7 +38,6 @@ namespace PFF {
 		m_swapchain_supported_presentmodes = application::get().get_renderer()->get_swapchain_suported_present_modes();
 		for (auto mode : m_swapchain_supported_presentmodes)
 			m_swapchain_supported_presentmodes_str.push_back(present_mode_to_str(mode));
-
 
 		//s_todo_list = new toolkit::todo::todo_list();
 	}

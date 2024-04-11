@@ -30,7 +30,7 @@ namespace PFF {
 		};
 
 		static theme_selection UI_theme = theme_selection::default;
-		static ImVec4 main_color = { .5f,	.0f,	.0f,	1.f };
+		static ImVec4 main_color = { .03f,	.72f,	.0f,	1.f };
 		static bool enable_window_forder = false;
 		static ImVec4 highlited_window_bg = LERP_GRAY(0.17f);
 		static ImVec4 main_titlebar_color = LERP_MAIN_COLOR_DARK(.5f);
@@ -77,8 +77,6 @@ namespace PFF {
 		}
 
 		void update_UI_theme() {
-
-			serialize_data(serializer::option::load_from_file);
 
 			ImGuiStyle* style = &ImGui::GetStyle();
 			ImVec4* colors = style->Colors;
@@ -256,6 +254,8 @@ namespace PFF {
 			default:
 				break;
 			}
+
+			serialize_data(serializer::option::load_from_file);
 		}
 
 		void update_UI_colors(ImVec4 new_color) {

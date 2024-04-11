@@ -6,21 +6,47 @@ namespace PFF {
 
 	// forwand declaration
 	class vk_device;
+	
+	/*
+	// ============================================ NEW VERSION ============================================ (doesnt need .cpp file)
+	struct graphics_pipeline_input {
+		VkDevice device;
+		std::string vertex_file_path;
+		std::string fragment_file_path;
+		VkExtent2D swapchain_extend;
+		VkFormat swapchain_image_format;
+	};
+
+	struct graphics_pipeline_output {
+		VkPipelineLayout layout;
+		VkRenderPass render_pass;
+		VkPipeline pipeline;
+	};
+
+	void make_pipeline_layout(VkDevice device, VkPipelineLayout layout) {
+
+		VkPipelineLayoutCreateInfo layout_CI{};
+
+	}
+	
+	// ============================================ OLD VERSION ============================================
+
+	*/
 
 	struct pipeline_config_info {
 
-		VkPipelineViewportStateCreateInfo	viewport_CI{};
-		VkPipelineInputAssemblyStateCreateInfo input_assembly_CI{};
-		VkPipelineRasterizationStateCreateInfo rasterization_CI{};
-		VkPipelineMultisampleStateCreateInfo multisample_CI{};
-		VkPipelineColorBlendAttachmentState color_blend_attachment{};
-		VkPipelineColorBlendStateCreateInfo color_blend_CI{};
-		VkPipelineDepthStencilStateCreateInfo depth_stencil_CI{};
-		std::vector<VkDynamicState> dynamic_states_enables{};
-		VkPipelineDynamicStateCreateInfo dynamic_state_CI{};
-		VkPipelineLayout pipeline_layout = nullptr;
-		VkRenderPass render_pass = nullptr;
-		u32 subpass = 0;
+		VkPipelineViewportStateCreateInfo		viewport_CI{};
+		VkPipelineInputAssemblyStateCreateInfo	input_assembly_CI{};
+		VkPipelineRasterizationStateCreateInfo	rasterization_CI{};
+		VkPipelineMultisampleStateCreateInfo	multisample_CI{};
+		VkPipelineColorBlendAttachmentState		color_blend_attachment{};
+		VkPipelineColorBlendStateCreateInfo		color_blend_CI{};
+		VkPipelineDepthStencilStateCreateInfo	depth_stencil_CI{};
+		std::vector<VkDynamicState>				dynamic_states_enables{};
+		VkPipelineDynamicStateCreateInfo		dynamic_state_CI{};
+		VkPipelineLayout						pipeline_layout = nullptr;
+		VkRenderPass							render_pass = nullptr;
+		u32										subpass = 0;
 
 		pipeline_config_info();
 

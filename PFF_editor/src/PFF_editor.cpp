@@ -35,7 +35,7 @@ namespace PFF {
 		floor_obj->transform.translation = { 0.f, 0.f, 0.f };
 		floor_obj->transform.scale = glm::vec3(2.5f);
 
-#if 0		// populate scene with grid of meshes
+#if 1		// populate scene with grid of meshes
 
 		std::shared_ptr<basic_mesh> model = basic_mesh::create_mesh_from_file("assets/smooth_vase.obj");
 		u32 counter = 0;
@@ -46,7 +46,7 @@ namespace PFF {
 				test_obj->mesh = model;
 				test_obj->transform.translation = { (x * 2) + 1, (y * 2) + 1, 0.5f };
 				test_obj->transform.scale = glm::vec3(2.f);
-				test_obj->rotation_speed = glm::linearRand(glm::vec3(0.0f), glm::vec3(glm::two_pi<f32>()));
+				//test_obj->rotation_speed = glm::linearRand(glm::vec3(0.0f), glm::vec3(glm::two_pi<f32>()));
 				counter++;
 			}
 		}
@@ -95,6 +95,7 @@ namespace PFF {
 
 	bool PFF_editor::update(const f32 delta_time) {
 
+		/*
 
 		static bool move_positive{};
 
@@ -110,7 +111,6 @@ namespace PFF {
 		else
 			m_test_game_object->transform.translation.y -= 10.f * delta_time;
 
-		/*
 			*/
 
 		return false;

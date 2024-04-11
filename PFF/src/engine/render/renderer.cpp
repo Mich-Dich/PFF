@@ -20,7 +20,10 @@ namespace PFF {
 
 	struct global_ubo {
 		glm::mat4 projectionView{ 1.f };
-		glm::vec3 light_direction = glm::normalize(glm::vec3{ 1.f, -3.f, -1.f });
+		//glm::vec3 light_direction = glm::normalize(glm::vec3{ 1.f, -3.f, -1.f });
+		glm::vec4 ambient_light_color{ 1.f, 1.f, 1.f, .05f };
+		glm::vec4 light_position{ 0.f, -5.f, 0.f, 0.f };
+		glm::vec4 light_color{ 1.f, 1.f, 1.f, 0.3f };		// w ist intensity
 	};
 
 	// ==================================================================== setup ====================================================================
@@ -65,8 +68,8 @@ namespace PFF {
 
 		CORE_LOG(Trace, "build descriptor_set layout");
 		m_global_set_layout = vk_descriptor_set_layout::builder(m_device)
-			.add_binding(0, VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER, VK_SHADER_STAGE_VERTEX_BIT)					// binding for renderer & ImGui
-			.add_binding(1, VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER, VK_SHADER_STAGE_FRAGMENT_BIT)		// for ImGui
+			.add_binding(0, VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER, VK_SHADER_STAGE_VERTEX_BIT | VK_SHADER_STAGE_FRAGMENT_BIT)
+			.add_binding(1, VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER, VK_SHADER_STAGE_FRAGMENT_BIT)
 			.build();
 
 		CORE_LOG(Trace, "Resize swapchain");
@@ -133,8 +136,15 @@ namespace PFF {
 
 		if (auto commandbuffer = begin_frame()) {
 
-			frame_info frame_info{ m_current_image_index, delta_time, commandbuffer, m_world_Layer->get_editor_camera(), m_global_descriptor_set[m_current_image_index] };
-
+			frame_info frame_info{ 
+				m_current_image_index, 
+				delta_time, 
+				commandbuffer, 
+				m_world_Layer->get_editor_camera(), 
+				m_global_descriptor_set[m_current_image_index],
+				m_world_Layer->get_current_map()->get_all_game_objects()
+			};
+			
 			// update
 			global_ubo ubo{};
 			ubo.projectionView = frame_info.camera->get_projection() * frame_info.camera->get_view();
@@ -143,7 +153,7 @@ namespace PFF {
 
 			// render
 			begin_swapchain_renderpass(commandbuffer);
-			m_mesh_render_system->render_game_objects(frame_info, m_world_Layer->get_current_map()->get_all_game_objects());
+			m_mesh_render_system->render_game_objects(frame_info, frame_info.game_objects);
 			// application::get().get_imgui_layer()->capture_current_image( ,m_swapchain->get_image_view(m_current_image_index));
 
 			//m_ui_render_system->bind_pipeline(frame_info);

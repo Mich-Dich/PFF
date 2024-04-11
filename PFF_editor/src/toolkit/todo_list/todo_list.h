@@ -85,9 +85,9 @@ namespace PFF::toolkit::todo {
 	public:
 
 		// can define here because header is only included in editor_layer.cpp file
-		todo_list_serializer(todo_list* todo_list, serializer::option option, const std::string& filename = "./config/todo_list.txt") {
+		todo_list_serializer(todo_list* todo_list, serializer::option option) {
 
-			serializer::yaml(filename, "todo_list", option)
+			serializer::yaml(config::get_filepath_from_configtype(config::file::editor), "todo_list", option)
 				.vector(KEY_VALUE(todo_list->m_topics), [&](serializer::yaml& yaml, const u64 x) {
 
 					yaml.entry(KEY_VALUE(todo_list->m_topics[x].name));
