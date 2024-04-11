@@ -174,7 +174,6 @@ IF EXIST ..\bin\Release-windows-x86_64\PFF\PFF.dll\ (xcopy /Q /E /Y /I ..\bin\Re
     </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <ClInclude Include="src\engine\render\shader.h" />
     <ClInclude Include="src\PFF.h" />
     <ClInclude Include="src\application.h" />
     <ClInclude Include="src\engine\Events\Event.h" />
@@ -203,6 +202,7 @@ IF EXIST ..\bin\Release-windows-x86_64\PFF\PFF.dll\ (xcopy /Q /E /Y /I ..\bin\Re
     <ClInclude Include="src\engine\render\render_system\mesh_render_system.h" />
     <ClInclude Include="src\engine\render\render_system\ui_render_system.h" />
     <ClInclude Include="src\engine\render\renderer.h" />
+    <ClInclude Include="src\engine\render\shader.h" />
     <ClInclude Include="src\engine\render\vk_buffer.h" />
     <ClInclude Include="src\engine\render\vk_descripters.h" />
     <ClInclude Include="src\engine\render\vk_device.h" />
