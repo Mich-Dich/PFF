@@ -114,7 +114,7 @@ namespace PFF {
 
                 //LOG(Fatal, "called: convert_to_string() with string");
                 dest_string = src_value;
-                std::replace(dest_string.begin(), dest_string.end(), ' ', '_');
+                std::replace(dest_string.begin(), dest_string.end(), ' ', '§');
                 return;
             }
 
@@ -192,7 +192,7 @@ namespace PFF {
             else if constexpr (std::is_convertible_v<T, std::string>) {
 
                 dest_value = src_string;
-                std::replace(dest_value.begin(), dest_value.end(), '_', ' ');
+                std::replace(dest_value.begin(), dest_value.end(), '§', ' ');
                 return;
             }
 

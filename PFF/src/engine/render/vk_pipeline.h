@@ -43,7 +43,6 @@ namespace PFF {
 	private:
 
 		void create_graphics_pipeline(const pipeline_config_info& config, const std::string& vert_file_path, const std::string& frag_file_path);
-		void create_shader_module(const std::vector<char>& code, VkShaderModule* shader_module);
 
 		ref<vk_device> m_device;
 

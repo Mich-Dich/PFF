@@ -1,5 +1,6 @@
 
 #include "util/pffpch.h"
+#include "engine/render/shader.h"
 
 #include "engine/render/vk_device.h"
 #include "engine/geometry/basic_mesh.h"
@@ -17,7 +18,8 @@ namespace PFF {
 		//pipeline_config_info CI{};
 		pipeline_layout = in_pipeline_layout;
 		render_pass = in_render_pass;
-		subpass = in_subpass;*/
+		subpass = in_subpass;
+		*/
 
 		input_assembly_CI = VkPipelineInputAssemblyStateCreateInfo{};
 		input_assembly_CI.sType = VK_STRUCTURE_TYPE_PIPELINE_INPUT_ASSEMBLY_STATE_CREATE_INFO;
@@ -134,12 +136,8 @@ namespace PFF {
 		CORE_ASSERT_S(config.pipeline_layout != VK_NULL_HANDLE);
 		CORE_ASSERT_S(config.render_pass != VK_NULL_HANDLE);
 
-		std::vector<char> shader_code;
-		CORE_ASSERT_S(io_handler::read_file(vert_file_path, shader_code));
-		create_shader_module(shader_code, &m_vert_shader_module);
-
-		CORE_ASSERT_S(io_handler::read_file(frag_file_path, shader_code));
-		create_shader_module(shader_code, &m_frag_shader_module);
+		renderer::util::create_shader_module(vert_file_path, m_device->get_device(), &m_vert_shader_module);
+		renderer::util::create_shader_module(frag_file_path, m_device->get_device(), &m_frag_shader_module);
 
 		VkPipelineShaderStageCreateInfo shader_stage_CI[2]{};
 		shader_stage_CI[0].sType = VK_STRUCTURE_TYPE_PIPELINE_SHADER_STAGE_CREATE_INFO;
@@ -196,17 +194,5 @@ namespace PFF {
 			"Created graphics pipeline", "Failed to create graphics pipeline");
 	}
 
-	void vk_pipeline::create_shader_module(const std::vector<char>& code, VkShaderModule* shader_module) {
-
-		PFF_PROFILE_FUNCTION();
-
-		VkShaderModuleCreateInfo SM_CI{};
-		SM_CI.sType = VK_STRUCTURE_TYPE_SHADER_MODULE_CREATE_INFO;
-		SM_CI.codeSize = code.size();
-		SM_CI.pCode = reinterpret_cast<const uint32_t*>(code.data());
-
-		CORE_ASSERT_S(vkCreateShaderModule(m_device->get_device(), &SM_CI, nullptr, shader_module) == VK_SUCCESS);
-
-	}
 
 }
