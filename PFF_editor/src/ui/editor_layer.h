@@ -11,7 +11,8 @@ namespace PFF {
 
 	class editor_layer : public layer {
 	public:
-		editor_layer(ImGuiContext* context) : m_context(context) {}
+
+		editor_layer(ImGuiContext* context);
 		~editor_layer();
 
 		void on_attach() override;

@@ -344,7 +344,7 @@ namespace PFF {
 
 	void imgui_layer::serialize(serializer::option option) {
 
-		serializer::yaml(config::get_filepath_from_configtype(config::file::editor), "UI", option)
+		serializer::yaml(config::get_filepath_from_configtype(config::file::ui), "font", option)
 			.entry(KEY_VALUE(m_font_size))
 			.entry(KEY_VALUE(m_big_font_size));
 	}

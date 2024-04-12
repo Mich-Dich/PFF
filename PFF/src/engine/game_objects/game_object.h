@@ -24,20 +24,22 @@ namespace PFF {
 	class game_object {
 	public:
 
-		DELETE_COPY(game_object);
-
-		game_object(game_object&&) = default;
-		game_object& operator=(game_object&&) = default;
-
-		FORCEINLINE u32 get_ID() const { return m_id; }
-		FORCEINLINE void set_translation(const glm::vec3 translation) { transform.translation = translation; }
+		using id_t = u64;
+		//using map = std::unordered_map<id_t, game_object>;
 
 		// TODO: remove this 
 		static game_object create_game_object() {
 
-			static u32 current_id = 0;
+			static id_t current_id = 0;
 			return game_object(current_id++);
 		}
+
+		DELETE_COPY(game_object);
+		game_object(game_object&&) = default;
+		game_object& operator=(game_object&&) = default;
+
+		FORCEINLINE id_t get_ID() const { return m_id; }
+		FORCEINLINE void set_translation(const glm::vec3 translation) { transform.translation = translation; }
 
 		ref<basic_mesh> mesh{};
 		glm::vec3 color{};
@@ -46,9 +48,9 @@ namespace PFF {
 
 	private:
 
-		game_object(u32 object_id) : m_id(object_id) {};
+		game_object(id_t object_id) : m_id(object_id) {};
 
-		u32 m_id;
+		id_t m_id;
 	};
 
 }

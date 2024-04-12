@@ -128,6 +128,9 @@
     <ClInclude Include="src\engine\render\renderer.h">
       <Filter>engine\render</Filter>
     </ClInclude>
+    <ClInclude Include="src\engine\render\shader.h">
+      <Filter>engine\render</Filter>
+    </ClInclude>
     <ClInclude Include="src\engine\render\vk_buffer.h">
       <Filter>engine\render</Filter>
     </ClInclude>
