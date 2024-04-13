@@ -24,7 +24,8 @@ namespace PFF {
 
 		PFF_PROFILE_FUNCTION();
 
-		m_game_objects.push_back(game_object::create_game_object());
+		auto obj = game_object::create_game_object();
+		m_game_objects.emplace(obj.get_ID(), std::move(obj));
 		return &m_game_objects[m_game_objects.size() - 1];
 	}
 

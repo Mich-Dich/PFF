@@ -140,10 +140,16 @@
     <ClInclude Include="src\engine\render\vk_device.h">
       <Filter>engine\render</Filter>
     </ClInclude>
+    <ClInclude Include="src\engine\render\vk_initializers.h">
+      <Filter>engine\render</Filter>
+    </ClInclude>
     <ClInclude Include="src\engine\render\vk_pipeline.h">
       <Filter>engine\render</Filter>
     </ClInclude>
     <ClInclude Include="src\engine\render\vk_swapchain.h">
+      <Filter>engine\render</Filter>
+    </ClInclude>
+    <ClInclude Include="src\engine\render\vk_types.h">
       <Filter>engine\render</Filter>
     </ClInclude>
     <ClInclude Include="src\entry_point.h" />
@@ -250,6 +256,9 @@
       <Filter>engine\render</Filter>
     </ClCompile>
     <ClCompile Include="src\engine\render\vk_device.cpp">
+      <Filter>engine\render</Filter>
+    </ClCompile>
+    <ClCompile Include="src\engine\render\vk_initializers.cpp">
       <Filter>engine\render</Filter>
     </ClCompile>
     <ClCompile Include="src\engine\render\vk_pipeline.cpp">

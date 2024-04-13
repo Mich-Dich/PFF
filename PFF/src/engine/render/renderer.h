@@ -64,8 +64,13 @@ namespace PFF {
 
 		VkCommandBuffer begin_frame();
 		void end_frame();
+
 		void begin_swapchain_renderpass(VkCommandBuffer commandbuffer);
 		void end_swapchain_renderpass(VkCommandBuffer commandbuffer);
+
+		void begin_swapchain_renderpass_UI(VkCommandBuffer commandbuffer);
+		void end_swapchain_renderpass_UI(VkCommandBuffer commandbuffer);
+
 		void create_command_buffer();
 		void free_command_buffers();
 		void recreate_swapchian();

@@ -227,15 +227,15 @@ namespace PFF {
 							break;
 
 						case input::action_type::vec_1D:
-							UI::add_table_row(action->get_name(), action->data._1D, ImGuiInputTextFlags_ReadOnly);
+							UI::add_table_row(action->get_name(), action->data.vec_1D, ImGuiInputTextFlags_ReadOnly);
 							break;
 
 						case input::action_type::vec_2D:
-							UI::add_table_row(action->get_name(), action->data._2D, ImGuiInputTextFlags_ReadOnly);
+							UI::add_table_row(action->get_name(), action->data.vec_2D, ImGuiInputTextFlags_ReadOnly);
 							break;
 
 						case input::action_type::vec_3D:
-							UI::add_table_row(action->get_name(), action->data._3D, ImGuiInputTextFlags_ReadOnly);
+							UI::add_table_row(action->get_name(), action->data.vec_3D, ImGuiInputTextFlags_ReadOnly);
 							break;
 
 						default:

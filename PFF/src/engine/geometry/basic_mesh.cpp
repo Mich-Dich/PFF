@@ -35,16 +35,12 @@ namespace PFF {
 
 	basic_mesh::basic_mesh(const basic_mesh::builder& builder) {
 
-		PFF_PROFILE_FUNCTION();
-
 		m_device = application::get().get_renderer()->get_device();
 		create_vetex_buffers(builder.vertices);
 		create_index_buffers(builder.indices);
 	}
 
 	basic_mesh::~basic_mesh() {
-
-		PFF_PROFILE_FUNCTION();
 
 		m_device.reset();
 		CORE_LOG(Trace, "Shutdown");
@@ -62,7 +58,7 @@ namespace PFF {
 
 	void basic_mesh::bind(VkCommandBuffer_T* commandBuffer) {
 
-		PFF_PROFILE_FUNCTION();
+		PFF_PROFILE_RENDER_FUNCTION();
 
 		VkBuffer buffers[] = { m_vertex_buffer->get_buffer()};
 		VkDeviceSize offsets[] = { 0 };
@@ -74,7 +70,7 @@ namespace PFF {
 
 	void basic_mesh::draw(VkCommandBuffer_T* commandBuffer) {
 
-		PFF_PROFILE_FUNCTION();
+		PFF_PROFILE_RENDER_FUNCTION();
 
 		if (m_has_index_buffer)
 			vkCmdDrawIndexed(commandBuffer, m_index_count, 1, 0, 0, 0);
@@ -124,7 +120,7 @@ namespace PFF {
 
 	std::vector<VkVertexInputBindingDescription> basic_mesh::vertex::get_binding_descriptions() {
 
-		PFF_PROFILE_FUNCTION();
+		PFF_PROFILE_RENDER_FUNCTION();
 
 		std::vector<VkVertexInputBindingDescription> binding_desc(1);
 		binding_desc[0].binding = 0;
@@ -135,7 +131,7 @@ namespace PFF {
 
 	std::vector<VkVertexInputAttributeDescription> basic_mesh::vertex::get_attribute_descriptions() {
 
-		PFF_PROFILE_FUNCTION();
+		PFF_PROFILE_RENDER_FUNCTION();
 
 		std::vector<VkVertexInputAttributeDescription> attribut_desc{};
 

@@ -46,7 +46,7 @@ namespace PFF {
 				test_obj->mesh = model;
 				test_obj->transform.translation = { (x * 2) + 1, (y * 2) + 1, 0.5f };
 				test_obj->transform.scale = glm::vec3(2.f);
-				//test_obj->rotation_speed = glm::linearRand(glm::vec3(0.0f), glm::vec3(glm::two_pi<f32>()));
+				test_obj->rotation_speed = glm::linearRand(glm::vec3(0.0f), glm::vec3(glm::two_pi<f32>()));
 				counter++;
 			}
 		}

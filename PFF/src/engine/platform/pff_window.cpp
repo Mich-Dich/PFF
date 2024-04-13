@@ -74,7 +74,9 @@ namespace PFF {
 
 		glfwWindowHint(GLFW_CLIENT_API, GLFW_NO_API);
 		glfwWindowHint(GLFW_RESIZABLE, GLFW_TRUE);
-		glfwWindowHint(GLFW_TITLEBAR, false);
+		glfwWindowHint(GLFW_TITLEBAR, GLFW_FALSE);
+		glfwWindowHint(GLFW_VISIBLE, GLFW_FALSE);
+		glfwWindowHint(GLFW_MAXIMIZED, (m_data.window_size_state == window_size_state::fullscreen || m_data.window_size_state == window_size_state::fullscreen_windowed) ? GLFW_TRUE : GLFW_FALSE);
 
 		auto loc_monitor = glfwGetPrimaryMonitor();
 		const auto loc_mode = glfwGetVideoMode(loc_monitor);
@@ -86,7 +88,7 @@ namespace PFF {
 		m_data.height = std::min((loc_mode->height - m_data.pos_y) - size_reduction, m_data.height);
 
 		m_Window = glfwCreateWindow(static_cast<int>(m_data.width), static_cast<int>(m_data.height), m_data.title.c_str(), nullptr, nullptr);
-		// glfwHideWindow(m_Window);
+		//glfwHideWindow(m_Window);
 
 		CORE_ASSERT(glfwVulkanSupported(), "", "GLFW does not support Vulkan");
 		CORE_LOG(Trace, "Creating window [" << m_data.title << " width: " << m_data.width << "  height: " << m_data.height << "]");
@@ -95,9 +97,6 @@ namespace PFF {
 		glfwGetCursorPos(m_Window, &m_data.cursor_pos_x, &m_data.cursor_pos_y);
 		glfwSetWindowPos(m_Window, m_data.pos_x, m_data.pos_y);
 		set_vsync(m_data.vsync);
-
-		if (m_data.window_size_state == window_size_state::fullscreen || m_data.window_size_state == window_size_state::fullscreen_windowed)
-			glfwMaximizeWindow(m_Window);
 
 		GLFWmonitor* primary = glfwGetPrimaryMonitor();
 		const GLFWvidmode* mode = glfwGetVideoMode(primary);
@@ -200,7 +199,6 @@ namespace PFF {
 			Data.event_callback(event);
 		});
 
-		glfwShowWindow(m_Window);
 	}
 
 	void pff_window::poll_events() {
@@ -219,36 +217,21 @@ namespace PFF {
 		}
 	}
 
-	void pff_window::capture_cursor() {
+	void pff_window::capture_cursor() { glfwSetInputMode(m_Window, GLFW_CURSOR, GLFW_CURSOR_DISABLED); }
 
-		glfwSetInputMode(m_Window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
-	}
+	void pff_window::release_cursor() { glfwSetInputMode(m_Window, GLFW_CURSOR, GLFW_CURSOR_NORMAL); }
 
-	void pff_window::release_cursor() {
+	void pff_window::set_vsync(bool enable) { CORE_LOG(Warn, "VSync functionality not supported yet"); }
 
-		glfwSetInputMode(m_Window, GLFW_CURSOR, GLFW_CURSOR_NORMAL);
-	}
+	VkExtent2D pff_window::get_extend() { return { static_cast<u32>(m_data.width), static_cast<u32>(m_data.height) }; }
 
-	void pff_window::set_vsync(bool enable) {
+	bool pff_window::should_close() { return glfwWindowShouldClose(m_Window); }
 
-		CORE_LOG(Warn, "VSync functionality not supported yet");
-	}
+	void pff_window::get_framebuffer_size(int* width, int* height) { glfwGetFramebufferSize(m_Window, width, height); }
 
+	void pff_window::show_window() { glfwShowWindow(m_Window); }
 
-	VkExtent2D pff_window::get_extend() { 
-		
-		return { static_cast<u32>(m_data.width), static_cast<u32>(m_data.height) };
-	}
-
-	bool pff_window::should_close() {
-	
-		return glfwWindowShouldClose(m_Window);
-	}
-
-	void pff_window::get_framebuffer_size(int* width, int* height) {
-
-		glfwGetFramebufferSize(m_Window, width, height);
-	}
+	bool pff_window::is_maximized() { return static_cast<bool>(glfwGetWindowAttrib(m_Window, GLFW_MAXIMIZED)); }
 
 	void pff_window::minimize_window() {
 		
@@ -271,11 +254,6 @@ namespace PFF {
 		glfwMaximizeWindow(m_Window);
 		m_data.window_size_state = window_size_state::fullscreen_windowed;
 		application::set_render_state(system_state::active);
-	}
-
-	bool pff_window::is_maximized() {
-
-		return static_cast<bool>(glfwGetWindowAttrib(m_Window, GLFW_MAXIMIZED));
 	}
 
 	void pff_window::create_window_surface(VkInstance_T* instance, VkSurfaceKHR_T** get_surface) {

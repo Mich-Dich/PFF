@@ -50,17 +50,17 @@ namespace PFF {
 		// make global descriptor pool
 		CORE_LOG(Trace, "build descriptor pool");
 		m_global_descriptor_pool = vk_descriptor_pool::builder(m_device)
-			.addPoolSize(VK_DESCRIPTOR_TYPE_SAMPLER, 1000)
-			.addPoolSize(VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER, 1000)
-			.addPoolSize(VK_DESCRIPTOR_TYPE_SAMPLED_IMAGE, 1000)
-			.addPoolSize(VK_DESCRIPTOR_TYPE_STORAGE_IMAGE, 1000)
-			.addPoolSize(VK_DESCRIPTOR_TYPE_UNIFORM_TEXEL_BUFFER, 1000)
-			.addPoolSize(VK_DESCRIPTOR_TYPE_STORAGE_TEXEL_BUFFER, 1000)
-			.addPoolSize(VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER, 1000)
-			.addPoolSize(VK_DESCRIPTOR_TYPE_STORAGE_BUFFER, 1000)
-			.addPoolSize(VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER_DYNAMIC, 1000)
-			.addPoolSize(VK_DESCRIPTOR_TYPE_STORAGE_BUFFER_DYNAMIC, 1000)
-			.addPoolSize(VK_DESCRIPTOR_TYPE_INPUT_ATTACHMENT, 1000)
+			.addPoolSize(VK_DESCRIPTOR_TYPE_SAMPLER,					1000)
+			.addPoolSize(VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER,		1000)
+			.addPoolSize(VK_DESCRIPTOR_TYPE_SAMPLED_IMAGE,				1000)
+			.addPoolSize(VK_DESCRIPTOR_TYPE_STORAGE_IMAGE,				1000)
+			.addPoolSize(VK_DESCRIPTOR_TYPE_UNIFORM_TEXEL_BUFFER,		1000)
+			.addPoolSize(VK_DESCRIPTOR_TYPE_STORAGE_TEXEL_BUFFER,		1000)
+			.addPoolSize(VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER,				1000)
+			.addPoolSize(VK_DESCRIPTOR_TYPE_STORAGE_BUFFER,				1000)
+			.addPoolSize(VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER_DYNAMIC,		1000)
+			.addPoolSize(VK_DESCRIPTOR_TYPE_STORAGE_BUFFER_DYNAMIC,		1000)
+			.addPoolSize(VK_DESCRIPTOR_TYPE_INPUT_ATTACHMENT,			1000)
 
 			.setMaxSets(1000)
 			.setPoolFlags(VK_DESCRIPTOR_POOL_CREATE_FREE_DESCRIPTOR_SET_BIT)
@@ -120,8 +120,6 @@ namespace PFF {
 
 	void renderer::add_render_system(VkDescriptorSetLayout descriptor_set_layout) {
 
-		PFF_PROFILE_FUNCTION();
-
 		CORE_LOG(Error, "Not implemented yet!");
 		//m_mesh_render_system = std::make_unique<render_system>(get_device(), get_swapchain_render_pass(), descriptor_set_layout);
 	}
@@ -153,14 +151,17 @@ namespace PFF {
 
 			// render
 			begin_swapchain_renderpass(commandbuffer);
-			m_mesh_render_system->render_game_objects(frame_info, frame_info.game_objects);
+			m_mesh_render_system->render_game_objects(frame_info);
 			// application::get().get_imgui_layer()->capture_current_image( ,m_swapchain->get_image_view(m_current_image_index));
 
+			
 			//m_ui_render_system->bind_pipeline(frame_info);
+			//begin_swapchain_renderpass_UI(commandbuffer);
 			IMGUI_LAYER->begin_frame();
 			for (layer* target : *m_layerstack)
 				target->on_imgui_render();
 			IMGUI_LAYER->end_frame(commandbuffer);
+			//end_swapchain_renderpass_UI(commandbuffer);
 
 			end_swapchain_renderpass(commandbuffer);
 			end_frame();
@@ -194,11 +195,7 @@ namespace PFF {
 	}
 
 	//
-	void renderer::refresh(const f32 delta_time) {
-
-		draw_frame(delta_time);
-	}
-
+	void renderer::refresh(const f32 delta_time) { draw_frame(delta_time); }
 
 	// ==================================================================== private ====================================================================
 
@@ -289,6 +286,53 @@ namespace PFF {
 
 	//
 	void renderer::end_swapchain_renderpass(VkCommandBuffer commandbuffer) {
+
+		PFF_PROFILE_FUNCTION();
+
+		CORE_ASSERT(m_is_frame_started, "", "Can not end frame if frame already in progress");
+		CORE_ASSERT(commandbuffer == get_current_command_buffer(), "", "Can not end render pass on command buffer from diffrent frame");
+
+		vkCmdEndRenderPass(commandbuffer);
+	}
+
+	//
+	void renderer::begin_swapchain_renderpass_UI(VkCommandBuffer commandbuffer) {
+
+		PFF_PROFILE_FUNCTION();
+
+		CORE_ASSERT(m_is_frame_started, "", "Can not begin frame if frame already in progress");
+		CORE_ASSERT(commandbuffer == get_current_command_buffer(), "", "Can not begin render pass on command buffer from diffrent frame");
+
+		std::array<VkClearValue, 2> clear_values{};
+		clear_values[0].color = { 0.01f, 0.01f, 0.01f, 1.0f };
+		clear_values[1].depthStencil = { 1.0f,0 };
+
+		VkRenderPassBeginInfo render_pass_BI{};
+		render_pass_BI.sType = VK_STRUCTURE_TYPE_RENDER_PASS_BEGIN_INFO;
+		render_pass_BI.renderPass = m_swapchain->get_ui_render_pass();
+		render_pass_BI.framebuffer = m_swapchain->getFrameBuffer(m_current_image_index);
+		render_pass_BI.renderArea.offset = { 0,0 };
+		render_pass_BI.renderArea.extent = m_swapchain->get_swapchain_extent();
+		render_pass_BI.clearValueCount = static_cast<u32>(clear_values.size());
+		render_pass_BI.pClearValues = clear_values.data();
+
+		vkCmdBeginRenderPass(commandbuffer, &render_pass_BI, VK_SUBPASS_CONTENTS_INLINE);
+
+		VkViewport viewport{};
+		viewport.x = 0.0f;
+		viewport.x = 0.0f;
+		viewport.width = static_cast<f32>(m_swapchain->get_swapchain_extent().width);
+		viewport.height = static_cast<f32>(m_swapchain->get_swapchain_extent().height);
+		viewport.minDepth = 0.0f;
+		viewport.maxDepth = 1.0f;
+
+		VkRect2D scissors{ {0,0},m_swapchain->get_swapchain_extent() };
+		vkCmdSetViewport(commandbuffer, 0, 1, &viewport);
+		vkCmdSetScissor(commandbuffer, 0, 1, &scissors);
+	}
+
+	//
+	void renderer::end_swapchain_renderpass_UI(VkCommandBuffer commandbuffer) {
 
 		PFF_PROFILE_FUNCTION();
 

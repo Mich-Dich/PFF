@@ -2,10 +2,11 @@
 #include "util/pffpch.h"
 
 #include <vulkan/vulkan.h>
+#include <vulkan/vk_enum_string_helper.h>
+
 #include <GLFW/glfw3.h>
 
 #include "engine/platform/pff_window.h"
-
 #include "vk_device.h"
 
 namespace PFF {
@@ -14,11 +15,11 @@ namespace PFF {
     // ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
     // - - - - - Setup
     // ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
-    
+
     // class member functions
     vk_device::vk_device(ref<pff_window>& m_window) : m_window{ m_window } {
 
-        PFF_PROFILE_FUNCTION();
+        PFF_PROFILE_RENDER_FUNCTION();
 
         create_instance();
         setup_debug_messenger();
@@ -30,7 +31,7 @@ namespace PFF {
 
     vk_device::~vk_device() {
 
-        PFF_PROFILE_FUNCTION();
+        PFF_PROFILE_RENDER_FUNCTION();
 
         vkDestroyCommandPool(m_device, m_commandPool, nullptr);
         vkDestroyDevice(m_device, nullptr);
@@ -52,9 +53,9 @@ namespace PFF {
     //
     void vk_device::setup_debug_messenger() {
 
-        PFF_PROFILE_FUNCTION();
+        PFF_PROFILE_RENDER_FUNCTION();
 
-        if (!c_enable_validation_layers) 
+        if (!c_enable_validation_layers)
             return;
 
         VkDebugUtilsMessengerCreateInfoEXT createInfo{};
@@ -64,9 +65,9 @@ namespace PFF {
     }
 
     //
-    VkResult vk_device::create_debug_utils_messengerEXT( VkInstance instance, const VkDebugUtilsMessengerCreateInfoEXT* pCreateInfo, const VkAllocationCallbacks* pAllocator, VkDebugUtilsMessengerEXT* pDebugMessenger) {
+    VkResult vk_device::create_debug_utils_messengerEXT(VkInstance instance, const VkDebugUtilsMessengerCreateInfoEXT* pCreateInfo, const VkAllocationCallbacks* pAllocator, VkDebugUtilsMessengerEXT* pDebugMessenger) {
 
-        PFF_PROFILE_FUNCTION();
+        PFF_PROFILE_RENDER_FUNCTION();
 
         auto func = (PFN_vkCreateDebugUtilsMessengerEXT)vkGetInstanceProcAddr(instance, "vkCreateDebugUtilsMessengerEXT");
         if (func != nullptr) {
@@ -79,7 +80,7 @@ namespace PFF {
     //
     void vk_device::destroy_debug_utils_messengerEXT(VkInstance instance, VkDebugUtilsMessengerEXT m_debug_messanger, const VkAllocationCallbacks* pAllocator) {
 
-        PFF_PROFILE_FUNCTION();
+        PFF_PROFILE_RENDER_FUNCTION();
 
         auto func = (PFN_vkDestroyDebugUtilsMessengerEXT)vkGetInstanceProcAddr(instance, "vkDestroyDebugUtilsMessengerEXT");
         if (func != nullptr) {
@@ -90,7 +91,7 @@ namespace PFF {
     //
     void vk_device::populate_debug_messenger_CI(VkDebugUtilsMessengerCreateInfoEXT& createInfo) {
 
-        PFF_PROFILE_FUNCTION();
+        PFF_PROFILE_RENDER_FUNCTION();
 
         createInfo = {};
         createInfo.sType = VK_STRUCTURE_TYPE_DEBUG_UTILS_MESSENGER_CREATE_INFO_EXT;
@@ -104,7 +105,7 @@ namespace PFF {
     VKAPI_ATTR VkBool32 VKAPI_CALL vk_device::debug_callback(
         VkDebugUtilsMessageSeverityFlagBitsEXT msgSeverity, VkDebugUtilsMessageTypeFlagsEXT msgType, const VkDebugUtilsMessengerCallbackDataEXT* Callback, void* UserData) {
 
-        PFF_PROFILE_FUNCTION();
+        PFF_PROFILE_RENDER_FUNCTION();
 
         // typedef enum VkDebugUtilsMessageTypeFlagBitsEXT {
         //     VK_DEBUG_UTILS_MESSAGE_TYPE_GENERAL_BIT_EXT = 0x00000001,
@@ -113,13 +114,13 @@ namespace PFF {
         //     VK_DEBUG_UTILS_MESSAGE_TYPE_DEVICE_ADDRESS_BINDING_BIT_EXT = 0x00000008,
         //     VK_DEBUG_UTILS_MESSAGE_TYPE_FLAG_BITS_MAX_ENUM_EXT = 0x7FFFFFFF
         // } VkDebugUtilsMessageTypeFlagBitsEXT;
-        // 
+        //
         //		Possible Levels for [messageSeverity]
         //	VK_DEBUG_UTILS_MESSAGE_SEVERITY_VERBOSE_BIT_EXT		=> Diagnostic message
         //	VK_DEBUG_UTILS_MESSAGE_SEVERITY_INFO_BIT_EXT		=> Informational message like the creation of a resource
         //	VK_DEBUG_UTILS_MESSAGE_SEVERITY_WARNING_BIT_EXT		=> Message about behavior that is not necessarily an error, but very likely a bug in your application
         //	VK_DEBUG_UTILS_MESSAGE_SEVERITY_ERROR_BIT_EXT		=> Message about behavior that is invalid and may cause crashes
-        // 
+        //
         //		Possible Levels for [messageType]
         //	VK_DEBUG_UTILS_MESSAGE_TYPE_GENERAL_BIT_EXT			=> Some event has happened that is unrelated to the specification or performance
         //	VK_DEBUG_UTILS_MESSAGE_TYPE_VALIDATION_BIT_EXT		=> Something has happened that violates the specification or indicates a possible mistake
@@ -132,30 +133,30 @@ namespace PFF {
 
         switch (msgSeverity) {
 
-            case VK_DEBUG_UTILS_MESSAGE_SEVERITY_VERBOSE_BIT_EXT:
-                CORE_LOG(Trace, "Validation Layer: " << vk_debug_message_type_to_string(msgType) << Callback->pMessage)
+        case VK_DEBUG_UTILS_MESSAGE_SEVERITY_VERBOSE_BIT_EXT:
+            CORE_LOG(Trace, "Validation Layer: " << vk_debug_message_type_to_string(msgType) << Callback->pMessage)
                 break;
 
-            case VK_DEBUG_UTILS_MESSAGE_SEVERITY_INFO_BIT_EXT:
-                CORE_LOG(Debug, "Validation Layer: " << vk_debug_message_type_to_string(msgType) << Callback->pMessage)
+        case VK_DEBUG_UTILS_MESSAGE_SEVERITY_INFO_BIT_EXT:
+            CORE_LOG(Debug, "Validation Layer: " << vk_debug_message_type_to_string(msgType) << Callback->pMessage)
                 break;
 
-            case VK_DEBUG_UTILS_MESSAGE_SEVERITY_WARNING_BIT_EXT:
-                CORE_LOG(Warn, "Validation Layer: " << vk_debug_message_type_to_string(msgType) << Callback->pMessage)
+        case VK_DEBUG_UTILS_MESSAGE_SEVERITY_WARNING_BIT_EXT:
+            CORE_LOG(Warn, "Validation Layer: " << vk_debug_message_type_to_string(msgType) << Callback->pMessage)
                 break;
 
-            case VK_DEBUG_UTILS_MESSAGE_SEVERITY_ERROR_BIT_EXT:
-                if (Callback->sType == VK_STRUCTURE_TYPE_DEBUG_UTILS_MESSENGER_CALLBACK_DATA_EXT)              // TODO: Fix RenderPass compadibility issue
-                    break;
-
-                CORE_LOG(Error, "Validation Layer: " << vk_debug_message_type_to_string(msgType) << Callback->pMessage)
+        case VK_DEBUG_UTILS_MESSAGE_SEVERITY_ERROR_BIT_EXT:
+            if (Callback->sType == VK_STRUCTURE_TYPE_DEBUG_UTILS_MESSENGER_CALLBACK_DATA_EXT)              // TODO: Fix RenderPass compadibility issue
                 break;
 
-            case VK_DEBUG_UTILS_MESSAGE_SEVERITY_FLAG_BITS_MAX_ENUM_EXT:
-                CORE_LOG(Fatal, "Validation Layer: " << vk_debug_message_type_to_string(msgType) << Callback->pMessage)
+            CORE_LOG(Error, "Validation Layer: " << vk_debug_message_type_to_string(msgType) << Callback->pMessage)
                 break;
-            default:
+
+        case VK_DEBUG_UTILS_MESSAGE_SEVERITY_FLAG_BITS_MAX_ENUM_EXT:
+            CORE_LOG(Fatal, "Validation Layer: " << vk_debug_message_type_to_string(msgType) << Callback->pMessage)
                 break;
+        default:
+            break;
         }
 
         return VK_FALSE;
@@ -163,11 +164,11 @@ namespace PFF {
 
 
 
-    VkResult create_debug_utils_messengerEXT( VkInstance m_VkInstance, const VkDebugUtilsMessengerCreateInfoEXT* pCreateInfo, const VkAllocationCallbacks* pAllocator, VkDebugUtilsMessengerEXT* pDebugMessenger) {
+    VkResult create_debug_utils_messengerEXT(VkInstance m_VkInstance, const VkDebugUtilsMessengerCreateInfoEXT* pCreateInfo, const VkAllocationCallbacks* pAllocator, VkDebugUtilsMessengerEXT* pDebugMessenger) {
 
-        PFF_PROFILE_FUNCTION();
+        PFF_PROFILE_RENDER_FUNCTION();
 
-        auto func = (PFN_vkCreateDebugUtilsMessengerEXT)vkGetInstanceProcAddr( m_VkInstance, "vkCreateDebugUtilsMessengerEXT");
+        auto func = (PFN_vkCreateDebugUtilsMessengerEXT)vkGetInstanceProcAddr(m_VkInstance, "vkCreateDebugUtilsMessengerEXT");
         if (func != nullptr) {
             return func(m_VkInstance, pCreateInfo, pAllocator, pDebugMessenger);
         } else {
@@ -175,11 +176,11 @@ namespace PFF {
         }
     }
 
-    void destroy_debug_utils_messengerEXT( VkInstance m_VkInstance, VkDebugUtilsMessengerEXT m_debug_messanger, const VkAllocationCallbacks* pAllocator) {
+    void destroy_debug_utils_messengerEXT(VkInstance m_VkInstance, VkDebugUtilsMessengerEXT m_debug_messanger, const VkAllocationCallbacks* pAllocator) {
 
-        PFF_PROFILE_FUNCTION();
+        PFF_PROFILE_RENDER_FUNCTION();
 
-        auto func = (PFN_vkDestroyDebugUtilsMessengerEXT)vkGetInstanceProcAddr( m_VkInstance, "vkDestroyDebugUtilsMessengerEXT");
+        auto func = (PFN_vkDestroyDebugUtilsMessengerEXT)vkGetInstanceProcAddr(m_VkInstance, "vkDestroyDebugUtilsMessengerEXT");
         if (func != nullptr) {
             func(m_VkInstance, m_debug_messanger, pAllocator);
         }
@@ -188,20 +189,20 @@ namespace PFF {
 
     void vk_device::create_instance() {
 
-        PFF_PROFILE_FUNCTION();
+        PFF_PROFILE_RENDER_FUNCTION();
 
-        CORE_ASSERT(!(c_enable_validation_layers && !check_validation_layer_support()),"", "validation layers requested, but not available!");
+        CORE_ASSERT(!(c_enable_validation_layers && !check_validation_layer_support()), "", "validation layers requested, but not available!");
 
         u32 version{};
         vkEnumerateInstanceVersion(&version);
         version &= ~(0xFFFU);
         CORE_LOG(Trace, "System supports VULKAN version: " << VK_API_VERSION_VARIANT(version)
-            << "." << VK_API_VERSION_MAJOR(version) 
-            << "." << VK_API_VERSION_MINOR(version) 
+            << "." << VK_API_VERSION_MAJOR(version)
+            << "." << VK_API_VERSION_MINOR(version)
             << "." << VK_API_VERSION_PATCH(version));
 
         // ============= TEST ==============================
-        version = VK_MAKE_API_VERSION(0, 1, 2, 0);
+        version = VK_MAKE_API_VERSION(0, 1, 3, 0);
         // ============= TEST ==============================
 
         VkApplicationInfo appInfo = {};
@@ -235,13 +236,13 @@ namespace PFF {
         }
 
         CORE_ASSERT(vkCreateInstance(&instance_CI, nullptr, &m_VkInstance) == VK_SUCCESS, "", "failed to create m_VkInstance!");
-       
+
         has_required_Instance_extensions(extensions);
     }
 
     void vk_device::pick_physical_device() {
 
-        PFF_PROFILE_FUNCTION();
+        PFF_PROFILE_RENDER_FUNCTION();
 
         u32 deviceCount = 0;
         vkEnumeratePhysicalDevices(m_VkInstance, &deviceCount, nullptr);
@@ -253,26 +254,28 @@ namespace PFF {
         std::multimap<int, VkPhysicalDevice> candidates;
 
         CORE_LOG(Info, "Num of GPUs supporting Vulkan: " << deviceCount)
-        for (int16 x = 0; x < devices.size(); x++) {
+            for (int16 x = 0; x < devices.size(); x++) {
 
-            if (!is_device_suitable(devices[x])) {
+                CORE_LOG(Trace, "Checking sutability of device[" << x << "]");
 
-                CORE_LOG(Warn, CONSOLE_LIST_BEGIN << "device [" << x << "] is NOT SUTABLE");
-                continue;
+                if (!is_device_suitable(devices[x])) {
+
+                    CORE_LOG(Warn, CONSOLE_LIST_BEGIN << "device [" << x << "] is NOT SUTABLE");
+                    continue;
+                }
+
+                int score = rateDeviceSuitability(devices[x]);
+                candidates.insert(std::make_pair(score, devices[x]));
+                CORE_LOG(Trace, CONSOLE_LIST_BEGIN << "device [" << x << "] has a Score of [" << score << "]");
             }
-
-            int score = rateDeviceSuitability(devices[x]);
-            candidates.insert(std::make_pair(score, devices[x]));
-            CORE_LOG(Trace, CONSOLE_LIST_BEGIN << "device [" << x << "] has a Score of [" << score << "]");
-        }
 
         if (candidates.rbegin()->first > 0) {
 
             m_physical_device = candidates.rbegin()->second;
             CORE_LOG(Debug, "Fount Device is sutable");
-        } else 
+        } else
             CORE_LOG(Error, "FAILED to find autable Device");
-                
+
         CORE_ASSERT(m_physical_device != VK_NULL_HANDLE, "", "failed to find a suitable GPU!");
         vkGetPhysicalDeviceProperties(m_physical_device, &properties);
         LOG(Info, "physical device: " << properties.deviceName);
@@ -282,7 +285,7 @@ namespace PFF {
 
     void vk_device::create_logical_device() {
 
-        PFF_PROFILE_FUNCTION();
+        PFF_PROFILE_RENDER_FUNCTION();
 
         vk_util::QueueFamilyIndices indices = find_queue_families(m_physical_device);
 
@@ -300,6 +303,24 @@ namespace PFF {
             device_queues_CI.push_back(queue_CI);
         }
 
+
+        // ===================== required features =====================
+        // Vulkan 1.2 features
+        VkPhysicalDeviceVulkan12Features features12{};
+        features12.sType = VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_VULKAN_1_2_FEATURES;
+        features12.bufferDeviceAddress = VK_TRUE;
+        features12.descriptorIndexing = VK_TRUE;
+
+        // Vulkan 1.3 features
+        VkPhysicalDeviceVulkan13Features features13{};
+        features13.sType = VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_VULKAN_1_3_FEATURES;
+        features13.dynamicRendering = VK_TRUE;
+        features13.synchronization2 = VK_TRUE;
+        features13.pNext = &features12;
+
+        VkPhysicalDeviceFeatures2 physical_features2 = {};
+        physical_features2.pNext = &features13;
+
         VkPhysicalDeviceFeatures deviceFeatures = {};
         deviceFeatures.samplerAnisotropy = VK_TRUE;
 
@@ -310,15 +331,16 @@ namespace PFF {
         device_CI.pEnabledFeatures = &deviceFeatures;
         device_CI.enabledExtensionCount = static_cast<u32>(m_device_extensions.size());
         device_CI.ppEnabledExtensionNames = m_device_extensions.data();
+        device_CI.pNext = &physical_features2;
 
         // might not really be necessary anymore because device specific validation layers have been deprecated
         if (c_enable_validation_layers) {
 
             device_CI.enabledLayerCount = static_cast<u32>(m_validation_layers.size());
             device_CI.ppEnabledLayerNames = m_validation_layers.data();
-        } else 
+        } else
             device_CI.enabledLayerCount = 0;
-        
+
         CORE_ASSERT(vkCreateDevice(m_physical_device, &device_CI, nullptr, &m_device) == VK_SUCCESS, "", "failed to create logical get_device!");
 
         vkGetDeviceQueue(m_device, indices.graphicsFamily, 0, &m_graphics_queue);
@@ -328,7 +350,7 @@ namespace PFF {
 
     void vk_device::create_command_pool() {
 
-        PFF_PROFILE_FUNCTION();
+        PFF_PROFILE_RENDER_FUNCTION();
 
         vk_util::QueueFamilyIndices queueFamilyIndices = find_physical_queue_families();
 
@@ -342,14 +364,39 @@ namespace PFF {
 
 
     void vk_device::create_surface() {
-        
+
         m_window->create_window_surface(m_VkInstance, &m_surface);
     }
 
 
     bool vk_device::is_device_suitable(VkPhysicalDevice device) {
 
-        PFF_PROFILE_FUNCTION();
+        PFF_PROFILE_RENDER_FUNCTION();
+
+        // Vulkan 1.2 features
+        VkPhysicalDeviceVulkan12Features features12{};
+        features12.sType = VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_VULKAN_1_2_FEATURES;
+
+        // Vulkan 1.3 features
+        VkPhysicalDeviceVulkan13Features features13{};
+        features13.sType = VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_VULKAN_1_3_FEATURES;
+        features13.pNext = &features12;
+
+        VkPhysicalDeviceFeatures2 required_features{};
+        required_features.sType = VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_FEATURES_2;
+        required_features.pNext = &features13;
+
+        vkGetPhysicalDeviceFeatures2(device, &required_features);
+
+        CORE_LOG(Trace, "Vulkan 1.2 features");
+        bool has_v1_3_features = true;
+        CORE_VALIDATE(features12.bufferDeviceAddress, has_v1_3_features = false, CONSOLE_LIST_BEGIN << "supports [bufferDeviceAddress]", CONSOLE_LIST_BEGIN << "does NOT support [bufferDeviceAddress]");
+        CORE_VALIDATE(features12.descriptorIndexing, has_v1_3_features = false, CONSOLE_LIST_BEGIN << "supports [descriptorIndexing]", CONSOLE_LIST_BEGIN << "does NOT support [descriptorIndexing]");
+
+        CORE_LOG(Trace, "Vulkan 1.3 features");
+        bool has_v1_2_features = true;
+        CORE_VALIDATE(features13.dynamicRendering, has_v1_2_features = false, CONSOLE_LIST_BEGIN << "supports [dynamicRendering]", CONSOLE_LIST_BEGIN << "does NOT support [dynamicRendering]");
+        CORE_VALIDATE(features13.synchronization2, has_v1_2_features = false, CONSOLE_LIST_BEGIN << "supports [synchronization2]", CONSOLE_LIST_BEGIN << "does NOT support [synchronization2]");
 
         vk_util::QueueFamilyIndices indices = find_queue_families(device);
         bool extensionsSupported = check_device_extension_support(device);
@@ -363,14 +410,13 @@ namespace PFF {
         VkPhysicalDeviceFeatures supportedFeatures;
         vkGetPhysicalDeviceFeatures(device, &supportedFeatures);
 
-        return indices.isComplete() && extensionsSupported && swapChainAdequate &&
-            supportedFeatures.samplerAnisotropy;
+        return indices.isComplete() && extensionsSupported && swapChainAdequate && supportedFeatures.samplerAnisotropy && has_v1_2_features && has_v1_3_features;
     }
 
 
     int vk_device::rateDeviceSuitability(VkPhysicalDevice device) {
 
-        PFF_PROFILE_FUNCTION();
+        PFF_PROFILE_RENDER_FUNCTION();
 
         VkPhysicalDeviceProperties  deviceProps;
         vkGetPhysicalDeviceProperties(device, &deviceProps);
@@ -396,7 +442,7 @@ namespace PFF {
 
     bool vk_device::check_validation_layer_support() {
 
-        PFF_PROFILE_FUNCTION();
+        PFF_PROFILE_RENDER_FUNCTION();
 
         u32 layerCount;
         vkEnumerateInstanceLayerProperties(&layerCount, nullptr);
@@ -424,7 +470,7 @@ namespace PFF {
 
     std::vector<const char*> vk_device::get_required_extensions() {
 
-        PFF_PROFILE_FUNCTION();
+        PFF_PROFILE_RENDER_FUNCTION();
 
         u32 glfwExtensionCount = 0;
         const char** glfwExtensions;
@@ -437,13 +483,13 @@ namespace PFF {
 
         CORE_LOG(Info, "Number of extenstions required: " << extensions.size());
         for (const char* name : extensions) {
-            CORE_LOG(Trace, CONSOLE_LIST_BEGIN << name );
+            CORE_LOG(Trace, CONSOLE_LIST_BEGIN << name);
         }
 
         if (c_enable_validation_layers) {
 
             CORE_LOG(Info, "Number of extenstions required for validation_layer: " << 1);
-            CORE_LOG(Trace, CONSOLE_LIST_BEGIN << VK_EXT_DEBUG_UTILS_EXTENSION_NAME );
+            CORE_LOG(Trace, CONSOLE_LIST_BEGIN << VK_EXT_DEBUG_UTILS_EXTENSION_NAME);
         }
 
 #endif
@@ -458,7 +504,7 @@ namespace PFF {
 
     void vk_device::has_required_Instance_extensions(const std::vector<const char*>& extentions) {
 
-        PFF_PROFILE_FUNCTION();
+        PFF_PROFILE_RENDER_FUNCTION();
 
         u32 extension_count = 0;
         vkEnumerateInstanceExtensionProperties(nullptr, &extension_count, nullptr);
@@ -466,7 +512,7 @@ namespace PFF {
         vkEnumerateInstanceExtensionProperties(nullptr, &extension_count, extensions.data());
 
         LOG(Info, "available extensions:")
-        std::unordered_set<std::string> available;
+            std::unordered_set<std::string> available;
         for (const auto& extension : extensions) {
 
             available.insert(extension.extensionName);
@@ -479,23 +525,23 @@ namespace PFF {
         vkEnumerateInstanceExtensionProperties(nullptr, &layer_count, layers.data());
 
         LOG(Info, "available layers:")
-        for (const auto& extension : layers) {
+            for (const auto& extension : layers) {
 
-            available.insert(extension.extensionName);
-            LOG(Trace, CONSOLE_LIST_BEGIN << extension.extensionName);
-        }
+                available.insert(extension.extensionName);
+                LOG(Trace, CONSOLE_LIST_BEGIN << extension.extensionName);
+            }
 
         LOG(Info, "required extensions/layers:")
-        for (const auto& required : extentions) {
+            for (const auto& required : extentions) {
 
-            LOG(Trace, CONSOLE_LIST_BEGIN << required);
-            CORE_ASSERT(available.find(required) != available.end(), "", "Missing required glfw extension");
-        }
+                LOG(Trace, CONSOLE_LIST_BEGIN << required);
+                CORE_ASSERT(available.find(required) != available.end(), "", "Missing required glfw extension");
+            }
     }
 
     bool vk_device::check_device_extension_support(VkPhysicalDevice get_device) {
 
-        PFF_PROFILE_FUNCTION();
+        PFF_PROFILE_RENDER_FUNCTION();
 
         u32 extensionCount;
         vkEnumerateDeviceExtensionProperties(get_device, nullptr, &extensionCount, nullptr);
@@ -518,7 +564,7 @@ namespace PFF {
 
     vk_util::QueueFamilyIndices vk_device::find_queue_families(VkPhysicalDevice device) {
 
-        PFF_PROFILE_FUNCTION();
+        PFF_PROFILE_RENDER_FUNCTION();
 
         u32 queueFamilyCount = 0;
         vkGetPhysicalDeviceQueueFamilyProperties(device, &queueFamilyCount, nullptr);
@@ -556,7 +602,7 @@ namespace PFF {
 
     SwapChainSupportDetails vk_device::query_swapchain_support(VkPhysicalDevice get_device) {
 
-        PFF_PROFILE_FUNCTION();
+        PFF_PROFILE_RENDER_FUNCTION();
 
         SwapChainSupportDetails details;
         vkGetPhysicalDeviceSurfaceCapabilitiesKHR(get_device, m_surface, &details.capabilities);
@@ -581,7 +627,7 @@ namespace PFF {
 
     VkFormat vk_device::find_supported_format(const std::vector<VkFormat>& candidates, VkImageTiling tiling, VkFormatFeatureFlags features) {
 
-        PFF_PROFILE_FUNCTION();
+        PFF_PROFILE_RENDER_FUNCTION();
 
         for (VkFormat format : candidates) {
             VkFormatProperties props;
@@ -589,7 +635,7 @@ namespace PFF {
 
             if (tiling == VK_IMAGE_TILING_LINEAR && (props.linearTilingFeatures & features) == features)
                 return format;
-            
+
             else if (tiling == VK_IMAGE_TILING_OPTIMAL && (props.optimalTilingFeatures & features) == features)
                 return format;
 
@@ -599,7 +645,7 @@ namespace PFF {
 
     u32 vk_device::find_memory_type(u32 typeFilter, VkMemoryPropertyFlags properties) {
 
-        PFF_PROFILE_FUNCTION();
+        PFF_PROFILE_RENDER_FUNCTION();
 
         VkPhysicalDeviceMemoryProperties memProperties;
         vkGetPhysicalDeviceMemoryProperties(m_physical_device, &memProperties);
@@ -615,7 +661,7 @@ namespace PFF {
 
     void vk_device::create_buffer(VkDeviceSize size, VkBufferUsageFlags usage, VkMemoryPropertyFlags properties, VkBuffer& m_buffer, VkDeviceMemory& bufferMemory) {
 
-        PFF_PROFILE_FUNCTION();
+        PFF_PROFILE_RENDER_FUNCTION();
 
         VkBufferCreateInfo buffer_CI{};
         buffer_CI.sType = VK_STRUCTURE_TYPE_BUFFER_CREATE_INFO;
@@ -640,7 +686,7 @@ namespace PFF {
 
     VkCommandBuffer vk_device::begin_single_time_commands() {
 
-        PFF_PROFILE_FUNCTION();
+        PFF_PROFILE_RENDER_FUNCTION();
 
         VkCommandBufferAllocateInfo alloc_CI{};
         alloc_CI.sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_ALLOCATE_INFO;
@@ -661,7 +707,7 @@ namespace PFF {
 
     void vk_device::end_single_time_commands(VkCommandBuffer commandBuffer) {
 
-        PFF_PROFILE_FUNCTION();
+        PFF_PROFILE_RENDER_FUNCTION();
 
         vkEndCommandBuffer(commandBuffer);
 
@@ -678,7 +724,7 @@ namespace PFF {
 
     void vk_device::copy_buffer(VkBuffer srcBuffer, VkBuffer dstBuffer, VkDeviceSize size) {
 
-        PFF_PROFILE_FUNCTION();
+        PFF_PROFILE_RENDER_FUNCTION();
 
         VkCommandBuffer commandBuffer = begin_single_time_commands();
 
@@ -691,9 +737,9 @@ namespace PFF {
         end_single_time_commands(commandBuffer);
     }
 
-    void vk_device::copy_buffer_to_image( VkBuffer m_buffer, VkImage image, u32 width, u32 height, u32 layerCount) {
+    void vk_device::copy_buffer_to_image(VkBuffer m_buffer, VkImage image, u32 width, u32 height, u32 layerCount) {
 
-        PFF_PROFILE_FUNCTION();
+        PFF_PROFILE_RENDER_FUNCTION();
 
         VkCommandBuffer commandBuffer = begin_single_time_commands();
 
@@ -714,13 +760,13 @@ namespace PFF {
         end_single_time_commands(commandBuffer);
     }
 
-    void vk_device::create_image_with_info( const VkImageCreateInfo& imageInfo, VkMemoryPropertyFlags properties, VkImage& image, VkDeviceMemory& imageMemory) {
+    void vk_device::create_image_with_info(const VkImageCreateInfo& imageInfo, VkMemoryPropertyFlags properties, VkImage& image, VkDeviceMemory& imageMemory) {
 
-        PFF_PROFILE_FUNCTION();
+        PFF_PROFILE_RENDER_FUNCTION();
 
         CORE_ASSERT(vkCreateImage(m_device, &imageInfo, nullptr, &image) == VK_SUCCESS, "", "failed to create image!")
 
-        VkMemoryRequirements memRequirements;
+            VkMemoryRequirements memRequirements;
         vkGetImageMemoryRequirements(m_device, image, &memRequirements);
 
         VkMemoryAllocateInfo allocInfo{};

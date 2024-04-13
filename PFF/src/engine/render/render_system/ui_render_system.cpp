@@ -35,7 +35,7 @@ namespace PFF {
 	ui_render_system::ui_render_system(ref<vk_device> device, VkRenderPass renderPass, VkDescriptorSetLayout descriptor_set_layout)
 	 : m_device( device ) {
 
-		PFF_PROFILE_FUNCTION();
+		PFF_PROFILE_RENDER_FUNCTION();
 
 		create_pipeline_layout(descriptor_set_layout);
 		create_pipeline(renderPass);
@@ -45,7 +45,7 @@ namespace PFF {
 
 	ui_render_system::~ui_render_system() {
 
-		PFF_PROFILE_FUNCTION();
+		PFF_PROFILE_RENDER_FUNCTION();
 
 		vkDestroyPipelineLayout(m_device->get_device(), m_pipeline_layout, nullptr);
 		m_renderer.reset();
@@ -57,7 +57,7 @@ namespace PFF {
 
 	void ui_render_system::bind_pipeline(frame_info frame_info) {
 
-		PFF_PROFILE_FUNCTION();
+		PFF_PROFILE_RENDER_FUNCTION();
 
 		m_vk_pipeline->bind_commnad_buffers(frame_info.command_buffer);
 		vkCmdBindDescriptorSets(frame_info.command_buffer, VK_PIPELINE_BIND_POINT_GRAPHICS, m_pipeline_layout, 0, 1, &frame_info.global_descriptor_set, 0, nullptr);
@@ -66,7 +66,7 @@ namespace PFF {
 
 	void ui_render_system::create_pipeline_layout(VkDescriptorSetLayout descriptor_set_layout) {
 
-		PFF_PROFILE_FUNCTION();
+		PFF_PROFILE_RENDER_FUNCTION();
 
 		VkPushConstantRange push_constant_range{};
 		push_constant_range.stageFlags = VK_SHADER_STAGE_VERTEX_BIT | VK_SHADER_STAGE_FRAGMENT_BIT;
@@ -87,7 +87,7 @@ namespace PFF {
 
 	void ui_render_system::create_pipeline(VkRenderPass renderPass) {
 
-		PFF_PROFILE_FUNCTION();
+		PFF_PROFILE_RENDER_FUNCTION();
 
 		CORE_ASSERT(m_pipeline_layout != nullptr, "", "[create_pipeline_layout()] was called bevor [m_pipeline_layout] is set");
 

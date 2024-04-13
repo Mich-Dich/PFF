@@ -15,7 +15,7 @@ namespace PFF {
 		VkCommandBuffer command_buffer;
 		ref<camera> camera;
 		VkDescriptorSet global_descriptor_set;
-		std::vector<game_object>& game_objects;
+		game_object::map& game_objects;
 	};
 
 }

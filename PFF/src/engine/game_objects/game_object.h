@@ -25,7 +25,7 @@ namespace PFF {
 	public:
 
 		using id_t = u64;
-		//using map = std::unordered_map<id_t, game_object>;
+		using map = std::unordered_map<id_t, game_object>;
 
 		// TODO: remove this 
 		static game_object create_game_object() {
@@ -34,7 +34,8 @@ namespace PFF {
 			return game_object(current_id++);
 		}
 
-		DELETE_COPY(game_object);
+		//DELETE_COPY(game_object);
+		game_object() = default;
 		game_object(game_object&&) = default;
 		game_object& operator=(game_object&&) = default;
 
@@ -45,6 +46,7 @@ namespace PFF {
 		glm::vec3 color{};
 		transform_comp transform{};
 		glm::vec3 rotation_speed = {};
+		glm::vec3 movement_speed = {};
 
 	private:
 

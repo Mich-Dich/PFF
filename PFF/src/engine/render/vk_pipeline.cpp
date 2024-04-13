@@ -12,7 +12,7 @@ namespace PFF {
 
 	pipeline_config_info::pipeline_config_info() {
 
-		PFF_PROFILE_FUNCTION();
+		PFF_PROFILE_RENDER_FUNCTION();
 
 		/*
 		//pipeline_config_info CI{};
@@ -100,23 +100,23 @@ namespace PFF {
 	vk_pipeline::vk_pipeline(ref<vk_device> device, const pipeline_config_info& config, const std::string& vert_file_path, const std::string& frag_file_path)
 		:m_device{ device } {
 
-		PFF_PROFILE_FUNCTION();
+		PFF_PROFILE_RENDER_FUNCTION();
 
-		LOG(Fatal, "Creating Pipeline");
+		LOG(Info, "Creating Pipeline");
 		create_graphics_pipeline(config, vert_file_path, frag_file_path);
 	}
 
 	//
 	vk_pipeline::~vk_pipeline() {
 
-		PFF_PROFILE_FUNCTION();
+		PFF_PROFILE_RENDER_FUNCTION();
 
 		vkDestroyShaderModule(m_device->get_device(), m_vert_shader_module, nullptr);
 		vkDestroyShaderModule(m_device->get_device(), m_frag_shader_module, nullptr);
 		vkDestroyPipeline(m_device->get_device(), m_graphics_pipeline, nullptr);
 
 		m_device.reset();
-		LOG(Fatal, "shutdown");
+		LOG(Info, "shutdown");
 	}
 
 	void vk_pipeline::bind_commnad_buffers(VkCommandBuffer command_buffer) {
@@ -126,7 +126,7 @@ namespace PFF {
 
 	void vk_pipeline::create_graphics_pipeline(const pipeline_config_info& config, const std::string& vert_file_path, const std::string& frag_file_path) {
 
-		PFF_PROFILE_FUNCTION();
+		PFF_PROFILE_RENDER_FUNCTION();
 
 		/*
 		auto config = default_pipline_config_info(config.scissor.extent.width, config.scissor.extent.height);

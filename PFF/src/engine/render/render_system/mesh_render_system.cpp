@@ -35,7 +35,7 @@ namespace PFF {
 	mesh_render_system::mesh_render_system(ref<vk_device> device, VkRenderPass renderPass, VkDescriptorSetLayout descriptor_set_layout)
 	 : m_device( device ) {
 
-		PFF_PROFILE_FUNCTION();
+		PFF_PROFILE_RENDER_FUNCTION();
 
 		create_pipeline_layout(descriptor_set_layout);
 		create_pipeline(renderPass);
@@ -45,7 +45,7 @@ namespace PFF {
 
 	mesh_render_system::~mesh_render_system() {
 
-		PFF_PROFILE_FUNCTION();
+		PFF_PROFILE_RENDER_FUNCTION();
 
 		vkDestroyPipelineLayout(m_device->get_device(), m_pipeline_layout, nullptr);
 		m_renderer.reset();
@@ -60,29 +60,32 @@ namespace PFF {
 
 	}
 
-	void mesh_render_system::render_game_objects(frame_info frame_info, std::vector<game_object>& game_objects) {
+	void mesh_render_system::render_game_objects(frame_info frame_info) {
 
-		PFF_PROFILE_FUNCTION();
+		PFF_PROFILE_RENDER_FUNCTION();
 
 		m_vk_pipeline->bind_commnad_buffers(frame_info.command_buffer);
 		vkCmdBindDescriptorSets(frame_info.command_buffer, VK_PIPELINE_BIND_POINT_GRAPHICS, m_pipeline_layout, 0, 1, &frame_info.global_descriptor_set, 0, nullptr);
 
-		for (auto& obj : game_objects) {
+		for (auto& obj : frame_info.game_objects) {
 			
+			if (obj.second.mesh == nullptr)
+				continue;
+
 			simple_push_constant_data PCD{};
-			PCD.modle_matrix = obj.transform.mat4_XYZ();
-			PCD.normal_matrix = obj.transform.normal_matrix();
+			PCD.modle_matrix = obj.second.transform.mat4_XYZ();
+			PCD.normal_matrix = obj.second.transform.normal_matrix();
 
 			vkCmdPushConstants(frame_info.command_buffer, m_pipeline_layout, VK_SHADER_STAGE_VERTEX_BIT | VK_SHADER_STAGE_FRAGMENT_BIT, 0, sizeof(simple_push_constant_data), &PCD);
 
-			obj.mesh->bind(frame_info.command_buffer);
-			obj.mesh->draw(frame_info.command_buffer);
+			obj.second.mesh->bind(frame_info.command_buffer);
+			obj.second.mesh->draw(frame_info.command_buffer);
 		}
 	}
 
 	void mesh_render_system::create_pipeline_layout(VkDescriptorSetLayout descriptor_set_layout) {
 
-		PFF_PROFILE_FUNCTION();
+		PFF_PROFILE_RENDER_FUNCTION();
 
 		VkPushConstantRange push_constant_range{};
 		push_constant_range.stageFlags = VK_SHADER_STAGE_VERTEX_BIT | VK_SHADER_STAGE_FRAGMENT_BIT;
@@ -103,7 +106,7 @@ namespace PFF {
 
 	void mesh_render_system::create_pipeline(VkRenderPass renderPass) {
 
-		PFF_PROFILE_FUNCTION();
+		PFF_PROFILE_RENDER_FUNCTION();
 
 		CORE_ASSERT(m_pipeline_layout != nullptr, "", "[create_pipeline_layout()] was called bevor [m_pipeline_layout] is set");
 

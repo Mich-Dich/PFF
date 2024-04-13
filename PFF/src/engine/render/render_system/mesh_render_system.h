@@ -25,7 +25,7 @@ namespace PFF {
 		//void bind_commnad_buffers(VkCommandBuffer command_buffer);
 
 		virtual void render(frame_info frame_info);
-		void render_game_objects(frame_info frame_info, std::vector<game_object>& game_objects);
+		void render_game_objects(frame_info frame_info);
 
 	private:
 

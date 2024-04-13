@@ -56,8 +56,8 @@ namespace PFF {
 		fps_timer.set_fps_settings(m_target_fps);
 
 		m_window = std::make_shared<pff_window>();			// Can be called after inital setup like [compiling shaders]
-		m_renderer = std::make_shared<renderer>(m_window, &m_layerstack);
 		m_window->set_event_callback(BIND_FN(application::on_event));
+		m_renderer = std::make_shared<renderer>(m_window, &m_layerstack);
 
 		m_world_layer = new world_layer();
 		m_layerstack.push_layer(m_world_layer);
@@ -101,6 +101,7 @@ namespace PFF {
 
 		PFF_PROFILE_BEGIN_SESSION("runtime", "benchmarks", "PFF_benchmark_runtime.json");
 
+		m_window->show_window();
 		m_window->poll_events();
 		fps_timer.start_measurement();
 		m_delta_time = 0.f;

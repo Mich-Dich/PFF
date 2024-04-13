@@ -14,7 +14,7 @@ namespace PFF {
 
 		DELETE_COPY(game_map);
 
-		FORCEINLINE std::vector<game_object>& get_all_game_objects() { return m_game_objects; }
+		FORCEINLINE game_object::map& get_all_game_objects() { return m_game_objects; }
 		//FORCEINLINE game_object& get_game_objects_data(u32 index) const { return static_cast<game_object*>(*m_game_objects[index]); }		// TODO: copys at the moment, fix that
 
 		game_object* create_empty_game_object();
@@ -22,7 +22,7 @@ namespace PFF {
 
 	private:
 
-		std::vector<game_object> m_game_objects{};
+		game_object::map m_game_objects{};
 
 	};
 

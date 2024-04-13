@@ -70,10 +70,10 @@ namespace PFF::serializer {
 
 			} else {				// load from file
 
-				if constexpr (PFF::util::is_vector<T>::value) {			// calue is a vector
+				if constexpr (PFF::util::is_vector<T>::value) {			// value is a vector
 
 					// deserialize content of subsections				
-					typename T::value_type buffer{};
+					T buffer{};
 					u32 section_indentation = 0;
 					bool found_section = false;
 					std::string line;

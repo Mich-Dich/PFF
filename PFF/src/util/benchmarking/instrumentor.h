@@ -186,6 +186,7 @@ namespace PFF {
 }
 
 
+// ==================================== profiler ENABLED ====================================
 #if PFF_PROFILE
 
 	// Resolve which function signature macro will be used
@@ -217,9 +218,25 @@ namespace PFF {
 	#define PFF_PROFILE_END_SESSION()								PFF::instrumentor::get().end_session()
 	#define PFF_PROFILE_SCOPE(name)									PFF_PROFILE_SCOPE_LINE(name, __LINE__)
 	#define PFF_PROFILE_FUNCTION()									PFF_PROFILE_SCOPE(PFF_FUNC_SIG)
+
+// ------------------------------------ subsystem: renderer ------------------------------------ 
+#if PFF_PROFILE_RENDERER
+	#define PFF_PROFILE_RENDER_SCOPE(name)									PFF_PROFILE_SCOPE_LINE(name, __LINE__)
+	#define PFF_PROFILE_RENDER_FUNCTION()									PFF_PROFILE_SCOPE(PFF_FUNC_SIG)
+#else
+	#define PFF_PROFILE_RENDER_SCOPE(name)
+	#define PFF_PROFILE_RENDER_FUNCTION()
+#endif
+
+// ==================================== profiler DISABLED ====================================
 #else
 	#define PFF_PROFILE_BEGIN_SESSION(name, directory, filename)
 	#define PFF_PROFILE_END_SESSION()
 	#define PFF_PROFILE_SCOPE(name)
 	#define PFF_PROFILE_FUNCTION()
+
+// ------------------------------------ subsystem: renderer ------------------------------------ 
+	#define PFF_PROFILE_RENDER_SCOPE(name)
+	#define PFF_PROFILE_RENDER_FUNCTION()
+
 #endif	// PFF_PROFILE

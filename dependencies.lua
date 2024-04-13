@@ -7,7 +7,10 @@ IncludeDir["glm"]               = "%{wks.location}/PFF/vendor/glm"
 IncludeDir["ImGui"]             = "%{wks.location}/PFF/vendor/imgui_new"
 IncludeDir["tinyobjloader"]     = "%{wks.location}/PFF/vendor/tinyobjloader"
 IncludeDir["stb_image"]         = "%{wks.location}/PFF/vendor/stb_image"
+
 IncludeDir["VulkanSDK"]         = "%{VULKAN_SDK}/Include"
+IncludeDir["vma"]               = "%{wks.location}/PFF/vendor/vma"
+IncludeDir["vkbootstrap"]       = "%{wks.location}/PFF/vendor/vkbootstrap"
 
 
 LibraryDir = {}

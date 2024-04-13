@@ -80,7 +80,7 @@
       <PrecompiledHeaderFile>util/pffpch.h</PrecompiledHeaderFile>
       <WarningLevel>Level3</WarningLevel>
       <PreprocessorDefinitions>PFF_USING_EDITOR;ENGINE_NAME=PFF;PROJECT_NAME="Sandbox";PFF_INSIDE_ENGINE;GLFW_INCLUDE_NONE;PFF_PLATFORM_WINDOWS;PFF_DEBUG;%(PreprocessorDefinitions)</PreprocessorDefinitions>
-      <AdditionalIncludeDirectories>src;assets;vendor\glm;vendor\glfw\include;vendor\imgui_new;vendor\imgui_new\backends;vendor\tinyobjloader;vendor\stb_image;C:\VulkanSDK\1.3.250.1\Include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>src;assets;vendor\glm;vendor\glfw\include;vendor\imgui_new;vendor\imgui_new\backends;vendor\tinyobjloader;vendor\stb_image;C:\VulkanSDK\1.3.250.1\Include;vendor\vma;vendor\vkbootstrap;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <DebugInformationFormat>EditAndContinue</DebugInformationFormat>
       <Optimization>Disabled</Optimization>
       <MinimalRebuild>false</MinimalRebuild>
@@ -111,7 +111,7 @@ IF EXIST ..\bin\Debug-windows-x86_64\PFF\PFF.dll\ (xcopy /Q /E /Y /I ..\bin\Debu
       <PrecompiledHeaderFile>util/pffpch.h</PrecompiledHeaderFile>
       <WarningLevel>Level3</WarningLevel>
       <PreprocessorDefinitions>PFF_USING_EDITOR;ENGINE_NAME=PFF;PROJECT_NAME="Sandbox";PFF_INSIDE_ENGINE;GLFW_INCLUDE_NONE;PFF_PLATFORM_WINDOWS;PFF_RELEASE_WITH_DEBUG_INFO;%(PreprocessorDefinitions)</PreprocessorDefinitions>
-      <AdditionalIncludeDirectories>src;assets;vendor\glm;vendor\glfw\include;vendor\imgui_new;vendor\imgui_new\backends;vendor\tinyobjloader;vendor\stb_image;C:\VulkanSDK\1.3.250.1\Include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>src;assets;vendor\glm;vendor\glfw\include;vendor\imgui_new;vendor\imgui_new\backends;vendor\tinyobjloader;vendor\stb_image;C:\VulkanSDK\1.3.250.1\Include;vendor\vma;vendor\vkbootstrap;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <DebugInformationFormat>ProgramDatabase</DebugInformationFormat>
       <Optimization>MaxSpeed</Optimization>
       <FunctionLevelLinking>true</FunctionLevelLinking>
@@ -146,7 +146,7 @@ IF EXIST ..\bin\RelWithDebInfo-windows-x86_64\PFF\PFF.dll\ (xcopy /Q /E /Y /I ..
       <PrecompiledHeaderFile>util/pffpch.h</PrecompiledHeaderFile>
       <WarningLevel>Level3</WarningLevel>
       <PreprocessorDefinitions>PFF_USING_EDITOR;ENGINE_NAME=PFF;PROJECT_NAME="Sandbox";PFF_INSIDE_ENGINE;GLFW_INCLUDE_NONE;PFF_PLATFORM_WINDOWS;PFF_RELEASE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
-      <AdditionalIncludeDirectories>src;assets;vendor\glm;vendor\glfw\include;vendor\imgui_new;vendor\imgui_new\backends;vendor\tinyobjloader;vendor\stb_image;C:\VulkanSDK\1.3.250.1\Include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>src;assets;vendor\glm;vendor\glfw\include;vendor\imgui_new;vendor\imgui_new\backends;vendor\tinyobjloader;vendor\stb_image;C:\VulkanSDK\1.3.250.1\Include;vendor\vma;vendor\vkbootstrap;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <Optimization>Full</Optimization>
       <FunctionLevelLinking>true</FunctionLevelLinking>
       <IntrinsicFunctions>true</IntrinsicFunctions>
@@ -206,8 +206,10 @@ IF EXIST ..\bin\Release-windows-x86_64\PFF\PFF.dll\ (xcopy /Q /E /Y /I ..\bin\Re
     <ClInclude Include="src\engine\render\vk_buffer.h" />
     <ClInclude Include="src\engine\render\vk_descripters.h" />
     <ClInclude Include="src\engine\render\vk_device.h" />
+    <ClInclude Include="src\engine\render\vk_initializers.h" />
     <ClInclude Include="src\engine\render\vk_pipeline.h" />
     <ClInclude Include="src\engine\render\vk_swapchain.h" />
+    <ClInclude Include="src\engine\render\vk_types.h" />
     <ClInclude Include="src\entry_point.h" />
     <ClInclude Include="src\util\benchmarking\instrumentor.h" />
     <ClInclude Include="src\util\core_config.h" />
@@ -246,6 +248,7 @@ IF EXIST ..\bin\Release-windows-x86_64\PFF\PFF.dll\ (xcopy /Q /E /Y /I ..\bin\Re
     <ClCompile Include="src\engine\render\vk_buffer.cpp" />
     <ClCompile Include="src\engine\render\vk_descripters.cpp" />
     <ClCompile Include="src\engine\render\vk_device.cpp" />
+    <ClCompile Include="src\engine\render\vk_initializers.cpp" />
     <ClCompile Include="src\engine\render\vk_pipeline.cpp" />
     <ClCompile Include="src\engine\render\vk_swapchain.cpp" />
     <ClCompile Include="src\util\io\config.cpp" />
