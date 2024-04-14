@@ -76,7 +76,8 @@ namespace PFF {
 		PFF_API void restore_window();
 		PFF_API void maximize_window();
 
-		void create_window_surface(VkInstance_T* instance, VkSurfaceKHR_T** get_surface);
+		void create_vulkan_surface(VkInstance_T* instance, VkSurfaceKHR_T** get_surface);
+
 		VkExtent2D get_extend();
 		bool should_close();
 		void poll_events();
@@ -95,7 +96,7 @@ namespace PFF {
 		std::queue<std::function<void()>> m_event_queue;
 		std::filesystem::path m_icon_path = "./Logo.png";
 
-		void init(window_attrib attributes);
+		void bind_event_calbacks();
 		void set_vsync(bool enable);
 	
 		window_attrib m_data{};

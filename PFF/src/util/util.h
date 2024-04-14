@@ -78,12 +78,11 @@ namespace PFF {
         FORCEINLINE constexpr const char* bool_to_str(bool boolean) { return boolean ? "true" : "false"; }
 
 		template <size_t N>
-		struct char_array {
-			char data[N];
-		};
+		struct char_array { char data[N]; };
 
 		template <typename T>
 		T str_to_num(const std::string& str) {
+
 			std::istringstream ss(str);
 			T num{};
 			ss >> num;
@@ -92,6 +91,7 @@ namespace PFF {
 
         template <typename T>
         std::string num_to_str(const T& num) {
+
             std::ostringstream oss;
             oss << num;
             return oss.str();
@@ -240,6 +240,7 @@ namespace PFF {
 
             // Matrix of size 4         TODO: move into seperate template for all matrixes
             else if constexpr (std::is_same_v<T, glm::mat4>) {
+
                 std::istringstream iss(src_string);
                 for (int i = 0; i < 4; ++i) {
                     for (int j = 0; j < 4; ++j) {
@@ -248,7 +249,6 @@ namespace PFF {
                 }
                 return;
             }
-
 
             else
                 DEBUG_BREAK();		// Input value is not supported

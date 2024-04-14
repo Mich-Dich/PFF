@@ -1,7 +1,7 @@
 #pragma once
 
 #include "util/pffpch.h"
-#include "engine/color_theme.h"
+#include "util/color_theme.h"
 
 #include <imgui.h>
 #include <imgui_impl_glfw.h>
@@ -47,7 +47,7 @@ namespace PFF::UI {
 	// @param [text] The text to be drawn.
 	static void draw_big_text(const char* text, bool wrapped = false) {
 
-		ImGui::PushFont(application::get().get_imgui_layer()->get_font("regular_big"));
+		//ImGui::PushFont(application::get().get_imgui_layer()->get_font("regular_big"));
 
 		if(wrapped)
 			ImGui::TextWrapped(text);

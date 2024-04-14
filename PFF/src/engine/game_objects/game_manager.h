@@ -16,7 +16,7 @@ namespace PFF{
 		}
 
 		player_controller* p_player_controller{};
-		game_object* p_player{};
+		//game_object* p_player{};
 
 	private:
 

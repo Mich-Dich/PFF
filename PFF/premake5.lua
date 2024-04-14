@@ -47,7 +47,7 @@ project "PFF"
 	{
 		"glfw",
 		"ImGui",
-        "%{Library.Vulkan}"
+        "%{Library.Vulkan}",
 	}
 
 	libdirs 

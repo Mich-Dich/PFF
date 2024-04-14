@@ -25,11 +25,11 @@ namespace PFF {
 	namespace UI::THEME {
 
 		enum class theme_selection {
-			default,
+			dark,
 			light
 		};
 
-		static theme_selection UI_theme = theme_selection::default;
+		static theme_selection UI_theme = theme_selection::dark;
 		static ImVec4 main_color = { .03f,	.72f,	.0f,	1.f };
 		static bool enable_window_forder = false;
 		static ImVec4 highlited_window_bg = LERP_GRAY(0.17f);
@@ -109,7 +109,7 @@ namespace PFF {
 			style->TabRounding = 2.f;
 
 			switch (UI_theme) {
-			case PFF::UI::THEME::theme_selection::default: {
+			case PFF::UI::THEME::theme_selection::dark: {
 
 				action_color_00_default					= LERP_MAIN_COLOR_DARK(.7f);
 				action_color_00_hover					= LERP_MAIN_COLOR_DARK(.85f);

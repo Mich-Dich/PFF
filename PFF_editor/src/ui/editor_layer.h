@@ -6,7 +6,7 @@
 struct ImGuiContext;
 
 namespace PFF {
-
+	/*
 	class renderer;
 
 	class editor_layer : public layer {
@@ -60,5 +60,6 @@ namespace PFF {
 		ImGuiContext* m_context;
 		f32 m_font_size = 14.5f;
 	};
+	*/
 
 }

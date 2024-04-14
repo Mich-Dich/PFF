@@ -5,7 +5,7 @@
 
 #include "vk_initializers.h"
 
-namespace PFF::vk_init {
+namespace PFF::render::vulkan::init {
 
 
     //> init_cmd

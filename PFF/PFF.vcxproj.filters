@@ -10,17 +10,11 @@
     <Filter Include="engine\game_objects">
       <UniqueIdentifier>{ADBB125B-191D-F068-A28A-361B0EEB2628}</UniqueIdentifier>
     </Filter>
-    <Filter Include="engine\geometry">
-      <UniqueIdentifier>{D64FE53D-42DB-5202-4BEC-D5F6B7F6AE02}</UniqueIdentifier>
-    </Filter>
     <Filter Include="engine\io_handler">
       <UniqueIdentifier>{1F9FA092-8BB5-9E28-D42C-2A4A40826FB0}</UniqueIdentifier>
     </Filter>
     <Filter Include="engine\layer">
       <UniqueIdentifier>{27B946B6-131C-D65A-BCA1-0E11A8E3A1DD}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="engine\map">
-      <UniqueIdentifier>{E8034884-D4BB-89D1-3DC3-622D299A24C2}</UniqueIdentifier>
     </Filter>
     <Filter Include="engine\platform">
       <UniqueIdentifier>{CF5EE486-3BEA-514B-44FB-D43FB005AE4B}</UniqueIdentifier>
@@ -28,8 +22,11 @@
     <Filter Include="engine\render">
       <UniqueIdentifier>{2A265F8D-96E6-DAC3-5F21-2441CBA01FA0}</UniqueIdentifier>
     </Filter>
-    <Filter Include="engine\render\render_system">
-      <UniqueIdentifier>{BDAE0EA7-29BC-3C8D-B2A2-38781EAF0844}</UniqueIdentifier>
+    <Filter Include="engine\render\vulkan">
+      <UniqueIdentifier>{8A7499B2-7603-237C-1F22-37770B903322}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="engine\render\vulkan\vendor">
+      <UniqueIdentifier>{A74BFF18-1359-2DFF-9C3F-29EA084CF9B5}</UniqueIdentifier>
     </Filter>
     <Filter Include="util">
       <UniqueIdentifier>{43339F7C-2F6A-A00D-D856-8610C46C1C0F}</UniqueIdentifier>
@@ -62,9 +59,6 @@
     <ClInclude Include="src\engine\Events\mouse_event.h">
       <Filter>engine\Events</Filter>
     </ClInclude>
-    <ClInclude Include="src\engine\color_theme.h">
-      <Filter>engine</Filter>
-    </ClInclude>
     <ClInclude Include="src\engine\game_objects\camera.h">
       <Filter>engine\game_objects</Filter>
     </ClInclude>
@@ -76,15 +70,6 @@
     </ClInclude>
     <ClInclude Include="src\engine\game_objects\player_controller.h">
       <Filter>engine\game_objects</Filter>
-    </ClInclude>
-    <ClInclude Include="src\engine\geometry\basic_mesh.h">
-      <Filter>engine\geometry</Filter>
-    </ClInclude>
-    <ClInclude Include="src\engine\geometry\dynamic_mesh.h">
-      <Filter>engine\geometry</Filter>
-    </ClInclude>
-    <ClInclude Include="src\engine\geometry\static_mesh.h">
-      <Filter>engine\geometry</Filter>
     </ClInclude>
     <ClInclude Include="src\engine\io_handler\file_loader.h">
       <Filter>engine\io_handler</Filter>
@@ -107,54 +92,36 @@
     <ClInclude Include="src\engine\layer\world_layer.h">
       <Filter>engine\layer</Filter>
     </ClInclude>
-    <ClInclude Include="src\engine\map\game_map.h">
-      <Filter>engine\map</Filter>
-    </ClInclude>
     <ClInclude Include="src\engine\platform\pff_window.h">
       <Filter>engine\platform</Filter>
-    </ClInclude>
-    <ClInclude Include="src\engine\render\frame_info.h">
-      <Filter>engine\render</Filter>
-    </ClInclude>
-    <ClInclude Include="src\engine\render\queue_families.h">
-      <Filter>engine\render</Filter>
-    </ClInclude>
-    <ClInclude Include="src\engine\render\render_system\mesh_render_system.h">
-      <Filter>engine\render\render_system</Filter>
-    </ClInclude>
-    <ClInclude Include="src\engine\render\render_system\ui_render_system.h">
-      <Filter>engine\render\render_system</Filter>
     </ClInclude>
     <ClInclude Include="src\engine\render\renderer.h">
       <Filter>engine\render</Filter>
     </ClInclude>
-    <ClInclude Include="src\engine\render\shader.h">
-      <Filter>engine\render</Filter>
+    <ClInclude Include="src\engine\render\vulkan\vendor\VkBootstrap.h">
+      <Filter>engine\render\vulkan\vendor</Filter>
     </ClInclude>
-    <ClInclude Include="src\engine\render\vk_buffer.h">
-      <Filter>engine\render</Filter>
+    <ClInclude Include="src\engine\render\vulkan\vendor\VkBootstrapDispatch.h">
+      <Filter>engine\render\vulkan\vendor</Filter>
     </ClInclude>
-    <ClInclude Include="src\engine\render\vk_descripters.h">
-      <Filter>engine\render</Filter>
+    <ClInclude Include="src\engine\render\vulkan\vk_initializers.h">
+      <Filter>engine\render\vulkan</Filter>
     </ClInclude>
-    <ClInclude Include="src\engine\render\vk_device.h">
-      <Filter>engine\render</Filter>
+    <ClInclude Include="src\engine\render\vulkan\vk_instance.h">
+      <Filter>engine\render\vulkan</Filter>
     </ClInclude>
-    <ClInclude Include="src\engine\render\vk_initializers.h">
-      <Filter>engine\render</Filter>
+    <ClInclude Include="src\engine\render\vulkan\vk_renderer.h">
+      <Filter>engine\render\vulkan</Filter>
     </ClInclude>
-    <ClInclude Include="src\engine\render\vk_pipeline.h">
-      <Filter>engine\render</Filter>
-    </ClInclude>
-    <ClInclude Include="src\engine\render\vk_swapchain.h">
-      <Filter>engine\render</Filter>
-    </ClInclude>
-    <ClInclude Include="src\engine\render\vk_types.h">
-      <Filter>engine\render</Filter>
+    <ClInclude Include="src\engine\render\vulkan\vk_types.h">
+      <Filter>engine\render\vulkan</Filter>
     </ClInclude>
     <ClInclude Include="src\entry_point.h" />
     <ClInclude Include="src\util\benchmarking\instrumentor.h">
       <Filter>util\benchmarking</Filter>
+    </ClInclude>
+    <ClInclude Include="src\util\color_theme.h">
+      <Filter>util</Filter>
     </ClInclude>
     <ClInclude Include="src\util\core_config.h">
       <Filter>util</Filter>
@@ -192,6 +159,8 @@
     <ClInclude Include="src\util\util.h">
       <Filter>util</Filter>
     </ClInclude>
+    <ClInclude Include="src\engine\render\vulkan\vk_device.h" />
+    <ClInclude Include="src\engine\render\vulkan\vk_image.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="src\application.cpp" />
@@ -206,15 +175,6 @@
     </ClCompile>
     <ClCompile Include="src\engine\game_objects\player_controller.cpp">
       <Filter>engine\game_objects</Filter>
-    </ClCompile>
-    <ClCompile Include="src\engine\geometry\basic_mesh.cpp">
-      <Filter>engine\geometry</Filter>
-    </ClCompile>
-    <ClCompile Include="src\engine\geometry\dynamic_mesh.cpp">
-      <Filter>engine\geometry</Filter>
-    </ClCompile>
-    <ClCompile Include="src\engine\geometry\static_mesh.cpp">
-      <Filter>engine\geometry</Filter>
     </ClCompile>
     <ClCompile Include="src\engine\io_handler\file_loader.cpp">
       <Filter>engine\io_handler</Filter>
@@ -234,38 +194,17 @@
     <ClCompile Include="src\engine\layer\world_layer.cpp">
       <Filter>engine\layer</Filter>
     </ClCompile>
-    <ClCompile Include="src\engine\map\game_map.cpp">
-      <Filter>engine\map</Filter>
-    </ClCompile>
     <ClCompile Include="src\engine\platform\pff_window.cpp">
       <Filter>engine\platform</Filter>
     </ClCompile>
-    <ClCompile Include="src\engine\render\render_system\mesh_render_system.cpp">
-      <Filter>engine\render\render_system</Filter>
+    <ClCompile Include="src\engine\render\vulkan\vendor\VkBootstrap.cpp">
+      <Filter>engine\render\vulkan\vendor</Filter>
     </ClCompile>
-    <ClCompile Include="src\engine\render\render_system\ui_render_system.cpp">
-      <Filter>engine\render\render_system</Filter>
+    <ClCompile Include="src\engine\render\vulkan\vk_initializers.cpp">
+      <Filter>engine\render\vulkan</Filter>
     </ClCompile>
-    <ClCompile Include="src\engine\render\renderer.cpp">
-      <Filter>engine\render</Filter>
-    </ClCompile>
-    <ClCompile Include="src\engine\render\vk_buffer.cpp">
-      <Filter>engine\render</Filter>
-    </ClCompile>
-    <ClCompile Include="src\engine\render\vk_descripters.cpp">
-      <Filter>engine\render</Filter>
-    </ClCompile>
-    <ClCompile Include="src\engine\render\vk_device.cpp">
-      <Filter>engine\render</Filter>
-    </ClCompile>
-    <ClCompile Include="src\engine\render\vk_initializers.cpp">
-      <Filter>engine\render</Filter>
-    </ClCompile>
-    <ClCompile Include="src\engine\render\vk_pipeline.cpp">
-      <Filter>engine\render</Filter>
-    </ClCompile>
-    <ClCompile Include="src\engine\render\vk_swapchain.cpp">
-      <Filter>engine\render</Filter>
+    <ClCompile Include="src\engine\render\vulkan\vk_renderer.cpp">
+      <Filter>engine\render\vulkan</Filter>
     </ClCompile>
     <ClCompile Include="src\util\io\config.cpp">
       <Filter>util\io</Filter>
@@ -285,5 +224,6 @@
     <ClCompile Include="src\util\timer.cpp">
       <Filter>util</Filter>
     </ClCompile>
+    <ClCompile Include="src\engine\render\vulkan\vk_image.cpp" />
   </ItemGroup>
 </Project>

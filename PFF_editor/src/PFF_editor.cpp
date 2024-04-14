@@ -22,12 +22,14 @@ namespace PFF {
 
 		// PFF_PROFILE_FUNCTION();
 
-		m_editor_layer = new editor_layer(get_imgui_layer()->get_context());
-		push_overlay(m_editor_layer);
-
 		LOG(Trace, "register player controller");
 		m_editor_controller = std::make_shared<editor_controller>();
-		register_player_controller(m_editor_controller);
+		//register_player_controller(m_editor_controller);
+
+		/*
+
+		m_editor_layer = new editor_layer(get_imgui_layer()->get_context());
+		push_overlay(m_editor_layer);
 
 		std::shared_ptr<basic_mesh> floor = basic_mesh::create_mesh_from_file("assets/floor.obj");
 		auto floor_obj = get_current_map()->create_empty_game_object();
@@ -62,7 +64,8 @@ namespace PFF {
 		m_test_game_object->rotation_speed = glm::vec3(0.f, 3.5f, 0.f);
 
 #endif // 1
-
+		*/
+		
 		// load editor camera loc && rot
 		glm::vec3 position = { -16, -19, -30 };
 		glm::vec3 look_direction = { .5f, -.4f, 0 };
@@ -78,10 +81,12 @@ namespace PFF {
 	}
 
 	bool PFF_editor::shutdown() {
-
+		
+		/*
 		pop_overlay(m_editor_layer);
 		delete m_editor_layer;
-
+		*/
+		
 		// save camera position
 		glm::vec3 position = m_editor_controller->get_editor_camera_pos();
 		glm::vec3 look_direction = m_editor_controller->get_editor_camera_direction();

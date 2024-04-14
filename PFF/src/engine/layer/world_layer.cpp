@@ -7,16 +7,16 @@
 #include "world_layer.h"
 
 namespace PFF {
-
+	/*
 	world_layer::world_layer() {
 
 		PFF_PROFILE_FUNCTION();
 
-		m_current_map = std::make_shared<game_map>();
+		//m_current_map = std::make_shared<game_map>();
 		m_editor_camera = std::make_shared<camera>();
 		//m_editor_camera.set_orthographic_projection(-aspect, aspect, -1, 1, 0, 10);
 
-		m_editor_camera->set_perspective_projection(glm::radians(50.f), application::get().get_renderer()->get_aspect_ratio(), 0.1f, 350.0f);
+		//m_editor_camera->set_perspective_projection(glm::radians(50.f), application::get().get_renderer()->get_aspect_ratio(), 0.1f, 350.0f);
 		m_editor_camera->set_view_direction(glm::vec3{ 0.0f }, glm::vec3{ 0.5f, 0.0f, 1.0f });
 
 		//float aspect = m_swapchain->get_extentAspectRatio();
@@ -29,7 +29,7 @@ namespace PFF {
 
 		m_player_controller.reset();
 		m_editor_camera.reset();
-		m_current_map.reset();
+		//m_current_map.reset();
 
 		CORE_LOG(Trace, "Shutdown");
 	}
@@ -47,24 +47,25 @@ namespace PFF {
 		PFF_PROFILE_FUNCTION();
 
 		m_player_controller->update_internal(delta_time);
-		for (auto& obj : m_current_map->get_all_game_objects()) {
-
-			obj.second.transform.rotation += glm::mod(obj.second.rotation_speed * delta_time, two_pi<f32>());
-			obj.second.transform.translation += obj.second.movement_speed * delta_time;
-		}
-
+		
+		//for (auto& obj : m_current_map->get_all_game_objects()) {
+		//
+		//	obj.second.transform.rotation += glm::mod(obj.second.rotation_speed * delta_time, two_pi<f32>());
+		//	obj.second.transform.translation += obj.second.movement_speed * delta_time;
+		//}
+		
 	}
 
 	void world_layer::on_event(event& event) {
 
 		PFF_PROFILE_FUNCTION();
 
-		if(m_player_controller)
+		if (m_player_controller)
 			m_player_controller->handle_event(event);
 	}
 
 	void world_layer::on_imgui_render() {
 	}
-
+*/
 
 }

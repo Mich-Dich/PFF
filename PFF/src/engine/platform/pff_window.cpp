@@ -33,7 +33,54 @@ namespace PFF {
 		PFF_PROFILE_FUNCTION();
 
 		window_attrib_serializer(&m_data, serializer::option::load_from_file);
-		init(m_data);
+
+		//attributes.app_ref = &application::get();
+		m_data = attributes;
+
+		if (!s_GLFWinitialized) {
+
+			glfwSetErrorCallback(GLFW_error_callback);
+			CORE_ASSERT(glfwInit(), "GLFW initialized", "Could not initialize GLFW");
+			s_GLFWinitialized = true;
+		}
+
+		glfwWindowHint(GLFW_CLIENT_API, GLFW_NO_API);
+		glfwWindowHint(GLFW_RESIZABLE, GLFW_TRUE);
+		//glfwWindowHint(GLFW_TITLEBAR, GLFW_FALSE);
+		glfwWindowHint(GLFW_VISIBLE, GLFW_FALSE);
+		glfwWindowHint(GLFW_MAXIMIZED, (m_data.window_size_state == window_size_state::fullscreen || m_data.window_size_state == window_size_state::fullscreen_windowed) ? GLFW_TRUE : GLFW_FALSE);
+
+		auto loc_monitor = glfwGetPrimaryMonitor();
+		const auto loc_mode = glfwGetVideoMode(loc_monitor);
+		const u16 size_reduction = 30;
+		m_data.width = std::min((loc_mode->width - m_data.pos_x) - size_reduction, m_data.width);
+		m_data.height = std::min((loc_mode->height - m_data.pos_y) - size_reduction, m_data.height);
+
+		m_Window = glfwCreateWindow(static_cast<int>(m_data.width), static_cast<int>(m_data.height), m_data.title.c_str(), nullptr, nullptr);
+		//glfwHideWindow(m_Window);
+
+		CORE_ASSERT(glfwVulkanSupported(), "", "GLFW does not support Vulkan");
+		CORE_LOG(Trace, "Creating window [" << m_data.title << " width: " << m_data.width << "  height: " << m_data.height << "]");
+
+		glfwSetWindowUserPointer(m_Window, &m_data);
+		glfwGetCursorPos(m_Window, &m_data.cursor_pos_x, &m_data.cursor_pos_y);
+		//glfwSetWindowPos(m_Window, m_data.pos_x, m_data.pos_y);
+		glfwSetWindowPos(m_Window, 100, 100);
+		set_vsync(m_data.vsync);
+
+		GLFWmonitor* primary = glfwGetPrimaryMonitor();
+		const GLFWvidmode* mode = glfwGetVideoMode(primary);
+		//glfwSetWindowMonitor(m_Window, NULL, m_data.pos_x, m_data.pos_y, m_data.width, m_data.height-30, mode->refreshRate);
+
+		// Set icon
+		GLFWimage icon;
+		int channels;
+		std::string iconPathStr = m_icon_path.string();
+		icon.pixels = stbi_load(iconPathStr.c_str(), &icon.width, &icon.height, &channels, 4);
+		glfwSetWindowIcon(m_Window, 1, &icon);
+		stbi_image_free(icon.pixels);
+
+		bind_event_calbacks();
 	}
 
 	pff_window::~pff_window() {
@@ -58,57 +105,9 @@ namespace PFF {
 	// ============================================================================== inplemantation ==============================================================================
 	
 
-	void pff_window::init(window_attrib attributes) {
+	void pff_window::bind_event_calbacks() {
 
 		PFF_PROFILE_FUNCTION();
-
-		attributes.app_ref = &application::get();
-		m_data = attributes;
-
-		if (!s_GLFWinitialized) {
-
-			glfwSetErrorCallback(GLFW_error_callback);
-			CORE_ASSERT(glfwInit(), "GLFW initialized", "Could not initialize GLFW");
-			s_GLFWinitialized = true;
-		}
-
-		glfwWindowHint(GLFW_CLIENT_API, GLFW_NO_API);
-		glfwWindowHint(GLFW_RESIZABLE, GLFW_TRUE);
-		glfwWindowHint(GLFW_TITLEBAR, GLFW_FALSE);
-		glfwWindowHint(GLFW_VISIBLE, GLFW_FALSE);
-		glfwWindowHint(GLFW_MAXIMIZED, (m_data.window_size_state == window_size_state::fullscreen || m_data.window_size_state == window_size_state::fullscreen_windowed) ? GLFW_TRUE : GLFW_FALSE);
-
-		auto loc_monitor = glfwGetPrimaryMonitor();
-		const auto loc_mode = glfwGetVideoMode(loc_monitor);
-		CORE_LOG(Trace, "Width: " << loc_mode->width << " height: " << loc_mode->height <<
-			"      || new width: " << loc_mode->width - m_data.pos_x << " new height: " << loc_mode->height - m_data.pos_y);
-
-		const u16 size_reduction = 30;
-		m_data.width = std::min((loc_mode->width - m_data.pos_x) - size_reduction, m_data.width);
-		m_data.height = std::min((loc_mode->height - m_data.pos_y) - size_reduction, m_data.height);
-
-		m_Window = glfwCreateWindow(static_cast<int>(m_data.width), static_cast<int>(m_data.height), m_data.title.c_str(), nullptr, nullptr);
-		//glfwHideWindow(m_Window);
-
-		CORE_ASSERT(glfwVulkanSupported(), "", "GLFW does not support Vulkan");
-		CORE_LOG(Trace, "Creating window [" << m_data.title << " width: " << m_data.width << "  height: " << m_data.height << "]");
-
-		glfwSetWindowUserPointer(m_Window, &m_data);
-		glfwGetCursorPos(m_Window, &m_data.cursor_pos_x, &m_data.cursor_pos_y);
-		glfwSetWindowPos(m_Window, m_data.pos_x, m_data.pos_y);
-		set_vsync(m_data.vsync);
-
-		GLFWmonitor* primary = glfwGetPrimaryMonitor();
-		const GLFWvidmode* mode = glfwGetVideoMode(primary);
-		//glfwSetWindowMonitor(m_Window, NULL, m_data.pos_x, m_data.pos_y, m_data.width, m_data.height-30, mode->refreshRate);
-
-		// Set icon
-		GLFWimage icon;
-		int channels;
-		std::string iconPathStr = m_icon_path.string();
-		icon.pixels = stbi_load(iconPathStr.c_str(), &icon.width, &icon.height, &channels, 4);
-		glfwSetWindowIcon(m_Window, 1, &icon);
-		stbi_image_free(icon.pixels);
 
 		glfwSetWindowRefreshCallback(m_Window, [](GLFWwindow* window) {
 			
@@ -146,11 +145,11 @@ namespace PFF {
 			Data.event_callback(event);
 		});
 
-		glfwSetTitlebarHitTestCallback(m_Window, [](GLFWwindow* window, int x, int y, int* hit) {
+		//glfwSetTitlebarHitTestCallback(m_Window, [](GLFWwindow* window, int x, int y, int* hit) {
 
-			window_attrib& Data = *(window_attrib*)glfwGetWindowUserPointer(window);
-			*hit = Data.app_ref->is_titlebar_hovered();
-		});
+		//	window_attrib& Data = *(window_attrib*)glfwGetWindowUserPointer(window);
+		//	*hit = Data.app_ref->is_titlebar_hovered();
+		//});
 
 		glfwSetWindowPosCallback(m_Window, [](GLFWwindow* window, int x, int y) {
 
@@ -238,14 +237,14 @@ namespace PFF {
 		LOG(Info, "minimizing window");
 		glfwIconifyWindow(m_Window);
 		m_data.window_size_state = window_size_state::minimised;
-		application::set_render_state(system_state::inactive);
+		//application::set_render_state(system_state::inactive);
 	}
 
 	void pff_window::restore_window() {
 		
 		LOG(Info, "restoring window");
 		glfwRestoreWindow(m_Window); 
-		application::set_render_state(system_state::active);
+		//application::set_render_state(system_state::active);
 	}
 
 	void pff_window::maximize_window() { 
@@ -253,13 +252,12 @@ namespace PFF {
 		LOG(Info, "maximising window");
 		glfwMaximizeWindow(m_Window);
 		m_data.window_size_state = window_size_state::fullscreen_windowed;
-		application::set_render_state(system_state::active);
+		//application::set_render_state(system_state::active);
 	}
 
-	void pff_window::create_window_surface(VkInstance_T* instance, VkSurfaceKHR_T** get_surface) {
+	void pff_window::create_vulkan_surface(VkInstance_T* instance, VkSurfaceKHR_T** get_surface) {
 
 		CORE_ASSERT(glfwCreateWindowSurface(instance, m_Window, nullptr, get_surface) == VK_SUCCESS, "", "Failed to create awindow surface");
-
 	}
 
 	// =============================================================================  serializer  =============================================================================

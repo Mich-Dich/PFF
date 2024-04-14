@@ -28,8 +28,9 @@ workspace "PFF"
 
 group "dependencies"
 	-- include "vendor/premake"
-	include "PFF/vendor/imgui_new"
+	include "PFF/vendor/imgui"
 	include "PFF/vendor/glfw"
+	-- include "PFF/vendor/vkbootstrap"
 group ""
 
 

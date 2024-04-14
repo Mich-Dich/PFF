@@ -12,12 +12,12 @@
 #include "application.h"
 #include "engine/platform/pff_window.h"
 #include "engine/render/renderer.h"
-#include "engine/color_theme.h"
+#include "util/color_theme.h"
 
 #include "imgui_layer.h"
 
 namespace PFF {
-
+	/*
 
 	static ImGui_ImplVulkanH_Window g_MainWindowData;
 	static VkPipelineCache          g_PipelineCache = VK_NULL_HANDLE;
@@ -379,5 +379,5 @@ namespace PFF {
 		ImGui_ImplVulkanH_CreateOrResizeWindow(vk_device->get_instance(), physical_device, device, vulkan_window, vk_device->get_queue_families().presentFamily, nullptr, width, height, 3);
 		
 	}
-
+	*/
 }

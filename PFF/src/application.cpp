@@ -14,9 +14,11 @@
 #include "engine/layer/imgui_layer.h"
 
 #include "engine/platform/pff_window.h"
+//#include "engine/map/game_map.h"
+
 #include "engine/render/renderer.h"
-#include "engine/render/vk_buffer.h"
-#include "engine/map/game_map.h"
+#include "engine/render/vulkan/vk_renderer.h"
+// #include "engine/render/vk_buffer.h"
 
 #include "application.h"
 
@@ -33,8 +35,8 @@ namespace PFF {
 	application* application::s_instance = nullptr;
 	ref<renderer> application::m_renderer;
 	ref<pff_window> application::m_window;
-	imgui_layer* application::m_imgui_layer;
-	world_layer* application::m_world_layer;
+	//imgui_layer* application::m_imgui_layer;
+	//world_layer* application::m_world_layer;
 	bool application::m_is_titlebar_hovered;
 	bool application::m_running;
 
@@ -57,16 +59,38 @@ namespace PFF {
 
 		m_window = std::make_shared<pff_window>();			// Can be called after inital setup like [compiling shaders]
 		m_window->set_event_callback(BIND_FN(application::on_event));
-		m_renderer = std::make_shared<renderer>(m_window, &m_layerstack);
+		
+		// =========================== RENDER_INIT ===========================
+		m_renderer = create_ref<render::vulkan::vk_renderer>(m_window);
+		//renderer::set_api(PFF::render_api::Vulkan);
 
-		m_world_layer = new world_layer();
-		m_layerstack.push_layer(m_world_layer);
+		//switch (renderer::get_api()) {
+		//	case PFF::render_api::none:
+		//		break;
+		//	case PFF::render_api::Vulkan:
+		//		break;
+		//	case PFF::render_api::OpenGl:
+		//		//#error "OpenGL renderer not implemented yet"
+		//		break;
+		//	case PFF::render_api::D3D12:
+		//		//#error "DirectX12 renderer not implemented yet"
+		//		break;
+		//	case PFF::render_api::Metal:
+		//		//#error "Metal renderer not implemented yet"
+		//		break;
+		//	default:
+		//		break;
+		//}
 
-		m_imgui_layer = new imgui_layer(m_renderer);
-		m_layerstack.push_overlay(m_imgui_layer);
 
-		m_renderer->set_world_Layer(m_world_layer);
-		m_renderer->set_state(system_state::active);
+		//m_world_layer = new world_layer();
+		//m_layerstack.push_layer(m_world_layer);
+
+		//m_imgui_layer = new imgui_layer(m_renderer);
+		//m_layerstack.push_overlay(m_imgui_layer);
+
+		//m_renderer->set_world_Layer(m_world_layer);
+		//m_renderer->set_state(system_state::active);
 
 		m_is_titlebar_hovered = false;
 		m_running = true;
@@ -80,13 +104,13 @@ namespace PFF {
 		PFF_PROFILE_BEGIN_SESSION("shutdown", "benchmarks", "PFF_benchmark_shutdown.json");
 		shutdown();
 
-		m_current_map.reset();
+		//m_current_map.reset();
 
-		m_layerstack.pop_overlay(m_imgui_layer);
-		delete m_imgui_layer;
+		//m_layerstack.pop_overlay(m_imgui_layer);
+		//delete m_imgui_layer;
 
-		m_layerstack.pop_layer(m_world_layer);
-		delete m_world_layer;
+		//m_layerstack.pop_layer(m_world_layer);
+		//delete m_world_layer;
 
 		m_renderer.reset();
 		m_window.reset();
@@ -104,7 +128,6 @@ namespace PFF {
 		m_window->show_window();
 		m_window->poll_events();
 		fps_timer.start_measurement();
-		m_delta_time = 0.f;
 
 		while (m_running) {
 
@@ -129,7 +152,7 @@ namespace PFF {
 			fps_timer.limit_fps(m_limit_fps, m_fps, m_delta_time, m_work_time, m_sleep_time);
 		}
 
-		m_renderer->wait_Idle();
+		m_renderer->wait_idle();
 		PFF_PROFILE_END_SESSION();
 	}
 
@@ -200,7 +223,7 @@ namespace PFF {
 		// m_camera.set_orthographic_projection(-aspect, aspect, -1, 1, 0, 10);
 		// m_camera.set_view_YXZ(glm::vec3(-1.0f, -2.0f, -3.0f), glm::vec3(0.0f));
 		// m_camera.set_view_direction(glm::vec3{ 0.0f }, glm::vec3{ 0.5f, 0.0f, 1.0f });
-		m_world_layer->get_editor_camera()->set_aspect_ratio(m_renderer->get_aspect_ratio());
+		//m_world_layer->get_editor_camera()->set_aspect_ratio(m_renderer->get_aspect_ratio());
 
 		return true;
 	}

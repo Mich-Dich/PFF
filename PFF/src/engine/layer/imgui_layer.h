@@ -8,7 +8,7 @@
 #include "imgui_impl_vulkan.h"
 
 namespace PFF {
-
+	/*
 	class renderer;
 	static void Setup_vulkan_window(ImGui_ImplVulkanH_Window* wd, int width, int height);
 
@@ -51,5 +51,5 @@ namespace PFF {
 
 		bool m_show_performance_window = true;
 	};
-
+	*/
 }

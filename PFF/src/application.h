@@ -8,6 +8,9 @@
 #include "engine/render/renderer.h"
 #include "util/timer.h"
 
+#include "engine/render/renderer.h"
+#include "engine/render/vulkan/vk_renderer.h"
+
 namespace PFF {
 
 	class pff_window;
@@ -36,12 +39,12 @@ namespace PFF {
 
 		// static
 		FORCEINLINE static application& get()							{ return *s_instance; }
-		FORCEINLINE static imgui_layer* get_imgui_layer()				{ return m_imgui_layer; }
-		FORCEINLINE static world_layer* get_world_layer()				{ return m_world_layer; }
-		FORCEINLINE static ref<game_map> get_current_map()				{ return m_world_layer->get_current_map(); }
+		//FORCEINLINE static imgui_layer* get_imgui_layer()				{ return m_imgui_layer; }
+		//FORCEINLINE static world_layer* get_world_layer()				{ return m_world_layer; }
+		//FORCEINLINE static ref<game_map> get_current_map()				{ return m_world_layer->get_current_map(); }
 		FORCEINLINE static ref<pff_window> get_window()					{ return m_window; }
-		FORCEINLINE static ref<renderer> get_renderer()					{ return m_renderer; }
-		FORCEINLINE static void  set_render_state(system_state state)	{ return m_renderer->set_state(state); }
+		//FORCEINLINE static ref<renderer> get_renderer()					{ return m_renderer; }
+		//FORCEINLINE static void  set_render_state(system_state state)	{ return m_renderer->set_state(state); }
 		FORCEINLINE static void close_application()						{ m_running = false; }
 		FORCEINLINE static bool is_titlebar_hovered()					{ return m_is_titlebar_hovered; }
 
@@ -53,7 +56,7 @@ namespace PFF {
 		FORCEINLINE void restore_window();
 		FORCEINLINE void maximize_window();
 
-		void register_player_controller(ref<player_controller> player_controller) { m_world_layer->register_player_controller(player_controller); }
+		//void register_player_controller(ref<player_controller> player_controller) { m_world_layer->register_player_controller(player_controller); }
 		void get_fps_values(bool& limit_fps, u32& target_fps, u32& current_fps, f32& work_time, f32& sleep_time);
 
 		virtual bool init();								// to be used by client
@@ -76,8 +79,8 @@ namespace PFF {
 		static ref<pff_window> m_window;
 		static bool m_is_titlebar_hovered;
 		static bool m_running;
-		static imgui_layer* m_imgui_layer;
-		static world_layer* m_world_layer;
+		//static imgui_layer* m_imgui_layer;
+		//static world_layer* m_world_layer;
 
 		layer_stack m_layerstack{};
 		std::vector<event> m_event_queue;		// TODO: change to queue

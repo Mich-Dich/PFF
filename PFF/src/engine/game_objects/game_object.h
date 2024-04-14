@@ -1,6 +1,6 @@
 #pragma once
 
-#include "engine/geometry/basic_mesh.h"
+//#include "engine/geometry/basic_mesh.h"
 
 #define GLM_FORCE_RADIANS
 #define GLM_FORCE_DEPTH_ZERO_TO_ONE
@@ -20,7 +20,7 @@ namespace PFF {
 		glm::mat4 mat4_XYZ();
 		glm::mat3 normal_matrix();
 	};
-
+	/*
 	class game_object {
 	public:
 
@@ -54,5 +54,5 @@ namespace PFF {
 
 		id_t m_id;
 	};
-
+	*/
 }

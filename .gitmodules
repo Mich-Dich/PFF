@@ -4,6 +4,6 @@
 [submodule "PFF/vendor/glfw"]
 	path = PFF/vendor/glfw
 	url = https://github.com/Mich-Dich/glfw
-[submodule "PFF/vendor/imgui_new"]
-	path = PFF/vendor/imgui_new
+[submodule "PFF/vendor/imgui"]
+	path = PFF/vendor/imgui
 	url = https://github.com/Mich-Dich/imgui

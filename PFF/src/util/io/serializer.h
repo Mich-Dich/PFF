@@ -96,7 +96,7 @@ namespace PFF::serializer {
 								// remove indentation                       remove "- " (array element marker)
 								line = line.substr(NUM_OF_INDENTING_SPACES + 2);
 								PFF:util::convert_from_string(line, buffer);
-								value.push_back(buffer);
+								value.emplace_back(buffer);
 							}
 
 							//LOG(Debug, "END OF SUB-SECTION");

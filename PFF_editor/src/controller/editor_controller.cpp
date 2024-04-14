@@ -51,6 +51,6 @@ namespace PFF {
 			application::get().limit_fps(!application::get().get_limit_fps(), application::get().get_target_fps());
 
 		//LOG(Trace, vec_to_str(camera_direction, "dir") << vec_to_str(camera_pos, "pos") << vec_to_str(m_input_mapping->move.data._3D, "input"));
-		m_world_layer->get_editor_camera()->set_view_XYZ(m_camera_pos, m_camera_direction);
+		//m_world_layer->get_editor_camera()->set_view_XYZ(m_camera_pos, m_camera_direction);
 	}
 }
