@@ -37,13 +37,10 @@ project "PFF"
 		"%{IncludeDir.ImGui}/backends/",
 		"%{IncludeDir.tinyobjloader}",
 		"%{IncludeDir.stb_image}",
-
 		"%{IncludeDir.VulkanSDK}",
-		"%{IncludeDir.vma}",
-		"%{IncludeDir.vkbootstrap}",
 	}
 	
-	links 
+	links
 	{
 		"glfw",
 		"ImGui",

@@ -9,7 +9,7 @@ namespace PFF::render::vulkan::init {
 
 
     //> init_cmd
-    VkCommandPoolCreateInfo command_pool_create_info(uint32_t queueFamilyIndex,VkCommandPoolCreateFlags flags /*= 0*/) {
+    VkCommandPoolCreateInfo command_pool_create_info(uint32_t queueFamilyIndex,VkCommandPoolCreateFlags flags) {
 
         VkCommandPoolCreateInfo info = {};
         info.sType = VK_STRUCTURE_TYPE_COMMAND_POOL_CREATE_INFO;
@@ -19,7 +19,7 @@ namespace PFF::render::vulkan::init {
     }
 
 
-    VkCommandBufferAllocateInfo command_buffer_allocate_info( VkCommandPool pool, uint32_t count /*= 1*/) {
+    VkCommandBufferAllocateInfo command_buffer_allocate_info( VkCommandPool pool, uint32_t count) {
 
         VkCommandBufferAllocateInfo info = {};
         info.sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_ALLOCATE_INFO;
@@ -32,7 +32,7 @@ namespace PFF::render::vulkan::init {
     //< init_cmd
     
     //> init_cmd_draw
-    VkCommandBufferBeginInfo command_buffer_begin_info(VkCommandBufferUsageFlags flags /*= 0*/) {
+    VkCommandBufferBeginInfo command_buffer_begin_info(VkCommandBufferUsageFlags flags) {
 
         VkCommandBufferBeginInfo info = {};
         info.sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_BEGIN_INFO;
@@ -44,7 +44,7 @@ namespace PFF::render::vulkan::init {
     //< init_cmd_draw
 
     //> init_sync
-    VkFenceCreateInfo fence_create_info(VkFenceCreateFlags flags /*= 0*/) {
+    VkFenceCreateInfo fence_create_info(VkFenceCreateFlags flags) {
         
         VkFenceCreateInfo info = {};
         info.sType = VK_STRUCTURE_TYPE_FENCE_CREATE_INFO;
@@ -53,7 +53,7 @@ namespace PFF::render::vulkan::init {
         return info;
     }
 
-    VkSemaphoreCreateInfo semaphore_create_info(VkSemaphoreCreateFlags flags /*= 0*/) {
+    VkSemaphoreCreateInfo semaphore_create_info(VkSemaphoreCreateFlags flags) {
         
         VkSemaphoreCreateInfo info = {};
         info.sType = VK_STRUCTURE_TYPE_SEMAPHORE_CREATE_INFO;
@@ -122,7 +122,7 @@ namespace PFF::render::vulkan::init {
     }
 
     //> color_info
-    VkRenderingAttachmentInfo attachment_info( VkImageView view, VkClearValue* clear, VkImageLayout layout /*= VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL*/) {
+    VkRenderingAttachmentInfo attachment_info( VkImageView view, VkClearValue* clear, VkImageLayout layout ) {
 
         VkRenderingAttachmentInfo colorAttachment{};
         colorAttachment.sType = VK_STRUCTURE_TYPE_RENDERING_ATTACHMENT_INFO;
@@ -140,7 +140,7 @@ namespace PFF::render::vulkan::init {
     //< color_info
     
     //> depth_info
-    VkRenderingAttachmentInfo depth_attachment_info(VkImageView view, VkImageLayout layout /*= VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL*/) {
+    VkRenderingAttachmentInfo depth_attachment_info(VkImageView view, VkImageLayout layout ) {
 
         VkRenderingAttachmentInfo depthAttachment{};
         depthAttachment.sType = VK_STRUCTURE_TYPE_RENDERING_ATTACHMENT_INFO;
@@ -260,8 +260,10 @@ namespace PFF::render::vulkan::init {
         info.extent = extent;
         info.mipLevels = 1;
         info.arrayLayers = 1;
-        info.samples = VK_SAMPLE_COUNT_1_BIT;   //for MSAA. we will not be using it by default, so default it to 1 sample per pixel
-        info.tiling = VK_IMAGE_TILING_OPTIMAL;  //optimal tiling, which means the image is stored on the best gpu format
+        info.samples = VK_SAMPLE_COUNT_1_BIT;   // MSAA => will not be used by default, so default it to 1 sample per pixel
+            // TIP:: For reading the image data from cpu, tiling needs to be LINEAR, which makes the gpu data into a simple 2d array. 
+            //       This tiling is highly limited in what GPU can do with it, so the only real use case for it is CPU readback
+        info.tiling = VK_IMAGE_TILING_OPTIMAL;  // optimal tiling, which means the image is stored on the best gpu format
         info.usage = usageFlags;
 
         return info;

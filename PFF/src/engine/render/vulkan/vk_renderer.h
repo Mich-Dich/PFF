@@ -3,11 +3,32 @@
 #include "engine/render/renderer.h"
 #include "engine/platform/pff_window.h"
 
+#include "vk_types.h"
+
 namespace PFF::render::vulkan {
+
+
+	// !! CAUTION !! - Doing callbacks like this is inneficient at scale, because we are storing whole std::functions for every object to be deleted. This is suboptimal. 
+	// For deleting thousands of objects, a better implementation would be to store arrays of vulkan handles of various types such as VkImage, VkBuffer, and so on. And then delete those from a loop.
+	struct deletion_queue {
+
+		std::deque<std::function<void()>> deletors;
+
+		void push_func(std::function<void()>&& function) { deletors.push_back(function); }
+
+		void flush() {
+
+			for (auto it = deletors.rbegin(); it != deletors.rend(); it++)
+				(*it)();
+
+			deletors.clear();
+		}
+	};
 
 	// framedata	// TODO: extract into own file
 	struct FrameData {
 
+		deletion_queue deletion_queue;
 		VkSemaphore swapchain_semaphore, render_semaphore;
 		VkFence render_fence;
 
@@ -23,24 +44,35 @@ namespace PFF::render::vulkan {
 		vk_renderer(ref<pff_window> window);
 		~vk_renderer();
 
+		FORCEINLINE f32 get_aspect_ratio() { return 1.f; };			// UNFINISHED
+
+		// init functions
+		void init_imgui() override;
+
+		// work functions
 		void draw_frame(f32 delta_time) override;
 		void refresh(f32 delta_time) override;
 		void set_size(u32 width, u32 height) override;
-		f32 get_aspect_ratio() override;
 		void wait_idle() override;
+		void immediate_submit(std::function<void(VkCommandBuffer cmd)>&& function); // Improvement => run this on a different queue than the graphics_queue, so it can overlap the execution with the main render loop.
 
 	private:
 
-		void create_swapchain(u32 width, u32 height);
-		void destroy_swapchain();
+		FORCEINLINE FrameData& get_current_frame() { return m_frames[m_frame_number % FRAME_COUNT]; };
+		
+		void init_swapchain();
 		void init_commands();
 		void init_sync_structures();
+		void init_descriptors();
+		void init_pipelines();
+		void destroy_swapchain();
 
+		void draw_internal(VkCommandBuffer cmd);
+		void create_swapchain(u32 width, u32 height);
+				
 		bool m_is_initialized = false;
 		int m_frame_number = 0;
 		ref<pff_window> m_window;
-
-		FORCEINLINE FrameData& get_current_frame() { return m_frames[m_frame_number % FRAME_COUNT]; };
 
 		// ---------------------------- instance ---------------------------- 
 		VkInstance					m_instance;			// Vulkan library handle
@@ -55,11 +87,31 @@ namespace PFF::render::vulkan {
 		u32							m_graphics_queue_family;
 		
 		// ---------------------------- swapchain ---------------------------- 
-		VkSwapchainKHR				m_swapchain {};
-		VkFormat					m_swapchain_image_format {};
-		std::vector<VkImage>		m_swapchain_images {};
-		std::vector<VkImageView>	m_swapchain_image_views {};
-		VkExtent2D					m_swapchain_extent {};
+		VkSwapchainKHR				m_swapchain;
+		VkFormat					m_swapchain_image_format;
+		std::vector<VkImage>		m_swapchain_images;
+		std::vector<VkImageView>	m_swapchain_image_views;
+		VkExtent2D					m_swapchain_extent;
+
+		deletion_queue m_deletion_queue;
+		VmaAllocator m_allocator;
+
+		vk_image m_draw_image;
+		VkExtent2D m_draw_extent;
+
+		// ---------------------------- descriptors ---------------------------- 
+		descriptor_allocator global_descriptor_allocator;
+		VkDescriptorSet m_draw_image_descriptors;
+		VkDescriptorSetLayout m_draw_image_descriptor_layout;
+		
+		// ---------------------------- pipelines ---------------------------- 
+		VkPipeline m_gradient_pipeline;
+		VkPipelineLayout m_gradient_pipeline_layout;
+
+		// ---------------------------- immediate-submit ---------------------------- 
+		VkFence			m_immFence;
+		VkCommandBuffer	m_immCommandBuffer;
+		VkCommandPool	m_immCommandPool;
 
 	};
 }

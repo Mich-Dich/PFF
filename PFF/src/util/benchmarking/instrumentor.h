@@ -101,6 +101,7 @@ namespace PFF {
 				m_output_stream.flush();
 				//LOG(Error, "profile function: " << result.name);
 			}
+
 		}
 
 		static instrumentor& get() {

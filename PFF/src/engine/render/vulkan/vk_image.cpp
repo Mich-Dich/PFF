@@ -38,4 +38,40 @@ namespace PFF::render::vulkan::util {
         vkCmdPipelineBarrier2(cmd, &dependency_I);
     }
 
+    void copy_image_to_image(VkCommandBuffer cmd, VkImage source, VkImage destination, VkExtent2D srcSize, VkExtent2D dstSize) {
+    
+        VkImageBlit2 blit_region{};
+        blit_region.sType = VK_STRUCTURE_TYPE_IMAGE_BLIT_2;
+        blit_region.pNext = nullptr;
+
+        blit_region.srcOffsets[1].x = srcSize.width;
+        blit_region.srcOffsets[1].y = srcSize.height;
+        blit_region.srcOffsets[1].z = 1;
+        blit_region.srcSubresource.aspectMask = VK_IMAGE_ASPECT_COLOR_BIT;
+        blit_region.srcSubresource.baseArrayLayer = 0;
+        blit_region.srcSubresource.layerCount = 1;
+        blit_region.srcSubresource.mipLevel = 0;
+
+        blit_region.dstOffsets[1].x = dstSize.width;
+        blit_region.dstOffsets[1].y = dstSize.height;
+        blit_region.dstOffsets[1].z = 1;
+        blit_region.dstSubresource.aspectMask = VK_IMAGE_ASPECT_COLOR_BIT;
+        blit_region.dstSubresource.baseArrayLayer = 0;
+        blit_region.dstSubresource.layerCount = 1;
+        blit_region.dstSubresource.mipLevel = 0;
+
+        VkBlitImageInfo2 blit_I{};
+        blit_I.sType = VK_STRUCTURE_TYPE_BLIT_IMAGE_INFO_2;
+        blit_I.pNext = nullptr;
+        blit_I.dstImage = destination;
+        blit_I.dstImageLayout = VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL;
+        blit_I.srcImage = source;
+        blit_I.srcImageLayout = VK_IMAGE_LAYOUT_TRANSFER_SRC_OPTIMAL;
+        blit_I.filter = VK_FILTER_LINEAR;
+        blit_I.regionCount = 1;
+        blit_I.pRegions = &blit_region;
+
+        vkCmdBlitImage2(cmd, &blit_I);
+    }
+
 }

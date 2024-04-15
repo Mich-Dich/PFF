@@ -104,10 +104,25 @@
     <ClInclude Include="src\engine\render\vulkan\vendor\VkBootstrapDispatch.h">
       <Filter>engine\render\vulkan\vendor</Filter>
     </ClInclude>
+    <ClInclude Include="src\engine\render\vulkan\vendor\vk_mem_alloc.h">
+      <Filter>engine\render\vulkan\vendor</Filter>
+    </ClInclude>
+    <ClInclude Include="src\engine\render\vulkan\vk_descriptor.h">
+      <Filter>engine\render\vulkan</Filter>
+    </ClInclude>
+    <ClInclude Include="src\engine\render\vulkan\vk_device.h">
+      <Filter>engine\render\vulkan</Filter>
+    </ClInclude>
+    <ClInclude Include="src\engine\render\vulkan\vk_image.h">
+      <Filter>engine\render\vulkan</Filter>
+    </ClInclude>
     <ClInclude Include="src\engine\render\vulkan\vk_initializers.h">
       <Filter>engine\render\vulkan</Filter>
     </ClInclude>
     <ClInclude Include="src\engine\render\vulkan\vk_instance.h">
+      <Filter>engine\render\vulkan</Filter>
+    </ClInclude>
+    <ClInclude Include="src\engine\render\vulkan\vk_pipeline.h">
       <Filter>engine\render\vulkan</Filter>
     </ClInclude>
     <ClInclude Include="src\engine\render\vulkan\vk_renderer.h">
@@ -159,8 +174,6 @@
     <ClInclude Include="src\util\util.h">
       <Filter>util</Filter>
     </ClInclude>
-    <ClInclude Include="src\engine\render\vulkan\vk_device.h" />
-    <ClInclude Include="src\engine\render\vulkan\vk_image.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="src\application.cpp" />
@@ -200,7 +213,16 @@
     <ClCompile Include="src\engine\render\vulkan\vendor\VkBootstrap.cpp">
       <Filter>engine\render\vulkan\vendor</Filter>
     </ClCompile>
+    <ClCompile Include="src\engine\render\vulkan\vk_descriptor.cpp">
+      <Filter>engine\render\vulkan</Filter>
+    </ClCompile>
+    <ClCompile Include="src\engine\render\vulkan\vk_image.cpp">
+      <Filter>engine\render\vulkan</Filter>
+    </ClCompile>
     <ClCompile Include="src\engine\render\vulkan\vk_initializers.cpp">
+      <Filter>engine\render\vulkan</Filter>
+    </ClCompile>
+    <ClCompile Include="src\engine\render\vulkan\vk_pipeline.cpp">
       <Filter>engine\render\vulkan</Filter>
     </ClCompile>
     <ClCompile Include="src\engine\render\vulkan\vk_renderer.cpp">
@@ -224,6 +246,5 @@
     <ClCompile Include="src\util\timer.cpp">
       <Filter>util</Filter>
     </ClCompile>
-    <ClCompile Include="src\engine\render\vulkan\vk_image.cpp" />
   </ItemGroup>
 </Project>

@@ -95,7 +95,8 @@
       <GenerateDebugInformation>true</GenerateDebugInformation>
     </Link>
     <PostBuildEvent>
-      <Command>"../PFF/vendor/vulkan-glslc/glslc.exe" shaders/default.vert -o shaders/default.vert.spv
+      <Command>"../PFF/vendor/vulkan-glslc/glslc.exe" shaders/gradient.comp -o shaders/gradient.comp.spv
+"../PFF/vendor/vulkan-glslc/glslc.exe" shaders/default.vert -o shaders/default.vert.spv
 "../PFF/vendor/vulkan-glslc/glslc.exe" shaders/default.frag -o shaders/default.frag.spv</Command>
     </PostBuildEvent>
   </ItemDefinitionGroup>
@@ -124,7 +125,8 @@
       <OptimizeReferences>true</OptimizeReferences>
     </Link>
     <PostBuildEvent>
-      <Command>"../PFF/vendor/vulkan-glslc/glslc.exe" shaders/default.vert -o shaders/default.vert.spv
+      <Command>"../PFF/vendor/vulkan-glslc/glslc.exe" shaders/gradient.comp -o shaders/gradient.comp.spv
+"../PFF/vendor/vulkan-glslc/glslc.exe" shaders/default.vert -o shaders/default.vert.spv
 "../PFF/vendor/vulkan-glslc/glslc.exe" shaders/default.frag -o shaders/default.frag.spv</Command>
     </PostBuildEvent>
   </ItemDefinitionGroup>
@@ -151,7 +153,8 @@
       <OptimizeReferences>true</OptimizeReferences>
     </Link>
     <PostBuildEvent>
-      <Command>"../PFF/vendor/vulkan-glslc/glslc.exe" shaders/default.vert -o shaders/default.vert.spv
+      <Command>"../PFF/vendor/vulkan-glslc/glslc.exe" shaders/gradient.comp -o shaders/gradient.comp.spv
+"../PFF/vendor/vulkan-glslc/glslc.exe" shaders/default.vert -o shaders/default.vert.spv
 "../PFF/vendor/vulkan-glslc/glslc.exe" shaders/default.frag -o shaders/default.frag.spv</Command>
     </PostBuildEvent>
   </ItemDefinitionGroup>

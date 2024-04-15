@@ -26,6 +26,7 @@ namespace PFF {
 		system_state get_state() const { return m_state; }
 		void set_state(system_state state) { m_state = state; }
 
+		virtual void init_imgui() = 0;
 		virtual void draw_frame(f32 delta_time) = 0;
 		virtual void refresh(f32 delta_time) = 0;
 		virtual void set_size(u32 width, u32 height) = 0;

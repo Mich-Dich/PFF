@@ -60,6 +60,8 @@ project "PFF_editor"
 		
 		postbuildcommands
 		{
+			'"%{glslc}" shaders/gradient.comp -o shaders/gradient.comp.spv',
+
 			'"%{glslc}" shaders/default.vert -o shaders/default.vert.spv',
 			'"%{glslc}" shaders/default.frag -o shaders/default.frag.spv',
 		}			

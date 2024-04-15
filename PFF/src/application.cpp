@@ -149,7 +149,7 @@ namespace PFF {
 			// engine render
 			m_renderer->draw_frame(m_delta_time);
 
-			fps_timer.limit_fps(m_limit_fps, m_fps, m_delta_time, m_work_time, m_sleep_time);
+			//fps_timer.limit_fps(m_limit_fps, m_fps, m_delta_time, m_work_time, m_sleep_time);
 		}
 
 		m_renderer->wait_idle();
