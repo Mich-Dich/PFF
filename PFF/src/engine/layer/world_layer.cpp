@@ -10,7 +10,7 @@ namespace PFF {
 	/*
 	world_layer::world_layer() {
 
-		PFF_PROFILE_FUNCTION();
+		CORE_LOG_INIT();
 
 		//m_current_map = std::make_shared<game_map>();
 		m_editor_camera = std::make_shared<camera>();
@@ -25,13 +25,12 @@ namespace PFF {
 
 	world_layer::~world_layer() {
 
-		PFF_PROFILE_FUNCTION();
 
 		m_player_controller.reset();
 		m_editor_camera.reset();
 		//m_current_map.reset();
 
-		CORE_LOG(Trace, "Shutdown");
+		CORE_LOG_SHUTDOWN();
 	}
 
 	void world_layer::on_attach() {
@@ -65,6 +64,8 @@ namespace PFF {
 	}
 
 	void world_layer::on_imgui_render() {
+	
+		#error Implement performance display first 
 	}
 */
 

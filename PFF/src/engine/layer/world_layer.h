@@ -29,7 +29,7 @@ namespace PFF {
 		virtual void on_detach();
 		virtual void on_update(const f32 delta_time);
 		virtual void on_event(event& event);
-		virtual void on_imgui_render();
+		virtual void on_imgui_render();			#error Implement performance display
 
 	private:
 

@@ -43,17 +43,14 @@ project "PFF"
 	links
 	{
 		"glfw",
-		"ImGui",
+		"imgui",
         "%{Library.Vulkan}",
 	}
 
 	libdirs 
 	{
-		--"PFF/libs",
-		--"%{IncludeDir.ImGui}/bin/" .. outputs .. "/ImGui",
-		--   "PFF/vendor/glfw/lib-vc2022",
-
-        "%{IncludeDir.VulkanSDK}/lib"
+		"vendor/imgui/bin/Debug-windows-x86_64/ImGui",
+        "%{IncludeDir.VulkanSDK}/lib",
 	}
 	
 	filter "system:windows"

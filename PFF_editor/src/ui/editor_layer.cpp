@@ -1,13 +1,13 @@
 
 #include <util/pch_editor.h>
 
-#include <imgui.h>
+//#include <imgui.h>
 
 //#include "util/io/serializer.h"
 #include "util/ui/panels/pannel_collection.h"
 #include "engine/platform/pff_window.h"
 #include "util/color_theme.h"
-#include "engine/layer/imgui_layer.h"
+#include "engine/layer/imgui_debug_layer.h"
 
 #include "toolkit/todo_list/todo_list.h"
 /*
@@ -21,25 +21,19 @@
 
 namespace PFF {
 
-	/*
-	//static toolkit::todo::todo_list* s_todo_list;
+	editor_layer::editor_layer(ImGuiContext* context) : layer("editor_layer"), m_context(context) { LOG_INIT(); }
 
-	editor_layer::editor_layer(ImGuiContext* context)
-		: m_context(context) {
+	editor_layer::~editor_layer() { LOG_SHUTDOWN(); }
 
-		//UI::THEME::update_UI_theme();
-	}
 
-	editor_layer::~editor_layer() {
-
-		LOG(Info, "Shutdown");
-	}
 
 	void editor_layer::on_attach() {
 
-		m_swapchain_supported_presentmodes = application::get().get_renderer()->get_swapchain_suported_present_modes();
-		for (auto mode : m_swapchain_supported_presentmodes)
-			m_swapchain_supported_presentmodes_str.push_back(present_mode_to_str(mode));
+		m_context = ImGui::CreateContext();
+
+		//m_swapchain_supported_presentmodes = application::get().get_renderer()->get_swapchain_suported_present_modes();
+		//for (auto mode : m_swapchain_supported_presentmodes)
+		//	m_swapchain_supported_presentmodes_str.push_back(present_mode_to_str(mode));
 
 		//s_todo_list = new toolkit::todo::todo_list();
 	}
@@ -61,23 +55,28 @@ namespace PFF {
 
 		ImGui::SetCurrentContext(m_context);
 
-		window_main_menu_bar();
-		// window_main_content();
+		//ImGuiWindowFlags window_flags{};
+		//if (ImGui::Begin("Test_window", &m_show_details, window_flags)) {}
+		//ImGui::End();
 
-		window_general_debugger();
-		window_outliner();
-		window_details();
-		window_world_settings();
-		window_content_browser_0();
-		window_content_browser_1();
 
-		window_graphics_engine_settings();
-		window_editor_settings();
-		window_general_settings();
-		
-		PFF::toolkit::todo::window_todo_list();
-
-		ImGui::ShowDemoWindow();				// DEV-ONLY
+		//window_main_menu_bar();
+		//// window_main_content();
+		//
+		//window_general_debugger();
+		//window_outliner();
+		//window_details();
+		//window_world_settings();
+		//window_content_browser_0();
+		//window_content_browser_1();
+		//
+		//window_graphics_engine_settings();
+		//window_editor_settings();
+		//window_general_settings();
+		//
+		//PFF::toolkit::todo::window_todo_list();
+				
+		//ImGui::ShowDemoWindow();				// DEV-ONLY
 	}
 
 
@@ -95,9 +94,9 @@ namespace PFF {
 		window_flags |= ImGuiWindowFlags_NoTitleBar | ImGuiWindowFlags_NoCollapse | ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoMove | ImGuiWindowFlags_NoScrollbar | ImGuiWindowFlags_NoScrollWithMouse;
 		window_flags |= ImGuiWindowFlags_NoBringToFrontOnFocus | ImGuiWindowFlags_NoNavFocus | ImGuiWindowFlags_NoDecoration | ImGuiWindowFlags_NoNav;
 		// window_flags |= ImGuiWindowFlags_MenuBar;
-		
+
 		// ImGui::PushStyleColor(ImGuiCol_WindowBg, PFF_UI_ACTIVE_THEME->WindowBg);
-		ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, ImVec2(0,0));
+		ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, ImVec2(0, 0));
 		ImGui::PushStyleVar(ImGuiStyleVar_WindowRounding, 0.f);
 		ImGui::PushStyleVar(ImGuiStyleVar_WindowBorderSize, 0.f);
 		ImGui::Begin("appliaction_titlebar", nullptr, window_flags);
@@ -106,7 +105,7 @@ namespace PFF {
 
 		const bool is_maximized = application::get_window()->is_maximized();
 		float titlebar_vertical_offset = is_maximized ? 6.f : 0.f;
-		
+
 		ImGui::SetCursorPos(ImVec2(0.f, titlebar_vertical_offset));
 		ImVec2 titlebar_min = ImGui::GetCursorScreenPos();
 		const ImVec2 titlebar_max = { ImGui::GetCursorScreenPos().x + ImGui::GetWindowWidth(),
@@ -141,9 +140,9 @@ namespace PFF {
 		ImGui::SetCursorPos(ImVec2(0.f, titlebar_vertical_offset));
 
 #if 1	// FOR DEBUG VISAUL
-		ImGui::InvisibleButton("##titlebar_drag_zone", ImVec2(button_area_width, titlebar_height ));
+		ImGui::InvisibleButton("##titlebar_drag_zone", ImVec2(button_area_width, titlebar_height));
 #else
-		ImGui::Button("##titlebar_drag_zone", ImVec2(button_area_width, titlebar_height ));
+		ImGui::Button("##titlebar_drag_zone", ImVec2(button_area_width, titlebar_height));
 #endif // 1
 
 		application::get().set_titlebar_hovered(ImGui::IsItemHovered());
@@ -154,19 +153,19 @@ namespace PFF {
 
 		}
 
-		const ImVec2 window_padding = { style->WindowPadding.x / 2,style->WindowPadding.y + 3.f};
+		const ImVec2 window_padding = { style->WindowPadding.x / 2,style->WindowPadding.y + 3.f };
 
 		ImGui::SetItemAllowOverlap();
-		ImGui::PushFont(application::get().get_imgui_layer()->get_font("giant"));
+		//ImGui::PushFont(application::get().get_imgui_layer()->get_font("giant"));
 		ImGui::SetCursorPos(ImVec2(25, ((titlebar_height - ImGui::GetFontSize() + titlebar_vertical_offset) / 2)));
 		ImGui::Text("PFF Editor");
-		ImGui::PopFont();
+		//ImGui::PopFont();
 
-		ImGui::SetCursorPos(ImVec2(viewport->Size.x - (window_padding.x + (button_spaccing * 2) + (button_width * 3)), window_padding.y + titlebar_vertical_offset ));
+		ImGui::SetCursorPos(ImVec2(viewport->Size.x - (window_padding.x + (button_spaccing * 2) + (button_width * 3)), window_padding.y + titlebar_vertical_offset));
 		if (ImGui::Button("_##Min", ImVec2(button_width, button_width)))
 			application::get().minimize_window();
 
-		ImGui::SetCursorPos(ImVec2(viewport->Size.x - (window_padding.x + (button_spaccing * 1) + (button_width * 2)), window_padding.y + titlebar_vertical_offset ));
+		ImGui::SetCursorPos(ImVec2(viewport->Size.x - (window_padding.x + (button_spaccing * 1) + (button_width * 2)), window_padding.y + titlebar_vertical_offset));
 		if (ImGui::Button("O##Max", ImVec2(button_width, button_width))) {
 			if (is_maximized)
 				application::get().restore_window();
@@ -174,7 +173,7 @@ namespace PFF {
 				application::get().maximize_window();
 		}
 
-		ImGui::SetCursorPos(ImVec2(viewport->Size.x - (window_padding.x + button_width), window_padding.y + titlebar_vertical_offset ));
+		ImGui::SetCursorPos(ImVec2(viewport->Size.x - (window_padding.x + button_width), window_padding.y + titlebar_vertical_offset));
 		if (ImGui::Button("X##Close", ImVec2(button_width, button_width)))
 			application::get().close_application();
 
@@ -210,8 +209,8 @@ namespace PFF {
 
 		if (!m_show_general_debugger)
 			return;
-		
-		ImGuiWindowFlags window_flags = ImGuiWindowFlags_NoTitleBar ;
+
+		ImGuiWindowFlags window_flags = ImGuiWindowFlags_NoTitleBar;
 		if (ImGui::Begin("Editor Debugger", &m_show_general_debugger, window_flags)) {
 
 			if (ImGui::BeginTabBar("##tabs", ImGuiTabBarFlags_None)) {
@@ -220,6 +219,7 @@ namespace PFF {
 				ImGui::SetNextItemWidth(tab_width);
 				if (ImGui::BeginTabItem("Inputs")) {
 
+					/*					
 					UI::begin_default_table("display_input_actions_params");
 					for (input_action* action : *application::get().get_world_layer()->get_current_player_controller()->get_input_mapping()) {						// get input_action
 
@@ -245,6 +245,7 @@ namespace PFF {
 						}
 					}
 					UI::end_default_table();
+					*/
 
 					ImGui::EndTabItem();
 				}
@@ -285,7 +286,7 @@ namespace PFF {
 
 		ImGuiWindowFlags window_flags = ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoMove | ImGuiWindowFlags_NoScrollbar | ImGuiWindowFlags_NoScrollWithMouse | ImGuiWindowFlags_NoCollapse;
 		if (ImGui::Begin("Viewport", nullptr, window_flags)) {
-		
+
 		}
 		ImGui::End();
 	}
@@ -388,90 +389,90 @@ namespace PFF {
 			ImGui::PopStyleColor();
 			ImGui::PopStyleVar(3);
 
-		}, [&] {
-		
-			if (item_current_idx == 0) {		// [General_settings] in array [items]
+			}, [&] {
 
-				ImGui::BeginGroup();
-				static u32 present_mode_selected = 0;
-				if (ImGui::CollapsingHeader("Swapchain##GraphicsSettings", ImGuiTreeNodeFlags_DefaultOpen)) {
+				if (item_current_idx == 0) {		// [General_settings] in array [items]
 
-					static int selected = 1;
+					ImGui::BeginGroup();
+					static u32 present_mode_selected = 0;
+					if (ImGui::CollapsingHeader("Swapchain##GraphicsSettings", ImGuiTreeNodeFlags_DefaultOpen)) {
 
-					if (ImGui::Button(" ? ##Present_mode_popup"))
-						ImGui::OpenPopup("present_mode_explanations");
+						static int selected = 1;
 
-					ImGui::SameLine();
-					ImGui::SetNextItemWidth(UI::THEME::default_item_width);
-					if (ImGui::Combo("##Present_mode_selector", &selected, m_swapchain_supported_presentmodes_str.data(), static_cast<int>(m_swapchain_supported_presentmodes_str.size()))) {
+						if (ImGui::Button(" ? ##Present_mode_popup"))
+							ImGui::OpenPopup("present_mode_explanations");
 
-						LOG(Fatal, "NOT IMPLEMENTED YET")
+						ImGui::SameLine();
+						ImGui::SetNextItemWidth(UI::THEME::default_item_width);
+						if (ImGui::Combo("##Present_mode_selector", &selected, m_swapchain_supported_presentmodes_str.data(), static_cast<int>(m_swapchain_supported_presentmodes_str.size()))) {
+
+							LOG(Fatal, "NOT IMPLEMENTED YET")
+						}
+						ImGui::SameLine();
+						ImGui::Text("Choose swapchain present mode of the [swapchain] for optimal performance and visual quality");
+
+
 					}
-					ImGui::SameLine();
-					ImGui::Text("Choose swapchain present mode of the [swapchain] for optimal performance and visual quality");
 
+					if (ImGui::BeginPopup("present_mode_explanations")) {
+
+						ImGui::Text("Explenations for possible present modes:");
+						ImGui::Separator();
+
+						ImGui::Text("Immediate");
+						ImGui::Indent(10.f);
+						ImGui::Text("The presentation engine does not wait for a vertical blanking period to update the current image,\n"
+							"meaning this mode may result in visible tearing. No internal queuing of presentation requests is needed,\n"
+							"as the requests are applied immediately.");
+						ImGui::Indent(-10.f);
+
+						ImGui::Text("Mailbox");
+						ImGui::Indent(10.f);
+						ImGui::Text("The presentation engine waits for the next vertical blanking period to update the current image,\n"
+							"preventing tearing. It maintains a single-entry queue for pending presentation requests.\n"
+							"If the queue is full, new requests replace existing ones, ensuring timely processing during each vertical blanking period.");
+						ImGui::Indent(-10.f);
+
+						ImGui::Text("FiFo (First-In, First-Out)");
+						ImGui::Indent(10.f);
+						ImGui::Text("Similar to Mailbox, the presentation engine waits for the next vertical blanking period to update the current image,\n"
+							"avoiding tearing. Pending presentation requests are queued, with new requests added to the end and processed in order\n"
+							"during each non-empty blanking period.");
+						ImGui::Indent(-10.f);
+
+						ImGui::Text("Relaxed FiFo");
+						ImGui::Indent(10.f);
+						ImGui::Text("The presentation engine typically waits for the next vertical blanking period to update the current image.\n"
+							"However, if a blanking period has passed since the last update, it may update immediately, potentially resulting in tearing.\n"
+							"It uses a queue for pending presentation requests, ensuring timely processing.");
+						ImGui::Indent(-10.f);
+
+						ImGui::Text("Shared Demand Refresh");
+						ImGui::Indent(10.f);
+						ImGui::Text("The presentation engine and application share access to a single image.\n"
+							"The engine updates the image only after receiving a presentation request,\n"
+							"while the application must request updates as needed. Tearing may occur since updates can happen at any point.");
+						ImGui::Indent(-10.f);
+
+						ImGui::Text("Shared Continuous Refresh");
+						ImGui::Indent(10.f);
+						ImGui::Text("Both the presentation engine and application have access to a shared image.\n"
+							"The engine periodically updates the image on its regular refresh cycle without needing additional requests from the application.\n"
+							"However, if rendering is not timed correctly, tearing may occur.");
+						ImGui::Indent(-10.f);
+
+						ImGui::EndPopup();
+					}
+
+
+					ImGui::EndGroup();
+				}
+
+				if (item_current_idx == 0) {		// [General_settings] in array [items]
 
 				}
 
-				if (ImGui::BeginPopup("present_mode_explanations")) {
-
-					ImGui::Text("Explenations for possible present modes:");
-					ImGui::Separator();
-
-					ImGui::Text("Immediate");
-					ImGui::Indent(10.f);
-					ImGui::Text("The presentation engine does not wait for a vertical blanking period to update the current image,\n"
-						"meaning this mode may result in visible tearing. No internal queuing of presentation requests is needed,\n"
-						"as the requests are applied immediately.");
-					ImGui::Indent(-10.f);
-
-					ImGui::Text("Mailbox");
-					ImGui::Indent(10.f);
-					ImGui::Text("The presentation engine waits for the next vertical blanking period to update the current image,\n"
-						"preventing tearing. It maintains a single-entry queue for pending presentation requests.\n"
-						"If the queue is full, new requests replace existing ones, ensuring timely processing during each vertical blanking period.");
-					ImGui::Indent(-10.f);
-
-					ImGui::Text("FiFo (First-In, First-Out)");
-					ImGui::Indent(10.f);
-					ImGui::Text("Similar to Mailbox, the presentation engine waits for the next vertical blanking period to update the current image,\n"
-						"avoiding tearing. Pending presentation requests are queued, with new requests added to the end and processed in order\n"
-						"during each non-empty blanking period.");
-					ImGui::Indent(-10.f);
-
-					ImGui::Text("Relaxed FiFo");
-					ImGui::Indent(10.f);
-					ImGui::Text("The presentation engine typically waits for the next vertical blanking period to update the current image.\n"
-						"However, if a blanking period has passed since the last update, it may update immediately, potentially resulting in tearing.\n"
-						"It uses a queue for pending presentation requests, ensuring timely processing.");
-					ImGui::Indent(-10.f);
-
-					ImGui::Text("Shared Demand Refresh");
-					ImGui::Indent(10.f);
-					ImGui::Text("The presentation engine and application share access to a single image.\n"
-						"The engine updates the image only after receiving a presentation request,\n"
-						"while the application must request updates as needed. Tearing may occur since updates can happen at any point.");
-					ImGui::Indent(-10.f);
-
-					ImGui::Text("Shared Continuous Refresh");
-					ImGui::Indent(10.f);
-					ImGui::Text("Both the presentation engine and application have access to a shared image.\n"
-						"The engine periodically updates the image on its regular refresh cycle without needing additional requests from the application.\n"
-						"However, if rendering is not timed correctly, tearing may occur.");
-					ImGui::Indent(-10.f);
-
-					ImGui::EndPopup();
-				}
-
-
-				ImGui::EndGroup();
-			}
-
-			if (item_current_idx == 0) {		// [General_settings] in array [items]
-
-			}
-			
-		});
+				});
 
 		ImGui::End();
 	}
@@ -481,7 +482,7 @@ namespace PFF {
 
 	void editor_layer::window_general_settings() {
 	}
-	
+
 	void draw_todo_item(const char* title, const char* description) {
 
 	}
@@ -519,7 +520,7 @@ namespace PFF {
 					application::get().close_application();
 				ImGui::EndMenu();
 			}
-			
+
 			if (ImGui::BeginMenu("Edit")) {
 				if (ImGui::MenuItem("Undo", "CTRL+Z")) {}
 				if (ImGui::MenuItem("Redo", "CTRL+Y", false, false)) {}  // Disabled item
@@ -529,7 +530,7 @@ namespace PFF {
 				if (ImGui::MenuItem("Paste", "CTRL+V")) {}
 				ImGui::EndMenu();
 			}
-			
+
 			if (ImGui::BeginMenu("settings")) {
 				if (ImGui::MenuItem("General Settings"))
 					m_show_general_settings = true;
@@ -645,7 +646,7 @@ namespace PFF {
 				}
 				ImGui::EndMenu();
 			}
-			
+
 			if (ImGui::BeginMenu("Windows")) {
 
 				ImGui::MenuItem("ToDo List", "", &PFF::toolkit::todo::s_show_todo_list);
@@ -655,7 +656,6 @@ namespace PFF {
 			ImGui::EndMenuBar();
 		}
 	}
-	*/
 }
 
 

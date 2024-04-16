@@ -149,6 +149,9 @@ namespace APP_NAMESPACE {
 
 	#define CORE_LOG(severity, message)			CORE_LOG_##severity(message)
 
+	#define CORE_LOG_INIT()						CORE_LOG(Trace, "init");
+	#define CORE_LOG_SHUTDOWN()						CORE_LOG(Trace, "shutdown");
+
 		// ---------------------------------------------------------------------------  Assertion & Validation  ---------------------------------------------------------------------------
 
 	#if ENABLED_LOGGING_OF_ASSERTS
@@ -263,3 +266,7 @@ namespace APP_NAMESPACE {
 	#define VALIDATE(expr, ReturnCommand, successMsg, failureMsg)						if (!(expr)) { ReturnCommand; }
 	#define VALIDATE_S(expr, ReturnCommand)												if (!(expr)) { ReturnCommand; }
 #endif // ENABLE_LOGGING_OF_CLIENT_VALIDATION
+
+	#define LOG_INIT()							LOG(Trace, "init");
+	#define LOG_SHUTDOWN()						LOG(Trace, "shutdown");
+

@@ -5,6 +5,8 @@
 
 #include "vk_types.h"
 
+class PFF::layer_stack;
+
 namespace PFF::render::vulkan {
 
 
@@ -41,19 +43,21 @@ namespace PFF::render::vulkan {
 	class vk_renderer : public PFF::renderer {
 	public:
 
-		vk_renderer(ref<pff_window> window);
+		vk_renderer(ref<pff_window> window, ref<PFF::layer_stack> layer_stack);
 		~vk_renderer();
 
 		FORCEINLINE f32 get_aspect_ratio() { return 1.f; };			// UNFINISHED
 
 		// init functions
-		void init_imgui() override;
+		void imgui_init() override;
+		void imgui_shutdown() override;
 
 		// work functions
 		void draw_frame(f32 delta_time) override;
 		void refresh(f32 delta_time) override;
 		void set_size(u32 width, u32 height) override;
 		void wait_idle() override;
+		void immediate_submit(std::function<void()>&& function) override;
 		void immediate_submit(std::function<void(VkCommandBuffer cmd)>&& function); // Improvement => run this on a different queue than the graphics_queue, so it can overlap the execution with the main render loop.
 
 	private:
@@ -68,11 +72,13 @@ namespace PFF::render::vulkan {
 		void destroy_swapchain();
 
 		void draw_internal(VkCommandBuffer cmd);
+		void draw_imgui(VkCommandBuffer cmd, VkImageView targetImageView);
 		void create_swapchain(u32 width, u32 height);
 				
 		bool m_is_initialized = false;
 		int m_frame_number = 0;
-		ref<pff_window> m_window;
+		ref<pff_window> m_window{};
+		ref<PFF::layer_stack> m_layer_stack;
 
 		// ---------------------------- instance ---------------------------- 
 		VkInstance					m_instance;			// Vulkan library handle
@@ -93,25 +99,26 @@ namespace PFF::render::vulkan {
 		std::vector<VkImageView>	m_swapchain_image_views;
 		VkExtent2D					m_swapchain_extent;
 
-		deletion_queue m_deletion_queue;
-		VmaAllocator m_allocator;
+		deletion_queue				m_deletion_queue;
+		VmaAllocator				m_allocator;
 
-		vk_image m_draw_image;
-		VkExtent2D m_draw_extent;
+		vk_image					m_draw_image;
+		VkExtent2D					m_draw_extent;
 
 		// ---------------------------- descriptors ---------------------------- 
-		descriptor_allocator global_descriptor_allocator;
-		VkDescriptorSet m_draw_image_descriptors;
-		VkDescriptorSetLayout m_draw_image_descriptor_layout;
+		descriptor_allocator		global_descriptor_allocator;
+		VkDescriptorSet				m_draw_image_descriptors;
+		VkDescriptorSetLayout		m_draw_image_descriptor_layout;
 		
 		// ---------------------------- pipelines ---------------------------- 
-		VkPipeline m_gradient_pipeline;
-		VkPipelineLayout m_gradient_pipeline_layout;
+		VkPipeline					m_gradient_pipeline;
+		VkPipelineLayout			m_gradient_pipeline_layout;
 
 		// ---------------------------- immediate-submit ---------------------------- 
-		VkFence			m_immFence;
-		VkCommandBuffer	m_immCommandBuffer;
-		VkCommandPool	m_immCommandPool;
+		VkFence						m_immFence;
+		VkCommandBuffer				m_immCommandBuffer;
+		VkCommandPool				m_immCommandPool;
 
+		VkDescriptorPool			m_imgui_desc_pool;
 	};
 }

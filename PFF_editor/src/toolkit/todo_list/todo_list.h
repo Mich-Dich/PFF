@@ -189,7 +189,7 @@ namespace PFF::toolkit::todo {
 				const ImVec2 text_size = ImGui::CalcTextSize("Add X ");
 				const f32 textbox_width = inner_width - (text_size.x + (style->ItemSpacing.x * 2) + (style->FramePadding.x * 4) + 1);
 
-				ImGui::BeginHorizontal("##Add_todo_dialog");
+				//ImGui::BeginHorizontal("##Add_todo_dialog");
 
 				PFF::UI::shift_cursor_pos(inner_padding, (button_size.y - ImGui::GetTextLineHeightWithSpacing()) / 2);
 				ImGui::SetNextItemWidth(textbox_width);
@@ -204,7 +204,7 @@ namespace PFF::toolkit::todo {
 				if (UI::add_gray_button(" X ##cancle_todo_add_topic"))
 					topic_buf.reset();
 
-				ImGui::EndHorizontal();
+				//ImGui::EndHorizontal();
 			}
 
 			UI::shift_cursor_pos(inner_padding + 5, 10);

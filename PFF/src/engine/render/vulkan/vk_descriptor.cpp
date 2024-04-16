@@ -56,19 +56,19 @@ namespace PFF::render::vulkan {
         pool_info.poolSizeCount = (uint32_t)poolSizes.size();
         pool_info.pPoolSizes = poolSizes.data();
 
-        vkCreateDescriptorPool(device, &pool_info, nullptr, &pool);
+        vkCreateDescriptorPool(device, &pool_info, nullptr, &m_pool);
     }
 
-    void descriptor_allocator::clear_descriptors(VkDevice device) { vkResetDescriptorPool(device, pool, 0); }
+    void descriptor_allocator::clear_descriptors(VkDevice device) { vkResetDescriptorPool(device, m_pool, 0); }
 
-    void descriptor_allocator::destroy_pool(VkDevice device) { vkDestroyDescriptorPool(device, pool, nullptr); }
+    void descriptor_allocator::destroy_pool(VkDevice device) { vkDestroyDescriptorPool(device, m_pool, nullptr); }
 
     VkDescriptorSet descriptor_allocator::allocate(VkDevice device, VkDescriptorSetLayout layout) {
 
         VkDescriptorSetAllocateInfo alloc_I = {};
         alloc_I.sType = VK_STRUCTURE_TYPE_DESCRIPTOR_SET_ALLOCATE_INFO;
         alloc_I.pNext = nullptr;
-        alloc_I.descriptorPool = pool;
+        alloc_I.descriptorPool = m_pool;
         alloc_I.descriptorSetCount = 1;
         alloc_I.pSetLayouts = &layout;
 

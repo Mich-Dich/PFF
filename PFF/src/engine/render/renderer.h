@@ -26,18 +26,24 @@ namespace PFF {
 		system_state get_state() const { return m_state; }
 		void set_state(system_state state) { m_state = state; }
 
-		virtual void init_imgui() = 0;
+		// --------------- ImGui ----------------
+		virtual void imgui_init() = 0;
+		virtual void imgui_shutdown() = 0;
+
+		// --------------- renderer ----------------
 		virtual void draw_frame(f32 delta_time) = 0;
 		virtual void refresh(f32 delta_time) = 0;
 		virtual void set_size(u32 width, u32 height) = 0;
 		virtual f32 get_aspect_ratio() = 0;
 		virtual void wait_idle() = 0;
+		virtual void immediate_submit(std::function<void()>&& function) = 0;
 
 		static render_api s_render_api;
 		system_state m_state = system_state::inactive;
 
-	private:
 
+		bool m_imgui_initalized = false;
+	private:
 
 	};
 }

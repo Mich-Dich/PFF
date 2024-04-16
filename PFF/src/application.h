@@ -3,7 +3,7 @@
 #include "util/pffpch.h"
 
 #include "engine/layer/layer_stack.h"			// need to include this for some reason
-#include "engine/layer/imgui_layer.h"
+#include "engine/layer/imgui_debug_layer.h"
 #include "engine/layer/world_layer.h"
 #include "engine/render/renderer.h"
 #include "util/timer.h"
@@ -31,15 +31,15 @@ namespace PFF {
 		DELETE_COPY(application);
 
 		FORCEINLINE f64 get_delta_time() const							{ return m_delta_time; }
-		FORCEINLINE USE_IN_EDITOR void push_overlay(layer* overlay)		{ m_layerstack.push_overlay(overlay); }
-		FORCEINLINE USE_IN_EDITOR void pop_overlay(layer* overlay)		{ m_layerstack.pop_overlay(overlay); }
+		FORCEINLINE USE_IN_EDITOR void push_overlay(layer* overlay)		{ m_layerstack->push_overlay(overlay); }
+		FORCEINLINE USE_IN_EDITOR void pop_overlay(layer* overlay)		{ m_layerstack->pop_overlay(overlay); }
 		FORCEINLINE u32 get_target_fps() const							{ return m_target_fps; }
 		FORCEINLINE bool get_limit_fps() const							{ return m_limit_fps; }
 		FORCEINLINE void set_titlebar_hovered(bool value)				{ m_is_titlebar_hovered = value; }
 
 		// static
 		FORCEINLINE static application& get()							{ return *s_instance; }
-		//FORCEINLINE static imgui_layer* get_imgui_layer()				{ return m_imgui_layer; }
+		//FORCEINLINE static imgui_debug_layer* get_imgui_layer()			{ return m_imgui_debug_layer; }
 		//FORCEINLINE static world_layer* get_world_layer()				{ return m_world_layer; }
 		//FORCEINLINE static ref<game_map> get_current_map()				{ return m_world_layer->get_current_map(); }
 		FORCEINLINE static ref<pff_window> get_window()					{ return m_window; }
@@ -60,8 +60,8 @@ namespace PFF {
 		void get_fps_values(bool& limit_fps, u32& target_fps, u32& current_fps, f32& work_time, f32& sleep_time);
 
 		virtual bool init();								// to be used by client
-		virtual bool update(const f32 delta_time);			// potentally make private - every actor has own function (like UNREAL)
-		virtual bool render(const f32 delta_time);			// potentally make private - every actor has own function (like UNREAL)
+		virtual bool update(const f32 delta_time);
+		virtual bool render(const f32 delta_time);
 		virtual bool shutdown();							// to be used by client
 
 	private:
@@ -79,10 +79,10 @@ namespace PFF {
 		static ref<pff_window> m_window;
 		static bool m_is_titlebar_hovered;
 		static bool m_running;
-		//static imgui_layer* m_imgui_layer;
+		static imgui_debug_layer* m_imgui_debug_layer;
 		//static world_layer* m_world_layer;
 
-		layer_stack m_layerstack{};
+		ref<layer_stack> m_layerstack{};
 		std::vector<event> m_event_queue;		// TODO: change to queue
 		ref<game_map> m_current_map = nullptr;
 

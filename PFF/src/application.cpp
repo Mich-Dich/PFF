@@ -11,7 +11,7 @@
 
 #include "engine/layer/layer_stack.h"
 #include "engine/layer/layer.h"
-#include "engine/layer/imgui_layer.h"
+#include "engine/layer/imgui_debug_layer.h"
 
 #include "engine/platform/pff_window.h"
 //#include "engine/map/game_map.h"
@@ -35,7 +35,7 @@ namespace PFF {
 	application* application::s_instance = nullptr;
 	ref<renderer> application::m_renderer;
 	ref<pff_window> application::m_window;
-	//imgui_layer* application::m_imgui_layer;
+	imgui_debug_layer* application::m_imgui_debug_layer;
 	//world_layer* application::m_world_layer;
 	bool application::m_is_titlebar_hovered;
 	bool application::m_running;
@@ -49,21 +49,24 @@ namespace PFF {
 		PFF_PROFILE_FUNCTION();
 
 		CORE_ASSERT(!s_instance, "", "Application already exists");
-		s_instance = this;
 
+		CORE_LOG_INIT();
+		s_instance = this;
 		config::init();
 
 		// init FPS system
 		fps_timer = timer();
 		fps_timer.set_fps_settings(m_target_fps);
 
+		m_layerstack = create_ref<layer_stack>();
+
 		m_window = std::make_shared<pff_window>();			// Can be called after inital setup like [compiling shaders]
 		m_window->set_event_callback(BIND_FN(application::on_event));
 		
 		// =========================== RENDER_INIT ===========================
-		m_renderer = create_ref<render::vulkan::vk_renderer>(m_window);
+		m_renderer = create_ref<render::vulkan::vk_renderer>(m_window, m_layerstack);
+		
 		//renderer::set_api(PFF::render_api::Vulkan);
-
 		//switch (renderer::get_api()) {
 		//	case PFF::render_api::none:
 		//		break;
@@ -82,40 +85,41 @@ namespace PFF {
 		//		break;
 		//}
 
-
 		//m_world_layer = new world_layer();
 		//m_layerstack.push_layer(m_world_layer);
-
-		//m_imgui_layer = new imgui_layer(m_renderer);
-		//m_layerstack.push_overlay(m_imgui_layer);
-
 		//m_renderer->set_world_Layer(m_world_layer);
-		//m_renderer->set_state(system_state::active);
 
+		m_imgui_debug_layer = new imgui_debug_layer();
+		m_layerstack->push_overlay(m_imgui_debug_layer);
+
+		m_renderer->set_state(system_state::active);
 		m_is_titlebar_hovered = false;
 		m_running = true;
 
-		init();												// init user code / potentally make every actor have own function (like UNREAL)
+		CORE_ASSERT(init(), "", "client defint init() has failed");			// init user code / potentally make every actor have own function (like UNREAL)
 		PFF_PROFILE_END_SESSION();
 	}
 
 	application::~application() {
 
 		PFF_PROFILE_BEGIN_SESSION("shutdown", "benchmarks", "PFF_benchmark_shutdown.json");
-		shutdown();
+		CORE_ASSERT(shutdown(), "", "client defint shutdown() has failed");			// init user code / potentally make every actor have own function (like UNREAL)
+
+		m_renderer->set_state(system_state::inactive);
 
 		//m_current_map.reset();
 
-		//m_layerstack.pop_overlay(m_imgui_layer);
-		//delete m_imgui_layer;
+		m_layerstack->pop_overlay(m_imgui_debug_layer);
+		delete m_imgui_debug_layer;
 
 		//m_layerstack.pop_layer(m_world_layer);
 		//delete m_world_layer;
 
+		m_layerstack.reset();
 		m_renderer.reset();
 		m_window.reset();
 
-		CORE_LOG(Info, "shutdown");
+		CORE_LOG_SHUTDOWN();
 		PFF_PROFILE_END_SESSION();
 	}
 
@@ -127,29 +131,22 @@ namespace PFF {
 
 		m_window->show_window();
 		m_window->poll_events();
+
 		fps_timer.start_measurement();
 
 		while (m_running) {
 
-			PFF_PROFILE_SCOPE("run");
-
-			// update internal state
-			m_window->poll_events();
-
-			// client update
-			update(m_delta_time);					// update app instance, top most level
+			PFF_PROFILE_SCOPE("run");			
+			m_window->poll_events();				// update internal state
 			
-			// engine update
-			for (layer* layer : m_layerstack)		// update all layers [world_layer, imgui_layer]
+			update(m_delta_time);					// client update
+			for (layer* layer : *m_layerstack)		// engine update for all layers [world_layer, debug_layer, imgui_layer]
 				layer->on_update(m_delta_time);
 
-			// client render
-			render(m_delta_time);					// TODO: REMOVE (indeally app instance doesn't need to render anything)
+			render(m_delta_time);					// client render
+			m_renderer->draw_frame(m_delta_time);	// engine render
 
-			// engine render
-			m_renderer->draw_frame(m_delta_time);
-
-			//fps_timer.limit_fps(m_limit_fps, m_fps, m_delta_time, m_work_time, m_sleep_time);
+			fps_timer.limit_fps(m_limit_fps, m_fps, m_delta_time, m_work_time, m_sleep_time);
 		}
 
 		m_renderer->wait_idle();
@@ -199,7 +196,7 @@ namespace PFF {
 
 		// none application events
 		if (!event.handled) {
-			for (auto layer = m_layerstack.end(); layer != m_layerstack.begin(); ) {
+			for (auto layer = m_layerstack->end(); layer != m_layerstack->begin(); ) {
 
 				(*--layer)->on_event(event);
 				if (event.handled)

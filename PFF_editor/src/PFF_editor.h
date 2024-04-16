@@ -21,7 +21,7 @@ namespace PFF {
 
 	private:
 		std::shared_ptr<editor_controller> m_editor_controller{};
-		//editor_layer* m_editor_layer;
+		editor_layer* m_editor_layer;
 		//PFF::game_object* m_test_game_object;
 	};
 

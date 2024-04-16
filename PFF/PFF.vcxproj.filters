@@ -34,6 +34,9 @@
     <Filter Include="util\benchmarking">
       <UniqueIdentifier>{FB59FD75-6770-FB0B-B0E7-862D1C3DCC93}</UniqueIdentifier>
     </Filter>
+    <Filter Include="util\imgui">
+      <UniqueIdentifier>{ED66C3AC-D91E-05FA-4226-DE552EFD9FEA}</UniqueIdentifier>
+    </Filter>
     <Filter Include="util\io">
       <UniqueIdentifier>{4AE65B48-B6C5-DAE3-BFDD-65BA2B3C4145}</UniqueIdentifier>
     </Filter>
@@ -80,7 +83,7 @@
     <ClInclude Include="src\engine\io_handler\input_mapping.h">
       <Filter>engine\io_handler</Filter>
     </ClInclude>
-    <ClInclude Include="src\engine\layer\imgui_layer.h">
+    <ClInclude Include="src\engine\layer\imgui_debug_layer.h">
       <Filter>engine\layer</Filter>
     </ClInclude>
     <ClInclude Include="src\engine\layer\layer.h">
@@ -144,6 +147,9 @@
     <ClInclude Include="src\util\data_types.h">
       <Filter>util</Filter>
     </ClInclude>
+    <ClInclude Include="src\util\imgui\imgui_util.h">
+      <Filter>util\imgui</Filter>
+    </ClInclude>
     <ClInclude Include="src\util\io\config.h">
       <Filter>util\io</Filter>
     </ClInclude>
@@ -195,7 +201,7 @@
     <ClCompile Include="src\engine\io_handler\input_mapping.cpp">
       <Filter>engine\io_handler</Filter>
     </ClCompile>
-    <ClCompile Include="src\engine\layer\imgui_layer.cpp">
+    <ClCompile Include="src\engine\layer\imgui_debug_layer.cpp">
       <Filter>engine\layer</Filter>
     </ClCompile>
     <ClCompile Include="src\engine\layer\layer.cpp">
@@ -227,6 +233,9 @@
     </ClCompile>
     <ClCompile Include="src\engine\render\vulkan\vk_renderer.cpp">
       <Filter>engine\render\vulkan</Filter>
+    </ClCompile>
+    <ClCompile Include="src\util\imgui\imgui_util.cpp">
+      <Filter>util\imgui</Filter>
     </ClCompile>
     <ClCompile Include="src\util\io\config.cpp">
       <Filter>util\io</Filter>

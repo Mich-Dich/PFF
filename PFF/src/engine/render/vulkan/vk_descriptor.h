@@ -19,7 +19,7 @@ namespace PFF::render::vulkan {
             float ratio;
         };
 
-        VkDescriptorPool pool;
+        VkDescriptorPool m_pool;
 
         void init_pool(VkDevice device, uint32_t maxSets, std::vector<pool_size_ratio> poolRatios);
         void clear_descriptors(VkDevice device);

@@ -2,6 +2,7 @@
 #include "util/pch_editor.h"
 
 #include "util/io/config.h"
+#include "util/color_theme.h"
 
 #include "PFF_editor.h"
 
@@ -26,11 +27,10 @@ namespace PFF {
 		m_editor_controller = std::make_shared<editor_controller>();
 		//register_player_controller(m_editor_controller);
 
-		/*
-
-		m_editor_layer = new editor_layer(get_imgui_layer()->get_context());
+		m_editor_layer = new editor_layer(PFF::UI::imgui::util::s_context);
 		push_overlay(m_editor_layer);
 
+		/*
 		std::shared_ptr<basic_mesh> floor = basic_mesh::create_mesh_from_file("assets/floor.obj");
 		auto floor_obj = get_current_map()->create_empty_game_object();
 		floor_obj->mesh = floor;
@@ -82,10 +82,8 @@ namespace PFF {
 
 	bool PFF_editor::shutdown() {
 		
-		/*
 		pop_overlay(m_editor_layer);
 		delete m_editor_layer;
-		*/
 		
 		// save camera position
 		glm::vec3 position = m_editor_controller->get_editor_camera_pos();
