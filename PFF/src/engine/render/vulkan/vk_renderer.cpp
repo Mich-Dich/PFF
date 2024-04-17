@@ -25,6 +25,7 @@
 #include "util/color_theme.h"
 #include "engine/layer/layer_stack.h"
 #include "engine/layer/layer.h"
+#include <cstdlib> // for system calls (conpieling shaders)
 
 #include "vk_renderer.h"
 
@@ -36,6 +37,8 @@ namespace PFF::render::vulkan {
 		: m_window(window), m_layer_stack(layer_stack) {
 
 		CORE_LOG_INIT();
+
+		util::compile_all_shaders_in_directory("../PFF/shaders");
 
 		vkb::InstanceBuilder builder;
 
@@ -262,8 +265,12 @@ namespace PFF::render::vulkan {
 
 		draw_internal(cmd);
 
+		util::transition_image(cmd, m_draw_image.image, VK_IMAGE_LAYOUT_GENERAL, VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL);
+
+		draw_geometry(cmd);
+
 		//transition the draw image and the swapchain image into their correct transfer layouts
-		util::transition_image(cmd, m_draw_image.image, VK_IMAGE_LAYOUT_GENERAL, VK_IMAGE_LAYOUT_TRANSFER_SRC_OPTIMAL);
+		util::transition_image(cmd, m_draw_image.image, VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL, VK_IMAGE_LAYOUT_TRANSFER_SRC_OPTIMAL);
 		util::transition_image(cmd, m_swapchain_images[swapchain_image_index], VK_IMAGE_LAYOUT_UNDEFINED, VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL);
 		util::copy_image_to_image(cmd, m_draw_image.image, m_swapchain_images[swapchain_image_index], m_draw_extent, m_swapchain_extent);						// copy from draw_image into swapchain
 
@@ -591,6 +598,8 @@ namespace PFF::render::vulkan {
 			for (u32 x = 0; x < m_background_effects.size(); x++) 
 				vkDestroyPipeline(m_device, m_background_effects[x].pipeline, nullptr);
 		});
+
+		init_triangle_pipeline();
 	}
 
 	void vk_renderer::destroy_swapchain() {
@@ -614,6 +623,38 @@ namespace PFF::render::vulkan {
 
 		// execute the compute pipeline dispatch. We are using 16x16 workgroup size so we need to divide by it
 		vkCmdDispatch(cmd, static_cast<u32>(std::ceil(m_draw_extent.width / 16.0)), static_cast<u32>(std::ceil(m_draw_extent.height / 16.0)), 1);
+	}
+
+	void vk_renderer::draw_geometry(VkCommandBuffer cmd) {
+
+		//begin a render pass  connected to our draw image
+		VkRenderingAttachmentInfo colorAttachment = init::attachment_info(m_draw_image.image_view, nullptr, VK_IMAGE_LAYOUT_GENERAL);
+		VkRenderingInfo renderInfo = init::rendering_info(m_draw_extent, &colorAttachment, nullptr);
+		vkCmdBeginRendering(cmd, &renderInfo);
+
+		vkCmdBindPipeline(cmd, VK_PIPELINE_BIND_POINT_GRAPHICS, m_triangle_pipeline);
+
+		//set dynamic viewport and scissor
+		VkViewport viewport = {};
+		viewport.x = 0;
+		viewport.y = 0;
+		viewport.width = static_cast<f32>(m_draw_extent.width);
+		viewport.height = static_cast<f32>(m_draw_extent.height);
+		viewport.minDepth = 0.f;
+		viewport.maxDepth = 1.f;
+		vkCmdSetViewport(cmd, 0, 1, &viewport);
+
+		VkRect2D scissor = {};
+		scissor.offset.x = 0;
+		scissor.offset.y = 0;
+		scissor.extent.width = m_draw_extent.width;
+		scissor.extent.height = m_draw_extent.height;
+		vkCmdSetScissor(cmd, 0, 1, &scissor);
+
+		//launch a draw command to draw 3 vertices
+		vkCmdDraw(cmd, 3, 1, 0, 0);
+
+		vkCmdEndRendering(cmd);
 	}
 
 	void vk_renderer::draw_imgui(VkCommandBuffer cmd, VkImageView targetImageView) {
@@ -645,5 +686,96 @@ namespace PFF::render::vulkan {
 		m_swapchain_image_views = vkbSwapchain.get_image_views().value();
 	}
 
+	void vk_renderer::init_triangle_pipeline() {
 
+		VkShaderModule triangleFragShader;
+		CORE_ASSERT(util::load_shader_module("../PFF/shaders/colored_triangle.frag.spv", m_device, &triangleFragShader), "", "Error when building the triangle fragment shader module");
+
+		VkShaderModule triangleVertexShader;
+		CORE_ASSERT(util::load_shader_module("../PFF/shaders/colored_triangle.vert.spv", m_device, &triangleVertexShader),"", "Error when building the triangle vertex shader module");
+
+		//build the pipeline layout that controls the inputs/outputs of the shader
+		//we are not using descriptor sets or other systems yet, so no need to use anything other than empty default
+		VkPipelineLayoutCreateInfo pipeline_layout_info = init::pipeline_layout_create_info();
+		VK_CHECK(vkCreatePipelineLayout(m_device, &pipeline_layout_info, nullptr, &m_triangle_pipeline_layout));
+
+		m_triangle_pipeline = pipeline_builder()
+			.set_pipeline_layout(m_triangle_pipeline_layout)			// use the triangle layout we created
+			.set_shaders(triangleVertexShader, triangleFragShader)		// connecting the vertex and pixel shaders to the pipeline
+			.set_input_topology(VK_PRIMITIVE_TOPOLOGY_TRIANGLE_LIST)	// it will draw triangles
+			.set_polygon_mode(VK_POLYGON_MODE_FILL)						// filled triangles
+			.set_cull_mode(VK_CULL_MODE_NONE, VK_FRONT_FACE_CLOCKWISE)	// no backface culling
+			.set_multisampling_none()									// no multisampling
+			.disable_blending()											// no blending
+			.set_color_attachment_format(m_draw_image.image_format)		//connect the image format we will draw into, from draw image
+			.set_depth_format(VK_FORMAT_UNDEFINED)
+			.disable_depthtest()										// no depth testing
+			.build(m_device);
+
+		//clean structures
+		vkDestroyShaderModule(m_device, triangleFragShader, nullptr);
+		vkDestroyShaderModule(m_device, triangleVertexShader, nullptr);
+
+		m_deletion_queue.push_func([&]() {
+			vkDestroyPipelineLayout(m_device, m_triangle_pipeline_layout, nullptr);
+			vkDestroyPipeline(m_device, m_triangle_pipeline, nullptr);
+			});
+	}
+
+	namespace util {
+
+		void compile_all_shaders_in_directory(const char* path_to_dir) {
+
+			const int STILL_WORKING = -42;
+
+			std::filesystem::path absolute_path = std::filesystem::absolute(path_to_dir);
+			for (const auto& entry : std::filesystem::directory_iterator(absolute_path)) {
+
+				bool compiling = false;
+				int result = STILL_WORKING;
+
+				std::set<std::string> extensions{ ".frag", ".vert", ".comp" };
+				if (std::filesystem::is_regular_file(entry)) {
+
+					if (extensions.find(entry.path().extension().string()) == extensions.end())
+						continue;
+
+					std::string compield_file{};
+					compield_file = entry.path().string() + ".spv";
+
+					std::string system_command;
+					system_command = "..\\PFF\\vendor\\vulkan-glslc\\glslc.exe " + entry.path().string() + " -o " + compield_file;
+
+					if (std::filesystem::exists(compield_file)) {
+
+						if (std::filesystem::last_write_time(entry).time_since_epoch().count() > std::filesystem::last_write_time(compield_file).time_since_epoch().count()) {
+
+							CORE_LOG(Trace, "compiling shader: " << entry.path().string());
+							compiling = true;
+							result = system(system_command.c_str());
+						}
+					}
+
+					else {
+
+						CORE_LOG(Trace, "compiling shader: " << entry.path().string());
+						compiling = true;
+						result = system(system_command.c_str());
+					}
+
+
+				} else if (std::filesystem::is_directory(entry)) {
+
+					CORE_ASSERT(false, "", "current entry is a DIRECTORY");
+				}
+
+				if (compiling) {
+
+					while (result == STILL_WORKING)
+						std::this_thread::sleep_for(std::chrono::milliseconds(10));
+
+				}
+			}
+		}
+	}
 }

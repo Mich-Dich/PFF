@@ -31,7 +31,6 @@ group "dependencies"
 	include "PFF/vendor/glfw"
 group ""
 
-
 include "PFF"
 include "PFF_editor"
 include "Sandbox"

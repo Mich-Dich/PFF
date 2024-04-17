@@ -1,6 +1,8 @@
 
 VULKAN_SDK = os.getenv("VULKAN_SDK")
 
+glslc = "../PFF/vendor/vulkan-glslc/glslc.exe"
+
 ------------ inlude ------------ 
 IncludeDir = {}
 IncludeDir["glfw"]              = "%{wks.location}/PFF/vendor/glfw"

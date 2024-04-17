@@ -9,6 +9,10 @@ class PFF::layer_stack;
 
 namespace PFF::render::vulkan {
 
+	namespace util {
+
+		void compile_all_shaders_in_directory(const char* path_to_dir = "../PFF/shaders");
+	}
 
 	// !! CAUTION !! - Doing callbacks like this is inneficient at scale, because we are storing whole std::functions for every object to be deleted. This is suboptimal. 
 	// For deleting thousands of objects, a better implementation would be to store arrays of vulkan handles of various types such as VkImage, VkBuffer, and so on. And then delete those from a loop.
@@ -89,9 +93,11 @@ namespace PFF::render::vulkan {
 		void destroy_swapchain();
 
 		void draw_internal(VkCommandBuffer cmd);
+		void draw_geometry(VkCommandBuffer cmd);
 		void draw_imgui(VkCommandBuffer cmd, VkImageView targetImageView);
 		void create_swapchain(u32 width, u32 height);
-				
+		void init_triangle_pipeline();
+
 		bool m_is_initialized = false;
 		int m_frame_number = 0;
 		ref<pff_window> m_window{};
@@ -139,5 +145,9 @@ namespace PFF::render::vulkan {
 
 		std::vector<compute_effect> m_background_effects;
 		int m_current_background_effect = 0;
+
+		VkPipelineLayout			m_triangle_pipeline_layout;
+		VkPipeline					m_triangle_pipeline;
+
 	};
 }

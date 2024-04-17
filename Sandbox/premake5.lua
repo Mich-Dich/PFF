@@ -11,8 +11,6 @@ project (client_project_name)
 	targetdir ("bin/" .. outputs  .. "/%{prj.name}")
 	objdir ("bin-int/" .. outputs  .. "/%{prj.name}")
 	
-	glslc = "../PFF/vendor/vulkan-glslc/glslc.exe"
-
 	defines
 	{
 		"ENGINE_NAME=PFF",

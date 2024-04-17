@@ -99,10 +99,7 @@
       <AdditionalOptions>/NODEFAULTLIB:LIBCMTD /NODEFAULTLIB:MSVCRT %(AdditionalOptions)</AdditionalOptions>
     </Link>
     <PostBuildEvent>
-      <Command>"../PFF/vendor/vulkan-glslc/glslc.exe" shaders/sky.comp -o shaders/sky.comp.spv
-"../PFF/vendor/vulkan-glslc/glslc.exe" shaders/gradient.comp -o shaders/gradient.comp.spv
-"../PFF/vendor/vulkan-glslc/glslc.exe" shaders/gradient_color.comp -o shaders/gradient_color.comp.spv
-IF NOT EXIST $(SolutionDir)\bin\Debug-windows-x86_64\Sandbox (mkdir $(SolutionDir)\bin\Debug-windows-x86_64\Sandbox)
+      <Command>IF NOT EXIST $(SolutionDir)\bin\Debug-windows-x86_64\Sandbox (mkdir $(SolutionDir)\bin\Debug-windows-x86_64\Sandbox)
 IF EXIST ..\bin\Debug-windows-x86_64\PFF\PFF.dll\ (xcopy /Q /E /Y /I ..\bin\Debug-windows-x86_64\PFF\PFF.dll $(SolutionDir)\bin\Debug-windows-x86_64\Sandbox &gt; nul) ELSE (xcopy /Q /Y /I ..\bin\Debug-windows-x86_64\PFF\PFF.dll $(SolutionDir)\bin\Debug-windows-x86_64\Sandbox &gt; nul)
 IF NOT EXIST $(SolutionDir)\bin\Debug-windows-x86_64\PFF_editor (mkdir $(SolutionDir)\bin\Debug-windows-x86_64\PFF_editor)
 IF EXIST ..\bin\Debug-windows-x86_64\PFF\PFF.dll\ (xcopy /Q /E /Y /I ..\bin\Debug-windows-x86_64\PFF\PFF.dll $(SolutionDir)\bin\Debug-windows-x86_64\PFF_editor &gt; nul) ELSE (xcopy /Q /Y /I ..\bin\Debug-windows-x86_64\PFF\PFF.dll $(SolutionDir)\bin\Debug-windows-x86_64\PFF_editor &gt; nul)</Command>
@@ -137,10 +134,7 @@ IF EXIST ..\bin\Debug-windows-x86_64\PFF\PFF.dll\ (xcopy /Q /E /Y /I ..\bin\Debu
       <AdditionalOptions>/NODEFAULTLIB:LIBCMTD /NODEFAULTLIB:MSVCRT %(AdditionalOptions)</AdditionalOptions>
     </Link>
     <PostBuildEvent>
-      <Command>"../PFF/vendor/vulkan-glslc/glslc.exe" shaders/sky.comp -o shaders/sky.comp.spv
-"../PFF/vendor/vulkan-glslc/glslc.exe" shaders/gradient.comp -o shaders/gradient.comp.spv
-"../PFF/vendor/vulkan-glslc/glslc.exe" shaders/gradient_color.comp -o shaders/gradient_color.comp.spv
-IF NOT EXIST $(SolutionDir)\bin\RelWithDebInfo-windows-x86_64\Sandbox (mkdir $(SolutionDir)\bin\RelWithDebInfo-windows-x86_64\Sandbox)
+      <Command>IF NOT EXIST $(SolutionDir)\bin\RelWithDebInfo-windows-x86_64\Sandbox (mkdir $(SolutionDir)\bin\RelWithDebInfo-windows-x86_64\Sandbox)
 IF EXIST ..\bin\RelWithDebInfo-windows-x86_64\PFF\PFF.dll\ (xcopy /Q /E /Y /I ..\bin\RelWithDebInfo-windows-x86_64\PFF\PFF.dll $(SolutionDir)\bin\RelWithDebInfo-windows-x86_64\Sandbox &gt; nul) ELSE (xcopy /Q /Y /I ..\bin\RelWithDebInfo-windows-x86_64\PFF\PFF.dll $(SolutionDir)\bin\RelWithDebInfo-windows-x86_64\Sandbox &gt; nul)
 IF NOT EXIST $(SolutionDir)\bin\RelWithDebInfo-windows-x86_64\PFF_editor (mkdir $(SolutionDir)\bin\RelWithDebInfo-windows-x86_64\PFF_editor)
 IF EXIST ..\bin\RelWithDebInfo-windows-x86_64\PFF\PFF.dll\ (xcopy /Q /E /Y /I ..\bin\RelWithDebInfo-windows-x86_64\PFF\PFF.dll $(SolutionDir)\bin\RelWithDebInfo-windows-x86_64\PFF_editor &gt; nul) ELSE (xcopy /Q /Y /I ..\bin\RelWithDebInfo-windows-x86_64\PFF\PFF.dll $(SolutionDir)\bin\RelWithDebInfo-windows-x86_64\PFF_editor &gt; nul)</Command>
@@ -173,10 +167,7 @@ IF EXIST ..\bin\RelWithDebInfo-windows-x86_64\PFF\PFF.dll\ (xcopy /Q /E /Y /I ..
       <AdditionalOptions>/NODEFAULTLIB:LIBCMTD /NODEFAULTLIB:MSVCRT %(AdditionalOptions)</AdditionalOptions>
     </Link>
     <PostBuildEvent>
-      <Command>"../PFF/vendor/vulkan-glslc/glslc.exe" shaders/sky.comp -o shaders/sky.comp.spv
-"../PFF/vendor/vulkan-glslc/glslc.exe" shaders/gradient.comp -o shaders/gradient.comp.spv
-"../PFF/vendor/vulkan-glslc/glslc.exe" shaders/gradient_color.comp -o shaders/gradient_color.comp.spv
-IF NOT EXIST $(SolutionDir)\bin\Release-windows-x86_64\Sandbox (mkdir $(SolutionDir)\bin\Release-windows-x86_64\Sandbox)
+      <Command>IF NOT EXIST $(SolutionDir)\bin\Release-windows-x86_64\Sandbox (mkdir $(SolutionDir)\bin\Release-windows-x86_64\Sandbox)
 IF EXIST ..\bin\Release-windows-x86_64\PFF\PFF.dll\ (xcopy /Q /E /Y /I ..\bin\Release-windows-x86_64\PFF\PFF.dll $(SolutionDir)\bin\Release-windows-x86_64\Sandbox &gt; nul) ELSE (xcopy /Q /Y /I ..\bin\Release-windows-x86_64\PFF\PFF.dll $(SolutionDir)\bin\Release-windows-x86_64\Sandbox &gt; nul)
 IF NOT EXIST $(SolutionDir)\bin\Release-windows-x86_64\PFF_editor (mkdir $(SolutionDir)\bin\Release-windows-x86_64\PFF_editor)
 IF EXIST ..\bin\Release-windows-x86_64\PFF\PFF.dll\ (xcopy /Q /E /Y /I ..\bin\Release-windows-x86_64\PFF\PFF.dll $(SolutionDir)\bin\Release-windows-x86_64\PFF_editor &gt; nul) ELSE (xcopy /Q /Y /I ..\bin\Release-windows-x86_64\PFF\PFF.dll $(SolutionDir)\bin\Release-windows-x86_64\PFF_editor &gt; nul)</Command>

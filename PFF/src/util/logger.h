@@ -150,7 +150,7 @@ namespace APP_NAMESPACE {
 	#define CORE_LOG(severity, message)			CORE_LOG_##severity(message)
 
 	#define CORE_LOG_INIT()						CORE_LOG(Trace, "init");
-	#define CORE_LOG_SHUTDOWN()						CORE_LOG(Trace, "shutdown");
+	#define CORE_LOG_SHUTDOWN()					CORE_LOG(Trace, "shutdown");
 
 		// ---------------------------------------------------------------------------  Assertion & Validation  ---------------------------------------------------------------------------
 
