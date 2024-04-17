@@ -11,7 +11,7 @@
 namespace PFF::UI::imgui::util {
 
 
-	//ImFont* PFF_API get_font(const std::string& name) {
+	//ImFont* get_font(const std::string& name) {
 	//
 	//	if (!contains(s_fonts, name))
 	//		return nullptr;
@@ -45,7 +45,7 @@ namespace PFF::UI::imgui::util {
 	}
 
 
-	void PFF_API next_window_position_selector(window_pos& position, bool& show_window) {
+	void next_window_position_selector(window_pos& position, bool& show_window) {
 
 		if (ImGui::BeginPopupContextWindow()) {
 			if (ImGui::MenuItem("custom", NULL, position == window_pos::custom))
@@ -71,6 +71,7 @@ namespace PFF::UI::imgui::util {
 			ImGui::EndPopup();
 		}
 	}
+
 
 	void progressbar_with_text(const char* lable, const char* progress_bar_text, f32 percent, f32 lable_size, f32 progressbar_size_x, f32 progressbar_size_y) {
 

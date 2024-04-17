@@ -55,8 +55,7 @@ namespace PFF {
 
 		ImGui::SetCurrentContext(m_context);
 
-		//ImGuiWindowFlags window_flags{};
-		//if (ImGui::Begin("Test_window", &m_show_details, window_flags)) {}
+		//if (ImGui::Begin("Test_window")) {}
 		//ImGui::End();
 
 

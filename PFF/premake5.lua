@@ -69,6 +69,10 @@ project "PFF"
 
 		postbuildcommands
 		{
+			'"%{glslc}" shaders/sky.comp -o shaders/sky.comp.spv',
+			'"%{glslc}" shaders/gradient.comp -o shaders/gradient.comp.spv',
+			'"%{glslc}" shaders/gradient_color.comp -o shaders/gradient_color.comp.spv',
+
 			"{MKDIR} %{wks.location}/bin/" .. outputs .. "/" .. client_project_name,
 			"{COPY} %{cfg.buildtarget.relpath} %{wks.location}/bin/" .. outputs  .. "/" .. client_project_name,
 			

@@ -27,6 +27,22 @@ namespace PFF::render::vulkan {
 		}
 	};
 
+	struct compute_push_constants {
+	
+		glm::vec4 data1;
+		glm::vec4 data2;
+		glm::vec4 data3;
+		glm::vec4 data4;
+	};
+
+	struct compute_effect {
+
+		const char* name;
+		VkPipeline pipeline;
+		VkPipelineLayout layout;
+		compute_push_constants data;
+	};
+
 	// framedata	// TODO: extract into own file
 	struct FrameData {
 
@@ -50,6 +66,7 @@ namespace PFF::render::vulkan {
 
 		// init functions
 		void imgui_init() override;
+		void imgui_create_fonts() override;
 		void imgui_shutdown() override;
 
 		// work functions
@@ -101,7 +118,6 @@ namespace PFF::render::vulkan {
 
 		deletion_queue				m_deletion_queue;
 		VmaAllocator				m_allocator;
-
 		vk_image					m_draw_image;
 		VkExtent2D					m_draw_extent;
 
@@ -120,5 +136,8 @@ namespace PFF::render::vulkan {
 		VkCommandPool				m_immCommandPool;
 
 		VkDescriptorPool			m_imgui_desc_pool;
+
+		std::vector<compute_effect> m_background_effects;
+		int m_current_background_effect = 0;
 	};
 }

@@ -103,7 +103,7 @@ namespace PFF::render::vulkan {
 		init_descriptors();
 		
 		init_pipelines();
-		imgui_init();
+		//imgui_init();
 
 		m_is_initialized = true;
 	}
@@ -114,7 +114,7 @@ namespace PFF::render::vulkan {
 			return;
 
 		vkDeviceWaitIdle(m_device);
-		imgui_shutdown();
+		//imgui_shutdown();
 		
 		m_deletion_queue.flush();
 		for (int i = 0; i < FRAME_COUNT; i++) {
@@ -172,10 +172,6 @@ namespace PFF::render::vulkan {
 		pool_info.pPoolSizes = pool_sizes;
 		VK_CHECK(vkCreateDescriptorPool(m_device, &pool_info, nullptr, &m_imgui_desc_pool));
 
-		// init imgui library
-		IMGUI_CHECKVERSION();
-		PFF::UI::imgui::util::s_context = ImGui::CreateContext();
-
 		ImGuiIO& io = ImGui::GetIO();
 		io.BackendFlags |= ImGuiBackendFlags_PlatformHasViewports;
 		io.BackendFlags |= ImGuiBackendFlags_RendererHasViewports;
@@ -205,25 +201,8 @@ namespace PFF::render::vulkan {
 		init_info.MSAASamples = VK_SAMPLE_COUNT_1_BIT;
 		CORE_ASSERT(ImGui_ImplVulkan_Init(&init_info), "", "Failed to initalize ImGui-Vulkan");
 
-		// Load fonts
-		//ImGuiIO& io = ImGui::GetIO();
-		ImFontConfig fontConfig;
-		fontConfig.FontDataOwnedByAtlas = true;
-
-		PFF::UI::imgui::util::s_fonts["default"] = io.Fonts->AddFontFromFileTTF("../PFF/assets/fonts/Open_Sans/static/OpenSans-Regular.ttf", 15.f);
-		PFF::UI::imgui::util::s_fonts["bold"] = io.Fonts->AddFontFromFileTTF("../PFF/assets/fonts/Open_Sans/static/OpenSans-Bold.ttf", 15.f);
-		PFF::UI::imgui::util::s_fonts["italic"] = io.Fonts->AddFontFromFileTTF("../PFF/assets/fonts/Open_Sans/static/OpenSans-Italic.ttf", 15.f);
-		
-		PFF::UI::imgui::util::s_fonts["regular_big"] = io.Fonts->AddFontFromFileTTF("../PFF/assets/fonts/Open_Sans/static/OpenSans-Regular.ttf", 18.f);
-		PFF::UI::imgui::util::s_fonts["bold_big"] =	io.Fonts->AddFontFromFileTTF("../PFF/assets/fonts/Open_Sans/static/OpenSans-Bold.ttf", 18.f);
-		PFF::UI::imgui::util::s_fonts["italic_big"] = io.Fonts->AddFontFromFileTTF("../PFF/assets/fonts/Open_Sans/static/OpenSans-Italic.ttf", 18.f);
-		
-		PFF::UI::imgui::util::s_fonts["giant"] = io.Fonts->AddFontFromFileTTF("../PFF/assets/fonts/Open_Sans/static/OpenSans-Bold.ttf", 30.f);
-		io.FontDefault = PFF::UI::imgui::util::s_fonts["default"];
-		
 		// execute a gpu command to upload imgui font textures
-		//ImGui_ImplVulkan_CreateFontsTexture();
-		immediate_submit([&](VkCommandBuffer cmd) { ImGui_ImplVulkan_CreateFontsTexture(); });
+		// immediate_submit([&](VkCommandBuffer cmd) { ImGui_ImplVulkan_CreateFontsTexture(); });
 
 		serializer::yaml(config::get_filepath_from_configtype(config::file::editor), "UI", serializer::option::load_from_file)
 			.entry(KEY_VALUE(UI::THEME::main_color))
@@ -234,17 +213,23 @@ namespace PFF::render::vulkan {
 
 		m_deletion_queue.push_func([=]() {
 
-			ImGui_ImplVulkan_Shutdown();
-			ImGui_ImplGlfw_Shutdown();
-			ImGui::DestroyContext(PFF::UI::imgui::util::s_context);
-			vkDestroyDescriptorPool(m_device, m_imgui_desc_pool, nullptr);
-
-			m_imgui_initalized = false;
 		});
 	}
 
+
+	void vk_renderer::imgui_create_fonts() {
+
+		immediate_submit([&](VkCommandBuffer cmd) { ImGui_ImplVulkan_CreateFontsTexture(); });
+	}
+
+
 	void vk_renderer::imgui_shutdown() { 
-		
+
+		ImGui_ImplVulkan_Shutdown();
+		ImGui_ImplGlfw_Shutdown();
+		vkDestroyDescriptorPool(m_device, m_imgui_desc_pool, nullptr);
+
+		m_imgui_initalized = false;
 	}
 
 	void vk_renderer::draw_frame(f32 delta_time) {
@@ -285,9 +270,27 @@ namespace PFF::render::vulkan {
 		// =========================================================== draw imgui ===========================================================
 		if (m_imgui_initalized) {
 		
+			ImGui::SetCurrentContext(application::get().get_imgui_layer()->get_context());
+
 			ImGui_ImplVulkan_NewFrame();
 			ImGui_ImplGlfw_NewFrame();
 			ImGui::NewFrame();
+
+			if (ImGui::Begin("background")) {
+
+				compute_effect& selected = m_background_effects[m_current_background_effect];
+
+				ImGui::Text("Selected effect: ", selected.name);
+				ImGui::SliderInt("Effect Index", &m_current_background_effect, 0, static_cast<int>(m_background_effects.size() - 1));
+
+				ImGui::InputFloat4("data1", (float*)&selected.data.data1);
+				ImGui::InputFloat4("data2", (float*)&selected.data.data2);
+				ImGui::InputFloat4("data3", (float*)&selected.data.data3);
+				ImGui::InputFloat4("data4", (float*)&selected.data.data4);
+
+			}
+			ImGui::End();
+
 
 			for (layer* layer : *m_layer_stack) {
 
@@ -505,40 +508,89 @@ namespace PFF::render::vulkan {
 
 	void vk_renderer::init_pipelines() {
 
+		VkPushConstantRange pushConstant{};
+		pushConstant.offset = 0;
+		pushConstant.size = sizeof(compute_push_constants);
+		pushConstant.stageFlags = VK_SHADER_STAGE_COMPUTE_BIT;
+
 		VkPipelineLayoutCreateInfo computeLayout_CI{};
 		computeLayout_CI.sType = VK_STRUCTURE_TYPE_PIPELINE_LAYOUT_CREATE_INFO;
 		computeLayout_CI.pNext = nullptr;
 		computeLayout_CI.pSetLayouts = &m_draw_image_descriptor_layout;
 		computeLayout_CI.setLayoutCount = 1;
-
+		computeLayout_CI.pPushConstantRanges = &pushConstant;
+		computeLayout_CI.pushConstantRangeCount = 1;
 		VK_CHECK(vkCreatePipelineLayout(m_device, &computeLayout_CI, nullptr, &m_gradient_pipeline_layout));
-
-		VkShaderModule computeDrawShader;
-		CORE_ASSERT(util::load_shader_module("shaders/gradient.comp.spv", m_device, &computeDrawShader), "", "Error when building the compute shader");
 
 		VkPipelineShaderStageCreateInfo stageinfo{};
 		stageinfo.sType = VK_STRUCTURE_TYPE_PIPELINE_SHADER_STAGE_CREATE_INFO;
 		stageinfo.pNext = nullptr;
 		stageinfo.stage = VK_SHADER_STAGE_COMPUTE_BIT;
-		stageinfo.module = computeDrawShader;
 		// TIP: giving it the name of the function we want the shader to use => main().
 		//		It is possible to store multiple compute shader variants on the same shader file, by using different entry point functions and then setting them up here.
 		stageinfo.pName = "main";
 
-		VkComputePipelineCreateInfo computePipelineCreateInfo{};
-		computePipelineCreateInfo.sType = VK_STRUCTURE_TYPE_COMPUTE_PIPELINE_CREATE_INFO;
-		computePipelineCreateInfo.pNext = nullptr;
-		computePipelineCreateInfo.layout = m_gradient_pipeline_layout;
-		computePipelineCreateInfo.stage = stageinfo;
+		VkComputePipelineCreateInfo compute_pipeline_CI{};
+		compute_pipeline_CI.sType = VK_STRUCTURE_TYPE_COMPUTE_PIPELINE_CREATE_INFO;
+		compute_pipeline_CI.pNext = nullptr;
+		compute_pipeline_CI.layout = m_gradient_pipeline_layout;
+		compute_pipeline_CI.stage = stageinfo;
 
-		VK_CHECK(vkCreateComputePipelines(m_device, VK_NULL_HANDLE, 1, &computePipelineCreateInfo, nullptr, &m_gradient_pipeline));
+		// ====================================================== Add pipeline [grid] ====================================================== 
 
-		vkDestroyShaderModule(m_device, computeDrawShader, nullptr);
+		VkShaderModule grid_shader;
+		CORE_ASSERT(util::load_shader_module("../PFF/shaders/gradient.comp.spv", m_device, &grid_shader), "", "Error when building the compute shader");
+		compute_pipeline_CI.stage.module = grid_shader;		//change the shader module only
+		
+		compute_effect grid{};
+		grid.layout = m_gradient_pipeline_layout;
+		grid.name = "sky";
+
+		VK_CHECK(vkCreateComputePipelines(m_device, VK_NULL_HANDLE, 1, &compute_pipeline_CI, nullptr, &grid.pipeline));
+		m_background_effects.emplace_back(grid);
+		vkDestroyShaderModule(m_device, grid_shader, nullptr);
+
+		// ====================================================== Add pipeline [gradient] ====================================================== 		
+		
+		VkShaderModule gradient_shader;
+		CORE_ASSERT(util::load_shader_module("../PFF/shaders/gradient_color.comp.spv", m_device, &gradient_shader), "", "Error when building the compute shader");
+		compute_pipeline_CI.stage.module = gradient_shader;	//change the shader module only
+
+		compute_effect gradient{};
+		gradient.layout = m_gradient_pipeline_layout;
+		gradient.name = "gradient";
+		// --------------- default gradient color --------------- 
+		gradient.data.data1 = glm::vec4(1.f, 0.f, 0.f, 1.f);
+		gradient.data.data2 = glm::vec4(0.f, 0.f, 1.f, 1.f);
+
+		VK_CHECK(vkCreateComputePipelines(m_device, VK_NULL_HANDLE, 1, &compute_pipeline_CI, nullptr, &gradient.pipeline));
+		m_background_effects.emplace_back(gradient);
+		vkDestroyShaderModule(m_device, gradient_shader, nullptr);
+
+		// ====================================================== Add pipeline [sky] ====================================================== 
+
+		VkShaderModule sky_shader;
+		CORE_ASSERT(util::load_shader_module("../PFF/shaders/sky.comp.spv", m_device, &sky_shader), "", "Error when building the compute shader");
+		compute_pipeline_CI.stage.module = sky_shader;		//change the shader module only
+
+		compute_effect sky{};
+		sky.layout = m_gradient_pipeline_layout;
+		sky.name = "sky";
+		// --------------- default sky parameters --------------- 
+		sky.data.data1 = glm::vec4(.1f, .2f, .4f, .97f);
+
+		//change the shader module only
+		VK_CHECK(vkCreateComputePipelines(m_device, VK_NULL_HANDLE, 1, &compute_pipeline_CI, nullptr, &sky.pipeline));
+		m_background_effects.emplace_back(sky);
+		vkDestroyShaderModule(m_device, sky_shader, nullptr);
+
+
 		m_deletion_queue.push_func([&]() {
 
 			vkDestroyPipelineLayout(m_device, m_gradient_pipeline_layout, nullptr);
-			vkDestroyPipeline(m_device, m_gradient_pipeline, nullptr);
-			});
+			for (u32 x = 0; x < m_background_effects.size(); x++) 
+				vkDestroyPipeline(m_device, m_background_effects[x].pipeline, nullptr);
+		});
 	}
 
 	void vk_renderer::destroy_swapchain() {
@@ -553,13 +605,14 @@ namespace PFF::render::vulkan {
 
 	void vk_renderer::draw_internal(VkCommandBuffer cmd) {
 
-		////make a clear-color from frame number. This will flash with a 120 frame period.
-		//float flash = abs(sin(m_frame_number / 120.f));
-		//VkClearColorValue clearValue = { { 0.0f, 0.0f, flash, 1.0f } };
-		//VkImageSubresourceRange clearRange = init::image_subresource_range(VK_IMAGE_ASPECT_COLOR_BIT);
+		compute_effect& effect = m_background_effects[m_current_background_effect];
 
-		vkCmdBindPipeline(cmd, VK_PIPELINE_BIND_POINT_COMPUTE, m_gradient_pipeline);
-		vkCmdBindDescriptorSets(cmd, VK_PIPELINE_BIND_POINT_COMPUTE, m_gradient_pipeline_layout, 0, 1, &m_draw_image_descriptors, 0, nullptr);
+		// bind the gradient drawing compute pipeline
+		vkCmdBindPipeline(cmd, VK_PIPELINE_BIND_POINT_COMPUTE, effect.pipeline);
+		vkCmdBindDescriptorSets(cmd, VK_PIPELINE_BIND_POINT_COMPUTE, m_gradient_pipeline_layout, 0, 1, &m_draw_image_descriptors, 0, nullptr);		// bind desc_set containing the draw_image for compute pipeline
+		vkCmdPushConstants(cmd, m_gradient_pipeline_layout, VK_SHADER_STAGE_COMPUTE_BIT, 0, sizeof(compute_push_constants), &effect.data);
+
+		// execute the compute pipeline dispatch. We are using 16x16 workgroup size so we need to divide by it
 		vkCmdDispatch(cmd, static_cast<u32>(std::ceil(m_draw_extent.width / 16.0)), static_cast<u32>(std::ceil(m_draw_extent.height / 16.0)), 1);
 	}
 

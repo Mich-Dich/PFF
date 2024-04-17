@@ -14,19 +14,11 @@
 #include "engine/layer/imgui_debug_layer.h"
 
 #include "engine/platform/pff_window.h"
-//#include "engine/map/game_map.h"
-
 #include "engine/render/renderer.h"
-#include "engine/render/vulkan/vk_renderer.h"
-// #include "engine/render/vk_buffer.h"
-
-#include "application.h"
-
-
-// DEV-ONLY:
 #include "engine/game_objects/camera.h"
 #include "util/timer.h"
 
+#include "application.h"
 
 namespace PFF {
 
@@ -35,7 +27,6 @@ namespace PFF {
 	application* application::s_instance = nullptr;
 	ref<renderer> application::m_renderer;
 	ref<pff_window> application::m_window;
-	imgui_debug_layer* application::m_imgui_debug_layer;
 	//world_layer* application::m_world_layer;
 	bool application::m_is_titlebar_hovered;
 	bool application::m_running;
@@ -43,60 +34,45 @@ namespace PFF {
 
 	application::application() {
 
-		PFF::Logger::Init("[$B$T:$J$E] [$B$L$X $I - $P:$G$E] $C$Z");
-
 		PFF_PROFILE_BEGIN_SESSION("startup", "benchmarks", "PFF_benchmark_startup.json");
 		PFF_PROFILE_FUNCTION();
 
+		PFF::Logger::Init("[$B$T:$J$E] [$B$L$X $I - $P:$G$E] $C$Z");
 		CORE_ASSERT(!s_instance, "", "Application already exists");
 
 		CORE_LOG_INIT();
 		s_instance = this;
+
+		// ---------------------------------------- general subsystems ----------------------------------------
 		config::init();
 
-		// init FPS system
 		fps_timer = timer();
 		fps_timer.set_fps_settings(m_target_fps);
 
 		m_layerstack = create_ref<layer_stack>();
 
-		m_window = std::make_shared<pff_window>();			// Can be called after inital setup like [compiling shaders]
+		m_window = std::make_shared<pff_window>();
 		m_window->set_event_callback(BIND_FN(application::on_event));
 		
-		// =========================== RENDER_INIT ===========================
+		// ---------------------------------------- renderer ----------------------------------------
 		m_renderer = create_ref<render::vulkan::vk_renderer>(m_window, m_layerstack);
 		
-		//renderer::set_api(PFF::render_api::Vulkan);
-		//switch (renderer::get_api()) {
-		//	case PFF::render_api::none:
-		//		break;
-		//	case PFF::render_api::Vulkan:
-		//		break;
-		//	case PFF::render_api::OpenGl:
-		//		//#error "OpenGL renderer not implemented yet"
-		//		break;
-		//	case PFF::render_api::D3D12:
-		//		//#error "DirectX12 renderer not implemented yet"
-		//		break;
-		//	case PFF::render_api::Metal:
-		//		//#error "Metal renderer not implemented yet"
-		//		break;
-		//	default:
-		//		break;
-		//}
+		// ---------------------------------------- layers ----------------------------------------
+		m_imgui_debug_layer = new imgui_debug_layer();
+		m_layerstack->push_overlay(m_imgui_debug_layer);
 
 		//m_world_layer = new world_layer();
 		//m_layerstack.push_layer(m_world_layer);
 		//m_renderer->set_world_Layer(m_world_layer);
 
-		m_imgui_debug_layer = new imgui_debug_layer();
-		m_layerstack->push_overlay(m_imgui_debug_layer);
+		// ---------------------------------------- client side ----------------------------------------
+		CORE_ASSERT(init(), "", "client defint init() has failed");			// init user code / potentally make every actor have own function (like UNREAL)
 
+		// ---------------------------------------- finished setup ----------------------------------------
 		m_renderer->set_state(system_state::active);
 		m_is_titlebar_hovered = false;
 		m_running = true;
 
-		CORE_ASSERT(init(), "", "client defint init() has failed");			// init user code / potentally make every actor have own function (like UNREAL)
 		PFF_PROFILE_END_SESSION();
 	}
 
@@ -107,17 +83,16 @@ namespace PFF {
 
 		m_renderer->set_state(system_state::inactive);
 
-		//m_current_map.reset();
-
 		m_layerstack->pop_overlay(m_imgui_debug_layer);
 		delete m_imgui_debug_layer;
 
+		//m_current_map.reset();
 		//m_layerstack.pop_layer(m_world_layer);
 		//delete m_world_layer;
 
-		m_layerstack.reset();
 		m_renderer.reset();
 		m_window.reset();
+		m_layerstack.reset();
 
 		CORE_LOG_SHUTDOWN();
 		PFF_PROFILE_END_SESSION();

@@ -1,10 +1,5 @@
 #pragma once
 
-//#include "vulkan/vk_renderer.h"
-// #include "opengl/gl_renderer.h"
-// #include "d3d12/dx_renderer.h"
-// #include "matal/me_renderer.h"
-
 namespace PFF {
 
 	enum class render_api {
@@ -28,6 +23,7 @@ namespace PFF {
 
 		// --------------- ImGui ----------------
 		virtual void imgui_init() = 0;
+		virtual void imgui_create_fonts() = 0;
 		virtual void imgui_shutdown() = 0;
 
 		// --------------- renderer ----------------
@@ -41,8 +37,8 @@ namespace PFF {
 		static render_api s_render_api;
 		system_state m_state = system_state::inactive;
 
-
 		bool m_imgui_initalized = false;
+
 	private:
 
 	};

@@ -14,7 +14,7 @@
 namespace PFF {
 
 	class pff_window;
-	// class renderer;
+	//class renderer;
 	class event;
 	class window_resize_event;
 	class window_close_event;
@@ -39,12 +39,12 @@ namespace PFF {
 
 		// static
 		FORCEINLINE static application& get()							{ return *s_instance; }
-		//FORCEINLINE static imgui_debug_layer* get_imgui_layer()			{ return m_imgui_debug_layer; }
-		//FORCEINLINE static world_layer* get_world_layer()				{ return m_world_layer; }
-		//FORCEINLINE static ref<game_map> get_current_map()				{ return m_world_layer->get_current_map(); }
 		FORCEINLINE static ref<pff_window> get_window()					{ return m_window; }
-		//FORCEINLINE static ref<renderer> get_renderer()					{ return m_renderer; }
+		FORCEINLINE static ref<renderer> get_renderer()					{ return m_renderer; }
+		FORCEINLINE imgui_debug_layer* get_imgui_layer()				{ return m_imgui_debug_layer; }
 		//FORCEINLINE static void  set_render_state(system_state state)	{ return m_renderer->set_state(state); }
+		//FORCEINLINE world_layer* get_world_layer()					{ return m_world_layer; }
+		//FORCEINLINE ref<game_map> get_current_map()					{ return m_world_layer->get_current_map(); }
 		FORCEINLINE static void close_application()						{ m_running = false; }
 		FORCEINLINE static bool is_titlebar_hovered()					{ return m_is_titlebar_hovered; }
 
@@ -79,7 +79,7 @@ namespace PFF {
 		static ref<pff_window> m_window;
 		static bool m_is_titlebar_hovered;
 		static bool m_running;
-		static imgui_debug_layer* m_imgui_debug_layer;
+		imgui_debug_layer* m_imgui_debug_layer;
 		//static world_layer* m_world_layer;
 
 		ref<layer_stack> m_layerstack{};

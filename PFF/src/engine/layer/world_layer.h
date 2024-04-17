@@ -1,9 +1,9 @@
 #pragma once
 
-#include "engine/layer/layer.h"
+//#include "engine/layer/layer.h"
 //#include "engine/map/game_map.h"
-#include "engine/game_objects/camera.h"
-#include "engine/game_objects/player_controller.h"
+//#include "engine/game_objects/camera.h"
+//#include "engine/game_objects/player_controller.h"
 
 namespace PFF {
 	/*
