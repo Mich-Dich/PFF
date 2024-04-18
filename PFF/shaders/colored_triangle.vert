@@ -6,9 +6,9 @@ void main() {
     
 	//const array of positions for the triangle
 	const vec3 positions[3] = vec3[3](
-		vec3(0.6f,0.6f, 0.0f),
-		vec3(-0.6f,0.6f, 0.0f),
-		vec3(0.f,-0.6f, 0.0f)
+		vec3(0.8f,0.8f, 0.0f),
+		vec3(-0.8f,0.8f, 0.0f),
+		vec3(0.f,-0.8f, 0.0f)
 	);
 
 	//const array of colors for the triangle

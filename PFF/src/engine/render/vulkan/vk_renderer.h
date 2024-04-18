@@ -85,18 +85,29 @@ namespace PFF::render::vulkan {
 
 		FORCEINLINE FrameData& get_current_frame() { return m_frames[m_frame_number % FRAME_COUNT]; };
 		
+		void init_default_data();
 		void init_swapchain();
 		void init_commands();
 		void init_sync_structures();
 		void init_descriptors();
-		void init_pipelines();
 		void destroy_swapchain();
+
+		void init_pipelines();
+		void init_pipelines_background();
+		void init_pipeline_triangle();
+		void init_pipeline_mesh();
 
 		void draw_internal(VkCommandBuffer cmd);
 		void draw_geometry(VkCommandBuffer cmd);
 		void draw_imgui(VkCommandBuffer cmd, VkImageView targetImageView);
 		void create_swapchain(u32 width, u32 height);
-		void init_triangle_pipeline();
+
+		allocated_buffer create_buffer(size_t allocSize, VkBufferUsageFlags usage, VmaMemoryUsage memoryUsage);
+		void destroy_buffer(const allocated_buffer& buffer);
+
+		// TIP: Note that this pattern is not very efficient, as CPU is waiting for the GPU command to fully execute before continuing with our CPU side logic
+		//		This is should be put on a background thread, whose sole job is to execute uploads like this one, and deleting/reusing the staging buffers.
+		GPU_mesh_buffers upload_mesh(std::vector<u32> indices, std::vector<vertex> vertices);
 
 		bool m_is_initialized = false;
 		int m_frame_number = 0;
@@ -144,10 +155,18 @@ namespace PFF::render::vulkan {
 		VkDescriptorPool			m_imgui_desc_pool;
 
 		std::vector<compute_effect> m_background_effects;
-		int m_current_background_effect = 0;
+		int							m_current_background_effect = 0;
 
+		// ---------------------------- triangle pipeline ---------------------------- 
 		VkPipelineLayout			m_triangle_pipeline_layout;
 		VkPipeline					m_triangle_pipeline;
+
+		// ---------------------------- mesh pipeline ---------------------------- 
+		VkPipelineLayout			m_mesh_pipeline_layout;
+		VkPipeline					m_mesh_pipeline;
+
+		GPU_mesh_buffers rectangle;
+
 
 	};
 }

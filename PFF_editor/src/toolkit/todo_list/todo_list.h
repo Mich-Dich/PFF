@@ -90,20 +90,18 @@ namespace PFF::toolkit::todo {
 			serializer::yaml(config::get_filepath_from_configtype(config::file::editor), "todo_list", option)
 				.vector(KEY_VALUE(todo_list->m_topics), [&](serializer::yaml& yaml, const u64 x) {
 
-					yaml.entry(KEY_VALUE(todo_list->m_topics[x].name));
-					yaml.entry(KEY_VALUE(todo_list->m_topics[x].selected));
-					yaml.vector(KEY_VALUE(todo_list->m_topics[x].tasks), [&](serializer::yaml& inner, const u64 y) {
+					yaml.entry(KEY_VALUE(todo_list->m_topics[x].name))
+						.entry(KEY_VALUE(todo_list->m_topics[x].selected))
+						.vector(KEY_VALUE(todo_list->m_topics[x].tasks), [&](serializer::yaml& inner, const u64 y) {
 
-						inner.entry(KEY_VALUE(todo_list->m_topics[x].tasks[y].title));
-						inner.entry(KEY_VALUE(todo_list->m_topics[x].tasks[y].description));
-						inner.entry(KEY_VALUE(todo_list->m_topics[x].tasks[y].done));
+						inner.entry(KEY_VALUE(todo_list->m_topics[x].tasks[y].title))
+							.entry(KEY_VALUE(todo_list->m_topics[x].tasks[y].description))
+							.entry(KEY_VALUE(todo_list->m_topics[x].tasks[y].done));
 					});
 				});
-
 		}
 
-		~todo_list_serializer() {}
-
+		~todo_list_serializer() = default;
 	};
 
 	// ============================================= implementation =============================================

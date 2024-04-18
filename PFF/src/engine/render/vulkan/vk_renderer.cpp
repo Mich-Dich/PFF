@@ -106,7 +106,8 @@ namespace PFF::render::vulkan {
 		init_descriptors();
 		
 		init_pipelines();
-		//imgui_init();
+		
+		init_default_data();
 
 		m_is_initialized = true;
 	}
@@ -143,9 +144,9 @@ namespace PFF::render::vulkan {
 		CORE_LOG_SHUTDOWN();
 	}
 
-	// --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+	// =======================================================================================================================================================================================
 	// PUBLIC FUNCTIONS
-	// --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+	// =======================================================================================================================================================================================
 
 	void vk_renderer::imgui_init() {
 		
@@ -267,7 +268,7 @@ namespace PFF::render::vulkan {
 
 		util::transition_image(cmd, m_draw_image.image, VK_IMAGE_LAYOUT_GENERAL, VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL);
 
-		draw_geometry(cmd);
+		 draw_geometry(cmd);
 
 		//transition the draw image and the swapchain image into their correct transfer layouts
 		util::transition_image(cmd, m_draw_image.image, VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL, VK_IMAGE_LAYOUT_TRANSFER_SRC_OPTIMAL);
@@ -391,10 +392,41 @@ namespace PFF::render::vulkan {
 		VK_CHECK(vkQueueSubmit2(m_graphics_queue, 1, &submit, m_immFence));
 		VK_CHECK(vkWaitForFences(m_device, 1, &m_immFence, true, 9999999999));
 	}
-
-	// --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+	
+	// =======================================================================================================================================================================================
 	// PRIVATE FUNCTIONS
-	// --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+	// =======================================================================================================================================================================================
+
+	// ================================================================================ INIT FUNCTION ================================================================================
+
+	void vk_renderer::init_default_data() {
+
+		std::vector<vertex> rect_vertices;
+		rect_vertices.resize(4);
+
+		rect_vertices[0].position = {  0.3, -0.3, 0 };
+		rect_vertices[1].position = {  0.3,  0.3, 0 };
+		rect_vertices[2].position = { -0.3, -0.3, 0 };
+		rect_vertices[3].position = { -0.3,  0.3, 0 };
+
+		rect_vertices[0].color = { 0,   0,   1,   1 };
+		rect_vertices[1].color = { 0.5, 0.5, 0.5, 1 };
+		rect_vertices[2].color = { 1,   0,   0,   1 };
+		rect_vertices[3].color = { 0,   1,   0,   1 };
+
+		std::vector<u32> rect_indices;
+		rect_indices.resize(6);
+
+		rect_indices[0] = 0;
+		rect_indices[1] = 1;
+		rect_indices[2] = 2;
+
+		rect_indices[3] = 2;
+		rect_indices[4] = 1;
+		rect_indices[5] = 3;
+
+		rectangle = upload_mesh(rect_indices, rect_vertices);
+	}
 
 	void vk_renderer::init_swapchain() {
 
@@ -513,7 +545,19 @@ namespace PFF::render::vulkan {
 	}
 
 
+	// ================================================================================ INIT PIPELINES ================================================================================
+
 	void vk_renderer::init_pipelines() {
+
+		//COMPUTE PIPELINES	
+		init_pipelines_background();
+
+		// GRAPHICS PIPELINES
+		init_pipeline_triangle();
+		init_pipeline_mesh();
+	}
+
+	void vk_renderer::init_pipelines_background() {
 
 		VkPushConstantRange pushConstant{};
 		pushConstant.offset = 0;
@@ -548,7 +592,7 @@ namespace PFF::render::vulkan {
 		VkShaderModule grid_shader;
 		CORE_ASSERT(util::load_shader_module("../PFF/shaders/gradient.comp.spv", m_device, &grid_shader), "", "Error when building the compute shader");
 		compute_pipeline_CI.stage.module = grid_shader;		//change the shader module only
-		
+
 		compute_effect grid{};
 		grid.layout = m_gradient_pipeline_layout;
 		grid.name = "sky";
@@ -558,7 +602,7 @@ namespace PFF::render::vulkan {
 		vkDestroyShaderModule(m_device, grid_shader, nullptr);
 
 		// ====================================================== Add pipeline [gradient] ====================================================== 		
-		
+
 		VkShaderModule gradient_shader;
 		CORE_ASSERT(util::load_shader_module("../PFF/shaders/gradient_color.comp.spv", m_device, &gradient_shader), "", "Error when building the compute shader");
 		compute_pipeline_CI.stage.module = gradient_shader;	//change the shader module only
@@ -595,12 +639,92 @@ namespace PFF::render::vulkan {
 		m_deletion_queue.push_func([&]() {
 
 			vkDestroyPipelineLayout(m_device, m_gradient_pipeline_layout, nullptr);
-			for (u32 x = 0; x < m_background_effects.size(); x++) 
+			for (u32 x = 0; x < m_background_effects.size(); x++)
 				vkDestroyPipeline(m_device, m_background_effects[x].pipeline, nullptr);
-		});
-
-		init_triangle_pipeline();
+			});
 	}
+
+
+	void vk_renderer::init_pipeline_triangle() {
+
+		VkShaderModule triangle_frag_shader;
+		CORE_ASSERT(util::load_shader_module("../PFF/shaders/colored_triangle.frag.spv", m_device, &triangle_frag_shader), "", "Error when building the triangle fragment shader module");
+
+		VkShaderModule triangle_vertex_shader;
+		CORE_ASSERT(util::load_shader_module("../PFF/shaders/colored_triangle.vert.spv", m_device, &triangle_vertex_shader), "", "Error when building the triangle vertex shader module");
+
+		//build the pipeline layout that controls the inputs/outputs of the shader
+		//we are not using descriptor sets or other systems yet, so no need to use anything other than empty default
+		VkPipelineLayoutCreateInfo pipeline_layout_info = init::pipeline_layout_create_info();
+		VK_CHECK(vkCreatePipelineLayout(m_device, &pipeline_layout_info, nullptr, &m_triangle_pipeline_layout));
+
+		m_triangle_pipeline = pipeline_builder()
+			.set_pipeline_layout(m_triangle_pipeline_layout)			// use the triangle layout we created
+			.set_shaders(triangle_vertex_shader, triangle_frag_shader)	// connecting the vertex and pixel shaders to the pipeline
+			.set_input_topology(VK_PRIMITIVE_TOPOLOGY_TRIANGLE_LIST)	// it will draw triangles
+			.set_polygon_mode(VK_POLYGON_MODE_FILL)						// filled triangles
+			.set_cull_mode(VK_CULL_MODE_NONE, VK_FRONT_FACE_CLOCKWISE)	// no backface culling
+			.set_multisampling_none()									// no multisampling
+			.disable_blending()											// no blending
+			.set_color_attachment_format(m_draw_image.image_format)		// connect the image format we will draw into, from draw image
+			.set_depth_format(VK_FORMAT_UNDEFINED)
+			.disable_depthtest()										// no depth testing
+			.build(m_device);
+
+		//clean structures
+		vkDestroyShaderModule(m_device, triangle_frag_shader, nullptr);
+		vkDestroyShaderModule(m_device, triangle_vertex_shader, nullptr);
+
+		m_deletion_queue.push_func([&]() {
+			vkDestroyPipelineLayout(m_device, m_triangle_pipeline_layout, nullptr);
+			vkDestroyPipeline(m_device, m_triangle_pipeline, nullptr);
+			});
+	}
+
+
+	void vk_renderer::init_pipeline_mesh() {
+
+		VkShaderModule mesh_frag_shader;
+		CORE_ASSERT(util::load_shader_module("../PFF/shaders/colored_triangle.frag.spv", m_device, &mesh_frag_shader), "", "Error when building the triangle fragment shader module");
+
+		VkShaderModule mesh_vertex_shader;
+		CORE_ASSERT(util::load_shader_module("../PFF/shaders/colored_triangle_mesh.vert.spv", m_device, &mesh_vertex_shader), "", "Error when building the triangle vertex shader module");
+
+		VkPushConstantRange push_constant_range{};
+		push_constant_range.offset = 0;
+		push_constant_range.size = sizeof(GPU_draw_push_constants);
+		push_constant_range.stageFlags = VK_SHADER_STAGE_VERTEX_BIT;
+
+		VkPipelineLayoutCreateInfo pipeline_layout_info = init::pipeline_layout_create_info();
+		pipeline_layout_info.pPushConstantRanges = &push_constant_range;
+		pipeline_layout_info.pushConstantRangeCount = 1;
+
+		VK_CHECK(vkCreatePipelineLayout(m_device, &pipeline_layout_info, nullptr, &m_mesh_pipeline_layout));
+
+		m_mesh_pipeline = pipeline_builder()
+			.set_pipeline_layout(m_mesh_pipeline_layout)				// use the triangle layout we created
+			.set_shaders(mesh_vertex_shader, mesh_frag_shader)			// connecting the vertex and pixel shaders to the pipeline
+			.set_input_topology(VK_PRIMITIVE_TOPOLOGY_TRIANGLE_LIST)	// it will draw triangles
+			.set_polygon_mode(VK_POLYGON_MODE_FILL)						// filled triangles
+			.set_cull_mode(VK_CULL_MODE_NONE, VK_FRONT_FACE_CLOCKWISE)	// no backface culling
+			.set_multisampling_none()									// no multisampling
+			.disable_blending()											// no blending
+			.set_color_attachment_format(m_draw_image.image_format)		// connect the image format we will draw into, from draw image
+			.set_depth_format(VK_FORMAT_UNDEFINED)
+			.disable_depthtest()										// no depth testing
+			.build(m_device);
+
+		//clean structures
+		vkDestroyShaderModule(m_device, mesh_frag_shader, nullptr);
+		vkDestroyShaderModule(m_device, mesh_vertex_shader, nullptr);
+
+		m_deletion_queue.push_func([&]() {
+			vkDestroyPipelineLayout(m_device, m_mesh_pipeline_layout, nullptr);
+			vkDestroyPipeline(m_device, m_mesh_pipeline, nullptr);
+			});
+	}
+
+	// ================================================================================== PIPELINES ==================================================================================
 
 	void vk_renderer::destroy_swapchain() {
 
@@ -651,8 +775,14 @@ namespace PFF::render::vulkan {
 		scissor.extent.height = m_draw_extent.height;
 		vkCmdSetScissor(cmd, 0, 1, &scissor);
 
-		//launch a draw command to draw 3 vertices
-		vkCmdDraw(cmd, 3, 1, 0, 0);
+		vkCmdBindPipeline(cmd, VK_PIPELINE_BIND_POINT_GRAPHICS, m_mesh_pipeline);
+
+		GPU_draw_push_constants push_constants;
+		push_constants.world_matrix = glm::mat4{ 1.f };
+		push_constants.vertex_buffer = rectangle.vertex_buffer_address;
+		vkCmdPushConstants(cmd, m_mesh_pipeline_layout, VK_SHADER_STAGE_VERTEX_BIT, 0, sizeof(GPU_draw_push_constants), &push_constants);
+		vkCmdBindIndexBuffer(cmd, rectangle.index_buffer.buffer, 0, VK_INDEX_TYPE_UINT32);
+		vkCmdDrawIndexed(cmd, 6, 1, 0, 0, 0);
 
 		vkCmdEndRendering(cmd);
 	}
@@ -686,41 +816,77 @@ namespace PFF::render::vulkan {
 		m_swapchain_image_views = vkbSwapchain.get_image_views().value();
 	}
 
-	void vk_renderer::init_triangle_pipeline() {
 
-		VkShaderModule triangleFragShader;
-		CORE_ASSERT(util::load_shader_module("../PFF/shaders/colored_triangle.frag.spv", m_device, &triangleFragShader), "", "Error when building the triangle fragment shader module");
 
-		VkShaderModule triangleVertexShader;
-		CORE_ASSERT(util::load_shader_module("../PFF/shaders/colored_triangle.vert.spv", m_device, &triangleVertexShader),"", "Error when building the triangle vertex shader module");
+	allocated_buffer vk_renderer::create_buffer(size_t allocSize, VkBufferUsageFlags usage, VmaMemoryUsage memoryUsage) {
 
-		//build the pipeline layout that controls the inputs/outputs of the shader
-		//we are not using descriptor sets or other systems yet, so no need to use anything other than empty default
-		VkPipelineLayoutCreateInfo pipeline_layout_info = init::pipeline_layout_create_info();
-		VK_CHECK(vkCreatePipelineLayout(m_device, &pipeline_layout_info, nullptr, &m_triangle_pipeline_layout));
+		VkBufferCreateInfo buffer_CI = {};
+		buffer_CI.sType = VK_STRUCTURE_TYPE_BUFFER_CREATE_INFO;
+		buffer_CI.pNext = nullptr;
+		buffer_CI.size = allocSize;
+		buffer_CI.usage = usage;
 
-		m_triangle_pipeline = pipeline_builder()
-			.set_pipeline_layout(m_triangle_pipeline_layout)			// use the triangle layout we created
-			.set_shaders(triangleVertexShader, triangleFragShader)		// connecting the vertex and pixel shaders to the pipeline
-			.set_input_topology(VK_PRIMITIVE_TOPOLOGY_TRIANGLE_LIST)	// it will draw triangles
-			.set_polygon_mode(VK_POLYGON_MODE_FILL)						// filled triangles
-			.set_cull_mode(VK_CULL_MODE_NONE, VK_FRONT_FACE_CLOCKWISE)	// no backface culling
-			.set_multisampling_none()									// no multisampling
-			.disable_blending()											// no blending
-			.set_color_attachment_format(m_draw_image.image_format)		//connect the image format we will draw into, from draw image
-			.set_depth_format(VK_FORMAT_UNDEFINED)
-			.disable_depthtest()										// no depth testing
-			.build(m_device);
+		VmaAllocationCreateInfo vmaalloc_CI = {};
+		vmaalloc_CI.usage = memoryUsage;
+		vmaalloc_CI.flags = VMA_ALLOCATION_CREATE_MAPPED_BIT;
+		allocated_buffer new_buffer;
 
-		//clean structures
-		vkDestroyShaderModule(m_device, triangleFragShader, nullptr);
-		vkDestroyShaderModule(m_device, triangleVertexShader, nullptr);
-
-		m_deletion_queue.push_func([&]() {
-			vkDestroyPipelineLayout(m_device, m_triangle_pipeline_layout, nullptr);
-			vkDestroyPipeline(m_device, m_triangle_pipeline, nullptr);
-			});
+		VK_CHECK(vmaCreateBuffer(m_allocator, &buffer_CI, &vmaalloc_CI, &new_buffer.buffer, &new_buffer.allocation, &new_buffer.info));
+		return new_buffer;
 	}
+
+	void vk_renderer::destroy_buffer(const allocated_buffer& buffer) {
+
+		vmaDestroyBuffer(m_allocator, buffer.buffer, buffer.allocation);
+	}
+
+	GPU_mesh_buffers vk_renderer::upload_mesh(std::vector<u32> indices, std::vector<vertex> vertices) {
+
+		const size_t vertexBufferSize = vertices.size() * sizeof(vertex);
+		const size_t indexBufferSize = indices.size() * sizeof(u32);
+
+		GPU_mesh_buffers new_mesh;
+		new_mesh.vertex_buffer = create_buffer(vertexBufferSize, VK_BUFFER_USAGE_STORAGE_BUFFER_BIT | VK_BUFFER_USAGE_TRANSFER_DST_BIT | VK_BUFFER_USAGE_SHADER_DEVICE_ADDRESS_BIT, VMA_MEMORY_USAGE_GPU_ONLY);
+		
+		//find the adress of the vertex buffer
+		VkBufferDeviceAddressInfo device_adress_I{};
+		device_adress_I.sType = VK_STRUCTURE_TYPE_BUFFER_DEVICE_ADDRESS_INFO;
+		device_adress_I.buffer = new_mesh.vertex_buffer.buffer;
+
+		new_mesh.vertex_buffer_address = vkGetBufferDeviceAddress(m_device, &device_adress_I);
+		new_mesh.index_buffer = create_buffer(indexBufferSize, VK_BUFFER_USAGE_INDEX_BUFFER_BIT | VK_BUFFER_USAGE_TRANSFER_DST_BIT, VMA_MEMORY_USAGE_GPU_ONLY);
+		
+		allocated_buffer staging = create_buffer(vertexBufferSize + indexBufferSize, VK_BUFFER_USAGE_TRANSFER_SRC_BIT, VMA_MEMORY_USAGE_CPU_ONLY);
+		void* data = staging.allocation->GetMappedData();
+		
+		memcpy(data, vertices.data(), vertexBufferSize);								// copy vertex buffer
+		memcpy((char*)data + vertexBufferSize, indices.data(), indexBufferSize);		// copy index buffer
+
+		immediate_submit([&](VkCommandBuffer cmd) {
+
+			VkBufferCopy vertexCopy{ 0 };
+			vertexCopy.dstOffset = 0;
+			vertexCopy.srcOffset = 0;
+			vertexCopy.size = vertexBufferSize;
+			vkCmdCopyBuffer(cmd, staging.buffer, new_mesh.vertex_buffer.buffer, 1, &vertexCopy);
+
+			VkBufferCopy indexCopy{ 0 };
+			indexCopy.dstOffset = 0;
+			indexCopy.srcOffset = vertexBufferSize;
+			indexCopy.size = indexBufferSize;
+			vkCmdCopyBuffer(cmd, staging.buffer, new_mesh.index_buffer.buffer, 1, &indexCopy);
+			});
+
+		destroy_buffer(staging);
+		m_deletion_queue.push_func([=]() {
+
+			destroy_buffer(new_mesh.vertex_buffer);
+			destroy_buffer(new_mesh.index_buffer);
+			});
+		
+		return new_mesh;
+	}
+
 
 	namespace util {
 
@@ -762,17 +928,17 @@ namespace PFF::render::vulkan {
 						compiling = true;
 						result = system(system_command.c_str());
 					}
+				} 
+				
+				else if (std::filesystem::is_directory(entry)) {
 
-
-				} else if (std::filesystem::is_directory(entry)) {
-
-					CORE_ASSERT(false, "", "current entry is a DIRECTORY");
+					CORE_ASSERT(false, "", "current entry is a DIRECTORY (recursive call not implemented yet)");
 				}
 
 				if (compiling) {
 
 					while (result == STILL_WORKING)
-						std::this_thread::sleep_for(std::chrono::milliseconds(10));
+						std::this_thread::sleep_for(std::chrono::milliseconds(50));
 
 				}
 			}
