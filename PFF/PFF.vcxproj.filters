@@ -10,6 +10,9 @@
     <Filter Include="engine\game_objects">
       <UniqueIdentifier>{ADBB125B-191D-F068-A28A-361B0EEB2628}</UniqueIdentifier>
     </Filter>
+    <Filter Include="engine\game_objects\geometry">
+      <UniqueIdentifier>{C8F7623D-B4B2-52E9-5D6A-CB3349049D79}</UniqueIdentifier>
+    </Filter>
     <Filter Include="engine\io_handler">
       <UniqueIdentifier>{1F9FA092-8BB5-9E28-D42C-2A4A40826FB0}</UniqueIdentifier>
     </Filter>
@@ -125,6 +128,9 @@
     <ClInclude Include="src\engine\render\vulkan\vk_instance.h">
       <Filter>engine\render\vulkan</Filter>
     </ClInclude>
+    <ClInclude Include="src\engine\render\vulkan\vk_loader.h">
+      <Filter>engine\render\vulkan</Filter>
+    </ClInclude>
     <ClInclude Include="src\engine\render\vulkan\vk_pipeline.h">
       <Filter>engine\render\vulkan</Filter>
     </ClInclude>
@@ -180,6 +186,7 @@
     <ClInclude Include="src\util\util.h">
       <Filter>util</Filter>
     </ClInclude>
+    <ClInclude Include="src\engine\render\render_util.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="src\application.cpp" />
@@ -191,6 +198,9 @@
     </ClCompile>
     <ClCompile Include="src\engine\game_objects\game_object.cpp">
       <Filter>engine\game_objects</Filter>
+    </ClCompile>
+    <ClCompile Include="src\engine\game_objects\geometry\mesh.cpp">
+      <Filter>engine\game_objects\geometry</Filter>
     </ClCompile>
     <ClCompile Include="src\engine\game_objects\player_controller.cpp">
       <Filter>engine\game_objects</Filter>
@@ -228,6 +238,9 @@
     <ClCompile Include="src\engine\render\vulkan\vk_initializers.cpp">
       <Filter>engine\render\vulkan</Filter>
     </ClCompile>
+    <ClCompile Include="src\engine\render\vulkan\vk_loader.cpp">
+      <Filter>engine\render\vulkan</Filter>
+    </ClCompile>
     <ClCompile Include="src\engine\render\vulkan\vk_pipeline.cpp">
       <Filter>engine\render\vulkan</Filter>
     </ClCompile>
@@ -255,5 +268,6 @@
     <ClCompile Include="src\util\timer.cpp">
       <Filter>util</Filter>
     </ClCompile>
+    <ClCompile Include="src\engine\render\render_util.cpp" />
   </ItemGroup>
 </Project>

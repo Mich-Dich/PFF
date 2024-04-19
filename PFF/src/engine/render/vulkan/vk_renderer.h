@@ -2,17 +2,13 @@
 
 #include "engine/render/renderer.h"
 #include "engine/platform/pff_window.h"
+#include "engine/layer/layer_stack.h"
 
 #include "vk_types.h"
 
 class PFF::layer_stack;
 
 namespace PFF::render::vulkan {
-
-	namespace util {
-
-		void compile_all_shaders_in_directory(const char* path_to_dir = "../PFF/shaders");
-	}
 
 	// !! CAUTION !! - Doing callbacks like this is inneficient at scale, because we are storing whole std::functions for every object to be deleted. This is suboptimal. 
 	// For deleting thousands of objects, a better implementation would be to store arrays of vulkan handles of various types such as VkImage, VkBuffer, and so on. And then delete those from a loop.
@@ -68,23 +64,27 @@ namespace PFF::render::vulkan {
 
 		FORCEINLINE f32 get_aspect_ratio() { return 1.f; };			// UNFINISHED
 
-		// init functions
-		void imgui_init() override;
-		void imgui_create_fonts() override;
-		void imgui_shutdown() override;
-
-		// work functions
+		// --------------- general ----------------
 		void draw_frame(f32 delta_time) override;
 		void refresh(f32 delta_time) override;
 		void set_size(u32 width, u32 height) override;
 		void wait_idle() override;
+
+		// --------------- ImGui ----------------
+		void imgui_init() override;
+		void imgui_create_fonts() override;
+		void imgui_shutdown() override;
+
+		// --------------- util ----------------
 		void immediate_submit(std::function<void()>&& function) override;
-		void immediate_submit(std::function<void(VkCommandBuffer cmd)>&& function); // Improvement => run this on a different queue than the graphics_queue, so it can overlap the execution with the main render loop.
+		void enable_vsync(bool enable) override {}							// TODO: implement (recreate swapchain with new VK_PRESENT_MODE_XXX )
 
 	private:
 
 		FORCEINLINE FrameData& get_current_frame() { return m_frames[m_frame_number % FRAME_COUNT]; };
 		
+		void immediate_submit(std::function<void(VkCommandBuffer cmd)>&& function); // Improvement => run this on a different queue than the graphics_queue, so it can overlap the execution with the main render loop.
+
 		void init_default_data();
 		void init_swapchain();
 		void init_commands();

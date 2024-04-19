@@ -10,12 +10,18 @@
 config/
 *.ini
 
-/bin
-/bin-int
+
+# Compield shaders
+*.spv
 
 # benchmarks
 /PFF_editor/benchmarks/
 PFF_editor/benchmarks/
+
+# premake generated
+*.sln
+/bin
+/bin-int
 
 # User-specific files
 *.rsuser

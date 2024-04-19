@@ -174,6 +174,7 @@ IF EXIST ..\bin\Release-windows-x86_64\PFF\PFF.dll\ (xcopy /Q /E /Y /I ..\bin\Re
     </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClInclude Include="src\engine\render\render_util.h" />
     <ClInclude Include="src\PFF.h" />
     <ClInclude Include="src\application.h" />
     <ClInclude Include="src\engine\Events\Event.h" />
@@ -201,6 +202,7 @@ IF EXIST ..\bin\Release-windows-x86_64\PFF\PFF.dll\ (xcopy /Q /E /Y /I ..\bin\Re
     <ClInclude Include="src\engine\render\vulkan\vk_image.h" />
     <ClInclude Include="src\engine\render\vulkan\vk_initializers.h" />
     <ClInclude Include="src\engine\render\vulkan\vk_instance.h" />
+    <ClInclude Include="src\engine\render\vulkan\vk_loader.h" />
     <ClInclude Include="src\engine\render\vulkan\vk_pipeline.h" />
     <ClInclude Include="src\engine\render\vulkan\vk_renderer.h" />
     <ClInclude Include="src\engine\render\vulkan\vk_types.h" />
@@ -226,6 +228,7 @@ IF EXIST ..\bin\Release-windows-x86_64\PFF\PFF.dll\ (xcopy /Q /E /Y /I ..\bin\Re
     <ClCompile Include="src\engine\game_objects\camera.cpp" />
     <ClCompile Include="src\engine\game_objects\game_manager.cpp" />
     <ClCompile Include="src\engine\game_objects\game_object.cpp" />
+    <ClCompile Include="src\engine\game_objects\geometry\mesh.cpp" />
     <ClCompile Include="src\engine\game_objects\player_controller.cpp" />
     <ClCompile Include="src\engine\io_handler\file_loader.cpp" />
     <ClCompile Include="src\engine\io_handler\input_mapping.cpp" />
@@ -234,10 +237,12 @@ IF EXIST ..\bin\Release-windows-x86_64\PFF\PFF.dll\ (xcopy /Q /E /Y /I ..\bin\Re
     <ClCompile Include="src\engine\layer\layer_stack.cpp" />
     <ClCompile Include="src\engine\layer\world_layer.cpp" />
     <ClCompile Include="src\engine\platform\pff_window.cpp" />
+    <ClCompile Include="src\engine\render\render_util.cpp" />
     <ClCompile Include="src\engine\render\vulkan\vendor\VkBootstrap.cpp" />
     <ClCompile Include="src\engine\render\vulkan\vk_descriptor.cpp" />
     <ClCompile Include="src\engine\render\vulkan\vk_image.cpp" />
     <ClCompile Include="src\engine\render\vulkan\vk_initializers.cpp" />
+    <ClCompile Include="src\engine\render\vulkan\vk_loader.cpp" />
     <ClCompile Include="src\engine\render\vulkan\vk_pipeline.cpp" />
     <ClCompile Include="src\engine\render\vulkan\vk_renderer.cpp" />
     <ClCompile Include="src\util\imgui\imgui_util.cpp" />

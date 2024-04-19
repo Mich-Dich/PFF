@@ -38,7 +38,7 @@ namespace PFF::render::vulkan {
 
 		CORE_LOG_INIT();
 
-		util::compile_all_shaders_in_directory("../PFF/shaders");
+		PFF::render::util::compile_shaders_in_dir("../PFF/shaders", true);
 
 		vkb::InstanceBuilder builder;
 
@@ -804,7 +804,9 @@ namespace PFF::render::vulkan {
 		vkb::Swapchain vkbSwapchain = vkb::SwapchainBuilder( m_chosenGPU, m_device, m_surface )
 			//.use_default_format_selection()
 			.set_desired_format(VkSurfaceFormatKHR{ m_swapchain_image_format, VK_COLOR_SPACE_SRGB_NONLINEAR_KHR })
-			.set_desired_present_mode(VK_PRESENT_MODE_FIFO_KHR)			//use vsync present mode
+			// VK_PRESENT_MODE_MAILBOX_KHR => fastest mode
+			// VK_PRESENT_MODE_FIFO_KHR => vsync present mode
+			.set_desired_present_mode(VK_PRESENT_MODE_MAILBOX_KHR)
 			.set_desired_extent(width, height)
 			.add_image_usage_flags(VK_IMAGE_USAGE_TRANSFER_DST_BIT)
 			.build()
@@ -887,61 +889,4 @@ namespace PFF::render::vulkan {
 		return new_mesh;
 	}
 
-
-	namespace util {
-
-		void compile_all_shaders_in_directory(const char* path_to_dir) {
-
-			const int STILL_WORKING = -42;
-
-			std::filesystem::path absolute_path = std::filesystem::absolute(path_to_dir);
-			for (const auto& entry : std::filesystem::directory_iterator(absolute_path)) {
-
-				bool compiling = false;
-				int result = STILL_WORKING;
-
-				std::set<std::string> extensions{ ".frag", ".vert", ".comp" };
-				if (std::filesystem::is_regular_file(entry)) {
-
-					if (extensions.find(entry.path().extension().string()) == extensions.end())
-						continue;
-
-					std::string compield_file{};
-					compield_file = entry.path().string() + ".spv";
-
-					std::string system_command;
-					system_command = "..\\PFF\\vendor\\vulkan-glslc\\glslc.exe " + entry.path().string() + " -o " + compield_file;
-
-					if (std::filesystem::exists(compield_file)) {
-
-						if (std::filesystem::last_write_time(entry).time_since_epoch().count() > std::filesystem::last_write_time(compield_file).time_since_epoch().count()) {
-
-							CORE_LOG(Trace, "compiling shader: " << entry.path().string());
-							compiling = true;
-							result = system(system_command.c_str());
-						}
-					}
-
-					else {
-
-						CORE_LOG(Trace, "compiling shader: " << entry.path().string());
-						compiling = true;
-						result = system(system_command.c_str());
-					}
-				} 
-				
-				else if (std::filesystem::is_directory(entry)) {
-
-					CORE_ASSERT(false, "", "current entry is a DIRECTORY (recursive call not implemented yet)");
-				}
-
-				if (compiling) {
-
-					while (result == STILL_WORKING)
-						std::this_thread::sleep_for(std::chrono::milliseconds(50));
-
-				}
-			}
-		}
-	}
 }
