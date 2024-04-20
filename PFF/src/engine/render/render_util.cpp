@@ -12,12 +12,10 @@ namespace PFF::render::util {
 	void compile_shaders_in_dir(const std::filesystem::path path_to_dir, bool compile_subdirectory) {
 
 		CORE_LOG(Trace, "Compiling shaders");
-
 		std::filesystem::path absolute_path = std::filesystem::absolute(path_to_dir);
 		for (const auto& entry : std::filesystem::directory_iterator(absolute_path)) {
 
-			// recursive call for all directorys
-			if (std::filesystem::is_directory(entry) && compile_subdirectory)
+			if (std::filesystem::is_directory(entry) && compile_subdirectory)		// recursive call for all directorys
 				compile_shaders_in_dir(entry);
 
 			compile_shader(entry.path());
@@ -27,8 +25,6 @@ namespace PFF::render::util {
 	void compile_shader(const std::filesystem::path path) {
 
 		std::filesystem::path absolute_path = std::filesystem::absolute(path);
-
-		// file is not a shader
 		if (!std::filesystem::is_regular_file(absolute_path) || posible_shader_extensions.find(absolute_path.extension().string()) == posible_shader_extensions.end())
 			return;
 

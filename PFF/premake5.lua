@@ -1,7 +1,7 @@
 
 project "PFF"
 	location "%{wks.location}/PFF"
-	kind "SharedLib"
+	kind "SharedLib"		-- TODO: make posibly into [StaticLib]
 	staticruntime "off"
 	language "C++"
 	cppdialect "C++17"
@@ -35,6 +35,7 @@ project "PFF"
 		"%{IncludeDir.glfw}/include",
 		"%{IncludeDir.ImGui}",
 		"%{IncludeDir.ImGui}/backends/",
+		"%{IncludeDir.fastgltf}",
 		"%{IncludeDir.tinyobjloader}",
 		"%{IncludeDir.stb_image}",
 		"%{IncludeDir.VulkanSDK}",
@@ -44,6 +45,7 @@ project "PFF"
 	{
 		"glfw",
 		"imgui",
+		"fastgltf",
         "%{Library.Vulkan}",
 	}
 
@@ -69,13 +71,6 @@ project "PFF"
 
 		postbuildcommands
 		{
-			--'"%{glslc}" shaders/colored_triangle.vert -o shaders/colored_triangle.vert.spv',
-			--'"%{glslc}" shaders/colored_triangle.frag -o shaders/colored_triangle.frag.spv',
-		
-			--'"%{glslc}" shaders/sky.comp -o shaders/sky.comp.spv',
-			--'"%{glslc}" shaders/gradient.comp -o shaders/gradient.comp.spv',
-			--'"%{glslc}" shaders/gradient_color.comp -o shaders/gradient_color.comp.spv',
-
 			"{MKDIR} %{wks.location}/bin/" .. outputs .. "/" .. client_project_name,
 			"{COPY} %{cfg.buildtarget.relpath} %{wks.location}/bin/" .. outputs  .. "/" .. client_project_name,
 			

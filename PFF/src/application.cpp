@@ -25,7 +25,7 @@ namespace PFF {
 	// ==================================================================== setup ====================================================================
 
 	application* application::s_instance = nullptr;
-	ref<renderer> application::m_renderer;
+	ref<PFF::render::renderer> application::m_renderer;
 	ref<pff_window> application::m_window;
 	//world_layer* application::m_world_layer;
 	bool application::m_is_titlebar_hovered;

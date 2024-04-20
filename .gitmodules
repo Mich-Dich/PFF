@@ -7,3 +7,6 @@
 [submodule "PFF/vendor/imgui"]
 	path = PFF/vendor/imgui
 	url = https://github.com/Mich-Dich/imgui
+[submodule "fastgltf"]
+	path = PFF/vendor/fastgltf
+	url = https://github.com/spnda/fastgltf

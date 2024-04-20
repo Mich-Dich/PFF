@@ -40,7 +40,7 @@ namespace PFF {
 		// static
 		FORCEINLINE static application& get()							{ return *s_instance; }
 		FORCEINLINE static ref<pff_window> get_window()					{ return m_window; }
-		FORCEINLINE static ref<renderer> get_renderer()					{ return m_renderer; }
+		FORCEINLINE static ref<PFF::render::renderer> get_renderer()					{ return m_renderer; }
 		FORCEINLINE imgui_debug_layer* get_imgui_layer()				{ return m_imgui_debug_layer; }
 		//FORCEINLINE static void  set_render_state(system_state state)	{ return m_renderer->set_state(state); }
 		//FORCEINLINE world_layer* get_world_layer()					{ return m_world_layer; }
@@ -75,7 +75,7 @@ namespace PFF {
 		//scope_ref<basic_mesh> createCubeModel(glm::vec3 offset);
 
 		static application* s_instance;
-		static ref<renderer> m_renderer;
+		static ref<PFF::render::renderer> m_renderer;
 		static ref<pff_window> m_window;
 		static bool m_is_titlebar_hovered;
 		static bool m_running;

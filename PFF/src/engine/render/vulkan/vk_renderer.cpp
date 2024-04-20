@@ -213,11 +213,32 @@ namespace PFF::render::vulkan {
 			.entry(KEY_VALUE(UI::THEME::UI_theme));
 		UI::THEME::update_UI_theme();
 
+
+		//void vk_renderer::createTextureSampler() {  ===============================================================
+		VkSamplerCreateInfo samplerInfo{};
+		samplerInfo.sType = VK_STRUCTURE_TYPE_SAMPLER_CREATE_INFO;
+		samplerInfo.magFilter = VK_FILTER_LINEAR;
+		samplerInfo.minFilter = VK_FILTER_LINEAR;
+		samplerInfo.addressModeU = VK_SAMPLER_ADDRESS_MODE_REPEAT;
+		samplerInfo.addressModeV = VK_SAMPLER_ADDRESS_MODE_REPEAT;
+		samplerInfo.addressModeW = VK_SAMPLER_ADDRESS_MODE_REPEAT;
+		samplerInfo.anisotropyEnable = VK_FALSE;
+		samplerInfo.maxAnisotropy = 1.0f;
+		samplerInfo.borderColor = VK_BORDER_COLOR_INT_OPAQUE_BLACK;
+		samplerInfo.unnormalizedCoordinates = VK_FALSE;
+		samplerInfo.compareEnable = VK_FALSE;
+		samplerInfo.compareOp = VK_COMPARE_OP_ALWAYS;
+		samplerInfo.mipmapMode = VK_SAMPLER_MIPMAP_MODE_LINEAR;
+		samplerInfo.mipLodBias = 0.0f;
+		samplerInfo.minLod = 0.0f;
+		samplerInfo.maxLod = 0.0f;
+
+		VK_CHECK(vkCreateSampler(m_device, &samplerInfo, nullptr, &m_texture_sampler));
+		// }  ===========================================================================================
+
+		m_imugi_image_dset = ImGui_ImplVulkan_AddTexture(m_texture_sampler, m_draw_image.image_view, VK_IMAGE_LAYOUT_GENERAL);
+
 		m_imgui_initalized = true;
-
-		m_deletion_queue.push_func([=]() {
-
-		});
 	}
 
 
@@ -229,6 +250,7 @@ namespace PFF::render::vulkan {
 
 	void vk_renderer::imgui_shutdown() { 
 
+		//ImGui_ImplVulkan_RemoveTexture(m_imugi_image_dset);
 		ImGui_ImplVulkan_Shutdown();
 		ImGui_ImplGlfw_Shutdown();
 		vkDestroyDescriptorPool(m_device, m_imgui_desc_pool, nullptr);
@@ -268,12 +290,23 @@ namespace PFF::render::vulkan {
 
 		util::transition_image(cmd, m_draw_image.image, VK_IMAGE_LAYOUT_GENERAL, VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL);
 
-		 draw_geometry(cmd);
+		draw_geometry(cmd);
+
+
+		const bool draw_in_window = true;
+
+		if (draw_in_window) {
+
+			util::transition_image(cmd, m_draw_image.image, VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL, VK_IMAGE_LAYOUT_GENERAL);
+
+		} else {
+
+			util::transition_image(cmd, m_draw_image.image, VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL, VK_IMAGE_LAYOUT_TRANSFER_SRC_OPTIMAL);
+			util::transition_image(cmd, m_swapchain_images[swapchain_image_index], VK_IMAGE_LAYOUT_UNDEFINED, VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL);
+			util::copy_image_to_image(cmd, m_draw_image.image, m_swapchain_images[swapchain_image_index], m_draw_extent, m_swapchain_extent);						// copy from draw_image into swapchain
+		}
 
 		//transition the draw image and the swapchain image into their correct transfer layouts
-		util::transition_image(cmd, m_draw_image.image, VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL, VK_IMAGE_LAYOUT_TRANSFER_SRC_OPTIMAL);
-		util::transition_image(cmd, m_swapchain_images[swapchain_image_index], VK_IMAGE_LAYOUT_UNDEFINED, VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL);
-		util::copy_image_to_image(cmd, m_draw_image.image, m_swapchain_images[swapchain_image_index], m_draw_extent, m_swapchain_extent);						// copy from draw_image into swapchain
 
 		// =========================================================== draw imgui ===========================================================
 		if (m_imgui_initalized) {
@@ -283,6 +316,22 @@ namespace PFF::render::vulkan {
 			ImGui_ImplVulkan_NewFrame();
 			ImGui_ImplGlfw_NewFrame();
 			ImGui::NewFrame();
+
+
+			if (draw_in_window) {
+
+				ImGui::DockSpaceOverViewport(ImGui::GetMainViewport());
+
+				ImGuiWindowFlags flags = 
+				ImGui::Begin("Viewport");
+
+
+				ImVec2 viewportPanelSize = ImGui::GetContentRegionAvail();
+				ImGui::Image(m_imugi_image_dset, ImVec2{ viewportPanelSize.x, viewportPanelSize.y });
+
+				ImGui::End();
+			}
+
 
 			if (ImGui::Begin("background")) {
 
@@ -315,9 +364,17 @@ namespace PFF::render::vulkan {
 			ImGui::RenderPlatformWindowsDefault();
 			glfwMakeContextCurrent(backup_current_context);
 
-			util::transition_image(cmd, m_swapchain_images[swapchain_image_index], VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL, VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL);
-			draw_imgui(cmd, m_swapchain_image_views[swapchain_image_index]);		//draw imgui into the swapchain image
-			util::transition_image(cmd, m_swapchain_images[swapchain_image_index], VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL, VK_IMAGE_LAYOUT_PRESENT_SRC_KHR);
+			if (draw_in_window) {
+				
+				util::transition_image(cmd, m_swapchain_images[swapchain_image_index], VK_IMAGE_LAYOUT_UNDEFINED, VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL);
+				draw_imgui(cmd, m_swapchain_image_views[swapchain_image_index]);		//draw imgui into the swapchain image
+				util::transition_image(cmd, m_swapchain_images[swapchain_image_index], VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL, VK_IMAGE_LAYOUT_PRESENT_SRC_KHR);
+			} else {
+
+				util::transition_image(cmd, m_swapchain_images[swapchain_image_index], VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL, VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL);
+				draw_imgui(cmd, m_swapchain_image_views[swapchain_image_index]);		//draw imgui into the swapchain image
+				util::transition_image(cmd, m_swapchain_images[swapchain_image_index], VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL, VK_IMAGE_LAYOUT_PRESENT_SRC_KHR);
+			}
 		}
 		// =========================================================== draw imgui ===========================================================
 
@@ -401,7 +458,7 @@ namespace PFF::render::vulkan {
 
 	void vk_renderer::init_default_data() {
 
-		std::vector<vertex> rect_vertices;
+		std::vector<PFF::geometry::vertex> rect_vertices;
 		rect_vertices.resize(4);
 
 		rect_vertices[0].position = {  0.3, -0.3, 0 };
@@ -447,6 +504,8 @@ namespace PFF::render::vulkan {
 		draw_image_usages |= VK_IMAGE_USAGE_TRANSFER_DST_BIT;
 		draw_image_usages |= VK_IMAGE_USAGE_STORAGE_BIT;
 		draw_image_usages |= VK_IMAGE_USAGE_COLOR_ATTACHMENT_BIT;
+		draw_image_usages |= VK_IMAGE_USAGE_SAMPLED_BIT;
+		//draw_image_usages |= VK_IMAGE_USAGE_INPUT_ATTACHMENT_BIT;
 
 		VkImageCreateInfo image_CI = init::image_create_info(m_draw_image.image_format, draw_image_usages, drawImageExtent);
 
@@ -512,13 +571,15 @@ namespace PFF::render::vulkan {
 
 		//create a descriptor pool that will hold 10 sets with 1 image each
 		std::vector<descriptor_allocator::pool_size_ratio> sizes = {
-			{ VK_DESCRIPTOR_TYPE_STORAGE_IMAGE, 1 }
+			{ VK_DESCRIPTOR_TYPE_STORAGE_IMAGE, 1 },
+			//{ VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER, 1 }
 		};
 		global_descriptor_allocator.init_pool(m_device, 10, sizes);
 
 		//make the descriptor set layout for our compute draw
 		descriptor_layout_builder builder;
 		builder.add_binding(0, VK_DESCRIPTOR_TYPE_STORAGE_IMAGE);
+		builder.add_binding(1, VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER);
 		m_draw_image_descriptor_layout = builder.build(m_device, VK_SHADER_STAGE_COMPUTE_BIT);
 		m_draw_image_descriptors = global_descriptor_allocator.allocate(m_device, m_draw_image_descriptor_layout);
 
@@ -819,7 +880,6 @@ namespace PFF::render::vulkan {
 	}
 
 
-
 	allocated_buffer vk_renderer::create_buffer(size_t allocSize, VkBufferUsageFlags usage, VmaMemoryUsage memoryUsage) {
 
 		VkBufferCreateInfo buffer_CI = {};
@@ -837,17 +897,15 @@ namespace PFF::render::vulkan {
 		return new_buffer;
 	}
 
-	void vk_renderer::destroy_buffer(const allocated_buffer& buffer) {
 
-		vmaDestroyBuffer(m_allocator, buffer.buffer, buffer.allocation);
-	}
+	void vk_renderer::destroy_buffer(const allocated_buffer& buffer) { vmaDestroyBuffer(m_allocator, buffer.buffer, buffer.allocation); }
 
-	GPU_mesh_buffers vk_renderer::upload_mesh(std::vector<u32> indices, std::vector<vertex> vertices) {
 
-		const size_t vertexBufferSize = vertices.size() * sizeof(vertex);
+	vk_GPU_mesh_buffers vk_renderer::upload_mesh(std::vector<u32> indices, std::vector<PFF::geometry::vertex> vertices) {
+
+		const size_t vertexBufferSize = vertices.size() * sizeof(PFF::geometry::vertex);
 		const size_t indexBufferSize = indices.size() * sizeof(u32);
-
-		GPU_mesh_buffers new_mesh;
+		vk_GPU_mesh_buffers new_mesh{};
 		new_mesh.vertex_buffer = create_buffer(vertexBufferSize, VK_BUFFER_USAGE_STORAGE_BUFFER_BIT | VK_BUFFER_USAGE_TRANSFER_DST_BIT | VK_BUFFER_USAGE_SHADER_DEVICE_ADDRESS_BIT, VMA_MEMORY_USAGE_GPU_ONLY);
 		
 		//find the adress of the vertex buffer
@@ -856,8 +914,7 @@ namespace PFF::render::vulkan {
 		device_adress_I.buffer = new_mesh.vertex_buffer.buffer;
 
 		new_mesh.vertex_buffer_address = vkGetBufferDeviceAddress(m_device, &device_adress_I);
-		new_mesh.index_buffer = create_buffer(indexBufferSize, VK_BUFFER_USAGE_INDEX_BUFFER_BIT | VK_BUFFER_USAGE_TRANSFER_DST_BIT, VMA_MEMORY_USAGE_GPU_ONLY);
-		
+		new_mesh.index_buffer = create_buffer(indexBufferSize, VK_BUFFER_USAGE_INDEX_BUFFER_BIT | VK_BUFFER_USAGE_TRANSFER_DST_BIT, VMA_MEMORY_USAGE_GPU_ONLY);		
 		allocated_buffer staging = create_buffer(vertexBufferSize + indexBufferSize, VK_BUFFER_USAGE_TRANSFER_SRC_BIT, VMA_MEMORY_USAGE_CPU_ONLY);
 		void* data = staging.allocation->GetMappedData();
 		

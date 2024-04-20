@@ -2,14 +2,21 @@
 
 #include "render_util.h"
 
-namespace PFF {
+namespace PFF::render {
 
 	enum class render_api {
+
 		none	= 0,
 		Vulkan	= 1,
 		OpenGl	= 2,
 		D3D12	= 3,
 		Metal	= 4,
+	};
+
+	class GPU_mesh_buffers {
+	public:
+
+		virtual ~GPU_mesh_buffers() {}
 	};
 
 	class renderer {

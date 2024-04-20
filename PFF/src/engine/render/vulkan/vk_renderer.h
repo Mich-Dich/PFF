@@ -3,6 +3,7 @@
 #include "engine/render/renderer.h"
 #include "engine/platform/pff_window.h"
 #include "engine/layer/layer_stack.h"
+#include "engine/geometry/geometry.h"
 
 #include "vk_types.h"
 
@@ -54,9 +55,20 @@ namespace PFF::render::vulkan {
 		VkCommandBuffer main_command_buffer;
 	};
 
+	class vk_GPU_mesh_buffers : public GPU_mesh_buffers {
+	public:
+
+		vk_GPU_mesh_buffers() {};
+		~vk_GPU_mesh_buffers() {};
+
+		allocated_buffer    index_buffer;
+		allocated_buffer    vertex_buffer;
+		VkDeviceAddress     vertex_buffer_address;
+	};
+
 	constexpr u32 FRAME_COUNT = 2;
 
-	class vk_renderer : public PFF::renderer {
+	class vk_renderer : public PFF::render::renderer {
 	public:
 
 		vk_renderer(ref<pff_window> window, ref<PFF::layer_stack> layer_stack);
@@ -107,7 +119,7 @@ namespace PFF::render::vulkan {
 
 		// TIP: Note that this pattern is not very efficient, as CPU is waiting for the GPU command to fully execute before continuing with our CPU side logic
 		//		This is should be put on a background thread, whose sole job is to execute uploads like this one, and deleting/reusing the staging buffers.
-		GPU_mesh_buffers upload_mesh(std::vector<u32> indices, std::vector<vertex> vertices);
+		vk_GPU_mesh_buffers upload_mesh(std::vector<u32> indices, std::vector<PFF::geometry::vertex> vertices);
 
 		bool m_is_initialized = false;
 		int m_frame_number = 0;
@@ -135,8 +147,12 @@ namespace PFF::render::vulkan {
 
 		deletion_queue				m_deletion_queue;
 		VmaAllocator				m_allocator;
+
 		vk_image					m_draw_image;
 		VkExtent2D					m_draw_extent;
+		// display rendered image in imgui
+		VkSampler			m_texture_sampler;
+		VkDescriptorSet		m_imugi_image_dset;
 
 		// ---------------------------- descriptors ---------------------------- 
 		descriptor_allocator		global_descriptor_allocator;
@@ -165,7 +181,7 @@ namespace PFF::render::vulkan {
 		VkPipelineLayout			m_mesh_pipeline_layout;
 		VkPipeline					m_mesh_pipeline;
 
-		GPU_mesh_buffers rectangle;
+		vk_GPU_mesh_buffers rectangle;
 
 
 	};

@@ -9,6 +9,8 @@
 
 #include "vendor/vk_mem_alloc.h"
 #include "vk_descriptor.h"
+#include "engine/geometry/mesh.h"
+
 
 struct vk_image {
 
@@ -24,24 +26,6 @@ struct allocated_buffer {
     VkBuffer            buffer;
     VmaAllocation       allocation;
     VmaAllocationInfo   info;
-};
-
-// wierd layout because alignement limitations on GPU
-struct vertex {
-
-    glm::vec3           position;
-    float               uv_x;
-    glm::vec3           normal;
-    float               uv_y;
-    glm::vec4           color;
-};
-
-// holds the resources needed for a mesh
-struct GPU_mesh_buffers {
-
-    allocated_buffer    index_buffer;
-    allocated_buffer    vertex_buffer;
-    VkDeviceAddress     vertex_buffer_address;
 };
 
 // push constants for our mesh object draws
