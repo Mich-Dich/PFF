@@ -207,7 +207,7 @@ namespace PFF::toolkit::todo {
 
 			UI::shift_cursor_pos(inner_padding + 5, 10);
 
-			ImGui::PushStyleColor(ImGuiCol_ChildBg, UI::THEME::highlited_window_bg);
+			ImGui::PushStyleColor(ImGuiCol_ChildBg, UI::highlited_window_bg);
 			ImGui::BeginChild("Child##for_todo_topics", { inner_width + (inner_padding - 10), ImGui::GetContentRegionAvail().y - inner_padding }, true, 0);
 			ImGui::PopStyleColor();
 

@@ -156,9 +156,6 @@
     <ClInclude Include="src\util\benchmarking\instrumentor.h">
       <Filter>util\benchmarking</Filter>
     </ClInclude>
-    <ClInclude Include="src\util\color_theme.h">
-      <Filter>util</Filter>
-    </ClInclude>
     <ClInclude Include="src\util\core_config.h">
       <Filter>util</Filter>
     </ClInclude>
@@ -198,6 +195,7 @@
     <ClInclude Include="src\util\util.h">
       <Filter>util</Filter>
     </ClInclude>
+    <ClInclude Include="src\engine\world\map.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="src\application.cpp" />
@@ -209,9 +207,6 @@
     </ClCompile>
     <ClCompile Include="src\engine\game_objects\game_object.cpp">
       <Filter>engine\game_objects</Filter>
-    </ClCompile>
-    <ClCompile Include="src\engine\game_objects\geometry\mesh.cpp">
-      <Filter>engine\game_objects\geometry</Filter>
     </ClCompile>
     <ClCompile Include="src\engine\game_objects\player_controller.cpp">
       <Filter>engine\game_objects</Filter>
@@ -285,5 +280,6 @@
     <ClCompile Include="src\util\timer.cpp">
       <Filter>util</Filter>
     </ClCompile>
+    <ClCompile Include="src\engine\world\map.cpp" />
   </ItemGroup>
 </Project>

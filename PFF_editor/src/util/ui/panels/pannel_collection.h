@@ -1,7 +1,6 @@
 #pragma once
 
 #include "util/pffpch.h"
-#include "util/color_theme.h"
 
 #include <imgui.h>
 #include <imgui_impl_glfw.h>
@@ -33,9 +32,9 @@ namespace PFF::UI {
 
 	static bool add_gray_button(const char* lable, const ImVec2& size = { 0, 0 }) {
 
-		ImGui::PushStyleColor(ImGuiCol_Button, UI::THEME::action_color_gray_default);
-		ImGui::PushStyleColor(ImGuiCol_ButtonHovered, UI::THEME::action_color_gray_hover);
-		ImGui::PushStyleColor(ImGuiCol_ButtonActive, UI::THEME::action_color_gray_active);
+		ImGui::PushStyleColor(ImGuiCol_Button, UI::action_color_gray_default);
+		ImGui::PushStyleColor(ImGuiCol_ButtonHovered, UI::action_color_gray_hover);
+		ImGui::PushStyleColor(ImGuiCol_ButtonActive, UI::action_color_gray_active);
 
 		const bool result = ImGui::Button(lable, size);
 
@@ -179,10 +178,10 @@ namespace PFF::UI {
 			ImGui::TableSetColumnIndex(0);
 
 			// draw background
-			const ImVec4 color = UI::THEME::highlited_window_bg;
+			const ImVec4 color = UI::highlited_window_bg;
 			const ImVec2 uperleft_corner = ImGui::GetCursorScreenPos();
 			const ImVec2 lowerright_corner = { uperleft_corner.x + width_left_side ,uperleft_corner.y + ImGui::GetWindowHeight() };
-			ImGui::GetWindowDrawList()->AddRectFilled(uperleft_corner, lowerright_corner, PFF::convert_color_to_int(color));
+			ImGui::GetWindowDrawList()->AddRectFilled(uperleft_corner, lowerright_corner, PFF::UI::convert_color_to_int(color));
 
 			shift_cursor_pos(0, ImGui::GetTextLineHeight());
 			ImGui::BeginGroup();

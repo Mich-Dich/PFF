@@ -46,7 +46,6 @@ namespace PFF {
 
 		glfwWindowHint(GLFW_CLIENT_API, GLFW_NO_API);
 		glfwWindowHint(GLFW_RESIZABLE, GLFW_TRUE);
-		//glfwWindowHint(GLFW_TITLEBAR, GLFW_FALSE);
 		glfwWindowHint(GLFW_VISIBLE, GLFW_FALSE);
 		glfwWindowHint(GLFW_MAXIMIZED, (m_data.window_size_state == window_size_state::fullscreen || m_data.window_size_state == window_size_state::fullscreen_windowed) ? GLFW_TRUE : GLFW_FALSE);
 
@@ -228,7 +227,7 @@ namespace PFF {
 
 	void pff_window::get_framebuffer_size(int* width, int* height) { glfwGetFramebufferSize(m_Window, width, height); }
 
-	void pff_window::show_window() { glfwShowWindow(m_Window); }
+	void pff_window::show_window(bool show) { show ? glfwShowWindow(m_Window) : glfwHideWindow(m_Window); }
 
 	bool pff_window::is_maximized() { return static_cast<bool>(glfwGetWindowAttrib(m_Window, GLFW_MAXIMIZED)); }
 
@@ -253,6 +252,14 @@ namespace PFF {
 		glfwMaximizeWindow(m_Window);
 		m_data.window_size_state = window_size_state::fullscreen_windowed;
 		//application::set_render_state(system_state::active);
+	}
+
+	PFF_API void pff_window::show_titlebar(bool show) {
+		
+		if (show)
+			glfwWindowHint(GLFW_TITLEBAR, GLFW_TRUE);
+		else	
+			glfwWindowHint(GLFW_TITLEBAR, GLFW_FALSE);
 	}
 
 	void pff_window::create_vulkan_surface(VkInstance_T* instance, VkSurfaceKHR_T** get_surface) {

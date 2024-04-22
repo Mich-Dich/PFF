@@ -7,38 +7,32 @@
 #include "world_layer.h"
 
 namespace PFF {
-	/*
-	world_layer::world_layer() {
+	
+	world_layer::world_layer() { CORE_LOG_INIT(); }
 
-		CORE_LOG_INIT();
+	world_layer::~world_layer() { CORE_LOG_SHUTDOWN(); }
 
-		//m_current_map = std::make_shared<game_map>();
+	void world_layer::on_attach() {
+	
+		//m_current_map = std::make_shared<game_map>();			// only a dummy map
 		m_editor_camera = std::make_shared<camera>();
-		//m_editor_camera.set_orthographic_projection(-aspect, aspect, -1, 1, 0, 10);
-
-		//m_editor_camera->set_perspective_projection(glm::radians(50.f), application::get().get_renderer()->get_aspect_ratio(), 0.1f, 350.0f);
 		m_editor_camera->set_view_direction(glm::vec3{ 0.0f }, glm::vec3{ 0.5f, 0.0f, 1.0f });
+		//m_editor_camera.set_orthographic_projection(-aspect, aspect, -1, 1, 0, 10);
+		//m_editor_camera->set_perspective_projection(glm::radians(50.f), application::get().get_renderer()->get_aspect_ratio(), 0.1f, 350.0f);
 
 		//float aspect = m_swapchain->get_extentAspectRatio();
 		//m_editor_camera.set_view_target(glm::vec3(-1.0f, -2.0f, -3.0f), glm::vec3(0.0f));
+		
+		CORE_LOG(Trace, "attaching world_layer");
 	}
 
-	world_layer::~world_layer() {
-
+	void world_layer::on_detach() { 
 
 		m_player_controller.reset();
 		m_editor_camera.reset();
 		//m_current_map.reset();
-
-		CORE_LOG_SHUTDOWN();
-	}
-
-	void world_layer::on_attach() {
-	}
-
-	void world_layer::on_detach() {
-
-		CORE_LOG(Trace, "Detach");
+		
+		CORE_LOG(Trace, "detaching world_layer");
 	}
 
 	void world_layer::on_update(const f32 delta_time) {
@@ -65,8 +59,8 @@ namespace PFF {
 
 	void world_layer::on_imgui_render() {
 	
-		#error Implement performance display first 
+
 	}
-*/
+
 
 }

@@ -24,7 +24,7 @@ namespace PFF::IO {
 
     namespace mesh_loader {
 
-        std::optional<std::vector<std::shared_ptr<PFF::geometry::mesh_asset>>> load_gltf_meshes(std::filesystem::path filePath) {
+        std::optional<std::vector<PFF::geometry::mesh_asset>> load_gltf_meshes(std::filesystem::path filePath) {
 
             CORE_LOG(Trace, "Loading GLTF: " << filePath );
 
@@ -40,7 +40,7 @@ namespace PFF::IO {
             fastgltf::Asset gltf;
             gltf = std::move(load.get());
 
-            std::vector<std::shared_ptr<geometry::mesh_asset>> meshes;
+            std::vector<geometry::mesh_asset> meshes;
 
             // use the same vectors for all meshes so that the memory doesnt reallocate as often
             std::vector<u32> indices;
@@ -134,7 +134,7 @@ namespace PFF::IO {
 
 
 
-                meshes.emplace_back(std::make_shared<geometry::mesh_asset>(std::move(new_mesh)));
+                meshes.emplace_back(geometry::mesh_asset(std::move(new_mesh)));
             }
 
             return meshes;

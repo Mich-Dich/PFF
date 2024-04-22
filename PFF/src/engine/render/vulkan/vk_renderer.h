@@ -1,9 +1,6 @@
 #pragma once
 
 #include "engine/render/renderer.h"
-#include "engine/platform/pff_window.h"
-#include "engine/layer/layer_stack.h"
-#include "engine/geometry/geometry.h"
 
 #include "vk_types.h"
 
@@ -90,6 +87,7 @@ namespace PFF::render::vulkan {
 		// --------------- util ----------------
 		void immediate_submit(std::function<void()>&& function) override;
 		void enable_vsync(bool enable) override {}							// TODO: implement (recreate swapchain with new VK_PRESENT_MODE_XXX )
+		void* get_rendered_image() override { return (void*)m_imugi_image_dset; }
 
 	private:
 
@@ -182,6 +180,7 @@ namespace PFF::render::vulkan {
 		VkPipeline					m_mesh_pipeline;
 
 		vk_GPU_mesh_buffers rectangle;
+		std::vector<geometry::mesh_asset> T_test_meshes;
 
 
 	};

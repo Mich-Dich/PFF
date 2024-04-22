@@ -1,12 +1,12 @@
 #pragma once
 
-//#include "engine/layer/layer.h"
+#include "engine/layer/layer.h"
 //#include "engine/map/game_map.h"
-//#include "engine/game_objects/camera.h"
-//#include "engine/game_objects/player_controller.h"
+#include "engine/game_objects/camera.h"
+#include "engine/game_objects/player_controller.h"
 
 namespace PFF {
-	/*
+	
 	class world_layer : public layer {
 	public:
 
@@ -29,7 +29,7 @@ namespace PFF {
 		virtual void on_detach();
 		virtual void on_update(const f32 delta_time);
 		virtual void on_event(event& event);
-		virtual void on_imgui_render();			#error Implement performance display
+		virtual void on_imgui_render();
 
 	private:
 
@@ -39,5 +39,5 @@ namespace PFF {
 		//ref<game_map> m_current_map{};
 
 	};
-	*/
+	
 }

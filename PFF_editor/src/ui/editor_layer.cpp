@@ -6,12 +6,14 @@
 //#include "util/io/serializer.h"
 #include "util/ui/panels/pannel_collection.h"
 #include "engine/platform/pff_window.h"
-#include "util/color_theme.h"
 #include "engine/layer/imgui_debug_layer.h"
 
 #include "toolkit/todo_list/todo_list.h"
-/*
+
 // TEST 
+#include "application.h"
+#include "engine/layer/imgui_debug_layer.h"
+/*
 #include "engine/render/renderer.h"
 #include "engine/render/vk_swapchain.h"
 */
@@ -29,7 +31,12 @@ namespace PFF {
 
 	void editor_layer::on_attach() {
 
-		m_context = ImGui::CreateContext();
+		LOG(Trace, "attaching editor_layer");
+		// inform GLFW window to hide title_bar
+		//application::get().get_window()->show_titlebar(false);
+
+
+		// m_context = ImGui::CreateContext();
 
 		//m_swapchain_supported_presentmodes = application::get().get_renderer()->get_swapchain_suported_present_modes();
 		//for (auto mode : m_swapchain_supported_presentmodes)
@@ -40,53 +47,46 @@ namespace PFF {
 
 	void editor_layer::on_detach() {
 
-		LOG(Trace, "Detaching editor_layer");
-		toolkit::todo::shutdown();					// only need to cal shutdown() to kill todo_list if editor shutsdown
+		//application::get().get_window()->show_titlebar(true);
+		//toolkit::todo::shutdown();					// only need to cal shutdown() to kill todo_list if editor shutsdown
 		//delete s_todo_list;
+		LOG(Trace, "Detaching editor_layer");
 	}
 
-	void editor_layer::on_update(f32 delta_time) {
-	}
+	void editor_layer::on_update(f32 delta_time) { }
 
-	void editor_layer::on_event(event& event) {
-	}
+	void editor_layer::on_event(event& event) { }
 
 	void editor_layer::on_imgui_render() {
-
+		
 		ImGui::SetCurrentContext(m_context);
 
-		//if (ImGui::Begin("Test_window")) {}
-		//ImGui::End();
-
-
-		//window_main_menu_bar();
-		//// window_main_content();
-		//
-		//window_general_debugger();
-		//window_outliner();
-		//window_details();
-		//window_world_settings();
-		//window_content_browser_0();
-		//window_content_browser_1();
-		//
-		//window_graphics_engine_settings();
-		//window_editor_settings();
-		//window_general_settings();
-		//
-		//PFF::toolkit::todo::window_todo_list();
-				
-		//ImGui::ShowDemoWindow();				// DEV-ONLY
+		window_main_menu_bar();
+		window_main_content();
+		
+		window_general_debugger();
+		window_outliner();
+		window_details();
+		window_world_settings();
+		window_content_browser_0();
+		window_content_browser_1();
+		
+		window_graphics_engine_settings();
+		window_editor_settings();
+		window_general_settings();
+		
+		PFF::toolkit::todo::window_todo_list();
 	}
 
 
 	void editor_layer::window_main_menu_bar() {
 
-		const f32 titlebar_height = 60.f;
+		const f32 m_titlebar_height = 60.f;
 
 		ImGuiStyle* style = &ImGui::GetStyle();
 		ImGuiViewport* viewport = ImGui::GetMainViewport();
 		ImGui::SetNextWindowPos(viewport->Pos);
-		ImGui::SetNextWindowSize(ImVec2(viewport->Size.x, titlebar_height));
+		ImGui::SetNextWindowSize(ImVec2(viewport->Size.x, m_titlebar_height));
 		ImGui::SetNextWindowViewport(viewport->ID);
 
 		ImGuiWindowFlags window_flags = ImGuiWindowFlags_NoDocking;
@@ -108,7 +108,7 @@ namespace PFF {
 		ImGui::SetCursorPos(ImVec2(0.f, titlebar_vertical_offset));
 		ImVec2 titlebar_min = ImGui::GetCursorScreenPos();
 		const ImVec2 titlebar_max = { ImGui::GetCursorScreenPos().x + ImGui::GetWindowWidth(),
-										ImGui::GetCursorScreenPos().y + titlebar_height };
+										ImGui::GetCursorScreenPos().y + m_titlebar_height };
 
 		auto* bg_draw_list = ImGui::GetBackgroundDrawList();
 		auto* fg_draw_list = ImGui::GetForegroundDrawList();
@@ -118,7 +118,7 @@ namespace PFF {
 		//window_draw_list->AddRectFilled(uperleft_corner, lowerright_corner, IM_COL32(51, 255, 51, 255));
 
 		auto color_buf = style->Colors[ImGuiCol_Button];
-		ImVec4 bufsd = UI::THEME::main_titlebar_color;
+		ImVec4 bufsd = UI::main_titlebar_color;
 		auto main_color = IM_COL32(color_buf.x * 255, color_buf.y * 255, color_buf.z * 255, color_buf.w * 255);
 
 		window_draw_list->AddRectFilled(titlebar_min, { titlebar_min.x + 200.f, titlebar_max.y }, main_color);
@@ -139,9 +139,9 @@ namespace PFF {
 		ImGui::SetCursorPos(ImVec2(0.f, titlebar_vertical_offset));
 
 #if 1	// FOR DEBUG VISAUL
-		ImGui::InvisibleButton("##titlebar_drag_zone", ImVec2(button_area_width, titlebar_height));
+		ImGui::InvisibleButton("##titlebar_drag_zone", ImVec2(button_area_width, m_titlebar_height));
 #else
-		ImGui::Button("##titlebar_drag_zone", ImVec2(button_area_width, titlebar_height));
+		ImGui::Button("##titlebar_drag_zone", ImVec2(button_area_width, m_titlebar_height));
 #endif // 1
 
 		application::get().set_titlebar_hovered(ImGui::IsItemHovered());
@@ -156,7 +156,7 @@ namespace PFF {
 
 		ImGui::SetItemAllowOverlap();
 		//ImGui::PushFont(application::get().get_imgui_layer()->get_font("giant"));
-		ImGui::SetCursorPos(ImVec2(25, ((titlebar_height - ImGui::GetFontSize() + titlebar_vertical_offset) / 2)));
+		ImGui::SetCursorPos(ImVec2(25, ((m_titlebar_height - ImGui::GetFontSize() + titlebar_vertical_offset) / 2)));
 		ImGui::Text("PFF Editor");
 		//ImGui::PopFont();
 
@@ -276,19 +276,33 @@ namespace PFF {
 		ImGui::End();
 	}
 
+
 	void editor_layer::window_main_content() {
 
-		ImGuiViewport* viewport = ImGui::GetMainViewport();
-		ImGui::SetNextWindowPos(ImVec2(viewport->Pos.x, viewport->Pos.y + 100), ImGuiCond_Once);
-		ImGui::SetNextWindowSize(ImVec2(viewport->Size.x - 100, 350));
+		auto viewport = ImGui::GetMainViewport();
+		ImGui::SetNextWindowPos(ImVec2(viewport->Pos.x, viewport->Pos.y + m_titlebar_height)/*, ImGuiCond_Once*/);
+		ImGui::SetNextWindowSize(ImVec2(viewport->Size.x, viewport->Size.y - m_titlebar_height));
 		ImGui::SetNextWindowViewport(viewport->ID);
 
-		ImGuiWindowFlags window_flags = ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoMove | ImGuiWindowFlags_NoScrollbar | ImGuiWindowFlags_NoScrollWithMouse | ImGuiWindowFlags_NoCollapse;
-		if (ImGui::Begin("Viewport", nullptr, window_flags)) {
+		ImGuiWindowFlags host_window_flags = 0;
+		host_window_flags |= ImGuiWindowFlags_NoTitleBar | ImGuiWindowFlags_NoCollapse | ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoMove | ImGuiWindowFlags_NoDocking;
+		host_window_flags |= ImGuiWindowFlags_NoBringToFrontOnFocus | ImGuiWindowFlags_NoNavFocus;
+		//if (dockspace_flags & ImGuiDockNodeFlags_PassthruCentralNode)
+		//	host_window_flags |= ImGuiWindowFlags_NoBackground;
 
-		}
+		ImGui::PushStyleVar(ImGuiStyleVar_WindowRounding, 0.0f);
+		ImGui::PushStyleVar(ImGuiStyleVar_WindowBorderSize, 0.0f);
+		ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, ImVec2(0.0f, 0.0f));
+		ImGui::Begin("main_content_area", NULL, host_window_flags);
+		ImGui::PopStyleVar(3);
+
+		static ImGuiDockNodeFlags dockspace_flags = 0 /* | ImGuiDockNodeFlags_AutoHideTabBar*/;
+		ImGuiID dockspace_id = ImGui::GetID("DockSpace");
+		ImGui::DockSpace(dockspace_id, ImVec2(0.0f, 0.0f), dockspace_flags);
+		
 		ImGui::End();
 	}
+
 
 	void editor_layer::window_outliner() {
 
@@ -300,6 +314,7 @@ namespace PFF {
 
 		ImGui::End();
 	}
+
 
 	void editor_layer::window_details() {
 
@@ -373,7 +388,7 @@ namespace PFF {
 			ImGui::PushStyleVar(ImGuiStyleVar_ItemSpacing, ImVec2(10, 10));
 			ImGui::PushStyleVar(ImGuiStyleVar_FramePadding, ImVec2(25, style->FramePadding.y));
 			ImGui::PushStyleVar(ImGuiStyleVar_SelectableTextAlign, ImVec2(.5f, .5f));
-			ImGui::PushStyleColor(ImGuiCol_FrameBg, UI::THEME::highlited_window_bg);
+			ImGui::PushStyleColor(ImGuiCol_FrameBg, UI::highlited_window_bg);
 			if (ImGui::BeginListBox("##Topic_selector", ImVec2(first_width, (ARRAY_SIZE(items) * ImGui::GetTextLineHeightWithSpacing()) - 1))) {
 
 				for (u32 n = 0; n < ARRAY_SIZE(items); n++) {
@@ -402,7 +417,7 @@ namespace PFF {
 							ImGui::OpenPopup("present_mode_explanations");
 
 						ImGui::SameLine();
-						ImGui::SetNextItemWidth(UI::THEME::default_item_width);
+						ImGui::SetNextItemWidth(UI::default_item_width);
 						if (ImGui::Combo("##Present_mode_selector", &selected, m_swapchain_supported_presentmodes_str.data(), static_cast<int>(m_swapchain_supported_presentmodes_str.size()))) {
 
 							LOG(Fatal, "NOT IMPLEMENTED YET")
@@ -556,8 +571,8 @@ namespace PFF {
 							if (ImGui::Selectable(items[n], is_selected)) {
 
 								item_current_idx = n;
-								UI::THEME::UI_theme = static_cast<UI::THEME::theme_selection>(item_current_idx);
-								UI::THEME::update_UI_theme();
+								UI::UI_theme = static_cast<UI::theme_selection>(item_current_idx);
+								UI::update_UI_theme();
 							}
 						}
 						ImGui::EndListBox();
@@ -575,13 +590,13 @@ namespace PFF {
 							.entry(KEY_VALUE(window_border));
 						//config::load(config::file::editor, "UI", "window_border", window_border);
 
-						backup_color = UI::THEME::main_color;
+						backup_color = UI::main_color;
 						ImGui::SetColorEditOptions(ImGuiColorEditFlags_Float | ImGuiColorEditFlags_HDR | ImGuiColorEditFlags_PickerHueWheel);
 						backup_color_init = true;
 					}
 
 					if (ImGui::Checkbox("Window Border", &window_border))
-						UI::THEME::enable_window_border(window_border);
+						UI::enable_window_border(window_border);
 
 					ImGui::Separator();
 					ImGui::Text("change main-color");
@@ -598,22 +613,22 @@ namespace PFF {
 						saved_palette_init = false;
 					}
 
-					if (ImGui::ColorPicker4("##picker", (float*)&UI::THEME::main_color, ImGuiColorEditFlags_NoSidePreview | ImGuiColorEditFlags_NoSmallPreview))
-						UI::THEME::update_UI_colors(UI::THEME::main_color);
+					if (ImGui::ColorPicker4("##picker", (float*)&UI::main_color, ImGuiColorEditFlags_NoSidePreview | ImGuiColorEditFlags_NoSmallPreview))
+						UI::update_UI_colors(UI::main_color);
 
 					ImGui::SameLine();
 					ImGui::BeginGroup();
 
 					ImGui::BeginGroup();
 					ImGui::Text("Current");
-					ImGui::ColorButton("##current", UI::THEME::main_color, ImGuiColorEditFlags_NoPicker | ImGuiColorEditFlags_AlphaPreviewHalf, ImVec2(60, 40));
+					ImGui::ColorButton("##current", UI::main_color, ImGuiColorEditFlags_NoPicker | ImGuiColorEditFlags_AlphaPreviewHalf, ImVec2(60, 40));
 					ImGui::EndGroup();
 
 					ImGui::SameLine();
 					ImGui::BeginGroup();
 					ImGui::Text("Previous");
 					if (ImGui::ColorButton("##previous", backup_color, ImGuiColorEditFlags_NoPicker | ImGuiColorEditFlags_AlphaPreviewHalf, ImVec2(60, 40)))
-						UI::THEME::update_UI_colors(backup_color);
+						UI::update_UI_colors(backup_color);
 
 					ImGui::EndGroup();
 
@@ -626,7 +641,7 @@ namespace PFF {
 
 						ImGuiColorEditFlags palette_button_flags = ImGuiColorEditFlags_NoAlpha | ImGuiColorEditFlags_NoPicker | ImGuiColorEditFlags_NoTooltip;
 						if (ImGui::ColorButton("##palette", saved_palette[n], palette_button_flags, ImVec2(21, 21)))
-							UI::THEME::update_UI_colors(ImVec4(saved_palette[n].x, saved_palette[n].y, saved_palette[n].z, UI::THEME::main_color.w));
+							UI::update_UI_colors(ImVec4(saved_palette[n].x, saved_palette[n].y, saved_palette[n].z, UI::main_color.w));
 
 						// Allow user to drop colors into each palette entry. Note that ColorButton() is already a
 						// drag source by default, unless specifying the ImGuiColorEditFlags_NoDragDrop flag.

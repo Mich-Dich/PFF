@@ -2,33 +2,52 @@
 #include "util/pch_editor.h"
 
 #include "util/io/config.h"
-#include "util/color_theme.h"
+//#include "util/color_theme.h"
 
 #include "PFF_editor.h"
 
 namespace PFF {
 
+
 	PFF_editor::PFF_editor() {
 
-		LOG(Debug, "PFF_editor Constructor");
-		init();
+		LOG(Trace, "register player controller");
+		m_editor_controller = std::make_shared<editor_controller>();
+		register_player_controller(m_editor_controller);
+
+		m_editor_layer = new editor_layer(application::get().get_imgui_layer()->get_context());
+		push_overlay(m_editor_layer);
+				
+		// load editor camera loc && rot
+		glm::vec3 position = { -16, -19, -30 };
+		glm::vec3 look_direction = { .5f, -.4f, 0 };
+
+		serializer::yaml(config::get_filepath_from_configtype(config::file::editor), "editor_camera", serializer::option::load_from_file)
+			.entry(KEY_VALUE(position))
+			.entry(KEY_VALUE(look_direction));
+
+		m_editor_controller->set_editor_camera_pos(position);
+		m_editor_controller->set_editor_camera_direction(look_direction);
 	}
 
 	PFF_editor::~PFF_editor() {
 
-		shutdown();
+		pop_overlay(m_editor_layer);
+		delete m_editor_layer;
+		
+		// save camera position
+		glm::vec3 position = m_editor_controller->get_editor_camera_pos();
+		glm::vec3 look_direction = m_editor_controller->get_editor_camera_direction();
+
+		serializer::yaml(config::get_filepath_from_configtype(config::file::editor), "editor_camera", serializer::option::save_to_file)
+			.entry(KEY_VALUE(position))
+			.entry(KEY_VALUE(look_direction));
+
 	}
 
 	bool PFF_editor::init() {
 
-		// PFF_PROFILE_FUNCTION();
-
-		LOG(Trace, "register player controller");
-		m_editor_controller = std::make_shared<editor_controller>();
-		//register_player_controller(m_editor_controller);
-
-		m_editor_layer = new editor_layer(application::get().get_imgui_layer()->get_context());
-		push_overlay(m_editor_layer);
+		LOG(Trace, "init editor logic");
 
 		/*
 		std::shared_ptr<basic_mesh> floor = basic_mesh::create_mesh_from_file("assets/floor.obj");
@@ -65,33 +84,15 @@ namespace PFF {
 
 #endif // 1
 		*/
-		
-		// load editor camera loc && rot
-		glm::vec3 position = { -16, -19, -30 };
-		glm::vec3 look_direction = { .5f, -.4f, 0 };
-
-		serializer::yaml(config::get_filepath_from_configtype(config::file::editor), "editor_camera", serializer::option::load_from_file)
-			.entry(KEY_VALUE(position))
-			.entry(KEY_VALUE(look_direction));
-
-		m_editor_controller->set_editor_camera_pos(position);
-		m_editor_controller->set_editor_camera_direction(look_direction);
-
 		return true;
 	}
 
 	bool PFF_editor::shutdown() {
 		
-		pop_overlay(m_editor_layer);
-		delete m_editor_layer;
-		
-		// save camera position
-		glm::vec3 position = m_editor_controller->get_editor_camera_pos();
-		glm::vec3 look_direction = m_editor_controller->get_editor_camera_direction();
+		return true;
+	}
 
-		serializer::yaml(config::get_filepath_from_configtype(config::file::editor), "editor_camera", serializer::option::save_to_file)
-			.entry(KEY_VALUE(position))
-			.entry(KEY_VALUE(look_direction));
+	bool PFF_editor::render(const f32 delta_time) {
 
 		return true;
 	}
@@ -99,7 +100,6 @@ namespace PFF {
 	bool PFF_editor::update(const f32 delta_time) {
 
 		/*
-
 		static bool move_positive{};
 
 		if (m_test_game_object->transform.translation.y >= 10.f)
@@ -113,9 +113,8 @@ namespace PFF {
 			m_test_game_object->transform.translation.y += 10.f * delta_time;
 		else
 			m_test_game_object->transform.translation.y -= 10.f * delta_time;
+		*/
 
-			*/
-
-		return false;
+		return true;
 	}
 }

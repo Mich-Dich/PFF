@@ -77,6 +77,7 @@ project "PFF_editor"
 		optimize "speed"
 
 	filter "configurations:Release"
+		buildoptions "/MD"
 		defines "EDITOR_RELEASE"
 		runtime "Release"
 		optimize "on"

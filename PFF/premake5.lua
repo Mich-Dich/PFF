@@ -91,6 +91,7 @@ project "PFF"
 		optimize "speed"
 
 	filter "configurations:Release"
+		buildoptions "/MD"
 		defines "PFF_RELEASE"
 		runtime "Release"
 		optimize "on"

@@ -34,6 +34,14 @@
 
 // ================================================================================  functions  ================================================================================
 
+
+template<typename key_type, typename value_type>
+bool contains(const std::unordered_map<key_type, value_type>& map, const key_type& key) {
+
+    return map.find(key) != map.end();
+}
+
+
 namespace PFF {
 
     // =================================================  smart pointers  =================================================

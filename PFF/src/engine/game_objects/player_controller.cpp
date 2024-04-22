@@ -61,7 +61,14 @@ namespace PFF {
 	#define INPUT_ACTION_MODEFIER_VEC3_SECOND_AXIS		BIT(3)
 	#define INPUT_ACTION_MODEFIER_AUTO_RESET			BIT(4)
 	*/
+
 	void player_controller::update_internal(f32 delta) {
+
+		return;
+
+
+
+
 
 		PFF_PROFILE_FUNCTION();
 

@@ -22,7 +22,6 @@
 #include "application.h"
 #include "util/io/serializer.h"
 #include "util/imgui/imgui_util.h"
-#include "util/color_theme.h"
 #include "engine/layer/layer_stack.h"
 #include "engine/layer/layer.h"
 #include <cstdlib> // for system calls (conpieling shaders)
@@ -208,10 +207,10 @@ namespace PFF::render::vulkan {
 		// execute a gpu command to upload imgui font textures
 		// immediate_submit([&](VkCommandBuffer cmd) { ImGui_ImplVulkan_CreateFontsTexture(); });
 
-		serializer::yaml(config::get_filepath_from_configtype(config::file::editor), "UI", serializer::option::load_from_file)
-			.entry(KEY_VALUE(UI::THEME::main_color))
-			.entry(KEY_VALUE(UI::THEME::UI_theme));
-		UI::THEME::update_UI_theme();
+		// serializer::yaml(config::get_filepath_from_configtype(config::file::editor), "UI", serializer::option::load_from_file)
+		// 	.entry(KEY_VALUE(UI::THEME::main_color))
+		// 	.entry(KEY_VALUE(UI::THEME::UI_theme));
+		// UI::THEME::update_UI_theme();
 
 
 		//void vk_renderer::createTextureSampler() {  ===============================================================
@@ -293,20 +292,17 @@ namespace PFF::render::vulkan {
 		draw_geometry(cmd);
 
 
-		const bool draw_in_window = true;
 
-		if (draw_in_window) {
+		if (m_render_swapchain) {
 
-			util::transition_image(cmd, m_draw_image.image, VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL, VK_IMAGE_LAYOUT_GENERAL);
-
-		} else {
-
+			//transition the draw image and the swapchain image into their correct transfer layouts
 			util::transition_image(cmd, m_draw_image.image, VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL, VK_IMAGE_LAYOUT_TRANSFER_SRC_OPTIMAL);
 			util::transition_image(cmd, m_swapchain_images[swapchain_image_index], VK_IMAGE_LAYOUT_UNDEFINED, VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL);
 			util::copy_image_to_image(cmd, m_draw_image.image, m_swapchain_images[swapchain_image_index], m_draw_extent, m_swapchain_extent);						// copy from draw_image into swapchain
-		}
 
-		//transition the draw image and the swapchain image into their correct transfer layouts
+		} else 
+			util::transition_image(cmd, m_draw_image.image, VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL, VK_IMAGE_LAYOUT_GENERAL);
+
 
 		// =========================================================== draw imgui ===========================================================
 		if (m_imgui_initalized) {
@@ -317,18 +313,26 @@ namespace PFF::render::vulkan {
 			ImGui_ImplGlfw_NewFrame();
 			ImGui::NewFrame();
 
+			for (layer* layer : *m_layer_stack) {
 
-			if (draw_in_window) {
+				// LOG(Trace, "drawing imgui of layer [" << layer->get_name() << "]");
+				layer->on_imgui_render();
+			}
 
-				ImGui::DockSpaceOverViewport(ImGui::GetMainViewport());
+			if (!m_render_swapchain) {
 
-				ImGuiWindowFlags flags = 
-				ImGui::Begin("Viewport");
+				ImGuiWindowFlags window_flags = ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoMove | ImGuiWindowFlags_NoScrollbar
+					| ImGuiWindowFlags_NoScrollWithMouse | ImGuiWindowFlags_NoCollapse | ImGuiWindowFlags_NoBackground | ImGuiWindowFlags_NoDecoration ;
 
+				//ImGui::SetNextWindowDockID();
+
+				ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, ImVec2(0, 0));
+				ImGui::PushStyleVar(ImGuiStyleVar_WindowBorderSize, 0);
+				ImGui::Begin("Viewport", nullptr, window_flags);
+				ImGui::PopStyleVar(2);
 
 				ImVec2 viewportPanelSize = ImGui::GetContentRegionAvail();
 				ImGui::Image(m_imugi_image_dset, ImVec2{ viewportPanelSize.x, viewportPanelSize.y });
-
 				ImGui::End();
 			}
 
@@ -348,13 +352,6 @@ namespace PFF::render::vulkan {
 			}
 			ImGui::End();
 
-
-			for (layer* layer : *m_layer_stack) {
-
-				// LOG(Trace, "drawing imgui of layer [" << layer->get_name() << "]");
-				layer->on_imgui_render();
-			}
-
 			ImGui::EndFrame();
 			ImGui::Render();
 
@@ -364,14 +361,15 @@ namespace PFF::render::vulkan {
 			ImGui::RenderPlatformWindowsDefault();
 			glfwMakeContextCurrent(backup_current_context);
 
-			if (draw_in_window) {
+			if (m_render_swapchain) {
 				
-				util::transition_image(cmd, m_swapchain_images[swapchain_image_index], VK_IMAGE_LAYOUT_UNDEFINED, VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL);
+				util::transition_image(cmd, m_swapchain_images[swapchain_image_index], VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL, VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL);
 				draw_imgui(cmd, m_swapchain_image_views[swapchain_image_index]);		//draw imgui into the swapchain image
 				util::transition_image(cmd, m_swapchain_images[swapchain_image_index], VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL, VK_IMAGE_LAYOUT_PRESENT_SRC_KHR);
+
 			} else {
 
-				util::transition_image(cmd, m_swapchain_images[swapchain_image_index], VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL, VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL);
+				util::transition_image(cmd, m_swapchain_images[swapchain_image_index], VK_IMAGE_LAYOUT_UNDEFINED, VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL);
 				draw_imgui(cmd, m_swapchain_image_views[swapchain_image_index]);		//draw imgui into the swapchain image
 				util::transition_image(cmd, m_swapchain_images[swapchain_image_index], VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL, VK_IMAGE_LAYOUT_PRESENT_SRC_KHR);
 			}
@@ -483,6 +481,8 @@ namespace PFF::render::vulkan {
 		rect_indices[5] = 3;
 
 		rectangle = upload_mesh(rect_indices, rect_vertices);
+
+		T_test_meshes = IO::mesh_loader::load_gltf_meshes("assets/meshes/basicmesh.glb").value();
 	}
 
 	void vk_renderer::init_swapchain() {

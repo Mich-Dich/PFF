@@ -4,7 +4,6 @@
 #include <imgui.h>
 
 #define UI_THEME_IMPLEMENTATION
-#include "util/color_theme.h"
 
 #include "imgui_util.h"
 

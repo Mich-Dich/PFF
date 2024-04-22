@@ -63,6 +63,7 @@ project (client_project_name)
 		optimize "on"
 			
 	filter "configurations:RelWithDebInfo"
+		buildoptions "/MD"
 		defines "PFF_RELEASE_WITH_DEBUG_INFO"
 		runtime "Release"
 		symbols "on"

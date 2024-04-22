@@ -58,20 +58,12 @@ namespace PFF {
 		m_renderer = create_ref<render::vulkan::vk_renderer>(m_window, m_layerstack);
 		
 		// ---------------------------------------- layers ----------------------------------------
-		m_imgui_debug_layer = new imgui_debug_layer();
-		m_layerstack->push_overlay(m_imgui_debug_layer);
-
-		//m_world_layer = new world_layer();
-		//m_layerstack.push_layer(m_world_layer);
+		m_world_layer = new world_layer();
+		m_layerstack->push_layer(m_world_layer);
 		//m_renderer->set_world_Layer(m_world_layer);
 
-		// ---------------------------------------- client side ----------------------------------------
-		CORE_ASSERT(init(), "", "client defint init() has failed");			// init user code / potentally make every actor have own function (like UNREAL)
-
-		// ---------------------------------------- finished setup ----------------------------------------
-		m_renderer->set_state(system_state::active);
-		m_is_titlebar_hovered = false;
-		m_running = true;
+		m_imgui_debug_layer = new UI::imgui_debug_layer();
+		m_layerstack->push_overlay(m_imgui_debug_layer);
 
 		PFF_PROFILE_END_SESSION();
 	}
@@ -79,8 +71,7 @@ namespace PFF {
 	application::~application() {
 
 		PFF_PROFILE_BEGIN_SESSION("shutdown", "benchmarks", "PFF_benchmark_shutdown.json");
-		CORE_ASSERT(shutdown(), "", "client defint shutdown() has failed");			// init user code / potentally make every actor have own function (like UNREAL)
-
+		
 		m_renderer->set_state(system_state::inactive);
 
 		m_layerstack->pop_overlay(m_imgui_debug_layer);
@@ -104,10 +95,7 @@ namespace PFF {
 
 		PFF_PROFILE_BEGIN_SESSION("runtime", "benchmarks", "PFF_benchmark_runtime.json");
 
-		m_window->show_window();
-		m_window->poll_events();
-
-		fps_timer.start_measurement();
+		client_init();
 
 		while (m_running) {
 
@@ -125,6 +113,9 @@ namespace PFF {
 		}
 
 		m_renderer->wait_idle();
+		
+		CORE_ASSERT(shutdown(), "client application is shutdown", "client-defint shutdown() has failed");			// init user code / potentally make every actor have own function (like UNREAL)
+
 		PFF_PROFILE_END_SESSION();
 	}
 
@@ -156,6 +147,26 @@ namespace PFF {
 	void application::maximize_window() { m_window->queue_event([window = m_window] { window->maximize_window(); }); }
 
 	// ==================================================================== PRIVATE ====================================================================
+	
+	void application::client_init() {
+
+		// ---------------------------------------- client side ----------------------------------------
+		CORE_ASSERT(init(), "client application is intalized", "client-defint init() has failed");			// init user code / potentally make every actor have own function (like UNREAL)
+
+		// ---------------------------------------- finished setup ----------------------------------------
+		m_renderer->set_state(system_state::active);
+		m_is_titlebar_hovered = false;
+		m_running = true;
+
+		m_window->show_window(true);
+		m_window->poll_events();
+		fps_timer.start_measurement();
+	}
+
+	void application::client_shutdown() {
+
+	}
+
 	// ==================================================================== event handling ====================================================================
 
 	void application::on_event(event& event) {
@@ -220,25 +231,6 @@ namespace PFF {
 		else
 			fps_timer.set_fps_settings(m_nonefocus_fps);
 
-		return true;
-	}
-
-
-	// ==================================================================== engine events ====================================================================
-
-	bool application::init() {
-		return true;
-	}
-
-	bool application::update(const f32 delta_time) {
-		return true;
-	}
-
-	bool application::render(const f32 delta_time) {
-		return true;
-	}
-
-	bool application::shutdown() {
 		return true;
 	}
 
