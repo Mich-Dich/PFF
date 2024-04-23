@@ -175,7 +175,6 @@ IF EXIST ..\bin\Release-windows-x86_64\PFF\PFF.dll\ (xcopy /Q /E /Y /I ..\bin\Re
     </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <ClInclude Include="src\engine\world\map.h" />
     <ClInclude Include="src\PFF.h" />
     <ClInclude Include="src\application.h" />
     <ClInclude Include="src\engine\Events\Event.h" />
@@ -186,12 +185,11 @@ IF EXIST ..\bin\Release-windows-x86_64\PFF\PFF.dll\ (xcopy /Q /E /Y /I ..\bin\Re
     <ClInclude Include="src\engine\game_objects\game_manager.h" />
     <ClInclude Include="src\engine\game_objects\game_object.h" />
     <ClInclude Include="src\engine\game_objects\player_controller.h" />
-    <ClInclude Include="src\engine\geometry\geometry.h" />
     <ClInclude Include="src\engine\geometry\mesh.h" />
     <ClInclude Include="src\engine\io_handler\file_loader.h" />
     <ClInclude Include="src\engine\io_handler\input_action.h" />
     <ClInclude Include="src\engine\io_handler\input_mapping.h" />
-    <ClInclude Include="src\engine\layer\imgui_debug_layer.h" />
+    <ClInclude Include="src\engine\layer\imgui_layer.h" />
     <ClInclude Include="src\engine\layer\layer.h" />
     <ClInclude Include="src\engine\layer\layer_stack.h" />
     <ClInclude Include="src\engine\layer\world_layer.h" />
@@ -210,6 +208,7 @@ IF EXIST ..\bin\Release-windows-x86_64\PFF\PFF.dll\ (xcopy /Q /E /Y /I ..\bin\Re
     <ClInclude Include="src\engine\render\vulkan\vk_pipeline.h" />
     <ClInclude Include="src\engine\render\vulkan\vk_renderer.h" />
     <ClInclude Include="src\engine\render\vulkan\vk_types.h" />
+    <ClInclude Include="src\engine\world\map.h" />
     <ClInclude Include="src\entry_point.h" />
     <ClInclude Include="src\util\benchmarking\instrumentor.h" />
     <ClInclude Include="src\util\core_config.h" />
@@ -232,12 +231,10 @@ IF EXIST ..\bin\Release-windows-x86_64\PFF\PFF.dll\ (xcopy /Q /E /Y /I ..\bin\Re
     <ClCompile Include="src\engine\game_objects\game_manager.cpp" />
     <ClCompile Include="src\engine\game_objects\game_object.cpp" />
     <ClCompile Include="src\engine\game_objects\player_controller.cpp" />
-    <ClCompile Include="src\engine\geometry\mesh.cpp">
-      <ObjectFileName>$(IntDir)\mesh1.obj</ObjectFileName>
-    </ClCompile>
+    <ClCompile Include="src\engine\geometry\mesh.cpp" />
     <ClCompile Include="src\engine\io_handler\file_loader.cpp" />
     <ClCompile Include="src\engine\io_handler\input_mapping.cpp" />
-    <ClCompile Include="src\engine\layer\imgui_debug_layer.cpp" />
+    <ClCompile Include="src\engine\layer\imgui_layer.cpp" />
     <ClCompile Include="src\engine\layer\layer.cpp" />
     <ClCompile Include="src\engine\layer\layer_stack.cpp" />
     <ClCompile Include="src\engine\layer\world_layer.cpp" />

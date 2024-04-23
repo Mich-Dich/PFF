@@ -1,13 +1,11 @@
 
 #include "util/pffpch.h"
 
-//#define VK_NO_PROTOTYPES
-//#include "vendor/volk.h"
+// ========== vulkan utils ============
 #include "vk_types.h"
 #define VMA_IMPLEMENTATION
 #include "vendor/vk_mem_alloc.h"
 #include "vendor/VkBootstrap.h"
-
 #include "vk_initializers.h"
 #include "vk_instance.h"
 #include "vk_image.h"
@@ -18,6 +16,9 @@
 #include "imgui_impl_glfw.h"
 #include "imgui_impl_vulkan.h"
 
+// ========== misc ============
+#include "engine/io_handler/file_loader.h"
+#include "engine/platform/pff_window.h"
 #include "GLFW/glfw3.h"
 #include "application.h"
 #include "util/io/serializer.h"
@@ -288,6 +289,7 @@ namespace PFF::render::vulkan {
 		draw_internal(cmd);
 
 		util::transition_image(cmd, m_draw_image.image, VK_IMAGE_LAYOUT_GENERAL, VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL);
+		util::transition_image(cmd, m_depth_image.image, VK_IMAGE_LAYOUT_UNDEFINED, VK_IMAGE_LAYOUT_DEPTH_ATTACHMENT_OPTIMAL);
 
 		draw_geometry(cmd);
 
@@ -480,9 +482,15 @@ namespace PFF::render::vulkan {
 		rect_indices[4] = 1;
 		rect_indices[5] = 3;
 
-		rectangle = upload_mesh(rect_indices, rect_vertices);
+		T_rectangle = upload_mesh(rect_indices, rect_vertices);
 
-		T_test_meshes = IO::mesh_loader::load_gltf_meshes("assets/meshes/basicmesh.glb").value();
+		T_test_meshes = IO::mesh_loader::load_gltf_meshes("../PFF/assets/meshes/basicmesh.glb").value();
+		CORE_VALIDATE(T_test_meshes.size() > 0, return, "", "Failed to load meshes");
+
+		for (auto mesh : T_test_meshes) {
+			mesh->mesh_buffers = upload_mesh(mesh->m_indices, mesh->m_vertices);
+		}
+
 	}
 
 	void vk_renderer::init_swapchain() {
@@ -496,6 +504,8 @@ namespace PFF::render::vulkan {
 			1
 		};
 
+		// =========================================== create draw_image ===========================================
+
 		m_draw_image.image_format = VK_FORMAT_R16G16B16A16_SFLOAT;
 		m_draw_image.image_extent = drawImageExtent;
 
@@ -506,23 +516,37 @@ namespace PFF::render::vulkan {
 		draw_image_usages |= VK_IMAGE_USAGE_COLOR_ATTACHMENT_BIT;
 		draw_image_usages |= VK_IMAGE_USAGE_SAMPLED_BIT;
 		//draw_image_usages |= VK_IMAGE_USAGE_INPUT_ATTACHMENT_BIT;
-
 		VkImageCreateInfo image_CI = init::image_create_info(m_draw_image.image_format, draw_image_usages, drawImageExtent);
-
 		VmaAllocationCreateInfo image_alloc_CI = {};
 		image_alloc_CI.usage = VMA_MEMORY_USAGE_GPU_ONLY;												// for the m_draw_image, we want to allocate it from GPU local memory
 		image_alloc_CI.requiredFlags = VkMemoryPropertyFlags(VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT);		// ensure image is only on GPU (only GPU side VRAM has this flag
 
 		vmaCreateImage(m_allocator, &image_CI, &image_alloc_CI, &m_draw_image.image, &m_draw_image.allocation, nullptr);						// allocate and create the image
 		VkImageViewCreateInfo view_CI = init::imageview_create_info(m_draw_image.image_format, m_draw_image.image, VK_IMAGE_ASPECT_COLOR_BIT);	// build a image-view for the draw image to use for rendering
-
 		VK_CHECK(vkCreateImageView(m_device, &view_CI, nullptr, &m_draw_image.image_view));
+
+		// =========================================== create depth_image ===========================================
+		
+		m_depth_image.image_format = VK_FORMAT_D32_SFLOAT;
+		m_depth_image.image_extent = drawImageExtent;
+
+		VkImageUsageFlags depthImageUsages{};
+		depthImageUsages |= VK_IMAGE_USAGE_DEPTH_STENCIL_ATTACHMENT_BIT;
+		VkImageCreateInfo dimg_info = init::image_create_info(m_depth_image.image_format, depthImageUsages, drawImageExtent);
+		
+		vmaCreateImage(m_allocator, &dimg_info, &image_alloc_CI, &m_depth_image.image, &m_depth_image.allocation, nullptr);
+		VkImageViewCreateInfo dview_info = init::imageview_create_info(m_depth_image.image_format, m_depth_image.image, VK_IMAGE_ASPECT_DEPTH_BIT);
+		VK_CHECK(vkCreateImageView(m_device, &dview_info, nullptr, &m_depth_image.image_view));
+
 
 		//add to deletion queues
 		m_deletion_queue.push_func([=]() {
 
 			vkDestroyImageView(m_device, m_draw_image.image_view, nullptr);
 			vmaDestroyImage(m_allocator, m_draw_image.image, m_draw_image.allocation);
+
+			vkDestroyImageView(m_device, m_depth_image.image_view, nullptr);
+			vmaDestroyImage(m_allocator, m_depth_image.image, m_depth_image.allocation);
 			});
 	}
 
@@ -770,9 +794,10 @@ namespace PFF::render::vulkan {
 			.set_cull_mode(VK_CULL_MODE_NONE, VK_FRONT_FACE_CLOCKWISE)	// no backface culling
 			.set_multisampling_none()									// no multisampling
 			.disable_blending()											// no blending
+			//.disable_depthtest()										
+			.enable_depthtest(true, VK_COMPARE_OP_GREATER_OR_EQUAL)
 			.set_color_attachment_format(m_draw_image.image_format)		// connect the image format we will draw into, from draw image
-			.set_depth_format(VK_FORMAT_UNDEFINED)
-			.disable_depthtest()										// no depth testing
+			.set_depth_format(m_depth_image.image_format)
 			.build(m_device);
 
 		//clean structures
@@ -813,10 +838,11 @@ namespace PFF::render::vulkan {
 	void vk_renderer::draw_geometry(VkCommandBuffer cmd) {
 
 		//begin a render pass  connected to our draw image
-		VkRenderingAttachmentInfo colorAttachment = init::attachment_info(m_draw_image.image_view, nullptr, VK_IMAGE_LAYOUT_GENERAL);
-		VkRenderingInfo renderInfo = init::rendering_info(m_draw_extent, &colorAttachment, nullptr);
-		vkCmdBeginRendering(cmd, &renderInfo);
+		VkRenderingAttachmentInfo color_attachment = init::attachment_info(m_draw_image.image_view, nullptr, VK_IMAGE_LAYOUT_GENERAL);
+		VkRenderingAttachmentInfo depth_attachment = init::depth_attachment_info(m_depth_image.image_view, VK_IMAGE_LAYOUT_DEPTH_ATTACHMENT_OPTIMAL);
+		VkRenderingInfo render_info = init::rendering_info(m_draw_extent, &color_attachment, &depth_attachment);
 
+		vkCmdBeginRendering(cmd, &render_info);
 		vkCmdBindPipeline(cmd, VK_PIPELINE_BIND_POINT_GRAPHICS, m_triangle_pipeline);
 
 		//set dynamic viewport and scissor
@@ -840,10 +866,24 @@ namespace PFF::render::vulkan {
 
 		GPU_draw_push_constants push_constants;
 		push_constants.world_matrix = glm::mat4{ 1.f };
-		push_constants.vertex_buffer = rectangle.vertex_buffer_address;
+		
+		push_constants.vertex_buffer = T_rectangle.vertex_buffer_address;
 		vkCmdPushConstants(cmd, m_mesh_pipeline_layout, VK_SHADER_STAGE_VERTEX_BIT, 0, sizeof(GPU_draw_push_constants), &push_constants);
-		vkCmdBindIndexBuffer(cmd, rectangle.index_buffer.buffer, 0, VK_INDEX_TYPE_UINT32);
+		vkCmdBindIndexBuffer(cmd, T_rectangle.index_buffer.buffer, 0, VK_INDEX_TYPE_UINT32);
 		vkCmdDrawIndexed(cmd, 6, 1, 0, 0, 0);
+		
+		// NOTE: Note that 10000 is “near” and 0.1 is “far”. And reversing the depth, so that depth 1 is the near plane, and depth 0 the far plane.
+		//		 This is a technique that greatly increases the quality of depth testing.
+		glm::mat4 projection = glm::perspective(glm::radians(70.f), (float)m_draw_extent.width / (float)m_draw_extent.height, 10000.f, 0.1f);
+		glm::mat4 view = glm::translate(glm::mat4(1.0f), glm::vec3{ 0, 0, -2.5f });
+		projection[1][1] *= -1;				// invert the Y direction on projection matrix
+		push_constants.world_matrix = projection * view;
+
+		// draw dummy mesh
+		push_constants.vertex_buffer = T_test_meshes[2]->mesh_buffers.vertex_buffer_address;
+		vkCmdPushConstants(cmd, m_mesh_pipeline_layout, VK_SHADER_STAGE_VERTEX_BIT, 0, sizeof(GPU_draw_push_constants), &push_constants);
+		vkCmdBindIndexBuffer(cmd, T_test_meshes[2]->mesh_buffers.index_buffer.buffer, 0, VK_INDEX_TYPE_UINT32);
+		vkCmdDrawIndexed(cmd, T_test_meshes[2]->surfaces[0].count, 1, T_test_meshes[2]->surfaces[0].startIndex, 0, 0);
 
 		vkCmdEndRendering(cmd);
 	}

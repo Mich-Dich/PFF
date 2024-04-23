@@ -2,14 +2,14 @@
 
 #include "util/pffpch.h"
 
-#include <glm/mat4x4.hpp>
-#include <glm/vec4.hpp>
+#include "vendor/vk_mem_alloc.h"
 #include <vulkan/vulkan.h>
 #include <vulkan/vk_enum_string_helper.h>
+#include <glm/mat4x4.hpp>
+#include <glm/vec4.hpp>
 
-#include "vendor/vk_mem_alloc.h"
 #include "vk_descriptor.h"
-#include "engine/geometry/mesh.h"
+//#include "engine/geometry/mesh.h"
 
 
 struct vk_image {

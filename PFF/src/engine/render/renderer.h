@@ -2,28 +2,26 @@
 
 #include "render_util.h"
 
-#include "engine/geometry/geometry.h"
-#include "engine/io_handler/file_loader.h"
-#include "engine/platform/pff_window.h"
+#include "engine/render/vulkan/vk_types.h"
 #include "engine/layer/layer_stack.h"
 
 namespace PFF::render {
 
 	enum class render_api {
 
-		none	= 0,
-		Vulkan	= 1,
-		OpenGl	= 2,
-		D3D12	= 3,
-		Metal	= 4,
+		none = 0,
+		Vulkan = 1,
+		OpenGl = 2,
+		D3D12 = 3,
+		Metal = 4,
 	};
 
-	class GPU_mesh_buffers {
-	public:
+	struct vk_GPU_mesh_buffers {
 
-		virtual ~GPU_mesh_buffers() {}
+		allocated_buffer		index_buffer{};
+		allocated_buffer		vertex_buffer{};
+		VkDeviceAddress			vertex_buffer_address{};
 	};
-
 
 	class renderer {
 	public:

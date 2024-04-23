@@ -1,6 +1,12 @@
 #pragma once
 
 #include "engine/render/renderer.h"
+#include "engine/render/vulkan/vk_types.h"
+
+
+#include "engine/platform/pff_window.h"
+#include "engine/geometry/mesh.h"
+
 
 #include "vk_types.h"
 
@@ -27,40 +33,29 @@ namespace PFF::render::vulkan {
 
 	struct compute_push_constants {
 	
-		glm::vec4 data1;
-		glm::vec4 data2;
-		glm::vec4 data3;
-		glm::vec4 data4;
+		glm::vec4				data1;
+		glm::vec4				data2;
+		glm::vec4				data3;
+		glm::vec4				data4;
 	};
 
 	struct compute_effect {
 
-		const char* name;
-		VkPipeline pipeline;
-		VkPipelineLayout layout;
-		compute_push_constants data;
+		const char*				name{};
+		VkPipeline				pipeline{};
+		VkPipelineLayout		layout{};
+		compute_push_constants	data{};
 	};
 
 	// framedata	// TODO: extract into own file
 	struct FrameData {
 
-		deletion_queue deletion_queue;
-		VkSemaphore swapchain_semaphore, render_semaphore;
-		VkFence render_fence;
+		deletion_queue			deletion_queue{};
+		VkSemaphore				swapchain_semaphore{}, render_semaphore{};
+		VkFence					render_fence{};
 
-		VkCommandPool command_pool;
-		VkCommandBuffer main_command_buffer;
-	};
-
-	class vk_GPU_mesh_buffers : public GPU_mesh_buffers {
-	public:
-
-		vk_GPU_mesh_buffers() {};
-		~vk_GPU_mesh_buffers() {};
-
-		allocated_buffer    index_buffer;
-		allocated_buffer    vertex_buffer;
-		VkDeviceAddress     vertex_buffer_address;
+		VkCommandPool			command_pool{};
+		VkCommandBuffer			main_command_buffer{};
 	};
 
 	constexpr u32 FRAME_COUNT = 2;
@@ -122,65 +117,67 @@ namespace PFF::render::vulkan {
 		bool m_is_initialized = false;
 		int m_frame_number = 0;
 		ref<pff_window> m_window{};
-		ref<PFF::layer_stack> m_layer_stack;
+		ref<PFF::layer_stack> m_layer_stack{};
 
 		// ---------------------------- instance ---------------------------- 
-		VkInstance					m_instance;			// Vulkan library handle
-		VkDebugUtilsMessengerEXT	m_debug_messenger;	// Vulkan debug output handle
-		VkPhysicalDevice			m_chosenGPU;		// GPU chosen as the default device
-		VkDevice					m_device;			// Vulkan device for commands
-		VkSurfaceKHR				m_surface;			// Vulkan window surface
+		VkInstance					m_instance{};			// Vulkan library handle
+		VkDebugUtilsMessengerEXT	m_debug_messenger{};	// Vulkan debug output handle
+		VkPhysicalDevice			m_chosenGPU{};			// GPU chosen as the default device
+		VkDevice					m_device{};				// Vulkan device for commands
+		VkSurfaceKHR				m_surface{};			// Vulkan window surface
 		
 		// ---------------------------- queues ---------------------------- 
 		FrameData					m_frames[FRAME_COUNT];
-		VkQueue						m_graphics_queue;
-		u32							m_graphics_queue_family;
+		VkQueue						m_graphics_queue{};
+		u32							m_graphics_queue_family{};
 		
 		// ---------------------------- swapchain ---------------------------- 
-		VkSwapchainKHR				m_swapchain;
-		VkFormat					m_swapchain_image_format;
-		std::vector<VkImage>		m_swapchain_images;
-		std::vector<VkImageView>	m_swapchain_image_views;
-		VkExtent2D					m_swapchain_extent;
+		VkSwapchainKHR				m_swapchain{};
+		VkFormat					m_swapchain_image_format{};
+		std::vector<VkImage>		m_swapchain_images{};
+		std::vector<VkImageView>	m_swapchain_image_views{};
+		VkExtent2D					m_swapchain_extent{};
 
-		deletion_queue				m_deletion_queue;
-		VmaAllocator				m_allocator;
+		deletion_queue				m_deletion_queue{};
+		VmaAllocator				m_allocator{};
 
-		vk_image					m_draw_image;
-		VkExtent2D					m_draw_extent;
+		VkExtent2D					m_draw_extent{};
+		vk_image					m_draw_image{};
+		vk_image					m_depth_image{};
+
 		// display rendered image in imgui
-		VkSampler			m_texture_sampler;
-		VkDescriptorSet		m_imugi_image_dset;
+		VkSampler			m_texture_sampler{};
+		VkDescriptorSet		m_imugi_image_dset{};
 
 		// ---------------------------- descriptors ---------------------------- 
-		descriptor_allocator		global_descriptor_allocator;
-		VkDescriptorSet				m_draw_image_descriptors;
-		VkDescriptorSetLayout		m_draw_image_descriptor_layout;
+		descriptor_allocator		global_descriptor_allocator{};
+		VkDescriptorSet				m_draw_image_descriptors{};
+		VkDescriptorSetLayout		m_draw_image_descriptor_layout{};
 		
 		// ---------------------------- pipelines ---------------------------- 
-		VkPipeline					m_gradient_pipeline;
-		VkPipelineLayout			m_gradient_pipeline_layout;
+		VkPipeline					m_gradient_pipeline{};
+		VkPipelineLayout			m_gradient_pipeline_layout{};
 
 		// ---------------------------- immediate-submit ---------------------------- 
-		VkFence						m_immFence;
-		VkCommandBuffer				m_immCommandBuffer;
-		VkCommandPool				m_immCommandPool;
+		VkFence						m_immFence{};
+		VkCommandBuffer				m_immCommandBuffer{};
+		VkCommandPool				m_immCommandPool{};
 
-		VkDescriptorPool			m_imgui_desc_pool;
+		VkDescriptorPool			m_imgui_desc_pool{};
 
-		std::vector<compute_effect> m_background_effects;
+		std::vector<compute_effect> m_background_effects{};
 		int							m_current_background_effect = 0;
 
 		// ---------------------------- triangle pipeline ---------------------------- 
-		VkPipelineLayout			m_triangle_pipeline_layout;
-		VkPipeline					m_triangle_pipeline;
+		VkPipelineLayout			m_triangle_pipeline_layout{};
+		VkPipeline					m_triangle_pipeline{};
 
 		// ---------------------------- mesh pipeline ---------------------------- 
-		VkPipelineLayout			m_mesh_pipeline_layout;
-		VkPipeline					m_mesh_pipeline;
+		VkPipelineLayout			m_mesh_pipeline_layout{};
+		VkPipeline					m_mesh_pipeline{};
 
-		vk_GPU_mesh_buffers rectangle;
-		std::vector<geometry::mesh_asset> T_test_meshes;
+		vk_GPU_mesh_buffers						T_rectangle;
+		std::vector<ref<PFF::geometry::mesh>>		T_test_meshes;
 
 
 	};

@@ -3,7 +3,7 @@
 #include "util/pffpch.h"
 
 #include "engine/layer/layer_stack.h"			// need to include this for some reason
-#include "engine/layer/imgui_debug_layer.h"
+#include "engine/layer/imgui_layer.h"
 #include "engine/layer/world_layer.h"
 #include "engine/render/renderer.h"
 #include "util/timer.h"
@@ -41,7 +41,7 @@ namespace PFF {
 		FORCEINLINE static application& get()							{ return *s_instance; }
 		FORCEINLINE static ref<pff_window> get_window()					{ return m_window; }
 		FORCEINLINE static ref<PFF::render::renderer> get_renderer()	{ return m_renderer; }
-		FORCEINLINE UI::imgui_debug_layer* get_imgui_layer()			{ return m_imgui_debug_layer; }
+		FORCEINLINE UI::imgui_layer* get_imgui_layer()			{ return m_imgui_layer; }
 		FORCEINLINE static void  set_render_state(system_state state)	{ return m_renderer->set_state(state); }
 		FORCEINLINE world_layer* get_world_layer()						{ return m_world_layer; }
 		//FORCEINLINE ref<game_map> get_current_map()					{ return m_world_layer->get_current_map(); }
@@ -83,7 +83,7 @@ namespace PFF {
 		static ref<pff_window> m_window;
 		static bool m_is_titlebar_hovered;
 		static bool m_running;
-		UI::imgui_debug_layer* m_imgui_debug_layer;
+		UI::imgui_layer* m_imgui_layer;
 		world_layer* m_world_layer;
 
 		ref<layer_stack> m_layerstack{};

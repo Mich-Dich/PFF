@@ -10,3 +10,6 @@
 [submodule "fastgltf"]
 	path = PFF/vendor/fastgltf
 	url = https://github.com/spnda/fastgltf
+[submodule "PFF/vendor/glm"]
+	path = PFF/vendor/glm
+	url = https://github.com/icaven/glm

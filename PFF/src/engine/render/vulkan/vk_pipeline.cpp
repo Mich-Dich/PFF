@@ -205,4 +205,19 @@ namespace PFF::render::vulkan {
         p_depth_stencil_CI.maxDepthBounds = 1.f;
         return *this;
     }
+
+
+    pipeline_builder& pipeline_builder::enable_depthtest(bool depthWriteEnable, VkCompareOp op) {
+
+        p_depth_stencil_CI.depthTestEnable = VK_TRUE;
+        p_depth_stencil_CI.depthWriteEnable = depthWriteEnable;
+        p_depth_stencil_CI.depthCompareOp = op;
+        p_depth_stencil_CI.depthBoundsTestEnable = VK_FALSE;
+        p_depth_stencil_CI.stencilTestEnable = VK_FALSE;
+        p_depth_stencil_CI.front = {};
+        p_depth_stencil_CI.back = {};
+        p_depth_stencil_CI.minDepthBounds = 0.f;
+        p_depth_stencil_CI.maxDepthBounds = 1.f;
+        return *this;
+    }
 }

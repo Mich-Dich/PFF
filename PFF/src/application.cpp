@@ -9,9 +9,10 @@
 #include "engine/events/mouse_event.h"
 #include "engine/events/key_event.h"
 
-#include "engine/layer/layer_stack.h"
 #include "engine/layer/layer.h"
-#include "engine/layer/imgui_debug_layer.h"
+#include "engine/layer/layer_stack.h"
+#include "engine/layer/imgui_layer.h"
+#include "engine/layer/world_layer.h"
 
 #include "engine/platform/pff_window.h"
 #include "engine/render/renderer.h"
@@ -62,8 +63,8 @@ namespace PFF {
 		m_layerstack->push_layer(m_world_layer);
 		//m_renderer->set_world_Layer(m_world_layer);
 
-		m_imgui_debug_layer = new UI::imgui_debug_layer();
-		m_layerstack->push_overlay(m_imgui_debug_layer);
+		m_imgui_layer = new UI::imgui_layer();
+		m_layerstack->push_overlay(m_imgui_layer);
 
 		PFF_PROFILE_END_SESSION();
 	}
@@ -74,8 +75,8 @@ namespace PFF {
 		
 		m_renderer->set_state(system_state::inactive);
 
-		m_layerstack->pop_overlay(m_imgui_debug_layer);
-		delete m_imgui_debug_layer;
+		m_layerstack->pop_overlay(m_imgui_layer);
+		delete m_imgui_layer;
 
 		//m_current_map.reset();
 		//m_layerstack.pop_layer(m_world_layer);

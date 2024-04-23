@@ -24,6 +24,7 @@ namespace PFF::render::vulkan {
         pipeline_builder& set_color_attachment_format(VkFormat format);
         pipeline_builder& set_depth_format(VkFormat format);
         pipeline_builder& disable_depthtest();
+        pipeline_builder& enable_depthtest(bool depthWriteEnable, VkCompareOp op);
 
         pipeline_builder& set_pipeline_layout(VkPipelineLayout pipeline_layout) { p_pipeline_layout = pipeline_layout; return *this; }
         

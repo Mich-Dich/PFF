@@ -33,15 +33,15 @@ namespace PFF {
 		FORCEINLINE void update_orthographic_projection() { set_orthographic_projection(m_orthographic_left, m_orthographic_right, m_orthographic_up, m_orthographic_down, m_clipping_near, m_clipping_far); }
 		FORCEINLINE void update_perspective_projection() { set_perspective_projection(m_perspective_fov_y, m_perspective_aspect_ratio, m_clipping_near, m_clipping_far); }
 		
-		f32 m_perspective_fov_y;
-		f32 m_perspective_aspect_ratio;
-		f32 m_orthographic_left;
-		f32 m_orthographic_right;
-		f32 m_orthographic_up;
-		f32 m_orthographic_down;
+		f32 m_perspective_fov_y{};
+		f32 m_perspective_aspect_ratio{};
+		f32 m_orthographic_left{};
+		f32 m_orthographic_right{};
+		f32 m_orthographic_up{};
+		f32 m_orthographic_down{};
 
-		f32 m_clipping_near;
-		f32 m_clipping_far;
+		f32 m_clipping_near{};
+		f32 m_clipping_far{};
 
 		glm::mat4 m_projection_matrix{ 1.0f };
 		glm::mat4 view_matrix{ 1.0f };

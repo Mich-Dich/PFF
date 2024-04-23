@@ -10,9 +10,6 @@
     <Filter Include="engine\game_objects">
       <UniqueIdentifier>{ADBB125B-191D-F068-A28A-361B0EEB2628}</UniqueIdentifier>
     </Filter>
-    <Filter Include="engine\game_objects\geometry">
-      <UniqueIdentifier>{C8F7623D-B4B2-52E9-5D6A-CB3349049D79}</UniqueIdentifier>
-    </Filter>
     <Filter Include="engine\geometry">
       <UniqueIdentifier>{D64FE53D-42DB-5202-4BEC-D5F6B7F6AE02}</UniqueIdentifier>
     </Filter>
@@ -33,6 +30,9 @@
     </Filter>
     <Filter Include="engine\render\vulkan\vendor">
       <UniqueIdentifier>{A74BFF18-1359-2DFF-9C3F-29EA084CF9B5}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="engine\world">
+      <UniqueIdentifier>{125715B7-FEB9-A45B-A73F-DD11938170DE}</UniqueIdentifier>
     </Filter>
     <Filter Include="util">
       <UniqueIdentifier>{43339F7C-2F6A-A00D-D856-8610C46C1C0F}</UniqueIdentifier>
@@ -80,9 +80,6 @@
     <ClInclude Include="src\engine\game_objects\player_controller.h">
       <Filter>engine\game_objects</Filter>
     </ClInclude>
-    <ClInclude Include="src\engine\geometry\geometry.h">
-      <Filter>engine\geometry</Filter>
-    </ClInclude>
     <ClInclude Include="src\engine\geometry\mesh.h">
       <Filter>engine\geometry</Filter>
     </ClInclude>
@@ -95,7 +92,7 @@
     <ClInclude Include="src\engine\io_handler\input_mapping.h">
       <Filter>engine\io_handler</Filter>
     </ClInclude>
-    <ClInclude Include="src\engine\layer\imgui_debug_layer.h">
+    <ClInclude Include="src\engine\layer\imgui_layer.h">
       <Filter>engine\layer</Filter>
     </ClInclude>
     <ClInclude Include="src\engine\layer\layer.h">
@@ -152,6 +149,9 @@
     <ClInclude Include="src\engine\render\vulkan\vk_types.h">
       <Filter>engine\render\vulkan</Filter>
     </ClInclude>
+    <ClInclude Include="src\engine\world\map.h">
+      <Filter>engine\world</Filter>
+    </ClInclude>
     <ClInclude Include="src\entry_point.h" />
     <ClInclude Include="src\util\benchmarking\instrumentor.h">
       <Filter>util\benchmarking</Filter>
@@ -195,7 +195,6 @@
     <ClInclude Include="src\util\util.h">
       <Filter>util</Filter>
     </ClInclude>
-    <ClInclude Include="src\engine\world\map.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="src\application.cpp" />
@@ -220,7 +219,7 @@
     <ClCompile Include="src\engine\io_handler\input_mapping.cpp">
       <Filter>engine\io_handler</Filter>
     </ClCompile>
-    <ClCompile Include="src\engine\layer\imgui_debug_layer.cpp">
+    <ClCompile Include="src\engine\layer\imgui_layer.cpp">
       <Filter>engine\layer</Filter>
     </ClCompile>
     <ClCompile Include="src\engine\layer\layer.cpp">
@@ -259,6 +258,9 @@
     <ClCompile Include="src\engine\render\vulkan\vk_renderer.cpp">
       <Filter>engine\render\vulkan</Filter>
     </ClCompile>
+    <ClCompile Include="src\engine\world\map.cpp">
+      <Filter>engine\world</Filter>
+    </ClCompile>
     <ClCompile Include="src\util\imgui\imgui_util.cpp">
       <Filter>util\imgui</Filter>
     </ClCompile>
@@ -280,6 +282,5 @@
     <ClCompile Include="src\util\timer.cpp">
       <Filter>util</Filter>
     </ClCompile>
-    <ClCompile Include="src\engine\world\map.cpp" />
   </ItemGroup>
 </Project>
