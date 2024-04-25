@@ -269,8 +269,9 @@ namespace PFF::render::vulkan {
 		uint32_t swapchain_image_index;
 		VkResult e = vkAcquireNextImageKHR(m_device, m_swapchain, 1000000000, get_current_frame().swapchain_semaphore, nullptr, &swapchain_image_index);
 		if (e == VK_ERROR_OUT_OF_DATE_KHR) {
-			//rebuild_swapchain();		// TODO: implement rebuild
-			return;
+			m_resize_nedded = true;
+			resize_swapchain();
+			return;					// this skips a frame, but it fine
 		}
 
 		VK_CHECK(vkResetFences(m_device, 1, &get_current_frame().render_fence));
@@ -279,8 +280,18 @@ namespace PFF::render::vulkan {
 		VK_CHECK(vkResetCommandBuffer(cmd, 0));
 
 		VkCommandBufferBeginInfo cmdBeginInfo = init::command_buffer_begin_info(VK_COMMAND_BUFFER_USAGE_ONE_TIME_SUBMIT_BIT);
-		m_draw_extent.width = m_draw_image.image_extent.width;
-		m_draw_extent.height = m_draw_image.image_extent.height;
+
+		if (m_imgui_initalized && !m_render_swapchain) {
+						
+			m_draw_extent.width = std::min(m_draw_image.image_extent.width, m_imugi_viewport_size.x) * m_render_scale;
+			m_draw_extent.height = std::min(m_draw_image.image_extent.height, m_imugi_viewport_size.y) * m_render_scale;
+		} else {
+		
+			m_draw_extent.width = std::min(m_swapchain_extent.width, m_draw_image.image_extent.width) * m_render_scale;
+			m_draw_extent.height = std::min(m_swapchain_extent.height, m_draw_image.image_extent.height) * m_render_scale;
+		}
+
+
 
 		VK_CHECK(vkBeginCommandBuffer(cmd, &cmdBeginInfo));
 
@@ -292,8 +303,6 @@ namespace PFF::render::vulkan {
 		util::transition_image(cmd, m_depth_image.image, VK_IMAGE_LAYOUT_UNDEFINED, VK_IMAGE_LAYOUT_DEPTH_ATTACHMENT_OPTIMAL);
 
 		draw_geometry(cmd);
-
-
 
 		if (m_render_swapchain) {
 
@@ -326,23 +335,30 @@ namespace PFF::render::vulkan {
 				ImGuiWindowFlags window_flags = ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoMove | ImGuiWindowFlags_NoScrollbar
 					| ImGuiWindowFlags_NoScrollWithMouse | ImGuiWindowFlags_NoCollapse | ImGuiWindowFlags_NoBackground | ImGuiWindowFlags_NoDecoration ;
 
-				//ImGui::SetNextWindowDockID();
+				//ImGui::SetNextWindowDockID();			ImGuiWindowFlags_AlwaysAutoResize
 
 				ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, ImVec2(0, 0));
 				ImGui::PushStyleVar(ImGuiStyleVar_WindowBorderSize, 0);
-				ImGui::Begin("Viewport", nullptr, window_flags);
-				ImGui::PopStyleVar(2);
+				ImGui::Begin("viewport" /*, nullptr, window_flags*/);
+					ImGui::PopStyleVar(2);
+					ImVec2 viewport_size = ImGui::GetWindowSize();
+					viewport_size.y -= ImGui::GetFrameHeight();
+					m_imugi_viewport_size = glm::u32vec2(viewport_size.x, viewport_size.y);
 
-				ImVec2 viewportPanelSize = ImGui::GetContentRegionAvail();
-				ImGui::Image(m_imugi_image_dset, ImVec2{ viewportPanelSize.x, viewportPanelSize.y });
+					ImVec2 viewport_uv = { viewport_size.x / m_draw_image.image_extent.width , viewport_size.y / m_draw_image.image_extent.height };
+					//CORE_LOG(Trace, "X: " << viewport_size.x << "/" << m_draw_image.image_extent.width << " = " << viewport_uv.x
+					//	<< "         Y: " << viewport_size.y << "/" << m_draw_image.image_extent.height << " = " << viewport_uv.y);
+
+					ImGui::Image(m_imugi_image_dset, ImVec2{ viewport_size.x, viewport_size.y }, ImVec2{0,0}, viewport_uv);
 				ImGui::End();
 			}
 
 
 			if (ImGui::Begin("background")) {
 
-				compute_effect& selected = m_background_effects[m_current_background_effect];
+				ImGui::SliderFloat("Render Scale", &m_render_scale, 0.3f, 1.f);
 
+				compute_effect& selected = m_background_effects[m_current_background_effect];
 				ImGui::Text("Selected effect: ", selected.name);
 				ImGui::SliderInt("Effect Index", &m_current_background_effect, 0, static_cast<int>(m_background_effects.size() - 1));
 
@@ -397,12 +413,21 @@ namespace PFF::render::vulkan {
 		presentInfo.pWaitSemaphores = &get_current_frame().render_semaphore;
 		presentInfo.waitSemaphoreCount = 1;
 		presentInfo.pImageIndices = &swapchain_image_index;
-		VK_CHECK(vkQueuePresentKHR(m_graphics_queue, &presentInfo));
+		VkResult queue_present_result = vkQueuePresentKHR(m_graphics_queue, &presentInfo);
+		if (queue_present_result == VK_ERROR_OUT_OF_DATE_KHR) {
+			m_resize_nedded = true;
+			resize_swapchain();
+		}
 
 		m_frame_number++;
 	}
 
-	void vk_renderer::refresh(f32 delta_time) {}
+	void vk_renderer::refresh(f32 delta_time) {
+	
+		//CORE_LOG(Debug, "Refreching renderer");
+		resize_swapchain();
+		draw_frame(delta_time);
+	}
 
 	void vk_renderer::set_size(u32 width, u32 height) {}
 
@@ -458,32 +483,6 @@ namespace PFF::render::vulkan {
 
 	void vk_renderer::init_default_data() {
 
-		std::vector<PFF::geometry::vertex> rect_vertices;
-		rect_vertices.resize(4);
-
-		rect_vertices[0].position = {  0.3, -0.3, 0 };
-		rect_vertices[1].position = {  0.3,  0.3, 0 };
-		rect_vertices[2].position = { -0.3, -0.3, 0 };
-		rect_vertices[3].position = { -0.3,  0.3, 0 };
-
-		rect_vertices[0].color = { 0,   0,   1,   1 };
-		rect_vertices[1].color = { 0.5, 0.5, 0.5, 1 };
-		rect_vertices[2].color = { 1,   0,   0,   1 };
-		rect_vertices[3].color = { 0,   1,   0,   1 };
-
-		std::vector<u32> rect_indices;
-		rect_indices.resize(6);
-
-		rect_indices[0] = 0;
-		rect_indices[1] = 1;
-		rect_indices[2] = 2;
-
-		rect_indices[3] = 2;
-		rect_indices[4] = 1;
-		rect_indices[5] = 3;
-
-		T_rectangle = upload_mesh(rect_indices, rect_vertices);
-
 		T_test_meshes = IO::mesh_loader::load_gltf_meshes("../PFF/assets/meshes/basicmesh.glb").value();
 		CORE_VALIDATE(T_test_meshes.size() > 0, return, "", "Failed to load meshes");
 
@@ -498,11 +497,17 @@ namespace PFF::render::vulkan {
 		create_swapchain(m_window->get_width(), m_window->get_height());
 
 		//draw image size will match the window
-		VkExtent3D drawImageExtent = {
+		VkExtent3D drawImageExtent = { 
 			m_window->get_width(),
 			m_window->get_height(),
-			1
+			1 
 		};
+		m_window->get_monitor_size((int*)&drawImageExtent.width, (int*)&drawImageExtent.height);
+		CORE_LOG(Debug, "render image extend: " << drawImageExtent.width << "/" << drawImageExtent.height);
+
+		VmaAllocationCreateInfo image_alloc_CI = {};
+		image_alloc_CI.usage = VMA_MEMORY_USAGE_GPU_ONLY;												// for the m_draw_image & m_depth_image, allocate it from GPU local memory
+		image_alloc_CI.requiredFlags = VkMemoryPropertyFlags(VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT);		// ensure image is only on GPU (only GPU side VRAM has this flag)
 
 		// =========================================== create draw_image ===========================================
 
@@ -517,10 +522,7 @@ namespace PFF::render::vulkan {
 		draw_image_usages |= VK_IMAGE_USAGE_SAMPLED_BIT;
 		//draw_image_usages |= VK_IMAGE_USAGE_INPUT_ATTACHMENT_BIT;
 		VkImageCreateInfo image_CI = init::image_create_info(m_draw_image.image_format, draw_image_usages, drawImageExtent);
-		VmaAllocationCreateInfo image_alloc_CI = {};
-		image_alloc_CI.usage = VMA_MEMORY_USAGE_GPU_ONLY;												// for the m_draw_image, we want to allocate it from GPU local memory
-		image_alloc_CI.requiredFlags = VkMemoryPropertyFlags(VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT);		// ensure image is only on GPU (only GPU side VRAM has this flag
-
+		
 		vmaCreateImage(m_allocator, &image_CI, &image_alloc_CI, &m_draw_image.image, &m_draw_image.allocation, nullptr);						// allocate and create the image
 		VkImageViewCreateInfo view_CI = init::imageview_create_info(m_draw_image.image_format, m_draw_image.image, VK_IMAGE_ASPECT_COLOR_BIT);	// build a image-view for the draw image to use for rendering
 		VK_CHECK(vkCreateImageView(m_device, &view_CI, nullptr, &m_draw_image.image_view));
@@ -638,7 +640,6 @@ namespace PFF::render::vulkan {
 		init_pipelines_background();
 
 		// GRAPHICS PIPELINES
-		init_pipeline_triangle();
 		init_pipeline_mesh();
 	}
 
@@ -730,43 +731,6 @@ namespace PFF::render::vulkan {
 	}
 
 
-	void vk_renderer::init_pipeline_triangle() {
-
-		VkShaderModule triangle_frag_shader;
-		CORE_ASSERT(util::load_shader_module("../PFF/shaders/colored_triangle.frag.spv", m_device, &triangle_frag_shader), "", "Error when building the triangle fragment shader module");
-
-		VkShaderModule triangle_vertex_shader;
-		CORE_ASSERT(util::load_shader_module("../PFF/shaders/colored_triangle.vert.spv", m_device, &triangle_vertex_shader), "", "Error when building the triangle vertex shader module");
-
-		//build the pipeline layout that controls the inputs/outputs of the shader
-		//we are not using descriptor sets or other systems yet, so no need to use anything other than empty default
-		VkPipelineLayoutCreateInfo pipeline_layout_info = init::pipeline_layout_create_info();
-		VK_CHECK(vkCreatePipelineLayout(m_device, &pipeline_layout_info, nullptr, &m_triangle_pipeline_layout));
-
-		m_triangle_pipeline = pipeline_builder()
-			.set_pipeline_layout(m_triangle_pipeline_layout)			// use the triangle layout we created
-			.set_shaders(triangle_vertex_shader, triangle_frag_shader)	// connecting the vertex and pixel shaders to the pipeline
-			.set_input_topology(VK_PRIMITIVE_TOPOLOGY_TRIANGLE_LIST)	// it will draw triangles
-			.set_polygon_mode(VK_POLYGON_MODE_FILL)						// filled triangles
-			.set_cull_mode(VK_CULL_MODE_NONE, VK_FRONT_FACE_CLOCKWISE)	// no backface culling
-			.set_multisampling_none()									// no multisampling
-			.disable_blending()											// no blending
-			.set_color_attachment_format(m_draw_image.image_format)		// connect the image format we will draw into, from draw image
-			.set_depth_format(VK_FORMAT_UNDEFINED)
-			.disable_depthtest()										// no depth testing
-			.build(m_device);
-
-		//clean structures
-		vkDestroyShaderModule(m_device, triangle_frag_shader, nullptr);
-		vkDestroyShaderModule(m_device, triangle_vertex_shader, nullptr);
-
-		m_deletion_queue.push_func([&]() {
-			vkDestroyPipelineLayout(m_device, m_triangle_pipeline_layout, nullptr);
-			vkDestroyPipeline(m_device, m_triangle_pipeline, nullptr);
-			});
-	}
-
-
 	void vk_renderer::init_pipeline_mesh() {
 
 		VkShaderModule mesh_frag_shader;
@@ -793,7 +757,8 @@ namespace PFF::render::vulkan {
 			.set_polygon_mode(VK_POLYGON_MODE_FILL)						// filled triangles
 			.set_cull_mode(VK_CULL_MODE_NONE, VK_FRONT_FACE_CLOCKWISE)	// no backface culling
 			.set_multisampling_none()									// no multisampling
-			.disable_blending()											// no blending
+			//.disable_blending()											// no blending
+			.enable_blending_additive()
 			//.disable_depthtest()										
 			.enable_depthtest(true, VK_COMPARE_OP_GREATER_OR_EQUAL)
 			.set_color_attachment_format(m_draw_image.image_format)		// connect the image format we will draw into, from draw image
@@ -822,6 +787,19 @@ namespace PFF::render::vulkan {
 
 	}
 
+	void vk_renderer::resize_swapchain() {
+
+		vkDeviceWaitIdle(m_device);
+
+		destroy_swapchain();
+		m_swapchain_extent.width = m_window->get_width();
+		m_swapchain_extent.height = m_window->get_height();
+		create_swapchain(m_swapchain_extent.width, m_swapchain_extent.height);
+
+		m_resize_nedded = false;
+	}
+
+
 	void vk_renderer::draw_internal(VkCommandBuffer cmd) {
 
 		compute_effect& effect = m_background_effects[m_current_background_effect];
@@ -843,7 +821,7 @@ namespace PFF::render::vulkan {
 		VkRenderingInfo render_info = init::rendering_info(m_draw_extent, &color_attachment, &depth_attachment);
 
 		vkCmdBeginRendering(cmd, &render_info);
-		vkCmdBindPipeline(cmd, VK_PIPELINE_BIND_POINT_GRAPHICS, m_triangle_pipeline);
+		vkCmdBindPipeline(cmd, VK_PIPELINE_BIND_POINT_GRAPHICS, m_mesh_pipeline);
 
 		//set dynamic viewport and scissor
 		VkViewport viewport = {};
@@ -861,26 +839,18 @@ namespace PFF::render::vulkan {
 		scissor.extent.width = m_draw_extent.width;
 		scissor.extent.height = m_draw_extent.height;
 		vkCmdSetScissor(cmd, 0, 1, &scissor);
-
-		vkCmdBindPipeline(cmd, VK_PIPELINE_BIND_POINT_GRAPHICS, m_mesh_pipeline);
-
-		GPU_draw_push_constants push_constants;
-		push_constants.world_matrix = glm::mat4{ 1.f };
-		
-		push_constants.vertex_buffer = T_rectangle.vertex_buffer_address;
-		vkCmdPushConstants(cmd, m_mesh_pipeline_layout, VK_SHADER_STAGE_VERTEX_BIT, 0, sizeof(GPU_draw_push_constants), &push_constants);
-		vkCmdBindIndexBuffer(cmd, T_rectangle.index_buffer.buffer, 0, VK_INDEX_TYPE_UINT32);
-		vkCmdDrawIndexed(cmd, 6, 1, 0, 0, 0);
 		
 		// NOTE: Note that 10000 is “near” and 0.1 is “far”. And reversing the depth, so that depth 1 is the near plane, and depth 0 the far plane.
 		//		 This is a technique that greatly increases the quality of depth testing.
 		glm::mat4 projection = glm::perspective(glm::radians(70.f), (float)m_draw_extent.width / (float)m_draw_extent.height, 10000.f, 0.1f);
 		glm::mat4 view = glm::translate(glm::mat4(1.0f), glm::vec3{ 0, 0, -2.5f });
 		projection[1][1] *= -1;				// invert the Y direction on projection matrix
-		push_constants.world_matrix = projection * view;
 
-		// draw dummy mesh
+		GPU_draw_push_constants push_constants;
+		push_constants.world_matrix = projection * view;
 		push_constants.vertex_buffer = T_test_meshes[2]->mesh_buffers.vertex_buffer_address;
+		
+		// draw dummy mesh
 		vkCmdPushConstants(cmd, m_mesh_pipeline_layout, VK_SHADER_STAGE_VERTEX_BIT, 0, sizeof(GPU_draw_push_constants), &push_constants);
 		vkCmdBindIndexBuffer(cmd, T_test_meshes[2]->mesh_buffers.index_buffer.buffer, 0, VK_INDEX_TYPE_UINT32);
 		vkCmdDrawIndexed(cmd, T_test_meshes[2]->surfaces[0].count, 1, T_test_meshes[2]->surfaces[0].startIndex, 0, 0);

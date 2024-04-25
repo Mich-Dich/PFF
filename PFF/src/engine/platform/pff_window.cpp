@@ -33,9 +33,7 @@ namespace PFF {
 		PFF_PROFILE_FUNCTION();
 
 		window_attrib_serializer(&m_data, serializer::option::load_from_file);
-
-		//attributes.app_ref = &application::get();
-		m_data = attributes;
+		//m_data.app_ref = &application::get();
 
 		if (!s_GLFWinitialized) {
 
@@ -121,7 +119,6 @@ namespace PFF {
 
 			if (Data.window_size_state == window_size_state::windowed) {
 
-				CORE_LOG(Trace, "Saving Size");
 				Data.width = static_cast<u32>(width);
 				Data.height = static_cast<u32>(height);
 			}
@@ -256,11 +253,19 @@ namespace PFF {
 
 	PFF_API void pff_window::show_titlebar(bool show) {
 		
-		if (show)
-			glfwWindowHint(GLFW_TITLEBAR, GLFW_TRUE);
-		else	
-			glfwWindowHint(GLFW_TITLEBAR, GLFW_FALSE);
+		glfwWindowHint(GLFW_TITLEBAR, show ? GLFW_TRUE : GLFW_FALSE);
 	}
+
+	void pff_window::get_monitor_size(int* width, int* height) {
+
+		auto monitor = glfwGetWindowMonitor(m_Window);
+		CORE_VALIDATE(monitor, monitor = glfwGetPrimaryMonitor(), "", "Failed to get user defined monitor, switching to main monitor");
+		auto video_mode = glfwGetVideoMode(monitor);
+
+		*width = video_mode->width;
+		*height = video_mode->height;
+	}
+
 
 	void pff_window::create_vulkan_surface(VkInstance_T* instance, VkSurfaceKHR_T** get_surface) {
 
@@ -282,7 +287,6 @@ namespace PFF {
 			.entry(KEY_VALUE(window_attributes->height))
 			.entry(KEY_VALUE(window_attributes->vsync))
 			.entry(KEY_VALUE(window_attributes->window_size_state));
-		
 	}
 
 }

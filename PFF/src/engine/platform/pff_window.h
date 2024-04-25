@@ -75,6 +75,7 @@ namespace PFF {
 		PFF_API void restore_window();
 		PFF_API void maximize_window();
 		PFF_API void show_titlebar(bool show);
+		PFF_API void get_monitor_size(int* width, int* height);
 
 		void create_vulkan_surface(VkInstance_T* instance, VkSurfaceKHR_T** get_surface);
 

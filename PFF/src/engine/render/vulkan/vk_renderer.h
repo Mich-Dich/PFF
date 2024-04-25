@@ -91,15 +91,16 @@ namespace PFF::render::vulkan {
 		void immediate_submit(std::function<void(VkCommandBuffer cmd)>&& function); // Improvement => run this on a different queue than the graphics_queue, so it can overlap the execution with the main render loop.
 
 		void init_default_data();
-		void init_swapchain();
 		void init_commands();
 		void init_sync_structures();
 		void init_descriptors();
+
+		void init_swapchain();
 		void destroy_swapchain();
+		void resize_swapchain();
 
 		void init_pipelines();
 		void init_pipelines_background();
-		void init_pipeline_triangle();
 		void init_pipeline_mesh();
 
 		void draw_internal(VkCommandBuffer cmd);
@@ -137,17 +138,20 @@ namespace PFF::render::vulkan {
 		std::vector<VkImage>		m_swapchain_images{};
 		std::vector<VkImageView>	m_swapchain_image_views{};
 		VkExtent2D					m_swapchain_extent{};
+		bool						m_resize_nedded = false;
 
 		deletion_queue				m_deletion_queue{};
 		VmaAllocator				m_allocator{};
 
 		VkExtent2D					m_draw_extent{};
+		f32							m_render_scale = 1.f;
 		vk_image					m_draw_image{};
 		vk_image					m_depth_image{};
 
 		// display rendered image in imgui
 		VkSampler			m_texture_sampler{};
 		VkDescriptorSet		m_imugi_image_dset{};
+		glm::u32vec2		m_imugi_viewport_size{100};
 
 		// ---------------------------- descriptors ---------------------------- 
 		descriptor_allocator		global_descriptor_allocator{};
@@ -169,14 +173,14 @@ namespace PFF::render::vulkan {
 		int							m_current_background_effect = 0;
 
 		// ---------------------------- triangle pipeline ---------------------------- 
-		VkPipelineLayout			m_triangle_pipeline_layout{};
-		VkPipeline					m_triangle_pipeline{};
+		//VkPipelineLayout			m_triangle_pipeline_layout{};
+		//VkPipeline					m_triangle_pipeline{};
 
 		// ---------------------------- mesh pipeline ---------------------------- 
 		VkPipelineLayout			m_mesh_pipeline_layout{};
 		VkPipeline					m_mesh_pipeline{};
 
-		vk_GPU_mesh_buffers						T_rectangle;
+		//vk_GPU_mesh_buffers						T_rectangle;
 		std::vector<ref<PFF::geometry::mesh>>		T_test_meshes;
 
 

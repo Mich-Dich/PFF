@@ -130,6 +130,8 @@ namespace PFF::render::vulkan {
         CORE_VALIDATE(vkCreateGraphicsPipelines(device, VK_NULL_HANDLE, 1, &graphics_pipeline_CI, nullptr, &newPipeline) == VK_SUCCESS, return VK_NULL_HANDLE, "", "failed to create pipeline");
         return newPipeline;
     }
+
+    // ========================================================================================= setters =========================================================================================
     
     pipeline_builder& pipeline_builder::set_shaders(VkShaderModule vertexShader, VkShaderModule fragmentShader) {
 
@@ -171,13 +173,6 @@ namespace PFF::render::vulkan {
         return *this;
     }
 
-    pipeline_builder& pipeline_builder::disable_blending() {
-        
-        m_color_blend_attachment_CI.colorWriteMask = VK_COLOR_COMPONENT_R_BIT | VK_COLOR_COMPONENT_G_BIT | VK_COLOR_COMPONENT_B_BIT | VK_COLOR_COMPONENT_A_BIT;   //default write mask
-        m_color_blend_attachment_CI.blendEnable = VK_FALSE;                 //no blending
-        return *this;
-    }
-
     pipeline_builder& pipeline_builder::set_color_attachment_format(VkFormat format) {
 
         p_color_attachmentformat = format;
@@ -189,6 +184,41 @@ namespace PFF::render::vulkan {
     pipeline_builder& pipeline_builder::set_depth_format(VkFormat format) {
 
         p_render_info_CI.depthAttachmentFormat = format;
+        return *this;
+    }
+
+    // ========================================================================================= feature =========================================================================================
+
+    pipeline_builder& pipeline_builder::disable_blending() {
+        
+        m_color_blend_attachment_CI.colorWriteMask = VK_COLOR_COMPONENT_R_BIT | VK_COLOR_COMPONENT_G_BIT | VK_COLOR_COMPONENT_B_BIT | VK_COLOR_COMPONENT_A_BIT;   //default write mask
+        m_color_blend_attachment_CI.blendEnable = VK_FALSE;                 //no blending
+        return *this;
+    }
+
+    pipeline_builder& pipeline_builder::enable_blending_additive() {
+
+        m_color_blend_attachment_CI.colorWriteMask = VK_COLOR_COMPONENT_R_BIT | VK_COLOR_COMPONENT_G_BIT | VK_COLOR_COMPONENT_B_BIT | VK_COLOR_COMPONENT_A_BIT;
+        m_color_blend_attachment_CI.blendEnable = VK_TRUE;
+        m_color_blend_attachment_CI.srcColorBlendFactor = VK_BLEND_FACTOR_ONE;
+        m_color_blend_attachment_CI.dstColorBlendFactor = VK_BLEND_FACTOR_DST_ALPHA;
+        m_color_blend_attachment_CI.colorBlendOp = VK_BLEND_OP_ADD;
+        m_color_blend_attachment_CI.srcAlphaBlendFactor = VK_BLEND_FACTOR_ONE;
+        m_color_blend_attachment_CI.dstAlphaBlendFactor = VK_BLEND_FACTOR_ZERO;
+        m_color_blend_attachment_CI.alphaBlendOp = VK_BLEND_OP_ADD;
+        return *this;
+    }
+
+    pipeline_builder& pipeline_builder::enable_blending_alphablend() {
+
+        m_color_blend_attachment_CI.colorWriteMask = VK_COLOR_COMPONENT_R_BIT | VK_COLOR_COMPONENT_G_BIT | VK_COLOR_COMPONENT_B_BIT | VK_COLOR_COMPONENT_A_BIT;
+        m_color_blend_attachment_CI.blendEnable = VK_TRUE;
+        m_color_blend_attachment_CI.srcColorBlendFactor = VK_BLEND_FACTOR_ONE_MINUS_DST_ALPHA;
+        m_color_blend_attachment_CI.dstColorBlendFactor = VK_BLEND_FACTOR_DST_ALPHA;
+        m_color_blend_attachment_CI.colorBlendOp = VK_BLEND_OP_ADD;
+        m_color_blend_attachment_CI.srcAlphaBlendFactor = VK_BLEND_FACTOR_ONE;
+        m_color_blend_attachment_CI.dstAlphaBlendFactor = VK_BLEND_FACTOR_ZERO;
+        m_color_blend_attachment_CI.alphaBlendOp = VK_BLEND_OP_ADD;
         return *this;
     }
 
