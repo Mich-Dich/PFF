@@ -29,6 +29,8 @@ namespace PFF {
 		//if (m_input_mapping->capture_mouse.get_data<bool>()) { }
 		if (m_input_mapping->capture_mouse.data.boolean) {
 
+			LOG(Debug, "mouse down");
+
 			application::get().capture_cursor();
 			m_camera_direction.y += m_input_mapping->look.data.vec_2D.x * 0.1f * delta;
 			m_camera_direction.x += m_input_mapping->look.data.vec_2D.y * 0.1f * delta;

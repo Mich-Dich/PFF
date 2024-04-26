@@ -29,8 +29,8 @@ PFF_editor/benchmarks/
 *.userosscache
 *.sln.docstates
 
-#default Engine fiels
-PFF/assets/meshes/**
+# default Engine fiels
+# PFF/assets/meshes/**
 
 # User-specific files (MonoDevelop/Xamarin Studio)
 *.userprefs

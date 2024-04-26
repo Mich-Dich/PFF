@@ -283,12 +283,12 @@ namespace PFF::render::vulkan {
 
 		if (m_imgui_initalized && !m_render_swapchain) {
 						
-			m_draw_extent.width = std::min(m_draw_image.image_extent.width, m_imugi_viewport_size.x) * m_render_scale;
-			m_draw_extent.height = std::min(m_draw_image.image_extent.height, m_imugi_viewport_size.y) * m_render_scale;
+			m_draw_extent.width = std::min(m_draw_image.image_extent.width, m_imugi_viewport_size.x) * (u32)m_render_scale;
+			m_draw_extent.height = std::min(m_draw_image.image_extent.height, m_imugi_viewport_size.y) * (u32)m_render_scale;
 		} else {
 		
-			m_draw_extent.width = std::min(m_swapchain_extent.width, m_draw_image.image_extent.width) * m_render_scale;
-			m_draw_extent.height = std::min(m_swapchain_extent.height, m_draw_image.image_extent.height) * m_render_scale;
+			m_draw_extent.width = std::min(m_swapchain_extent.width, m_draw_image.image_extent.width) * (u32)m_render_scale;
+			m_draw_extent.height = std::min(m_swapchain_extent.height, m_draw_image.image_extent.height) * (u32)m_render_scale;
 		}
 
 
@@ -344,17 +344,13 @@ namespace PFF::render::vulkan {
 					ImVec2 viewport_size = ImGui::GetWindowSize();
 					viewport_size.y -= ImGui::GetFrameHeight();
 					m_imugi_viewport_size = glm::u32vec2(viewport_size.x, viewport_size.y);
-
-					ImVec2 viewport_uv = { viewport_size.x / m_draw_image.image_extent.width , viewport_size.y / m_draw_image.image_extent.height };
-					//CORE_LOG(Trace, "X: " << viewport_size.x << "/" << m_draw_image.image_extent.width << " = " << viewport_uv.x
-					//	<< "         Y: " << viewport_size.y << "/" << m_draw_image.image_extent.height << " = " << viewport_uv.y);
-
+					ImVec2 viewport_uv = { std::max(std::min(viewport_size.x / m_draw_image.image_extent.width, 1.f), 0.f), std::max(std::min(viewport_size.y / m_draw_image.image_extent.height, 1.f), 0.f) };
 					ImGui::Image(m_imugi_image_dset, ImVec2{ viewport_size.x, viewport_size.y }, ImVec2{0,0}, viewport_uv);
 				ImGui::End();
 			}
 
 
-			if (ImGui::Begin("background")) {
+			if (ImGui::Begin("Render Debug")) {
 
 				ImGui::SliderFloat("Render Scale", &m_render_scale, 0.3f, 1.f);
 

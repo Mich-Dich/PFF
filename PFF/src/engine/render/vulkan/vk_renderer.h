@@ -170,7 +170,7 @@ namespace PFF::render::vulkan {
 		VkDescriptorPool			m_imgui_desc_pool{};
 
 		std::vector<compute_effect> m_background_effects{};
-		int							m_current_background_effect = 0;
+		int							m_current_background_effect = 2;
 
 		// ---------------------------- triangle pipeline ---------------------------- 
 		//VkPipelineLayout			m_triangle_pipeline_layout{};

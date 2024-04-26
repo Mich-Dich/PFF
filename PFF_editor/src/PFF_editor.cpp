@@ -12,11 +12,12 @@ namespace PFF {
 	PFF_editor::PFF_editor() {
 
 		LOG(Trace, "register player controller");
-		m_editor_controller = std::make_shared<editor_controller>();
-		register_player_controller(m_editor_controller);
 
 		m_editor_layer = new editor_layer(application::get().get_imgui_layer()->get_context());
 		push_overlay(m_editor_layer);
+
+		m_editor_controller = std::make_shared<editor_controller>();
+		register_player_controller(m_editor_controller);
 				
 		// load editor camera loc && rot
 		glm::vec3 position = { -16, -19, -30 };
@@ -31,9 +32,6 @@ namespace PFF {
 	}
 
 	PFF_editor::~PFF_editor() {
-
-		pop_overlay(m_editor_layer);
-		delete m_editor_layer;
 		
 		// save camera position
 		glm::vec3 position = m_editor_controller->get_editor_camera_pos();
@@ -43,6 +41,8 @@ namespace PFF {
 			.entry(KEY_VALUE(position))
 			.entry(KEY_VALUE(look_direction));
 
+		pop_overlay(m_editor_layer);
+		delete m_editor_layer;
 	}
 
 	bool PFF_editor::init() {

@@ -141,11 +141,10 @@ namespace PFF {
 			Data.event_callback(event);
 		});
 
-		//glfwSetTitlebarHitTestCallback(m_Window, [](GLFWwindow* window, int x, int y, int* hit) {
-
-		//	window_attrib& Data = *(window_attrib*)glfwGetWindowUserPointer(window);
-		//	*hit = Data.app_ref->is_titlebar_hovered();
-		//});
+		glfwSetTitlebarHitTestCallback(m_Window, [](GLFWwindow* window, int x, int y, int* hit) {
+			
+			*hit = application::get().is_titlebar_hovered();
+		});
 
 		glfwSetWindowPosCallback(m_Window, [](GLFWwindow* window, int x, int y) {
 

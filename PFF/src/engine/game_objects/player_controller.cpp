@@ -64,12 +64,6 @@ namespace PFF {
 
 	void player_controller::update_internal(f32 delta) {
 
-		return;
-
-
-
-
-
 		PFF_PROFILE_FUNCTION();
 
 		for (u32 x = 0; x < m_input_mapping->get_length(); x++) {				// reset action->data if needed

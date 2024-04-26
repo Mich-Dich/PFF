@@ -30,7 +30,7 @@ namespace PFF {
 
 		LOG(Trace, "attaching editor_layer");
 		// inform GLFW window to hide title_bar
-		//application::get().get_window()->show_titlebar(false);
+		application::get().get_window()->show_titlebar(false);
 
 
 		// m_context = ImGui::CreateContext();
@@ -115,7 +115,7 @@ namespace PFF {
 		//window_draw_list->AddRectFilled(uperleft_corner, lowerright_corner, IM_COL32(51, 255, 51, 255));
 
 		auto color_buf = style->Colors[ImGuiCol_Button];
-		ImVec4 bufsd = UI::main_titlebar_color;
+		//ImVec4 bufsd = UI::main_titlebar_color;
 		auto main_color = IM_COL32(color_buf.x * 255, color_buf.y * 255, color_buf.z * 255, color_buf.w * 255);
 
 		window_draw_list->AddRectFilled(titlebar_min, { titlebar_min.x + 200.f, titlebar_max.y }, main_color);
