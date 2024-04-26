@@ -11,8 +11,6 @@ project (client_project_name)
 	targetdir ("bin/" .. outputs  .. "/%{prj.name}")
 	objdir ("bin-int/" .. outputs  .. "/%{prj.name}")
 	
-	glslc = "../PFF/vendor/vulkan-glslc/glslc.exe"
-
 	defines
 	{
 		"ENGINE_NAME=PFF",
@@ -65,6 +63,7 @@ project (client_project_name)
 		optimize "on"
 			
 	filter "configurations:RelWithDebInfo"
+		buildoptions "/MD"
 		defines "PFF_RELEASE_WITH_DEBUG_INFO"
 		runtime "Release"
 		symbols "on"

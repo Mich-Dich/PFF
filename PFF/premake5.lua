@@ -1,7 +1,7 @@
 
 project "PFF"
 	location "%{wks.location}/PFF"
-	kind "SharedLib"
+	kind "SharedLib"		-- TODO: make posibly into [StaticLib]
 	staticruntime "off"
 	language "C++"
 	cppdialect "C++17"
@@ -35,26 +35,24 @@ project "PFF"
 		"%{IncludeDir.glfw}/include",
 		"%{IncludeDir.ImGui}",
 		"%{IncludeDir.ImGui}/backends/",
+		"%{IncludeDir.fastgltf}",
 		"%{IncludeDir.tinyobjloader}",
 		"%{IncludeDir.stb_image}",
-        
 		"%{IncludeDir.VulkanSDK}",
 	}
 	
-	links 
+	links
 	{
 		"glfw",
-		"ImGui",
-        "%{Library.Vulkan}"
+		"imgui",
+		"fastgltf",
+        "%{Library.Vulkan}",
 	}
 
 	libdirs 
 	{
-		--"PFF/libs",
-		--"%{IncludeDir.ImGui}/bin/" .. outputs .. "/ImGui",
-		--   "PFF/vendor/glfw/lib-vc2022",
-
-        "%{IncludeDir.VulkanSDK}/lib"
+		"vendor/imgui/bin/Debug-windows-x86_64/ImGui",
+        "%{IncludeDir.VulkanSDK}/lib",
 	}
 	
 	filter "system:windows"
@@ -93,6 +91,7 @@ project "PFF"
 		optimize "speed"
 
 	filter "configurations:Release"
+		buildoptions "/MD"
 		defines "PFF_RELEASE"
 		runtime "Release"
 		optimize "on"

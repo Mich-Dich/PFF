@@ -27,11 +27,10 @@ workspace "PFF"
 	outputs  = "%{cfg.buildcfg}-%{cfg.system}-%{cfg.architecture}"
 
 group "dependencies"
-	-- include "vendor/premake"
-	include "PFF/vendor/imgui_new"
+	include "PFF/vendor/fastgltf"
+	include "PFF/vendor/imgui"
 	include "PFF/vendor/glfw"
 group ""
-
 
 include "PFF"
 include "PFF_editor"

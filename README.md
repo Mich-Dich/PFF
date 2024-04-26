@@ -11,8 +11,7 @@ This shows a mesh with 3.5 million vertices
 
 Contains a ToDo-List by default
 ![second_image](/.github/resources/PFF_editor_zXmikPE9jC.png?raw=true "image of the editor as it is now")
-
-(UI is not finished yet, e.g. Logo missing)
+(UI is not finished yet)
 
 ## Getting Started
 To get started with PFF, follow these simple steps:
@@ -22,11 +21,13 @@ To get started with PFF, follow these simple steps:
    git clone --recursive https://github.com/Mich-Dich/PFF
    ```
 
+Windows:
 2. Execute the following file to create a VS 2022 solution:
    ```
    AutoGenerateSolution.bat
    ```
-
+Linux: (currently not supported)
+Apple: (currently not supported)
 
 ## Dependencies
 PFF relies on the following dependencies:
@@ -35,9 +36,7 @@ PFF relies on the following dependencies:
 - [glfw](https://www.glfw.org/)
 - [ImGui](https://github.com/ocornut/imgui)
 - [glm](https://github.com/icaven/glm)
-
-- [Vulkan](https://www.lunarg.com/vulkan-sdk/)
-Make sure you install Vulkan SDK and update the path in [premake5.lua]
+- [Vulkan](https://www.lunarg.com/vulkan-sdk/) install Vulkan SDK and add it to your PATH or update the variable [VULKAN_SDK] in [dependencies.lua]
 
 ## Usage
 You can start using PFF by either utilizing the provided project, [Sandbox], or creating your own project and linking it by adjusting the `premake5.lua` file. 
@@ -81,14 +80,18 @@ By leveraging procedural generation, PFF empowers game developers to break free 
 PFF's development roadmap outlines key focus areas:
 
 ### General Systems
-- Editor
+- Linux/Apple support
 - Launcher
+- Editor
 - Asset manager
 
 ### Procedural Systems
-- Animation
-- Sound
 - Mesh generation
+   - Tree
+   - Composite-mesh
+   - Terrain
+- Sound
+- Animation
 
 Feel free to contribute and help shape the future of PFF. Thank you for your interest and support!
 

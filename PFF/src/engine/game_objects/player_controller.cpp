@@ -61,6 +61,7 @@ namespace PFF {
 	#define INPUT_ACTION_MODEFIER_VEC3_SECOND_AXIS		BIT(3)
 	#define INPUT_ACTION_MODEFIER_AUTO_RESET			BIT(4)
 	*/
+
 	void player_controller::update_internal(f32 delta) {
 
 		PFF_PROFILE_FUNCTION();
@@ -109,27 +110,27 @@ namespace PFF {
 					// ==================================================================================================================================
 					case input::action_type::vec_1D: {
 
-						action->data._1D += m_buffer;
+						action->data.vec_1D += m_buffer;
 					} break;
 
 					// ==================================================================================================================================
 					case input::action_type::vec_2D: {
 
 						if (key_details->modefier_flags & INPUT_ACTION_MODEFIER_AXIS_2)
-							action->data._2D.y += m_buffer;
+							action->data.vec_2D.y += m_buffer;
 						else
-							action->data._2D.x += m_buffer;
+							action->data.vec_2D.x += m_buffer;
 					} break;
 
 					// ==================================================================================================================================
 					case input::action_type::vec_3D: {
 
 						if (key_details->modefier_flags & INPUT_ACTION_MODEFIER_AXIS_2)
-							action->data._3D.y += m_buffer;
+							action->data.vec_3D.y += m_buffer;
 						else if (key_details->modefier_flags & INPUT_ACTION_MODEFIER_AXIS_3)
-							action->data._3D.z += m_buffer;
+							action->data.vec_3D.z += m_buffer;
 						else
-							action->data._3D.x += m_buffer;
+							action->data.vec_3D.x += m_buffer;
 
 					} break;
 
@@ -143,20 +144,20 @@ namespace PFF {
 
 					// ==================================================================================================================================
 					case input::action_type::vec_1D: {
-						action->data._1D = std::clamp(action->data._1D, -1.f, 1.f);
+						action->data.vec_1D = std::clamp(action->data.vec_1D, -1.f, 1.f);
 					} break;
 
 					// ==================================================================================================================================
 					case input::action_type::vec_2D: {
-						if (glm::dot(action->data._2D, action->data._2D) > std::numeric_limits<f32>::epsilon())
-							action->data._2D = glm::normalize(action->data._2D);
+						if (glm::dot(action->data.vec_2D, action->data.vec_2D) > std::numeric_limits<f32>::epsilon())
+							action->data.vec_2D = glm::normalize(action->data.vec_2D);
 
 					} break;
 
 					// ==================================================================================================================================
 					case input::action_type::vec_3D: {
-						if (glm::dot(action->data._3D, action->data._3D) > std::numeric_limits<f32>::epsilon())
-							action->data._3D = glm::normalize(action->data._3D);
+						if (glm::dot(action->data.vec_3D, action->data.vec_3D) > std::numeric_limits<f32>::epsilon())
+							action->data.vec_3D = glm::normalize(action->data.vec_3D);
 
 					} break;
 

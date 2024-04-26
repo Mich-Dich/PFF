@@ -1,0 +1,39 @@
+#pragma once
+
+#include "util/pffpch.h"
+
+#include "vendor/vk_mem_alloc.h"
+#include <vulkan/vulkan.h>
+#include <vulkan/vk_enum_string_helper.h>
+#include <glm/mat4x4.hpp>
+#include <glm/vec4.hpp>
+
+#include "vk_descriptor.h"
+//#include "engine/geometry/mesh.h"
+
+
+struct vk_image {
+
+    VkImage             image;
+    VkImageView         image_view;
+    VmaAllocation       allocation;
+    VkExtent3D          image_extent;
+    VkFormat            image_format;
+};
+
+struct allocated_buffer {
+
+    VkBuffer            buffer;
+    VmaAllocation       allocation;
+    VmaAllocationInfo   info;
+};
+
+// push constants for our mesh object draws
+struct GPU_draw_push_constants {
+
+    glm::mat4           world_matrix;
+    VkDeviceAddress     vertex_buffer;
+};
+
+
+#define VK_CHECK(expr)		CORE_ASSERT_S(expr == VK_SUCCESS)

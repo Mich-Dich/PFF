@@ -8,10 +8,13 @@
 #include "engine/render/renderer.h"
 #include "util/timer.h"
 
+#include "engine/render/renderer.h"
+#include "engine/render/vulkan/vk_renderer.h"
+
 namespace PFF {
 
 	class pff_window;
-	// class renderer;
+	//class renderer;
 	class event;
 	class window_resize_event;
 	class window_close_event;
@@ -28,20 +31,20 @@ namespace PFF {
 		DELETE_COPY(application);
 
 		FORCEINLINE f64 get_delta_time() const							{ return m_delta_time; }
-		FORCEINLINE USE_IN_EDITOR void push_overlay(layer* overlay)		{ m_layerstack.push_overlay(overlay); }
-		FORCEINLINE USE_IN_EDITOR void pop_overlay(layer* overlay)		{ m_layerstack.pop_overlay(overlay); }
+		FORCEINLINE USE_IN_EDITOR void push_overlay(layer* overlay)		{ m_layerstack->push_overlay(overlay); }
+		FORCEINLINE USE_IN_EDITOR void pop_overlay(layer* overlay)		{ m_layerstack->pop_overlay(overlay); }
 		FORCEINLINE u32 get_target_fps() const							{ return m_target_fps; }
 		FORCEINLINE bool get_limit_fps() const							{ return m_limit_fps; }
 		FORCEINLINE void set_titlebar_hovered(bool value)				{ m_is_titlebar_hovered = value; }
 
 		// static
 		FORCEINLINE static application& get()							{ return *s_instance; }
-		FORCEINLINE static imgui_layer* get_imgui_layer()				{ return m_imgui_layer; }
-		FORCEINLINE static world_layer* get_world_layer()				{ return m_world_layer; }
-		FORCEINLINE static ref<game_map> get_current_map()				{ return m_world_layer->get_current_map(); }
 		FORCEINLINE static ref<pff_window> get_window()					{ return m_window; }
-		FORCEINLINE static ref<renderer> get_renderer()					{ return m_renderer; }
+		FORCEINLINE static ref<PFF::render::renderer> get_renderer()	{ return m_renderer; }
+		FORCEINLINE UI::imgui_layer* get_imgui_layer()			{ return m_imgui_layer; }
 		FORCEINLINE static void  set_render_state(system_state state)	{ return m_renderer->set_state(state); }
+		FORCEINLINE world_layer* get_world_layer()						{ return m_world_layer; }
+		//FORCEINLINE ref<game_map> get_current_map()					{ return m_world_layer->get_current_map(); }
 		FORCEINLINE static void close_application()						{ m_running = false; }
 		FORCEINLINE static bool is_titlebar_hovered()					{ return m_is_titlebar_hovered; }
 
@@ -56,12 +59,16 @@ namespace PFF {
 		void register_player_controller(ref<player_controller> player_controller) { m_world_layer->register_player_controller(player_controller); }
 		void get_fps_values(bool& limit_fps, u32& target_fps, u32& current_fps, f32& work_time, f32& sleep_time);
 
-		virtual bool init();								// to be used by client
-		virtual bool update(const f32 delta_time);			// potentally make private - every actor has own function (like UNREAL)
-		virtual bool render(const f32 delta_time);			// potentally make private - every actor has own function (like UNREAL)
-		virtual bool shutdown();							// to be used by client
+		// ---------------------- client defined ---------------------- 
+		virtual bool init() { return true; };
+		virtual bool update(const f32 delta_time) { return true; };
+		virtual bool render(const f32 delta_time) { return true; };
+		virtual bool shutdown() { return true; };
 
 	private:
+
+		void client_init();
+		void client_shutdown();
 
 		void on_event(event& event);
 		bool on_window_close(window_close_event& event);
@@ -72,14 +79,14 @@ namespace PFF {
 		//scope_ref<basic_mesh> createCubeModel(glm::vec3 offset);
 
 		static application* s_instance;
-		static ref<renderer> m_renderer;
+		static ref<PFF::render::renderer> m_renderer;
 		static ref<pff_window> m_window;
 		static bool m_is_titlebar_hovered;
 		static bool m_running;
-		static imgui_layer* m_imgui_layer;
-		static world_layer* m_world_layer;
+		UI::imgui_layer* m_imgui_layer;
+		world_layer* m_world_layer;
 
-		layer_stack m_layerstack{};
+		ref<layer_stack> m_layerstack{};
 		std::vector<event> m_event_queue;		// TODO: change to queue
 		ref<game_map> m_current_map = nullptr;
 

@@ -10,12 +10,17 @@
 config/
 *.ini
 
-/bin
-/bin-int
+# Compield shaders
+*.spv
 
 # benchmarks
 /PFF_editor/benchmarks/
 PFF_editor/benchmarks/
+
+# premake generated
+*.sln
+/bin
+/bin-int
 
 # User-specific files
 *.rsuser
@@ -23,6 +28,9 @@ PFF_editor/benchmarks/
 *.user
 *.userosscache
 *.sln.docstates
+
+# default Engine fiels
+# PFF/assets/meshes/**
 
 # User-specific files (MonoDevelop/Xamarin Studio)
 *.userprefs

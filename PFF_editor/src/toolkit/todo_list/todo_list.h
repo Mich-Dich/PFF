@@ -90,20 +90,18 @@ namespace PFF::toolkit::todo {
 			serializer::yaml(config::get_filepath_from_configtype(config::file::editor), "todo_list", option)
 				.vector(KEY_VALUE(todo_list->m_topics), [&](serializer::yaml& yaml, const u64 x) {
 
-					yaml.entry(KEY_VALUE(todo_list->m_topics[x].name));
-					yaml.entry(KEY_VALUE(todo_list->m_topics[x].selected));
-					yaml.vector(KEY_VALUE(todo_list->m_topics[x].tasks), [&](serializer::yaml& inner, const u64 y) {
+					yaml.entry(KEY_VALUE(todo_list->m_topics[x].name))
+						.entry(KEY_VALUE(todo_list->m_topics[x].selected))
+						.vector(KEY_VALUE(todo_list->m_topics[x].tasks), [&](serializer::yaml& inner, const u64 y) {
 
-						inner.entry(KEY_VALUE(todo_list->m_topics[x].tasks[y].title));
-						inner.entry(KEY_VALUE(todo_list->m_topics[x].tasks[y].description));
-						inner.entry(KEY_VALUE(todo_list->m_topics[x].tasks[y].done));
+						inner.entry(KEY_VALUE(todo_list->m_topics[x].tasks[y].title))
+							.entry(KEY_VALUE(todo_list->m_topics[x].tasks[y].description))
+							.entry(KEY_VALUE(todo_list->m_topics[x].tasks[y].done));
 					});
 				});
-
 		}
 
-		~todo_list_serializer() {}
-
+		~todo_list_serializer() = default;
 	};
 
 	// ============================================= implementation =============================================
@@ -189,7 +187,7 @@ namespace PFF::toolkit::todo {
 				const ImVec2 text_size = ImGui::CalcTextSize("Add X ");
 				const f32 textbox_width = inner_width - (text_size.x + (style->ItemSpacing.x * 2) + (style->FramePadding.x * 4) + 1);
 
-				ImGui::BeginHorizontal("##Add_todo_dialog");
+				//ImGui::BeginHorizontal("##Add_todo_dialog");
 
 				PFF::UI::shift_cursor_pos(inner_padding, (button_size.y - ImGui::GetTextLineHeightWithSpacing()) / 2);
 				ImGui::SetNextItemWidth(textbox_width);
@@ -204,12 +202,12 @@ namespace PFF::toolkit::todo {
 				if (UI::add_gray_button(" X ##cancle_todo_add_topic"))
 					topic_buf.reset();
 
-				ImGui::EndHorizontal();
+				//ImGui::EndHorizontal();
 			}
 
 			UI::shift_cursor_pos(inner_padding + 5, 10);
 
-			ImGui::PushStyleColor(ImGuiCol_ChildBg, UI::THEME::highlited_window_bg);
+			ImGui::PushStyleColor(ImGuiCol_ChildBg, UI::highlited_window_bg);
 			ImGui::BeginChild("Child##for_todo_topics", { inner_width + (inner_padding - 10), ImGui::GetContentRegionAvail().y - inner_padding }, true, 0);
 			ImGui::PopStyleColor();
 

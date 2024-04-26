@@ -24,6 +24,8 @@ namespace PFF {
 
 		u32 m_layer_insert = 0;
 
+		//imgui_layer m_imgui_layer;
+		//world_layer m_world_layer;
 	};
 
 }

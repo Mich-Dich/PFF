@@ -7,14 +7,14 @@
 
 namespace PFF {
 
-	layer_stack::layer_stack() {}
+	layer_stack::layer_stack() { CORE_LOG_INIT(); }
 	
 	layer_stack::~layer_stack() {
 
-		PFF_PROFILE_FUNCTION();
-
 		for (layer* layer : m_layers)
 			delete layer;
+
+		CORE_LOG_SHUTDOWN();
 	}
 
 	void layer_stack::push_layer(layer* layer) {

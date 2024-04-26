@@ -80,9 +80,9 @@ namespace PFF {
 
 		union input_action_data {
 			bool boolean;
-			f32 _1D;
-			glm::vec2 _2D;
-			glm::vec3 _3D{};
+			f32 vec_1D;
+			glm::vec2 vec_2D;
+			glm::vec3 vec_3D{};
 		};
 
 		std::string description{};
@@ -100,7 +100,7 @@ namespace PFF {
 		const size_t get_length() const { return keys.size(); }
 		input::key_details* get_key(u32 index) { return &keys[index]; }
 
-
+		/*
 		template <typename T>
 		T get_data() const {
 
@@ -108,22 +108,23 @@ namespace PFF {
 				"Unsupported data type");
 
 			switch (value) {
-			case PFF::input_action_type::_bool:
+			case PFF::input::action_type::_bool:
 				return data.boolean;
 
-			case PFF::input_action_type::_1D:
+			case PFF::input::action_type::_1D:
 				return data.vec_1d;
 
-			case PFF::input_action_type::_2D:
+			case PFF::input::action_type::_2D:
 				return data.vec_2d;
 
-			case PFF::input_action_type::_3D:
+			case PFF::input::action_type::_3D:
 				return data.vec_3d;
 
 			default:
 				return T{};
 			}
 		}
+		*/
 
 		void set_name(std::string_view name) { this->name = name; }
 		std::string_view get_name() const { return name; }

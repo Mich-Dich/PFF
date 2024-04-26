@@ -7,7 +7,6 @@
 namespace PFF {
 
 	class PFF_editor : public application {
-
 	public:
 
 		PFF_editor();
@@ -16,13 +15,15 @@ namespace PFF {
 		FORCEINLINE editor_layer* get_editor_layer() { return m_editor_layer; }
 
 		bool init() override;
-		bool shutdown() override;
+		bool render(const f32 delta_time) override;
 		bool update(const f32 delta_time) override;
+		bool shutdown() override;
 
 	private:
+
 		std::shared_ptr<editor_controller> m_editor_controller{};
 		editor_layer* m_editor_layer;
-		PFF::game_object* m_test_game_object;
+		//PFF::game_object* m_test_game_object;
 	};
 
 }

@@ -67,15 +67,18 @@ namespace PFF {
 		FORCEINLINE f64 get_cursor_pos_x() const { return m_data.cursor_pos_x; }
 		FORCEINLINE f64 get_cursor_pos_y() const { return m_data.cursor_pos_y; }
 		FORCEINLINE window_size_state get_window_size_state() const { return m_data.window_size_state; }
-
 		FORCEINLINE PFF_API_EDITOR void get_framebuffer_size(int* width, int* height);
 
+		PFF_API void show_window(bool show);
+		PFF_API bool is_maximized();
 		PFF_API void minimize_window();
 		PFF_API void restore_window();
 		PFF_API void maximize_window();
-		PFF_API bool is_maximized();
+		PFF_API void show_titlebar(bool show);
+		PFF_API void get_monitor_size(int* width, int* height);
 
-		void create_window_surface(VkInstance_T* instance, VkSurfaceKHR_T** get_surface);
+		void create_vulkan_surface(VkInstance_T* instance, VkSurfaceKHR_T** get_surface);
+
 		VkExtent2D get_extend();
 		bool should_close();
 		void poll_events();
@@ -94,7 +97,7 @@ namespace PFF {
 		std::queue<std::function<void()>> m_event_queue;
 		std::filesystem::path m_icon_path = "./Logo.png";
 
-		void init(window_attrib attributes);
+		void bind_event_calbacks();
 		void set_vsync(bool enable);
 	
 		window_attrib m_data{};

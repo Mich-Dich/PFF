@@ -1,101 +1,98 @@
 
 #include <util/pch_editor.h>
 
-#include <imgui.h>
+//#include <imgui.h>
 
 //#include "util/io/serializer.h"
 #include "util/ui/panels/pannel_collection.h"
 #include "engine/platform/pff_window.h"
-#include "engine/color_theme.h"
 #include "engine/layer/imgui_layer.h"
 
 #include "toolkit/todo_list/todo_list.h"
 
 // TEST 
-#include "engine/render/renderer.h"
-#include "engine/render/vk_swapchain.h"
+#include "application.h"
+//#include "engine/render/renderer.h"
+//#include "engine/render/vk_swapchain.h"
 
 #include "editor_layer.h"
 
 
 namespace PFF {
 
-	//static toolkit::todo::todo_list* s_todo_list;
+	editor_layer::editor_layer(ImGuiContext* context) : layer("editor_layer"), m_context(context) { LOG_INIT(); }
 
-	editor_layer::editor_layer(ImGuiContext* context)
-		: m_context(context) {
+	editor_layer::~editor_layer() { LOG_SHUTDOWN(); }
 
-		//UI::THEME::update_UI_theme();
-	}
 
-	editor_layer::~editor_layer() {
-
-		LOG(Info, "Shutdown");
-	}
 
 	void editor_layer::on_attach() {
 
-		m_swapchain_supported_presentmodes = application::get().get_renderer()->get_swapchain_suported_present_modes();
-		for (auto mode : m_swapchain_supported_presentmodes)
-			m_swapchain_supported_presentmodes_str.push_back(present_mode_to_str(mode));
+		LOG(Trace, "attaching editor_layer");
+		// inform GLFW window to hide title_bar
+		application::get().get_window()->show_titlebar(false);
+
+
+		// m_context = ImGui::CreateContext();
+
+		//m_swapchain_supported_presentmodes = application::get().get_renderer()->get_swapchain_suported_present_modes();
+		//for (auto mode : m_swapchain_supported_presentmodes)
+		//	m_swapchain_supported_presentmodes_str.push_back(present_mode_to_str(mode));
 
 		//s_todo_list = new toolkit::todo::todo_list();
 	}
 
 	void editor_layer::on_detach() {
 
-		LOG(Trace, "Detaching editor_layer");
-		toolkit::todo::shutdown();					// only need to cal shutdown() to kill todo_list if editor shutsdown
+		//application::get().get_window()->show_titlebar(true);
+		//toolkit::todo::shutdown();					// only need to cal shutdown() to kill todo_list if editor shutsdown
 		//delete s_todo_list;
+		LOG(Trace, "Detaching editor_layer");
 	}
 
-	void editor_layer::on_update(f32 delta_time) {
-	}
+	void editor_layer::on_update(f32 delta_time) { }
 
-	void editor_layer::on_event(event& event) {
-	}
+	void editor_layer::on_event(event& event) { }
 
 	void editor_layer::on_imgui_render() {
-
+		
 		ImGui::SetCurrentContext(m_context);
 
 		window_main_menu_bar();
-		// window_main_content();
-
+		window_main_content();
+		
 		window_general_debugger();
 		window_outliner();
 		window_details();
 		window_world_settings();
 		window_content_browser_0();
 		window_content_browser_1();
-
+		
 		window_graphics_engine_settings();
 		window_editor_settings();
 		window_general_settings();
 		
 		PFF::toolkit::todo::window_todo_list();
-
-		ImGui::ShowDemoWindow();				// DEV-ONLY
 	}
 
 
 	void editor_layer::window_main_menu_bar() {
 
-		const f32 titlebar_height = 60.f;
+		const f32 m_titlebar_height = 60.f;
 
 		ImGuiStyle* style = &ImGui::GetStyle();
 		ImGuiViewport* viewport = ImGui::GetMainViewport();
 		ImGui::SetNextWindowPos(viewport->Pos);
-		ImGui::SetNextWindowSize(ImVec2(viewport->Size.x, titlebar_height));
+		ImGui::SetNextWindowSize(ImVec2(viewport->Size.x, m_titlebar_height));
 		ImGui::SetNextWindowViewport(viewport->ID);
 
 		ImGuiWindowFlags window_flags = ImGuiWindowFlags_NoDocking;
 		window_flags |= ImGuiWindowFlags_NoTitleBar | ImGuiWindowFlags_NoCollapse | ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoMove | ImGuiWindowFlags_NoScrollbar | ImGuiWindowFlags_NoScrollWithMouse;
 		window_flags |= ImGuiWindowFlags_NoBringToFrontOnFocus | ImGuiWindowFlags_NoNavFocus | ImGuiWindowFlags_NoDecoration | ImGuiWindowFlags_NoNav;
 		// window_flags |= ImGuiWindowFlags_MenuBar;
-		
+
 		// ImGui::PushStyleColor(ImGuiCol_WindowBg, PFF_UI_ACTIVE_THEME->WindowBg);
-		ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, ImVec2(0,0));
+		ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, ImVec2(0, 0));
 		ImGui::PushStyleVar(ImGuiStyleVar_WindowRounding, 0.f);
 		ImGui::PushStyleVar(ImGuiStyleVar_WindowBorderSize, 0.f);
 		ImGui::Begin("appliaction_titlebar", nullptr, window_flags);
@@ -104,11 +101,11 @@ namespace PFF {
 
 		const bool is_maximized = application::get_window()->is_maximized();
 		float titlebar_vertical_offset = is_maximized ? 6.f : 0.f;
-		
+
 		ImGui::SetCursorPos(ImVec2(0.f, titlebar_vertical_offset));
 		ImVec2 titlebar_min = ImGui::GetCursorScreenPos();
 		const ImVec2 titlebar_max = { ImGui::GetCursorScreenPos().x + ImGui::GetWindowWidth(),
-										ImGui::GetCursorScreenPos().y + titlebar_height };
+										ImGui::GetCursorScreenPos().y + m_titlebar_height };
 
 		auto* bg_draw_list = ImGui::GetBackgroundDrawList();
 		auto* fg_draw_list = ImGui::GetForegroundDrawList();
@@ -118,7 +115,7 @@ namespace PFF {
 		//window_draw_list->AddRectFilled(uperleft_corner, lowerright_corner, IM_COL32(51, 255, 51, 255));
 
 		auto color_buf = style->Colors[ImGuiCol_Button];
-		ImVec4 bufsd = UI::THEME::main_titlebar_color;
+		//ImVec4 bufsd = UI::main_titlebar_color;
 		auto main_color = IM_COL32(color_buf.x * 255, color_buf.y * 255, color_buf.z * 255, color_buf.w * 255);
 
 		window_draw_list->AddRectFilled(titlebar_min, { titlebar_min.x + 200.f, titlebar_max.y }, main_color);
@@ -139,9 +136,9 @@ namespace PFF {
 		ImGui::SetCursorPos(ImVec2(0.f, titlebar_vertical_offset));
 
 #if 1	// FOR DEBUG VISAUL
-		ImGui::InvisibleButton("##titlebar_drag_zone", ImVec2(button_area_width, titlebar_height ));
+		ImGui::InvisibleButton("##titlebar_drag_zone", ImVec2(button_area_width, m_titlebar_height));
 #else
-		ImGui::Button("##titlebar_drag_zone", ImVec2(button_area_width, titlebar_height ));
+		ImGui::Button("##titlebar_drag_zone", ImVec2(button_area_width, m_titlebar_height));
 #endif // 1
 
 		application::get().set_titlebar_hovered(ImGui::IsItemHovered());
@@ -152,19 +149,19 @@ namespace PFF {
 
 		}
 
-		const ImVec2 window_padding = { style->WindowPadding.x / 2,style->WindowPadding.y + 3.f};
+		const ImVec2 window_padding = { style->WindowPadding.x / 2,style->WindowPadding.y + 3.f };
 
 		ImGui::SetItemAllowOverlap();
-		ImGui::PushFont(application::get().get_imgui_layer()->get_font("giant"));
-		ImGui::SetCursorPos(ImVec2(25, ((titlebar_height - ImGui::GetFontSize() + titlebar_vertical_offset) / 2)));
+		//ImGui::PushFont(application::get().get_imgui_layer()->get_font("giant"));
+		ImGui::SetCursorPos(ImVec2(25, ((m_titlebar_height - ImGui::GetFontSize() + titlebar_vertical_offset) / 2)));
 		ImGui::Text("PFF Editor");
-		ImGui::PopFont();
+		//ImGui::PopFont();
 
-		ImGui::SetCursorPos(ImVec2(viewport->Size.x - (window_padding.x + (button_spaccing * 2) + (button_width * 3)), window_padding.y + titlebar_vertical_offset ));
+		ImGui::SetCursorPos(ImVec2(viewport->Size.x - (window_padding.x + (button_spaccing * 2) + (button_width * 3)), window_padding.y + titlebar_vertical_offset));
 		if (ImGui::Button("_##Min", ImVec2(button_width, button_width)))
 			application::get().minimize_window();
 
-		ImGui::SetCursorPos(ImVec2(viewport->Size.x - (window_padding.x + (button_spaccing * 1) + (button_width * 2)), window_padding.y + titlebar_vertical_offset ));
+		ImGui::SetCursorPos(ImVec2(viewport->Size.x - (window_padding.x + (button_spaccing * 1) + (button_width * 2)), window_padding.y + titlebar_vertical_offset));
 		if (ImGui::Button("O##Max", ImVec2(button_width, button_width))) {
 			if (is_maximized)
 				application::get().restore_window();
@@ -172,7 +169,7 @@ namespace PFF {
 				application::get().maximize_window();
 		}
 
-		ImGui::SetCursorPos(ImVec2(viewport->Size.x - (window_padding.x + button_width), window_padding.y + titlebar_vertical_offset ));
+		ImGui::SetCursorPos(ImVec2(viewport->Size.x - (window_padding.x + button_width), window_padding.y + titlebar_vertical_offset));
 		if (ImGui::Button("X##Close", ImVec2(button_width, button_width)))
 			application::get().close_application();
 
@@ -208,8 +205,8 @@ namespace PFF {
 
 		if (!m_show_general_debugger)
 			return;
-		
-		ImGuiWindowFlags window_flags = ImGuiWindowFlags_NoTitleBar ;
+
+		ImGuiWindowFlags window_flags = ImGuiWindowFlags_NoTitleBar;
 		if (ImGui::Begin("Editor Debugger", &m_show_general_debugger, window_flags)) {
 
 			if (ImGui::BeginTabBar("##tabs", ImGuiTabBarFlags_None)) {
@@ -218,6 +215,7 @@ namespace PFF {
 				ImGui::SetNextItemWidth(tab_width);
 				if (ImGui::BeginTabItem("Inputs")) {
 
+					/*					
 					UI::begin_default_table("display_input_actions_params");
 					for (input_action* action : *application::get().get_world_layer()->get_current_player_controller()->get_input_mapping()) {						// get input_action
 
@@ -227,15 +225,15 @@ namespace PFF {
 							break;
 
 						case input::action_type::vec_1D:
-							UI::add_table_row(action->get_name(), action->data._1D, ImGuiInputTextFlags_ReadOnly);
+							UI::add_table_row(action->get_name(), action->data.vec_1D, ImGuiInputTextFlags_ReadOnly);
 							break;
 
 						case input::action_type::vec_2D:
-							UI::add_table_row(action->get_name(), action->data._2D, ImGuiInputTextFlags_ReadOnly);
+							UI::add_table_row(action->get_name(), action->data.vec_2D, ImGuiInputTextFlags_ReadOnly);
 							break;
 
 						case input::action_type::vec_3D:
-							UI::add_table_row(action->get_name(), action->data._3D, ImGuiInputTextFlags_ReadOnly);
+							UI::add_table_row(action->get_name(), action->data.vec_3D, ImGuiInputTextFlags_ReadOnly);
 							break;
 
 						default:
@@ -243,6 +241,7 @@ namespace PFF {
 						}
 					}
 					UI::end_default_table();
+					*/
 
 					ImGui::EndTabItem();
 				}
@@ -274,19 +273,33 @@ namespace PFF {
 		ImGui::End();
 	}
 
+
 	void editor_layer::window_main_content() {
 
-		ImGuiViewport* viewport = ImGui::GetMainViewport();
-		ImGui::SetNextWindowPos(ImVec2(viewport->Pos.x, viewport->Pos.y + 100), ImGuiCond_Once);
-		ImGui::SetNextWindowSize(ImVec2(viewport->Size.x - 100, 350));
+		auto viewport = ImGui::GetMainViewport();
+		ImGui::SetNextWindowPos(ImVec2(viewport->Pos.x, viewport->Pos.y + m_titlebar_height)/*, ImGuiCond_Once*/);
+		ImGui::SetNextWindowSize(ImVec2(viewport->Size.x, viewport->Size.y - m_titlebar_height));
 		ImGui::SetNextWindowViewport(viewport->ID);
 
-		ImGuiWindowFlags window_flags = ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoMove | ImGuiWindowFlags_NoScrollbar | ImGuiWindowFlags_NoScrollWithMouse | ImGuiWindowFlags_NoCollapse;
-		if (ImGui::Begin("Viewport", nullptr, window_flags)) {
+		ImGuiWindowFlags host_window_flags = 0;
+		host_window_flags |= ImGuiWindowFlags_NoTitleBar | ImGuiWindowFlags_NoCollapse | ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoMove | ImGuiWindowFlags_NoDocking;
+		host_window_flags |= ImGuiWindowFlags_NoBringToFrontOnFocus | ImGuiWindowFlags_NoNavFocus;
+		//if (dockspace_flags & ImGuiDockNodeFlags_PassthruCentralNode)
+		//	host_window_flags |= ImGuiWindowFlags_NoBackground;
+
+		ImGui::PushStyleVar(ImGuiStyleVar_WindowRounding, 0.0f);
+		ImGui::PushStyleVar(ImGuiStyleVar_WindowBorderSize, 0.0f);
+		ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, ImVec2(0.0f, 0.0f));
+		ImGui::Begin("main_content_area", NULL, host_window_flags);
+		ImGui::PopStyleVar(3);
+
+		static ImGuiDockNodeFlags dockspace_flags = 0 /* | ImGuiDockNodeFlags_AutoHideTabBar*/;
+		ImGuiID dockspace_id = ImGui::GetID("DockSpace");
+		ImGui::DockSpace(dockspace_id, ImVec2(0.0f, 0.0f), dockspace_flags);
 		
-		}
 		ImGui::End();
 	}
+
 
 	void editor_layer::window_outliner() {
 
@@ -298,6 +311,7 @@ namespace PFF {
 
 		ImGui::End();
 	}
+
 
 	void editor_layer::window_details() {
 
@@ -371,7 +385,7 @@ namespace PFF {
 			ImGui::PushStyleVar(ImGuiStyleVar_ItemSpacing, ImVec2(10, 10));
 			ImGui::PushStyleVar(ImGuiStyleVar_FramePadding, ImVec2(25, style->FramePadding.y));
 			ImGui::PushStyleVar(ImGuiStyleVar_SelectableTextAlign, ImVec2(.5f, .5f));
-			ImGui::PushStyleColor(ImGuiCol_FrameBg, UI::THEME::highlited_window_bg);
+			ImGui::PushStyleColor(ImGuiCol_FrameBg, UI::highlited_window_bg);
 			if (ImGui::BeginListBox("##Topic_selector", ImVec2(first_width, (ARRAY_SIZE(items) * ImGui::GetTextLineHeightWithSpacing()) - 1))) {
 
 				for (u32 n = 0; n < ARRAY_SIZE(items); n++) {
@@ -386,90 +400,90 @@ namespace PFF {
 			ImGui::PopStyleColor();
 			ImGui::PopStyleVar(3);
 
-		}, [&] {
-		
-			if (item_current_idx == 0) {		// [General_settings] in array [items]
+			}, [&] {
 
-				ImGui::BeginGroup();
-				static u32 present_mode_selected = 0;
-				if (ImGui::CollapsingHeader("Swapchain##GraphicsSettings", ImGuiTreeNodeFlags_DefaultOpen)) {
+				if (item_current_idx == 0) {		// [General_settings] in array [items]
 
-					static int selected = 1;
+					ImGui::BeginGroup();
+					static u32 present_mode_selected = 0;
+					if (ImGui::CollapsingHeader("Swapchain##GraphicsSettings", ImGuiTreeNodeFlags_DefaultOpen)) {
 
-					if (ImGui::Button(" ? ##Present_mode_popup"))
-						ImGui::OpenPopup("present_mode_explanations");
+						static int selected = 1;
 
-					ImGui::SameLine();
-					ImGui::SetNextItemWidth(UI::THEME::default_item_width);
-					if (ImGui::Combo("##Present_mode_selector", &selected, m_swapchain_supported_presentmodes_str.data(), static_cast<int>(m_swapchain_supported_presentmodes_str.size()))) {
+						if (ImGui::Button(" ? ##Present_mode_popup"))
+							ImGui::OpenPopup("present_mode_explanations");
 
-						LOG(Fatal, "NOT IMPLEMENTED YET")
+						ImGui::SameLine();
+						ImGui::SetNextItemWidth(UI::default_item_width);
+						if (ImGui::Combo("##Present_mode_selector", &selected, m_swapchain_supported_presentmodes_str.data(), static_cast<int>(m_swapchain_supported_presentmodes_str.size()))) {
+
+							LOG(Fatal, "NOT IMPLEMENTED YET")
+						}
+						ImGui::SameLine();
+						ImGui::Text("Choose swapchain present mode of the [swapchain] for optimal performance and visual quality");
+
+
 					}
-					ImGui::SameLine();
-					ImGui::Text("Choose swapchain present mode of the [swapchain] for optimal performance and visual quality");
 
+					if (ImGui::BeginPopup("present_mode_explanations")) {
+
+						ImGui::Text("Explenations for possible present modes:");
+						ImGui::Separator();
+
+						ImGui::Text("Immediate");
+						ImGui::Indent(10.f);
+						ImGui::Text("The presentation engine does not wait for a vertical blanking period to update the current image,\n"
+							"meaning this mode may result in visible tearing. No internal queuing of presentation requests is needed,\n"
+							"as the requests are applied immediately.");
+						ImGui::Indent(-10.f);
+
+						ImGui::Text("Mailbox");
+						ImGui::Indent(10.f);
+						ImGui::Text("The presentation engine waits for the next vertical blanking period to update the current image,\n"
+							"preventing tearing. It maintains a single-entry queue for pending presentation requests.\n"
+							"If the queue is full, new requests replace existing ones, ensuring timely processing during each vertical blanking period.");
+						ImGui::Indent(-10.f);
+
+						ImGui::Text("FiFo (First-In, First-Out)");
+						ImGui::Indent(10.f);
+						ImGui::Text("Similar to Mailbox, the presentation engine waits for the next vertical blanking period to update the current image,\n"
+							"avoiding tearing. Pending presentation requests are queued, with new requests added to the end and processed in order\n"
+							"during each non-empty blanking period.");
+						ImGui::Indent(-10.f);
+
+						ImGui::Text("Relaxed FiFo");
+						ImGui::Indent(10.f);
+						ImGui::Text("The presentation engine typically waits for the next vertical blanking period to update the current image.\n"
+							"However, if a blanking period has passed since the last update, it may update immediately, potentially resulting in tearing.\n"
+							"It uses a queue for pending presentation requests, ensuring timely processing.");
+						ImGui::Indent(-10.f);
+
+						ImGui::Text("Shared Demand Refresh");
+						ImGui::Indent(10.f);
+						ImGui::Text("The presentation engine and application share access to a single image.\n"
+							"The engine updates the image only after receiving a presentation request,\n"
+							"while the application must request updates as needed. Tearing may occur since updates can happen at any point.");
+						ImGui::Indent(-10.f);
+
+						ImGui::Text("Shared Continuous Refresh");
+						ImGui::Indent(10.f);
+						ImGui::Text("Both the presentation engine and application have access to a shared image.\n"
+							"The engine periodically updates the image on its regular refresh cycle without needing additional requests from the application.\n"
+							"However, if rendering is not timed correctly, tearing may occur.");
+						ImGui::Indent(-10.f);
+
+						ImGui::EndPopup();
+					}
+
+
+					ImGui::EndGroup();
+				}
+
+				if (item_current_idx == 0) {		// [General_settings] in array [items]
 
 				}
 
-				if (ImGui::BeginPopup("present_mode_explanations")) {
-
-					ImGui::Text("Explenations for possible present modes:");
-					ImGui::Separator();
-
-					ImGui::Text("Immediate");
-					ImGui::Indent(10.f);
-					ImGui::Text("The presentation engine does not wait for a vertical blanking period to update the current image,\n"
-						"meaning this mode may result in visible tearing. No internal queuing of presentation requests is needed,\n"
-						"as the requests are applied immediately.");
-					ImGui::Indent(-10.f);
-
-					ImGui::Text("Mailbox");
-					ImGui::Indent(10.f);
-					ImGui::Text("The presentation engine waits for the next vertical blanking period to update the current image,\n"
-						"preventing tearing. It maintains a single-entry queue for pending presentation requests.\n"
-						"If the queue is full, new requests replace existing ones, ensuring timely processing during each vertical blanking period.");
-					ImGui::Indent(-10.f);
-
-					ImGui::Text("FiFo (First-In, First-Out)");
-					ImGui::Indent(10.f);
-					ImGui::Text("Similar to Mailbox, the presentation engine waits for the next vertical blanking period to update the current image,\n"
-						"avoiding tearing. Pending presentation requests are queued, with new requests added to the end and processed in order\n"
-						"during each non-empty blanking period.");
-					ImGui::Indent(-10.f);
-
-					ImGui::Text("Relaxed FiFo");
-					ImGui::Indent(10.f);
-					ImGui::Text("The presentation engine typically waits for the next vertical blanking period to update the current image.\n"
-						"However, if a blanking period has passed since the last update, it may update immediately, potentially resulting in tearing.\n"
-						"It uses a queue for pending presentation requests, ensuring timely processing.");
-					ImGui::Indent(-10.f);
-
-					ImGui::Text("Shared Demand Refresh");
-					ImGui::Indent(10.f);
-					ImGui::Text("The presentation engine and application share access to a single image.\n"
-						"The engine updates the image only after receiving a presentation request,\n"
-						"while the application must request updates as needed. Tearing may occur since updates can happen at any point.");
-					ImGui::Indent(-10.f);
-
-					ImGui::Text("Shared Continuous Refresh");
-					ImGui::Indent(10.f);
-					ImGui::Text("Both the presentation engine and application have access to a shared image.\n"
-						"The engine periodically updates the image on its regular refresh cycle without needing additional requests from the application.\n"
-						"However, if rendering is not timed correctly, tearing may occur.");
-					ImGui::Indent(-10.f);
-
-					ImGui::EndPopup();
-				}
-
-
-				ImGui::EndGroup();
-			}
-
-			if (item_current_idx == 0) {		// [General_settings] in array [items]
-
-			}
-			
-		});
+				});
 
 		ImGui::End();
 	}
@@ -479,7 +493,7 @@ namespace PFF {
 
 	void editor_layer::window_general_settings() {
 	}
-	
+
 	void draw_todo_item(const char* title, const char* description) {
 
 	}
@@ -517,7 +531,7 @@ namespace PFF {
 					application::get().close_application();
 				ImGui::EndMenu();
 			}
-			
+
 			if (ImGui::BeginMenu("Edit")) {
 				if (ImGui::MenuItem("Undo", "CTRL+Z")) {}
 				if (ImGui::MenuItem("Redo", "CTRL+Y", false, false)) {}  // Disabled item
@@ -527,7 +541,7 @@ namespace PFF {
 				if (ImGui::MenuItem("Paste", "CTRL+V")) {}
 				ImGui::EndMenu();
 			}
-			
+
 			if (ImGui::BeginMenu("settings")) {
 				if (ImGui::MenuItem("General Settings"))
 					m_show_general_settings = true;
@@ -554,8 +568,8 @@ namespace PFF {
 							if (ImGui::Selectable(items[n], is_selected)) {
 
 								item_current_idx = n;
-								UI::THEME::UI_theme = static_cast<UI::THEME::theme_selection>(item_current_idx);
-								UI::THEME::update_UI_theme();
+								UI::UI_theme = static_cast<UI::theme_selection>(item_current_idx);
+								UI::update_UI_theme();
 							}
 						}
 						ImGui::EndListBox();
@@ -573,13 +587,13 @@ namespace PFF {
 							.entry(KEY_VALUE(window_border));
 						//config::load(config::file::editor, "UI", "window_border", window_border);
 
-						backup_color = UI::THEME::main_color;
+						backup_color = UI::main_color;
 						ImGui::SetColorEditOptions(ImGuiColorEditFlags_Float | ImGuiColorEditFlags_HDR | ImGuiColorEditFlags_PickerHueWheel);
 						backup_color_init = true;
 					}
 
 					if (ImGui::Checkbox("Window Border", &window_border))
-						UI::THEME::enable_window_border(window_border);
+						UI::enable_window_border(window_border);
 
 					ImGui::Separator();
 					ImGui::Text("change main-color");
@@ -596,22 +610,22 @@ namespace PFF {
 						saved_palette_init = false;
 					}
 
-					if (ImGui::ColorPicker4("##picker", (float*)&UI::THEME::main_color, ImGuiColorEditFlags_NoSidePreview | ImGuiColorEditFlags_NoSmallPreview))
-						UI::THEME::update_UI_colors(UI::THEME::main_color);
+					if (ImGui::ColorPicker4("##picker", (float*)&UI::main_color, ImGuiColorEditFlags_NoSidePreview | ImGuiColorEditFlags_NoSmallPreview))
+						UI::update_UI_colors(UI::main_color);
 
 					ImGui::SameLine();
 					ImGui::BeginGroup();
 
 					ImGui::BeginGroup();
 					ImGui::Text("Current");
-					ImGui::ColorButton("##current", UI::THEME::main_color, ImGuiColorEditFlags_NoPicker | ImGuiColorEditFlags_AlphaPreviewHalf, ImVec2(60, 40));
+					ImGui::ColorButton("##current", UI::main_color, ImGuiColorEditFlags_NoPicker | ImGuiColorEditFlags_AlphaPreviewHalf, ImVec2(60, 40));
 					ImGui::EndGroup();
 
 					ImGui::SameLine();
 					ImGui::BeginGroup();
 					ImGui::Text("Previous");
 					if (ImGui::ColorButton("##previous", backup_color, ImGuiColorEditFlags_NoPicker | ImGuiColorEditFlags_AlphaPreviewHalf, ImVec2(60, 40)))
-						UI::THEME::update_UI_colors(backup_color);
+						UI::update_UI_colors(backup_color);
 
 					ImGui::EndGroup();
 
@@ -624,7 +638,7 @@ namespace PFF {
 
 						ImGuiColorEditFlags palette_button_flags = ImGuiColorEditFlags_NoAlpha | ImGuiColorEditFlags_NoPicker | ImGuiColorEditFlags_NoTooltip;
 						if (ImGui::ColorButton("##palette", saved_palette[n], palette_button_flags, ImVec2(21, 21)))
-							UI::THEME::update_UI_colors(ImVec4(saved_palette[n].x, saved_palette[n].y, saved_palette[n].z, UI::THEME::main_color.w));
+							UI::update_UI_colors(ImVec4(saved_palette[n].x, saved_palette[n].y, saved_palette[n].z, UI::main_color.w));
 
 						// Allow user to drop colors into each palette entry. Note that ColorButton() is already a
 						// drag source by default, unless specifying the ImGuiColorEditFlags_NoDragDrop flag.
@@ -643,7 +657,7 @@ namespace PFF {
 				}
 				ImGui::EndMenu();
 			}
-			
+
 			if (ImGui::BeginMenu("Windows")) {
 
 				ImGui::MenuItem("ToDo List", "", &PFF::toolkit::todo::s_show_todo_list);

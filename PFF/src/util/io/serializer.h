@@ -70,10 +70,10 @@ namespace PFF::serializer {
 
 			} else {				// load from file
 
-				if constexpr (PFF::util::is_vector<T>::value) {			// calue is a vector
+				if constexpr (PFF::util::is_vector<T>::value) {			// value is a vector
 
 					// deserialize content of subsections				
-					typename T::value_type buffer{};
+					T buffer{};
 					u32 section_indentation = 0;
 					bool found_section = false;
 					std::string line;
@@ -96,7 +96,7 @@ namespace PFF::serializer {
 								// remove indentation                       remove "- " (array element marker)
 								line = line.substr(NUM_OF_INDENTING_SPACES + 2);
 								PFF:util::convert_from_string(line, buffer);
-								value.push_back(buffer);
+								value.emplace_back(buffer);
 							}
 
 							//LOG(Debug, "END OF SUB-SECTION");

@@ -34,6 +34,14 @@
 
 // ================================================================================  functions  ================================================================================
 
+
+template<typename key_type, typename value_type>
+bool contains(const std::unordered_map<key_type, value_type>& map, const key_type& key) {
+
+    return map.find(key) != map.end();
+}
+
+
 namespace PFF {
 
     // =================================================  smart pointers  =================================================
@@ -62,13 +70,27 @@ namespace PFF {
 
 	namespace util {
 
+        //@brief Checks the validity of a pointer.
+        //@param [ptr] Pointer to check.
+        //@return [conat char*] "valid" if the pointer is not null, "invalid" otherwise.
+        FORCEINLINE constexpr const char* ptr_validity_check(const void* ptr) { return (ptr != nullptr) ? "valid" : "invalid"; }
+
+        //@brief Converts a string to a boolean value.
+        //@param [string] The string to convert.
+        //@return true if the string is "true", false otherwise.
+        FORCEINLINE constexpr bool str_to_bool(const std::string& string) { return(string == "true") ? true : false; }
+
+        //@brief Converts a boolean value to a string.
+        //@param [boolean] The boolean value to convert.
+        //@return [conat char*] "true" if the boolean value is true, "false" otherwise.
+        FORCEINLINE constexpr const char* bool_to_str(bool boolean) { return boolean ? "true" : "false"; }
+
 		template <size_t N>
-		struct char_array {
-			char data[N];
-		};
+		struct char_array { char data[N]; };
 
 		template <typename T>
 		T str_to_num(const std::string& str) {
+
 			std::istringstream ss(str);
 			T num{};
 			ss >> num;
@@ -77,6 +99,7 @@ namespace PFF {
 
         template <typename T>
         std::string num_to_str(const T& num) {
+
             std::ostringstream oss;
             oss << num;
             return oss.str();
@@ -168,18 +191,18 @@ namespace PFF {
         }
 
 
-        template<typename T>
         // @brief Converts a string representation to a value of type T.
         // @brief Can handle conversion into various types such as: arithmetic types, boolean, glm::vec2, glm::vec3, glm::vec4, ImVec2, ImVec4, and glm::mat4.
         // @brief If the input value type is not supported, a DEBUG_BREAK() is triggered.
         // @param [string] The string to be converted.
         // @param [value] Reference to the variable that will store the converted value.
         // @tparam T The type of the value [string] should be converted to.
+        template<typename T>
         constexpr void convert_from_string(const std::string& src_string, T& dest_value) {
 
             if constexpr (std::is_same_v<T, bool>) {
 
-                dest_value = util::str_to_bool(src_string);
+                dest_value = PFF::util::str_to_bool(src_string);
                 return;
             }
 
@@ -225,6 +248,7 @@ namespace PFF {
 
             // Matrix of size 4         TODO: move into seperate template for all matrixes
             else if constexpr (std::is_same_v<T, glm::mat4>) {
+
                 std::istringstream iss(src_string);
                 for (int i = 0; i < 4; ++i) {
                     for (int j = 0; j < 4; ++j) {
@@ -234,31 +258,30 @@ namespace PFF {
                 return;
             }
 
-
             else
                 DEBUG_BREAK();		// Input value is not supported
         }
 
-		template <typename T, typename... Rest>
         // @brief Combines hash values. from: https://stackoverflow.com/a/57595105
         // @tparam T The type of the value to hash.
         // @tparam Rest Additional types to hash.
         // @param seed The seed value for the hash.
         // @param v The value to hash.
         // @param rest Additional values to hash.
+		template <typename T, typename... Rest>
         constexpr void hash_combine(std::size_t& seed, const T& v, const Rest&... rest) {
 
 			seed ^= std::hash<T>{}(v)+0x9e3779b9 + (seed << 6) + (seed >> 2);
 			(hash_combine(seed, rest), ...);
 		}
 
-		template <size_t N, size_t K>
         // @brief Removes a substring from a character array.
         // @tparam N The size of the source character array.
         // @tparam K The size of the remove character array.
         // @param source The source character array.
         // @param remove The substring to remove.
         // @return A character array with the specified substring removed.
+		template <size_t N, size_t K>
 		constexpr auto remove_substring(const char(&source)[N], const char(&remove)[K]) {
 
 			char_array<N> result = {};
@@ -278,20 +301,5 @@ namespace PFF {
 			}
 			return result;
 		}
-        
-        //@brief Checks the validity of a pointer.
-        //@param [ptr] Pointer to check.
-        //@return [conat char*] "valid" if the pointer is not null, "invalid" otherwise.
-		FORCEINLINE constexpr const char* ptr_validity_check(const void* ptr) {return (ptr != nullptr) ? "valid" : "invalid";}
-        
-        //@brief Converts a string to a boolean value.
-        //@param [string] The string to convert.
-        //@return true if the string is "true", false otherwise.
-		FORCEINLINE constexpr bool str_to_bool(const std::string& string) { return(string == "true") ? true : false; }
-                
-        //@brief Converts a boolean value to a string.
-        //@param [boolean] The boolean value to convert.
-        //@return [conat char*] "true" if the boolean value is true, "false" otherwise.
-		FORCEINLINE constexpr const char* bool_to_str(bool boolean) { return boolean ? "true" : "false"; }
 	}
 }

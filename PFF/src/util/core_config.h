@@ -5,7 +5,8 @@
 // -------------------------------------------------------------------------------------------------------------------------------------------
 
 // collect timing-data from evey magor function?
-#define PFF_PROFILE								1
+#define PFF_PROFILE								0	// general
+#define PFF_PROFILE_RENDERER					0	// renderer
 
 // log assert and validation behaviour?
 // NOTE - expr in assert/validation will still be executed
