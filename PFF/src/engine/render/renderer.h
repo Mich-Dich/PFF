@@ -4,6 +4,7 @@
 
 #include "engine/render/vulkan/vk_types.h"
 #include "engine/layer/layer_stack.h"
+#include "engine/game_objects/camera.h"
 
 namespace PFF::render {
 
@@ -31,6 +32,8 @@ namespace PFF::render {
 		FORCEINLINE static render_api get_api() { return s_render_api; }
 		FORCEINLINE static void set_api(render_api api) { s_render_api = api; }
 
+		FORCEINLINE void set_active_camera(ref<camera> camera) { m_active_camera = camera; }
+
 		virtual void* get_rendered_image() = 0;
 
 		system_state get_state() const { return m_state; }
@@ -57,7 +60,7 @@ namespace PFF::render {
 
 		bool m_imgui_initalized = false;
 		bool m_render_swapchain = false;	// false => will display rendered image in a imgui window TRUE: will display rendered image directly into GLFW_window
-
+		ref<camera> m_active_camera{};
 	private:
 
 	};

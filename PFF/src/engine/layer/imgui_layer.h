@@ -52,13 +52,15 @@ namespace PFF::UI {
 
 		PFF_API_EDITOR ImFont* get_font(const std::string& name = "default");
 
+		ImGuiID m_viewport_ID{};
+
 	private:
 
 		void serialize(serializer::option option);
 
 		// ------------------------- general -------------------------
 		ImGuiContext* m_context{};
-		f32 m_font_size = 15.f, m_big_font_size = 18.f;
+		f32 m_font_size = 14.5f, m_big_font_size = 18.f;
 		std::unordered_map<std::string, ImFont*> m_fonts{};
 
 		// ------------------------- performance display -------------------------

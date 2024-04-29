@@ -27,6 +27,9 @@
 #include "engine/layer/layer.h"
 #include <cstdlib> // for system calls (conpieling shaders)
 
+#include "util/ui/pannel_collection.h"
+
+
 #include "vk_renderer.h"
 
 namespace PFF::render::vulkan {
@@ -332,20 +335,30 @@ namespace PFF::render::vulkan {
 
 			if (!m_render_swapchain) {
 
-				ImGuiWindowFlags window_flags = ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoMove | ImGuiWindowFlags_NoScrollbar
-					| ImGuiWindowFlags_NoScrollWithMouse | ImGuiWindowFlags_NoCollapse | ImGuiWindowFlags_NoBackground | ImGuiWindowFlags_NoDecoration ;
+				ImGuiWindowFlags window_flags = 0//ImGuiWindowFlags_NoResize
+					| ImGuiWindowFlags_NoScrollbar
+					| ImGuiWindowFlags_NoScrollWithMouse 
+					| ImGuiWindowFlags_NoCollapse 
+					| ImGuiWindowFlags_NoBackground 
+					//| ImGuiWindowFlags_NoDecoration
+					;
 
-				//ImGui::SetNextWindowDockID();			ImGuiWindowFlags_AlwaysAutoResize
 
 				ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, ImVec2(0, 0));
 				ImGui::PushStyleVar(ImGuiStyleVar_WindowBorderSize, 0);
-				ImGui::Begin("viewport" /*, nullptr, window_flags*/);
+				ImGui::Begin("viewport", nullptr, window_flags);
 					ImGui::PopStyleVar(2);
+					
+					// display rendred image
 					ImVec2 viewport_size = ImGui::GetWindowSize();
 					viewport_size.y -= ImGui::GetFrameHeight();
 					m_imugi_viewport_size = glm::u32vec2(viewport_size.x, viewport_size.y);
 					ImVec2 viewport_uv = { std::max(std::min(viewport_size.x / m_draw_image.image_extent.width, 1.f), 0.f), std::max(std::min(viewport_size.y / m_draw_image.image_extent.height, 1.f), 0.f) };
 					ImGui::Image(m_imugi_image_dset, ImVec2{ viewport_size.x, viewport_size.y }, ImVec2{0,0}, viewport_uv);
+
+					// show debug data
+					application::get().get_imgui_layer()->show_FPS();
+
 				ImGui::End();
 			}
 
@@ -358,10 +371,16 @@ namespace PFF::render::vulkan {
 				ImGui::Text("Selected effect: ", selected.name);
 				ImGui::SliderInt("Effect Index", &m_current_background_effect, 0, static_cast<int>(m_background_effects.size() - 1));
 
-				ImGui::InputFloat4("data1", (float*)&selected.data.data1);
-				ImGui::InputFloat4("data2", (float*)&selected.data.data2);
-				ImGui::InputFloat4("data3", (float*)&selected.data.data3);
-				ImGui::InputFloat4("data4", (float*)&selected.data.data4);
+				UI::begin_default_table("renderer background values");
+					UI::add_table_row("data 1", selected.data.data1);
+					UI::add_table_row("data 2", selected.data.data2);
+					UI::add_table_row("data 3", selected.data.data3);
+					UI::add_table_row("data 4", selected.data.data4);
+				UI::end_default_table();
+				//ImGui::InputFloat4("data1", (float*)&selected.data.data1);
+				//ImGui::InputFloat4("data2", (float*)&selected.data.data2);
+				//ImGui::InputFloat4("data3", (float*)&selected.data.data3);
+				//ImGui::InputFloat4("data4", (float*)&selected.data.data4);
 
 			}
 			ImGui::End();
@@ -838,18 +857,21 @@ namespace PFF::render::vulkan {
 		
 		// NOTE: Note that 10000 is “near” and 0.1 is “far”. And reversing the depth, so that depth 1 is the near plane, and depth 0 the far plane.
 		//		 This is a technique that greatly increases the quality of depth testing.
-		glm::mat4 projection = glm::perspective(glm::radians(70.f), (float)m_draw_extent.width / (float)m_draw_extent.height, 10000.f, 0.1f);
-		glm::mat4 view = glm::translate(glm::mat4(1.0f), glm::vec3{ 0, 0, -2.5f });
+		glm::mat4 projection = glm::perspective(glm::radians(m_active_camera->get_perspective_fov_y()), (float)m_draw_extent.width / (float)m_draw_extent.height, 10000.f, 0.1f);
 		projection[1][1] *= -1;				// invert the Y direction on projection matrix
+		glm::mat4 view = m_active_camera->get_view();
+		
+		const int selected_mesh = 2;
+		const int selected_surface = 0;
 
 		GPU_draw_push_constants push_constants;
 		push_constants.world_matrix = projection * view;
-		push_constants.vertex_buffer = T_test_meshes[2]->mesh_buffers.vertex_buffer_address;
+		push_constants.vertex_buffer = T_test_meshes[selected_mesh]->mesh_buffers.vertex_buffer_address;
 		
 		// draw dummy mesh
 		vkCmdPushConstants(cmd, m_mesh_pipeline_layout, VK_SHADER_STAGE_VERTEX_BIT, 0, sizeof(GPU_draw_push_constants), &push_constants);
-		vkCmdBindIndexBuffer(cmd, T_test_meshes[2]->mesh_buffers.index_buffer.buffer, 0, VK_INDEX_TYPE_UINT32);
-		vkCmdDrawIndexed(cmd, T_test_meshes[2]->surfaces[0].count, 1, T_test_meshes[2]->surfaces[0].startIndex, 0, 0);
+		vkCmdBindIndexBuffer(cmd, T_test_meshes[selected_mesh]->mesh_buffers.index_buffer.buffer, 0, VK_INDEX_TYPE_UINT32);
+		vkCmdDrawIndexed(cmd, T_test_meshes[selected_mesh]->surfaces[selected_surface].count, 1, T_test_meshes[selected_mesh]->surfaces[selected_surface].startIndex, 0, 0);
 
 		vkCmdEndRendering(cmd);
 	}

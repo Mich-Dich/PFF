@@ -37,18 +37,18 @@ namespace PFF {
 		void window_editor_settings();
 		void window_general_settings();
 
-		void set_next_window_pos(int16 location);
-		void progressbar_with_text(f32 percent, const char* text, f32 min_size_x = 0.0f, f32 min_size_y = 0.0f);
-		void progressbar(f32 percent, f32 min_size_x = 0.0f, f32 min_size_y = 0.0f);
+		//void set_next_window_pos(int16 location);
+		//void progressbar_with_text(f32 percent, const char* text, f32 min_size_x = 0.0f, f32 min_size_y = 0.0f);
+		//void progressbar(f32 percent, f32 min_size_x = 0.0f, f32 min_size_y = 0.0f);
 		void main_menu_bar();
 
 		bool m_show_options = false;
 		bool m_show_general_debugger = true;
 		bool m_show_main_menu_bar = false;
-		bool m_show_outliner = false;
+		bool m_show_outliner = true;
 		bool m_show_details = false;
 		bool m_show_world_settings = false;
-		bool m_show_content_browser_0 = false;
+		bool m_show_content_browser_0 = true;
 		bool m_show_content_browser_1 = false;
 		bool m_show_graphics_engine_settings = false;
 		bool m_show_editor_settings = false;

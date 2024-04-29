@@ -58,15 +58,15 @@ namespace PFF {
 			vec_3D,
 		};
 
-		struct key_details {
+		struct key_binding_details {
 
 			key_code key{};
 			u16 trigger_flags{};
 			u16 modefier_flags{};
 			int16 active{};
 
-			key_details() : key(key_code::key_unknown), trigger_flags(0), modefier_flags(0) {};
-			key_details(key_code key, u16 trigger_flags = 0, u16 modefier_flags = 0)
+			key_binding_details() : key(key_code::key_unknown), trigger_flags(0), modefier_flags(0) {};
+			key_binding_details(key_code key, u16 trigger_flags = 0, u16 modefier_flags = 0)
 				: key(key), trigger_flags(trigger_flags), modefier_flags(modefier_flags) {};
 		};
 
@@ -91,14 +91,13 @@ namespace PFF {
 		input::action_type value;
 		input_action_data data;
 		f32 duration_in_sec;
-		std::vector<input::key_details> keys;
+		std::vector<input::key_binding_details> keys_bindings;
 
+		input_action(bool triger_when_paused = false, u16 flags = 0, input::action_type value = input::action_type::boolean, f32 duration_in_sec = 0.0f, std::vector<input::key_binding_details> keys_bindings = {})
+			: triger_when_paused(triger_when_paused), flags(flags), value(value), duration_in_sec(duration_in_sec), keys_bindings(keys_bindings) {}
 
-		input_action(bool triger_when_paused = false, u16 flags = 0, input::action_type value = input::action_type::boolean, f32 duration_in_sec = 0.0f, std::vector<input::key_details> keys = {})
-			: triger_when_paused(triger_when_paused), flags(flags), value(value), duration_in_sec(duration_in_sec), keys(keys) {}
-
-		const size_t get_length() const { return keys.size(); }
-		input::key_details* get_key(u32 index) { return &keys[index]; }
+		const size_t get_length() const { return keys_bindings.size(); }
+		input::key_binding_details* get_key(u32 index) { return &keys_bindings[index]; }
 
 		/*
 		template <typename T>

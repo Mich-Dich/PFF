@@ -24,6 +24,8 @@ namespace PFF::UI::imgui::util {
 
 	void PFF_API set_next_window_pos(window_pos location, f32 padding = 10.f);
 
+	void PFF_API set_next_window_pos_in_window(window_pos location, f32 padding = 10.f);
+
 	void PFF_API next_window_position_selector(window_pos& position, bool& show_window);
 	
 	void PFF_API progressbar_with_text(const char* lable, const char* progress_bar_text, f32 percent, f32 lable_size = 50.f, f32 progressbar_size_x = 50.f, f32 progressbar_size_y = 1.f);

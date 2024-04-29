@@ -7,13 +7,9 @@
 namespace PFF {
 
 
-	camera::camera() {
-	}
+	camera::camera() { LOG_INIT(); }
 
-	camera::~camera() {
-
-		CORE_LOG(Trace, "Shutdown");
-	}
+	camera::~camera() { LOG_SHUTDOWN(); }
 
 	void camera::set_clipping_dis(const f32 near_dis, const f32 far_dis) {
 
@@ -49,7 +45,7 @@ namespace PFF {
 
 		PFF_PROFILE_FUNCTION();
 
-		CORE_VALIDATE((target - position) != glm::vec3(0.0f, 0.0f, 0.0f), return, "", "Provided position and target are to close")
+		CORE_VALIDATE((target - position) != glm::vec3(0.0f, 0.0f, 0.0f), return, "", "Provided position and target are identical")
 		set_view_direction(position, target - position, up);
 	}
 

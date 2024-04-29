@@ -164,7 +164,6 @@
     <ClInclude Include="src\toolkit\todo_list\todo_list.h" />
     <ClInclude Include="src\ui\editor_layer.h" />
     <ClInclude Include="src\util\pch_editor.h" />
-    <ClInclude Include="src\util\ui\panels\pannel_collection.h" />
     <ClInclude Include="src\util\util_editor.h" />
   </ItemGroup>
   <ItemGroup>

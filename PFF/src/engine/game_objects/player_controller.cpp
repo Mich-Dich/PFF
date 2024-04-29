@@ -83,15 +83,15 @@ namespace PFF {
 			}
 
 			for (u32 x = 0; x < action->get_length(); x++) {	
-				input::key_details* key_details = action->get_key(x);					// get key
+				input::key_binding_details* key_binding_details = action->get_key(x);					// get key
 
-				f32 m_buffer = key_details->active;
+				f32 m_buffer = key_binding_details->active;
 
 				// =============================================== modefiers ===============================================
-				if (key_details->modefier_flags & INPUT_ACTION_MODEFIER_NEGATE)
+				if (key_binding_details->modefier_flags & INPUT_ACTION_MODEFIER_NEGATE)
 					m_buffer *= -1.f;
 
-				if (key_details->modefier_flags & INPUT_ACTION_MODEFIER_SMOOTH_INTERP) {
+				if (key_binding_details->modefier_flags & INPUT_ACTION_MODEFIER_SMOOTH_INTERP) {
 
 					//CORE_LOG(Info, "INPUT_ACTION_MODEFIER_SMOOTH_INTERP is not supported yet");
 				}
@@ -103,7 +103,7 @@ namespace PFF {
 
 						action->data.boolean = (m_buffer > 0.f);
 
-						//if (key_details->trigger_flags & INPUT_ACTION_TRIGGER_KEY_MOVE_DOWN) {}
+						//if (key_binding_details->trigger_flags & INPUT_ACTION_TRIGGER_KEY_MOVE_DOWN) {}
 
 					} break;
 
@@ -116,7 +116,7 @@ namespace PFF {
 					// ==================================================================================================================================
 					case input::action_type::vec_2D: {
 
-						if (key_details->modefier_flags & INPUT_ACTION_MODEFIER_AXIS_2)
+						if (key_binding_details->modefier_flags & INPUT_ACTION_MODEFIER_AXIS_2)
 							action->data.vec_2D.y += m_buffer;
 						else
 							action->data.vec_2D.x += m_buffer;
@@ -125,9 +125,9 @@ namespace PFF {
 					// ==================================================================================================================================
 					case input::action_type::vec_3D: {
 
-						if (key_details->modefier_flags & INPUT_ACTION_MODEFIER_AXIS_2)
+						if (key_binding_details->modefier_flags & INPUT_ACTION_MODEFIER_AXIS_2)
 							action->data.vec_3D.y += m_buffer;
-						else if (key_details->modefier_flags & INPUT_ACTION_MODEFIER_AXIS_3)
+						else if (key_binding_details->modefier_flags & INPUT_ACTION_MODEFIER_AXIS_3)
 							action->data.vec_3D.z += m_buffer;
 						else
 							action->data.vec_3D.x += m_buffer;
@@ -176,9 +176,9 @@ namespace PFF {
 			if (action->flags & INPUT_ACTION_MODEFIER_AUTO_RESET_ALL) {
 
 				for (u32 x = 0; x < action->get_length(); x++) {
-					input::key_details* key_details = action->get_key(x);				// get key
+					input::key_binding_details* key_binding_details = action->get_key(x);				// get key
 
-					key_details->active = {};
+					key_binding_details->active = {};
 				}
 			}
 		}
@@ -205,43 +205,63 @@ namespace PFF {
 			input_action* action = m_input_mapping->get_action(x);
 
 			for (u32 x = 0; x < action->get_length(); x++) {					// get input_action
-				input::key_details* key_details = action->get_key(x);
+				input::key_binding_details* key_binding_details = action->get_key(x);
 
-				if (key_details->key == event.get_keycode()) {					// check if I have an event for that key
+				if (key_binding_details->key != event.get_keycode()) 					// check if I have an event for that key
+					continue;
+
+				std::chrono::time_point<std::chrono::steady_clock> time_now = std::chrono::steady_clock::now();
+				bool m_buffer = false;
 
 
-					std::chrono::time_point<std::chrono::steady_clock> time_now = std::chrono::steady_clock::now();
-					bool m_buffer = false;
-
-					//LOG(Debug, "Test");
-					// =============================================== triggers ===============================================
-					if (key_details->trigger_flags & INPUT_ACTION_TRIGGER_KEY_DOWN)
+				// =============================================== triggers ===============================================
+				// secondary if check to avoid overriding
+				// key_binding can have multiple triggers && only one could be active
+				do {
+					if (key_binding_details->trigger_flags & INPUT_ACTION_TRIGGER_KEY_DOWN)
 						m_buffer = (event.m_key_state != key_state::release);
 
-					if (key_details->trigger_flags & INPUT_ACTION_TRIGGER_KEY_UP)
+					if (m_buffer)
+						break;
+
+					if (key_binding_details->trigger_flags & INPUT_ACTION_TRIGGER_KEY_UP)
 						m_buffer = (event.m_key_state == key_state::release);
 
-					if (key_details->trigger_flags & INPUT_ACTION_TRIGGER_KEY_HOLD)
+					if (m_buffer)
+						break;
+
+					if (key_binding_details->trigger_flags & INPUT_ACTION_TRIGGER_KEY_HOLD)
 						m_buffer = (event.m_key_state == key_state::repeat);
 
-					if (key_details->trigger_flags & INPUT_ACTION_TRIGGER_KEY_TAP) {
+					if (m_buffer)
+						break;
 
-						CORE_LOG(Warn, "INPUT_ACTION_TRIGGER_KEY_TAP - not implemented yet")
+					if (key_binding_details->trigger_flags & INPUT_ACTION_TRIGGER_KEY_TAP) {
+
+						CORE_LOG(Warn, "INPUT_ACTION_TRIGGER_KEY_TAP - not implemented yet");
 						action->time_stamp = time_now;
 					}
 
-					if (key_details->trigger_flags & INPUT_ACTION_TRIGGER_KEY_MOVE_DOWN) {
+					if (m_buffer)
+						break;
 
-						m_buffer = (event.m_key_state == key_state::press && key_details->active == false);
-						// CORE_LOG(Info, "Current buffer: " << m_buffer << " [" << util::bool_to_str(event.m_key_state == key_state::press) << "/" << util::bool_to_str(key_details->active == false) << "]");
+					if (key_binding_details->trigger_flags & INPUT_ACTION_TRIGGER_KEY_MOVE_DOWN) {
+
+						m_buffer = (event.m_key_state == key_state::press && key_binding_details->active == false);
+						// CORE_LOG(Info, "Current buffer: " << m_buffer << " [" << util::bool_to_str(event.m_key_state == key_state::press) << "/" << util::bool_to_str(key_binding_details->active == false) << "]");
 					}
 
-					if (key_details->trigger_flags & INPUT_ACTION_TRIGGER_KEY_MOVE_UP)
+					if (m_buffer)
+						break;
+
+					if (key_binding_details->trigger_flags & INPUT_ACTION_TRIGGER_KEY_MOVE_UP)
 						m_buffer = (event.m_key_state == key_state::repeat);
 
-					key_details->active = (m_buffer) ? 1 : 0;
-					//LOG(Debug, "Key: " << static_cast<int32>(key_details->key) << " is " << bool_to_str(key_details->active));
-				}
+				} while (false);
+
+
+				key_binding_details->active = (m_buffer) ? 1 : 0;
+				//LOG(Debug, "Key: " << static_cast<int32>(key_binding_details->key) << " is " << bool_to_str(key_binding_details->active));
 			}
 		}
 		return true;
@@ -258,9 +278,9 @@ namespace PFF {
 			input_action* action = m_input_mapping->get_action(x);
 
 			for (u32 x = 0; x < action->get_length(); x++) {				// get input_action
-				input::key_details* key_details = action->get_key(x);
+				input::key_binding_details* key_binding_details = action->get_key(x);
 
-				if (key_details->key == event.get_keycode()) {						// check if I have an event for that key
+				if (key_binding_details->key == event.get_keycode()) {						// check if I have an event for that key
 
 					std::chrono::time_point<std::chrono::steady_clock> time_now = std::chrono::steady_clock::now();
 
@@ -268,16 +288,28 @@ namespace PFF {
 					f32 event_value = event.get_value();
 
 					// =============================================== triggers ===============================================
-					if (key_details->trigger_flags & INPUT_ACTION_TRIGGER_MOUSE_POS_AND_NEG)
-						m_buffer = (event_value != 0);
+					// secondary if check to avoid overriding
+					// key_binding can have multiple triggers && only one could be active
+					do {
 
-					if (key_details->trigger_flags & INPUT_ACTION_TRIGGER_MOUSE_POSITIVE)
-						m_buffer = (event_value > 0);
+						if (key_binding_details->trigger_flags & INPUT_ACTION_TRIGGER_MOUSE_POS_AND_NEG)
+							m_buffer = (event_value != 0);
 
-					if (key_details->trigger_flags & INPUT_ACTION_TRIGGER_MOUSE_NEGATIVE)
-						m_buffer = (event_value < 0);
+						if (m_buffer)
+							break;
 
-					key_details->active = (m_buffer) ? static_cast<int16>(event_value) : 0;
+						if (key_binding_details->trigger_flags & INPUT_ACTION_TRIGGER_MOUSE_POSITIVE)
+							m_buffer = (event_value > 0);
+
+						if (m_buffer)
+							break;
+
+						if (key_binding_details->trigger_flags & INPUT_ACTION_TRIGGER_MOUSE_NEGATIVE)
+							m_buffer = (event_value < 0);
+
+					} while (false);
+
+					key_binding_details->active = (m_buffer) ? static_cast<int16>(event_value) : 0;
 					//CORE_LOG(Info, "action value: " << bool_to_str(action->data.boolean));
 
 				}
