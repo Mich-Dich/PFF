@@ -46,7 +46,7 @@ namespace PFF::UI {
 	// @param [text] The text to be drawn.
 	static void draw_big_text(const char* text, bool wrapped = false) {
 
-		//ImGui::PushFont(application::get().get_imgui_layer()->get_font("regular_big"));
+		ImGui::PushFont(application::get().get_imgui_layer()->get_font("regular_big"));
 
 		if(wrapped)
 			ImGui::TextWrapped(text);
@@ -191,7 +191,9 @@ namespace PFF::UI {
 			shift_cursor_pos(10, 10);
 
 			ImGui::BeginGroup();
+			ImGui::PushStyleVar(ImGuiStyleVar_FramePadding, ImVec2(5, 5));
 			right_side();
+			ImGui::PopStyleVar();
 			ImGui::EndGroup();
 
 			ImGui::EndTable();

@@ -52,6 +52,9 @@
     <Filter Include="util\platform">
       <UniqueIdentifier>{1767156D-8327-91A3-4C62-DA20B8E1D57F}</UniqueIdentifier>
     </Filter>
+    <Filter Include="util\ui">
+      <UniqueIdentifier>{D0E75B48-3CC7-DAE3-45DF-65BAB13D4145}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="src\PFF.h" />
@@ -192,10 +195,12 @@
     <ClInclude Include="src\util\timer.h">
       <Filter>util</Filter>
     </ClInclude>
+    <ClInclude Include="src\util\ui\pannel_collection.h">
+      <Filter>util\ui</Filter>
+    </ClInclude>
     <ClInclude Include="src\util\util.h">
       <Filter>util</Filter>
     </ClInclude>
-    <ClInclude Include="src\util\ui\pannel_collection.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="src\application.cpp" />

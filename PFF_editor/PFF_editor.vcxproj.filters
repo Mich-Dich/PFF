@@ -25,12 +25,6 @@
     <Filter Include="src\util">
       <UniqueIdentifier>{BA5238CF-A61F-93DA-CF38-8182BB64C868}</UniqueIdentifier>
     </Filter>
-    <Filter Include="src\util\ui">
-      <UniqueIdentifier>{E7E79551-539D-0E47-DC91-081E4846054B}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="src\util\ui\panels">
-      <UniqueIdentifier>{7962BFDC-6546-8032-CEA6-7A85BAA96AB4}</UniqueIdentifier>
-    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="src\PFF_editor.h">

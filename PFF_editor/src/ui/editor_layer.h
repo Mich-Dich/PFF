@@ -54,6 +54,9 @@ namespace PFF {
 		bool m_show_editor_settings = false;
 		bool m_show_general_settings = false;
 
+		bool style_editor = false;
+		bool demo_window = true;
+
 		std::vector<VkPresentModeKHR> m_swapchain_supported_presentmodes;
 		std::vector<const char*> m_swapchain_supported_presentmodes_str;
 

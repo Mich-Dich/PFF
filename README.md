@@ -6,12 +6,7 @@ PFF (Procedurally Focused Framework) is a 3D game engine crafted in C/C++, desig
 
 ### Here are screenshots that show the current state of PFF.
 
-This shows a mesh with 3.5 million vertices
-![first_image](/.github/resources/PFF_editor_vHol9hqUU4.png?raw=true "image of the editor as it is now")
-
-Contains a ToDo-List by default
-![second_image](/.github/resources/PFF_editor_zXmikPE9jC.png?raw=true "image of the editor as it is now")
-(UI is not finished yet)
+![first_image](/.github/resources/PFF_editor_Yxjqcj034r.png?raw=true "image of the editor as it is now")
 
 ## Getting Started
 To get started with PFF, follow these simple steps:

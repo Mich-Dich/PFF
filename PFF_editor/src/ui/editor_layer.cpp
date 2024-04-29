@@ -74,6 +74,12 @@ namespace PFF {
 		window_general_settings();
 		
 		PFF::toolkit::todo::window_todo_list();
+
+		if (style_editor)
+			ImGui::ShowStyleEditor();
+
+		if (demo_window)
+			ImGui::ShowDemoWindow();
 	}
 
 
@@ -654,6 +660,8 @@ namespace PFF {
 			if (ImGui::BeginMenu("Windows")) {
 
 				ImGui::MenuItem("ToDo List", "", &PFF::toolkit::todo::s_show_todo_list);
+				ImGui::MenuItem("Style Editor", "", &style_editor);
+				ImGui::MenuItem("Demo Window", "", &demo_window);
 
 				ImGui::EndMenu();
 			}

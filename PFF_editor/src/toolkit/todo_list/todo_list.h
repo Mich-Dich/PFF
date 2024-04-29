@@ -157,7 +157,13 @@ namespace PFF::toolkit::todo {
 		ImGui::SetNextWindowViewport(viewport->ID);
 
 		ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, ImVec2(0, 0));
-		ImGui::Begin("ToDo List", &s_show_todo_list, window_flags);
+		if (!ImGui::Begin("ToDo List", &s_show_todo_list, window_flags)) {
+
+			ImGui::PopStyleVar();
+			ImGui::End();
+			return;
+		}
+		ImGui::PopStyleVar();
 
 		static buffer::topic topic_buf{};
 		static buffer::task task_buf{};
@@ -192,13 +198,15 @@ namespace PFF::toolkit::todo {
 				PFF::UI::shift_cursor_pos(inner_padding, (button_size.y - ImGui::GetTextLineHeightWithSpacing()) / 2);
 				ImGui::SetNextItemWidth(textbox_width);
 				ImGui::InputText("##name_of_new_todo_topic", topic_buf.name, CHAR_BUFFER_DEFAULT_SIZE, ImGuiInputTextFlags_EnterReturnsTrue);
-					
+
+				ImGui::SameLine();
 				if (ImGui::Button("Add##todo_add_topic")) {
 
 					s_todo_list->add_topic(topic_buf);
 					topic_buf.reset();
 				};
 
+				ImGui::SameLine();
 				if (UI::add_gray_button(" X ##cancle_todo_add_topic"))
 					topic_buf.reset();
 
@@ -360,18 +368,17 @@ namespace PFF::toolkit::todo {
 		});
 
 		ImGui::End();
-		ImGui::PopStyleVar();
 	}
 
 	void todo_list::add_topic(buffer::topic buffer) {
 
 		LOG(Trace, "Adding a new topic to ToDo-list");
-		m_topics.push_back({ buffer.name, false, false, {{"Test", "Descr"}} });
+		m_topics.push_back({ buffer.name, false, false, {} });
 	}
 
 	void todo_list::remove_topic(const u64 index) {
 
-		ASSERT(index >= 0 && index < m_topics.size(), "", "Tried to remove a nonvalid index")
+		VALIDATE(index >= 0 && index < m_topics.size(), return, "", "Tried to remove a nonvalid index")
 		m_topics.erase(m_topics.begin() + index);
 	}
 
