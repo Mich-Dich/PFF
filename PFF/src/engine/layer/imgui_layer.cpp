@@ -134,7 +134,7 @@ namespace PFF::UI {
 		if (location != UI::imgui::util::window_pos::custom)
 			window_flags |= ImGuiWindowFlags_NoMove;
 
-		// PFF::UI::imgui::util::set_next_window_pos_in_window(location);
+		UI::imgui::util::set_next_window_pos_in_window(location);
 		ImGui::SetNextWindowBgAlpha(0.8f); // Transparent background
 		if (ImGui::Begin("performance_timer", &m_show_FPS_window, window_flags)) {
 

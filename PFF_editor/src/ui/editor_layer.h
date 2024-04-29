@@ -37,9 +37,9 @@ namespace PFF {
 		void window_editor_settings();
 		void window_general_settings();
 
-		void set_next_window_pos(int16 location);
-		void progressbar_with_text(f32 percent, const char* text, f32 min_size_x = 0.0f, f32 min_size_y = 0.0f);
-		void progressbar(f32 percent, f32 min_size_x = 0.0f, f32 min_size_y = 0.0f);
+		//void set_next_window_pos(int16 location);
+		//void progressbar_with_text(f32 percent, const char* text, f32 min_size_x = 0.0f, f32 min_size_y = 0.0f);
+		//void progressbar(f32 percent, f32 min_size_x = 0.0f, f32 min_size_y = 0.0f);
 		void main_menu_bar();
 
 		bool m_show_options = false;

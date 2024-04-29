@@ -4,7 +4,8 @@
 //#include <imgui.h>
 
 //#include "util/io/serializer.h"
-#include "util/ui/panels/pannel_collection.h"
+
+#include "util/ui/pannel_collection.h"
 #include "engine/platform/pff_window.h"
 #include "engine/layer/imgui_layer.h"
 
@@ -220,8 +221,8 @@ namespace PFF {
 				ImGui::SetNextItemWidth(tab_width);
 				if (ImGui::BeginTabItem("Inputs")) {
 
-					/*					
-					UI::begin_default_table("display_input_actions_params");
+									
+					UI::begin_default_table("display_input_actions_params", false);
 					for (input_action* action : *application::get().get_world_layer()->get_current_player_controller()->get_input_mapping()) {						// get input_action
 
 						switch (action->value) {
@@ -246,7 +247,7 @@ namespace PFF {
 						}
 					}
 					UI::end_default_table();
-					*/
+					
 
 					ImGui::EndTabItem();
 				}
@@ -259,7 +260,7 @@ namespace PFF {
 
 						//static_cast<PFF_editor>(application::get()); .get_editor_layer();
 						//glm::vec3 camera_pos = get_editor_camera_pos();
-						UI::begin_default_table("##Camera_params");
+						UI::begin_default_table("##Camera_params", false);
 
 						UI::add_table_row("Position", glm::vec3(), 0);
 						UI::add_table_row("Direction", glm::vec2(), 0);
@@ -497,19 +498,6 @@ namespace PFF {
 	}
 
 	void editor_layer::window_general_settings() {
-	}
-
-	void draw_todo_item(const char* title, const char* description) {
-
-	}
-
-	void editor_layer::set_next_window_pos(int16 location) {
-	}
-
-	void editor_layer::progressbar_with_text(f32 percent, const char* text, f32 min_size_x, f32 min_size_y) {
-	}
-
-	void editor_layer::progressbar(f32 percent, f32 min_size_x, f32 min_size_y) {
 	}
 
 	void editor_layer::main_menu_bar() {

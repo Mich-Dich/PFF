@@ -54,9 +54,6 @@
     <ClInclude Include="src\util\pch_editor.h">
       <Filter>src\util</Filter>
     </ClInclude>
-    <ClInclude Include="src\util\ui\panels\pannel_collection.h">
-      <Filter>src\util\ui\panels</Filter>
-    </ClInclude>
     <ClInclude Include="src\util\util_editor.h">
       <Filter>src\util</Filter>
     </ClInclude>

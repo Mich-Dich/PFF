@@ -61,7 +61,7 @@ namespace PFF {
 		// ---------------------------------------- layers ----------------------------------------
 		m_world_layer = new world_layer();
 		m_layerstack->push_layer(m_world_layer);
-		//m_renderer->set_world_Layer(m_world_layer);
+		m_renderer->set_active_camera(m_world_layer->get_editor_camera());
 
 		m_imgui_layer = new UI::imgui_layer();
 		m_layerstack->push_overlay(m_imgui_layer);

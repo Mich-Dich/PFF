@@ -29,8 +29,6 @@ namespace PFF {
 		//if (m_input_mapping->capture_mouse.get_data<bool>()) { }
 		if (m_input_mapping->capture_mouse.data.boolean) {
 
-			LOG(Debug, "mouse down");
-
 			application::get().capture_cursor();
 			m_camera_direction.y += m_input_mapping->look.data.vec_2D.x * 0.1f * delta;
 			m_camera_direction.x += m_input_mapping->look.data.vec_2D.y * 0.1f * delta;
@@ -51,8 +49,8 @@ namespace PFF {
 
 		if (m_input_mapping->toggle_fps.data.boolean)
 			application::get().limit_fps(!application::get().get_limit_fps(), application::get().get_target_fps());
-
-		//LOG(Trace, vec_to_str(camera_direction, "dir") << vec_to_str(camera_pos, "pos") << vec_to_str(m_input_mapping->move.data._3D, "input"));
-		//m_world_layer->get_editor_camera()->set_view_XYZ(m_camera_pos, m_camera_direction);
+		
+		//LOG(Trace, vec_to_str(m_camera_direction, "dir") << vec_to_str(m_camera_pos, "pos") << vec_to_str(m_input_mapping->move.data._3D, "input"));
+		m_world_layer->get_editor_camera()->set_view_XYZ(m_camera_pos, m_camera_direction);
 	}
 }
