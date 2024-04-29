@@ -47,27 +47,44 @@ namespace PFF {
 		glfwWindowHint(GLFW_VISIBLE, GLFW_FALSE);
 		glfwWindowHint(GLFW_MAXIMIZED, (m_data.window_size_state == window_size_state::fullscreen || m_data.window_size_state == window_size_state::fullscreen_windowed) ? GLFW_TRUE : GLFW_FALSE);
 
-		auto loc_monitor = glfwGetPrimaryMonitor();
-		const auto loc_mode = glfwGetVideoMode(loc_monitor);
-		const u16 size_reduction = 30;
-		m_data.width = std::min((loc_mode->width - m_data.pos_x) - size_reduction, m_data.width);
-		m_data.height = std::min((loc_mode->height - m_data.pos_y) - size_reduction, m_data.height);
-
+		m_data.height -= 35;
+		m_data.width -= 8;
 		m_Window = glfwCreateWindow(static_cast<int>(m_data.width), static_cast<int>(m_data.height), m_data.title.c_str(), nullptr, nullptr);
-		//glfwHideWindow(m_Window);
 
 		CORE_ASSERT(glfwVulkanSupported(), "", "GLFW does not support Vulkan");
 		CORE_LOG(Trace, "Creating window [" << m_data.title << " width: " << m_data.width << "  height: " << m_data.height << "]");
 
+		//glfwSetWindowPos(m_Window, 100, 100);
+		glfwSetWindowPos(m_Window, m_data.pos_x, m_data.pos_y);
+		CORE_LOG(Trace, "window pos [" << m_data.title << " X: " << m_data.pos_x << "  Y: " << m_data.pos_y << "]");
+		
 		glfwSetWindowUserPointer(m_Window, &m_data);
 		glfwGetCursorPos(m_Window, &m_data.cursor_pos_x, &m_data.cursor_pos_y);
-		//glfwSetWindowPos(m_Window, m_data.pos_x, m_data.pos_y);
-		glfwSetWindowPos(m_Window, 100, 100);
 		set_vsync(m_data.vsync);
 
 		GLFWmonitor* primary = glfwGetPrimaryMonitor();
 		const GLFWvidmode* mode = glfwGetVideoMode(primary);
-		//glfwSetWindowMonitor(m_Window, NULL, m_data.pos_x, m_data.pos_y, m_data.width, m_data.height-30, mode->refreshRate);
+		
+		int monitor_count;
+		auto monitors = glfwGetMonitors(&monitor_count);
+
+		for (int x = 0; x < monitor_count; x++) {
+
+			int xpos, ypos, width, height;
+			glfwGetMonitorWorkarea(monitors[x], &xpos, &ypos, &width, &height);
+			CORE_LOG(Trace, "Monitor: " << x << " data: "<< xpos << " / " << ypos << " / " << width << " / " << height);
+		}
+
+
+
+
+		//   check vertical									  check horicontal
+		//if ((m_data.pos_y + m_data.height > mode->height) || (m_data.pos_x + m_data.width > mode->width)) {
+		//
+		//	m_data.pos_y = std::max(m_data.pos_y - ((m_data.pos_y + m_data.height) - mode->height + 30), (u32)0);
+		//	m_data.pos_x = std::max(m_data.pos_x - ((m_data.pos_x + m_data.width) - mode->width + 30), (u32)0);
+		//}
+		glfwSetWindowMonitor(m_Window, NULL, m_data.pos_x, m_data.pos_y, m_data.width, m_data.height, mode->refreshRate);
 
 		// Set icon
 		GLFWimage icon;

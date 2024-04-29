@@ -332,20 +332,31 @@ namespace PFF::render::vulkan {
 
 			if (!m_render_swapchain) {
 
-				ImGuiWindowFlags window_flags = ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoMove | ImGuiWindowFlags_NoScrollbar
-					| ImGuiWindowFlags_NoScrollWithMouse | ImGuiWindowFlags_NoCollapse | ImGuiWindowFlags_NoBackground | ImGuiWindowFlags_NoDecoration ;
+				ImGuiWindowFlags window_flags = 0//ImGuiWindowFlags_NoResize
+					| ImGuiWindowFlags_NoScrollbar
+					| ImGuiWindowFlags_NoScrollWithMouse 
+					| ImGuiWindowFlags_NoCollapse 
+					| ImGuiWindowFlags_NoBackground 
+					//| ImGuiWindowFlags_NoDecoration
+					;
 
-				//ImGui::SetNextWindowDockID();			ImGuiWindowFlags_AlwaysAutoResize
 
 				ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, ImVec2(0, 0));
 				ImGui::PushStyleVar(ImGuiStyleVar_WindowBorderSize, 0);
-				ImGui::Begin("viewport" /*, nullptr, window_flags*/);
+				ImGui::Begin("viewport", nullptr, window_flags);
 					ImGui::PopStyleVar(2);
+					
+					// display rendred image
 					ImVec2 viewport_size = ImGui::GetWindowSize();
 					viewport_size.y -= ImGui::GetFrameHeight();
 					m_imugi_viewport_size = glm::u32vec2(viewport_size.x, viewport_size.y);
 					ImVec2 viewport_uv = { std::max(std::min(viewport_size.x / m_draw_image.image_extent.width, 1.f), 0.f), std::max(std::min(viewport_size.y / m_draw_image.image_extent.height, 1.f), 0.f) };
 					ImGui::Image(m_imugi_image_dset, ImVec2{ viewport_size.x, viewport_size.y }, ImVec2{0,0}, viewport_uv);
+
+					// show debug data
+					UI::imgui::util::set_next_window_pos_in_window(UI::imgui::util::window_pos::top_right);
+					application::get().get_imgui_layer()->show_FPS();
+
 				ImGui::End();
 			}
 

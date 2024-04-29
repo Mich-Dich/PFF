@@ -91,12 +91,21 @@ namespace PFF {
 		window_flags |= ImGuiWindowFlags_NoBringToFrontOnFocus | ImGuiWindowFlags_NoNavFocus | ImGuiWindowFlags_NoDecoration | ImGuiWindowFlags_NoNav;
 		// window_flags |= ImGuiWindowFlags_MenuBar;
 
+		
+		auto color_buf = style->Colors[ImGuiCol_Button];
+		auto main_color = IM_COL32(color_buf.x * 255, color_buf.y * 255, color_buf.z * 255, color_buf.w * 255);
+		auto BG_color = IM_COL32(20, 20, 20, 255);
+
+
 		// ImGui::PushStyleColor(ImGuiCol_WindowBg, PFF_UI_ACTIVE_THEME->WindowBg);
 		ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, ImVec2(0, 0));
 		ImGui::PushStyleVar(ImGuiStyleVar_WindowRounding, 0.f);
 		ImGui::PushStyleVar(ImGuiStyleVar_WindowBorderSize, 0.f);
+		ImGui::PushStyleColor(ImGuiCol_WindowBg, BG_color);
+
 		ImGui::Begin("appliaction_titlebar", nullptr, window_flags);
 
+		ImGui::PopStyleColor();
 		ImGui::PopStyleVar(3);
 
 		const bool is_maximized = application::get_window()->is_maximized();
@@ -114,13 +123,9 @@ namespace PFF {
 		auto* window_draw_list = ImGui::GetWindowDrawList();
 		//window_draw_list->AddRectFilled(uperleft_corner, lowerright_corner, IM_COL32(51, 255, 51, 255));
 
-		auto color_buf = style->Colors[ImGuiCol_Button];
-		//ImVec4 bufsd = UI::main_titlebar_color;
-		auto main_color = IM_COL32(color_buf.x * 255, color_buf.y * 255, color_buf.z * 255, color_buf.w * 255);
-
 		window_draw_list->AddRectFilled(titlebar_min, { titlebar_min.x + 200.f, titlebar_max.y }, main_color);
 		titlebar_min.x += 200.f;
-		window_draw_list->AddRectFilledMultiColor(titlebar_min, { titlebar_min.x + 550.f, titlebar_max.y }, main_color, IM_COL32_BLACK_TRANS, IM_COL32_BLACK_TRANS, main_color);
+		window_draw_list->AddRectFilledMultiColor(titlebar_min, { titlebar_min.x + 550.f, titlebar_max.y }, main_color, BG_color, BG_color, main_color);
 
 		// Debug titlebar bounds
 		//fg_draw_list->AddRect(titlebar_min, titlebar_max, IM_COL32(222, 43, 43, 255));
@@ -152,10 +157,10 @@ namespace PFF {
 		const ImVec2 window_padding = { style->WindowPadding.x / 2,style->WindowPadding.y + 3.f };
 
 		ImGui::SetItemAllowOverlap();
-		//ImGui::PushFont(application::get().get_imgui_layer()->get_font("giant"));
+		ImGui::PushFont(application::get().get_imgui_layer()->get_font("giant"));
 		ImGui::SetCursorPos(ImVec2(25, ((m_titlebar_height - ImGui::GetFontSize() + titlebar_vertical_offset) / 2)));
 		ImGui::Text("PFF Editor");
-		//ImGui::PopFont();
+		ImGui::PopFont();
 
 		ImGui::SetCursorPos(ImVec2(viewport->Size.x - (window_padding.x + (button_spaccing * 2) + (button_width * 3)), window_padding.y + titlebar_vertical_offset));
 		if (ImGui::Button("_##Min", ImVec2(button_width, button_width)))

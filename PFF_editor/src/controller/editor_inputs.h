@@ -26,7 +26,7 @@ namespace PFF {
 		move.flags = INPUT_ACTION_MODEFIER_SMOOTH_INTERP | INPUT_ACTION_MODEFIER_USE_VEC_NORMAL | INPUT_ACTION_MODEFIER_AUTO_RESET;
 		move.value = PFF::input::action_type::vec_3D;
 		move.duration_in_sec = 0.5f;
-		move.keys = {
+		move.keys_bindings = {
 			{key_code::key_W, INPUT_ACTION_TRIGGER_KEY_DOWN },
 			{key_code::key_S, INPUT_ACTION_TRIGGER_KEY_DOWN , INPUT_ACTION_MODEFIER_NEGATE },
 			{key_code::key_A, INPUT_ACTION_TRIGGER_KEY_DOWN , INPUT_ACTION_MODEFIER_AXIS_2 | INPUT_ACTION_MODEFIER_NEGATE},
@@ -43,7 +43,7 @@ namespace PFF {
 		capture_mouse.flags = 0;
 		capture_mouse.value = PFF::input::action_type::boolean;
 		capture_mouse.duration_in_sec = 0.5f;
-		capture_mouse.keys = {
+		capture_mouse.keys_bindings = {
 			{key_code::mouse_bu_right, INPUT_ACTION_TRIGGER_KEY_DOWN},
 		};
 		REGISTER_INPUT_ACTION(capture_mouse);
@@ -55,7 +55,7 @@ namespace PFF {
 		look.flags = INPUT_ACTION_MODEFIER_AUTO_RESET_ALL | INPUT_ACTION_MODEFIER_SMOOTH_INTERP;
 		look.value = PFF::input::action_type::vec_2D;
 		look.duration_in_sec = 0.5f;
-		look.keys = {
+		look.keys_bindings = {
 			{key_code::mouse_moved_x, INPUT_ACTION_TRIGGER_MOUSE_POS_AND_NEG},
 			{key_code::mouse_moved_y, INPUT_ACTION_TRIGGER_MOUSE_POS_AND_NEG , INPUT_ACTION_MODEFIER_AXIS_2 | INPUT_ACTION_MODEFIER_NEGATE},
 		};
@@ -67,7 +67,7 @@ namespace PFF {
 		change_move_speed.flags = INPUT_ACTION_MODEFIER_AUTO_RESET_ALL;
 		change_move_speed.value = PFF::input::action_type::vec_1D;
 		change_move_speed.duration_in_sec = 0.5f;
-		change_move_speed.keys = {
+		change_move_speed.keys_bindings = {
 			{key_code::mouse_scrolled_y, INPUT_ACTION_TRIGGER_MOUSE_POS_AND_NEG},
 		};
 		REGISTER_INPUT_ACTION(change_move_speed);
@@ -80,7 +80,7 @@ namespace PFF {
 		toggle_fps.flags = INPUT_ACTION_MODEFIER_AUTO_RESET_ALL;
 		toggle_fps.value = PFF::input::action_type::boolean;
 		toggle_fps.duration_in_sec = 0.f;
-		toggle_fps.keys = {
+		toggle_fps.keys_bindings = {
 			{key_code::key_P, INPUT_ACTION_TRIGGER_KEY_MOVE_DOWN},
 		};
 		REGISTER_INPUT_ACTION(toggle_fps);

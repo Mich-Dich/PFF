@@ -31,7 +31,7 @@ namespace PFF {
 		//  } data;																		// NO NEED TO SAVE
 		//  std::chrono::time_point<std::chrono::high_resolution_clock> time_stamp;		// NO NEED TO SAVE
 		//  f32 duration_in_sec;														// SAVE
-		//  std::vector<key_details> keys;												// SAVE
+		//  std::vector<key_binding_details> keys_bindings;												// SAVE
 
 		auto serializer_option = force_override ? serializer::option::save_to_file : serializer::option::load_from_file;
 
@@ -39,14 +39,14 @@ namespace PFF {
 			.entry(KEY_VALUE(action->triger_when_paused))
 			.entry(KEY_VALUE(action->duration_in_sec))
 			.entry(KEY_VALUE(action->value))
-			.vector(KEY_VALUE(action->keys), [&](serializer::yaml& yaml, u64 x) {
+			.vector(KEY_VALUE(action->keys_bindings), [&](serializer::yaml& yaml, u64 x) {
 
-				std::string key_name = key_code_to_string(action->keys[x].key);
+				std::string key_name = key_code_to_string(action->keys_bindings[x].key);
 				yaml.entry(KEY_VALUE(key_name));
-				action->keys[x].key = string_to_key_code(key_name);
+				action->keys_bindings[x].key = string_to_key_code(key_name);
 
-				yaml.entry(KEY_VALUE(action->keys[x].trigger_flags));
-				yaml.entry(KEY_VALUE(action->keys[x].modefier_flags));
+				yaml.entry(KEY_VALUE(action->keys_bindings[x].trigger_flags));
+				yaml.entry(KEY_VALUE(action->keys_bindings[x].modefier_flags));
 			});
 
 		m_actions.emplace_back(action);
