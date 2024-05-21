@@ -17,6 +17,18 @@ typedef double f64;
 
 typedef unsigned long long handle;
 
+struct system_time {
+
+	unsigned short year;
+	unsigned short month;
+	unsigned short day_of_week;
+	unsigned short day;
+	unsigned short hour;
+	unsigned short minute;
+	unsigned short secund;
+	unsigned short millisecends;
+};
+
 enum class error_code {
 	success = 0,
 	generic_not_found,

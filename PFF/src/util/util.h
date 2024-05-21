@@ -66,9 +66,11 @@ namespace PFF {
         return std::make_unique<T>(std::forward<args>(arguments)...);
     }
     
-    // =================================================  utilitys =================================================
+    // ================================================= utilitys =================================================
 
 	namespace util {
+
+        system_time get_system_time();
 
         //@brief Checks the validity of a pointer.
         //@param [ptr] Pointer to check.

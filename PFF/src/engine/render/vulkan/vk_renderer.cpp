@@ -294,8 +294,6 @@ namespace PFF::render::vulkan {
 			m_draw_extent.height = std::min(m_swapchain_extent.height, m_draw_image.image_extent.height) * (u32)m_render_scale;
 		}
 
-
-
 		VK_CHECK(vkBeginCommandBuffer(cmd, &cmdBeginInfo));
 
 		util::transition_image(cmd, m_draw_image.image, VK_IMAGE_LAYOUT_UNDEFINED, VK_IMAGE_LAYOUT_GENERAL);
@@ -306,6 +304,8 @@ namespace PFF::render::vulkan {
 		util::transition_image(cmd, m_depth_image.image, VK_IMAGE_LAYOUT_UNDEFINED, VK_IMAGE_LAYOUT_DEPTH_ATTACHMENT_OPTIMAL);
 
 		draw_geometry(cmd);
+
+		//draw_debug(cmd);
 
 		if (m_render_swapchain) {
 

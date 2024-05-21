@@ -82,8 +82,8 @@ namespace PFF {
 		VkExtent2D get_extend();
 		bool should_close();
 		void poll_events();
-		void capture_cursor();
-		void release_cursor();
+		PFF_API void capture_cursor();
+		PFF_API void release_cursor();
 
 		template<typename Func>
 		void queue_event(Func&& func) {

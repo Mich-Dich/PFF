@@ -41,7 +41,7 @@ namespace PFF {
 		FORCEINLINE static application& get()							{ return *s_instance; }
 		FORCEINLINE static ref<pff_window> get_window()					{ return m_window; }
 		FORCEINLINE static ref<PFF::render::renderer> get_renderer()	{ return m_renderer; }
-		FORCEINLINE UI::imgui_layer* get_imgui_layer()			{ return m_imgui_layer; }
+		FORCEINLINE UI::imgui_layer* get_imgui_layer()					{ return m_imgui_layer; }
 		FORCEINLINE static void  set_render_state(system_state state)	{ return m_renderer->set_state(state); }
 		FORCEINLINE world_layer* get_world_layer()						{ return m_world_layer; }
 		//FORCEINLINE ref<game_map> get_current_map()					{ return m_world_layer->get_current_map(); }

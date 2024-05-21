@@ -31,9 +31,11 @@ namespace PFF {
 		m_data(attributes) {
 
 		PFF_PROFILE_FUNCTION();
+		LOG_INIT();
 
+		{
 		window_attrib_serializer(&m_data, serializer::option::load_from_file);
-		//m_data.app_ref = &application::get();
+		}
 
 		if (!s_GLFWinitialized) {
 
@@ -75,9 +77,6 @@ namespace PFF {
 			CORE_LOG(Trace, "Monitor: " << x << " data: "<< xpos << " / " << ypos << " / " << width << " / " << height);
 		}
 
-
-
-
 		//   check vertical									  check horicontal
 		//if ((m_data.pos_y + m_data.height > mode->height) || (m_data.pos_x + m_data.width > mode->width)) {
 		//
@@ -113,7 +112,7 @@ namespace PFF {
 		window_attrib_serializer(&m_data, serializer::option::save_to_file);
 		glfwDestroyWindow(m_Window);
 		glfwTerminate();
-		CORE_LOG(Trace, "shutdown");
+		LOG_SHUTDOWN();
 	}
 
 	// ============================================================================== inplemantation ==============================================================================
@@ -172,7 +171,7 @@ namespace PFF {
 
 			window_attrib& Data = *(window_attrib*)glfwGetWindowUserPointer(window);
 			Data.window_size_state = maximized? window_size_state::fullscreen : window_size_state::windowed;
-			CORE_LOG(Trace, "Maximize window: " << maximized);
+			// CORE_LOG(Trace, "Maximize window: " << maximized);
 		});
 
 		glfwSetScrollCallback(m_Window, [](GLFWwindow* window, double xOffset, double yOffset) {
@@ -246,7 +245,7 @@ namespace PFF {
 
 	void pff_window::minimize_window() {
 		
-		LOG(Info, "minimizing window");
+		LOG(Trace, "minimizing window");
 		glfwIconifyWindow(m_Window);
 		m_data.window_size_state = window_size_state::minimised;
 		//application::set_render_state(system_state::inactive);
@@ -254,14 +253,14 @@ namespace PFF {
 
 	void pff_window::restore_window() {
 		
-		LOG(Info, "restoring window");
+		LOG(Trace, "restoring window");
 		glfwRestoreWindow(m_Window); 
 		//application::set_render_state(system_state::active);
 	}
 
 	void pff_window::maximize_window() { 
 		
-		LOG(Info, "maximising window");
+		LOG(Trace, "maximising window");
 		glfwMaximizeWindow(m_Window);
 		m_data.window_size_state = window_size_state::fullscreen_windowed;
 		//application::set_render_state(system_state::active);

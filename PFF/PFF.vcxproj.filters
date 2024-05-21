@@ -288,5 +288,6 @@
     <ClCompile Include="src\util\timer.cpp">
       <Filter>util</Filter>
     </ClCompile>
+    <ClCompile Include="src\util\util.cpp" />
   </ItemGroup>
 </Project>

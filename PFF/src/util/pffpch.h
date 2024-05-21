@@ -52,7 +52,6 @@
 // ============================================================================  platform specific  ============================================================================
 
 #ifdef PFF_PLATFORM_WINDOWS
-	//#include <Windows.h>
 	#include "util/platform/windows_util.h"
 #else
 	#error PFF only suports windows

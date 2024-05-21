@@ -8,7 +8,6 @@
 #include <cstdarg>
 #include <fstream>
 #include <iomanip>
-#include <Windows.h>
 
 #include "logger.h"
 
@@ -16,6 +15,7 @@
 #define SHORTEN_FILE_PATH(text)         (strstr(text, PROJECT_FOLDER) ? strstr(text, PROJECT_FOLDER) + strlen(PROJECT_FOLDER) + 1 : text)
 #define SHORT_FILE(text)                (strrchr(text, '\\') ? strrchr(text, '\\') + 1 : text)
 #define SHORTEN_FUNC_NAME(text)         (strrchr(text, '::') ? strrchr(text, '::') + 1 : text)
+
 
 
 namespace APP_NAMESPACE {
@@ -58,15 +58,13 @@ namespace APP_NAMESPACE {
             std::ostringstream Init_Message;
             Init_Message.flush();
 
-            SYSTEMTIME TimeLoc;
-            GetLocalTime(&TimeLoc);
-
-            Init_Message << "[" << std::setw(4) << std::setfill('0') << TimeLoc.wYear
-                << "/" << std::setw(2) << std::setfill('0') << TimeLoc.wMonth
-                << "/" << std::setw(2) << std::setfill('0') << TimeLoc.wDay
-                << " - " << std::setw(2) << std::setfill('0') << TimeLoc.wHour
-                << ":" << std::setw(2) << std::setfill('0') << TimeLoc.wMinute
-                << ":" << std::setw(2) << std::setfill('0') << TimeLoc.wSecond << "]"
+            system_time loc_system_time = util::get_system_time();
+            Init_Message << "[" << std::setw(4) << std::setfill('0') << loc_system_time.year
+                << "/" << std::setw(2) << std::setfill('0') << loc_system_time.month
+                << "/" << std::setw(2) << std::setfill('0') << loc_system_time.day
+                << " - " << std::setw(2) << std::setfill('0') << loc_system_time.hour
+                << ":" << std::setw(2) << std::setfill('0') << loc_system_time.minute
+                << ":" << std::setw(2) << std::setfill('0') << loc_system_time.secund << "]"
                 << "  Log initialized" << std::endl
 
                 << "   Inital Log Format: '" << format << "'" << std::endl << "   Enabled Log Levels: ";
@@ -121,17 +119,12 @@ namespace APP_NAMESPACE {
             if (strlen(message) == 0)
                 return;
 
-            HANDLE hConsole = GetStdHandle(STD_OUTPUT_HANDLE);
-
-            // Get the current local system time
-            SYSTEMTIME TimeLoc;
-            GetLocalTime(&TimeLoc);
+            system_time loc_system_time = util::get_system_time();
 
             // Create Buffer vars
             std::ostringstream Format_Filled;
             Format_Filled.flush();
             char Format_Command;
-
 
             // Loop over Format string and build Final Message
             int FormatLen = static_cast<int>(LogMessageFormat.length());
@@ -182,36 +175,36 @@ namespace APP_NAMESPACE {
 
                         // ------------------------------------  Time  -------------------------------------------------------------------------------
                         // Clock hh:mm:ss
-                    case 'T':   Format_Filled << std::setw(2) << std::setfill('0') << TimeLoc.wHour
-                            << ":" << std::setw(2) << std::setfill('0') << TimeLoc.wMinute
-                            << ":" << std::setw(2) << std::setfill('0') << TimeLoc.wSecond; break;
+                    case 'T':   Format_Filled << std::setw(2) << std::setfill('0') << loc_system_time.hour
+                            << ":" << std::setw(2) << std::setfill('0') << loc_system_time.minute
+                            << ":" << std::setw(2) << std::setfill('0') << loc_system_time.secund; break;
 
                         // Clock secunde
-                    case 'H':   Format_Filled << std::setw(2) << std::setfill('0') << TimeLoc.wHour; break;
+                    case 'H':   Format_Filled << std::setw(2) << std::setfill('0') << loc_system_time.hour; break;
 
                         // Clock minute
-                    case 'M':   Format_Filled << std::setw(2) << std::setfill('0') << TimeLoc.wMinute; break;
+                    case 'M':   Format_Filled << std::setw(2) << std::setfill('0') << loc_system_time.minute; break;
 
                         // Clock second
-                    case 'S':   Format_Filled << std::setw(2) << std::setfill('0') << TimeLoc.wSecond; break;
+                    case 'S':   Format_Filled << std::setw(2) << std::setfill('0') << loc_system_time.secund; break;
 
                         // Clock millisec.
-                    case 'J':   Format_Filled << std::setw(3) << std::setfill('0') << TimeLoc.wMilliseconds; break;
+                    case 'J':   Format_Filled << std::setw(3) << std::setfill('0') << loc_system_time.millisecends; break;
 
                         // ------------------------------------  Date  -------------------------------------------------------------------------------
                         // Data yyyy/mm/dd
-                    case 'N':   Format_Filled << std::setw(4) << std::setfill('0') << TimeLoc.wYear
-                            << "/" << std::setw(2) << std::setfill('0') << TimeLoc.wMonth
-                            << "/" << std::setw(2) << std::setfill('0') << TimeLoc.wDay; break;
+                    case 'N':   Format_Filled << std::setw(4) << std::setfill('0') << loc_system_time.year
+                            << "/" << std::setw(2) << std::setfill('0') << loc_system_time.month
+                            << "/" << std::setw(2) << std::setfill('0') << loc_system_time.day; break;
 
                         // Year
-                    case 'Y':   Format_Filled << std::setw(4) << std::setfill('0') << TimeLoc.wYear; break;
+                    case 'Y':   Format_Filled << std::setw(4) << std::setfill('0') << loc_system_time.year; break;
 
                         // Month
-                    case 'O':   Format_Filled << std::setw(2) << std::setfill('0') << TimeLoc.wMonth; break;
+                    case 'O':   Format_Filled << std::setw(2) << std::setfill('0') << loc_system_time.month; break;
 
                         // Day
-                    case 'D':   Format_Filled << std::setw(2) << std::setfill('0') << TimeLoc.wDay; break;
+                    case 'D':   Format_Filled << std::setw(2) << std::setfill('0') << loc_system_time.day; break;
 
                         // ------------------------------------  Default  -------------------------------------------------------------------------------
                     default: break;
