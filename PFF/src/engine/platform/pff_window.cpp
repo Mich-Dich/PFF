@@ -85,6 +85,10 @@ namespace PFF {
 		//}
 		glfwSetWindowMonitor(m_Window, NULL, m_data.pos_x, m_data.pos_y, m_data.width, m_data.height, mode->refreshRate);
 
+		if (m_data.window_size_state == window_size_state::fullscreen
+			|| m_data.window_size_state == window_size_state::fullscreen)
+			glfwMaximizeWindow(m_Window);
+
 		// Set icon
 		GLFWimage icon;
 		int channels;
@@ -171,7 +175,7 @@ namespace PFF {
 
 			window_attrib& Data = *(window_attrib*)glfwGetWindowUserPointer(window);
 			Data.window_size_state = maximized? window_size_state::fullscreen : window_size_state::windowed;
-			// CORE_LOG(Trace, "Maximize window: " << maximized);
+			 CORE_LOG(Trace, "Maximize window: " << maximized);
 		});
 
 		glfwSetScrollCallback(m_Window, [](GLFWwindow* window, double xOffset, double yOffset) {
