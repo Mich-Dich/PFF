@@ -34,8 +34,6 @@ namespace PFF {
 		application::get().get_window()->show_titlebar(false);
 
 
-		// m_context = ImGui::CreateContext();
-
 		//m_swapchain_supported_presentmodes = application::get().get_renderer()->get_swapchain_suported_present_modes();
 		//for (auto mode : m_swapchain_supported_presentmodes)
 		//	m_swapchain_supported_presentmodes_str.push_back(present_mode_to_str(mode));
@@ -59,7 +57,7 @@ namespace PFF {
 		
 		ImGui::SetCurrentContext(m_context);
 
-		window_main_menu_bar();
+		window_main_title_bar();
 		window_main_content();
 		
 		window_general_debugger();
@@ -83,7 +81,7 @@ namespace PFF {
 	}
 
 
-	void editor_layer::window_main_menu_bar() {
+	void editor_layer::window_main_title_bar() {
 
 		const f32 m_titlebar_height = 60.f;
 
@@ -96,13 +94,10 @@ namespace PFF {
 		ImGuiWindowFlags window_flags = ImGuiWindowFlags_NoDocking;
 		window_flags |= ImGuiWindowFlags_NoTitleBar | ImGuiWindowFlags_NoCollapse | ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoMove | ImGuiWindowFlags_NoScrollbar | ImGuiWindowFlags_NoScrollWithMouse;
 		window_flags |= ImGuiWindowFlags_NoBringToFrontOnFocus | ImGuiWindowFlags_NoNavFocus | ImGuiWindowFlags_NoDecoration | ImGuiWindowFlags_NoNav;
-		// window_flags |= ImGuiWindowFlags_MenuBar;
-
 		
 		auto color_buf = style->Colors[ImGuiCol_Button];
 		auto main_color = IM_COL32(color_buf.x * 255, color_buf.y * 255, color_buf.z * 255, color_buf.w * 255);
 		auto BG_color = IM_COL32(20, 20, 20, 255);
-
 
 		// ImGui::PushStyleColor(ImGuiCol_WindowBg, PFF_UI_ACTIVE_THEME->WindowBg);
 		ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, ImVec2(0, 0));
@@ -123,8 +118,8 @@ namespace PFF {
 		const ImVec2 titlebar_max = { ImGui::GetCursorScreenPos().x + ImGui::GetWindowWidth(),
 										ImGui::GetCursorScreenPos().y + m_titlebar_height };
 
-		auto* bg_draw_list = ImGui::GetBackgroundDrawList();
-		auto* fg_draw_list = ImGui::GetForegroundDrawList();
+		/*auto* bg_draw_list = ImGui::GetBackgroundDrawList();
+		auto* fg_draw_list = ImGui::GetForegroundDrawList();*/
 		// bg_draw_list->AddRectFilled(titlebar_min, titlebar_max, IM_COL32(21, 251, 21, 255));
 
 		auto* window_draw_list = ImGui::GetWindowDrawList();
@@ -185,26 +180,27 @@ namespace PFF {
 		if (ImGui::Button("X##Close", ImVec2(button_width, button_width)))
 			application::get().close_application();
 
-		//ImGuiStyle* style = &ImGui::GetStyle();
-		ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, ImVec2(4, 4));
-		ImGui::PushStyleVar(ImGuiStyleVar_WindowRounding, 0.f);
-		ImGui::PushStyleVar(ImGuiStyleVar_WindowBorderSize, 0.f);
-		ImGui::PushStyleColor(ImGuiCol_MenuBarBg, ImVec4{ 0, 0, 0, 0 });
-		ImGui::PushStyleColor(ImGuiCol_WindowBg, ImVec4{ 0, 0, 0, 0 });
-
 		// make new window with menubar because I dont know how to limit the extend of a MenuBar
 		// just ImGui::MenuBar() would bo over the entire width of [appliaction_titlebar]
-		ImGui::SetNextWindowPos(ImVec2(viewport->Pos.x + 160, viewport->Pos.y + window_padding.y + titlebar_vertical_offset));
-		ImGui::SetNextWindowSize({ 0,0 });
-		ImGui::SetNextWindowViewport(viewport->ID);
 		{
+			ImGui::SetNextWindowPos(ImVec2(viewport->Pos.x + 160, viewport->Pos.y + window_padding.y + titlebar_vertical_offset));
+			ImGui::SetNextWindowSize({ 0,0 });
+			ImGui::SetNextWindowViewport(viewport->ID);
 			window_flags = ImGuiWindowFlags_NoTitleBar | ImGuiWindowFlags_NoCollapse | ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoMove | ImGuiWindowFlags_NoScrollbar | ImGuiWindowFlags_NoScrollWithMouse;
 			window_flags |= ImGuiWindowFlags_NoDocking | ImGuiWindowFlags_MenuBar | ImGuiWindowFlags_AlwaysAutoResize;
+			
+			//ImGuiStyle* style = &ImGui::GetStyle();
+			ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, ImVec2(4, 4));
+			ImGui::PushStyleVar(ImGuiStyleVar_WindowRounding, 0.f);
+			ImGui::PushStyleVar(ImGuiStyleVar_WindowBorderSize, 0.f);
+			ImGui::PushStyleColor(ImGuiCol_MenuBarBg, ImVec4{ 0, 0, 0, 0 });
+			ImGui::PushStyleColor(ImGuiCol_WindowBg, ImVec4{ 0, 0, 0, 0 });
+
 			ImGui::Begin("application_title_menubar", nullptr, window_flags);
 
-			ImGui::PopStyleColor(2);
-			ImGui::PopStyleVar(3);
-			main_menu_bar();
+				ImGui::PopStyleColor(2);
+				ImGui::PopStyleVar(3);
+				main_menu_bar();
 
 			ImGui::End();
 		}
@@ -228,31 +224,31 @@ namespace PFF {
 				if (ImGui::BeginTabItem("Inputs")) {
 
 									
-					UI::begin_default_table("display_input_actions_params", false);
+					UI::begin_table("display_input_actions_params", false);
 					for (input_action* action : *application::get().get_world_layer()->get_current_player_controller()->get_input_mapping()) {						// get input_action
 
 						switch (action->value) {
 						case input::action_type::boolean:
-							UI::add_table_row(action->get_name(), action->data.boolean, ImGuiInputTextFlags_ReadOnly);
+							UI::table_row(action->get_name(), action->data.boolean, ImGuiInputTextFlags_ReadOnly);
 							break;
 
 						case input::action_type::vec_1D:
-							UI::add_table_row(action->get_name(), action->data.vec_1D, ImGuiInputTextFlags_ReadOnly);
+							UI::table_row(action->get_name(), action->data.vec_1D, ImGuiInputTextFlags_ReadOnly);
 							break;
 
 						case input::action_type::vec_2D:
-							UI::add_table_row(action->get_name(), action->data.vec_2D, ImGuiInputTextFlags_ReadOnly);
+							UI::table_row(action->get_name(), action->data.vec_2D, ImGuiInputTextFlags_ReadOnly);
 							break;
 
 						case input::action_type::vec_3D:
-							UI::add_table_row(action->get_name(), action->data.vec_3D, ImGuiInputTextFlags_ReadOnly);
+							UI::table_row(action->get_name(), action->data.vec_3D, ImGuiInputTextFlags_ReadOnly);
 							break;
 
 						default:
 							break;
 						}
 					}
-					UI::end_default_table();
+					UI::end_table();
 					
 
 					ImGui::EndTabItem();
@@ -266,12 +262,12 @@ namespace PFF {
 
 						//static_cast<PFF_editor>(application::get()); .get_editor_layer();
 						//glm::vec3 camera_pos = get_editor_camera_pos();
-						UI::begin_default_table("##Camera_params", false);
+						UI::begin_table("##Camera_params", false);
 
-						UI::add_table_row("Position", glm::vec3(), 0);
-						UI::add_table_row("Direction", glm::vec2(), 0);
+						UI::table_row("Position", glm::vec3(), 0);
+						UI::table_row("Direction", glm::vec2(), 0);
 
-						UI::end_default_table();
+						UI::end_table();
 
 					}
 
@@ -554,9 +550,18 @@ namespace PFF {
 					LOG(Trace, "start GES window")
 				}
 
-				if (ImGui::BeginMenu("Color Theme")) {
+				if (ImGui::BeginMenu("UI")) {
 
-					ImGui::Text("Select Theme");
+					UI::big_text("Font");
+
+					UI::begin_table("display_input_actions_params", false, ImVec2(350, (ImGui::GetTextLineHeightWithSpacing() * 2)) );
+						if (UI::table_row("Font size", UI::m_font_size))
+							application::get().get_imgui_layer()->recreate_fonts();
+						if (UI::table_row("Big font size", UI::m_big_font_size))
+							application::get().get_imgui_layer()->recreate_fonts();
+					UI::end_table();
+
+					UI::big_text("Select Theme");
 
 					const char* items[] = { "Dark", "Light" };
 					static int item_current_idx = 0;
@@ -567,7 +572,8 @@ namespace PFF {
 							if (ImGui::Selectable(items[n], is_selected)) {
 
 								item_current_idx = n;
-								UI::UI_theme = static_cast<UI::theme_selection>(item_current_idx);
+								UI::set_UI_theme_selection(static_cast<UI::theme_selection>(item_current_idx));
+								CORE_LOG(Debug, "updating UI theme" << (int)UI::UI_theme);
 								UI::update_UI_theme();
 							}
 						}

@@ -49,6 +49,7 @@ namespace PFF::render {
 		// --------------- ImGui ----------------
 		virtual void imgui_init() = 0;
 		virtual void imgui_create_fonts() = 0;
+		virtual void imgui_destroy_fonts() = 0;
 		virtual void imgui_shutdown() = 0;
 
 		// --------------- util ----------------

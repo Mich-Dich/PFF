@@ -77,6 +77,7 @@ namespace PFF::render::vulkan {
 		// --------------- ImGui ----------------
 		void imgui_init() override;
 		void imgui_create_fonts() override;
+		void imgui_destroy_fonts() override;
 		void imgui_shutdown() override;
 
 		// --------------- util ----------------

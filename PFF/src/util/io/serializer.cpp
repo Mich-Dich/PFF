@@ -121,11 +121,14 @@ namespace PFF::serializer {
 						continue;
 					}
 
-					line.erase(std::remove(line.begin(), line.end(), ' '), line.end());
 					std::istringstream iss(line);
 					std::string key, value;
 					std::getline(iss, key, ':');
 					std::getline(iss, value);
+					
+					if (!value.empty() && value.front() == ' ')
+						value.erase(0, 1);
+					
 					m_key_value_pares[key] = value;
 				}
 

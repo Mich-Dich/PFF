@@ -14,12 +14,15 @@ namespace PFF::UI {
 		light
 	};
 
+
+	static f32 m_font_size = 14.5f, m_big_font_size = 18.f;
 	static theme_selection UI_theme = theme_selection::dark;
-	static ImVec4 main_color;
 	static bool enable_window_forder;
 	static ImVec4 highlited_window_bg;
-	static ImVec4 main_titlebar_color;
 	static f32 default_item_width;
+
+	static ImVec4 main_color;
+	static ImVec4 main_titlebar_color;
 	
 	static ImVec4 action_color_00_default;
 	static ImVec4 action_color_00_hover;
@@ -29,6 +32,7 @@ namespace PFF::UI {
 	static ImVec4 action_color_gray_hover;
 	static ImVec4 action_color_gray_active;
 
+	void PFF_API set_UI_theme_selection(theme_selection theme_selection);
 	void PFF_API enable_window_border(bool enable);
 	void PFF_API update_UI_theme();
 	void PFF_API update_UI_colors(ImVec4 new_color);
@@ -49,6 +53,8 @@ namespace PFF::UI {
 		void on_event(event& event) override;
 		void on_imgui_render() override;
 		void show_FPS();
+		
+		PFF_API void recreate_fonts();
 
 		PFF_API_EDITOR ImFont* get_font(const std::string& name = "default");
 
@@ -56,11 +62,10 @@ namespace PFF::UI {
 
 	private:
 
-		void serialize(serializer::option option);
+		void create_fonts();
 
 		// ------------------------- general -------------------------
 		ImGuiContext* m_context{};
-		f32 m_font_size = 14.5f, m_big_font_size = 18.f;
 		std::unordered_map<std::string, ImFont*> m_fonts{};
 
 		// ------------------------- performance display -------------------------
@@ -68,6 +73,7 @@ namespace PFF::UI {
 		f32 m_work_time = 0.f, m_sleep_time = 0.f;
 		u32 m_target_fps = 0, m_current_fps = 0;
 		bool m_limit_fps = false;
-						
+		bool fonts_need_recreation = false;
+
 	};
 }

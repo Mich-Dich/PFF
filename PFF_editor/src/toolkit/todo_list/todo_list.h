@@ -1,8 +1,11 @@
 #pragma once
 
+#include <imgui_internal.h>
+
 namespace PFF::toolkit::todo {
 
 #define CHAR_BUFFER_DEFAULT_SIZE 256
+#define CHAR_BUFFER_DEFAULT_MULTIPLIER 20
 
 	// forward declareation
 	class todo_list_serializer;
@@ -14,13 +17,34 @@ namespace PFF::toolkit::todo {
 	static todo_list* s_todo_list;
 
 	// ============================================= serializer =============================================
+	
+	int count_lines(const char text[CHAR_BUFFER_DEFAULT_SIZE]) {
+
+		if (text[0] == '\0')
+			return 1;
+
+		int line_count = 0;
+		for (int i = 0; i < 256; ++i) {
+			if (text[i] == '\0')
+				break;
+		
+			if (text[i] == '\n')
+				++line_count;
+		}
+		
+		// If the last character is not a newline and the string is not empty, count the last line
+		if (text[0] != '\0' && text[255] != '\n')
+			++line_count;
+		
+		return line_count;
+	}
 
 	namespace buffer {
 
 		struct topic {
 
 			bool input_enabled = false;
-			char name[CHAR_BUFFER_DEFAULT_SIZE] = "";
+			char name[CHAR_BUFFER_DEFAULT_SIZE] = "\0";
 
 			void reset() {
 
@@ -32,8 +56,8 @@ namespace PFF::toolkit::todo {
 		struct task {
 
 			bool input_enabled = false;
-			char name[CHAR_BUFFER_DEFAULT_SIZE] = "";
-			char description[CHAR_BUFFER_DEFAULT_SIZE] = "";
+			char name[CHAR_BUFFER_DEFAULT_SIZE] = "\0";
+			char description[CHAR_BUFFER_DEFAULT_SIZE * CHAR_BUFFER_DEFAULT_MULTIPLIER] = "\0";
 
 			void reset() {
 
@@ -180,7 +204,7 @@ namespace PFF::toolkit::todo {
 			const f32 inner_width = first_width - (inner_padding * 2);
 
 			PFF::UI::shift_cursor_pos(inner_offset_x, (button_size.y - ImGui::GetTextLineHeightWithSpacing()) / 2);
-			PFF::UI::draw_big_text("Topics");
+			PFF::UI::big_text("Topics");
 
 			ImGui::SameLine();
 			ImGui::SetCursorPosX( start_pos + (first_width - button_size.x - inner_offset_x));
@@ -260,7 +284,7 @@ namespace PFF::toolkit::todo {
 			//ImGui::PopStyleColor();
 
 			const ImVec2 start_pos = ImGui::GetCursorPos();
-			UI::draw_big_text("Open Tasks");
+			UI::big_text("Open Tasks");
 
 			//ImGui::SameLine();
 			ImGui::SetCursorPos(start_pos);
@@ -283,7 +307,7 @@ namespace PFF::toolkit::todo {
 							sprintf_s(buf, 32, "##topic_%llutask_%llu", x, y);
 							ImGui::Checkbox(buf, &s_todo_list->m_topics[x].tasks[y].done);
 							ImGui::SameLine();
-							UI::draw_big_text(s_todo_list->m_topics[x].tasks[y].title.c_str(), true);
+							UI::big_text(s_todo_list->m_topics[x].tasks[y].title.c_str(), true);
 							UI::shift_cursor_pos(inner_offset_x + 5, 0);
 							ImGui::TextWrapped(s_todo_list->m_topics[x].tasks[y].description.c_str());
 						}
@@ -308,7 +332,7 @@ namespace PFF::toolkit::todo {
 					ImGui::Text("Title");
 					ImGui::SetCursorPos(start_pos);
 				}
-				ImGui::InputTextEx("##new_task_title", NULL, task_buf.name, CHAR_BUFFER_DEFAULT_SIZE, input_size, 0);
+				ImGui::InputTextMultiline("##new_task_title", task_buf.name, CHAR_BUFFER_DEFAULT_SIZE, input_size, 0);
 				show_hint_title = strlen(task_buf.name) == 0;
 
 				ImGui::SameLine();
@@ -329,7 +353,12 @@ namespace PFF::toolkit::todo {
 					ImGui::Text("Description");
 					ImGui::SetCursorPos(start_pos);
 				}
-				ImGui::InputTextEx("##new_task_description", NULL, task_buf.description, CHAR_BUFFER_DEFAULT_SIZE * 4, input_size, 0);
+
+				const int box_height = count_lines(task_buf.description);
+				const ImVec2 description_input_size = { max_width - 60, (ImGui::GetTextLineHeight() * (float)box_height) + ImGui::GetTextLineHeightWithSpacing() };
+
+				ImGui::InputTextMultiline("##new_task_description", task_buf.description, CHAR_BUFFER_DEFAULT_SIZE* CHAR_BUFFER_DEFAULT_MULTIPLIER, description_input_size, 
+					ImGuiInputTextFlags_AllowTabInput | ImGuiInputTextFlags_Multiline | ImGuiInputTextFlags_NoHorizontalScroll);
 				show_hint_descr = strlen(task_buf.description) == 0;
 
 				ImGui::SameLine();
@@ -354,7 +383,7 @@ namespace PFF::toolkit::todo {
 								sprintf_s(buf, 32, "##topic_%llutask_%llu", x, y);
 								ImGui::Checkbox(buf, &s_todo_list->m_topics[x].tasks[y].done);
 								ImGui::SameLine();
-								UI::draw_big_text(s_todo_list->m_topics[x].tasks[y].title.c_str());
+								UI::big_text(s_todo_list->m_topics[x].tasks[y].title.c_str());
 								UI::shift_cursor_pos(inner_offset_x + 5, 0);
 								ImGui::Text(s_todo_list->m_topics[x].tasks[y].description.c_str());
 							}

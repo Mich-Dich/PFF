@@ -162,7 +162,8 @@ namespace PFF {
             else if constexpr (std::is_same_v<T, glm::vec4> || std::is_same_v<T, ImVec4>) {
 
                 std::ostringstream oss;
-                oss << src_value.x << ' ' << src_value.y << ' ' << src_value.z << ' ' << src_value.w;
+                oss << std::fixed << std::setprecision(4) 
+                    << src_value.x << ' ' << src_value.y << ' ' << src_value.z << ' ' << src_value.w;
                 dest_string = oss.str();
                 return;
             }

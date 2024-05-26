@@ -3,6 +3,7 @@
 #define TEST_NAME_CONVERTION(variable)		extract_vaiable_name(#variable)
 #define SERIALIZE_KEY_VALUE(variable)		serialize_key_value(extract_vaiable_name(#variable), variable);
 
+// @brief used with [PFF::serializer] to shorten the PFF::serializer::yaml::entry call
 #define KEY_VALUE(var)						extract_vaiable_name(#var), var
 
 namespace PFF::serializer {
@@ -22,9 +23,9 @@ namespace PFF::serializer {
 		DELETE_COPY_MOVE(yaml);
 
 		// @brief This function adds or looks for a subsection with the specified section name in the YAML file.
-		//          If the serializer option is set to save to file, it adds the subsection to the YAML content
+		//          If the serializer option is set to [save_to_file], it adds the subsection to the YAML content
 		//          and executes the provided function within that subsection. If the serializer option is set to
-		//          load from file, it looks for the subsection in the YAML content, deserializes its content,
+		//          [load_from_file], it looks for the subsection in the YAML content, deserializes its content,
 		//          and executes the provided function within that subsection.
 		// @param [section_name] The name of the subsection to be added or looked for.
 		// @param [sub_section_function] The function to be executed within the subsection.
@@ -34,9 +35,9 @@ namespace PFF::serializer {
 
 		// @brief This function is responsible for serializing or deserializing a single variable 
 		//          to or from the YAML file based on the specified serialization option. If the 
-		//          option is set to save to file, it converts the variable to its string 
-		//          representation and writes it to the YAML file. If the option is set to load from
-		//          file, it reads the variable's value from the YAML file and converts it back to 
+		//          option is set to [save_to_file], it converts the variable to its string 
+		//          representation and writes it to the YAML file. If the option is set to [load_from_file],
+		//			it reads the variable's value from the YAML file and converts it back to 
 		//          its original type. For vectors, it handles serialization and deserialization 
 		//          of each element individually.
 		// @param [key_name] The key name associated with the variable in the YAML file.

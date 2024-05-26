@@ -22,7 +22,7 @@
 #include "GLFW/glfw3.h"
 #include "application.h"
 #include "util/io/serializer.h"
-#include "util/imgui/imgui_util.h"
+#include "util/UI/pannel_collection.h"
 #include "engine/layer/layer_stack.h"
 #include "engine/layer/layer.h"
 #include <cstdlib> // for system calls (conpieling shaders)
@@ -245,10 +245,9 @@ namespace PFF::render::vulkan {
 	}
 
 
-	void vk_renderer::imgui_create_fonts() {
+	void vk_renderer::imgui_create_fonts() { immediate_submit([&](VkCommandBuffer cmd) { ImGui_ImplVulkan_CreateFontsTexture(); }); }
 
-		immediate_submit([&](VkCommandBuffer cmd) { ImGui_ImplVulkan_CreateFontsTexture(); });
-	}
+	void vk_renderer::imgui_destroy_fonts() { immediate_submit([&](VkCommandBuffer cmd) { ImGui_ImplVulkan_DestroyFontsTexture(); }); }
 
 
 	void vk_renderer::imgui_shutdown() { 
@@ -261,6 +260,7 @@ namespace PFF::render::vulkan {
 		m_imgui_initalized = false;
 	}
 
+	
 	void vk_renderer::draw_frame(f32 delta_time) {
 
 		if (m_state != system_state::active)
@@ -371,12 +371,12 @@ namespace PFF::render::vulkan {
 				ImGui::Text("Selected effect: ", selected.name);
 				ImGui::SliderInt("Effect Index", &m_current_background_effect, 0, static_cast<int>(m_background_effects.size() - 1));
 
-				UI::begin_default_table("renderer background values");
-					UI::add_table_row("data 1", selected.data.data1);
-					UI::add_table_row("data 2", selected.data.data2);
-					UI::add_table_row("data 3", selected.data.data3);
-					UI::add_table_row("data 4", selected.data.data4);
-				UI::end_default_table();
+				UI::begin_table("renderer background values");
+					UI::table_row("data 1", selected.data.data1);
+					UI::table_row("data 2", selected.data.data2);
+					UI::table_row("data 3", selected.data.data3);
+					UI::table_row("data 4", selected.data.data4);
+				UI::end_table();
 				//ImGui::InputFloat4("data1", (float*)&selected.data.data1);
 				//ImGui::InputFloat4("data2", (float*)&selected.data.data2);
 				//ImGui::InputFloat4("data3", (float*)&selected.data.data3);

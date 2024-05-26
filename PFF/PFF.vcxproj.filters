@@ -165,9 +165,6 @@
     <ClInclude Include="src\util\data_types.h">
       <Filter>util</Filter>
     </ClInclude>
-    <ClInclude Include="src\util\imgui\imgui_util.h">
-      <Filter>util\imgui</Filter>
-    </ClInclude>
     <ClInclude Include="src\util\io\config.h">
       <Filter>util\io</Filter>
     </ClInclude>
@@ -267,9 +264,6 @@
     <ClCompile Include="src\engine\world\map.cpp">
       <Filter>engine\world</Filter>
     </ClCompile>
-    <ClCompile Include="src\util\imgui\imgui_util.cpp">
-      <Filter>util\imgui</Filter>
-    </ClCompile>
     <ClCompile Include="src\util\io\config.cpp">
       <Filter>util\io</Filter>
     </ClCompile>
@@ -291,5 +285,6 @@
     <ClCompile Include="src\util\util.cpp">
       <Filter>util</Filter>
     </ClCompile>
+    <ClCompile Include="src\util\ui\pannel_collection.cpp" />
   </ItemGroup>
 </Project>

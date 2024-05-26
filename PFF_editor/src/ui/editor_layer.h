@@ -24,7 +24,7 @@ namespace PFF {
 	private:
 
 		// ImGui windows
-		void window_main_menu_bar();
+		void window_main_title_bar();
 		void window_general_debugger();
 		void window_main_content();
 		void window_outliner();
