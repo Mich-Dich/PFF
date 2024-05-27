@@ -62,13 +62,92 @@ namespace PFF::UI {
 	// @param [right_side] The function representing the content of the right side.
 	PFF_API void custom_frame(const f32 width_left_side, std::function<void()> left_side, std::function<void()> right_side);
 
+	
+	// @brief Renders an integer slider within a table row in an ImGui interface.
+	// 
+	// This function creates a row in an ImGui table, sets the label in the first column,
+	// and places an integer slider in the second column. The slider modifies the provided
+	// integer value within the specified range.
+	// 
+	// @param label The text label for the slider, displayed in the first column of the table.
+	// @param value A reference to the integer value to be modified by the slider.
+	// @param min_value The minimum value for the slider.
+	// @param max_value The maximum value for the slider.
+	// @param flags Optional ImGui input text flags.
+	// 
+	// @return true if the value was changed by the slider, false otherwise.
+	bool table_row_slider(std::string_view label, int& value, int min_value = 0, int max_value = 1, ImGuiInputTextFlags flags = ImGuiInputTextFlags_None);
+
+	// @brief Renders a slider within a table row in an ImGui interface.
+	// 
+	// This function creates a row in an ImGui table, sets the label in the first column,
+	// and places a slider in the second column. The type of the slider is determined by
+	// the type of the value parameter.
+	// 
+	// @tparam T The type of the value to be modified by the slider. Supported types are:
+	// @tparam      - int
+	// @tparam      - f32 (float)
+	// @tparam      - f64 (double)
+	// @tparam      - glm::vec2
+	// @tparam      - glm::vec3
+	// @tparam      - glm::vec4
+	// @tparam      - ImVec2
+	// @tparam      - ImVec4
+	// 
+	// @param label The text label for the slider, displayed in the first column of the table.
+	// @param value A reference to the value to be modified by the slider.
+	// @param min_value The minimum value for the slider. Defaults to 0.f.
+	// @param max_value The maximum value for the slider. Defaults to 1.f.
+	// @param flags Optional ImGui input text flags. Defaults to ImGuiInputTextFlags_None.
+	// 
+	// @return true if the value was changed by the slider, false otherwise.
+	template<typename T>
+	bool table_row_slider(std::string_view label, T& value, f32 min_value = 0.f, f32 max_value = 1.f, ImGuiInputTextFlags flags = ImGuiInputTextFlags_None) {
+
+		ImGuiStyle& style = ImGui::GetStyle();
+		ImVec2 current_item_spacing = style.ItemSpacing;
+		flags |= ImGuiInputTextFlags_AllowTabInput;
+
+		ImGui::TableNextRow();
+		ImGui::TableSetColumnIndex(0);
+		ImGui::Text("%s", label.data());
+
+		ImGui::TableSetColumnIndex(1);
+
+		// Copy non-space characters from label to loc_label
+		std::string loc_label = "##";
+		loc_label.reserve(label.size() + 2);
+		std::remove_copy_if(label.begin(), label.end(), std::back_inserter(loc_label), [](char c) {
+			return std::isspace(static_cast<unsigned char>(c));
+		});
+
+		ImGui::SetNextItemWidth(ImGui::GetColumnWidth());
+
+		if constexpr (std::is_same_v<T, int>)
+			return ImGui::SliderInt(loc_label.c_str(), &value, static_cast<int>(min_value), static_cast<int>(max_value), "%d", flags);
+
+		if constexpr (std::is_same_v<T, f32> || std::is_same_v<T, f64>)
+			return ImGui::SliderFloat(loc_label.c_str(), &value, min_value, max_value, "%.2f", flags);
+
+		if constexpr (std::is_same_v<T, glm::vec2> || std::is_same_v<T, ImVec2>)
+			return ImGui::SliderFloat2(loc_label.c_str(), &value[0], min_value, max_value, "%.2f", flags);
+
+		if constexpr (std::is_same_v<T, glm::vec3>)
+			return ImGui::SliderFloat3(loc_label.c_str(), &value[0], min_value, max_value, "%.2f", flags);
+
+		if constexpr (std::is_same_v<T, glm::vec4> || std::is_same_v<T, ImVec4>)
+			return ImGui::SliderFloat4(loc_label.c_str(), &value[0], min_value, max_value, "%.2f", flags);
+
+		return false;
+	}
+
 	// @brief Adds a row to an ImGui table with a label and corresponding value input field.
 	// @tparam [T] The type of the value.
 	// @param [label] The label for the row.
 	// @param [value] The value to be displayed or edited.
 	// @param [flags] Flags controlling the behavior of the input field.
 	template<typename T>
-	bool table_row(std::string_view label, T& value, ImGuiInputTextFlags flags = ImGuiInputTextFlags_None, f32 drag_speed = 0.01f, f32 min_value = 0.f, f32 max_value = 0.f) {
+	bool table_row(std::string_view label, T& value, f32 drag_speed = 0.01f, f32 min_value = 0.f, f32 max_value = 0.f, ImGuiInputTextFlags flags = ImGuiInputTextFlags_None) {
 
 		ImGuiStyle& style = ImGui::GetStyle();
 		ImVec2 current_item_spacing = style.ItemSpacing;
@@ -117,7 +196,7 @@ namespace PFF::UI {
 			ImGui::Text("%s", std::to_string(value).c_str());
 			return false;
 		}
-		
+
 		return false;
 	}
 

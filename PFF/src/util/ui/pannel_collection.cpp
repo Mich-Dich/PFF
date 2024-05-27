@@ -224,4 +224,30 @@ namespace PFF::UI {
 			ImGui::EndTable();
 		}
 	}
+
+
+	bool table_row_slider(std::string_view label, int& value, int min_value, int max_value, ImGuiInputTextFlags flags) {
+
+		ImGuiStyle& style = ImGui::GetStyle();
+		ImVec2 current_item_spacing = style.ItemSpacing;
+		flags |= ImGuiInputTextFlags_AllowTabInput;
+
+		ImGui::TableNextRow();
+		ImGui::TableSetColumnIndex(0);
+		ImGui::Text("%s", label.data());
+
+		ImGui::TableSetColumnIndex(1);
+
+		// Copy non-space characters from label to loc_label
+		std::string loc_label = "##";
+		loc_label.reserve(label.size() + 2);
+		std::remove_copy_if(label.begin(), label.end(), std::back_inserter(loc_label), [](char c) {
+			return std::isspace(static_cast<unsigned char>(c));
+			});
+
+		ImGui::SetNextItemWidth(ImGui::GetColumnWidth());
+		return ImGui::SliderInt(loc_label.c_str(), &value, static_cast<int>(min_value), static_cast<int>(max_value), "%d", flags);
+	}
+
+
 }

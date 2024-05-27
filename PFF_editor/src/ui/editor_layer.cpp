@@ -33,7 +33,6 @@ namespace PFF {
 		// inform GLFW window to hide title_bar
 		application::get().get_window()->show_titlebar(false);
 
-
 		//m_swapchain_supported_presentmodes = application::get().get_renderer()->get_swapchain_suported_present_modes();
 		//for (auto mode : m_swapchain_supported_presentmodes)
 		//	m_swapchain_supported_presentmodes_str.push_back(present_mode_to_str(mode));
@@ -552,14 +551,39 @@ namespace PFF {
 
 				if (ImGui::BeginMenu("UI")) {
 
-					UI::big_text("Font");
+					//UI::big_text("Font");
 
-					UI::begin_table("display_input_actions_params", false, ImVec2(350, (ImGui::GetTextLineHeightWithSpacing() * 2)) );
-						if (UI::table_row("Font size", UI::m_font_size))
-							application::get().get_imgui_layer()->recreate_fonts();
-						if (UI::table_row("Big font size", UI::m_big_font_size))
-							application::get().get_imgui_layer()->recreate_fonts();
-					UI::end_table();
+					//ImGuiIO& io = ImGui::GetIO();
+					//const float MIN_SCALE = 0.3f, MAX_SCALE = 2.0f;
+					//ImGui::PushItemWidth(ImGui::GetFontSize() * 8);
+					//ImGui::DragFloat("global scale", &io.FontGlobalScale, 0.005f, MIN_SCALE, MAX_SCALE, "%.2f", ImGuiSliderFlags_AlwaysClamp); // Scale everything
+					//ImGui::PopItemWidth();
+
+
+					//ImGui::PushItemWidth(ImGui::GetFontSize() * 8);
+					//UI::begin_table("display_input_actions_params", false, ImVec2(350, (ImGui::GetTextLineHeightWithSpacing() * 2)) );
+
+					//static float font_size = UI::m_font_size;
+					//if (UI::table_row("Font scale", font_size)) {
+
+					//	//application::get().get_imgui_layer()->set_font_scale(font_size / ui::m_font_size);
+					//	//imguiio io = imgui::getio();
+					//	//log(trace, "font size: " << io.fontGlobalScale);
+					//}
+
+					//UI::end_table();
+					//ImGui::PopItemWidth();
+
+
+					//if (ImGui::Button("Recreate Fonts")) {
+
+					//	std::future<void> parsing_fonts = std::async(std::launch::async, []() {
+					//	
+					//		application::get().get_imgui_layer()->recreate_fonts();
+					//	});
+					//}
+
+
 
 					UI::big_text("Select Theme");
 

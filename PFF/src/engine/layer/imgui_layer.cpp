@@ -98,27 +98,29 @@ namespace PFF::UI {
 		CORE_LOG_SHUTDOWN();
 	}
 
+
+	using namespace std::chrono_literals;
+
 	void imgui_layer::on_attach() { 
+
 		
+		
+		
+		// Test timer_async
+		util::timer_async(4s, []() { LOG(Info, "DONE"); });
+
+
+
+
 		LOG(Trace, "attach imgui layer"); 
 	
 		IMGUI_CHECKVERSION();
 		m_context = ImGui::CreateContext();
 		application::get().get_renderer()->imgui_init();
 
-		create_fonts();
-		load_UI_data();
-	}
-
-	void imgui_layer::recreate_fonts() {
-
-		fonts_need_recreation = true;
-	}
-
-	void imgui_layer::create_fonts() {
-
 		// Load fonts
 		auto io = ImGui::GetIO();
+		io.FontAllowUserScaling = true;
 		m_fonts["default"] = io.Fonts->AddFontFromFileTTF("../PFF/assets/fonts/Open_Sans/static/OpenSans-Regular.ttf", m_font_size);
 		m_fonts["bold"] = io.Fonts->AddFontFromFileTTF("../PFF/assets/fonts/Open_Sans/static/OpenSans-Bold.ttf", m_font_size);
 		m_fonts["italic"] = io.Fonts->AddFontFromFileTTF("../PFF/assets/fonts/Open_Sans/static/OpenSans-Italic.ttf", m_font_size);
@@ -131,7 +133,9 @@ namespace PFF::UI {
 		io.FontDefault = m_fonts["default"];
 
 		application::get().get_renderer()->imgui_create_fonts();
+		load_UI_data();
 	}
+
 
 	void imgui_layer::on_detach() { 
 		
@@ -145,14 +149,6 @@ namespace PFF::UI {
 
 	void imgui_layer::on_update(const f32 delta_time) {
 
-		// TODO: Move to seperate thread to work async
-		//if (fonts_need_recreation) {
-		//	m_fonts.clear();
-		//	application::get().get_renderer()->imgui_destroy_fonts();
-		//	create_fonts();
-		//	fonts_need_recreation = false;
-		//}
-
 		if (m_show_FPS_window)
 			application::get().get_fps_values(m_limit_fps, m_target_fps, m_current_fps, m_work_time, m_sleep_time);
 	}
@@ -160,11 +156,13 @@ namespace PFF::UI {
 
 	void imgui_layer::on_event(event& event) { }
 
+
 	void imgui_layer::on_imgui_render() {
 
 		PFF_PROFILE_FUNCTION();
 		ImGui::SetCurrentContext(m_context);
 	}
+
 
 	void imgui_layer::show_FPS() {
 

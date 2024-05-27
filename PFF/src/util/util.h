@@ -113,6 +113,56 @@ namespace PFF {
         template<typename T, typename Alloc>
         struct is_vector<std::vector<T, Alloc>> : std::true_type {};
 
+        // @brief Combines hash values. from: https://stackoverflow.com/a/57595105
+        // @tparam T The type of the value to hash.
+        // @tparam Rest Additional types to hash.
+        // @param seed The seed value for the hash.
+        // @param v The value to hash.
+        // @param rest Additional values to hash.
+        template <typename T, typename... Rest>
+        constexpr void hash_combine(std::size_t& seed, const T& v, const Rest&... rest) {
+
+            seed ^= std::hash<T>{}(v)+0x9e3779b9 + (seed << 6) + (seed >> 2);
+            (hash_combine(seed, rest), ...);
+        }
+
+        // --------------------------------------------------------------------------------------------------------------------
+        // TIMER
+        // --------------------------------------------------------------------------------------------------------------------
+
+        // @brief Asynchronously starts a timer with the specified duration and callback function.
+        // 
+        // @brief Usage example:
+        // @brief     auto timer = util::timer_async(5s, []() { LOG(Info, "Timer has finished"); });
+        // 
+        // @param duration The duration of the timer.
+        // @param callback The callback function to be executed when the timer finishes.
+        // @return Reference to the std::future<void> associated with the timer.
+        template<class _rep, class _period>
+        std::future<void>& timer_async(std::chrono::duration<_rep, _period> duration, std::function<void()> callback) {
+
+            auto future = std::async(std::launch::async, [duration, callback]() {
+                std::this_thread::sleep_for(duration);
+                callback();
+            });
+
+            return application::get().add_future(future);
+        }
+
+        // @brief Checks if the specified timer has finished.
+        //
+        // @brief  Usage example:
+        // @brief      if (is_timer_ready(timer, 1ms)) { // do something }
+        // 
+        // @param timer The timer to check.
+        // @param duration The duration to wait before checking the timer status. Default is 1ms.
+        // @return True if the timer has finished, false otherwise.
+        template<class _rep, class _period>
+        bool is_timer_ready(std::future<void>& timer, std::chrono::duration<_rep, _period> duration = 1ms) { return timer.wait_for(duration) == std::future_status::ready; }
+
+        // --------------------------------------------------------------------------------------------------------------------
+        // STRING MANIPULATION
+        // --------------------------------------------------------------------------------------------------------------------
 
         // @brief Converts a value of type T to its string representation.
         // @brief Can handle conversion from various types such as: arithmetic types, boolean, glm::vec2, glm::vec3, glm::vec4, ImVec2, ImVec4, and glm::mat4
@@ -264,19 +314,6 @@ namespace PFF {
             else
                 DEBUG_BREAK();		// Input value is not supported
         }
-
-        // @brief Combines hash values. from: https://stackoverflow.com/a/57595105
-        // @tparam T The type of the value to hash.
-        // @tparam Rest Additional types to hash.
-        // @param seed The seed value for the hash.
-        // @param v The value to hash.
-        // @param rest Additional values to hash.
-		template <typename T, typename... Rest>
-        constexpr void hash_combine(std::size_t& seed, const T& v, const Rest&... rest) {
-
-			seed ^= std::hash<T>{}(v)+0x9e3779b9 + (seed << 6) + (seed >> 2);
-			(hash_combine(seed, rest), ...);
-		}
 
         // @brief Removes a substring from a character array.
         // @tparam N The size of the source character array.

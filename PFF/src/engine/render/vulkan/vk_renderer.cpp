@@ -365,22 +365,15 @@ namespace PFF::render::vulkan {
 
 			if (ImGui::Begin("Render Debug")) {
 
-				ImGui::SliderFloat("Render Scale", &m_render_scale, 0.3f, 1.f);
-
 				compute_effect& selected = m_background_effects[m_current_background_effect];
-				ImGui::Text("Selected effect: ", selected.name);
-				ImGui::SliderInt("Effect Index", &m_current_background_effect, 0, static_cast<int>(m_background_effects.size() - 1));
 
 				UI::begin_table("renderer background values");
-					UI::table_row("data 1", selected.data.data1);
-					UI::table_row("data 2", selected.data.data2);
-					UI::table_row("data 3", selected.data.data3);
-					UI::table_row("data 4", selected.data.data4);
+					UI::table_row_slider("Effects", m_current_background_effect, 0, static_cast<int>(m_background_effects.size() - 1) );
+					UI::table_row_slider("data_1", selected.data.data1);
+					UI::table_row_slider("data 2", selected.data.data2);
+					UI::table_row_slider("data 3", selected.data.data3);
+					UI::table_row_slider("data 4", selected.data.data4);
 				UI::end_table();
-				//ImGui::InputFloat4("data1", (float*)&selected.data.data1);
-				//ImGui::InputFloat4("data2", (float*)&selected.data.data2);
-				//ImGui::InputFloat4("data3", (float*)&selected.data.data3);
-				//ImGui::InputFloat4("data4", (float*)&selected.data.data4);
 
 			}
 			ImGui::End();

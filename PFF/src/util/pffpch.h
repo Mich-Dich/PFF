@@ -13,6 +13,7 @@
 #include <cstdio>
 #include <chrono>
 #include <thread>
+#include <future>
 
 #include <string>
 #include <sstream>

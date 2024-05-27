@@ -54,15 +54,11 @@ namespace PFF::UI {
 		void on_imgui_render() override;
 		void show_FPS();
 		
-		PFF_API void recreate_fonts();
-
 		PFF_API_EDITOR ImFont* get_font(const std::string& name = "default");
 
 		ImGuiID m_viewport_ID{};
 
 	private:
-
-		void create_fonts();
 
 		// ------------------------- general -------------------------
 		ImGuiContext* m_context{};
