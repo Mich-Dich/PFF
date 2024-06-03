@@ -14,31 +14,10 @@ namespace PFF::toolkit::todo {
 	//static vars
 	static bool s_init = false;
 	static bool s_show_todo_list = false;
-	static todo_list* s_todo_list;
+	//static todo_list* s_todo_list;
 
 	// ============================================= serializer =============================================
 	
-	int count_lines(const char text[CHAR_BUFFER_DEFAULT_SIZE]) {
-
-		if (text[0] == '\0')
-			return 1;
-
-		int line_count = 0;
-		for (int i = 0; i < 256; ++i) {
-			if (text[i] == '\0')
-				break;
-		
-			if (text[i] == '\n')
-				++line_count;
-		}
-		
-		// If the last character is not a newline and the string is not empty, count the last line
-		if (text[0] != '\0' && text[255] != '\n')
-			++line_count;
-		
-		return line_count;
-	}
-
 	namespace buffer {
 
 		struct topic {
@@ -92,84 +71,52 @@ namespace PFF::toolkit::todo {
 		}
 	};
 
-	class todo_list {
-	public:
 
-		todo_list();
-		~todo_list();
+	static std::vector<topic> s_topics{};
 
-		//void window_todo_list();
-		void add_topic(buffer::topic buffer);
-		void remove_topic(const u64 index);
+	static void remove_topic(const u64 index) {
 
-		std::vector<topic> m_topics{};
-	};
+		VALIDATE(index >= 0 && index < s_topics.size(), return, "", "Tried to remove a nonvalid index");
+		s_topics.erase(s_topics.begin() + index);
+	}
 
-	class todo_list_serializer {
-	public:
 
-		// can define here because header is only included in editor_layer.cpp file
-		todo_list_serializer(todo_list* todo_list, serializer::option option) {
+	// can define here because header is only included in editor_layer.cpp file
+	void serialize_todo_list(std::vector<topic>& m_topics, serializer::option option) {
 
-			serializer::yaml(config::get_filepath_from_configtype(config::file::editor), "todo_list", option)
-				.vector(KEY_VALUE(todo_list->m_topics), [&](serializer::yaml& yaml, const u64 x) {
+		serializer::yaml(config::get_filepath_from_configtype(config::file::editor), "todo_list", option)
+			.vector(KEY_VALUE(m_topics), [&](serializer::yaml& yaml, const u64 x) {
 
-					yaml.entry(KEY_VALUE(todo_list->m_topics[x].name))
-						.entry(KEY_VALUE(todo_list->m_topics[x].selected))
-						.vector(KEY_VALUE(todo_list->m_topics[x].tasks), [&](serializer::yaml& inner, const u64 y) {
+				yaml.entry(KEY_VALUE(m_topics[x].name))
+					.entry(KEY_VALUE(m_topics[x].selected))
+					.vector(KEY_VALUE(m_topics[x].tasks), [&](serializer::yaml& inner, const u64 y) {
 
-						inner.entry(KEY_VALUE(todo_list->m_topics[x].tasks[y].title))
-							.entry(KEY_VALUE(todo_list->m_topics[x].tasks[y].description))
-							.entry(KEY_VALUE(todo_list->m_topics[x].tasks[y].done));
+						inner.entry(KEY_VALUE(m_topics[x].tasks[y].title))
+							.entry(KEY_VALUE(m_topics[x].tasks[y].description))
+							.entry(KEY_VALUE(m_topics[x].tasks[y].done));
 					});
-				});
-		}
-
-		~todo_list_serializer() = default;
-	};
+			});
+	}
 
 	// ============================================= implementation =============================================
-
-	todo_list::todo_list() {
-
-		LOG(Info, "Init todo_list");
-		todo_list_serializer(this, serializer::option::load_from_file);
-	}
-
-	todo_list::~todo_list() {
-
-		LOG(Info, "Shutdown todo_list");
-		todo_list_serializer(this, serializer::option::save_to_file);
-	}
-
-	void init() {
-
-		if (!s_init) {
-
-			s_todo_list = new toolkit::todo::todo_list();
-			s_init = true;
-		}
-	}
-
-	void shutdown() {
-
-		if (s_init) {
-
-			delete s_todo_list;
-			s_init = false;		
-		}
-
-	}
-
+	
 	static void window_todo_list() {
 
 		if (!s_show_todo_list) {
 
-			shutdown();
+			if (s_init) {
+
+				serialize_todo_list(s_topics, serializer::option::save_to_file);
+				s_init = false;
+			}
 			return;
 		}
 
-		init();
+		if (!s_init) {
+
+			serialize_todo_list(s_topics, serializer::option::load_from_file);
+			s_init = true;
+		}
 
 		ImGuiStyle* style = &ImGui::GetStyle();
 		ImGuiWindowFlags window_flags{};
@@ -226,7 +173,7 @@ namespace PFF::toolkit::todo {
 				ImGui::SameLine();
 				if (ImGui::Button("Add##todo_add_topic")) {
 
-					s_todo_list->add_topic(topic_buf);
+					s_topics.push_back({ topic_buf.name, false, false, {} });
 					topic_buf.reset();
 				};
 
@@ -244,31 +191,31 @@ namespace PFF::toolkit::todo {
 			ImGui::PopStyleColor();
 
 			ImGui::PushStyleVar(ImGuiStyleVar_SelectableTextAlign, ImVec2(.5f, .5f));
-			for (u64 n = 0; n < s_todo_list->m_topics.size(); n++) {
+			for (u64 n = 0; n < s_topics.size(); n++) {
 
-				if (ImGui::Selectable(s_todo_list->m_topics[n].name.c_str(), s_todo_list->m_topics[n].selected, 0, { inner_width - 10 - style->ItemSpacing.x, 20})) {
+				if (ImGui::Selectable(s_topics[n].name.c_str(), s_topics[n].selected, 0, { inner_width - 10 - style->ItemSpacing.x, 20})) {
 
 					if (!ImGui::GetIO().KeyCtrl) {			// Clear selection when CTRL is not held
-						for (u64 x = 0; x < s_todo_list->m_topics.size(); x++)
-							s_todo_list->m_topics[x].selected = false;
+						for (u64 x = 0; x < s_topics.size(); x++)
+							s_topics[x].selected = false;
 					}
-					s_todo_list->m_topics[n].selected ^= 1;
+					s_topics[n].selected ^= 1;
 				}
 
 				char buf[32];
 				sprintf_s(buf, 32, "X##kill_%llu", n);
 
 				ImGui::SameLine();
-				if (s_todo_list->m_topics[n].hovered) {
+				if (s_topics[n].hovered) {
 
 					if (UI::add_gray_button(buf, { inner_padding, 22 }))
-						s_todo_list->remove_topic(n);
+						remove_topic(n);
 					else
-						s_todo_list->m_topics[n].hovered = ImGui::IsItemHovered();
+						s_topics[n].hovered = ImGui::IsItemHovered();
 
 				} else {
 					ImGui::InvisibleButton(buf, { inner_padding, 22 });
-					s_todo_list->m_topics[n].hovered = ImGui::IsItemHovered();
+					s_topics[n].hovered = ImGui::IsItemHovered();
 				}
 					
 
@@ -296,20 +243,20 @@ namespace PFF::toolkit::todo {
 			char buf[32];
 
 			UI::shift_cursor_pos(0, 10);
-			for (u64 x = 0; x < s_todo_list->m_topics.size(); x++) {
+			for (u64 x = 0; x < s_topics.size(); x++) {
 
-				if (s_todo_list->m_topics[x].selected) {
+				if (s_topics[x].selected) {
 
-					for (u64 y = 0; y < s_todo_list->m_topics[x].tasks.size(); y++) {
+					for (u64 y = 0; y < s_topics[x].tasks.size(); y++) {
 
-						if (!s_todo_list->m_topics[x].tasks[y].done) {
+						if (!s_topics[x].tasks[y].done) {
 
 							sprintf_s(buf, 32, "##topic_%llutask_%llu", x, y);
-							ImGui::Checkbox(buf, &s_todo_list->m_topics[x].tasks[y].done);
+							ImGui::Checkbox(buf, &s_topics[x].tasks[y].done);
 							ImGui::SameLine();
-							UI::big_text(s_todo_list->m_topics[x].tasks[y].title.c_str(), true);
+							UI::big_text(s_topics[x].tasks[y].title.c_str(), true);
 							UI::shift_cursor_pos(inner_offset_x + 5, 0);
-							ImGui::TextWrapped(s_todo_list->m_topics[x].tasks[y].description.c_str());
+							ImGui::TextWrapped(s_topics[x].tasks[y].description.c_str());
 						}
 					}
 				}
@@ -319,7 +266,6 @@ namespace PFF::toolkit::todo {
 
 				ImVec2 start_pos{};
 				const f32 max_width = ImGui::GetColumnWidth();
-				const ImVec2 input_size = { max_width - 60, 22 };
 				//const ImVec2 button_size = { 50, 22 };
 				static bool show_hint_title = true;
 				static bool show_hint_descr = true;
@@ -332,16 +278,18 @@ namespace PFF::toolkit::todo {
 					ImGui::Text("Title");
 					ImGui::SetCursorPos(start_pos);
 				}
+				const int box_height_name = util::count_lines(task_buf.name);
+				const ImVec2 input_size = { max_width - 60, (ImGui::GetTextLineHeight() * (float)box_height_name) + ImGui::GetTextLineHeightWithSpacing() };
 				ImGui::InputTextMultiline("##new_task_title", task_buf.name, CHAR_BUFFER_DEFAULT_SIZE, input_size, 0);
 				show_hint_title = strlen(task_buf.name) == 0;
 
 				ImGui::SameLine();
 				if (ImGui::Button("Add##new_task_to_todo", button_size_small)) {
 
-					for (u64 x = 0; x < s_todo_list->m_topics.size(); x++) {
+					for (u64 x = 0; x < s_topics.size(); x++) {
 
-						if (s_todo_list->m_topics[x].selected)
-							s_todo_list->m_topics[x].add_task(task_buf);
+						if (s_topics[x].selected)
+							s_topics[x].add_task(task_buf);
 					}
 					task_buf.reset();
 				}
@@ -354,7 +302,7 @@ namespace PFF::toolkit::todo {
 					ImGui::SetCursorPos(start_pos);
 				}
 
-				const int box_height = count_lines(task_buf.description);
+				const int box_height = util::count_lines(task_buf.description);
 				const ImVec2 description_input_size = { max_width - 60, (ImGui::GetTextLineHeight() * (float)box_height) + ImGui::GetTextLineHeightWithSpacing() };
 
 				ImGui::InputTextMultiline("##new_task_description", task_buf.description, CHAR_BUFFER_DEFAULT_SIZE* CHAR_BUFFER_DEFAULT_MULTIPLIER, description_input_size, 
@@ -372,20 +320,20 @@ namespace PFF::toolkit::todo {
 			if (ImGui::CollapsingHeader("done Items")) {
 
 				ImGui::Indent();
-				for (u64 x = 0; x < s_todo_list->m_topics.size(); x++) {
+				for (u64 x = 0; x < s_topics.size(); x++) {
 
-					if (s_todo_list->m_topics[x].selected) {
+					if (s_topics[x].selected) {
 
-						for (u64 y = 0; y < s_todo_list->m_topics[x].tasks.size(); y++) {
+						for (u64 y = 0; y < s_topics[x].tasks.size(); y++) {
 
-							if (s_todo_list->m_topics[x].tasks[y].done) {
+							if (s_topics[x].tasks[y].done) {
 
 								sprintf_s(buf, 32, "##topic_%llutask_%llu", x, y);
-								ImGui::Checkbox(buf, &s_todo_list->m_topics[x].tasks[y].done);
+								ImGui::Checkbox(buf, &s_topics[x].tasks[y].done);
 								ImGui::SameLine();
-								UI::big_text(s_todo_list->m_topics[x].tasks[y].title.c_str());
+								UI::big_text(s_topics[x].tasks[y].title.c_str());
 								UI::shift_cursor_pos(inner_offset_x + 5, 0);
-								ImGui::Text(s_todo_list->m_topics[x].tasks[y].description.c_str());
+								ImGui::Text(s_topics[x].tasks[y].description.c_str());
 							}
 						}
 					}
@@ -397,18 +345,6 @@ namespace PFF::toolkit::todo {
 		});
 
 		ImGui::End();
-	}
-
-	void todo_list::add_topic(buffer::topic buffer) {
-
-		LOG(Trace, "Adding a new topic to ToDo-list");
-		m_topics.push_back({ buffer.name, false, false, {} });
-	}
-
-	void todo_list::remove_topic(const u64 index) {
-
-		VALIDATE(index >= 0 && index < m_topics.size(), return, "", "Tried to remove a nonvalid index")
-		m_topics.erase(m_topics.begin() + index);
 	}
 
 }

@@ -150,11 +150,10 @@ namespace PFF::render::vulkan {
 
         for (auto p : ready_pools) 
             vkDestroyDescriptorPool(device, p, nullptr);
-        
         ready_pools.clear();
-        for (auto p : full_pools) {
+        
+        for (auto p : full_pools)
             vkDestroyDescriptorPool(device, p, nullptr);
-        }
         full_pools.clear();
     }
 
@@ -187,6 +186,27 @@ namespace PFF::render::vulkan {
     }
 
 
+    void descriptor_writer::write_image(int binding, VkImageView image, VkSampler sampler, VkImageLayout layout, VkDescriptorType type) {
+
+        VkDescriptorImageInfo descriptor_buffer_I = {};
+        descriptor_buffer_I.sampler = sampler;
+        descriptor_buffer_I.imageView = image;
+        descriptor_buffer_I.imageLayout = layout;
+
+        VkDescriptorImageInfo& info = imageInfos.emplace_back(descriptor_buffer_I);
+
+        VkWriteDescriptorSet write = {};
+        write.sType = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET;
+        write.dstBinding = binding;
+        write.dstSet = VK_NULL_HANDLE; //left empty for now until we need to write it
+        write.descriptorCount = 1;
+        write.descriptorType = type;
+        write.pImageInfo = &info;
+
+        writes.push_back(write);
+    }
+
+
     void descriptor_writer::write_buffer(int binding, VkBuffer buffer, size_t size, size_t offset, VkDescriptorType type) {
 
         VkDescriptorBufferInfo descriptor_buffer_I = {};
@@ -207,24 +227,19 @@ namespace PFF::render::vulkan {
         writes.push_back(write);
     }
 
-    void descriptor_writer::write_image(int binding, VkImageView image, VkSampler sampler, VkImageLayout layout, VkDescriptorType type) {
+    void descriptor_writer::clear() {
 
-        VkDescriptorImageInfo descriptor_buffer_I = {};
-        descriptor_buffer_I.sampler = sampler;
-        descriptor_buffer_I.imageView = image;
-        descriptor_buffer_I.imageLayout = layout;
+        imageInfos.clear();
+        writes.clear();
+        bufferInfos.clear();
+    }
 
-        VkDescriptorImageInfo& info = imageInfos.emplace_back(descriptor_buffer_I);
+    void descriptor_writer::update_set(VkDevice device, VkDescriptorSet set) {
 
-        VkWriteDescriptorSet write = {};
-        write.sType = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET;
-        write.dstBinding = binding;
-        write.dstSet = VK_NULL_HANDLE; //left empty for now until we need to write it
-        write.descriptorCount = 1;
-        write.descriptorType = type;
-        write.pImageInfo = &info;
+        for (VkWriteDescriptorSet& write : writes)
+            write.dstSet = set;
 
-        writes.push_back(write);
+        vkUpdateDescriptorSets(device, (uint32_t)writes.size(), writes.data(), 0, nullptr);
     }
 
 }

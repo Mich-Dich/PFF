@@ -24,6 +24,23 @@ namespace PFF {
 
 		CORE_LOG(Error, "[GLFW Error: " << errorCode << "]: " << description);
 	}
+	
+	// =============================================================================  serializer  =============================================================================
+
+	static void serialize_window_atributes(window_attrib* window_attributes, const PFF::serializer::option option) {
+
+		if (option == serializer::option::save_to_file && window_attributes->window_size_state == window_size_state::minimised)
+			window_attributes->window_size_state = window_size_state::windowed;
+
+		serializer::yaml(config::get_filepath_from_configtype(config::file::editor), "window_attributes", option)
+			.entry(KEY_VALUE(window_attributes->title))
+			.entry(KEY_VALUE(window_attributes->pos_x))
+			.entry(KEY_VALUE(window_attributes->pos_y))
+			.entry(KEY_VALUE(window_attributes->width))
+			.entry(KEY_VALUE(window_attributes->height))
+			.entry(KEY_VALUE(window_attributes->vsync))
+			.entry(KEY_VALUE(window_attributes->window_size_state));
+	}
 
 	// ================================================================================== setup ==================================================================================
 
@@ -33,10 +50,8 @@ namespace PFF {
 		PFF_PROFILE_FUNCTION();
 		LOG_INIT();
 
-		{
-		window_attrib_serializer(&m_data, serializer::option::load_from_file);
-		}
-
+		serialize_window_atributes(&m_data, serializer::option::load_from_file);
+		
 		if (!s_GLFWinitialized) {
 
 			glfwSetErrorCallback(GLFW_error_callback);
@@ -86,7 +101,7 @@ namespace PFF {
 		glfwSetWindowMonitor(m_Window, NULL, m_data.pos_x, m_data.pos_y, m_data.width, m_data.height, mode->refreshRate);
 
 		if (m_data.window_size_state == window_size_state::fullscreen
-			|| m_data.window_size_state == window_size_state::fullscreen)
+			|| m_data.window_size_state == window_size_state::fullscreen_windowed)
 			glfwMaximizeWindow(m_Window);
 
 		// Set icon
@@ -113,7 +128,7 @@ namespace PFF {
 		m_data.pos_x = loc_pos_x + 4;								// window padding
 		m_data.pos_y = loc_pos_y + 25 + titlebar_vertical_offset;	// [custom titlebar height offset] + [aximize offset]
 
-		window_attrib_serializer(&m_data, serializer::option::save_to_file);
+		serialize_window_atributes(&m_data, serializer::option::save_to_file);
 		glfwDestroyWindow(m_Window);
 		glfwTerminate();
 		LOG_SHUTDOWN();
@@ -289,23 +304,6 @@ namespace PFF {
 	void pff_window::create_vulkan_surface(VkInstance_T* instance, VkSurfaceKHR_T** get_surface) {
 
 		CORE_ASSERT(glfwCreateWindowSurface(instance, m_Window, nullptr, get_surface) == VK_SUCCESS, "", "Failed to create awindow surface");
-	}
-
-	// =============================================================================  serializer  =============================================================================
-
-	window_attrib_serializer::window_attrib_serializer(window_attrib* window_attributes, const PFF::serializer::option option) {
-
-		if (option == serializer::option::save_to_file && window_attributes->window_size_state == window_size_state::minimised)
-			window_attributes->window_size_state = window_size_state::windowed;
-		
-		serializer::yaml(config::get_filepath_from_configtype(config::file::editor), "window_attributes", option)
-			.entry(KEY_VALUE(window_attributes->title))
-			.entry(KEY_VALUE(window_attributes->pos_x))
-			.entry(KEY_VALUE(window_attributes->pos_y))
-			.entry(KEY_VALUE(window_attributes->width))
-			.entry(KEY_VALUE(window_attributes->height))
-			.entry(KEY_VALUE(window_attributes->vsync))
-			.entry(KEY_VALUE(window_attributes->window_size_state));
 	}
 
 }

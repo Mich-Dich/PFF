@@ -76,7 +76,12 @@ namespace PFF::UI {
 	// @param flags Optional ImGui input text flags.
 	// 
 	// @return true if the value was changed by the slider, false otherwise.
-	bool table_row_slider(std::string_view label, int& value, int min_value = 0, int max_value = 1, ImGuiInputTextFlags flags = ImGuiInputTextFlags_None);
+	PFF_API bool table_row_slider(std::string_view label, int& value, int min_value = 0, int max_value = 1, ImGuiInputTextFlags flags = ImGuiInputTextFlags_None);
+
+
+	// @brief Add
+	PFF_API void table_row(std::function<void()> first_colum, std::function<void()> second_colum);
+
 
 	// @brief Renders a slider within a table row in an ImGui interface.
 	// 

@@ -6,6 +6,11 @@
 #include "engine/layer/layer_stack.h"
 #include "engine/game_objects/camera.h"
 
+#if defined PFF_RENDER_API_VULKAN
+#include "engine/render/vulkan/vk_descriptor.h"
+#include "engine/render/vulkan/vk_types.h"
+#endif
+
 namespace PFF::render {
 
 	enum class render_api {
@@ -17,12 +22,45 @@ namespace PFF::render {
 		Metal = 4,
 	};
 
-	struct vk_GPU_mesh_buffers {
+	struct GPU_mesh_buffers {
 
-		allocated_buffer		index_buffer{};
-		allocated_buffer		vertex_buffer{};
+#if defined PFF_RENDER_API_VULKAN
+		vk_buffer		index_buffer{};
+		vk_buffer		vertex_buffer{};
 		VkDeviceAddress			vertex_buffer_address{};
+#endif
+
 	};
+
+	// !! CAUTION !! - Doing callbacks like this is inneficient at scale, because we are storing whole std::functions for every object to be deleted. This is suboptimal. 
+	// For deleting thousands of objects, a better implementation would be to store arrays of vulkan handles of various types such as VkImage, VkBuffer, and so on. And then delete those from a loop.
+	struct deletion_queue {
+
+		std::deque<std::function<void()>> deletors;
+
+		void push_func(std::function<void()>&& function) { deletors.push_back(function); }
+
+		void flush() {
+
+			for (auto it = deletors.rbegin(); it != deletors.rend(); it++)
+				(*it)();
+
+			deletors.clear();
+		}
+	};
+
+	struct GPU_scene_data {
+
+		glm::mat4 view;
+		glm::mat4 proj;
+		glm::mat4 viewproj;
+		glm::vec4 ambientColor;
+		glm::vec4 sunlightDirection; // w for sun power
+		glm::vec4 sunlightColor;
+	};
+
+	//CORE_LOG(Debug, "Befor suspected clear call");
+	//CORE_LOG(Debug, "After suspected clear call");
 
 	class renderer {
 	public:
@@ -51,7 +89,6 @@ namespace PFF::render {
 		virtual void imgui_create_fonts() = 0;
 		virtual void imgui_destroy_fonts() = 0;
 		virtual void imgui_shutdown() = 0;
-
 		// --------------- util ----------------
 		virtual void immediate_submit(std::function<void()>&& function) = 0;
 		virtual void enable_vsync(bool enable) = 0;

@@ -52,7 +52,6 @@ namespace PFF::UI {
 			.entry(KEY_VALUE(action_color_gray_active));
 
 		std::string buffer = option == serializer::option::load_from_file ? "load_from_file" : "save_to_file";
-		CORE_LOG(Info, "Serializer with option: [" << buffer << "]");
 	}
 
 	void save_UI_theme_data() {
@@ -99,18 +98,7 @@ namespace PFF::UI {
 	}
 
 
-	using namespace std::chrono_literals;
-
 	void imgui_layer::on_attach() { 
-
-		
-		
-		
-		// Test timer_async
-		util::timer_async(4s, []() { LOG(Info, "DONE"); });
-
-
-
 
 		LOG(Trace, "attach imgui layer"); 
 	

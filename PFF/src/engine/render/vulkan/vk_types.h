@@ -21,7 +21,7 @@ struct vk_image {
     VkFormat            image_format;
 };
 
-struct allocated_buffer {
+struct vk_buffer {
 
     VkBuffer            buffer;
     VmaAllocation       allocation;

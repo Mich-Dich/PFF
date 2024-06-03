@@ -160,7 +160,7 @@
     <ClInclude Include="src\PFF_editor.h" />
     <ClInclude Include="src\controller\editor_controller.h" />
     <ClInclude Include="src\controller\editor_inputs.h" />
-    <ClInclude Include="src\toolkit\graphics_engine_settings\graphics_engine_settings.h" />
+    <ClInclude Include="src\toolkit\settings\graphics_engine_settings.h" />
     <ClInclude Include="src\toolkit\todo_list\todo_list.h" />
     <ClInclude Include="src\ui\editor_layer.h" />
     <ClInclude Include="src\util\pch_editor.h" />
@@ -170,7 +170,6 @@
     <ClCompile Include="src\PFF_editor.cpp" />
     <ClCompile Include="src\controller\editor_controller.cpp" />
     <ClCompile Include="src\entry.cpp" />
-    <ClCompile Include="src\toolkit\graphics_engine_settings\graphics_engine_settings.cpp" />
     <ClCompile Include="src\ui\editor_layer.cpp" />
     <ClCompile Include="src\util\pch_editor.cpp">
       <PrecompiledHeader>Create</PrecompiledHeader>

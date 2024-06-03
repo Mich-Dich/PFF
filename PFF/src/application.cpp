@@ -16,6 +16,7 @@
 
 #include "engine/platform/pff_window.h"
 #include "engine/render/renderer.h"
+#include "engine/render/render_util.h"
 #include "engine/game_objects/camera.h"
 #include "util/timer.h"
 
@@ -26,7 +27,11 @@ namespace PFF {
 	// ==================================================================== setup ====================================================================
 
 	application* application::s_instance = nullptr;
-	ref<PFF::render::renderer> application::m_renderer;
+
+#if defined PFF_RENDER_API_VULKAN
+	ref<PFF::render::vulkan::vk_renderer> application::m_renderer;
+#endif
+
 	ref<pff_window> application::m_window;
 	//world_layer* application::m_world_layer;
 	bool application::m_is_titlebar_hovered;
@@ -56,8 +61,10 @@ namespace PFF {
 		m_window->set_event_callback(BIND_FN(application::on_event));
 		
 		// ---------------------------------------- renderer ----------------------------------------
+
+#if defined PFF_RENDER_API_VULKAN
 		m_renderer = create_ref<render::vulkan::vk_renderer>(m_window, m_layerstack);
-		
+#endif
 		// ---------------------------------------- layers ----------------------------------------
 		m_world_layer = new world_layer();
 		m_layerstack->push_layer(m_world_layer);

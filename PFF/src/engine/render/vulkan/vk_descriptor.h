@@ -47,7 +47,7 @@ namespace PFF::render::vulkan {
         std::vector<PoolSizeRatio> ratios;
         std::vector<VkDescriptorPool> full_pools;
         std::vector<VkDescriptorPool> ready_pools;
-        u32 sets_per_pool;
+        u32 sets_per_pool = 1;
 
     };
 

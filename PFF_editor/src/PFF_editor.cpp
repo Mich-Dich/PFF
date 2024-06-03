@@ -20,7 +20,6 @@ namespace PFF {
 		register_player_controller(m_editor_controller);
 				
 		// load editor camera loc && rot
-		//glm::vec3 position = { 0, 0, -2 };
 		glm::vec3 position = { -16, -19, -30 };
 		glm::vec3 look_direction = { .5f, -.4f, 0 };
 

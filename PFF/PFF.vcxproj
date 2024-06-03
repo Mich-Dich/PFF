@@ -200,11 +200,9 @@ IF EXIST ..\bin\Release-windows-x86_64\PFF\PFF.dll\ (xcopy /Q /E /Y /I ..\bin\Re
     <ClInclude Include="src\engine\render\vulkan\vendor\VkBootstrapDispatch.h" />
     <ClInclude Include="src\engine\render\vulkan\vendor\vk_mem_alloc.h" />
     <ClInclude Include="src\engine\render\vulkan\vk_descriptor.h" />
-    <ClInclude Include="src\engine\render\vulkan\vk_device.h" />
     <ClInclude Include="src\engine\render\vulkan\vk_image.h" />
     <ClInclude Include="src\engine\render\vulkan\vk_initializers.h" />
     <ClInclude Include="src\engine\render\vulkan\vk_instance.h" />
-    <ClInclude Include="src\engine\render\vulkan\vk_loader.h" />
     <ClInclude Include="src\engine\render\vulkan\vk_pipeline.h" />
     <ClInclude Include="src\engine\render\vulkan\vk_renderer.h" />
     <ClInclude Include="src\engine\render\vulkan\vk_types.h" />
@@ -244,7 +242,6 @@ IF EXIST ..\bin\Release-windows-x86_64\PFF\PFF.dll\ (xcopy /Q /E /Y /I ..\bin\Re
     <ClCompile Include="src\engine\render\vulkan\vk_descriptor.cpp" />
     <ClCompile Include="src\engine\render\vulkan\vk_image.cpp" />
     <ClCompile Include="src\engine\render\vulkan\vk_initializers.cpp" />
-    <ClCompile Include="src\engine\render\vulkan\vk_loader.cpp" />
     <ClCompile Include="src\engine\render\vulkan\vk_pipeline.cpp" />
     <ClCompile Include="src\engine\render\vulkan\vk_renderer.cpp" />
     <ClCompile Include="src\engine\world\map.cpp" />

@@ -50,7 +50,7 @@ namespace PFF {
 			sleep_time = 0;
 
 		f32 time = static_cast<f32>(glfwGetTime());
-		delta_time = time - m_last_frame_time;
+		delta_time = std::min<f32>(time - m_last_frame_time, 100000);
 		m_last_frame_time = time;
 		fps = static_cast<u32>(1.0 / (work_time + (sleep_time * 0.001)) + 0.5); // Round to nearest integer
 	}

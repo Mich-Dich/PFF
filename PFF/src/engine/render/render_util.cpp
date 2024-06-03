@@ -40,12 +40,12 @@ namespace PFF::render::util {
 
 		if (std::filesystem::exists(compield_file)) {
 			if (std::filesystem::last_write_time(absolute_path).time_since_epoch().count() < std::filesystem::last_write_time(compield_file).time_since_epoch().count()) {
-				CORE_LOG(Trace, "shader is already compield: [" << absolute_path.string() << "]");
+				CORE_LOG(Trace, "shader is already compield: [" << EXTRACT_AFTER_PFF(absolute_path.string()) << "]");
 				return;
 			}
 		}
 
-		CORE_LOG(Trace, "compiling shader: [" << absolute_path.string() << "]");
+		CORE_LOG(Trace, "compiling shader: [" << EXTRACT_AFTER_PFF(absolute_path.string()) << "]");
 		CORE_ASSERT(system(system_command.c_str()) == 0, "", "shader could not be compiled: [" << absolute_path.string() << "]");
 	}
 

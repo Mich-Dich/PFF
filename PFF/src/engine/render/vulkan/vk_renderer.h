@@ -14,23 +14,6 @@ class PFF::layer_stack;
 
 namespace PFF::render::vulkan {
 
-	// !! CAUTION !! - Doing callbacks like this is inneficient at scale, because we are storing whole std::functions for every object to be deleted. This is suboptimal. 
-	// For deleting thousands of objects, a better implementation would be to store arrays of vulkan handles of various types such as VkImage, VkBuffer, and so on. And then delete those from a loop.
-	struct deletion_queue {
-
-		std::deque<std::function<void()>> deletors;
-
-		void push_func(std::function<void()>&& function) { deletors.push_back(function); }
-
-		void flush() {
-
-			for (auto it = deletors.rbegin(); it != deletors.rend(); it++)
-				(*it)();
-
-			deletors.clear();
-		}
-	};
-
 	struct compute_push_constants {
 	
 		glm::vec4				data1;
@@ -45,17 +28,6 @@ namespace PFF::render::vulkan {
 		VkPipeline				pipeline{};
 		VkPipelineLayout		layout{};
 		compute_push_constants	data{};
-	};
-
-	// framedata	// TODO: extract into own file
-	struct FrameData {
-
-		deletion_queue			deletion_queue{};
-		VkSemaphore				swapchain_semaphore{}, render_semaphore{};
-		VkFence					render_fence{};
-
-		VkCommandPool			command_pool{};
-		VkCommandBuffer			main_command_buffer{};
 	};
 
 	constexpr u32 FRAME_COUNT = 2;
@@ -87,6 +59,19 @@ namespace PFF::render::vulkan {
 
 	private:
 
+		struct FrameData {
+
+			VkSemaphore						swapchain_semaphore{}, render_semaphore{};
+			VkFence							render_fence{};
+
+			VkCommandPool					command_pool{};
+			VkCommandBuffer					main_command_buffer{};
+
+			deletion_queue					deletion_queue{};
+			descriptor_allocator_growable	frame_descriptors;
+
+		};
+
 		FORCEINLINE FrameData& get_current_frame() { return m_frames[m_frame_number % FRAME_COUNT]; };
 		
 		void immediate_submit(std::function<void(VkCommandBuffer cmd)>&& function); // Improvement => run this on a different queue than the graphics_queue, so it can overlap the execution with the main render loop.
@@ -109,12 +94,16 @@ namespace PFF::render::vulkan {
 		void draw_imgui(VkCommandBuffer cmd, VkImageView targetImageView);
 		void create_swapchain(u32 width, u32 height);
 
-		allocated_buffer create_buffer(size_t allocSize, VkBufferUsageFlags usage, VmaMemoryUsage memoryUsage);
-		void destroy_buffer(const allocated_buffer& buffer);
+		vk_image create_image(VkExtent3D size, VkFormat format, VkImageUsageFlags usage, bool mipmapped = false);
+		vk_image create_image(void* data, VkExtent3D size, VkFormat format, VkImageUsageFlags usage, bool mipmapped = false);
+		void destroy_image(const vk_image& img);
+
+		vk_buffer create_buffer(size_t allocSize, VkBufferUsageFlags usage, VmaMemoryUsage memoryUsage);
+		void destroy_buffer(const vk_buffer& buffer);
 
 		// TIP: Note that this pattern is not very efficient, as CPU is waiting for the GPU command to fully execute before continuing with our CPU side logic
 		//		This is should be put on a background thread, whose sole job is to execute uploads like this one, and deleting/reusing the staging buffers.
-		vk_GPU_mesh_buffers upload_mesh(std::vector<u32> indices, std::vector<PFF::geometry::vertex> vertices);
+		GPU_mesh_buffers upload_mesh(std::vector<u32> indices, std::vector<PFF::geometry::vertex> vertices);
 
 		bool m_is_initialized = false;
 		int m_frame_number = 0;
@@ -150,9 +139,9 @@ namespace PFF::render::vulkan {
 		vk_image					m_depth_image{};
 
 		// display rendered image in imgui
-		VkSampler			m_texture_sampler{};
-		VkDescriptorSet		m_imugi_image_dset{};
-		glm::u32vec2		m_imugi_viewport_size{100};
+		VkSampler					m_texture_sampler{};
+		VkDescriptorSet				m_imugi_image_dset{};
+		glm::u32vec2				m_imugi_viewport_size{100};
 
 		// ---------------------------- descriptors ---------------------------- 
 		descriptor_allocator		global_descriptor_allocator{};
@@ -167,23 +156,33 @@ namespace PFF::render::vulkan {
 		VkFence						m_immFence{};
 		VkCommandBuffer				m_immCommandBuffer{};
 		VkCommandPool				m_immCommandPool{};
-
 		VkDescriptorPool			m_imgui_desc_pool{};
-
 		std::vector<compute_effect> m_background_effects{};
 		int							m_current_background_effect = 2;
 
 		// ---------------------------- triangle pipeline ---------------------------- 
 		//VkPipelineLayout			m_triangle_pipeline_layout{};
-		//VkPipeline					m_triangle_pipeline{};
+		//VkPipeline				m_triangle_pipeline{};
 
 		// ---------------------------- mesh pipeline ---------------------------- 
 		VkPipelineLayout			m_mesh_pipeline_layout{};
 		VkPipeline					m_mesh_pipeline{};
 
-		//vk_GPU_mesh_buffers						T_rectangle;
+		//vk_GPU_mesh_buffers		T_rectangle;
 		std::vector<ref<PFF::geometry::mesh>>		T_test_meshes;
 
+		// ---------------------------- GPU side global scene data ---------------------------- 
+		GPU_scene_data				m_scene_data;
+		VkDescriptorSetLayout		m_gpu_scene_data_descriptor_layout;
+
+		// ---------------------------- default textures ---------------------------- 
+		vk_image					m_white_image;
+		vk_image					m_black_image;
+		vk_image					m_grey_image;
+		vk_image					m_error_checkerboard_image;
+		VkSampler					m_default_sampler_linear;
+		VkSampler					m_default_sampler_nearest;
+		VkDescriptorSetLayout		m_single_image_descriptor_layout;
 
 	};
 }

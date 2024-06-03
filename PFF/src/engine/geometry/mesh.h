@@ -37,7 +37,7 @@ namespace PFF::geometry {
 
 		std::string							name{};
 		std::vector<Geo_surface>			surfaces{};
-        PFF::render::vk_GPU_mesh_buffers	mesh_buffers{};
+        PFF::render::GPU_mesh_buffers	    mesh_buffers{};
 
 		std::vector<u32>					m_indices{};
 		std::vector<vertex>					m_vertices{};

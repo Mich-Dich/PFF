@@ -38,14 +38,6 @@ namespace PFF {
 			: title(title), width(width), height(height), vsync(vsync), event_callback(callback){}
 	};
 
-	class window_attrib_serializer {
-	public:
-
-		window_attrib_serializer(window_attrib* window_attributes, const PFF::serializer::option option);
-		~window_attrib_serializer() {};
-
-	};
-
 	// ==============================================================  window ==============================================================
 
 	class pff_window {

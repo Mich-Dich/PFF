@@ -249,5 +249,13 @@ namespace PFF::UI {
 		return ImGui::SliderInt(loc_label.c_str(), &value, static_cast<int>(min_value), static_cast<int>(max_value), "%d", flags);
 	}
 
+	void table_row(std::function<void()> first_colum, std::function<void()> second_colum) {
+
+		ImGui::TableNextRow();
+		ImGui::TableSetColumnIndex(0);
+		first_colum();
+		ImGui::TableSetColumnIndex(1);
+		second_colum();
+	}
 
 }

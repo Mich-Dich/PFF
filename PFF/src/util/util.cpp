@@ -47,4 +47,25 @@ namespace PFF::util {
         return loc_system_time;
     }
 
+    int count_lines(const char* text) {
+
+        if (text[0] == '\0')
+            return 1;
+
+        int line_count = 0;
+        for (int i = 0; i < 256; ++i) {
+            if (text[i] == '\0')
+                break;
+
+            if (text[i] == '\n')
+                ++line_count;
+        }
+
+        // If the last character is not a newline and the string is not empty, count the last line
+        if (text[0] != '\0' && text[255] != '\n')
+            ++line_count;
+
+        return line_count;
+    }
+
 }

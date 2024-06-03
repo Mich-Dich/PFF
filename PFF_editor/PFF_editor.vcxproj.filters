@@ -36,7 +36,7 @@
     <ClInclude Include="src\controller\editor_inputs.h">
       <Filter>src\controller</Filter>
     </ClInclude>
-    <ClInclude Include="src\toolkit\graphics_engine_settings\graphics_engine_settings.h">
+    <ClInclude Include="src\toolkit\settings\graphics_engine_settings.h">
       <Filter>src\toolkit\graphics_engine_settings</Filter>
     </ClInclude>
     <ClInclude Include="src\toolkit\todo_list\todo_list.h">
@@ -61,9 +61,6 @@
     </ClCompile>
     <ClCompile Include="src\entry.cpp">
       <Filter>src</Filter>
-    </ClCompile>
-    <ClCompile Include="src\toolkit\graphics_engine_settings\graphics_engine_settings.cpp">
-      <Filter>src\toolkit\graphics_engine_settings</Filter>
     </ClCompile>
     <ClCompile Include="src\ui\editor_layer.cpp">
       <Filter>src\ui</Filter>

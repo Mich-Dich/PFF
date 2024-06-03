@@ -11,7 +11,7 @@
 
 // =================================================================================  macros  ==================================================================================
 
-#define ARRAY_SIZE(array)		(sizeof(array) / sizeof(array[0]))
+#define ARRAY_SIZE(array)		            (sizeof(array) / sizeof(array[0]))
 
 #define APP_NAMESPACE PFF
 
@@ -133,7 +133,9 @@ namespace PFF {
         // @brief Asynchronously starts a timer with the specified duration and callback function.
         // 
         // @brief Usage example:
-        // @brief     auto timer = util::timer_async(5s, []() { LOG(Info, "Timer has finished"); });
+        // @brief     util::timer_async(std::chrono::seconds(2), []() { LOG(Info, "Timer Done");  });
+        // @brief Or:
+        // @brief     auto timer = util::timer_async(std::chrono::seconds(2), []() { LOG(Info, "Timer Done");  });
         // 
         // @param duration The duration of the timer.
         // @param callback The callback function to be executed when the timer finishes.
@@ -341,5 +343,20 @@ namespace PFF {
 			}
 			return result;
 		}
+
+        PFF_API int count_lines(const char* text);
+
+        #define EXTRACT_AFTER_PFF(path) ([](const std::string& str) -> std::string { \
+            const std::string delimiter = "PFF"; \
+            size_t pos = str.find(delimiter); \
+            if (pos != std::string::npos) { \
+                pos = str.find(delimiter, pos + delimiter.length()); \
+                if (pos != std::string::npos) { \
+                    return str.substr(pos + delimiter.length() + 1); \
+                } \
+            } \
+            return ""; \
+        }(path))
+
 	}
 }

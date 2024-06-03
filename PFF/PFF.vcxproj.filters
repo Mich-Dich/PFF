@@ -128,9 +128,6 @@
     <ClInclude Include="src\engine\render\vulkan\vk_descriptor.h">
       <Filter>engine\render\vulkan</Filter>
     </ClInclude>
-    <ClInclude Include="src\engine\render\vulkan\vk_device.h">
-      <Filter>engine\render\vulkan</Filter>
-    </ClInclude>
     <ClInclude Include="src\engine\render\vulkan\vk_image.h">
       <Filter>engine\render\vulkan</Filter>
     </ClInclude>
@@ -138,9 +135,6 @@
       <Filter>engine\render\vulkan</Filter>
     </ClInclude>
     <ClInclude Include="src\engine\render\vulkan\vk_instance.h">
-      <Filter>engine\render\vulkan</Filter>
-    </ClInclude>
-    <ClInclude Include="src\engine\render\vulkan\vk_loader.h">
       <Filter>engine\render\vulkan</Filter>
     </ClInclude>
     <ClInclude Include="src\engine\render\vulkan\vk_pipeline.h">
@@ -250,9 +244,6 @@
       <Filter>engine\render\vulkan</Filter>
     </ClCompile>
     <ClCompile Include="src\engine\render\vulkan\vk_initializers.cpp">
-      <Filter>engine\render\vulkan</Filter>
-    </ClCompile>
-    <ClCompile Include="src\engine\render\vulkan\vk_loader.cpp">
       <Filter>engine\render\vulkan</Filter>
     </ClCompile>
     <ClCompile Include="src\engine\render\vulkan\vk_pipeline.cpp">

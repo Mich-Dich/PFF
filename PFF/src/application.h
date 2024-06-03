@@ -86,7 +86,11 @@ namespace PFF {
 		//scope_ref<basic_mesh> createCubeModel(glm::vec3 offset);
 
 		static application* s_instance;
-		static ref<PFF::render::renderer> m_renderer;
+
+#if defined PFF_RENDER_API_VULKAN
+		static ref<PFF::render::vulkan::vk_renderer> m_renderer;
+#endif
+
 		static ref<pff_window> m_window;
 		static bool m_is_titlebar_hovered;
 		static bool m_running;
