@@ -20,4 +20,7 @@ namespace PFF::render::util {
 	// @return None.
 	void compile_shader(const std::filesystem::path path);
 
+
+	//GLuint LoadTextureFromEmbeddedData(const uint8_t* data, int data_size, int* out_width, int* out_height);
+
 }

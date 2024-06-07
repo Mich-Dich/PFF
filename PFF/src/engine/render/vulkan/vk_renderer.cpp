@@ -516,9 +516,72 @@ namespace PFF::render::vulkan {
 
 #if 0
 		T_test_meshes = IO::mesh_loader::load_gltf_meshes("../PFF/assets/meshes/basicmesh.glb").value();
-#else
+#elif 0
 		T_test_meshes = IO::mesh_loader::load_gltf_meshes("../PFF/assets/meshes/BP-688.glb").value();
+#else
+
+		// ----------------------------- procedual test ----------------------------- 
+		const int grid_size_x = 6;
+		const int grid_size_y = 4;
+		const f32 grid_side_length_x = 10;
+		const f32 grid_side_length_y = 10;
+
+		geometry::mesh loc_mesh{};
+		loc_mesh.name = "procedural_test";
+		geometry::Geo_surface new_surface{};
+
+		loc_mesh.m_vertices.reserve(grid_size_x * grid_size_y);
+		for (int y = 0; y <= grid_size_y; ++y) {
+			for (int x = 0; x <= grid_size_x; ++x) {
+
+				float offset_x = (static_cast<f32>(grid_size_x) / 2) * grid_side_length_x;
+				float offset_y = (static_cast<f32>(grid_size_y) / 2) * grid_side_length_y;
+
+				geometry::vertex new_vertex;
+				new_vertex.position = glm::vec3(
+					(x * grid_side_length_x) - offset_x, 
+					0,
+					(y * grid_side_length_y) - offset_y
+				);
+				new_vertex.normal = { 0, 0, 1 };
+				new_vertex.color = glm::vec4{ 1.f };
+				new_vertex.uv_x = x;
+				new_vertex.uv_y = y;
+				loc_mesh.m_vertices.push_back(new_vertex);
+			}
+		}
+
+		CORE_LOG(Trace, "Finished adding verts");
+
+		for (int y = 0; y < grid_size_y; y++) {
+			for (int x = 0; x < grid_size_x; x++) {
+
+				int top_left = y * (grid_size_x + 1) + x;
+				int top_right = top_left + 1;
+				int bottom_left = (y + 1) * (grid_size_x + 1) + x;
+				int bottom_right = bottom_left + 1;
+
+				// First triangle
+				loc_mesh.m_indices.push_back(top_left);
+				loc_mesh.m_indices.push_back(bottom_left);
+				loc_mesh.m_indices.push_back(top_right);
+
+				// Second triangle
+				loc_mesh.m_indices.push_back(top_right);
+				loc_mesh.m_indices.push_back(bottom_left);
+				loc_mesh.m_indices.push_back(bottom_right);
+			}
+		}
+
+		new_surface.count = static_cast<int>(loc_mesh.m_indices.size());
+		loc_mesh.surfaces.push_back(new_surface);
+
+		T_test_meshes.emplace_back(create_ref<geometry::mesh>(std::move(loc_mesh)));
+		// ----------------------------- procedual test -----------------------------
+		 
 #endif
+
+
 
 		CORE_VALIDATE(T_test_meshes.size() > 0, return, "", "Failed to load meshes");
 		for (auto mesh : T_test_meshes) 
@@ -536,12 +599,13 @@ namespace PFF::render::vulkan {
 		m_grey_image = create_image((void*)&black, VkExtent3D{ 1, 1, 1 }, VK_FORMAT_R8G8B8A8_UNORM, VK_IMAGE_USAGE_SAMPLED_BIT);
 
 		//checkerboard image
+		const int EDGE_LENGTH = 2;
 		u32 color = glm::packUnorm4x8(glm::vec4(0.2f, 0.2f, 0.2f, 1));
-		std::array<u32, 16 * 16 > pixels; //for 16x16 checkerboard texture
-		for (int x = 0; x < 16; x++) 
-			for (int y = 0; y < 16; y++)
-				pixels[y * 16 + x] = ((x % 2) ^ (y % 2)) ? grey : color;			
-		m_error_checkerboard_image = create_image(pixels.data(), VkExtent3D{ 16, 16, 1 }, VK_FORMAT_R8G8B8A8_UNORM, VK_IMAGE_USAGE_SAMPLED_BIT);
+		std::array<u32, EDGE_LENGTH * EDGE_LENGTH > pixels; //for 16x16 checkerboard texture
+		for (int x = 0; x < EDGE_LENGTH; x++)
+			for (int y = 0; y < EDGE_LENGTH; y++)
+				pixels[y * EDGE_LENGTH + x] = ((x % EDGE_LENGTH) ^ (y % EDGE_LENGTH)) ? grey : color;
+		m_error_checkerboard_image = create_image(pixels.data(), VkExtent3D{ EDGE_LENGTH, EDGE_LENGTH, 1 }, VK_FORMAT_R8G8B8A8_UNORM, VK_IMAGE_USAGE_SAMPLED_BIT);
 
 		VkSamplerCreateInfo sampler{};
 		sampler.sType = VK_STRUCTURE_TYPE_SAMPLER_CREATE_INFO;
@@ -827,7 +891,7 @@ namespace PFF::render::vulkan {
 		m_deletion_queue.push_func([&]() {
 
 			vkDestroyPipelineLayout(m_device, m_gradient_pipeline_layout, nullptr);
-			for (u32 x = 0; x < m_background_effects.size(); x++)
+			for (u64 x = 0; x < m_background_effects.size(); x++)
 				vkDestroyPipeline(m_device, m_background_effects[x].pipeline, nullptr);
 			});
 	}
@@ -905,7 +969,7 @@ namespace PFF::render::vulkan {
 		vkDestroySwapchainKHR(m_device, m_swapchain, nullptr);
 
 		// destroy swapchain resources
-		for (int i = 0; i < m_swapchain_image_views.size(); i++)
+		for (u64 i = 0; i < m_swapchain_image_views.size(); i++)
 			vkDestroyImageView(m_device, m_swapchain_image_views[i], nullptr);
 
 	}
@@ -1011,7 +1075,7 @@ namespace PFF::render::vulkan {
 		vkCmdPushConstants(cmd, m_mesh_pipeline_layout, VK_SHADER_STAGE_VERTEX_BIT, 0, sizeof(GPU_draw_push_constants), &push_constants);
 		vkCmdBindIndexBuffer(cmd, T_test_meshes[selected_mesh]->mesh_buffers.index_buffer.buffer, 0, VK_INDEX_TYPE_UINT32);
 
-		for (int y = 0; y < T_test_meshes[selected_mesh]->surfaces.size(); y++)
+		for (u64 y = 0; y < T_test_meshes[selected_mesh]->surfaces.size(); y++)
 			vkCmdDrawIndexed(cmd, T_test_meshes[selected_mesh]->surfaces[y].count, 1, T_test_meshes[selected_mesh]->surfaces[y].startIndex, 0, 0);
 
 

@@ -46,9 +46,6 @@ namespace PFF::IO {
 
             // use the same vectors for all meshes so that the memory doesnt reallocate as often
 
-
-
-
             //std::vector<u32> indices;
             //std::vector<geometry::vertex> vertices;
             for (fastgltf::Mesh& mesh : gltf.meshes) {
@@ -131,14 +128,7 @@ namespace PFF::IO {
                         vtx.color = glm::vec4(vtx.normal, 1.f);
                 }
 
-
-
-
                 // new_mesh.meshBuffers = engine->uploadMesh(indices, vertices);
-
-
-
-
                 meshes.emplace_back(create_ref<geometry::mesh>(std::move(loc_mesh)));
             }
 

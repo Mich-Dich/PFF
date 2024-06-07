@@ -48,13 +48,9 @@ namespace PFF {
 		FORCEINLINE static void close_application()						{ m_running = false; }
 		FORCEINLINE static bool is_titlebar_hovered()					{ return m_is_titlebar_hovered; }
 
-		FORCEINLINE std::future<void>& add_future(std::future<void>& future)	{
 
-			std::lock_guard<std::mutex> lock(global_futures_mutex);
-			global_futures.push_back(std::move(future));
-			return global_futures.back();
-		}
-
+		std::future<void>& add_future(std::future<void>& future, std::shared_ptr<std::pair<std::atomic<bool>, std::condition_variable>>& shared_state);
+		void remove_timer(std::future<void>& future);
 		void run();
 		void limit_fps(const bool new_value, const u32 new_limit = 60);
 		FORCEINLINE void capture_cursor();
@@ -112,8 +108,8 @@ namespace PFF {
 		timer fps_timer;
 
 		// vector to store futures (from timer_async and other std::async tasks)
-		std::vector<std::future<void>> global_futures{};								// TODO(maybe): execute lamdas on main thread
-		std::mutex global_futures_mutex{}; // Mutex to protect global_futures
+		std::vector<util::timer> m_timers{};
+		std::mutex m_global_futures_mutex{}; // Mutex to protect global_futures
 
 	};
 

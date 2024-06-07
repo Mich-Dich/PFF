@@ -85,6 +85,14 @@ namespace PFF {
 		m_layerstack->pop_overlay(m_imgui_layer);
 		delete m_imgui_layer;
 
+
+		for (size_t x = 0; x < m_timers.size(); x++) {
+
+			util::cancel_timer(m_timers[x]);
+
+		}
+		m_timers.clear();
+
 		//m_current_map.reset();
 		//m_layerstack.pop_layer(m_world_layer);
 		//delete m_world_layer;
@@ -98,6 +106,27 @@ namespace PFF {
 	}
 
 	// ==================================================================== main loop ====================================================================
+
+	std::future<void>& application::add_future(std::future<void>& future, std::shared_ptr<std::pair<std::atomic<bool>, std::condition_variable>>& shared_state) {
+
+		std::lock_guard<std::mutex> lock(m_global_futures_mutex);
+		m_timers.push_back({ std::move(future), shared_state });
+		return m_timers.back().future;
+	}
+
+
+	void application::remove_timer(std::future<void>& future) {
+
+		std::lock_guard<std::mutex> lock(m_global_futures_mutex);
+
+		LOG(Trace, "timer vector length: " << m_timers.size());
+		/*m_timers.erase(std::remove_if(m_timers.begin(), m_timers.end(),
+			[&future](const util::timer& t) { return t.future._Ptr() == future._Ptr(); }),
+			m_timers.end());*/
+		LOG(Trace, "timer vector length: " << m_timers.size());
+	}
+
+
 
 	void application::run() {
 

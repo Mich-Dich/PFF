@@ -30,7 +30,7 @@ namespace PFF::render::vulkan {
         info.sType = VK_STRUCTURE_TYPE_DESCRIPTOR_SET_LAYOUT_CREATE_INFO;
         info.pNext = nullptr;
         info.pBindings = bindings.data();
-        info.bindingCount = (uint32_t)bindings.size();
+        info.bindingCount = (u32)bindings.size();
         info.flags = 0;
 
         VkDescriptorSetLayout set;
@@ -38,14 +38,14 @@ namespace PFF::render::vulkan {
         return set;
     }
 
-    void descriptor_allocator::init_pool(VkDevice device, uint32_t maxSets, std::vector<pool_size_ratio> poolRatios) {
+    void descriptor_allocator::init_pool(VkDevice device, u32 maxSets, std::vector<pool_size_ratio> poolRatios) {
 
         std::vector<VkDescriptorPoolSize> poolSizes;
         for (pool_size_ratio ratio : poolRatios) {
 
             VkDescriptorPoolSize buffer{};
             buffer.type = ratio.type;
-            buffer.descriptorCount = uint32_t(ratio.ratio * maxSets);
+            buffer.descriptorCount = static_cast<u32>(ratio.ratio * maxSets);
             poolSizes.push_back(buffer);
         }
 
@@ -53,7 +53,7 @@ namespace PFF::render::vulkan {
         pool_info.sType = VK_STRUCTURE_TYPE_DESCRIPTOR_POOL_CREATE_INFO;
         pool_info.flags = 0;
         pool_info.maxSets = maxSets;
-        pool_info.poolSizeCount = (uint32_t)poolSizes.size();
+        pool_info.poolSizeCount = static_cast<u32>(poolSizes.size());
         pool_info.pPoolSizes = poolSizes.data();
 
         vkCreateDescriptorPool(device, &pool_info, nullptr, &m_pool);
@@ -106,7 +106,7 @@ namespace PFF::render::vulkan {
 
             VkDescriptorPoolSize loc_desc_size{};
             loc_desc_size.type = ratio.type;
-            loc_desc_size.descriptorCount = uint32_t(ratio.ratio * set_count);
+            loc_desc_size.descriptorCount = static_cast<u32>(ratio.ratio * set_count);
             poolSizes.push_back(loc_desc_size);
         }
 
@@ -114,7 +114,7 @@ namespace PFF::render::vulkan {
         pool_info.sType = VK_STRUCTURE_TYPE_DESCRIPTOR_POOL_CREATE_INFO;
         pool_info.flags = 0;
         pool_info.maxSets = set_count;
-        pool_info.poolSizeCount = (uint32_t)poolSizes.size();
+        pool_info.poolSizeCount = static_cast<u32>(poolSizes.size());
         pool_info.pPoolSizes = poolSizes.data();
 
         VkDescriptorPool newPool;
@@ -122,7 +122,7 @@ namespace PFF::render::vulkan {
         return newPool;
     }
     
-    void descriptor_allocator_growable::init(VkDevice device, uint32_t maxSets, std::vector<PoolSizeRatio> poolRatios) {
+    void descriptor_allocator_growable::init(VkDevice device, u32 maxSets, std::vector<PoolSizeRatio> poolRatios) {
 
         ratios.clear();
 
@@ -239,7 +239,7 @@ namespace PFF::render::vulkan {
         for (VkWriteDescriptorSet& write : writes)
             write.dstSet = set;
 
-        vkUpdateDescriptorSets(device, (uint32_t)writes.size(), writes.data(), 0, nullptr);
+        vkUpdateDescriptorSets(device, static_cast<u32>(writes.size()), writes.data(), 0, nullptr);
     }
 
 }

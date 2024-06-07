@@ -47,6 +47,15 @@ namespace PFF::util {
         return loc_system_time;
     }
 
+    void util::cancel_timer(timer& timer) {
+
+        timer.shared_state->first = true;
+        timer.shared_state->second.notify_one();
+        if (timer.future.valid()) {
+            timer.future.wait();
+        }
+    }
+
     int count_lines(const char* text) {
 
         if (text[0] == '\0')

@@ -1,9 +1,6 @@
 
 #include "util/pch_editor.h"
 
-#include "util/io/config.h"
-//#include "util/color_theme.h"
-
 #include "PFF_editor.h"
 
 namespace PFF {
@@ -29,6 +26,7 @@ namespace PFF {
 
 		m_editor_controller->set_editor_camera_pos(position);
 		m_editor_controller->set_editor_camera_direction(look_direction);
+		
 	}
 
 	PFF_editor::~PFF_editor() {
@@ -50,21 +48,19 @@ namespace PFF {
 		LOG(Trace, "init editor logic");
 
 		/*
-		std::shared_ptr<basic_mesh> floor = basic_mesh::create_mesh_from_file("assets/floor.obj");
 		auto floor_obj = get_current_map()->create_empty_game_object();
-		floor_obj->mesh = floor;
+		floor_obj->mesh = basic_mesh::create_mesh_from_file("assets/floor.obj");
 		floor_obj->transform.translation = { 0.f, 0.f, 0.f };
 		floor_obj->transform.scale = glm::vec3(2.5f);
 
 #if 1		// populate scene with grid of meshes
 
-		std::shared_ptr<basic_mesh> model = basic_mesh::create_mesh_from_file("assets/smooth_vase.obj");
 		u32 counter = 0;
 		for (int16 x = -10; x < 10; x++) {
 			for (int16 y = -10; y < 10; y++) {
 
 				auto test_obj = get_current_map()->create_empty_game_object();
-				test_obj->mesh = model;
+				test_obj->mesh = basic_mesh::create_mesh_from_file("assets/smooth_vase.obj");
 				test_obj->transform.translation = { (x * 2) + 1, (y * 2) + 1, 0.5f };
 				test_obj->transform.scale = glm::vec3(2.f);
 				test_obj->rotation_speed = glm::linearRand(glm::vec3(0.0f), glm::vec3(glm::two_pi<f32>()));
@@ -75,9 +71,8 @@ namespace PFF {
 
 #else
 		// untitled / thruster
-		std::shared_ptr<basic_mesh> model = basic_mesh::create_mesh_from_file("assets/untitled.obj");
 		m_test_game_object = get_current_map()->create_empty_game_object();
-		m_test_game_object->mesh = model;
+		m_test_game_object->mesh = basic_mesh::create_mesh_from_file("assets/untitled.obj");
 		m_test_game_object->set_translation({ .0f, 0.f, 2.f });
 		m_test_game_object->transform.scale = glm::vec3(1.f);
 		m_test_game_object->rotation_speed = glm::vec3(0.f, 3.5f, 0.f);

@@ -130,6 +130,12 @@ namespace PFF {
         // TIMER
         // --------------------------------------------------------------------------------------------------------------------
 
+        struct timer {
+
+            std::future<void> future;
+            std::shared_ptr<std::pair<std::atomic<bool>, std::condition_variable>> shared_state;
+        };
+
         // @brief Asynchronously starts a timer with the specified duration and callback function.
         // 
         // @brief Usage example:
@@ -141,15 +147,32 @@ namespace PFF {
         // @param callback The callback function to be executed when the timer finishes.
         // @return Reference to the std::future<void> associated with the timer.
         template<class _rep, class _period>
-        std::future<void>& timer_async(std::chrono::duration<_rep, _period> duration, std::function<void()> callback) {
+        std::future<void>& timer_async(std::chrono::duration<_rep, _period> duration, std::function<void()> callback, std::function<void()> cancle_callback = NULL) {
 
-            auto future = std::async(std::launch::async, [duration, callback]() {
-                std::this_thread::sleep_for(duration);
-                callback();
+            auto shared_state = std::make_shared<std::pair<std::atomic<bool>, std::condition_variable>>();
+            shared_state->first = false;
+            auto future = std::async(std::launch::async, [duration, callback, cancle_callback, shared_state]() {
+
+                std::mutex mtx;
+                std::unique_lock<std::mutex> lock(mtx);
+
+                if (shared_state->second.wait_for(lock, duration, [shared_state]() { return shared_state->first.load(); })) {
+                    // Woken up by main thread
+                    if(cancle_callback != NULL)
+                        cancle_callback();
+                } else {
+                    // Time expired
+                    callback();
+                }
+
+                //application::get().remove_timer(future);
             });
 
-            return application::get().add_future(future);
+            return application::get().add_future(future, shared_state);
         }
+
+
+        void cancel_timer(timer& timer);
 
         // @brief Checks if the specified timer has finished.
         //
