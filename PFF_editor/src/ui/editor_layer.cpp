@@ -416,40 +416,6 @@ namespace PFF {
 
 				if (ImGui::BeginMenu("UI")) {
 
-					//UI::big_text("Font");
-
-					//ImGuiIO& io = ImGui::GetIO();
-					//const float MIN_SCALE = 0.3f, MAX_SCALE = 2.0f;
-					//ImGui::PushItemWidth(ImGui::GetFontSize() * 8);
-					//ImGui::DragFloat("global scale", &io.FontGlobalScale, 0.005f, MIN_SCALE, MAX_SCALE, "%.2f", ImGuiSliderFlags_AlwaysClamp); // Scale everything
-					//ImGui::PopItemWidth();
-
-
-					//ImGui::PushItemWidth(ImGui::GetFontSize() * 8);
-					//UI::begin_table("display_input_actions_params", false, ImVec2(350, (ImGui::GetTextLineHeightWithSpacing() * 2)) );
-
-					//static float font_size = UI::m_font_size;
-					//if (UI::table_row("Font scale", font_size)) {
-
-					//	//application::get().get_imgui_layer()->set_font_scale(font_size / ui::m_font_size);
-					//	//imguiio io = imgui::getio();
-					//	//log(trace, "font size: " << io.fontGlobalScale);
-					//}
-
-					//UI::end_table();
-					//ImGui::PopItemWidth();
-
-
-					//if (ImGui::Button("Recreate Fonts")) {
-
-					//	std::future<void> parsing_fonts = std::async(std::launch::async, []() {
-					//	
-					//		application::get().get_imgui_layer()->recreate_fonts();
-					//	});
-					//}
-
-
-
 					UI::big_text("Select Theme");
 
 					const char* items[] = { "Dark", "Light" };
@@ -509,46 +475,58 @@ namespace PFF {
 
 					ImGui::SameLine();
 					ImGui::BeginGroup();
-
-					ImGui::BeginGroup();
-					ImGui::Text("Current");
-					ImGui::ColorButton("##current", UI::main_color, ImGuiColorEditFlags_NoPicker | ImGuiColorEditFlags_AlphaPreviewHalf, ImVec2(60, 40));
-					ImGui::EndGroup();
-
-					ImGui::SameLine();
-					ImGui::BeginGroup();
-					ImGui::Text("Previous");
-					if (ImGui::ColorButton("##previous", backup_color, ImGuiColorEditFlags_NoPicker | ImGuiColorEditFlags_AlphaPreviewHalf, ImVec2(60, 40)))
-						UI::update_UI_colors(backup_color);
-
-					ImGui::EndGroup();
-
-					ImGui::Separator();
-					ImGui::Text("Palette");
-					for (int n = 0; n < ARRAY_SIZE(saved_palette); n++) {
-						ImGui::PushID(n);
-						if ((n % 5) != 0)
-							ImGui::SameLine(0.0f, ImGui::GetStyle().ItemSpacing.y);
-
-						ImGuiColorEditFlags palette_button_flags = ImGuiColorEditFlags_NoAlpha | ImGuiColorEditFlags_NoPicker | ImGuiColorEditFlags_NoTooltip;
-						if (ImGui::ColorButton("##palette", saved_palette[n], palette_button_flags, ImVec2(21, 21)))
-							UI::update_UI_colors(ImVec4(saved_palette[n].x, saved_palette[n].y, saved_palette[n].z, UI::main_color.w));
-
-						// Allow user to drop colors into each palette entry. Note that ColorButton() is already a
-						// drag source by default, unless specifying the ImGuiColorEditFlags_NoDragDrop flag.
-						if (ImGui::BeginDragDropTarget()) {
-							if (const ImGuiPayload* payload = ImGui::AcceptDragDropPayload(IMGUI_PAYLOAD_TYPE_COLOR_3F))
-								memcpy((float*)&saved_palette[n], payload->Data, sizeof(float) * 3);
-							if (const ImGuiPayload* payload = ImGui::AcceptDragDropPayload(IMGUI_PAYLOAD_TYPE_COLOR_4F))
-								memcpy((float*)&saved_palette[n], payload->Data, sizeof(float) * 4);
-							ImGui::EndDragDropTarget();
+					{
+						ImGui::BeginGroup();
+						{
+							ImGui::Text("Current");
+							ImGui::ColorButton("##current", UI::main_color, ImGuiColorEditFlags_NoPicker | ImGuiColorEditFlags_AlphaPreviewHalf, ImVec2(60, 40));
 						}
+						ImGui::EndGroup();
 
-						ImGui::PopID();
+						ImGui::SameLine();
+						{
+							ImGui::BeginGroup();
+							ImGui::Text("Previous");
+							if (ImGui::ColorButton("##previous", backup_color, ImGuiColorEditFlags_NoPicker | ImGuiColorEditFlags_AlphaPreviewHalf, ImVec2(60, 40)))
+								UI::update_UI_colors(backup_color);
+						}
+						ImGui::EndGroup();
+
+						ImGui::Separator();
+						ImGui::Text("Palette");
+						for (int n = 0; n < ARRAY_SIZE(saved_palette); n++) {
+							ImGui::PushID(n);
+							if ((n % 5) != 0)
+								ImGui::SameLine(0.0f, ImGui::GetStyle().ItemSpacing.y);
+
+							ImGuiColorEditFlags palette_button_flags = ImGuiColorEditFlags_NoAlpha | ImGuiColorEditFlags_NoPicker | ImGuiColorEditFlags_NoTooltip;
+							if (ImGui::ColorButton("##palette", saved_palette[n], palette_button_flags, ImVec2(21, 21)))
+								UI::update_UI_colors(ImVec4(saved_palette[n].x, saved_palette[n].y, saved_palette[n].z, UI::main_color.w));
+
+							// Allow user to drop colors into each palette entry. Note that ColorButton() is already a
+							// drag source by default, unless specifying the ImGuiColorEditFlags_NoDragDrop flag.
+							if (ImGui::BeginDragDropTarget()) {
+								if (const ImGuiPayload* payload = ImGui::AcceptDragDropPayload(IMGUI_PAYLOAD_TYPE_COLOR_3F))
+									memcpy((float*)&saved_palette[n], payload->Data, sizeof(float) * 3);
+								if (const ImGuiPayload* payload = ImGui::AcceptDragDropPayload(IMGUI_PAYLOAD_TYPE_COLOR_4F))
+									memcpy((float*)&saved_palette[n], payload->Data, sizeof(float) * 4);
+								ImGui::EndDragDropTarget();
+							}
+
+							ImGui::PopID();
+						}
 					}
 					ImGui::EndGroup();
+
+					//static f32 background_brightness = 0;
+					//ImGui::SetNextItemWidth(350);
+					//UI::begin_table("background_settings_values", false, ImVec2(350, (ImGui::GetTextLineHeightWithSpacing() * 2)) );
+					//UI::table_row_slider("brightness", background_brightness);
+					//UI::end_table();
+
 					ImGui::EndMenu();
 				}
+
 				ImGui::EndMenu();
 			}
 

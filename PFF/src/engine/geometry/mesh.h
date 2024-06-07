@@ -26,6 +26,12 @@ namespace PFF::geometry {
         glm::vec3           normal;
         float               uv_y;
         glm::vec4           color;
+
+        vertex()
+            : position(glm::vec3()), uv_x(0), normal(glm::vec3()), uv_y(0), color(glm::vec4()) {}
+
+        vertex(const glm::vec3& pos, float u_x, const glm::vec3& norm, float u_y, const glm::vec4& col)
+            : position(pos), uv_x(u_x), normal(norm), uv_y(u_y), color(col) {}
     };
 
 

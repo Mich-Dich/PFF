@@ -521,71 +521,89 @@ namespace PFF::render::vulkan {
 #else
 
 		// ----------------------------- procedual test ----------------------------- 
-		const int grid_size_x = 6;
-		const int grid_size_y = 4;
-		const f32 grid_side_length_x = 10;
-		const f32 grid_side_length_y = 10;
+		{
+			PFF_PROFILE_SCOPE("Procedural Grid Mesh");
 
-		geometry::mesh loc_mesh{};
-		loc_mesh.name = "procedural_test";
-		geometry::Geo_surface new_surface{};
+			const glm::ivec2 grid_size = glm::ivec2(10);	// size of a grid tile
+			const glm::ivec2 grid_tile_size = glm::ivec2(100);	// size of a grid tile
+			const glm::ivec2 grid_resolution = glm::ivec2(10);
 
-		loc_mesh.m_vertices.reserve(grid_size_x * grid_size_y);
-		for (int y = 0; y <= grid_size_y; ++y) {
-			for (int x = 0; x <= grid_size_x; ++x) {
+			srand(static_cast<u32>(time(0)));
 
-				float offset_x = (static_cast<f32>(grid_size_x) / 2) * grid_side_length_x;
-				float offset_y = (static_cast<f32>(grid_size_y) / 2) * grid_side_length_y;
+			geometry::mesh loc_mesh{};
+			loc_mesh.name = "procedural_test";
 
-				geometry::vertex new_vertex;
-				new_vertex.position = glm::vec3(
-					(x * grid_side_length_x) - offset_x, 
-					0,
-					(y * grid_side_length_y) - offset_y
-				);
-				new_vertex.normal = { 0, 0, 1 };
-				new_vertex.color = glm::vec4{ 1.f };
-				new_vertex.uv_x = x;
-				new_vertex.uv_y = y;
-				loc_mesh.m_vertices.push_back(new_vertex);
+			const int iterations_x = grid_size.x * grid_resolution.x;
+			const int iterations_y = grid_size.y * grid_resolution.y;
+
+			loc_mesh.m_vertices.resize((iterations_x + 1) * (iterations_y + 1));
+			loc_mesh.m_indices.resize((iterations_x * iterations_y) * 6);
+
+			const glm::vec2 offset = glm::vec2(
+				(static_cast<f32>(grid_size.x) / 2) * grid_tile_size.x,
+				(static_cast<f32>(grid_size.y) / 2) * grid_tile_size.y
+			);
+			const glm::vec2 pos_multiplier = glm::vec2(
+				(static_cast<f32>(grid_tile_size.x) / static_cast<f32>(grid_resolution.x)),
+				(static_cast<f32>(grid_tile_size.y) / static_cast<f32>(grid_resolution.y))
+			);
+
+			int counter_vert = 0;
+			for (int y = 0; y <= iterations_y; ++y) {
+				for (int x = 0; x <= iterations_x; ++x) {
+
+					geometry::vertex new_vertex;
+					new_vertex.position = glm::vec3(
+						(x * pos_multiplier.x) - offset.x,
+						static_cast<f32>((rand() % 100)) / 10.0f,
+						(y * pos_multiplier.y) - offset.y
+					);
+					new_vertex.normal = { 0, 0, 1 };
+					new_vertex.color = glm::vec4{ 1.f };
+					new_vertex.uv_x = static_cast<f32>(x) / static_cast<f32>(grid_resolution.x);
+					new_vertex.uv_y = static_cast<f32>(y) / static_cast<f32>(grid_resolution.y);
+					
+					loc_mesh.m_vertices[counter_vert] = new_vertex;
+					counter_vert++;
+				}
 			}
-		}
 
-		CORE_LOG(Trace, "Finished adding verts");
 
-		for (int y = 0; y < grid_size_y; y++) {
-			for (int x = 0; x < grid_size_x; x++) {
+			int counter = 0;
+			for (int y = 0; y < iterations_y; y++) {
+				for (int x = 0; x < iterations_x; x++) {
 
-				int top_left = y * (grid_size_x + 1) + x;
-				int top_right = top_left + 1;
-				int bottom_left = (y + 1) * (grid_size_x + 1) + x;
-				int bottom_right = bottom_left + 1;
+					int top_left = y * ((iterations_x)+1) + x;
+					int top_right = top_left + 1;
+					int bottom_left = (y + 1) * ((iterations_x)+1) + x;
+					int bottom_right = bottom_left + 1;
 
-				// First triangle
-				loc_mesh.m_indices.push_back(top_left);
-				loc_mesh.m_indices.push_back(bottom_left);
-				loc_mesh.m_indices.push_back(top_right);
+					loc_mesh.m_indices[counter + 0] = top_left;
+					loc_mesh.m_indices[counter + 1] = bottom_left;
+					loc_mesh.m_indices[counter + 2] = top_right;
 
-				// Second triangle
-				loc_mesh.m_indices.push_back(top_right);
-				loc_mesh.m_indices.push_back(bottom_left);
-				loc_mesh.m_indices.push_back(bottom_right);
+					loc_mesh.m_indices[counter + 3] = top_right;
+					loc_mesh.m_indices[counter + 4] = bottom_left;
+					loc_mesh.m_indices[counter + 5] = bottom_right;
+					counter += 6;
+				}
 			}
+
+			geometry::Geo_surface new_surface{};
+			new_surface.count = static_cast<int>(loc_mesh.m_indices.size());
+			loc_mesh.surfaces.push_back(new_surface);
+
+			T_test_meshes.emplace_back(create_ref<geometry::mesh>(std::move(loc_mesh)));
 		}
-
-		new_surface.count = static_cast<int>(loc_mesh.m_indices.size());
-		loc_mesh.surfaces.push_back(new_surface);
-
-		T_test_meshes.emplace_back(create_ref<geometry::mesh>(std::move(loc_mesh)));
 		// ----------------------------- procedual test -----------------------------
 		 
 #endif
 
+		if (T_test_meshes.size() > 0) {
 
-
-		CORE_VALIDATE(T_test_meshes.size() > 0, return, "", "Failed to load meshes");
-		for (auto mesh : T_test_meshes) 
-			mesh->mesh_buffers = upload_mesh(mesh->m_indices, mesh->m_vertices);
+			for (auto mesh : T_test_meshes) 
+				mesh->mesh_buffers = upload_mesh(mesh->m_indices, mesh->m_vertices);
+		}
 		
 
 		//3 default textures, white, grey, black. 1 pixel each
