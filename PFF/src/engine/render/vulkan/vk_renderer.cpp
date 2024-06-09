@@ -518,57 +518,77 @@ namespace PFF::render::vulkan {
 		T_test_meshes = IO::mesh_loader::load_gltf_meshes("../PFF/assets/meshes/basicmesh.glb").value();
 #elif 0
 		T_test_meshes = IO::mesh_loader::load_gltf_meshes("../PFF/assets/meshes/BP-688.glb").value();
-#else
+#else	// procedural terrain test
 
-		// ----------------------------- procedual test ----------------------------- 
-		{
+//#define PROFILE_GENERATION
+
+		geometry::mesh loc_mesh{};
+		loc_mesh.name = "procedural_test";
+
+#ifdef PROFILE_GENERATION
+		for (size_t i = 0; i < 10; i++) {
+			loc_mesh = geometry::mesh{};		// reset
+			CORE_LOG(Trace, "starting mesh generation iteration: " << i);
 			PFF_PROFILE_SCOPE("Procedural Grid Mesh");
+#endif
+		
+		PFF::util::noise noise(PFF::util::noise_type::Perlin);
+		noise.SetFractalType(PFF::util::fractal_type::FBm);
+		noise.set_frequency(0.005f);
+		noise.set_fractal_octaves(4);
+		noise.set_fractal_lacunarity(2.3f);
 
-			const glm::ivec2 grid_size = glm::ivec2(10);	// size of a grid tile
-			const glm::ivec2 grid_tile_size = glm::ivec2(100);	// size of a grid tile
-			const glm::ivec2 grid_resolution = glm::ivec2(10);
+		const glm::ivec2 grid_size = glm::ivec2(10);		// number of grid tiles
+		const glm::vec2 grid_tile_size = glm::ivec2(1000);	// size of a grid tile
+		const glm::vec2 grid_resolution = glm::ivec2(100);
+		const int iterations_x = static_cast<u32>(grid_size.x * grid_resolution.x);
+		const int iterations_y = static_cast<u32>(grid_size.y * grid_resolution.y);
 
-			srand(static_cast<u32>(time(0)));
-
-			geometry::mesh loc_mesh{};
-			loc_mesh.name = "procedural_test";
-
-			const int iterations_x = grid_size.x * grid_resolution.x;
-			const int iterations_y = grid_size.y * grid_resolution.y;
-
+		const glm::vec2 offset = glm::vec2(
+			(static_cast<f32>(grid_size.x) / 2) * grid_tile_size.x,
+			(static_cast<f32>(grid_size.y) / 2) * grid_tile_size.y
+		);
+		const glm::vec2 pos_multiplier = glm::vec2(
+			(grid_tile_size.x / grid_resolution.x),
+			(grid_tile_size.y / grid_resolution.y)
+		);
+		
+		{
+#ifdef PROFILE_GENERATION
+			PFF_PROFILE_SCOPE("Procedural Grid Mesh - resize vectors");
+#endif
 			loc_mesh.m_vertices.resize((iterations_x + 1) * (iterations_y + 1));
 			loc_mesh.m_indices.resize((iterations_x * iterations_y) * 6);
+		}
 
-			const glm::vec2 offset = glm::vec2(
-				(static_cast<f32>(grid_size.x) / 2) * grid_tile_size.x,
-				(static_cast<f32>(grid_size.y) / 2) * grid_tile_size.y
-			);
-			const glm::vec2 pos_multiplier = glm::vec2(
-				(static_cast<f32>(grid_tile_size.x) / static_cast<f32>(grid_resolution.x)),
-				(static_cast<f32>(grid_tile_size.y) / static_cast<f32>(grid_resolution.y))
-			);
-
+		{
+#ifdef PROFILE_GENERATION
+			PFF_PROFILE_SCOPE("Procedural Grid Mesh - first loop");
+#endif
 			int counter_vert = 0;
 			for (int y = 0; y <= iterations_y; ++y) {
 				for (int x = 0; x <= iterations_x; ++x) {
 
-					geometry::vertex new_vertex;
-					new_vertex.position = glm::vec3(
-						(x * pos_multiplier.x) - offset.x,
-						static_cast<f32>((rand() % 100)) / 10.0f,
-						(y * pos_multiplier.y) - offset.y
+					loc_mesh.m_vertices[counter_vert] = geometry::vertex(
+						glm::vec3(
+							(x * pos_multiplier.x) - offset.x,
+							noise.get_noise((f32)x, (f32)y) * 500.f,
+							(y * pos_multiplier.y) - offset.y
+						),
+						{ 0, 0, 1 },
+						glm::vec4{ 1.f },
+						static_cast<f32>(x) / grid_resolution.x,
+						static_cast<f32>(y) / grid_resolution.y
 					);
-					new_vertex.normal = { 0, 0, 1 };
-					new_vertex.color = glm::vec4{ 1.f };
-					new_vertex.uv_x = static_cast<f32>(x) / static_cast<f32>(grid_resolution.x);
-					new_vertex.uv_y = static_cast<f32>(y) / static_cast<f32>(grid_resolution.y);
-					
-					loc_mesh.m_vertices[counter_vert] = new_vertex;
 					counter_vert++;
 				}
 			}
-
-
+		}
+			
+		{
+#ifdef PROFILE_GENERATION
+			PFF_PROFILE_SCOPE("Procedural Grid Mesh - second loop");
+#endif
 			int counter = 0;
 			for (int y = 0; y < iterations_y; y++) {
 				for (int x = 0; x < iterations_x; x++) {
@@ -588,15 +608,18 @@ namespace PFF::render::vulkan {
 					counter += 6;
 				}
 			}
-
-			geometry::Geo_surface new_surface{};
-			new_surface.count = static_cast<int>(loc_mesh.m_indices.size());
-			loc_mesh.surfaces.push_back(new_surface);
-
-			T_test_meshes.emplace_back(create_ref<geometry::mesh>(std::move(loc_mesh)));
 		}
-		// ----------------------------- procedual test -----------------------------
-		 
+
+		geometry::Geo_surface new_surface{};
+		new_surface.count = static_cast<int>(loc_mesh.m_indices.size());
+		loc_mesh.surfaces.push_back(new_surface);
+
+#ifdef PROFILE_GENERATION
+		}
+#endif
+		
+		T_test_meshes.emplace_back(create_ref<geometry::mesh>(std::move(loc_mesh)));
+		
 #endif
 
 		if (T_test_meshes.size() > 0) {
