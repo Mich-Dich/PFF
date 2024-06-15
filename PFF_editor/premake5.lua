@@ -32,12 +32,10 @@ project "PFF_editor"
 	includedirs
 	{
 		"src",
-		"assets",
-		"shaders",
-
-		"%{wks.location}/PFF/vendor/glm",
 		"%{wks.location}/PFF/src",
-		"%{wks.location}/PFF/vendor/glm",
+
+		"%{IncludeDir.entt}",
+		"%{IncludeDir.glm}",
 		"%{IncludeDir.ImGui}",
 		"%{IncludeDir.ImGui}/backends/",
 		

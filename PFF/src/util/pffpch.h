@@ -65,7 +65,12 @@
 #include "util/math/constance.h"
 #include "util/math/random.h"
 
+#include "macros.h"
 #include "util/util.h"
 #include "util/benchmarking/instrumentor.h"
 #include "util/io/serializer.h"
 //#include "util/math/random.h"
+
+// ==================================================================================  for application use  ==================================================================================
+
+#include "UUID.h"

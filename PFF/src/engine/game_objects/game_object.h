@@ -3,6 +3,7 @@
 //#include "engine/geometry/basic_mesh.h"
 
 #define GLM_FORCE_RADIANS
+
 #define GLM_FORCE_DEPTH_ZERO_TO_ONE
 #include <glm/glm.hpp>
 #include <glm/gtc/constants.hpp>
@@ -20,6 +21,7 @@ namespace PFF {
 		glm::mat4 mat4_XYZ();
 		glm::mat3 normal_matrix();
 	};
+
 	/*
 	class game_object {
 	public:

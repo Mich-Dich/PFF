@@ -34,6 +34,60 @@
 
 namespace PFF::render::vulkan {
 
+	void deletion_queue:: setup(VkDevice device, VmaAllocator allocator) {
+		m_device = device;
+		m_allocator = allocator;
+	}
+
+	void deletion_queue::cleanup() {
+
+		vmaDestroyAllocator(m_allocator);
+		m_allocator = nullptr;
+		m_device = nullptr;
+	}
+
+	void deletion_queue::push_func(std::function<void()>&& function) { m_deletors.push_back(function); }
+
+	void deletion_queue::flush() {
+
+#define IS_OF_TYPE(name)							entry.first == std::type_index(typeid(name))
+#define USE_AS(name)								static_cast<name>(entry.second)
+#define SIMPLE_DESTROY_FUNC(type, function)			if (IS_OF_TYPE(type))							\
+														function(m_device, USE_AS(type), nullptr);
+
+		for (auto it = m_deletors.rbegin(); it != m_deletors.rend(); it++)
+			(*it)();
+		m_deletors.clear();
+				
+		for (const auto& entry : m_pointers) {
+
+			SIMPLE_DESTROY_FUNC(VkSampler, vkDestroySampler)
+			else SIMPLE_DESTROY_FUNC(VkCommandPool, vkDestroyCommandPool)
+			else SIMPLE_DESTROY_FUNC(VkFence, vkDestroyFence)
+			else SIMPLE_DESTROY_FUNC(VkDescriptorSetLayout, vkDestroyDescriptorSetLayout)
+			else SIMPLE_DESTROY_FUNC(VkPipelineLayout, vkDestroyPipelineLayout)
+			else SIMPLE_DESTROY_FUNC(VkPipeline, vkDestroyPipeline)
+
+			else if (IS_OF_TYPE(descriptor_allocator*)) {
+
+				USE_AS(descriptor_allocator*)->clear_descriptors(m_device);
+				USE_AS(descriptor_allocator*)->destroy_pool(m_device);
+			}
+
+			else if (IS_OF_TYPE(vk_image*)) {
+
+				vk_image* image = USE_AS(vk_image*);
+				vkDestroyImageView(m_device, image->image_view, nullptr);
+				vmaDestroyImage(m_allocator, image->image, image->allocation);
+			}
+
+			else
+				CORE_LOG(Error, "Renderer deletion queue used with an unknown type [" << entry.first.name() << "]");
+
+		}
+		m_pointers.clear();
+	}
+
 	// ============================================= setup  ============================================= 
 
 	vk_renderer::vk_renderer(ref<pff_window> window, ref<PFF::layer_stack> layer_stack)
@@ -99,7 +153,10 @@ namespace PFF::render::vulkan {
 		allocatorInfo.flags = VMA_ALLOCATOR_CREATE_BUFFER_DEVICE_ADDRESS_BIT;
 		vmaCreateAllocator(&allocatorInfo, &m_allocator);
 
-		m_deletion_queue.push_func([&]() { vmaDestroyAllocator(m_allocator); });
+		// Setup deletion queues
+		m_deletion_queue.setup(m_device, m_allocator);
+		for (int i = 0; i < FRAME_COUNT; i++)
+			m_frames[i].deletion_queue.setup(m_device, m_allocator);
 
 		init_commands();
 		init_swapchain();
@@ -133,6 +190,7 @@ namespace PFF::render::vulkan {
 		}
 
 		m_deletion_queue.flush();
+		m_deletion_queue.cleanup();
 		
 		destroy_swapchain();
 		vkDestroySurfaceKHR(m_instance, m_surface, nullptr);
@@ -240,9 +298,7 @@ namespace PFF::render::vulkan {
 
 		m_imugi_image_dset = ImGui_ImplVulkan_AddTexture(m_texture_sampler, m_draw_image.image_view, VK_IMAGE_LAYOUT_GENERAL);
 
-		m_deletion_queue.push_func([=]() {
-			vkDestroySampler(m_device, m_texture_sampler, nullptr);
-		});
+		m_deletion_queue.push_pointer(m_texture_sampler);
 
 		m_imgui_initalized = true;
 	}
@@ -642,7 +698,7 @@ namespace PFF::render::vulkan {
 		//checkerboard image
 		const int EDGE_LENGTH = 2;
 		u32 color = glm::packUnorm4x8(glm::vec4(0.2f, 0.2f, 0.2f, 1));
-		std::array<u32, EDGE_LENGTH * EDGE_LENGTH > pixels; //for 16x16 checkerboard texture
+		std::array<u32, EDGE_LENGTH * EDGE_LENGTH > pixels; //for checkerboard texture
 		for (int x = 0; x < EDGE_LENGTH; x++)
 			for (int y = 0; y < EDGE_LENGTH; y++)
 				pixels[y * EDGE_LENGTH + x] = ((x % EDGE_LENGTH) ^ (y % EDGE_LENGTH)) ? grey : color;
@@ -659,15 +715,12 @@ namespace PFF::render::vulkan {
 		sampler.minFilter = VK_FILTER_LINEAR;
 		vkCreateSampler(m_device, &sampler, nullptr, &m_default_sampler_linear);
 
-		m_deletion_queue.push_func([=]() {
-
-			destroy_image(m_white_image);
-			destroy_image(m_black_image);
-			destroy_image(m_grey_image);
-			destroy_image(m_error_checkerboard_image);
-			vkDestroySampler(m_device, m_default_sampler_linear, nullptr);
-			vkDestroySampler(m_device, m_default_sampler_nearest, nullptr);
-		});
+		m_deletion_queue.push_pointer(&m_white_image);
+		m_deletion_queue.push_pointer(&m_black_image);
+		m_deletion_queue.push_pointer(&m_grey_image);
+		m_deletion_queue.push_pointer(&m_error_checkerboard_image);
+		m_deletion_queue.push_pointer(m_default_sampler_linear);
+		m_deletion_queue.push_pointer(m_default_sampler_nearest);
 	}
 
 	void vk_renderer::init_swapchain() {
@@ -718,15 +771,8 @@ namespace PFF::render::vulkan {
 		VkImageViewCreateInfo dview_info = init::imageview_create_info(m_depth_image.image_format, m_depth_image.image, VK_IMAGE_ASPECT_DEPTH_BIT);
 		VK_CHECK(vkCreateImageView(m_device, &dview_info, nullptr, &m_depth_image.image_view));
 
-		//add to deletion queues
-		m_deletion_queue.push_func([=]() {
-
-			vkDestroyImageView(m_device, m_draw_image.image_view, nullptr);
-			vmaDestroyImage(m_allocator, m_draw_image.image, m_draw_image.allocation);
-
-			vkDestroyImageView(m_device, m_depth_image.image_view, nullptr);
-			vmaDestroyImage(m_allocator, m_depth_image.image, m_depth_image.allocation);
-		});
+		m_deletion_queue.push_pointer(&m_draw_image);
+		m_deletion_queue.push_pointer(&m_depth_image);
 	}
 
 
@@ -747,7 +793,7 @@ namespace PFF::render::vulkan {
 		VkCommandBufferAllocateInfo cmdAllocInfo = init::command_buffer_allocate_info(m_immCommandPool, 1);
 		VK_CHECK(vkAllocateCommandBuffers(m_device, &cmdAllocInfo, &m_immCommandBuffer));
 
-		m_deletion_queue.push_func([=]() { vkDestroyCommandPool(m_device, m_immCommandPool, nullptr); });
+		m_deletion_queue.push_pointer(m_immCommandPool);
 	}
 
 
@@ -766,7 +812,7 @@ namespace PFF::render::vulkan {
 		}
 
 		VK_CHECK(vkCreateFence(m_device, &fence_CI, nullptr, &m_immFence));
-		m_deletion_queue.push_func([=]() { vkDestroyFence(m_device, m_immFence, nullptr); });
+		m_deletion_queue.push_pointer(m_immFence);
 	}
 
 
@@ -794,12 +840,8 @@ namespace PFF::render::vulkan {
 			writer.update_set(m_device, m_draw_image_descriptors);
 		}
 		
-		m_deletion_queue.push_func([=]() { 
-			
-			global_descriptor_allocator.clear_descriptors(m_device);
-			global_descriptor_allocator.destroy_pool(m_device);
-			vkDestroyDescriptorSetLayout(m_device, m_draw_image_descriptor_layout, nullptr); 
-		});
+		m_deletion_queue.push_pointer(&global_descriptor_allocator);
+		m_deletion_queue.push_pointer(m_draw_image_descriptor_layout);
 		
 		{
 			descriptor_layout_builder builder;
@@ -832,9 +874,7 @@ namespace PFF::render::vulkan {
 			builder.add_binding(0, VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER);
 			m_gpu_scene_data_descriptor_layout = builder.build(m_device, VK_SHADER_STAGE_VERTEX_BIT | VK_SHADER_STAGE_FRAGMENT_BIT);
 
-			m_deletion_queue.push_func([=]() {
-				vkDestroyDescriptorSetLayout(m_device, m_gpu_scene_data_descriptor_layout, nullptr);
-			});
+			m_deletion_queue.push_pointer(m_gpu_scene_data_descriptor_layout);
 		}
 	}
 
@@ -994,6 +1034,10 @@ namespace PFF::render::vulkan {
 		//clean structures
 		vkDestroyShaderModule(m_device, mesh_frag_shader, nullptr);
 		vkDestroyShaderModule(m_device, mesh_vertex_shader, nullptr);
+
+		//m_deletion_queue.push_pointer(m_single_image_descriptor_layout);
+		//m_deletion_queue.push_pointer(m_mesh_pipeline_layout);
+		//m_deletion_queue.push_pointer(m_mesh_pipeline);
 
 		m_deletion_queue.push_func([&]() {
 
@@ -1220,7 +1264,7 @@ namespace PFF::render::vulkan {
 	}
 	
 	void vk_renderer::destroy_image(const vk_image& img) {
-
+		
 		vkDestroyImageView(m_device, img.image_view, nullptr);
 		vmaDestroyImage(m_allocator, img.image, img.allocation);
 	}

@@ -2,17 +2,19 @@
 
 #include "engine/render/renderer.h"
 #include "engine/render/vulkan/vk_types.h"
-
-
 #include "engine/platform/pff_window.h"
 #include "engine/geometry/mesh.h"
 
-
-#include "vk_types.h"
+#include <typeindex>
+//#include "vk_types.h"
+//#include <vulkan/vulkan.h>
 
 class PFF::layer_stack;
 
 namespace PFF::render::vulkan {
+
+	class deletion_queue;
+	constexpr u32 FRAME_COUNT = 2;
 
 	struct compute_push_constants {
 	
@@ -30,7 +32,29 @@ namespace PFF::render::vulkan {
 		compute_push_constants	data{};
 	};
 
-	constexpr u32 FRAME_COUNT = 2;
+
+	class deletion_queue {
+	public:
+
+		PFF_DEFAULT_CONSTRUCTORS(deletion_queue);
+
+		void setup(VkDevice device, VmaAllocator allocator);
+		void cleanup();
+
+		template<typename T>
+		void push_pointer(T* pointer) { m_pointers.push_back(std::pair<std::type_index, void*>{std::type_index(typeid(T*)), pointer}); }
+
+		void push_func(std::function<void()>&& function);
+		void flush();
+
+		// --------------- data ---------------
+	private:
+		std::deque<std::function<void()>> m_deletors{};
+		std::vector<std::pair<std::type_index, void*>> m_pointers{};
+		VkDevice m_device{};
+		VmaAllocator m_allocator{};
+	};
+
 
 	class vk_renderer : public PFF::render::renderer {
 	public:
@@ -58,6 +82,8 @@ namespace PFF::render::vulkan {
 		void* get_rendered_image() override { return (void*)m_imugi_image_dset; }
 
 	private:
+
+		friend class deletion_queue;
 
 		struct FrameData {
 
@@ -118,7 +144,7 @@ namespace PFF::render::vulkan {
 		VkSurfaceKHR				m_surface{};			// Vulkan window surface
 		
 		// ---------------------------- queues ---------------------------- 
-		FrameData					m_frames[FRAME_COUNT];
+		FrameData					m_frames[FRAME_COUNT]{};
 		VkQueue						m_graphics_queue{};
 		u32							m_graphics_queue_family{};
 		

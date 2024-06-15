@@ -13,8 +13,8 @@
     <Filter Include="src\toolkit">
       <UniqueIdentifier>{C2705FF9-2E26-D8EE-B71A-D2C523CFCEF2}</UniqueIdentifier>
     </Filter>
-    <Filter Include="src\toolkit\graphics_engine_settings">
-      <UniqueIdentifier>{47372309-331E-E500-DC6E-4B1EC8345E67}</UniqueIdentifier>
+    <Filter Include="src\toolkit\settings">
+      <UniqueIdentifier>{42BCE99D-2E4B-7367-D769-8762C3D7830D}</UniqueIdentifier>
     </Filter>
     <Filter Include="src\toolkit\todo_list">
       <UniqueIdentifier>{426A2C2E-AED6-E728-77CA-7F86E3F50991}</UniqueIdentifier>
@@ -37,7 +37,7 @@
       <Filter>src\controller</Filter>
     </ClInclude>
     <ClInclude Include="src\toolkit\settings\graphics_engine_settings.h">
-      <Filter>src\toolkit\graphics_engine_settings</Filter>
+      <Filter>src\toolkit\settings</Filter>
     </ClInclude>
     <ClInclude Include="src\toolkit\todo_list\todo_list.h">
       <Filter>src\toolkit\todo_list</Filter>

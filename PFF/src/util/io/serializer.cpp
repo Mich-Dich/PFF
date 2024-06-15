@@ -68,7 +68,6 @@ namespace PFF::serializer {
 						break;
 					}
 				}
-
 			}
 
 			else 
@@ -117,22 +116,14 @@ namespace PFF::serializer {
 					//  more indented                                         is sub-section        is array-element
 					if ((measure_indentation(line) != SECTION_INDENTATION) || line.back() == ':' || line.front() == '-') {
 
-						m_file_content << line << "\n";
+						m_file_content << line << '\n';
 						continue;
 					}
 
-					std::istringstream iss(line);
 					std::string key, value;
-					std::getline(iss, key, ':');
-					std::getline(iss, value);
-					
-					if (!value.empty() && value.front() == ' ')
-						value.erase(0, 1);
-					
+					extract_key_value(key, value, line);
 					m_key_value_pares[key] = value;
 				}
-
-				//LOG(Debug, "END OF SECTION");
 			}
 
 			// exit outer loop if inner-loop already done
@@ -140,9 +131,17 @@ namespace PFF::serializer {
 				break;
 
 		}
-
-		//LOG(Trace, "Filished parting file")
 		return *this;
+	}
+
+	void yaml::extract_key_value(std::string& key, std::string& value, std::string& line) {
+
+		std::istringstream iss(line);
+		std::getline(iss, key, ':');
+		std::getline(iss, value);
+
+		if (!value.empty() && value.front() == ' ')
+			value.erase(0, 1);
 	}
 
 	yaml& yaml::sub_section(const std::string& section_name, std::function<void(PFF::serializer::yaml&)> sub_section_function) {
@@ -181,10 +180,7 @@ namespace PFF::serializer {
 				if ((measure_indentation(line) == 0) && (line.find(section_name) != std::string::npos) && (line.back() == ':')) {
 
 					found_section = true;
-					//m_level_of_indention++;
-					//LOG(Debug, "sub_section() found section => line: [" << line << "]");
 
-					//     not end of content
 					while (std::getline(file_content_buffer, line)) {
 
 						line = line.substr(NUM_OF_INDENTING_SPACES);
@@ -196,27 +192,15 @@ namespace PFF::serializer {
 							continue;
 						}
 
-						line.erase(std::remove(line.begin(), line.end(), ' '), line.end());
-						std::istringstream iss(line);
 						std::string key, value;
-						std::getline(iss, key, ':');
-						std::getline(iss, value);
+						extract_key_value(key, value, line);
 						m_key_value_pares[key] = value;
 					}
-
-					//LOG(Debug, "END OF SUB-SECTION");
 				}
-
-				// skip rest of content if section found
 				if (found_section)
 					break;
 			}
-			//m_level_of_indention--;
-
 			sub_section_function(*this);
-
-			// restore [m_key_value_pares]
-			//LOG(Fatal, "Reseting values");
 			m_key_value_pares = key_value_pares_buffer;
 			m_file_content << file_content_buffer.str();
 		}

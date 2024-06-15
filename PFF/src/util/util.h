@@ -11,26 +11,6 @@
 
 // =================================================================================  macros  ==================================================================================
 
-#define ARRAY_SIZE(array)		            (sizeof(array) / sizeof(array[0]))
-
-#define APP_NAMESPACE PFF
-
-#define BIT(x) (1 << x)
-
-#define BIND_FN(x)							std::bind(&x, this, std::placeholders::_1)
-
-#define DELETE_COPY(type)					type(const type&) = delete;								\
-											type& operator=(const type&) = delete
-
-#define DELETE_MOVE(type)					type(type&&) = delete;									\
-											type& operator=(type&&) = delete
-
-#define DELETE_COPY_MOVE(type)				type(const type&) = delete;								\
-											type& operator=(const type&) = delete;					\
-											type(type&&) = delete;									\
-											type& operator=(type&&) = delete
-
-#define CONSOLE_LIST_BEGIN					" " << (char)(200) << " "
 
 // ================================================================================  functions  ================================================================================
 
@@ -214,7 +194,8 @@ namespace PFF {
 
                 //LOG(Fatal, "called: convert_to_string() with string");
                 dest_string = src_value;
-                std::replace(dest_string.begin(), dest_string.end(), ' ', '§');
+                //std::replace(dest_string.begin(), dest_string.end(), ' ', '%');
+                std::replace(dest_string.begin(), dest_string.end(), '\n', '$');
                 return;
             }
 
@@ -293,7 +274,8 @@ namespace PFF {
             else if constexpr (std::is_convertible_v<T, std::string>) {
 
                 dest_value = src_string;
-                std::replace(dest_value.begin(), dest_value.end(), '§', ' ');
+                std::replace(dest_value.begin(), dest_value.end(), '%', ' ');
+                std::replace(dest_value.begin(), dest_value.end(), '$', '\n');
                 return;
             }
 

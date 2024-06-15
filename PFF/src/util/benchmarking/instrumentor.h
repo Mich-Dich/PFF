@@ -154,6 +154,7 @@ namespace PFF {
 
 	class instrumentor_timer {
 	public:
+
 		instrumentor_timer(const char* name)
 			: m_name(name), m_stopped(false) {
 

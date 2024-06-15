@@ -27,7 +27,8 @@ project (client_project_name)
 	
 	includedirs
 	{
-		"PFF/vendor/glm",
+		"%{IncludeDir.entt}",
+		"%{IncludeDir.glm}",
 		"PFF/src",
 	}
 

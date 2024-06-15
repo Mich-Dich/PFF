@@ -40,9 +40,6 @@
     <Filter Include="util\benchmarking">
       <UniqueIdentifier>{FB59FD75-6770-FB0B-B0E7-862D1C3DCC93}</UniqueIdentifier>
     </Filter>
-    <Filter Include="util\imgui">
-      <UniqueIdentifier>{ED66C3AC-D91E-05FA-4226-DE552EFD9FEA}</UniqueIdentifier>
-    </Filter>
     <Filter Include="util\io">
       <UniqueIdentifier>{4AE65B48-B6C5-DAE3-BFDD-65BA2B3C4145}</UniqueIdentifier>
     </Filter>
@@ -174,6 +171,9 @@
     <ClInclude Include="src\util\math\constance.h">
       <Filter>util\math</Filter>
     </ClInclude>
+    <ClInclude Include="src\util\math\noise.h">
+      <Filter>util\math</Filter>
+    </ClInclude>
     <ClInclude Include="src\util\math\random.h">
       <Filter>util\math</Filter>
     </ClInclude>
@@ -192,7 +192,8 @@
     <ClInclude Include="src\util\util.h">
       <Filter>util</Filter>
     </ClInclude>
-    <ClInclude Include="src\util\math\noise.h" />
+    <ClInclude Include="src\util\UUID.h" />
+    <ClInclude Include="src\util\macros.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="src\application.cpp" />
@@ -274,9 +275,14 @@
     <ClCompile Include="src\util\timer.cpp">
       <Filter>util</Filter>
     </ClCompile>
+    <ClCompile Include="src\util\ui\pannel_collection.cpp">
+      <Filter>util\ui</Filter>
+    </ClCompile>
     <ClCompile Include="src\util\util.cpp">
       <Filter>util</Filter>
     </ClCompile>
-    <ClCompile Include="src\util\ui\pannel_collection.cpp" />
+    <ClCompile Include="src\engine\world\entity.h" />
+    <ClCompile Include="src\util\UUID.cpp" />
+    <ClCompile Include="src\engine\world\components.h" />
   </ItemGroup>
 </Project>

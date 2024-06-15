@@ -13,6 +13,10 @@
 
 namespace PFF::render {
 
+	// ------------------------------------------------------------------------------------------------------------------------
+	// DATA STRUCTURES
+	// ------------------------------------------------------------------------------------------------------------------------
+
 	enum class render_api {
 
 		none = 0,
@@ -22,45 +26,68 @@ namespace PFF::render {
 		Metal = 4,
 	};
 
+	enum class material_pass : u8 {
+
+		MainColor,
+		Transparent,
+		Other
+	};
+
 	struct GPU_mesh_buffers {
 
 #if defined PFF_RENDER_API_VULKAN
-		vk_buffer		index_buffer{};
-		vk_buffer		vertex_buffer{};
-		VkDeviceAddress			vertex_buffer_address{};
+		vk_buffer			index_buffer{};
+		vk_buffer			vertex_buffer{};
+		VkDeviceAddress		vertex_buffer_address{};
 #endif
-
 	};
 
-	// !! CAUTION !! - Doing callbacks like this is inneficient at scale, because we are storing whole std::functions for every object to be deleted. This is suboptimal. 
-	// For deleting thousands of objects, a better implementation would be to store arrays of vulkan handles of various types such as VkImage, VkBuffer, and so on. And then delete those from a loop.
-	struct deletion_queue {
+	struct material_pipeline {
 
-		std::deque<std::function<void()>> deletors;
+		VkPipeline			pipeline;
+		VkPipelineLayout	layout;
+	};
 
-		void push_func(std::function<void()>&& function) { deletors.push_back(function); }
+	struct material_instance {
 
-		void flush() {
-
-			for (auto it = deletors.rbegin(); it != deletors.rend(); it++)
-				(*it)();
-
-			deletors.clear();
-		}
+		material_pipeline*	pipeline;
+		VkDescriptorSet		materialSet;
+		material_pass		passType;
 	};
 
 	struct GPU_scene_data {
 
-		glm::mat4 view;
-		glm::mat4 proj;
-		glm::mat4 viewproj;
-		glm::vec4 ambientColor;
-		glm::vec4 sunlightDirection; // w for sun power
-		glm::vec4 sunlightColor;
+		glm::mat4			view;
+		glm::mat4			proj;
+		glm::mat4			viewproj;
+		glm::vec4			ambientColor;
+		glm::vec4			sunlightDirection; // w for sun power
+		glm::vec4			sunlightColor;
 	};
 
-	//CORE_LOG(Debug, "Befor suspected clear call");
-	//CORE_LOG(Debug, "After suspected clear call");
+	// ------------------------------------------------------------------------------------------------------------------------
+	// ECS - COMPONENT
+	// ------------------------------------------------------------------------------------------------------------------------
+
+	struct mesh_component {
+
+		PFF_DEFAULT_CONSTRUCTORS(mesh_component);
+
+		u32					indexCount;
+		u32					firstIndex;
+		glm::mat4			transform;
+
+#if defined PFF_RENDER_API_VULKAN
+		VkBuffer			indexBuffer;
+		VkDeviceAddress		vertexBufferAddress;
+		material_instance*	material;
+#endif
+	};
+
+	// ------------------------------------------------------------------------------------------------------------------------
+	// RENDERER FUNCTIONALLITY
+	// ------------------------------------------------------------------------------------------------------------------------
+
 
 	class renderer {
 	public:

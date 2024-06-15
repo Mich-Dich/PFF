@@ -38,6 +38,7 @@ project "PFF"
 		"%{IncludeDir.fastgltf}",
 		"%{IncludeDir.tinyobjloader}",
 		"%{IncludeDir.stb_image}",
+		"%{IncludeDir.entt}",
 		"%{IncludeDir.VulkanSDK}",
 	}
 	

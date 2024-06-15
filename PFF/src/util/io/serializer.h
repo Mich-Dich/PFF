@@ -51,12 +51,9 @@ namespace PFF::serializer {
 				std::string buffer{};
 				if constexpr (PFF::util::is_vector<T>::value) {			// value is a vector
 
-					//LOG(Info, "T is a std::vector.");
-
 					m_file_content << add_spaces(m_level_of_indention) << m_prefix << key_name << ":\n";
 					for (auto interation : value) {
 
-						//LOG(Info, "interation: "<< interation)
 						PFF::util::convert_to_string<T::value_type>(interation, buffer);
 						m_file_content << add_spaces(m_level_of_indention + 1) << "- " << buffer << "\n";
 					}
@@ -65,8 +62,6 @@ namespace PFF::serializer {
 
 					PFF::util::convert_to_string<T>(value, buffer);
 					m_file_content << add_spaces(m_level_of_indention) << m_prefix << key_name << ": " << buffer << "\n";
-
-					//LOG(Trace, "called: entry() to set: " << key_name << " - " << buffer);
 				}
 
 			} else {				// load from file
@@ -173,7 +168,7 @@ namespace PFF::serializer {
 				m_file_content = {};
 
 				// deserialize content of subsections				
-				u64 index = -1;
+				int64 index = -1;
 				bool found_section = false;
 				const u32 section_indentation = 0;
 				std::string line;
@@ -210,11 +205,8 @@ namespace PFF::serializer {
 								continue;
 							}
 
-							line.erase(std::remove(line.begin(), line.end(), ' '), line.end());
-							std::istringstream iss(line);
 							std::string key, value;
-							std::getline(iss, key, ':');
-							std::getline(iss, value);
+							extract_key_value(key, value, line);
 							vector_of_key_value_pares[index][key] = value;
 						}
 					}
@@ -254,6 +246,7 @@ namespace PFF::serializer {
 
 		void serialize();
 		yaml& deserialize();
+		void extract_key_value(std::string& key, std::string& value, std::string& line);
 
 		static const u32 NUM_OF_INDENTING_SPACES = 2;		// should not change
 
