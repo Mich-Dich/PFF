@@ -26,13 +26,6 @@ namespace PFF::render {
 		Metal = 4,
 	};
 
-	enum class material_pass : u8 {
-
-		MainColor,
-		Transparent,
-		Other
-	};
-
 	struct GPU_mesh_buffers {
 
 #if defined PFF_RENDER_API_VULKAN
@@ -40,6 +33,13 @@ namespace PFF::render {
 		vk_buffer			vertex_buffer{};
 		VkDeviceAddress		vertex_buffer_address{};
 #endif
+	};
+
+	enum class material_pass : u8 {
+
+		MainColor,
+		Transparent,
+		Other
 	};
 
 	struct material_pipeline {
@@ -51,38 +51,22 @@ namespace PFF::render {
 	struct material_instance {
 
 		material_pipeline*	pipeline;
-		VkDescriptorSet		materialSet;
-		material_pass		passType;
+#if defined PFF_RENDER_API_VULKAN
+		VkDescriptorSet		material_set;
+#endif
+		material_pass		pass_type;
 	};
 
 	struct GPU_scene_data {
 
 		glm::mat4			view;
 		glm::mat4			proj;
-		glm::mat4			viewproj;
-		glm::vec4			ambientColor;
-		glm::vec4			sunlightDirection; // w for sun power
-		glm::vec4			sunlightColor;
+		glm::mat4			view_proj;
+		glm::vec4			ambient_color;
+		glm::vec4			sunlight_direction;		// w for sun power
+		glm::vec4			sunlight_color;
 	};
 
-	// ------------------------------------------------------------------------------------------------------------------------
-	// ECS - COMPONENT
-	// ------------------------------------------------------------------------------------------------------------------------
-
-	struct mesh_component {
-
-		PFF_DEFAULT_CONSTRUCTORS(mesh_component);
-
-		u32					indexCount;
-		u32					firstIndex;
-		glm::mat4			transform;
-
-#if defined PFF_RENDER_API_VULKAN
-		VkBuffer			indexBuffer;
-		VkDeviceAddress		vertexBufferAddress;
-		material_instance*	material;
-#endif
-	};
 
 	// ------------------------------------------------------------------------------------------------------------------------
 	// RENDERER FUNCTIONALLITY

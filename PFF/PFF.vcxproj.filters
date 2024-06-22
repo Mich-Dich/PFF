@@ -107,6 +107,9 @@
     <ClInclude Include="src\engine\platform\pff_window.h">
       <Filter>engine\platform</Filter>
     </ClInclude>
+    <ClInclude Include="src\engine\render\render_public_data.h">
+      <Filter>engine\render</Filter>
+    </ClInclude>
     <ClInclude Include="src\engine\render\render_util.h">
       <Filter>engine\render</Filter>
     </ClInclude>
@@ -143,10 +146,19 @@
     <ClInclude Include="src\engine\render\vulkan\vk_types.h">
       <Filter>engine\render\vulkan</Filter>
     </ClInclude>
+    <ClInclude Include="src\engine\world\components.h">
+      <Filter>engine\world</Filter>
+    </ClInclude>
+    <ClInclude Include="src\engine\world\entity.h">
+      <Filter>engine\world</Filter>
+    </ClInclude>
     <ClInclude Include="src\engine\world\map.h">
       <Filter>engine\world</Filter>
     </ClInclude>
     <ClInclude Include="src\entry_point.h" />
+    <ClInclude Include="src\util\UUID.h">
+      <Filter>util</Filter>
+    </ClInclude>
     <ClInclude Include="src\util\benchmarking\instrumentor.h">
       <Filter>util\benchmarking</Filter>
     </ClInclude>
@@ -166,6 +178,9 @@
       <Filter>util\io</Filter>
     </ClInclude>
     <ClInclude Include="src\util\logger.h">
+      <Filter>util</Filter>
+    </ClInclude>
+    <ClInclude Include="src\util\macros.h">
       <Filter>util</Filter>
     </ClInclude>
     <ClInclude Include="src\util\math\constance.h">
@@ -192,8 +207,6 @@
     <ClInclude Include="src\util\util.h">
       <Filter>util</Filter>
     </ClInclude>
-    <ClInclude Include="src\util\UUID.h" />
-    <ClInclude Include="src\util\macros.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="src\application.cpp" />
@@ -257,6 +270,9 @@
     <ClCompile Include="src\engine\world\map.cpp">
       <Filter>engine\world</Filter>
     </ClCompile>
+    <ClCompile Include="src\util\UUID.cpp">
+      <Filter>util</Filter>
+    </ClCompile>
     <ClCompile Include="src\util\io\config.cpp">
       <Filter>util\io</Filter>
     </ClCompile>
@@ -281,8 +297,5 @@
     <ClCompile Include="src\util\util.cpp">
       <Filter>util</Filter>
     </ClCompile>
-    <ClCompile Include="src\engine\world\entity.h" />
-    <ClCompile Include="src\util\UUID.cpp" />
-    <ClCompile Include="src\engine\world\components.h" />
   </ItemGroup>
 </Project>

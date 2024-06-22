@@ -27,13 +27,19 @@ project (client_project_name)
 	
 	includedirs
 	{
+		"src",
+		"%{wks.location}/PFF/src",
+
 		"%{IncludeDir.entt}",
 		"%{IncludeDir.glm}",
-		"PFF/src",
+		"%{IncludeDir.ImGui}",
+		
+		"C:/VulkanSDK/1.3.250.1/Include",
 	}
 
 	links
 	{
+		"ImGui",
 		"PFF",
 	}
 

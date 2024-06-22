@@ -12,13 +12,13 @@
 #elif PFF_INSIDE_EDITOR
 	#define PFF_API_EDITOR __declspec(dllimport)
 #else
-	#define PFF_API_EDITOR	#error Error: Unauthorized Usage. The component you are attempting to utilize is restricted to the editor environment only. This functionality is exclusive to the editing tools and is not intended for general use in the application. If you require access to this feature, please use the appropriate editor interface or consult the documentation for guidance. For further assistance, please contact our support team.Mich Games
+	#define PFF_API_EDITOR	
 #endif
 
 #if defined(PFF_INSIDE_ENGINE) || defined(PFF_INSIDE_EDITOR)
 	#define USE_IN_EDITOR
 #else
-	#define USE_IN_EDITOR	#error Error: Unauthorized Usage. The component you are attempting to utilize is restricted to the editor environment only. This functionality is exclusive to the editing tools and is not intended for general use in the application. If you require access to this feature, please use the appropriate editor interface or consult the documentation for guidance. For further assistance, please contact our support team.Mich Games
+	#define USE_IN_EDITOR	
 #endif
 
 #define DEBUG_BREAK() (__debugbreak())

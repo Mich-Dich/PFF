@@ -194,6 +194,7 @@ IF EXIST ..\bin\Release-windows-x86_64\PFF\PFF.dll\ (xcopy /Q /E /Y /I ..\bin\Re
     <ClInclude Include="src\engine\layer\layer_stack.h" />
     <ClInclude Include="src\engine\layer\world_layer.h" />
     <ClInclude Include="src\engine\platform\pff_window.h" />
+    <ClInclude Include="src\engine\render\render_public_data.h" />
     <ClInclude Include="src\engine\render\render_util.h" />
     <ClInclude Include="src\engine\render\renderer.h" />
     <ClInclude Include="src\engine\render\vulkan\vendor\VkBootstrap.h" />
@@ -206,8 +207,11 @@ IF EXIST ..\bin\Release-windows-x86_64\PFF\PFF.dll\ (xcopy /Q /E /Y /I ..\bin\Re
     <ClInclude Include="src\engine\render\vulkan\vk_pipeline.h" />
     <ClInclude Include="src\engine\render\vulkan\vk_renderer.h" />
     <ClInclude Include="src\engine\render\vulkan\vk_types.h" />
+    <ClInclude Include="src\engine\world\components.h" />
+    <ClInclude Include="src\engine\world\entity.h" />
     <ClInclude Include="src\engine\world\map.h" />
     <ClInclude Include="src\entry_point.h" />
+    <ClInclude Include="src\util\UUID.h" />
     <ClInclude Include="src\util\benchmarking\instrumentor.h" />
     <ClInclude Include="src\util\core_config.h" />
     <ClInclude Include="src\util\data_types.h" />
@@ -224,7 +228,6 @@ IF EXIST ..\bin\Release-windows-x86_64\PFF\PFF.dll\ (xcopy /Q /E /Y /I ..\bin\Re
     <ClInclude Include="src\util\timer.h" />
     <ClInclude Include="src\util\ui\pannel_collection.h" />
     <ClInclude Include="src\util\util.h" />
-    <ClInclude Include="src\util\UUID.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="src\application.cpp" />
@@ -247,9 +250,8 @@ IF EXIST ..\bin\Release-windows-x86_64\PFF\PFF.dll\ (xcopy /Q /E /Y /I ..\bin\Re
     <ClCompile Include="src\engine\render\vulkan\vk_initializers.cpp" />
     <ClCompile Include="src\engine\render\vulkan\vk_pipeline.cpp" />
     <ClCompile Include="src\engine\render\vulkan\vk_renderer.cpp" />
-    <ClCompile Include="src\engine\world\components.h" />
-    <ClCompile Include="src\engine\world\entity.h" />
     <ClCompile Include="src\engine\world\map.cpp" />
+    <ClCompile Include="src\util\UUID.cpp" />
     <ClCompile Include="src\util\io\config.cpp" />
     <ClCompile Include="src\util\io\io_handler.cpp" />
     <ClCompile Include="src\util\io\serializer.cpp" />
@@ -260,7 +262,6 @@ IF EXIST ..\bin\Release-windows-x86_64\PFF\PFF.dll\ (xcopy /Q /E /Y /I ..\bin\Re
     <ClCompile Include="src\util\timer.cpp" />
     <ClCompile Include="src\util\ui\pannel_collection.cpp" />
     <ClCompile Include="src\util\util.cpp" />
-    <ClCompile Include="src\util\UUID.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="vendor\glfw\GLFW.vcxproj">

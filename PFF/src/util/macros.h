@@ -5,7 +5,8 @@
 #define PFF_IMPLISITE_CAST(type, field)			operator type& () { return field; };
 #define PFF_IMPLISITE_CAST_CONST(type, field)	operator const type& () const { return field; };
 
-#define PFF_DEFAULT_CONSTRUCTORS(name)			name() = default;					\
+#define PFF_DEFAULT_CONSTRUCTORS(name)			public: \
+												name() = default;					\
 												name(const name&) = default;	\
 												name(name&&) = default;
 

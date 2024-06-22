@@ -5,6 +5,11 @@
 
 namespace PFF {
 
+	void PFF_editor::serialize(serializer::option option) {
+
+		// list all serialize functions
+		m_editor_controller->serialize(option);
+	}
 
 	PFF_editor::PFF_editor() {
 
@@ -16,28 +21,12 @@ namespace PFF {
 		m_editor_controller = std::make_shared<editor_controller>();
 		register_player_controller(m_editor_controller);
 				
-		// load editor camera loc && rot
-		glm::vec3 position = { -16, -19, -30 };
-		glm::vec3 look_direction = { .5f, -.4f, 0 };
-
-		serializer::yaml(config::get_filepath_from_configtype(config::file::editor), "editor_camera", serializer::option::load_from_file)
-			.entry(KEY_VALUE(position))
-			.entry(KEY_VALUE(look_direction));
-
-		m_editor_controller->set_editor_camera_pos(position);
-		m_editor_controller->set_editor_camera_direction(look_direction);
-		
+		serialize(serializer::option::load_from_file);	
 	}
 
 	PFF_editor::~PFF_editor() {
-		
-		// save camera position
-		glm::vec3 position = m_editor_controller->get_editor_camera_pos();
-		glm::vec3 look_direction = m_editor_controller->get_editor_camera_direction();
 
-		serializer::yaml(config::get_filepath_from_configtype(config::file::editor), "editor_camera", serializer::option::save_to_file)
-			.entry(KEY_VALUE(position))
-			.entry(KEY_VALUE(look_direction));
+		serialize(serializer::option::save_to_file);
 
 		pop_overlay(m_editor_layer);
 		delete m_editor_layer;

@@ -2,8 +2,6 @@
 
 namespace PFF::render::util {
 
-#define PFF_RENDER_API_VULKAN
-
 	// @brief It iterates through each file in the directory and compiles any file recognized as a shader.
 	//        If [compile_subdirectory] is set to true, it recursively searches and compiles shaders in subdirectories.
 	// @param [path_to_dir] The path to the directory containing shaders.

@@ -52,8 +52,8 @@ namespace PFF::render::vulkan {
 
 #define IS_OF_TYPE(name)							entry.first == std::type_index(typeid(name))
 #define USE_AS(name)								static_cast<name>(entry.second)
-#define SIMPLE_DESTROY_FUNC(type, function)			if (IS_OF_TYPE(type))							\
-														function(m_device, USE_AS(type), nullptr);
+#define VK_DESTROY_FUNC(name)						if (IS_OF_TYPE(Vk##name))	{vkDestroy##name(m_device, USE_AS(Vk##name), nullptr); }
+														
 
 		for (auto it = m_deletors.rbegin(); it != m_deletors.rend(); it++)
 			(*it)();
@@ -61,12 +61,13 @@ namespace PFF::render::vulkan {
 				
 		for (const auto& entry : m_pointers) {
 
-			SIMPLE_DESTROY_FUNC(VkSampler, vkDestroySampler)
-			else SIMPLE_DESTROY_FUNC(VkCommandPool, vkDestroyCommandPool)
-			else SIMPLE_DESTROY_FUNC(VkFence, vkDestroyFence)
-			else SIMPLE_DESTROY_FUNC(VkDescriptorSetLayout, vkDestroyDescriptorSetLayout)
-			else SIMPLE_DESTROY_FUNC(VkPipelineLayout, vkDestroyPipelineLayout)
-			else SIMPLE_DESTROY_FUNC(VkPipeline, vkDestroyPipeline)
+			VK_DESTROY_FUNC(Sampler)
+			else VK_DESTROY_FUNC(CommandPool)
+			else VK_DESTROY_FUNC(DescriptorPool)
+			else VK_DESTROY_FUNC(Fence)
+			else VK_DESTROY_FUNC(DescriptorSetLayout)
+			else VK_DESTROY_FUNC(Pipeline)
+			else VK_DESTROY_FUNC(PipelineLayout)
 
 			else if (IS_OF_TYPE(descriptor_allocator*)) {
 
@@ -83,7 +84,6 @@ namespace PFF::render::vulkan {
 
 			else
 				CORE_LOG(Error, "Renderer deletion queue used with an unknown type [" << entry.first.name() << "]");
-
 		}
 		m_pointers.clear();
 	}
@@ -594,7 +594,7 @@ namespace PFF::render::vulkan {
 		noise.set_fractal_octaves(4);
 		noise.set_fractal_lacunarity(2.3f);
 
-		const glm::ivec2 grid_size = glm::ivec2(10);		// number of grid tiles
+		const glm::ivec2 grid_size = glm::ivec2(5);			// number of grid tiles
 		const glm::vec2 grid_tile_size = glm::ivec2(1000);	// size of a grid tile
 		const glm::vec2 grid_resolution = glm::ivec2(100);
 		const int iterations_x = static_cast<u32>(grid_size.x * grid_resolution.x);
@@ -619,7 +619,7 @@ namespace PFF::render::vulkan {
 
 		{
 #ifdef PROFILE_GENERATION
-			PFF_PROFILE_SCOPE("Procedural Grid Mesh - first loop");
+			PFF_PROFILE_SCOPE("Procedural Grid Mesh - generate vertexes");
 #endif
 			int counter_vert = 0;
 			for (int y = 0; y <= iterations_y; ++y) {
@@ -643,7 +643,7 @@ namespace PFF::render::vulkan {
 			
 		{
 #ifdef PROFILE_GENERATION
-			PFF_PROFILE_SCOPE("Procedural Grid Mesh - second loop");
+			PFF_PROFILE_SCOPE("Procedural Grid Mesh - generate triange");
 #endif
 			int counter = 0;
 			for (int y = 0; y < iterations_y; y++) {
@@ -734,7 +734,7 @@ namespace PFF::render::vulkan {
 			1 
 		};
 		m_window->get_monitor_size((int*)&drawImageExtent.width, (int*)&drawImageExtent.height);
-		CORE_LOG(Debug, "render image extend: " << drawImageExtent.width << "/" << drawImageExtent.height);
+		CORE_LOG(Trace, "render image extend: " << drawImageExtent.width << "/" << drawImageExtent.height);
 
 		VmaAllocationCreateInfo image_alloc_CI = {};
 		image_alloc_CI.usage = VMA_MEMORY_USAGE_GPU_ONLY;												// for the m_draw_image & m_depth_image, allocate it from GPU local memory
@@ -1145,7 +1145,7 @@ namespace PFF::render::vulkan {
 		
 		// NOTE: Note that 10000 is “near” and 0.1 is “far”. And reversing the depth, so that depth 1 is the near plane, and depth 0 the far plane.
 		//		 This is a technique that greatly increases the quality of depth testing.
-		glm::mat4 projection = glm::perspective(glm::radians(m_active_camera->get_perspective_fov_y()), (float)m_draw_extent.width / (float)m_draw_extent.height, 10000.f, 0.1f);
+		glm::mat4 projection = glm::perspective(glm::radians(m_active_camera->get_perspective_fov_y()), (float)m_draw_extent.width / (float)m_draw_extent.height, 100000.f, 0.1f);
 		projection[1][1] *= -1;				// invert the Y direction on projection matrix
 		glm::mat4 view = m_active_camera->get_view();
 		
