@@ -236,8 +236,20 @@ namespace PFF::render::vulkan {
 
     void descriptor_writer::update_set(VkDevice device, VkDescriptorSet set) {
 
+#if 1
         for (VkWriteDescriptorSet& write : writes)
             write.dstSet = set;
+#else
+        // Check if writes is empty
+        CORE_VALIDATE(!writes.empty(), return, "", "Error: No writes available for updating descriptor set.");
+
+        for (VkWriteDescriptorSet& write : writes) {
+
+            // Check if write is valid
+            CORE_VALIDATE(write.sType == VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET, return, "", "Error: Invalid write descriptor set structure type.");
+            write.dstSet = set;
+        }
+#endif
 
         vkUpdateDescriptorSets(device, static_cast<u32>(writes.size()), writes.data(), 0, nullptr);
     }

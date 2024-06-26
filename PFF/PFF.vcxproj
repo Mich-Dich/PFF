@@ -99,10 +99,18 @@
       <AdditionalOptions>/NODEFAULTLIB:LIBCMTD /NODEFAULTLIB:MSVCRT %(AdditionalOptions)</AdditionalOptions>
     </Link>
     <PostBuildEvent>
-      <Command>IF NOT EXIST $(SolutionDir)\bin\Debug-windows-x86_64\Sandbox (mkdir $(SolutionDir)\bin\Debug-windows-x86_64\Sandbox)
+      <Command>IF NOT EXIST $(SolutionDir)\bin\Debug-windows-x86_64\PFF\shaders (mkdir $(SolutionDir)\bin\Debug-windows-x86_64\PFF\shaders)
+IF EXIST $(SolutionDir)\PFF\shaders\ (xcopy /Q /E /Y /I $(SolutionDir)\PFF\shaders $(SolutionDir)\bin\Debug-windows-x86_64\PFF\shaders &gt; nul) ELSE (xcopy /Q /Y /I $(SolutionDir)\PFF\shaders $(SolutionDir)\bin\Debug-windows-x86_64\PFF\shaders &gt; nul)
+IF NOT EXIST $(SolutionDir)\bin\Debug-windows-x86_64\PFF\defaults (mkdir $(SolutionDir)\bin\Debug-windows-x86_64\PFF\defaults)
+IF EXIST $(SolutionDir)\PFF\defaults\ (xcopy /Q /E /Y /I $(SolutionDir)\PFF\defaults $(SolutionDir)\bin\Debug-windows-x86_64\PFF\defaults &gt; nul) ELSE (xcopy /Q /Y /I $(SolutionDir)\PFF\defaults $(SolutionDir)\bin\Debug-windows-x86_64\PFF\defaults &gt; nul)
+IF NOT EXIST $(SolutionDir)\bin\Debug-windows-x86_64\PFF\assets (mkdir $(SolutionDir)\bin\Debug-windows-x86_64\PFF\assets)
+IF EXIST $(SolutionDir)\PFF\assets\ (xcopy /Q /E /Y /I $(SolutionDir)\PFF\assets $(SolutionDir)\bin\Debug-windows-x86_64\PFF\assets &gt; nul) ELSE (xcopy /Q /Y /I $(SolutionDir)\PFF\assets $(SolutionDir)\bin\Debug-windows-x86_64\PFF\assets &gt; nul)
+IF NOT EXIST $(SolutionDir)\bin\Debug-windows-x86_64\Sandbox (mkdir $(SolutionDir)\bin\Debug-windows-x86_64\Sandbox)
 IF EXIST ..\bin\Debug-windows-x86_64\PFF\PFF.dll\ (xcopy /Q /E /Y /I ..\bin\Debug-windows-x86_64\PFF\PFF.dll $(SolutionDir)\bin\Debug-windows-x86_64\Sandbox &gt; nul) ELSE (xcopy /Q /Y /I ..\bin\Debug-windows-x86_64\PFF\PFF.dll $(SolutionDir)\bin\Debug-windows-x86_64\Sandbox &gt; nul)
 IF NOT EXIST $(SolutionDir)\bin\Debug-windows-x86_64\PFF_editor (mkdir $(SolutionDir)\bin\Debug-windows-x86_64\PFF_editor)
-IF EXIST ..\bin\Debug-windows-x86_64\PFF\PFF.dll\ (xcopy /Q /E /Y /I ..\bin\Debug-windows-x86_64\PFF\PFF.dll $(SolutionDir)\bin\Debug-windows-x86_64\PFF_editor &gt; nul) ELSE (xcopy /Q /Y /I ..\bin\Debug-windows-x86_64\PFF\PFF.dll $(SolutionDir)\bin\Debug-windows-x86_64\PFF_editor &gt; nul)</Command>
+IF EXIST ..\bin\Debug-windows-x86_64\PFF\PFF.dll\ (xcopy /Q /E /Y /I ..\bin\Debug-windows-x86_64\PFF\PFF.dll $(SolutionDir)\bin\Debug-windows-x86_64\PFF_editor &gt; nul) ELSE (xcopy /Q /Y /I ..\bin\Debug-windows-x86_64\PFF\PFF.dll $(SolutionDir)\bin\Debug-windows-x86_64\PFF_editor &gt; nul)
+IF NOT EXIST $(SolutionDir)\bin\Debug-windows-x86_64\Sandbox (mkdir $(SolutionDir)\bin\Debug-windows-x86_64\Sandbox)
+IF EXIST ..\bin\Debug-windows-x86_64\PFF\PFF.dll\ (xcopy /Q /E /Y /I ..\bin\Debug-windows-x86_64\PFF\PFF.dll $(SolutionDir)\bin\Debug-windows-x86_64\Sandbox &gt; nul) ELSE (xcopy /Q /Y /I ..\bin\Debug-windows-x86_64\PFF\PFF.dll $(SolutionDir)\bin\Debug-windows-x86_64\Sandbox &gt; nul)</Command>
     </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='RelWithDebInfo|x64'">
@@ -134,10 +142,18 @@ IF EXIST ..\bin\Debug-windows-x86_64\PFF\PFF.dll\ (xcopy /Q /E /Y /I ..\bin\Debu
       <AdditionalOptions>/NODEFAULTLIB:LIBCMTD /NODEFAULTLIB:MSVCRT %(AdditionalOptions)</AdditionalOptions>
     </Link>
     <PostBuildEvent>
-      <Command>IF NOT EXIST $(SolutionDir)\bin\RelWithDebInfo-windows-x86_64\Sandbox (mkdir $(SolutionDir)\bin\RelWithDebInfo-windows-x86_64\Sandbox)
+      <Command>IF NOT EXIST $(SolutionDir)\bin\RelWithDebInfo-windows-x86_64\PFF\shaders (mkdir $(SolutionDir)\bin\RelWithDebInfo-windows-x86_64\PFF\shaders)
+IF EXIST $(SolutionDir)\PFF\shaders\ (xcopy /Q /E /Y /I $(SolutionDir)\PFF\shaders $(SolutionDir)\bin\RelWithDebInfo-windows-x86_64\PFF\shaders &gt; nul) ELSE (xcopy /Q /Y /I $(SolutionDir)\PFF\shaders $(SolutionDir)\bin\RelWithDebInfo-windows-x86_64\PFF\shaders &gt; nul)
+IF NOT EXIST $(SolutionDir)\bin\RelWithDebInfo-windows-x86_64\PFF\defaults (mkdir $(SolutionDir)\bin\RelWithDebInfo-windows-x86_64\PFF\defaults)
+IF EXIST $(SolutionDir)\PFF\defaults\ (xcopy /Q /E /Y /I $(SolutionDir)\PFF\defaults $(SolutionDir)\bin\RelWithDebInfo-windows-x86_64\PFF\defaults &gt; nul) ELSE (xcopy /Q /Y /I $(SolutionDir)\PFF\defaults $(SolutionDir)\bin\RelWithDebInfo-windows-x86_64\PFF\defaults &gt; nul)
+IF NOT EXIST $(SolutionDir)\bin\RelWithDebInfo-windows-x86_64\PFF\assets (mkdir $(SolutionDir)\bin\RelWithDebInfo-windows-x86_64\PFF\assets)
+IF EXIST $(SolutionDir)\PFF\assets\ (xcopy /Q /E /Y /I $(SolutionDir)\PFF\assets $(SolutionDir)\bin\RelWithDebInfo-windows-x86_64\PFF\assets &gt; nul) ELSE (xcopy /Q /Y /I $(SolutionDir)\PFF\assets $(SolutionDir)\bin\RelWithDebInfo-windows-x86_64\PFF\assets &gt; nul)
+IF NOT EXIST $(SolutionDir)\bin\RelWithDebInfo-windows-x86_64\Sandbox (mkdir $(SolutionDir)\bin\RelWithDebInfo-windows-x86_64\Sandbox)
 IF EXIST ..\bin\RelWithDebInfo-windows-x86_64\PFF\PFF.dll\ (xcopy /Q /E /Y /I ..\bin\RelWithDebInfo-windows-x86_64\PFF\PFF.dll $(SolutionDir)\bin\RelWithDebInfo-windows-x86_64\Sandbox &gt; nul) ELSE (xcopy /Q /Y /I ..\bin\RelWithDebInfo-windows-x86_64\PFF\PFF.dll $(SolutionDir)\bin\RelWithDebInfo-windows-x86_64\Sandbox &gt; nul)
 IF NOT EXIST $(SolutionDir)\bin\RelWithDebInfo-windows-x86_64\PFF_editor (mkdir $(SolutionDir)\bin\RelWithDebInfo-windows-x86_64\PFF_editor)
-IF EXIST ..\bin\RelWithDebInfo-windows-x86_64\PFF\PFF.dll\ (xcopy /Q /E /Y /I ..\bin\RelWithDebInfo-windows-x86_64\PFF\PFF.dll $(SolutionDir)\bin\RelWithDebInfo-windows-x86_64\PFF_editor &gt; nul) ELSE (xcopy /Q /Y /I ..\bin\RelWithDebInfo-windows-x86_64\PFF\PFF.dll $(SolutionDir)\bin\RelWithDebInfo-windows-x86_64\PFF_editor &gt; nul)</Command>
+IF EXIST ..\bin\RelWithDebInfo-windows-x86_64\PFF\PFF.dll\ (xcopy /Q /E /Y /I ..\bin\RelWithDebInfo-windows-x86_64\PFF\PFF.dll $(SolutionDir)\bin\RelWithDebInfo-windows-x86_64\PFF_editor &gt; nul) ELSE (xcopy /Q /Y /I ..\bin\RelWithDebInfo-windows-x86_64\PFF\PFF.dll $(SolutionDir)\bin\RelWithDebInfo-windows-x86_64\PFF_editor &gt; nul)
+IF NOT EXIST $(SolutionDir)\bin\RelWithDebInfo-windows-x86_64\Sandbox (mkdir $(SolutionDir)\bin\RelWithDebInfo-windows-x86_64\Sandbox)
+IF EXIST ..\bin\RelWithDebInfo-windows-x86_64\PFF\PFF.dll\ (xcopy /Q /E /Y /I ..\bin\RelWithDebInfo-windows-x86_64\PFF\PFF.dll $(SolutionDir)\bin\RelWithDebInfo-windows-x86_64\Sandbox &gt; nul) ELSE (xcopy /Q /Y /I ..\bin\RelWithDebInfo-windows-x86_64\PFF\PFF.dll $(SolutionDir)\bin\RelWithDebInfo-windows-x86_64\Sandbox &gt; nul)</Command>
     </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
@@ -168,10 +184,18 @@ IF EXIST ..\bin\RelWithDebInfo-windows-x86_64\PFF\PFF.dll\ (xcopy /Q /E /Y /I ..
       <AdditionalOptions>/NODEFAULTLIB:LIBCMTD /NODEFAULTLIB:MSVCRT %(AdditionalOptions)</AdditionalOptions>
     </Link>
     <PostBuildEvent>
-      <Command>IF NOT EXIST $(SolutionDir)\bin\Release-windows-x86_64\Sandbox (mkdir $(SolutionDir)\bin\Release-windows-x86_64\Sandbox)
+      <Command>IF NOT EXIST $(SolutionDir)\bin\Release-windows-x86_64\PFF\shaders (mkdir $(SolutionDir)\bin\Release-windows-x86_64\PFF\shaders)
+IF EXIST $(SolutionDir)\PFF\shaders\ (xcopy /Q /E /Y /I $(SolutionDir)\PFF\shaders $(SolutionDir)\bin\Release-windows-x86_64\PFF\shaders &gt; nul) ELSE (xcopy /Q /Y /I $(SolutionDir)\PFF\shaders $(SolutionDir)\bin\Release-windows-x86_64\PFF\shaders &gt; nul)
+IF NOT EXIST $(SolutionDir)\bin\Release-windows-x86_64\PFF\defaults (mkdir $(SolutionDir)\bin\Release-windows-x86_64\PFF\defaults)
+IF EXIST $(SolutionDir)\PFF\defaults\ (xcopy /Q /E /Y /I $(SolutionDir)\PFF\defaults $(SolutionDir)\bin\Release-windows-x86_64\PFF\defaults &gt; nul) ELSE (xcopy /Q /Y /I $(SolutionDir)\PFF\defaults $(SolutionDir)\bin\Release-windows-x86_64\PFF\defaults &gt; nul)
+IF NOT EXIST $(SolutionDir)\bin\Release-windows-x86_64\PFF\assets (mkdir $(SolutionDir)\bin\Release-windows-x86_64\PFF\assets)
+IF EXIST $(SolutionDir)\PFF\assets\ (xcopy /Q /E /Y /I $(SolutionDir)\PFF\assets $(SolutionDir)\bin\Release-windows-x86_64\PFF\assets &gt; nul) ELSE (xcopy /Q /Y /I $(SolutionDir)\PFF\assets $(SolutionDir)\bin\Release-windows-x86_64\PFF\assets &gt; nul)
+IF NOT EXIST $(SolutionDir)\bin\Release-windows-x86_64\Sandbox (mkdir $(SolutionDir)\bin\Release-windows-x86_64\Sandbox)
 IF EXIST ..\bin\Release-windows-x86_64\PFF\PFF.dll\ (xcopy /Q /E /Y /I ..\bin\Release-windows-x86_64\PFF\PFF.dll $(SolutionDir)\bin\Release-windows-x86_64\Sandbox &gt; nul) ELSE (xcopy /Q /Y /I ..\bin\Release-windows-x86_64\PFF\PFF.dll $(SolutionDir)\bin\Release-windows-x86_64\Sandbox &gt; nul)
 IF NOT EXIST $(SolutionDir)\bin\Release-windows-x86_64\PFF_editor (mkdir $(SolutionDir)\bin\Release-windows-x86_64\PFF_editor)
-IF EXIST ..\bin\Release-windows-x86_64\PFF\PFF.dll\ (xcopy /Q /E /Y /I ..\bin\Release-windows-x86_64\PFF\PFF.dll $(SolutionDir)\bin\Release-windows-x86_64\PFF_editor &gt; nul) ELSE (xcopy /Q /Y /I ..\bin\Release-windows-x86_64\PFF\PFF.dll $(SolutionDir)\bin\Release-windows-x86_64\PFF_editor &gt; nul)</Command>
+IF EXIST ..\bin\Release-windows-x86_64\PFF\PFF.dll\ (xcopy /Q /E /Y /I ..\bin\Release-windows-x86_64\PFF\PFF.dll $(SolutionDir)\bin\Release-windows-x86_64\PFF_editor &gt; nul) ELSE (xcopy /Q /Y /I ..\bin\Release-windows-x86_64\PFF\PFF.dll $(SolutionDir)\bin\Release-windows-x86_64\PFF_editor &gt; nul)
+IF NOT EXIST $(SolutionDir)\bin\Release-windows-x86_64\Sandbox (mkdir $(SolutionDir)\bin\Release-windows-x86_64\Sandbox)
+IF EXIST ..\bin\Release-windows-x86_64\PFF\PFF.dll\ (xcopy /Q /E /Y /I ..\bin\Release-windows-x86_64\PFF\PFF.dll $(SolutionDir)\bin\Release-windows-x86_64\Sandbox &gt; nul) ELSE (xcopy /Q /Y /I ..\bin\Release-windows-x86_64\PFF\PFF.dll $(SolutionDir)\bin\Release-windows-x86_64\Sandbox &gt; nul)</Command>
     </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemGroup>

@@ -3,6 +3,9 @@
 
 #include <imgui.h>
 
+#include "engine/render/image.h"
+#include "util/ui/window_images.embed"
+
 #include "layer.h"
 #include "application.h"
 #include "engine/render/renderer.h"
@@ -90,6 +93,14 @@ namespace PFF::UI {
 		action_color_gray_default = LERP_GRAY(0.2f);
 		action_color_gray_hover = LERP_GRAY(0.27f);
 		action_color_gray_active = LERP_GRAY(0.35f);
+
+		//{
+		//	u32 w, h;
+		//	void* data = image::decode(g_WindowMaximizeIcon, sizeof(g_WindowMaximizeIcon), w, h);
+		//	image test_image = image(data, w, h);
+
+		//	//test_image.reset();
+		//}
 	}
 
 	imgui_layer::~imgui_layer() { 

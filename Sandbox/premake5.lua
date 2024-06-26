@@ -2,11 +2,11 @@
 ------------------------------------ CLIENT GAME ------------------------------------
 
 project (client_project_name)
-	location (client_project_name)
+	location ("%{wks.location}/" .. client_project_name)
 	kind "ConsoleApp"
+	staticruntime "off"
 	language "C++"
 	cppdialect "C++17"
-	staticruntime "off"
 
 	targetdir ("bin/" .. outputs  .. "/%{prj.name}")
 	objdir ("bin-int/" .. outputs  .. "/%{prj.name}")
@@ -19,10 +19,11 @@ project (client_project_name)
 
 	files
 	{
-		"%{prj.name}/src/**.h",
-		"%{prj.name}/src/**.cpp",
-		"%{prj.name}/**.vert",
-		"%{prj.name}/**.frag",
+		"src/**.h",
+		"src/**.cpp",
+
+		"**.vert",
+		"**.frag",
 	}
 	
 	includedirs
@@ -41,21 +42,16 @@ project (client_project_name)
 	{
 		"ImGui",
 		"PFF",
+		"PFF_editor",
 	}
 
 	filter "system:windows"
-		cppdialect "C++17"
+		-- cppdialect "C++17"
 		systemversion "latest"
 
 		defines
 		{
 			"PFF_PLATFORM_WINDOWS",
-		}
-
-		postbuildcommands
-		{
-			'"%{glslc}" shaders/default.vert -o shaders/default.vert.spv',
-			'"%{glslc}" shaders/default.frag -o shaders/default.frag.spv',
 		}
 
 	filter "configurations:Debug"
@@ -75,3 +71,33 @@ project (client_project_name)
 		runtime "Release"
 		symbols "on"
 		optimize "speed"
+
+
+
+
+		
+-- filter "configurations:Game only in debug-mode"
+-- 	buildoptions "/MDd"
+-- 	defines "PFF_GAME_ONLY_DEBUG"
+-- 	runtime "Debug"
+-- 	symbols "on"
+
+-- filter "configurations:Game only in release-mode"
+-- 	buildoptions "/MD"
+-- 	defines "PFF_GAME_ONLY_RELEASE_WITH_DEBUG_INFO"
+-- 	runtime "Release"
+-- 	symbols "on"
+-- 	optimize "speed"
+
+-- filter "configurations:Editor in debug-mode"
+-- 	buildoptions "/MDd"
+-- 	defines "PFF_EDITOR_DEBUG"
+-- 	runtime "Debug"
+-- 	symbols "on"
+
+-- filter "configurations:Editor only in release-mode"
+-- 	buildoptions "/MD"
+-- 	defines "PFF_EDITOR_RELEASE_WITH_DEBUG_INFO"
+-- 	runtime "Release"
+-- 	symbols "on"
+-- 	optimize "speed"

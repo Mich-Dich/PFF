@@ -15,6 +15,8 @@ namespace PFF::UI {
 	};
 
 
+	static std::string ini_file_location = config::get_filepath_from_configtype_ini(config::file::imgui).c_str();
+
 	static f32 m_font_size = 14.5f, m_big_font_size = 18.f;
 	static theme_selection UI_theme = theme_selection::dark;
 	static bool enable_window_forder;

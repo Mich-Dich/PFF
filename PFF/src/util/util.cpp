@@ -12,6 +12,39 @@
 
 namespace PFF::util {
 
+    void extract_part_after_delimiter(std::string& dest, const std::string& input, const char* delimiter) {
+
+        size_t found = input.find_last_of(delimiter);
+        if (found != std::string::npos) {
+
+            dest = input.substr(found + 1);
+            return;
+        }
+
+        return; // If delimiter is not found
+    }
+
+    void extract_part_befor_delimiter(std::string& dest, const std::string& input, const char* delimiter) {
+
+        size_t found = input.find_last_of(delimiter);
+        if (found != std::string::npos) {
+
+            dest = input.substr(0, found);
+            return;
+        }
+
+        return; // If delimiter is not found
+    }
+
+    std::string extract_vaiable_name(const std::string& input) {
+
+        std::string result = input;
+        extract_part_after_delimiter(result, input, "->");
+        extract_part_after_delimiter(result, result, ".");
+
+        return result;
+    }
+
     system_time get_system_time() {
 
         system_time loc_system_time{};

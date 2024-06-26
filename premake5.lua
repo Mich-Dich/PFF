@@ -32,6 +32,32 @@ group "dependencies"
 	include "PFF/vendor/glfw"
 group ""
 
+function copy_content_of_dir(outputs, dir_names)
+	local commands = {}
+
+	for _, dir_name in ipairs(dir_names) do
+		local target_dir = "%{wks.location}/bin/" .. outputs .. "/" .. dir_name
+		local source_dir = "%{wks.location}/" .. dir_name
+
+		-- Debug print
+		print("Copying directory: " .. source_dir .. " to " .. target_dir)
+
+		-- Create target directory
+		table.insert(commands, "{MKDIR} " .. target_dir)
+
+		-- Add copy command
+		table.insert(commands, "{COPY} " .. source_dir .. " " .. target_dir)
+	end
+
+	-- Debug print all commands
+	print("Generated commands:")
+	for _, cmd in ipairs(commands) do
+		print(cmd)
+	end
+
+	return commands
+end
+
 include "PFF"
 include "PFF_editor"
 include "Sandbox"

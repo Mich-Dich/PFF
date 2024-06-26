@@ -64,6 +64,7 @@ namespace PFF {
 
 #if defined PFF_RENDER_API_VULKAN
 		m_renderer = create_ref<render::vulkan::vk_renderer>(m_window, m_layerstack);
+		m_renderer->setup();
 #endif
 		// ---------------------------------------- layers ----------------------------------------
 		m_world_layer = new world_layer();

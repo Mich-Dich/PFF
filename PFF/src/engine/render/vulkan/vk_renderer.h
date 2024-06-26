@@ -62,7 +62,15 @@ namespace PFF::render::vulkan {
 		vk_renderer(ref<pff_window> window, ref<PFF::layer_stack> layer_stack);
 		~vk_renderer();
 
-		FORCEINLINE f32 get_aspect_ratio() { return 1.f; };			// UNFINISHED
+		FORCEINLINE f32 get_aspect_ratio()			{ return 1.f; };			// TODO: finish
+		FORCEINLINE VkDevice get_device()			{ return m_device; }
+		FORCEINLINE VmaAllocator get_allocator()	{ return m_allocator; }
+
+
+		// !!!!!!!!!!!!!!!! DEV-ONLY !!!!!!!!!!!!!!!!!!!!!!
+		void setup();
+
+
 
 		// --------------- general ----------------
 		void draw_frame(f32 delta_time) override;
@@ -78,8 +86,17 @@ namespace PFF::render::vulkan {
 
 		// --------------- util ----------------
 		void immediate_submit(std::function<void()>&& function) override;
+		void immediate_submit(std::function<void(VkCommandBuffer cmd)>&& function); // Improvement => run this on a different queue than the graphics_queue, so it can overlap the execution with the main render loop.
 		void enable_vsync(bool enable) override {}							// TODO: implement (recreate swapchain with new VK_PRESENT_MODE_XXX )
 		void* get_rendered_image() override { return (void*)m_imugi_image_dset; }
+
+		vk_buffer create_buffer(size_t allocSize, VkBufferUsageFlags usage, VmaMemoryUsage memoryUsage);
+		void destroy_buffer(const vk_buffer& buffer);
+
+		//image create_image(VkExtent3D size, VkFormat format, VkImageUsageFlags usage, bool mipmapped = false);
+		//image create_image(void* data, VkExtent3D size, VkFormat format, VkImageUsageFlags usage, bool mipmapped = false);
+		//void destroy_image(const image& img);
+		//void destroy_image(VkImageView image_view, VkImage image, VmaAllocation allocation);
 
 	private:
 
@@ -99,8 +116,8 @@ namespace PFF::render::vulkan {
 		};
 
 		FORCEINLINE FrameData& get_current_frame() { return m_frames[m_frame_number % FRAME_COUNT]; };
-		
-		void immediate_submit(std::function<void(VkCommandBuffer cmd)>&& function); // Improvement => run this on a different queue than the graphics_queue, so it can overlap the execution with the main render loop.
+
+
 
 		void init_default_data();
 		void init_commands();
@@ -124,8 +141,8 @@ namespace PFF::render::vulkan {
 		vk_image create_image(void* data, VkExtent3D size, VkFormat format, VkImageUsageFlags usage, bool mipmapped = false);
 		void destroy_image(const vk_image& img);
 
-		vk_buffer create_buffer(size_t allocSize, VkBufferUsageFlags usage, VmaMemoryUsage memoryUsage);
-		void destroy_buffer(const vk_buffer& buffer);
+		//vk_buffer create_buffer(size_t allocSize, VkBufferUsageFlags usage, VmaMemoryUsage memoryUsage);
+		//void destroy_buffer(const vk_buffer& buffer);
 
 		// TIP: Note that this pattern is not very efficient, as CPU is waiting for the GPU command to fully execute before continuing with our CPU side logic
 		//		This is should be put on a background thread, whose sole job is to execute uploads like this one, and deleting/reusing the staging buffers.
@@ -161,8 +178,8 @@ namespace PFF::render::vulkan {
 
 		VkExtent2D					m_draw_extent{};
 		f32							m_render_scale = 1.f;
-		vk_image					m_draw_image{};
-		vk_image					m_depth_image{};
+		vk_image						m_draw_image;
+		vk_image						m_depth_image;
 
 		// display rendered image in imgui
 		VkSampler					m_texture_sampler{};
@@ -202,10 +219,10 @@ namespace PFF::render::vulkan {
 		VkDescriptorSetLayout		m_gpu_scene_data_descriptor_layout;
 
 		// ---------------------------- default textures ---------------------------- 
-		vk_image					m_white_image;
-		vk_image					m_black_image;
-		vk_image					m_grey_image;
-		vk_image					m_error_checkerboard_image;
+		vk_image						m_white_image;
+		vk_image						m_black_image;
+		vk_image						m_grey_image;
+		vk_image						m_error_checkerboard_image;
 		VkSampler					m_default_sampler_linear;
 		VkSampler					m_default_sampler_nearest;
 		VkDescriptorSetLayout		m_single_image_descriptor_layout;

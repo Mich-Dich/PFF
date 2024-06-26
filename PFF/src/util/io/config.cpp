@@ -158,20 +158,20 @@ namespace PFF {
 
         // ----------------------------------------------- file path resolution ----------------------------------------------- 
 
-        PFF_API_EDITOR std::string get_filepath_from_configtype(file type) {
+        std::string get_filepath_from_configtype(file type) { return CONFIG_DIR + config::file_type_to_string(type) + FILE_EXTENSION_CONFIG; }
 
-            return CONFIG_DIR + config::file_type_to_string(type) + FILE_EXTENSION_CONFIG;
-        }
+        std::string get_filepath_from_configtype_ini(file type) { return CONFIG_DIR + config::file_type_to_string(type) + FILE_EXTENSION_INI; }
 
         //
         std::string file_type_to_string(file type) {
 
             static const std::unordered_map<file, std::string> typeStrings{
+                {file::ui, "ui" },
                 {file::editor, "editor"},
                 {file::engine, "engine"},
+                {file::imgui, "imgui"},
                 {file::game, "game"},
                 {file::input, "input"},
-                {file::ui, "ui" },
             };
 
             auto it = typeStrings.find(type);

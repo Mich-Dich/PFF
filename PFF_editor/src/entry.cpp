@@ -6,11 +6,11 @@
 
 namespace PFF {
 
-	// ============================================================================= implementstion =============================================================================
+	// --------------------- entry-point into application ---------------------
 
-	application* create_application() {
-
-		return new PFF_editor();
+	application* create_application() { 
+		
+		return new PFF_editor(); 
 	}
 
 }

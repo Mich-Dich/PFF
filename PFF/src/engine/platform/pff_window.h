@@ -22,8 +22,8 @@ namespace PFF {
 	struct window_attrib {
 
 		std::string title;
-		u32 pos_x{};
-		u32 pos_y{};
+		u32 pos_x = 100;
+		u32 pos_y = 100;
 		f64 cursor_pos_x{};
 		f64 cursor_pos_y{};
 		u32 width{};
@@ -87,7 +87,7 @@ namespace PFF {
 
 		std::mutex m_event_queue_mutex;
 		std::queue<std::function<void()>> m_event_queue;
-		std::filesystem::path m_icon_path = "./Logo.png";
+		std::filesystem::path m_icon_path = "./assets/logo.png";
 
 		void bind_event_calbacks();
 		void set_vsync(bool enable);

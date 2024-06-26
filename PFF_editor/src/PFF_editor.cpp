@@ -32,11 +32,46 @@ namespace PFF {
 		delete m_editor_layer;
 	}
 
+	bool PFF_editor::init() { return true; }
+
+	bool PFF_editor::shutdown() { return true; }
+
+	bool PFF_editor::render(const f32 delta_time) { return true; }
+
+	bool PFF_editor::update(const f32 delta_time) { return true; }
+}
+
+
+
+
+
+/*
+
+	bool PFF_editor::update(const f32 delta_time) {
+		
+		static bool move_positive{};
+
+		if (m_test_game_object->transform.translation.y >= 10.f)
+			move_positive = false;
+
+		if (m_test_game_object->transform.translation.y <= -10.f)
+			move_positive = true;
+
+		if (move_positive)
+			m_test_game_object->transform.translation.y += 10.f * delta_time;
+		else
+			m_test_game_object->transform.translation.y -= 10.f * delta_time;
+	
+		return true;
+	}
+
+
+
+
 	bool PFF_editor::init() {
 
 		LOG(Trace, "init editor logic");
 
-		/*
 		auto floor_obj = get_current_map()->create_empty_game_object();
 		floor_obj->mesh = basic_mesh::create_mesh_from_file("assets/floor.obj");
 		floor_obj->transform.translation = { 0.f, 0.f, 0.f };
@@ -67,38 +102,9 @@ namespace PFF {
 		m_test_game_object->rotation_speed = glm::vec3(0.f, 3.5f, 0.f);
 
 #endif // 1
-		*/
 		return true;
 	}
 
-	bool PFF_editor::shutdown() {
-		
-		return true;
-	}
-
-	bool PFF_editor::render(const f32 delta_time) {
-
-		return true;
-	}
-
-	bool PFF_editor::update(const f32 delta_time) {
-
-		/*
-		static bool move_positive{};
-
-		if (m_test_game_object->transform.translation.y >= 10.f)
-			move_positive = false;
-
-		if (m_test_game_object->transform.translation.y <= -10.f)
-			move_positive = true;
 
 
-		if (move_positive)
-			m_test_game_object->transform.translation.y += 10.f * delta_time;
-		else
-			m_test_game_object->transform.translation.y -= 10.f * delta_time;
-		*/
-
-		return true;
-	}
-}
+*/

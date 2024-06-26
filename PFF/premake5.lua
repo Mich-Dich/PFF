@@ -1,7 +1,7 @@
 
 project "PFF"
 	location "%{wks.location}/PFF"
-	kind "SharedLib"		-- TODO: make posibly into [StaticLib]
+	kind "SharedLib"
 	staticruntime "off"
 	language "C++"
 	cppdialect "C++17"
@@ -24,6 +24,7 @@ project "PFF"
 	{
 		"src/**.h",
 		"src/**.cpp",
+		"src/**.embeded",
 	}
 
 	includedirs
@@ -77,6 +78,11 @@ project "PFF"
 			
 			"{MKDIR} %{wks.location}/bin/" .. outputs .. "/PFF_editor",
 			"{COPY} %{cfg.buildtarget.relpath} %{wks.location}/bin/" .. outputs  .. "/PFF_editor",
+			
+			"{MKDIR} %{wks.location}/bin/" .. outputs .. "/" .. client_project_name,
+			"{COPY} %{cfg.buildtarget.relpath} %{wks.location}/bin/" .. outputs  .. "/" .. client_project_name,
+
+			postbuildcommands { table.unpack(copy_content_of_dir(outputs, {"PFF/shaders", "PFF/defaults", "PFF/assets"})), }
 		}
 
 	filter "configurations:Debug"

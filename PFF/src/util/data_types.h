@@ -45,6 +45,7 @@ enum class system_state {
 
 #define CONFIG_DIR				"./config/"
 #define FILE_EXTENSION_CONFIG	".yml"
+#define FILE_EXTENSION_INI		".ini"
 
 enum class key_state {
 	release = 0,

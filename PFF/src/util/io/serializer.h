@@ -4,7 +4,7 @@
 #define SERIALIZE_KEY_VALUE(variable)		serialize_key_value(extract_vaiable_name(#variable), variable);
 
 // @brief used with [PFF::serializer] to shorten the PFF::serializer::yaml::entry call
-#define KEY_VALUE(var)						extract_vaiable_name(#var), var
+#define KEY_VALUE(var)						util::extract_vaiable_name(#var), var
 
 namespace PFF::serializer {
 
@@ -276,33 +276,4 @@ namespace PFF::serializer {
 
 	}
 	*/
-}
-
-namespace PFF {
-
-	// @brief Searches for the last occurrence of the specified delimiter in the input string,
-	//          and if found, extracts the substring after the delimiter into the 'dest' string.
-	//          If the delimiter is not found, the 'dest' string remains unchanged.
-	// @param [dest] Reference to a string where the extracted part will be stored.
-	// @param [input] The input string from which the part is to be extracted.
-	// @param [delimiter] The character delimiter used to identify the part to extract.
-	// @return None
-	PFF_API void extract_part_after_delimiter(std::string& dest, const std::string& input, const char* delimiter);
-
-	// @brief Searches for the last occurrence of the specified delimiter in the input string,
-	//          and if found, extracts the substring before the delimiter into the 'dest' string.
-	//          If the delimiter is not found, the 'dest' string remains unchanged.
-	// @param [dest] Reference to a string where the extracted part will be stored.
-	// @param [input] The input string from which the part is to be extracted.
-	// @param [delimiter] The character delimiter used to identify the part to extract.
-	// @return None
-	PFF_API void extract_part_befor_delimiter(std::string& dest, const std::string& input, const char* delimiter);
-
-	// @brief Given a string representing a variable access chain (e.g., "object1->object2.variable"),
-	//          this function extracts and returns the name of the variable ("variable" in this example).
-	//          The extraction process considers both "->" and "." as delimiters for nested access.
-	// @param [input] The input string representing the variable access chain.
-	// @return A string containing the name of the variable extracted from the input string.
-	PFF_API std::string extract_vaiable_name(const std::string& input);
-
 }

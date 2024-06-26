@@ -2,9 +2,9 @@
 project "PFF_editor"
 	location "%{wks.location}/PFF_editor"
 	kind "ConsoleApp"
+	staticruntime "off"
 	language "C++"
 	cppdialect "C++17"
-	staticruntime "off"
 
 	targetdir ("%{wks.location}/bin/" .. outputs  .. "/%{prj.name}")
 	objdir ("%{wks.location}/bin-int/" .. outputs  .. "/%{prj.name}")
@@ -12,7 +12,7 @@ project "PFF_editor"
 	pchheader "util/pch_editor.h"
 	pchsource "src/util/pch_editor.cpp"
 
-	glslc = "%{wks.location}/PFF/vendor/vulkan-glslc/glslc.exe"
+	-- glslc = "%{wks.location}/PFF/vendor/vulkan-glslc/glslc.exe"
 
 	defines
 	{
@@ -25,13 +25,13 @@ project "PFF_editor"
 	{
 		"src/**.h",
 		"src/**.cpp",
-		"**.vert",
-		"**.frag",
 	}
 
 	includedirs
 	{
 		"src",
+		"assets",
+		"content",
 		"%{wks.location}/PFF/src",
 
 		"%{IncludeDir.entt}",
@@ -47,21 +47,23 @@ project "PFF_editor"
 		"ImGui",
 		"PFF",
 	}
-
+	
 	filter "system:windows"
 		systemversion "latest"
+
+		linkoptions 
+		{
+			 "/NODEFAULTLIB:LIBCMTD",
+			 "/NODEFAULTLIB:MSVCRT",
+		}
 
 		defines
 		{
 			"PFF_PLATFORM_WINDOWS",
 		}
 		
-		postbuildcommands
-		{
-			'"%{glslc}" shaders/default.vert -o shaders/default.vert.spv',
-			'"%{glslc}" shaders/default.frag -o shaders/default.frag.spv',
-		}			
-
+        postbuildcommands { table.unpack(copy_content_of_dir(outputs, {"PFF_editor/shaders", "PFF_editor/defaults", "PFF_editor/assets"})), }
+		
 	filter "configurations:Debug"
 		buildoptions "/MDd"
 		defines "EDITOR_DEBUG"

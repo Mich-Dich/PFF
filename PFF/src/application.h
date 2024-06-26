@@ -25,28 +25,31 @@ namespace PFF {
 
 	class PFF_API application {
 	public:
+
 		application();
 		virtual ~application();
 
 		DELETE_COPY(application);
 
-		FORCEINLINE f64 get_delta_time() const							{ return m_delta_time; }
-		FORCEINLINE USE_IN_EDITOR void push_overlay(layer* overlay)		{ m_layerstack->push_overlay(overlay); }
-		FORCEINLINE USE_IN_EDITOR void pop_overlay(layer* overlay)		{ m_layerstack->pop_overlay(overlay); }
-		FORCEINLINE u32 get_target_fps() const							{ return m_target_fps; }
-		FORCEINLINE bool get_limit_fps() const							{ return m_limit_fps; }
-		FORCEINLINE void set_titlebar_hovered(bool value)				{ m_is_titlebar_hovered = value; }
+		FORCEINLINE f64 get_delta_time() const										{ return m_delta_time; }
+		FORCEINLINE USE_IN_EDITOR void push_overlay(layer* overlay)					{ m_layerstack->push_overlay(overlay); }
+		FORCEINLINE USE_IN_EDITOR void pop_overlay(layer* overlay)					{ m_layerstack->pop_overlay(overlay); }
+		FORCEINLINE u32 get_target_fps() const										{ return m_target_fps; }
+		FORCEINLINE bool get_limit_fps() const										{ return m_limit_fps; }
+		FORCEINLINE void set_titlebar_hovered(bool value)							{ m_is_titlebar_hovered = value; }
 
 		// static
-		FORCEINLINE static application& get()							{ return *s_instance; }
-		FORCEINLINE static ref<pff_window> get_window()					{ return m_window; }
-		FORCEINLINE static ref<PFF::render::renderer> get_renderer()	{ return m_renderer; }
-		FORCEINLINE UI::imgui_layer* get_imgui_layer()					{ return m_imgui_layer; }
-		FORCEINLINE static void  set_render_state(system_state state)	{ return m_renderer->set_state(state); }
-		FORCEINLINE world_layer* get_world_layer()						{ return m_world_layer; }
-		//FORCEINLINE ref<game_map> get_current_map()					{ return m_world_layer->get_current_map(); }
-		FORCEINLINE static void close_application()						{ m_running = false; }
-		FORCEINLINE static bool is_titlebar_hovered()					{ return m_is_titlebar_hovered; }
+#if defined PFF_RENDER_API_VULKAN
+		FORCEINLINE static ref<PFF::render::vulkan::vk_renderer> get_renderer()		{ return m_renderer; }
+#endif
+		FORCEINLINE static application& get()										{ return *s_instance; }
+		FORCEINLINE static ref<pff_window> get_window()								{ return m_window; }
+		FORCEINLINE UI::imgui_layer* get_imgui_layer()								{ return m_imgui_layer; }
+		FORCEINLINE static void  set_render_state(system_state state)				{ return m_renderer->set_state(state); }
+		FORCEINLINE world_layer* get_world_layer()									{ return m_world_layer; }
+		//FORCEINLINE ref<game_map> get_current_map()								{ return m_world_layer->get_current_map(); }
+		FORCEINLINE static void close_application()									{ m_running = false; }
+		FORCEINLINE static bool is_titlebar_hovered()								{ return m_is_titlebar_hovered; }
 
 
 		std::future<void>& add_future(std::future<void>& future, std::shared_ptr<std::pair<std::atomic<bool>, std::condition_variable>>& shared_state);

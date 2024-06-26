@@ -15,6 +15,7 @@
 #include "imgui.h"
 #include "imgui_impl_glfw.h"
 #include "imgui_impl_vulkan.h"
+#include "engine/layer/imgui_layer.h"
 
 // ========== misc ============
 #include "engine/io_handler/file_loader.h"
@@ -158,13 +159,15 @@ namespace PFF::render::vulkan {
 		for (int i = 0; i < FRAME_COUNT; i++)
 			m_frames[i].deletion_queue.setup(m_device, m_allocator);
 
+	}
+
+	void vk_renderer::setup() {
+
 		init_commands();
 		init_swapchain();
 		init_sync_structures();
 		init_descriptors();
-		
 		init_pipelines();
-		
 		init_default_data();
 
 		m_is_initialized = true;
@@ -246,7 +249,23 @@ namespace PFF::render::vulkan {
 		io.ConfigFlags |= ImGuiConfigFlags_DockingEnable;           // Enable Docking
 		//io.ConfigFlags |= ImGuiConfigFlags_ViewportsNoTaskBarIcons;
 		//io.ConfigFlags |= ImGuiConfigFlags_ViewportsNoMerge;
-		io.IniFilename = "./config/imgui.ini";
+		io.IniFilename = UI::ini_file_location.c_str();
+
+		// check for imgui ini-file or copy from default file
+		if (!std::filesystem::exists(UI::ini_file_location)) {
+
+			std::ofstream file(UI::ini_file_location);
+			CORE_ASSERT(file.is_open(), "", "Failed to open [" << UI::ini_file_location << "] default: [" << io.IniFilename << "]");
+
+			std::ifstream default_config_file("./defaults/imgui_config.ini");
+			CORE_ASSERT(default_config_file.is_open(), "", "Failed to open [default_config_file]");
+
+			file << default_config_file.rdbuf();
+
+			default_config_file.close();
+			file.close();
+		}
+
 		CORE_ASSERT(ImGui_ImplGlfw_InitForVulkan(m_window->get_window(), true), "", "Failed to initalize imgui -> init GLFW for Vulkan");
 
 		// this initializes imgui for Vulkan
@@ -347,11 +366,11 @@ namespace PFF::render::vulkan {
 		VkCommandBufferBeginInfo cmdBeginInfo = init::command_buffer_begin_info(VK_COMMAND_BUFFER_USAGE_ONE_TIME_SUBMIT_BIT);
 
 		if (m_imgui_initalized && !m_render_swapchain) {
-						
+
 			m_draw_extent.width = std::min(m_draw_image.image_extent.width, m_imugi_viewport_size.x) * (u32)m_render_scale;
 			m_draw_extent.height = std::min(m_draw_image.image_extent.height, m_imugi_viewport_size.y) * (u32)m_render_scale;
 		} else {
-		
+
 			m_draw_extent.width = std::min(m_swapchain_extent.width, m_draw_image.image_extent.width) * (u32)m_render_scale;
 			m_draw_extent.height = std::min(m_swapchain_extent.height, m_draw_image.image_extent.height) * (u32)m_render_scale;
 		}
@@ -753,7 +772,7 @@ namespace PFF::render::vulkan {
 		draw_image_usages |= VK_IMAGE_USAGE_SAMPLED_BIT;
 		//draw_image_usages |= VK_IMAGE_USAGE_INPUT_ATTACHMENT_BIT;
 		VkImageCreateInfo image_CI = init::image_create_info(m_draw_image.image_format, draw_image_usages, drawImageExtent);
-		
+
 		vmaCreateImage(m_allocator, &image_CI, &image_alloc_CI, &m_draw_image.image, &m_draw_image.allocation, nullptr);						// allocate and create the image
 		VkImageViewCreateInfo view_CI = init::imageview_create_info(m_draw_image.image_format, m_draw_image.image, VK_IMAGE_ASPECT_COLOR_BIT);	// build a image-view for the draw image to use for rendering
 		VK_CHECK(vkCreateImageView(m_device, &view_CI, nullptr, &m_draw_image.image_view));
@@ -1262,13 +1281,14 @@ namespace PFF::render::vulkan {
 
 		return new_image;
 	}
+
 	
 	void vk_renderer::destroy_image(const vk_image& img) {
 		
 		vkDestroyImageView(m_device, img.image_view, nullptr);
 		vmaDestroyImage(m_allocator, img.image, img.allocation);
 	}
-
+	
 	// =======================================================================================================================================
 	// BUFFER
 	// =======================================================================================================================================
@@ -1292,8 +1312,6 @@ namespace PFF::render::vulkan {
 
 
 	void vk_renderer::destroy_buffer(const vk_buffer& buffer) { vmaDestroyBuffer(m_allocator, buffer.buffer, buffer.allocation); }
-
-
 
 
 	GPU_mesh_buffers vk_renderer::upload_mesh(std::vector<u32> indices, std::vector<PFF::geometry::vertex> vertices) {

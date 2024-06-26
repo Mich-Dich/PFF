@@ -11,7 +11,6 @@
 #include "vk_descriptor.h"
 //#include "engine/geometry/mesh.h"
 
-
 struct vk_image {
 
     VkImage             image;

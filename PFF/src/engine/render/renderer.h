@@ -2,11 +2,13 @@
 
 #include "render_util.h"
 
-#include "engine/render/vulkan/vk_types.h"
 #include "engine/layer/layer_stack.h"
 #include "engine/game_objects/camera.h"
 
+//#include "engine/render/image.h"
+
 #if defined PFF_RENDER_API_VULKAN
+#include "engine/render/vulkan/vk_types.h"
 #include "engine/render/vulkan/vk_descriptor.h"
 #include "engine/render/vulkan/vk_types.h"
 #endif
@@ -100,6 +102,7 @@ namespace PFF::render {
 		virtual void imgui_create_fonts() = 0;
 		virtual void imgui_destroy_fonts() = 0;
 		virtual void imgui_shutdown() = 0;
+
 		// --------------- util ----------------
 		virtual void immediate_submit(std::function<void()>&& function) = 0;
 		virtual void enable_vsync(bool enable) = 0;
