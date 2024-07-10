@@ -76,11 +76,11 @@ namespace PFF::render::vulkan {
 				USE_AS(descriptor_allocator*)->destroy_pool(m_device);
 			}
 
-			else if (IS_OF_TYPE(vk_image*)) {
+			else if (IS_OF_TYPE(image*)) {
 
-				vk_image* image = USE_AS(vk_image*);
-				vkDestroyImageView(m_device, image->image_view, nullptr);
-				vmaDestroyImage(m_allocator, image->image, image->allocation);
+				image* loc_image = USE_AS(image*);
+				vkDestroyImageView(m_device, loc_image->get_image_view(), nullptr);
+				vmaDestroyImage(m_allocator, loc_image->get_image(), loc_image->get_allocation());
 			}
 
 			else
@@ -315,7 +315,7 @@ namespace PFF::render::vulkan {
 		VK_CHECK(vkCreateSampler(m_device, &samplerInfo, nullptr, &m_texture_sampler));
 		// }  ===========================================================================================
 
-		m_imugi_image_dset = ImGui_ImplVulkan_AddTexture(m_texture_sampler, m_draw_image.image_view, VK_IMAGE_LAYOUT_GENERAL);
+		m_imugi_image_dset = ImGui_ImplVulkan_AddTexture(m_texture_sampler, m_draw_image.get_image_view(), VK_IMAGE_LAYOUT_GENERAL);
 
 		m_deletion_queue.push_pointer(m_texture_sampler);
 
@@ -367,22 +367,22 @@ namespace PFF::render::vulkan {
 
 		if (m_imgui_initalized && !m_render_swapchain) {
 
-			m_draw_extent.width = std::min(m_draw_image.image_extent.width, m_imugi_viewport_size.x) * (u32)m_render_scale;
-			m_draw_extent.height = std::min(m_draw_image.image_extent.height, m_imugi_viewport_size.y) * (u32)m_render_scale;
+			m_draw_extent.width = std::min(m_draw_image.get_image_extent().width, m_imugi_viewport_size.x) * (u32)m_render_scale;
+			m_draw_extent.height = std::min(m_draw_image.get_image_extent().height, m_imugi_viewport_size.y) * (u32)m_render_scale;
 		} else {
 
-			m_draw_extent.width = std::min(m_swapchain_extent.width, m_draw_image.image_extent.width) * (u32)m_render_scale;
-			m_draw_extent.height = std::min(m_swapchain_extent.height, m_draw_image.image_extent.height) * (u32)m_render_scale;
+			m_draw_extent.width = std::min(m_swapchain_extent.width, m_draw_image.get_image_extent().width) * (u32)m_render_scale;
+			m_draw_extent.height = std::min(m_swapchain_extent.height, m_draw_image.get_image_extent().height) * (u32)m_render_scale;
 		}
 
 		VK_CHECK(vkBeginCommandBuffer(cmd, &cmdBeginInfo));
 
-		util::transition_image(cmd, m_draw_image.image, VK_IMAGE_LAYOUT_UNDEFINED, VK_IMAGE_LAYOUT_GENERAL);
+		util::transition_image(cmd, m_draw_image.get_image(), VK_IMAGE_LAYOUT_UNDEFINED, VK_IMAGE_LAYOUT_GENERAL);
 
 		draw_internal(cmd);
 
-		util::transition_image(cmd, m_draw_image.image, VK_IMAGE_LAYOUT_GENERAL, VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL);
-		util::transition_image(cmd, m_depth_image.image, VK_IMAGE_LAYOUT_UNDEFINED, VK_IMAGE_LAYOUT_DEPTH_ATTACHMENT_OPTIMAL);
+		util::transition_image(cmd, m_draw_image.get_image(), VK_IMAGE_LAYOUT_GENERAL, VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL);
+		util::transition_image(cmd, m_depth_image.get_image(), VK_IMAGE_LAYOUT_UNDEFINED, VK_IMAGE_LAYOUT_DEPTH_ATTACHMENT_OPTIMAL);
 
 		draw_geometry(cmd);
 
@@ -391,12 +391,12 @@ namespace PFF::render::vulkan {
 		if (m_render_swapchain) {
 
 			//transition the draw image and the swapchain image into their correct transfer layouts
-			util::transition_image(cmd, m_draw_image.image, VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL, VK_IMAGE_LAYOUT_TRANSFER_SRC_OPTIMAL);
+			util::transition_image(cmd, m_draw_image.get_image(), VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL, VK_IMAGE_LAYOUT_TRANSFER_SRC_OPTIMAL);
 			util::transition_image(cmd, m_swapchain_images[swapchain_image_index], VK_IMAGE_LAYOUT_UNDEFINED, VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL);
-			util::copy_image_to_image(cmd, m_draw_image.image, m_swapchain_images[swapchain_image_index], m_draw_extent, m_swapchain_extent);						// copy from draw_image into swapchain
+			util::copy_image_to_image(cmd, m_draw_image.get_image(), m_swapchain_images[swapchain_image_index], m_draw_extent, m_swapchain_extent);						// copy from draw_image into swapchain
 
 		} else 
-			util::transition_image(cmd, m_draw_image.image, VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL, VK_IMAGE_LAYOUT_GENERAL);
+			util::transition_image(cmd, m_draw_image.get_image(), VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL, VK_IMAGE_LAYOUT_GENERAL);
 
 
 		// =========================================================== draw imgui ===========================================================
@@ -434,7 +434,9 @@ namespace PFF::render::vulkan {
 					ImVec2 viewport_size = ImGui::GetWindowSize();
 					viewport_size.y -= ImGui::GetFrameHeight();
 					m_imugi_viewport_size = glm::u32vec2(viewport_size.x, viewport_size.y);
-					ImVec2 viewport_uv = { std::max(std::min(viewport_size.x / m_draw_image.image_extent.width, 1.f), 0.f), std::max(std::min(viewport_size.y / m_draw_image.image_extent.height, 1.f), 0.f) };
+					ImVec2 viewport_uv = { 
+						std::max(std::min(viewport_size.x / m_draw_image.get_image_extent().width, 1.f), 0.f), 
+						std::max(std::min(viewport_size.y / m_draw_image.get_image_extent().height, 1.f), 0.f)};
 					ImGui::Image(m_imugi_image_dset, ImVec2{ viewport_size.x, viewport_size.y }, ImVec2{0,0}, viewport_uv);
 
 					// show debug data
@@ -706,13 +708,13 @@ namespace PFF::render::vulkan {
 
 		//3 default textures, white, grey, black. 1 pixel each
 		u32 white = glm::packUnorm4x8(glm::vec4(1, 1, 1, 1));
-		m_white_image = create_image((void*)&white, VkExtent3D{ 1, 1, 1 }, VK_FORMAT_R8G8B8A8_UNORM, VK_IMAGE_USAGE_SAMPLED_BIT);
+		m_white_image = image((void*)&white, VkExtent3D{ 1, 1, 1 });
 
 		u32 grey = glm::packUnorm4x8(glm::vec4(0.4f, 0.44f, 0.4f, 1));
-		m_black_image = create_image((void*)&grey, VkExtent3D{ 1, 1, 1 }, VK_FORMAT_R8G8B8A8_UNORM, VK_IMAGE_USAGE_SAMPLED_BIT);
+		m_black_image = image((void*)&grey, VkExtent3D{ 1, 1, 1 });
 
 		u32 black = glm::packUnorm4x8(glm::vec4(0, 0, 0, 1));	// TODO: chnage A to 1
-		m_grey_image = create_image((void*)&black, VkExtent3D{ 1, 1, 1 }, VK_FORMAT_R8G8B8A8_UNORM, VK_IMAGE_USAGE_SAMPLED_BIT);
+		m_grey_image = image((void*)&black, VkExtent3D{ 1, 1, 1 });
 
 		//checkerboard image
 		const int EDGE_LENGTH = 2;
@@ -721,7 +723,7 @@ namespace PFF::render::vulkan {
 		for (int x = 0; x < EDGE_LENGTH; x++)
 			for (int y = 0; y < EDGE_LENGTH; y++)
 				pixels[y * EDGE_LENGTH + x] = ((x % EDGE_LENGTH) ^ (y % EDGE_LENGTH)) ? grey : color;
-		m_error_checkerboard_image = create_image(pixels.data(), VkExtent3D{ EDGE_LENGTH, EDGE_LENGTH, 1 }, VK_FORMAT_R8G8B8A8_UNORM, VK_IMAGE_USAGE_SAMPLED_BIT);
+		m_error_checkerboard_image = image(pixels.data(), VkExtent3D{ EDGE_LENGTH, EDGE_LENGTH, 1 });
 
 		VkSamplerCreateInfo sampler{};
 		sampler.sType = VK_STRUCTURE_TYPE_SAMPLER_CREATE_INFO;
@@ -761,8 +763,8 @@ namespace PFF::render::vulkan {
 
 		// =========================================== create draw_image ===========================================
 
-		m_draw_image.image_format = VK_FORMAT_R16G16B16A16_SFLOAT;
-		m_draw_image.image_extent = drawImageExtent;
+		m_draw_image.set_image_format(VK_FORMAT_R16G16B16A16_SFLOAT);
+		m_draw_image.set_image_extent(drawImageExtent);
 
 		VkImageUsageFlags draw_image_usages{};
 		draw_image_usages |= VK_IMAGE_USAGE_TRANSFER_SRC_BIT;
@@ -771,24 +773,24 @@ namespace PFF::render::vulkan {
 		draw_image_usages |= VK_IMAGE_USAGE_COLOR_ATTACHMENT_BIT;
 		draw_image_usages |= VK_IMAGE_USAGE_SAMPLED_BIT;
 		//draw_image_usages |= VK_IMAGE_USAGE_INPUT_ATTACHMENT_BIT;
-		VkImageCreateInfo image_CI = init::image_create_info(m_draw_image.image_format, draw_image_usages, drawImageExtent);
+		VkImageCreateInfo image_CI = init::image_create_info(m_draw_image.get_image_format(), draw_image_usages, drawImageExtent);
 
-		vmaCreateImage(m_allocator, &image_CI, &image_alloc_CI, &m_draw_image.image, &m_draw_image.allocation, nullptr);						// allocate and create the image
-		VkImageViewCreateInfo view_CI = init::imageview_create_info(m_draw_image.image_format, m_draw_image.image, VK_IMAGE_ASPECT_COLOR_BIT);	// build a image-view for the draw image to use for rendering
-		VK_CHECK(vkCreateImageView(m_device, &view_CI, nullptr, &m_draw_image.image_view));
+		vmaCreateImage(m_allocator, &image_CI, &image_alloc_CI, m_draw_image.get_image_pointer(), m_draw_image.get_allocation_pointer(), nullptr);						// allocate and create the image
+		VkImageViewCreateInfo view_CI = init::imageview_create_info(m_draw_image.get_image_format(), m_draw_image.get_image(), VK_IMAGE_ASPECT_COLOR_BIT);	// build a image-view for the draw image to use for rendering
+		VK_CHECK(vkCreateImageView(m_device, &view_CI, nullptr, m_draw_image.get_image_view_pointer()));
 
 		// =========================================== create depth_image ===========================================
 		
-		m_depth_image.image_format = VK_FORMAT_D32_SFLOAT;
-		m_depth_image.image_extent = drawImageExtent;
+		m_depth_image.set_image_format(VK_FORMAT_D32_SFLOAT);
+		m_depth_image.set_image_extent(drawImageExtent);
 
 		VkImageUsageFlags depthImageUsages{};
 		depthImageUsages |= VK_IMAGE_USAGE_DEPTH_STENCIL_ATTACHMENT_BIT;
-		VkImageCreateInfo dimg_info = init::image_create_info(m_depth_image.image_format, depthImageUsages, drawImageExtent);
+		VkImageCreateInfo dimg_info = init::image_create_info(m_depth_image.get_image_format(), depthImageUsages, drawImageExtent);
 		
-		vmaCreateImage(m_allocator, &dimg_info, &image_alloc_CI, &m_depth_image.image, &m_depth_image.allocation, nullptr);
-		VkImageViewCreateInfo dview_info = init::imageview_create_info(m_depth_image.image_format, m_depth_image.image, VK_IMAGE_ASPECT_DEPTH_BIT);
-		VK_CHECK(vkCreateImageView(m_device, &dview_info, nullptr, &m_depth_image.image_view));
+		vmaCreateImage(m_allocator, &dimg_info, &image_alloc_CI, m_depth_image.get_image_pointer(), m_depth_image.get_allocation_pointer(), nullptr);
+		VkImageViewCreateInfo dview_info = init::imageview_create_info(m_depth_image.get_image_format(), m_depth_image.get_image(), VK_IMAGE_ASPECT_DEPTH_BIT);
+		VK_CHECK(vkCreateImageView(m_device, &dview_info, nullptr, m_depth_image.get_image_view_pointer()));
 
 		m_deletion_queue.push_pointer(&m_draw_image);
 		m_deletion_queue.push_pointer(&m_depth_image);
@@ -855,7 +857,7 @@ namespace PFF::render::vulkan {
 
 		{
 			descriptor_writer writer;
-			writer.write_image(0, m_draw_image.image_view, VK_NULL_HANDLE, VK_IMAGE_LAYOUT_GENERAL, VK_DESCRIPTOR_TYPE_STORAGE_IMAGE);
+			writer.write_image(0, m_draw_image.get_image_view(), VK_NULL_HANDLE, VK_IMAGE_LAYOUT_GENERAL, VK_DESCRIPTOR_TYPE_STORAGE_IMAGE);
 			writer.update_set(m_device, m_draw_image_descriptors);
 		}
 		
@@ -1046,8 +1048,8 @@ namespace PFF::render::vulkan {
 			.enable_blending_additive()
 			//.disable_depthtest()										
 			.enable_depthtest(true, VK_COMPARE_OP_GREATER_OR_EQUAL)
-			.set_color_attachment_format(m_draw_image.image_format)		// connect the image format we will draw into, from draw image
-			.set_depth_format(m_depth_image.image_format)
+			.set_color_attachment_format(m_draw_image.get_image_format())		// connect the image format we will draw into, from draw image
+			.set_depth_format(m_depth_image.get_image_format())
 			.build(m_device);
 
 		//clean structures
@@ -1127,8 +1129,8 @@ namespace PFF::render::vulkan {
 		// ==========================================  ==========================================
 
 		//begin a render pass connected to our draw image
-		VkRenderingAttachmentInfo color_attachment = init::attachment_info(m_draw_image.image_view, nullptr, VK_IMAGE_LAYOUT_GENERAL);
-		VkRenderingAttachmentInfo depth_attachment = init::depth_attachment_info(m_depth_image.image_view, VK_IMAGE_LAYOUT_DEPTH_ATTACHMENT_OPTIMAL);
+		VkRenderingAttachmentInfo color_attachment = init::attachment_info(m_draw_image.get_image_view(), nullptr, VK_IMAGE_LAYOUT_GENERAL);
+		VkRenderingAttachmentInfo depth_attachment = init::depth_attachment_info(m_depth_image.get_image_view(), VK_IMAGE_LAYOUT_DEPTH_ATTACHMENT_OPTIMAL);
 		VkRenderingInfo render_info = init::rendering_info(m_draw_extent, &color_attachment, &depth_attachment);
 
 		vkCmdBeginRendering(cmd, &render_info);
@@ -1139,7 +1141,7 @@ namespace PFF::render::vulkan {
 		VkDescriptorSet imageSet = get_current_frame().frame_descriptors.allocate(m_device, m_single_image_descriptor_layout);
 		{
 			descriptor_writer writer;
-			writer.write_image(0, m_error_checkerboard_image.image_view, m_default_sampler_nearest, VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL, VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER);
+			writer.write_image(0, m_error_checkerboard_image.get_image_view(), m_default_sampler_nearest, VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL, VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER);
 			writer.update_set(m_device, imageSet);
 		}
 		vkCmdBindDescriptorSets(cmd, VK_PIPELINE_BIND_POINT_GRAPHICS, m_mesh_pipeline_layout, 0, 1, &imageSet, 0, nullptr);
@@ -1221,73 +1223,73 @@ namespace PFF::render::vulkan {
 	// IMAGE
 	// =======================================================================================================================================
 
-	vk_image vk_renderer::create_image(VkExtent3D size, VkFormat format, VkImageUsageFlags usage, bool mipmapped) {
+	//image vk_renderer::create_image(VkExtent3D size, VkFormat format, VkImageUsageFlags usage, bool mipmapped) {
 
-		vk_image newImage;
-		newImage.image_format = format;
-		newImage.image_extent = size;
+	//	image newImage;
+	//	newImage.set_image_format(format);
+	//	newImage.set_image_extent(size);
 
-		VkImageCreateInfo img_info = init::image_create_info(format, usage, size);
-		if (mipmapped)
-			img_info.mipLevels = static_cast<uint32_t>(std::floor(std::log2(std::max(size.width, size.height)))) + 1;
+	//	VkImageCreateInfo img_info = init::image_create_info(format, usage, size);
+	//	if (mipmapped)
+	//		img_info.mipLevels = static_cast<uint32_t>(std::floor(std::log2(std::max(size.width, size.height)))) + 1;
 
-		// always allocate images on dedicated GPU memory
-		VmaAllocationCreateInfo allocinfo = {};
-		allocinfo.usage = VMA_MEMORY_USAGE_GPU_ONLY;
-		allocinfo.requiredFlags = VkMemoryPropertyFlags(VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT);
-		VK_CHECK(vmaCreateImage(m_allocator, &img_info, &allocinfo, &newImage.image, &newImage.allocation, nullptr));
+	//	// always allocate images on dedicated GPU memory
+	//	VmaAllocationCreateInfo allocinfo = {};
+	//	allocinfo.usage = VMA_MEMORY_USAGE_GPU_ONLY;
+	//	allocinfo.requiredFlags = VkMemoryPropertyFlags(VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT);
+	//	VK_CHECK(vmaCreateImage(m_allocator, &img_info, &allocinfo, newImage.get_image_pointer(), newImage.get_allocation_pointer(), nullptr));
 
-		// if the format is a depth format, we will need to have it use the correct aspect flag
-		VkImageAspectFlags aspectFlag = VK_IMAGE_ASPECT_COLOR_BIT;
-		if (format == VK_FORMAT_D32_SFLOAT) 
-			aspectFlag = VK_IMAGE_ASPECT_DEPTH_BIT;
+	//	// if the format is a depth format, we will need to have it use the correct aspect flag
+	//	VkImageAspectFlags aspectFlag = VK_IMAGE_ASPECT_COLOR_BIT;
+	//	if (format == VK_FORMAT_D32_SFLOAT) 
+	//		aspectFlag = VK_IMAGE_ASPECT_DEPTH_BIT;
 
-		// build a image-view for the image
-		VkImageViewCreateInfo view_info = init::imageview_create_info(format, newImage.image, aspectFlag);
-		view_info.subresourceRange.levelCount = img_info.mipLevels;
-		VK_CHECK(vkCreateImageView(m_device, &view_info, nullptr, &newImage.image_view));
+	//	// build a image-view for the image
+	//	VkImageViewCreateInfo view_info = init::imageview_create_info(format, newImage.get_image(), aspectFlag);
+	//	view_info.subresourceRange.levelCount = img_info.mipLevels;
+	//	VK_CHECK(vkCreateImageView(m_device, &view_info, nullptr, newImage.get_image_view_pointer()));
 
-		return newImage;
-	}
+	//	return newImage;
+	//}
 
-	vk_image vk_renderer::create_image(void* data, VkExtent3D size, VkFormat format, VkImageUsageFlags usage, bool mipmapped) {
+	//image vk_renderer::create_image(void* data, VkExtent3D size, VkFormat format, VkImageUsageFlags usage, bool mipmapped) {
 
-		size_t data_size = size.depth * size.width * size.height * 4;
-		vk_buffer uploadbuffer = create_buffer(data_size, VK_BUFFER_USAGE_TRANSFER_SRC_BIT, VMA_MEMORY_USAGE_CPU_TO_GPU);
-		memcpy(uploadbuffer.info.pMappedData, data, data_size);
-		vk_image new_image = create_image(size, format, usage | VK_IMAGE_USAGE_TRANSFER_DST_BIT | VK_IMAGE_USAGE_TRANSFER_SRC_BIT, mipmapped);
+	//	size_t data_size = size.depth * size.width * size.height * 4;
+	//	vk_buffer uploadbuffer = create_buffer(data_size, VK_BUFFER_USAGE_TRANSFER_SRC_BIT, VMA_MEMORY_USAGE_CPU_TO_GPU);
+	//	memcpy(uploadbuffer.info.pMappedData, data, data_size);
+	//	image new_image = create_image(size, format, usage | VK_IMAGE_USAGE_TRANSFER_DST_BIT | VK_IMAGE_USAGE_TRANSFER_SRC_BIT, mipmapped);
 
-		immediate_submit([&](VkCommandBuffer cmd) {
+	//	immediate_submit([&](VkCommandBuffer cmd) {
 
-			util::transition_image(cmd, new_image.image, VK_IMAGE_LAYOUT_UNDEFINED, VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL);
+	//		util::transition_image(cmd, new_image.get_image(), VK_IMAGE_LAYOUT_UNDEFINED, VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL);
 
-			VkBufferImageCopy copyRegion = {};
-			copyRegion.bufferOffset = 0;
-			copyRegion.bufferRowLength = 0;
-			copyRegion.bufferImageHeight = 0;
-			copyRegion.imageSubresource.aspectMask = VK_IMAGE_ASPECT_COLOR_BIT;
-			copyRegion.imageSubresource.mipLevel = 0;
-			copyRegion.imageSubresource.baseArrayLayer = 0;
-			copyRegion.imageSubresource.layerCount = 1;
-			copyRegion.imageExtent = size;
+	//		VkBufferImageCopy copyRegion = {};
+	//		copyRegion.bufferOffset = 0;
+	//		copyRegion.bufferRowLength = 0;
+	//		copyRegion.bufferImageHeight = 0;
+	//		copyRegion.imageSubresource.aspectMask = VK_IMAGE_ASPECT_COLOR_BIT;
+	//		copyRegion.imageSubresource.mipLevel = 0;
+	//		copyRegion.imageSubresource.baseArrayLayer = 0;
+	//		copyRegion.imageSubresource.layerCount = 1;
+	//		copyRegion.imageExtent = size;
 
-			// copy the buffer into the image
-			vkCmdCopyBufferToImage(cmd, uploadbuffer.buffer, new_image.image, VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL, 1, &copyRegion);
+	//		// copy the buffer into the image
+	//		vkCmdCopyBufferToImage(cmd, uploadbuffer.buffer, new_image.get_image(), VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL, 1, &copyRegion);
 
-			util::transition_image(cmd, new_image.image, VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL, VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL);
-		});
+	//		util::transition_image(cmd, new_image.get_image(), VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL, VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL);
+	//	});
 
-		destroy_buffer(uploadbuffer);
+	//	destroy_buffer(uploadbuffer);
 
-		return new_image;
-	}
+	//	return new_image;
+	//}
 
-	
-	void vk_renderer::destroy_image(const vk_image& img) {
-		
-		vkDestroyImageView(m_device, img.image_view, nullptr);
-		vmaDestroyImage(m_allocator, img.image, img.allocation);
-	}
+	//
+	//void vk_renderer::destroy_image(image& img) {
+	//	
+	//	vkDestroyImageView(m_device, img.get_image_view(), nullptr);
+	//	vmaDestroyImage(m_allocator, img.get_image(), img.get_allocation());
+	//}
 	
 	// =======================================================================================================================================
 	// BUFFER

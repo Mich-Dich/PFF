@@ -58,7 +58,7 @@ namespace PFF {
 		m_layerstack = create_ref<layer_stack>();
 
 		m_window = std::make_shared<pff_window>();
-		m_window->set_event_callback(BIND_FN(application::on_event));
+		m_window->set_event_callback(BIND_FUNKTION(application::on_event));
 		
 		// ---------------------------------------- renderer ----------------------------------------
 
@@ -213,10 +213,10 @@ namespace PFF {
 
 		// application events
 		event_dispatcher dispatcher(event);
-		dispatcher.dispatch<window_close_event>(BIND_FN(application::on_window_close));
-		dispatcher.dispatch<window_resize_event>(BIND_FN(application::on_window_resize));
-		dispatcher.dispatch<window_refresh_event>(BIND_FN(application::on_window_refresh));
-		dispatcher.dispatch<window_focus_event>(BIND_FN(application::on_window_focus));
+		dispatcher.dispatch<window_close_event>(BIND_FUNKTION(application::on_window_close));
+		dispatcher.dispatch<window_resize_event>(BIND_FUNKTION(application::on_window_resize));
+		dispatcher.dispatch<window_refresh_event>(BIND_FUNKTION(application::on_window_refresh));
+		dispatcher.dispatch<window_focus_event>(BIND_FUNKTION(application::on_window_focus));
 
 		// none application events
 		if (!event.handled) {

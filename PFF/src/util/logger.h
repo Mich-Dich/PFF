@@ -9,10 +9,10 @@
 	#define DEBUG_BREAK() __debugbreak()
 #endif // !DEBUG_BREAK
 
-#define APP_NAMESPACE			PFF
+#define PFF			PFF
 #define PROJECT_FOLDER			"PFF"
 
-namespace APP_NAMESPACE {
+namespace PFF {
 
 	class Exception : public std::runtime_error {
 	public:
@@ -111,36 +111,36 @@ namespace APP_NAMESPACE {
 //  ===================================================================================  Core Logger  ===================================================================================
 #if defined(PFF_INSIDE_ENGINE) || defined(PFF_INSIDE_EDITOR)
 
-	#define CORE_LOG_Fatal(message)				{ APP_NAMESPACE::Logger::LogMessage(APP_NAMESPACE::Logger::LogMsgSeverity::Fatal,__FILE__,__FUNCTION__,__LINE__).flush() << message; }
-	#define CORE_LOG_Error(message)				{ APP_NAMESPACE::Logger::LogMessage(APP_NAMESPACE::Logger::LogMsgSeverity::Error,__FILE__,__FUNCTION__,__LINE__).flush() << message; }
+	#define CORE_LOG_Fatal(message)				{ PFF::Logger::LogMessage(PFF::Logger::LogMsgSeverity::Fatal,__FILE__,__FUNCTION__,__LINE__).flush() << message; }
+	#define CORE_LOG_Error(message)				{ PFF::Logger::LogMessage(PFF::Logger::LogMsgSeverity::Error,__FILE__,__FUNCTION__,__LINE__).flush() << message; }
 
 	#if CORE_LOG_LEVEL_ENABLED >= 1
-		#define CORE_LOG_Warn(message)				{ APP_NAMESPACE::Logger::LogMessage(APP_NAMESPACE::Logger::LogMsgSeverity::Warn,__FILE__,__FUNCTION__,__LINE__).flush() << message; }
+		#define CORE_LOG_Warn(message)				{ PFF::Logger::LogMessage(PFF::Logger::LogMsgSeverity::Warn,__FILE__,__FUNCTION__,__LINE__).flush() << message; }
 	#else
 		#define CORE_LOG_Warn(message)				{;}
 	#endif
 
 	#if CORE_LOG_LEVEL_ENABLED >= 2
-		#define CORE_LOG_Info(message)				{ APP_NAMESPACE::Logger::LogMessage(APP_NAMESPACE::Logger::LogMsgSeverity::Info,__FILE__,__FUNCTION__,__LINE__).flush() << message; }
+		#define CORE_LOG_Info(message)				{ PFF::Logger::LogMessage(PFF::Logger::LogMsgSeverity::Info,__FILE__,__FUNCTION__,__LINE__).flush() << message; }
 	#else
 		#define CORE_LOG_Info(message)				{;}
 	#endif
 
 	#if CORE_LOG_LEVEL_ENABLED >= 3
-		#define CORE_LOG_Debug(message)				{ APP_NAMESPACE::Logger::LogMessage(APP_NAMESPACE::Logger::LogMsgSeverity::Debug,__FILE__,__FUNCTION__,__LINE__).flush() << message; }
+		#define CORE_LOG_Debug(message)				{ PFF::Logger::LogMessage(PFF::Logger::LogMsgSeverity::Debug,__FILE__,__FUNCTION__,__LINE__).flush() << message; }
 	#else
 		#define CORE_LOG_Debug(message)				{;}
 	#endif
 
 	#if CORE_LOG_LEVEL_ENABLED >= 4
-		#define CORE_LOG_Trace(message)				{ APP_NAMESPACE::Logger::LogMessage(APP_NAMESPACE::Logger::LogMsgSeverity::Trace,__FILE__,__FUNCTION__,__LINE__).flush() << message; }
-		#define CORE_LOG_SEPERATOR					APP_NAMESPACE::Logger::Set_Format("$C$Z");									\
-														CORE_LOG_Trace(APP_NAMESPACE::Logger::SeperatorStringSmall)				\
-														APP_NAMESPACE::Logger::Use_Format_Backup();
+		#define CORE_LOG_Trace(message)				{ PFF::Logger::LogMessage(PFF::Logger::LogMsgSeverity::Trace,__FILE__,__FUNCTION__,__LINE__).flush() << message; }
+		#define CORE_LOG_SEPERATOR					PFF::Logger::Set_Format("$C$Z");									\
+														CORE_LOG_Trace(PFF::Logger::SeperatorStringSmall)				\
+														PFF::Logger::Use_Format_Backup();
 
-		#define CORE_LOG_SEPERATOR_BIG				APP_NAMESPACE::Logger::Set_Format("$C$Z");									\
-														CORE_LOG_Trace(APP_NAMESPACE::Logger::SeperatorStringBig)				\
-														APP_NAMESPACE::Logger::Use_Format_Backup();
+		#define CORE_LOG_SEPERATOR_BIG				PFF::Logger::Set_Format("$C$Z");									\
+														CORE_LOG_Trace(PFF::Logger::SeperatorStringBig)				\
+														PFF::Logger::Use_Format_Backup();
 	#else
 		#define CORE_LOG_Trace(message, ...)		{;}
 		#define CORE_LOG_SEPERATOR					{;}
@@ -199,29 +199,29 @@ namespace APP_NAMESPACE {
 
 //  ===================================================================================  Client Logger  ===================================================================================
 
-#define LOG_Fatal(message)						{ APP_NAMESPACE::Logger::LogMessage(APP_NAMESPACE::Logger::LogMsgSeverity::Fatal,__FILE__,__FUNCTION__,__LINE__) << message; }
-#define LOG_Error(message)						{ APP_NAMESPACE::Logger::LogMessage(APP_NAMESPACE::Logger::LogMsgSeverity::Error,__FILE__,__FUNCTION__,__LINE__) << message; }
+#define LOG_Fatal(message)						{ PFF::Logger::LogMessage(PFF::Logger::LogMsgSeverity::Fatal,__FILE__,__FUNCTION__,__LINE__) << message; }
+#define LOG_Error(message)						{ PFF::Logger::LogMessage(PFF::Logger::LogMsgSeverity::Error,__FILE__,__FUNCTION__,__LINE__) << message; }
 
 #if LOG_LEVEL_ENABLED >= 1
-	#define LOG_Warn(message, ...)					{ APP_NAMESPACE::Logger::LogMessage(APP_NAMESPACE::Logger::LogMsgSeverity::Warn,__FILE__,__FUNCTION__,__LINE__) << message; }
+	#define LOG_Warn(message, ...)					{ PFF::Logger::LogMessage(PFF::Logger::LogMsgSeverity::Warn,__FILE__,__FUNCTION__,__LINE__) << message; }
 #else
 	#define LOG_Warn(message, ...)					{;}
 #endif
 
 #if LOG_LEVEL_ENABLED >= 2
-	#define LOG_Info(message, ...)					{ APP_NAMESPACE::Logger::LogMessage(APP_NAMESPACE::Logger::LogMsgSeverity::Info,__FILE__,__FUNCTION__,__LINE__) << message; }
+	#define LOG_Info(message, ...)					{ PFF::Logger::LogMessage(PFF::Logger::LogMsgSeverity::Info,__FILE__,__FUNCTION__,__LINE__) << message; }
 #else
 	#define LOG_Info(message, ...)					{;}
 #endif
 
 #if LOG_LEVEL_ENABLED >= 3
-	#define LOG_Debug(message, ...)					{ APP_NAMESPACE::Logger::LogMessage(APP_NAMESPACE::Logger::LogMsgSeverity::Debug,__FILE__,__FUNCTION__,__LINE__) << message; }
+	#define LOG_Debug(message, ...)					{ PFF::Logger::LogMessage(PFF::Logger::LogMsgSeverity::Debug,__FILE__,__FUNCTION__,__LINE__) << message; }
 #else
 	#define LOG_Debug(message, ...)					{;}
 #endif
 
 #if LOG_LEVEL_ENABLED >= 4
-	#define LOG_Trace(message, ...)					{ APP_NAMESPACE::Logger::LogMessage(APP_NAMESPACE::Logger::LogMsgSeverity::Trace,__FILE__,__FUNCTION__,__LINE__) << message; }
+	#define LOG_Trace(message, ...)					{ PFF::Logger::LogMessage(PFF::Logger::LogMsgSeverity::Trace,__FILE__,__FUNCTION__,__LINE__) << message; }
 #else
 	#define LOG_Trace(message, ...)					{;}
 #endif

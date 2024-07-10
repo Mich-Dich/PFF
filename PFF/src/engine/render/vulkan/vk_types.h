@@ -11,14 +11,20 @@
 #include "vk_descriptor.h"
 //#include "engine/geometry/mesh.h"
 
-struct vk_image {
-
-    VkImage             image;
-    VkImageView         image_view;
-    VmaAllocation       allocation;
-    VkExtent3D          image_extent;
-    VkFormat            image_format;
-};
+//class image {
+//public:
+//
+//    //PFF_DEFAULT_CONSTRUCTORS(image);
+//
+//    //friend class PFF::render::vulkan::vk_renderer;
+////private:
+//
+//    VkImage             m_image{};
+//    VkImageView         m_image_view{};
+//    VmaAllocation       m_allocation{};
+//    VkExtent3D          m_image_extent{};
+//    VkFormat            m_image_format{};
+//};
 
 struct vk_buffer {
 

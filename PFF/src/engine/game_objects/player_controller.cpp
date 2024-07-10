@@ -191,8 +191,8 @@ namespace PFF {
 		if (event.is_in_category(EC_Input)) {
 
 			event_dispatcher dispatcher(event);
-			dispatcher.dispatch<key_event>(BIND_FN(player_controller::handle_key_events));
-			dispatcher.dispatch<mouse_event>(BIND_FN(player_controller::handle_mouse_events));
+			dispatcher.dispatch<key_event>(BIND_FUNKTION(player_controller::handle_key_events));
+			dispatcher.dispatch<mouse_event>(BIND_FUNKTION(player_controller::handle_mouse_events));
 		}
 	}
 

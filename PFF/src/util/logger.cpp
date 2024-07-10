@@ -12,14 +12,14 @@
 #include "logger.h"
 
 
-namespace APP_NAMESPACE::Logger {
+namespace PFF::Logger {
     static int enable_ANSI_escape_codes();
 }
 
 #if defined PFF_PLATFORM_WINDOWS
 
     #include <Windows.h>
-    static int APP_NAMESPACE::Logger::enable_ANSI_escape_codes() {
+    static int PFF::Logger::enable_ANSI_escape_codes() {
 
         // Enable ANSI escape codes
         HANDLE hOut = GetStdHandle(STD_OUTPUT_HANDLE);
@@ -75,7 +75,7 @@ namespace APP_NAMESPACE::Logger {
 
 
 
-namespace APP_NAMESPACE::Logger {
+namespace PFF::Logger {
 
     static const char* SeperatorStringBig = "====================================================================================================================";
     static const char* SeperatorStringSmall = "--------------------------------------------------------------------------------------------------------------------";

@@ -63,14 +63,11 @@ namespace PFF::render::vulkan {
 		~vk_renderer();
 
 		FORCEINLINE f32 get_aspect_ratio()			{ return 1.f; };			// TODO: finish
-		FORCEINLINE VkDevice get_device()			{ return m_device; }
-		FORCEINLINE VmaAllocator get_allocator()	{ return m_allocator; }
+		PFF_DEFAULT_GETTERS(VmaAllocator,			allocator);
+		PFF_DEFAULT_GETTERS(VkDevice,				device);
 
-
-		// !!!!!!!!!!!!!!!! DEV-ONLY !!!!!!!!!!!!!!!!!!!!!!
+		// !!!!!!!!!!!!!!!! DEV !!!!!!!!!!!!!!!!!!!!!!
 		void setup();
-
-
 
 		// --------------- general ----------------
 		void draw_frame(f32 delta_time) override;
@@ -137,9 +134,9 @@ namespace PFF::render::vulkan {
 		void draw_imgui(VkCommandBuffer cmd, VkImageView targetImageView);
 		void create_swapchain(u32 width, u32 height);
 
-		vk_image create_image(VkExtent3D size, VkFormat format, VkImageUsageFlags usage, bool mipmapped = false);
-		vk_image create_image(void* data, VkExtent3D size, VkFormat format, VkImageUsageFlags usage, bool mipmapped = false);
-		void destroy_image(const vk_image& img);
+		//image create_image(VkExtent3D size, VkFormat format, VkImageUsageFlags usage, bool mipmapped = false);
+		//image create_image(void* data, VkExtent3D size, VkFormat format, VkImageUsageFlags usage, bool mipmapped = false);
+		//void destroy_image(image& img);
 
 		//vk_buffer create_buffer(size_t allocSize, VkBufferUsageFlags usage, VmaMemoryUsage memoryUsage);
 		//void destroy_buffer(const vk_buffer& buffer);
@@ -178,8 +175,8 @@ namespace PFF::render::vulkan {
 
 		VkExtent2D					m_draw_extent{};
 		f32							m_render_scale = 1.f;
-		vk_image						m_draw_image;
-		vk_image						m_depth_image;
+		image						m_draw_image;
+		image						m_depth_image;
 
 		// display rendered image in imgui
 		VkSampler					m_texture_sampler{};
@@ -219,10 +216,10 @@ namespace PFF::render::vulkan {
 		VkDescriptorSetLayout		m_gpu_scene_data_descriptor_layout;
 
 		// ---------------------------- default textures ---------------------------- 
-		vk_image						m_white_image;
-		vk_image						m_black_image;
-		vk_image						m_grey_image;
-		vk_image						m_error_checkerboard_image;
+		image						m_white_image;
+		image						m_black_image;
+		image						m_grey_image;
+		image						m_error_checkerboard_image;
 		VkSampler					m_default_sampler_linear;
 		VkSampler					m_default_sampler_nearest;
 		VkDescriptorSetLayout		m_single_image_descriptor_layout;

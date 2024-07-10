@@ -5,10 +5,9 @@
 #include "engine/layer/layer_stack.h"
 #include "engine/game_objects/camera.h"
 
-//#include "engine/render/image.h"
+#include "engine/render/image.h"
 
 #if defined PFF_RENDER_API_VULKAN
-#include "engine/render/vulkan/vk_types.h"
 #include "engine/render/vulkan/vk_descriptor.h"
 #include "engine/render/vulkan/vk_types.h"
 #endif
