@@ -107,6 +107,9 @@
     <ClInclude Include="src\engine\platform\pff_window.h">
       <Filter>engine\platform</Filter>
     </ClInclude>
+    <ClInclude Include="src\engine\render\image.h">
+      <Filter>engine\render</Filter>
+    </ClInclude>
     <ClInclude Include="src\engine\render\render_public_data.h">
       <Filter>engine\render</Filter>
     </ClInclude>
@@ -207,7 +210,6 @@
     <ClInclude Include="src\util\util.h">
       <Filter>util</Filter>
     </ClInclude>
-    <ClInclude Include="src\engine\render\image.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="src\application.cpp" />
@@ -246,6 +248,9 @@
     </ClCompile>
     <ClCompile Include="src\engine\platform\pff_window.cpp">
       <Filter>engine\platform</Filter>
+    </ClCompile>
+    <ClCompile Include="src\engine\render\image.cpp">
+      <Filter>engine\render</Filter>
     </ClCompile>
     <ClCompile Include="src\engine\render\render_util.cpp">
       <Filter>engine\render</Filter>
@@ -298,6 +303,5 @@
     <ClCompile Include="src\util\util.cpp">
       <Filter>util</Filter>
     </ClCompile>
-    <ClCompile Include="src\engine\render\image.cpp" />
   </ItemGroup>
 </Project>

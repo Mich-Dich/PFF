@@ -2,13 +2,12 @@
 #include "util/pffpch.h"
 
 #include "application.h"
-#include "player_controller.h"
-
 #include "engine/Events/Event.h"
 #include "engine/Events/mouse_event.h"
 #include "engine/Events/key_event.h"
 #include "engine/layer/world_layer.h"
 
+#include "player_controller.h"
 
 // !! CAUTION !! not implemented yet
 // defines the min diffrence between the input::action_type (in smooth input mode) and the target value
@@ -17,50 +16,32 @@
 
 namespace PFF {
 
-	player_controller::player_controller() {
+	player_controller::player_controller() { init(); }
 
-		PFF_PROFILE_FUNCTION();
+	player_controller::~player_controller() { m_input_mapping.reset(); }
 
-		init();
-	}
-
-	player_controller::~player_controller() {
-
-		PFF_PROFILE_FUNCTION();
-
-		m_input_mapping.reset();
-		CORE_LOG(Trace, "Shutdown");
-	}
-
-	void player_controller::set_world_layer_ref(world_layer* world_layer) {
-
-		PFF_PROFILE_FUNCTION();
-
-		m_world_layer = world_layer;
-	}
+	void player_controller::set_world_layer_ref(world_layer* world_layer) { m_world_layer = world_layer; }
 
 	void player_controller::init() { }
 
 	void player_controller::update(f32 delta) { }
 
-	/*
-	#define INPUT_ACTION_TRIGGER_KEY_DOWN				BIT(0)		// activate input when key is pressed down (can repeat)
-	#define INPUT_ACTION_TRIGGER_KEY_UP					BIT(1)		// activate input when key NOT pressed (can repeat)
-	#define INPUT_ACTION_TRIGGER_KEY_HOLD				BIT(2)		// activate input when key down LONGER than [duration_in_sec] in input_action struct (can repeat)
-	#define INPUT_ACTION_TRIGGER_KEY_TAP				BIT(3)		// activate input when key down SHORTER than [duration_in_sec] in input_action struct (can repeat)
-	#define INPUT_ACTION_TRIGGER_KEY_MOVE_DOWN			BIT(4)		// activate input when starting to press a key (can NOT repeat)
-	#define INPUT_ACTION_TRIGGER_KEY_MOVE_UP			BIT(5)		// activate input when releasing a key (can NOT repeat)
+	//  #define INPUT_ACTION_TRIGGER_KEY_DOWN				BIT(0)		// activate input when key is pressed down (can repeat)
+	//  #define INPUT_ACTION_TRIGGER_KEY_UP					BIT(1)		// activate input when key NOT pressed (can repeat)
+	//  #define INPUT_ACTION_TRIGGER_KEY_HOLD				BIT(2)		// activate input when key down LONGER than [duration_in_sec] in input_action struct (can repeat)
+	//  #define INPUT_ACTION_TRIGGER_KEY_TAP				BIT(3)		// activate input when key down SHORTER than [duration_in_sec] in input_action struct (can repeat)
+	//  #define INPUT_ACTION_TRIGGER_KEY_MOVE_DOWN			BIT(4)		// activate input when starting to press a key (can NOT repeat)
+	//  #define INPUT_ACTION_TRIGGER_KEY_MOVE_UP			BIT(5)		// activate input when releasing a key (can NOT repeat)
 
-	#define INPUT_ACTION_TRIGGER_MOUSE_POSITIVE			BIT(10)
-	#define INPUT_ACTION_TRIGGER_MOUSE_NEGATIVE			BIT(11)
-	#define INPUT_ACTION_TRIGGER_MOUSE_POS_AND_NEG		BIT(12)
+	//  #define INPUT_ACTION_TRIGGER_MOUSE_POSITIVE			BIT(10)
+	//  #define INPUT_ACTION_TRIGGER_MOUSE_NEGATIVE			BIT(11)
+	//  #define INPUT_ACTION_TRIGGER_MOUSE_POS_AND_NEG		BIT(12)
 
-	#define INPUT_ACTION_MODEFIER_NEGATE				BIT(0)
-	#define INPUT_ACTION_MODEFIER_VEC2_NORMAL			BIT(1)
-	#define INPUT_ACTION_MODEFIER_VEC2_SECOND_AXIS		BIT(2)
-	#define INPUT_ACTION_MODEFIER_VEC3_SECOND_AXIS		BIT(3)
-	#define INPUT_ACTION_MODEFIER_AUTO_RESET			BIT(4)
-	*/
+	//  #define INPUT_ACTION_MODEFIER_NEGATE				BIT(0)
+	//  #define INPUT_ACTION_MODEFIER_VEC2_NORMAL			BIT(1)
+	//  #define INPUT_ACTION_MODEFIER_VEC2_SECOND_AXIS		BIT(2)
+	//  #define INPUT_ACTION_MODEFIER_VEC3_SECOND_AXIS		BIT(3)
+	//  #define INPUT_ACTION_MODEFIER_AUTO_RESET			BIT(4)
 
 	void player_controller::update_internal(f32 delta) {
 
@@ -71,10 +52,8 @@ namespace PFF {
 
 			if (action->flags & INPUT_ACTION_MODEFIER_AUTO_RESET || action->flags & INPUT_ACTION_MODEFIER_AUTO_RESET_ALL)
 				action->data = {};
-
 		}
 
-		//CORE_LOG(Trace, event.get_keycode());
 		for (u32 x = 0; x < m_input_mapping->get_length(); x++) {
 			input_action* action = m_input_mapping->get_action(x);				// get input_action
 
@@ -82,8 +61,8 @@ namespace PFF {
 
 			}
 
-			for (u32 x = 0; x < action->get_length(); x++) {	
-				input::key_binding_details* key_binding_details = action->get_key(x);					// get key
+			for (u32 y = 0; y < action->get_length(); y++) {	
+				input::key_binding_details* key_binding_details = action->get_key(y);					// get key
 
 				f32 m_buffer = key_binding_details->active;
 
@@ -93,7 +72,7 @@ namespace PFF {
 
 				if (key_binding_details->modefier_flags & INPUT_ACTION_MODEFIER_SMOOTH_INTERP) {
 
-					//CORE_LOG(Info, "INPUT_ACTION_MODEFIER_SMOOTH_INTERP is not supported yet");
+					CORE_LOG(Info, "INPUT_ACTION_MODEFIER_SMOOTH_INTERP is not supported yet");
 				}
 
 				switch (action->value) {
@@ -204,8 +183,8 @@ namespace PFF {
 		for (u32 x = 0; x < m_input_mapping->get_length(); x++) {				// get input_action
 			input_action* action = m_input_mapping->get_action(x);
 
-			for (u32 x = 0; x < action->get_length(); x++) {					// get input_action
-				input::key_binding_details* key_binding_details = action->get_key(x);
+			for (u32 y = 0; y < action->get_length(); y++) {					// get input_action
+				input::key_binding_details* key_binding_details = action->get_key(y);
 
 				if (key_binding_details->key != event.get_keycode()) 					// check if I have an event for that key
 					continue;

@@ -335,12 +335,15 @@ namespace PFF {
                 return;
             }
 
-            // Matrix of size 4         TODO: move into seperate template for all matrixes
-            else if constexpr (std::is_same_v<T, glm::mat4>) {
+            else if constexpr (std::is_same_v<T, glm::mat4> || std::is_same_v<T, glm::mat3>) {
+
+                int loc_size = 4;
+                if constexpr (std::is_same_v<T, glm::mat3>)
+                    loc_size = 3;
 
                 std::istringstream iss(src_string);
-                for (int i = 0; i < 4; ++i) {
-                    for (int j = 0; j < 4; ++j) {
+                for (int i = 0; i < loc_size; ++i) {
+                    for (int j = 0; j < loc_size; ++j) {
                         iss >> dest_value[i][j];
                     }
                 }
@@ -350,6 +353,7 @@ namespace PFF {
             else
                 DEBUG_BREAK();		// Input value is not supported
         }
+
 
         // @brief Removes a substring from a character array.
         // @tparam N The size of the source character array.
@@ -380,16 +384,16 @@ namespace PFF {
 
         PFF_API int count_lines(const char* text);
 
-        #define EXTRACT_AFTER_PFF(path) ([](const std::string& str) -> std::string { \
-            const std::string delimiter = "PFF"; \
-            size_t pos = str.find(delimiter); \
-            if (pos != std::string::npos) { \
-                pos = str.find(delimiter, pos + delimiter.length()); \
-                if (pos != std::string::npos) { \
-                    return str.substr(pos + delimiter.length() + 1); \
-                } \
-            } \
-            return ""; \
+        #define EXTRACT_AFTER_PFF(path) ([](const std::string& str) -> std::string {    \
+            const std::string delimiter = "PFF";                                        \
+            size_t pos = str.find(delimiter);                                           \
+            if (pos != std::string::npos) {                                             \
+                pos = str.find(delimiter, pos + delimiter.length());                    \
+                if (pos != std::string::npos) {                                         \
+                    return str.substr(pos + delimiter.length() + 1);                    \
+                }                                                                       \
+            }                                                                           \
+            return "";                                                                  \
         }(path))
 
 	}

@@ -8,7 +8,7 @@
 
 namespace PFF {
 
-    class image {
+    class PFF_API image {
     public:
 
 #if defined PFF_RENDER_API_VULKAN

@@ -90,11 +90,6 @@ namespace PFF::render::vulkan {
 		vk_buffer create_buffer(size_t allocSize, VkBufferUsageFlags usage, VmaMemoryUsage memoryUsage);
 		void destroy_buffer(const vk_buffer& buffer);
 
-		//image create_image(VkExtent3D size, VkFormat format, VkImageUsageFlags usage, bool mipmapped = false);
-		//image create_image(void* data, VkExtent3D size, VkFormat format, VkImageUsageFlags usage, bool mipmapped = false);
-		//void destroy_image(const image& img);
-		//void destroy_image(VkImageView image_view, VkImage image, VmaAllocation allocation);
-
 	private:
 
 		friend class deletion_queue;
@@ -134,13 +129,6 @@ namespace PFF::render::vulkan {
 		void draw_imgui(VkCommandBuffer cmd, VkImageView targetImageView);
 		void create_swapchain(u32 width, u32 height);
 
-		//image create_image(VkExtent3D size, VkFormat format, VkImageUsageFlags usage, bool mipmapped = false);
-		//image create_image(void* data, VkExtent3D size, VkFormat format, VkImageUsageFlags usage, bool mipmapped = false);
-		//void destroy_image(image& img);
-
-		//vk_buffer create_buffer(size_t allocSize, VkBufferUsageFlags usage, VmaMemoryUsage memoryUsage);
-		//void destroy_buffer(const vk_buffer& buffer);
-
 		// TIP: Note that this pattern is not very efficient, as CPU is waiting for the GPU command to fully execute before continuing with our CPU side logic
 		//		This is should be put on a background thread, whose sole job is to execute uploads like this one, and deleting/reusing the staging buffers.
 		GPU_mesh_buffers upload_mesh(std::vector<u32> indices, std::vector<PFF::geometry::vertex> vertices);
@@ -151,78 +139,78 @@ namespace PFF::render::vulkan {
 		ref<PFF::layer_stack> m_layer_stack{};
 
 		// ---------------------------- instance ---------------------------- 
-		VkInstance					m_instance{};			// Vulkan library handle
-		VkDebugUtilsMessengerEXT	m_debug_messenger{};	// Vulkan debug output handle
-		VkPhysicalDevice			m_chosenGPU{};			// GPU chosen as the default device
-		VkDevice					m_device{};				// Vulkan device for commands
-		VkSurfaceKHR				m_surface{};			// Vulkan window surface
+		VkInstance									m_instance{};			// Vulkan library handle
+		VkDebugUtilsMessengerEXT					m_debug_messenger{};	// Vulkan debug output handle
+		VkPhysicalDevice							m_chosenGPU{};			// GPU chosen as the default device
+		VkDevice									m_device{};				// Vulkan device for commands
+		VkSurfaceKHR								m_surface{};			// Vulkan window surface
 		
 		// ---------------------------- queues ---------------------------- 
-		FrameData					m_frames[FRAME_COUNT]{};
-		VkQueue						m_graphics_queue{};
-		u32							m_graphics_queue_family{};
+		FrameData									m_frames[FRAME_COUNT]{};
+		VkQueue										m_graphics_queue{};
+		u32											m_graphics_queue_family{};
 		
 		// ---------------------------- swapchain ---------------------------- 
-		VkSwapchainKHR				m_swapchain{};
-		VkFormat					m_swapchain_image_format{};
-		std::vector<VkImage>		m_swapchain_images{};
-		std::vector<VkImageView>	m_swapchain_image_views{};
-		VkExtent2D					m_swapchain_extent{};
-		bool						m_resize_nedded = false;
-
-		deletion_queue				m_deletion_queue{};
-		VmaAllocator				m_allocator{};
-
-		VkExtent2D					m_draw_extent{};
-		f32							m_render_scale = 1.f;
-		image						m_draw_image;
-		image						m_depth_image;
+		VkSwapchainKHR								m_swapchain{};
+		VkFormat									m_swapchain_image_format{};
+		std::vector<VkImage>						m_swapchain_images{};
+		std::vector<VkImageView>					m_swapchain_image_views{};
+		VkExtent2D									m_swapchain_extent{};
+		bool										m_resize_nedded = false;
+													
+		deletion_queue								m_deletion_queue{};
+		VmaAllocator								m_allocator{};
+													
+		VkExtent2D									m_draw_extent{};
+		f32											m_render_scale = 1.f;
+		image										m_draw_image;
+		image										m_depth_image;
 
 		// display rendered image in imgui
-		VkSampler					m_texture_sampler{};
-		VkDescriptorSet				m_imugi_image_dset{};
-		glm::u32vec2				m_imugi_viewport_size{100};
+		VkSampler									m_texture_sampler{};
+		VkDescriptorSet								m_imugi_image_dset{};
+		glm::u32vec2								m_imugi_viewport_size{100};
 
 		// ---------------------------- descriptors ---------------------------- 
-		descriptor_allocator		global_descriptor_allocator{};
-		VkDescriptorSet				m_draw_image_descriptors{};
-		VkDescriptorSetLayout		m_draw_image_descriptor_layout{};
+		descriptor_allocator						global_descriptor_allocator{};
+		VkDescriptorSet								m_draw_image_descriptors{};
+		VkDescriptorSetLayout						m_draw_image_descriptor_layout{};
 		
 		// ---------------------------- pipelines ---------------------------- 
-		VkPipeline					m_gradient_pipeline{};
-		VkPipelineLayout			m_gradient_pipeline_layout{};
+		VkPipeline									m_gradient_pipeline{};
+		VkPipelineLayout							m_gradient_pipeline_layout{};
 
 		// ---------------------------- immediate-submit ---------------------------- 
-		VkFence						m_immFence{};
-		VkCommandBuffer				m_immCommandBuffer{};
-		VkCommandPool				m_immCommandPool{};
-		VkDescriptorPool			m_imgui_desc_pool{};
-		std::vector<compute_effect> m_background_effects{};
-		int							m_current_background_effect = 2;
+		VkFence										m_immFence{};
+		VkCommandBuffer								m_immCommandBuffer{};
+		VkCommandPool								m_immCommandPool{};
+		VkDescriptorPool							m_imgui_desc_pool{};
+		std::vector<compute_effect> 				m_background_effects{};
+		int											m_current_background_effect = 2;
 
 		// ---------------------------- triangle pipeline ---------------------------- 
-		//VkPipelineLayout			m_triangle_pipeline_layout{};
-		//VkPipeline				m_triangle_pipeline{};
+		//VkPipelineLayout							m_triangle_pipeline_layout{};
+		//VkPipeline								m_triangle_pipeline{};
 
 		// ---------------------------- mesh pipeline ---------------------------- 
-		VkPipelineLayout			m_mesh_pipeline_layout{};
-		VkPipeline					m_mesh_pipeline{};
+		VkPipelineLayout							m_mesh_pipeline_layout{};
+		VkPipeline									m_mesh_pipeline{};
 
 		//vk_GPU_mesh_buffers		T_rectangle;
 		std::vector<ref<PFF::geometry::mesh>>		T_test_meshes;
 
 		// ---------------------------- GPU side global scene data ---------------------------- 
-		GPU_scene_data				m_scene_data;
-		VkDescriptorSetLayout		m_gpu_scene_data_descriptor_layout;
+		GPU_scene_data								m_scene_data;
+		VkDescriptorSetLayout						m_gpu_scene_data_descriptor_layout;
 
 		// ---------------------------- default textures ---------------------------- 
-		image						m_white_image;
-		image						m_black_image;
-		image						m_grey_image;
-		image						m_error_checkerboard_image;
-		VkSampler					m_default_sampler_linear;
-		VkSampler					m_default_sampler_nearest;
-		VkDescriptorSetLayout		m_single_image_descriptor_layout;
+		image										m_white_image;
+		image										m_black_image;
+		image										m_grey_image;
+		image										m_error_checkerboard_image;
+		VkSampler									m_default_sampler_linear;
+		VkSampler									m_default_sampler_nearest;
+		VkDescriptorSetLayout						m_single_image_descriptor_layout;
 
 	};
 }

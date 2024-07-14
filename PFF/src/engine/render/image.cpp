@@ -64,11 +64,9 @@ namespace PFF {
 			copyRegion.imageSubresource.layerCount = 1;
 			copyRegion.imageExtent = size;
 
-			// copy the buffer into the image
 			vkCmdCopyBufferToImage(cmd, uploadbuffer.buffer, get_image(), VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL, 1, &copyRegion);
-
 			render::vulkan::util::transition_image(cmd, get_image(), VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL, VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL);
-			});
+		});
 
 		GET_RENDERER->destroy_buffer(uploadbuffer);
 	}

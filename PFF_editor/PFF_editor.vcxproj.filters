@@ -31,6 +31,9 @@
     <ClInclude Include="src\toolkit\settings\graphics_engine_settings.h">
       <Filter>toolkit\settings</Filter>
     </ClInclude>
+    <ClInclude Include="src\toolkit\texture_editor.h">
+      <Filter>toolkit</Filter>
+    </ClInclude>
     <ClInclude Include="src\toolkit\todo_list\todo_list.h">
       <Filter>toolkit\todo_list</Filter>
     </ClInclude>
@@ -50,6 +53,9 @@
       <Filter>controller</Filter>
     </ClCompile>
     <ClCompile Include="src\entry.cpp" />
+    <ClCompile Include="src\toolkit\texture_editor.cpp">
+      <Filter>toolkit</Filter>
+    </ClCompile>
     <ClCompile Include="src\ui\editor_layer.cpp">
       <Filter>ui</Filter>
     </ClCompile>

@@ -3,6 +3,8 @@
 #include "engine/layer/layer.h"
 #include "engine/io_handler/input_mapping.h"
 
+#include "toolkit/texture_editor.h"
+
 struct ImGuiContext;
 
 namespace PFF {
@@ -22,6 +24,8 @@ namespace PFF {
 		void on_imgui_render() override;
 
 	private:
+
+		std::vector<toolkit::editor_window> m_editor_windows{};
 
 		// ImGui windows
 		void window_main_title_bar();

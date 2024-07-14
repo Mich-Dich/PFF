@@ -10,6 +10,7 @@
 #include "engine/layer/imgui_layer.h"
 
 #include "toolkit/todo_list/todo_list.h"
+#include "toolkit/texture_editor.h"
 #include "toolkit/settings/graphics_engine_settings.h"
 
 // TEST 
@@ -72,6 +73,7 @@ namespace PFF {
 		PFF::toolkit::settings::window_graphics_engine();
 		
 		PFF::toolkit::todo::window_todo_list();
+		//PFF::toolkit::texture_editor::window();
 
 		if (style_editor)
 			ImGui::ShowStyleEditor();
@@ -391,7 +393,7 @@ namespace PFF {
 				if (ImGui::MenuItem("Options"), NULL, m_show_options)
 					m_show_options = true;
 				ImGui::Separator();
-				if (ImGui::MenuItem("Quit", "Alt+F4"))
+				if (ImGui::MenuItem("Quit", "Alt + F4"))
 					application::get().close_application();
 				ImGui::EndMenu();
 			}
@@ -538,6 +540,18 @@ namespace PFF {
 
 				ImGui::EndMenu();
 			}
+
+
+			if (ImGui::BeginMenu("Tools")) {
+
+				if (ImGui::MenuItem("Texture Editor", "", nullptr)) {
+
+					m_editor_windows.push_back( toolkit::texture_editor() );
+				}
+
+				ImGui::EndMenu();
+			}
+
 			ImGui::EndMenuBar();
 		}
 	}
