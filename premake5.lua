@@ -50,10 +50,10 @@ function copy_content_of_dir(outputs, dir_names)
 	end
 
 	-- Debug print all commands
-	print("Generated commands:")
-	for _, cmd in ipairs(commands) do
-		print(cmd)
-	end
+	-- print("Generated commands:")
+	-- for _, cmd in ipairs(commands) do
+	-- 	print(cmd)ls
+	-- end
 
 	return commands
 end

@@ -1,12 +1,19 @@
 # PFF - Procedurally Focused Framework
 
-![Main Logo](/.github/resources/Logo2.png?raw=true "mich")
-
-PFF (Procedurally Focused Framework) is a 3D game engine crafted in C/C++, designed with a primary focus on harnessing the potential of procedural generation. Primarily developed for Windows, PFF is poised to extend its capabilities to Linux in the future, aspiring to offer a versatile and dynamic platform for game development.
+<table style="border-collapse: collapse; width: 100%; border: none;">
+  <tr>
+    <td style="border: none;">
+      <img src="/.github/resources/Logo2.png?raw=true" alt="Main Logo" title="mich" style="max-width: 100%; height: auto; border: none;">
+    </td>
+    <td style="vertical-align: middle; padding-right: 20px; border: none;">
+      <strong>PFF (Procedurally Focused Framework)</strong> is a 3D game engine crafted in C/C++, designed with a primary focus on harnessing the potential of procedural generation. Primarily developed for Windows, PFF is poised to extend its capabilities to Linux in the future, aspiring to offer a versatile and dynamic platform for game development.
+    </td>
+  </tr>
+</table>
 
 ### Here are screenshots that show the current state of PFF.
 
-![first_image](/.github/resources/PFF_editor_Yxjqcj034r.png?raw=true "image of the editor as it is now")
+![first_image](/.github/resources/PFF_editor_4lyAmXu471.png?raw=true "image of the editor as it is now")
 
 ## Getting Started
 To get started with PFF, follow these simple steps:
@@ -17,12 +24,12 @@ To get started with PFF, follow these simple steps:
    ```
 
 Windows:
+
 2. Execute the following file to create a VS 2022 solution:
    ```
    AutoGenerateSolution.bat
    ```
-Linux: (currently not supported)
-Apple: (currently not supported)
+Linux/Apple: (currently not supported)
 
 ## Dependencies
 PFF relies on the following dependencies:
@@ -34,8 +41,14 @@ PFF relies on the following dependencies:
 - [Vulkan](https://www.lunarg.com/vulkan-sdk/) install Vulkan SDK and add it to your PATH or update the variable [VULKAN_SDK] in [dependencies.lua]
 
 ## Usage
+
 You can start using PFF by either utilizing the provided project, [Sandbox], or creating your own project and linking it by adjusting the `premake5.lua` file. 
 Your game (main class) has to inherit from the `application` class.
+
+## Documentation
+
+To help you get familiar with PFF, a [wiki](https://github.com/Mich-Dich/PFF/wiki) is available and currently under development. The wiki will provide detailed documentation, guides, and examples to assist you in navigating and utilizing the framework effectively. Check back regularly for updates as more content is added.
+
 
 ## Procedural Generation Unleashed
 
@@ -72,21 +85,24 @@ At the heart of PFF lies its commitment to procedural generation, an innovative 
 By leveraging procedural generation, PFF empowers game developers to break free from conventional constraints, fostering creativity, and delivering unique and immersive gaming experiences. Explore the endless possibilities with PFF! 🌐✨
 
 ## Roadmap
-PFF's development roadmap outlines key focus areas:
 
 ### General Systems
 - Linux/Apple support
 - Launcher
-- Editor
 - Asset manager
+- Texture Editor
+- Material Editor
 
 ### Procedural Systems
 - Mesh generation
-   - Tree
    - Composite-mesh
+   - Tree
    - Terrain
+   - Voxel
 - Sound
 - Animation
+- Texture
+- Materials
 
 Feel free to contribute and help shape the future of PFF. Thank you for your interest and support!
 

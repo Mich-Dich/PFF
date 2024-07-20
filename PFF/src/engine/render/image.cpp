@@ -5,6 +5,8 @@
 	#include <vulkan/vulkan.h>
 	#include "vulkan/vk_image.h"
 	#include "vulkan/vk_initializers.h"
+
+	#include "imgui_impl_vulkan.h"
 #endif
 
 #include "application.h"
@@ -43,6 +45,14 @@ namespace PFF {
 		VK_CHECK(vkCreateImageView(GET_RENDERER->get_device(), &view_info, nullptr, get_image_view_pointer()));
 	}
 
+	VkDescriptorSet image::get_descriptor_set() {
+
+		if (m_descriptor_set == nullptr)
+			m_descriptor_set = (VkDescriptorSet)ImGui_ImplVulkan_AddTexture(GET_RENDERER->get_default_sampler_nearest(), m_image_view, VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL);
+
+		return m_descriptor_set;
+	};
+
 	image::image(void* data, VkExtent3D size, VkFormat format, VkImageUsageFlags usage, bool mipmapped) {
 
 		size_t data_size = size.depth * size.width * size.height * 4;
@@ -66,6 +76,8 @@ namespace PFF {
 
 			vkCmdCopyBufferToImage(cmd, uploadbuffer.buffer, get_image(), VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL, 1, &copyRegion);
 			render::vulkan::util::transition_image(cmd, get_image(), VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL, VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL);
+
+			//m_descriptor_set = (VkDescriptorSet)ImGui_ImplVulkan_AddTexture(GET_RENDERER->get_texture_sampler_nearest(), m_image_view, VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL);
 		});
 
 		GET_RENDERER->destroy_buffer(uploadbuffer);

@@ -24,14 +24,16 @@ namespace PFF {
         PFF_DEFAULT_GETTER_SETTER_ALL(VmaAllocation,    allocation);
         PFF_DEFAULT_GETTER_SETTER_ALL(VkExtent3D,       image_extent);
         PFF_DEFAULT_GETTER_SETTER_ALL(VkFormat,         image_format);
+        VkDescriptorSet get_descriptor_set();
 
     private:
       
-        VkImage             m_image{};
-        VkImageView         m_image_view{};
-        VmaAllocation       m_allocation{};
+        VkImage             m_image = nullptr;
+        VkImageView         m_image_view = nullptr;
+        VmaAllocation       m_allocation = nullptr;
         VkExtent3D          m_image_extent{};
         VkFormat            m_image_format{};
+        VkDescriptorSet     m_descriptor_set = nullptr;
 #endif
 
     };

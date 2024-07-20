@@ -84,17 +84,17 @@ namespace PFF::toolkit::todo {
 	// can define here because header is only included in editor_layer.cpp file
 	void serialize_todo_list(std::vector<topic>& m_topics, serializer::option option) {
 
-		serializer::yaml(config::get_filepath_from_configtype(config::file::editor), "todo_list", option)
+		PFF::serializer::yaml(config::get_filepath_from_configtype(config::file::editor), "todo_list", option)
 			.vector(KEY_VALUE(m_topics), [&](serializer::yaml& yaml, const u64 x) {
 
 				yaml.entry(KEY_VALUE(m_topics[x].name))
-					.entry(KEY_VALUE(m_topics[x].selected))
-					.vector(KEY_VALUE(m_topics[x].tasks), [&](serializer::yaml& inner, const u64 y) {
+				.entry(KEY_VALUE(m_topics[x].selected))
+				.vector(KEY_VALUE(m_topics[x].tasks), [&](serializer::yaml& inner, const u64 y) {
 
-						inner.entry(KEY_VALUE(m_topics[x].tasks[y].title))
-							.entry(KEY_VALUE(m_topics[x].tasks[y].description))
-							.entry(KEY_VALUE(m_topics[x].tasks[y].done));
-					});
+					inner.entry(KEY_VALUE(m_topics[x].tasks[y].title))
+					.entry(KEY_VALUE(m_topics[x].tasks[y].description))
+					.entry(KEY_VALUE(m_topics[x].tasks[y].done));
+				});
 			});
 	}
 

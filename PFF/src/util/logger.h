@@ -9,7 +9,6 @@
 	#define DEBUG_BREAK() __debugbreak()
 #endif // !DEBUG_BREAK
 
-#define PFF			PFF
 #define PROJECT_FOLDER			"PFF"
 
 namespace PFF {

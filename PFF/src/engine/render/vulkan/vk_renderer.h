@@ -65,6 +65,9 @@ namespace PFF::render::vulkan {
 		FORCEINLINE f32 get_aspect_ratio()			{ return 1.f; };			// TODO: finish
 		PFF_DEFAULT_GETTERS(VmaAllocator,			allocator);
 		PFF_DEFAULT_GETTERS(VkDevice,				device);
+		PFF_DEFAULT_GETTER(VkSampler,				texture_sampler);
+		PFF_DEFAULT_GETTER(VkSampler,				default_sampler_linear);
+		PFF_DEFAULT_GETTER(VkSampler,				default_sampler_nearest);
 
 		// !!!!!!!!!!!!!!!! DEV !!!!!!!!!!!!!!!!!!!!!!
 		void setup();

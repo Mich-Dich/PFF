@@ -10,8 +10,8 @@
 #include "engine/layer/imgui_layer.h"
 
 #include "toolkit/todo_list/todo_list.h"
-#include "toolkit/texture_editor.h"
 #include "toolkit/settings/graphics_engine_settings.h"
+#include "toolkit/texture_editor.h"
 
 // TEST 
 #include "application.h"
@@ -42,6 +42,10 @@ namespace PFF {
 
 	void editor_layer::on_detach() {
 
+		for (auto& editor_window : m_editor_windows) 
+			editor_window.release();
+		m_editor_windows.clear();
+
 		//application::get().get_window()->show_titlebar(true);
 		//toolkit::todo::shutdown();					// only need to cal shutdown() to kill todo_list if editor shutsdown
 		//delete s_todo_list;
@@ -71,9 +75,10 @@ namespace PFF {
 		window_general_settings();
 
 		PFF::toolkit::settings::window_graphics_engine();
-		
 		PFF::toolkit::todo::window_todo_list();
-		//PFF::toolkit::texture_editor::window();
+
+		for (const auto& editor_window : m_editor_windows)
+			editor_window->window();
 
 		if (style_editor)
 			ImGui::ShowStyleEditor();
@@ -546,7 +551,8 @@ namespace PFF {
 
 				if (ImGui::MenuItem("Texture Editor", "", nullptr)) {
 
-					m_editor_windows.push_back( toolkit::texture_editor() );
+					LOG(Trace, "Adding Editor Window (texture_editor)");
+					m_editor_windows.emplace_back( std::make_unique<toolkit::texture_editor>() );
 				}
 
 				ImGui::EndMenu();
