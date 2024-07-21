@@ -10,7 +10,6 @@
 #include "engine/events/key_event.h"
 #include "application.h"
 
-#define STB_IMAGE_IMPLEMENTATION
 #include <stb_image.h>
 
 #include "pff_window.h"

@@ -35,6 +35,10 @@
 
 namespace PFF::render::vulkan {
 
+
+	static std::vector<std::vector<std::function<void()>>> s_resource_free_queue;
+
+
 	void deletion_queue:: setup(VkDevice device, VmaAllocator allocator) {
 		m_device = device;
 		m_allocator = allocator;
@@ -154,6 +158,8 @@ namespace PFF::render::vulkan {
 		allocatorInfo.flags = VMA_ALLOCATOR_CREATE_BUFFER_DEVICE_ADDRESS_BIT;
 		vmaCreateAllocator(&allocatorInfo, &m_allocator);
 
+		s_resource_free_queue.resize(FRAME_COUNT);
+
 		// Setup deletion queues
 		m_deletion_queue.setup(m_device, m_allocator);
 		for (int i = 0; i < FRAME_COUNT; i++)
@@ -237,7 +243,7 @@ namespace PFF::render::vulkan {
 		pool_info.maxSets = 1000;
 		pool_info.poolSizeCount = static_cast<u32>(std::size(pool_sizes));
 		pool_info.pPoolSizes = pool_sizes;
-		VK_CHECK(vkCreateDescriptorPool(m_device, &pool_info, nullptr, &m_imgui_desc_pool));
+		VK_CHECK_S(vkCreateDescriptorPool(m_device, &pool_info, nullptr, &m_imgui_desc_pool));
 
 		ImGuiIO& io = ImGui::GetIO();
 		io.BackendFlags |= ImGuiBackendFlags_PlatformHasViewports;
@@ -312,7 +318,7 @@ namespace PFF::render::vulkan {
 		samplerInfo.minLod = 0.0f;
 		samplerInfo.maxLod = 0.0f;
 
-		VK_CHECK(vkCreateSampler(m_device, &samplerInfo, nullptr, &m_texture_sampler));
+		VK_CHECK_S(vkCreateSampler(m_device, &samplerInfo, nullptr, &m_texture_sampler));
 		// }  ===========================================================================================
 
 		m_imugi_image_dset = ImGui_ImplVulkan_AddTexture(m_texture_sampler, m_draw_image.get_image_view(), VK_IMAGE_LAYOUT_GENERAL);
@@ -345,7 +351,14 @@ namespace PFF::render::vulkan {
 			return;
 		
 		//wait until the gpu has finished rendering the last frame. Timeout of 1 second
-		VK_CHECK(vkWaitForFences(m_device, 1, &get_current_frame().render_fence, true, 1000000000));
+		VK_CHECK_S(vkWaitForFences(m_device, 1, &get_current_frame().render_fence, true, 1000000000));
+
+		// Free resources in queue
+		{
+			for (auto& func : s_resource_free_queue[m_frame_number % FRAME_COUNT])
+				func();
+			s_resource_free_queue[m_frame_number % FRAME_COUNT].clear();
+		}
 
 		get_current_frame().deletion_queue.flush();
 		get_current_frame().frame_descriptors.clear_pools(m_device);
@@ -358,24 +371,24 @@ namespace PFF::render::vulkan {
 			return;					// this skips a frame, but it fine
 		}
 
-		VK_CHECK(vkResetFences(m_device, 1, &get_current_frame().render_fence));
+		VK_CHECK_S(vkResetFences(m_device, 1, &get_current_frame().render_fence));
 
 		VkCommandBuffer cmd = get_current_frame().main_command_buffer;
-		VK_CHECK(vkResetCommandBuffer(cmd, 0));
+		VK_CHECK_S(vkResetCommandBuffer(cmd, 0));
 
 		VkCommandBufferBeginInfo cmdBeginInfo = init::command_buffer_begin_info(VK_COMMAND_BUFFER_USAGE_ONE_TIME_SUBMIT_BIT);
 
 		if (m_imgui_initalized && !m_render_swapchain) {
 
-			m_draw_extent.width = std::min(m_draw_image.get_image_extent().width, m_imugi_viewport_size.x) * (u32)m_render_scale;
-			m_draw_extent.height = std::min(m_draw_image.get_image_extent().height, m_imugi_viewport_size.y) * (u32)m_render_scale;
+			m_draw_extent.width = std::min(m_draw_image.get_width(), m_imugi_viewport_size.x) * (u32)m_render_scale;
+			m_draw_extent.height = std::min(m_draw_image.get_height(), m_imugi_viewport_size.y) * (u32)m_render_scale;
 		} else {
 
-			m_draw_extent.width = std::min(m_swapchain_extent.width, m_draw_image.get_image_extent().width) * (u32)m_render_scale;
-			m_draw_extent.height = std::min(m_swapchain_extent.height, m_draw_image.get_image_extent().height) * (u32)m_render_scale;
+			m_draw_extent.width = std::min(m_swapchain_extent.width, m_draw_image.get_width()) * (u32)m_render_scale;
+			m_draw_extent.height = std::min(m_swapchain_extent.height, m_draw_image.get_height()) * (u32)m_render_scale;
 		}
 
-		VK_CHECK(vkBeginCommandBuffer(cmd, &cmdBeginInfo));
+		VK_CHECK_S(vkBeginCommandBuffer(cmd, &cmdBeginInfo));
 
 		util::transition_image(cmd, m_draw_image.get_image(), VK_IMAGE_LAYOUT_UNDEFINED, VK_IMAGE_LAYOUT_GENERAL);
 
@@ -435,8 +448,8 @@ namespace PFF::render::vulkan {
 					viewport_size.y -= ImGui::GetFrameHeight();
 					m_imugi_viewport_size = glm::u32vec2(viewport_size.x, viewport_size.y);
 					ImVec2 viewport_uv = { 
-						std::max(std::min(viewport_size.x / m_draw_image.get_image_extent().width, 1.f), 0.f), 
-						std::max(std::min(viewport_size.y / m_draw_image.get_image_extent().height, 1.f), 0.f)};
+						std::max(std::min(viewport_size.x / m_draw_image.get_width(), 1.f), 0.f),
+						std::max(std::min(viewport_size.y / m_draw_image.get_height(), 1.f), 0.f)};
 					ImGui::Image(m_imugi_image_dset, ImVec2{ viewport_size.x, viewport_size.y }, ImVec2{0,0}, viewport_uv);
 
 					// show debug data
@@ -505,13 +518,13 @@ namespace PFF::render::vulkan {
 		else
 			util::transition_image(cmd, m_swapchain_images[swapchain_image_index], VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL, VK_IMAGE_LAYOUT_PRESENT_SRC_KHR);
 				
-		VK_CHECK(vkEndCommandBuffer(cmd));
+		VK_CHECK_S(vkEndCommandBuffer(cmd));
 
 		VkCommandBufferSubmitInfo cmdinfo = init::command_buffer_submit_info(cmd);
 		VkSemaphoreSubmitInfo waitInfo = init::semaphore_submit_info(VK_PIPELINE_STAGE_2_COLOR_ATTACHMENT_OUTPUT_BIT_KHR, get_current_frame().swapchain_semaphore);
 		VkSemaphoreSubmitInfo signalInfo = init::semaphore_submit_info(VK_PIPELINE_STAGE_2_ALL_GRAPHICS_BIT, get_current_frame().render_semaphore);
 		VkSubmitInfo2 submit = init::submit_info(&cmdinfo, &signalInfo, &waitInfo);
-		VK_CHECK(vkQueueSubmit2(m_graphics_queue, 1, &submit, get_current_frame().render_fence));		// [m_render_fence] will now block until the graphic commands finish execution
+		VK_CHECK_S(vkQueueSubmit2(m_graphics_queue, 1, &submit, get_current_frame().render_fence));		// [m_render_fence] will now block until the graphic commands finish execution
 
 		VkPresentInfoKHR presentInfo = {};
 		presentInfo.sType = VK_STRUCTURE_TYPE_PRESENT_INFO_KHR;
@@ -526,6 +539,9 @@ namespace PFF::render::vulkan {
 			m_resize_nedded = true;
 			resize_swapchain();
 		}
+
+		if (m_frame_number > 184467440737095)
+			m_frame_number = m_frame_number % FRAME_COUNT;
 
 		m_frame_number++;
 	}
@@ -543,46 +559,51 @@ namespace PFF::render::vulkan {
 
 	void vk_renderer::immediate_submit(std::function<void()>&& function) {
 
-		VK_CHECK(vkResetFences(m_device, 1, &m_immFence));
-		VK_CHECK(vkResetCommandBuffer(m_immCommandBuffer, 0));
+		VK_CHECK_S(vkResetFences(m_device, 1, &m_immFence));
+		VK_CHECK_S(vkResetCommandBuffer(m_immCommandBuffer, 0));
 
 		VkCommandBuffer cmd = m_immCommandBuffer;
 		VkCommandBufferBeginInfo cmdBeginInfo = init::command_buffer_begin_info(VK_COMMAND_BUFFER_USAGE_ONE_TIME_SUBMIT_BIT);
-		VK_CHECK(vkBeginCommandBuffer(cmd, &cmdBeginInfo));
+		VK_CHECK_S(vkBeginCommandBuffer(cmd, &cmdBeginInfo));
 
 		function();
 
-		VK_CHECK(vkEndCommandBuffer(cmd));
+		VK_CHECK_S(vkEndCommandBuffer(cmd));
 		VkCommandBufferSubmitInfo cmdinfo = init::command_buffer_submit_info(cmd);
 		VkSubmitInfo2 submit = init::submit_info(&cmdinfo, nullptr, nullptr);
 
 		// submit command buffer to the queue and execute it.
 		//  _renderFence will now block until the graphic commands finish execution
-		VK_CHECK(vkQueueSubmit2(m_graphics_queue, 1, &submit, m_immFence));
-		VK_CHECK(vkWaitForFences(m_device, 1, &m_immFence, true, 9999999999));
+		VK_CHECK_S(vkQueueSubmit2(m_graphics_queue, 1, &submit, m_immFence));
+		VK_CHECK_S(vkWaitForFences(m_device, 1, &m_immFence, true, 9999999999));
 	}
 
 	void vk_renderer::immediate_submit(std::function<void(VkCommandBuffer cmd)>&& function) {
 
-		VK_CHECK(vkResetFences(m_device, 1, &m_immFence));
-		VK_CHECK(vkResetCommandBuffer(m_immCommandBuffer, 0));
+		VK_CHECK_S(vkResetFences(m_device, 1, &m_immFence));
+		VK_CHECK_S(vkResetCommandBuffer(m_immCommandBuffer, 0));
 
 		VkCommandBuffer cmd = m_immCommandBuffer;
 		VkCommandBufferBeginInfo cmdBeginInfo = init::command_buffer_begin_info(VK_COMMAND_BUFFER_USAGE_ONE_TIME_SUBMIT_BIT);
-		VK_CHECK(vkBeginCommandBuffer(cmd, &cmdBeginInfo));
+		VK_CHECK_S(vkBeginCommandBuffer(cmd, &cmdBeginInfo));
 
 		function(cmd);
 
-		VK_CHECK(vkEndCommandBuffer(cmd));
+		VK_CHECK_S(vkEndCommandBuffer(cmd));
 		VkCommandBufferSubmitInfo cmdinfo = init::command_buffer_submit_info(cmd);
 		VkSubmitInfo2 submit = init::submit_info(&cmdinfo, nullptr, nullptr);
 
 		// submit command buffer to the queue and execute it.
 		//  _renderFence will now block until the graphic commands finish execution
-		VK_CHECK(vkQueueSubmit2(m_graphics_queue, 1, &submit, m_immFence));
-		VK_CHECK(vkWaitForFences(m_device, 1, &m_immFence, true, 9999999999));
+		VK_CHECK_S(vkQueueSubmit2(m_graphics_queue, 1, &submit, m_immFence));
+		VK_CHECK_S(vkWaitForFences(m_device, 1, &m_immFence, true, 9999999999));
 	}
-	
+
+	void vk_renderer::submit_resource_free(std::function<void()>&& func) {
+
+		s_resource_free_queue[m_frame_number % FRAME_COUNT].emplace_back(func);
+	}
+
 	// =======================================================================================================================================================================================
 	// PRIVATE FUNCTIONS
 	// =======================================================================================================================================================================================
@@ -708,13 +729,13 @@ namespace PFF::render::vulkan {
 
 		//3 default textures, white, grey, black. 1 pixel each
 		u32 white = glm::packUnorm4x8(glm::vec4(1, 1, 1, 1));
-		m_white_image = image((void*)&white, VkExtent3D{ 1, 1, 1 });
+		m_white_image = image((void*)&white, 1, 1, image_format::RGBA);
 
 		u32 grey = glm::packUnorm4x8(glm::vec4(0.4f, 0.44f, 0.4f, 1));
-		m_black_image = image((void*)&grey, VkExtent3D{ 1, 1, 1 });
+		m_black_image = image((void*)&grey, 1, 1, image_format::RGBA);
 
 		u32 black = glm::packUnorm4x8(glm::vec4(0, 0, 0, 1));	// TODO: chnage A to 1
-		m_grey_image = image((void*)&black, VkExtent3D{ 1, 1, 1 });
+		m_grey_image = image((void*)&black, 1, 1, image_format::RGBA);
 
 		//checkerboard image
 		const int EDGE_LENGTH = 2;
@@ -723,7 +744,7 @@ namespace PFF::render::vulkan {
 		for (int x = 0; x < EDGE_LENGTH; x++)
 			for (int y = 0; y < EDGE_LENGTH; y++)
 				pixels[y * EDGE_LENGTH + x] = ((x % EDGE_LENGTH) ^ (y % EDGE_LENGTH)) ? grey : color;
-		m_error_checkerboard_image = image(pixels.data(), VkExtent3D{ EDGE_LENGTH, EDGE_LENGTH, 1 });
+		m_error_checkerboard_image = image(pixels.data(), EDGE_LENGTH, EDGE_LENGTH, image_format::RGBA);
 
 		VkSamplerCreateInfo sampler{};
 		sampler.sType = VK_STRUCTURE_TYPE_SAMPLER_CREATE_INFO;
@@ -777,7 +798,7 @@ namespace PFF::render::vulkan {
 
 		vmaCreateImage(m_allocator, &image_CI, &image_alloc_CI, m_draw_image.get_image_pointer(), m_draw_image.get_allocation_pointer(), nullptr);						// allocate and create the image
 		VkImageViewCreateInfo view_CI = init::imageview_create_info(m_draw_image.get_image_format(), m_draw_image.get_image(), VK_IMAGE_ASPECT_COLOR_BIT);	// build a image-view for the draw image to use for rendering
-		VK_CHECK(vkCreateImageView(m_device, &view_CI, nullptr, m_draw_image.get_image_view_pointer()));
+		VK_CHECK_S(vkCreateImageView(m_device, &view_CI, nullptr, m_draw_image.get_image_view_pointer()));
 
 		// =========================================== create depth_image ===========================================
 		
@@ -790,7 +811,7 @@ namespace PFF::render::vulkan {
 		
 		vmaCreateImage(m_allocator, &dimg_info, &image_alloc_CI, m_depth_image.get_image_pointer(), m_depth_image.get_allocation_pointer(), nullptr);
 		VkImageViewCreateInfo dview_info = init::imageview_create_info(m_depth_image.get_image_format(), m_depth_image.get_image(), VK_IMAGE_ASPECT_DEPTH_BIT);
-		VK_CHECK(vkCreateImageView(m_device, &dview_info, nullptr, m_depth_image.get_image_view_pointer()));
+		VK_CHECK_S(vkCreateImageView(m_device, &dview_info, nullptr, m_depth_image.get_image_view_pointer()));
 
 		m_deletion_queue.push_pointer(&m_draw_image);
 		m_deletion_queue.push_pointer(&m_depth_image);
@@ -805,14 +826,14 @@ namespace PFF::render::vulkan {
 
 		for (int i = 0; i < FRAME_COUNT; i++) {
 
-			VK_CHECK(vkCreateCommandPool(m_device, &command_pool_CI, nullptr, &m_frames[i].command_pool));
+			VK_CHECK_S(vkCreateCommandPool(m_device, &command_pool_CI, nullptr, &m_frames[i].command_pool));
 			VkCommandBufferAllocateInfo command_alloc_I = init::command_buffer_allocate_info(m_frames[i].command_pool, 1);			// allocate default command buffer used for rendering
-			VK_CHECK(vkAllocateCommandBuffers(m_device, &command_alloc_I, &m_frames[i].main_command_buffer));
+			VK_CHECK_S(vkAllocateCommandBuffers(m_device, &command_alloc_I, &m_frames[i].main_command_buffer));
 		}
 
-		VK_CHECK(vkCreateCommandPool(m_device, &command_pool_CI, nullptr, &m_immCommandPool));
+		VK_CHECK_S(vkCreateCommandPool(m_device, &command_pool_CI, nullptr, &m_immCommandPool));
 		VkCommandBufferAllocateInfo cmdAllocInfo = init::command_buffer_allocate_info(m_immCommandPool, 1);
-		VK_CHECK(vkAllocateCommandBuffers(m_device, &cmdAllocInfo, &m_immCommandBuffer));
+		VK_CHECK_S(vkAllocateCommandBuffers(m_device, &cmdAllocInfo, &m_immCommandBuffer));
 
 		m_deletion_queue.push_pointer(m_immCommandPool);
 	}
@@ -827,12 +848,12 @@ namespace PFF::render::vulkan {
 
 		for (int i = 0; i < FRAME_COUNT; i++) {
 
-			VK_CHECK(vkCreateFence(m_device, &fence_CI, nullptr, &m_frames[i].render_fence));
-			VK_CHECK(vkCreateSemaphore(m_device, &semaphore_CI, nullptr, &m_frames[i].swapchain_semaphore));
-			VK_CHECK(vkCreateSemaphore(m_device, &semaphore_CI, nullptr, &m_frames[i].render_semaphore));
+			VK_CHECK_S(vkCreateFence(m_device, &fence_CI, nullptr, &m_frames[i].render_fence));
+			VK_CHECK_S(vkCreateSemaphore(m_device, &semaphore_CI, nullptr, &m_frames[i].swapchain_semaphore));
+			VK_CHECK_S(vkCreateSemaphore(m_device, &semaphore_CI, nullptr, &m_frames[i].render_semaphore));
 		}
 
-		VK_CHECK(vkCreateFence(m_device, &fence_CI, nullptr, &m_immFence));
+		VK_CHECK_S(vkCreateFence(m_device, &fence_CI, nullptr, &m_immFence));
 		m_deletion_queue.push_pointer(m_immFence);
 	}
 
@@ -925,7 +946,7 @@ namespace PFF::render::vulkan {
 		computeLayout_CI.setLayoutCount = 1;
 		computeLayout_CI.pPushConstantRanges = &pushConstant;
 		computeLayout_CI.pushConstantRangeCount = 1;
-		VK_CHECK(vkCreatePipelineLayout(m_device, &computeLayout_CI, nullptr, &m_gradient_pipeline_layout));
+		VK_CHECK_S(vkCreatePipelineLayout(m_device, &computeLayout_CI, nullptr, &m_gradient_pipeline_layout));
 
 		VkPipelineShaderStageCreateInfo stageinfo{};
 		stageinfo.sType = VK_STRUCTURE_TYPE_PIPELINE_SHADER_STAGE_CREATE_INFO;
@@ -951,7 +972,7 @@ namespace PFF::render::vulkan {
 		grid.layout = m_gradient_pipeline_layout;
 		grid.name = "sky";
 
-		VK_CHECK(vkCreateComputePipelines(m_device, VK_NULL_HANDLE, 1, &compute_pipeline_CI, nullptr, &grid.pipeline));
+		VK_CHECK_S(vkCreateComputePipelines(m_device, VK_NULL_HANDLE, 1, &compute_pipeline_CI, nullptr, &grid.pipeline));
 		m_background_effects.emplace_back(grid);
 		vkDestroyShaderModule(m_device, grid_shader, nullptr);
 
@@ -968,7 +989,7 @@ namespace PFF::render::vulkan {
 		gradient.data.data1 = glm::vec4(1.f, 0.f, 0.f, 1.f);
 		gradient.data.data2 = glm::vec4(0.f, 0.f, 1.f, 1.f);
 
-		VK_CHECK(vkCreateComputePipelines(m_device, VK_NULL_HANDLE, 1, &compute_pipeline_CI, nullptr, &gradient.pipeline));
+		VK_CHECK_S(vkCreateComputePipelines(m_device, VK_NULL_HANDLE, 1, &compute_pipeline_CI, nullptr, &gradient.pipeline));
 		m_background_effects.emplace_back(gradient);
 		vkDestroyShaderModule(m_device, gradient_shader, nullptr);
 
@@ -985,7 +1006,7 @@ namespace PFF::render::vulkan {
 		sky.data.data1 = glm::vec4(.1f, .2f, .4f, .99f);
 
 		//change the shader module only
-		VK_CHECK(vkCreateComputePipelines(m_device, VK_NULL_HANDLE, 1, &compute_pipeline_CI, nullptr, &sky.pipeline));
+		VK_CHECK_S(vkCreateComputePipelines(m_device, VK_NULL_HANDLE, 1, &compute_pipeline_CI, nullptr, &sky.pipeline));
 		m_background_effects.emplace_back(sky);
 		vkDestroyShaderModule(m_device, sky_shader, nullptr);
 
@@ -1018,7 +1039,7 @@ namespace PFF::render::vulkan {
 		pipeline_layout_info.pushConstantRangeCount = 1;
 		pipeline_layout_info.pSetLayouts = &m_single_image_descriptor_layout;
 		pipeline_layout_info.setLayoutCount = 1;
-		VK_CHECK(vkCreatePipelineLayout(m_device, &pipeline_layout_info, nullptr, &m_mesh_pipeline_layout));
+		VK_CHECK_S(vkCreatePipelineLayout(m_device, &pipeline_layout_info, nullptr, &m_mesh_pipeline_layout));
 #else
 		VkShaderModule mesh_frag_shader;
 		CORE_ASSERT(util::load_shader_module("../PFF/shaders/colored_triangle.frag.spv", m_device, &mesh_frag_shader), "", "Error when building the triangle fragment shader module");
@@ -1034,7 +1055,7 @@ namespace PFF::render::vulkan {
 		VkPipelineLayoutCreateInfo pipeline_layout_info = init::pipeline_layout_create_info();
 		pipeline_layout_info.pPushConstantRanges = &push_constant_range;
 		pipeline_layout_info.pushConstantRangeCount = 1;
-		VK_CHECK(vkCreatePipelineLayout(m_device, &pipeline_layout_info, nullptr, &m_mesh_pipeline_layout));
+		VK_CHECK_S(vkCreatePipelineLayout(m_device, &pipeline_layout_info, nullptr, &m_mesh_pipeline_layout));
 #endif
 
 		m_mesh_pipeline = pipeline_builder()
@@ -1235,7 +1256,7 @@ namespace PFF::render::vulkan {
 		vmaalloc_CI.flags = VMA_ALLOCATION_CREATE_MAPPED_BIT;
 		vk_buffer new_buffer;
 
-		VK_CHECK(vmaCreateBuffer(m_allocator, &buffer_CI, &vmaalloc_CI, &new_buffer.buffer, &new_buffer.allocation, &new_buffer.info));
+		VK_CHECK_S(vmaCreateBuffer(m_allocator, &buffer_CI, &vmaalloc_CI, &new_buffer.buffer, &new_buffer.allocation, &new_buffer.info));
 		return new_buffer;
 	}
 

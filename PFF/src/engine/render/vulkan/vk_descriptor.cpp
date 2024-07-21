@@ -34,7 +34,7 @@ namespace PFF::render::vulkan {
         info.flags = 0;
 
         VkDescriptorSetLayout set;
-        VK_CHECK(vkCreateDescriptorSetLayout(device, &info, nullptr, &set));
+        VK_CHECK_S(vkCreateDescriptorSetLayout(device, &info, nullptr, &set));
         return set;
     }
 
@@ -73,7 +73,7 @@ namespace PFF::render::vulkan {
         alloc_I.pSetLayouts = &layout;
 
         VkDescriptorSet ds;
-        VK_CHECK(vkAllocateDescriptorSets(device, &alloc_I, &ds));
+        VK_CHECK_S(vkAllocateDescriptorSets(device, &alloc_I, &ds));
         return ds;
     }
 
@@ -178,7 +178,7 @@ namespace PFF::render::vulkan {
             full_pools.push_back(poolToUse);
             poolToUse = get_pool(device);
             descriptor_set_AI.descriptorPool = poolToUse;
-            VK_CHECK(vkAllocateDescriptorSets(device, &descriptor_set_AI, &ds));    // If the second time fails too stuff is completely broken
+            VK_CHECK_S(vkAllocateDescriptorSets(device, &descriptor_set_AI, &ds));    // If the second time fails too stuff is completely broken
         }
 
         ready_pools.push_back(poolToUse);

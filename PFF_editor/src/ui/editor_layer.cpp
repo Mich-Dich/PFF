@@ -42,8 +42,8 @@ namespace PFF {
 
 	void editor_layer::on_detach() {
 
-		for (auto& editor_window : m_editor_windows) 
-			editor_window.release();
+		for (auto& editor_window : m_editor_windows)
+			editor_window.reset();
 		m_editor_windows.clear();
 
 		//application::get().get_window()->show_titlebar(true);
@@ -77,8 +77,15 @@ namespace PFF {
 		PFF::toolkit::settings::window_graphics_engine();
 		PFF::toolkit::todo::window_todo_list();
 
-		for (const auto& editor_window : m_editor_windows)
-			editor_window->window();
+		// First pass to mark items for removal
+		auto it = std::remove_if(m_editor_windows.begin(), m_editor_windows.end(),
+			[](const std::unique_ptr<PFF::editor_window>& editor_window) {
+				editor_window->window();
+				return editor_window->should_close();
+			});
+
+		// Erase the removed items
+		m_editor_windows.erase(it, m_editor_windows.end());
 
 		if (style_editor)
 			ImGui::ShowStyleEditor();

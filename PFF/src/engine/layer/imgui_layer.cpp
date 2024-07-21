@@ -79,8 +79,8 @@ namespace PFF::UI {
 	imgui_layer::imgui_layer() : layer("imgui_layer") { 
 		
 		CORE_LOG_INIT(); 
-				
-		main_color = { .03f,	.72f,	.03f,	1.f };
+		
+		main_color = { .0f,	.4088f,	1.0f,	1.f };
 		enable_window_forder = false;
 		highlited_window_bg = LERP_GRAY(0.17f);
 		main_titlebar_color = LERP_MAIN_COLOR_DARK(.5f);

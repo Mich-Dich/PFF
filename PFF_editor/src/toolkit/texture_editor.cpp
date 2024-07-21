@@ -20,12 +20,12 @@ namespace PFF::toolkit {
 		for (int x = 0; x < EDGE_LENGTH; x++)
 			for (int y = 0; y < EDGE_LENGTH; y++)
 				pixels[y * EDGE_LENGTH + x] = ((x % EDGE_LENGTH) ^ (y % EDGE_LENGTH)) ? grey : color;
-		m_image = image(pixels.data(), VkExtent3D{ EDGE_LENGTH, EDGE_LENGTH, 1 });
+		m_image = image(pixels.data(), EDGE_LENGTH, EDGE_LENGTH, image_format::RGBA);
 	}
 	
 	texture_editor::~texture_editor() {
 	
-		LOG(Info, "CLOSING EDITOR WINDOW")
+		CORE_LOG_SHUTDOWN();
 	}
 
 	void texture_editor::window() {

@@ -20,6 +20,8 @@ namespace PFF {
 		virtual ~editor_window() {};
 		virtual void window() {};
 
+		FORCEINLINE bool should_close() const { return !show_window; }
+
 	protected:
 		void make_window_name(const char* base_name);
 		std::string window_name{};

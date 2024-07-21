@@ -8,32 +8,44 @@
 
 namespace PFF {
 
+    enum class PFF_API image_format {
+        None = 0,
+        RGBA,
+        RGBA32F
+    };
+
     class PFF_API image {
     public:
 
 #if defined PFF_RENDER_API_VULKAN
 
         image() = default;
-        image(void* data, VkExtent3D size, VkFormat format = VK_FORMAT_R8G8B8A8_UNORM, VkImageUsageFlags usage = VK_IMAGE_USAGE_SAMPLED_BIT, bool mipmapped = false);
+        image(void* data, VkExtent3D size, image_format format, bool mipmapped = false);
+        image(void* data, u32 width, u32 height, image_format format, bool mipmapped = false);
         ~image();
-
-        void allocate_image(VkExtent3D size, VkFormat format, VkImageUsageFlags usage, bool mipmapped = false);
 
         PFF_DEFAULT_GETTER_SETTER_ALL(VkImage,          image);
         PFF_DEFAULT_GETTER_SETTER_ALL(VkImageView,      image_view);
         PFF_DEFAULT_GETTER_SETTER_ALL(VmaAllocation,    allocation);
         PFF_DEFAULT_GETTER_SETTER_ALL(VkExtent3D,       image_extent);
         PFF_DEFAULT_GETTER_SETTER_ALL(VkFormat,         image_format);
+        FORCEINLINE u32 get_width()                     const { return m_image_extent.width; }
+        FORCEINLINE u32 get_height()                    const { return m_image_extent.height; }
         VkDescriptorSet get_descriptor_set();
 
     private:
-      
+
+        void allocate_memory(void* data, VkExtent3D size, image_format format, bool mipmapped = false, VkImageUsageFlags usage = VK_IMAGE_USAGE_SAMPLED_BIT);
+        void allocate_image(VkExtent3D size, VkFormat format, VkImageUsageFlags usage, bool mipmapped = false);
+
         VkImage             m_image = nullptr;
         VkImageView         m_image_view = nullptr;
         VmaAllocation       m_allocation = nullptr;
         VkExtent3D          m_image_extent{};
         VkFormat            m_image_format{};
         VkDescriptorSet     m_descriptor_set = nullptr;
+        //VkSampler           m_sampler = nullptr;
+
 #endif
 
     };

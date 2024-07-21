@@ -41,4 +41,5 @@ struct GPU_draw_push_constants {
 };
 
 
-#define VK_CHECK(expr)		CORE_ASSERT_S(expr == VK_SUCCESS)
+#define VK_CHECK_S(expr)		                        CORE_ASSERT_S(expr == VK_SUCCESS)
+#define VK_CHECK(expr, successMsg, failureMsg)		    CORE_ASSERT(expr == VK_SUCCESS)

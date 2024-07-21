@@ -25,11 +25,13 @@ namespace PFF {
 	}
 
 	PFF_editor::~PFF_editor() {
-
+	
 		serialize(serializer::option::save_to_file);
 
 		pop_overlay(m_editor_layer);
 		delete m_editor_layer;
+
+		CORE_LOG_SHUTDOWN();
 	}
 
 	bool PFF_editor::init() { return true; }

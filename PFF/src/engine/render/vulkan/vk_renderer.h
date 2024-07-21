@@ -65,6 +65,9 @@ namespace PFF::render::vulkan {
 		FORCEINLINE f32 get_aspect_ratio()			{ return 1.f; };			// TODO: finish
 		PFF_DEFAULT_GETTERS(VmaAllocator,			allocator);
 		PFF_DEFAULT_GETTERS(VkDevice,				device);
+
+		PFF_DEFAULT_GETTERS(VkPhysicalDevice,		chosenGPU);
+
 		PFF_DEFAULT_GETTER(VkSampler,				texture_sampler);
 		PFF_DEFAULT_GETTER(VkSampler,				default_sampler_linear);
 		PFF_DEFAULT_GETTER(VkSampler,				default_sampler_nearest);
@@ -87,6 +90,9 @@ namespace PFF::render::vulkan {
 		// --------------- util ----------------
 		void immediate_submit(std::function<void()>&& function) override;
 		void immediate_submit(std::function<void(VkCommandBuffer cmd)>&& function); // Improvement => run this on a different queue than the graphics_queue, so it can overlap the execution with the main render loop.
+
+		void submit_resource_free(std::function<void()>&& func);
+
 		void enable_vsync(bool enable) override {}							// TODO: implement (recreate swapchain with new VK_PRESENT_MODE_XXX )
 		void* get_rendered_image() override { return (void*)m_imugi_image_dset; }
 
@@ -137,7 +143,7 @@ namespace PFF::render::vulkan {
 		GPU_mesh_buffers upload_mesh(std::vector<u32> indices, std::vector<PFF::geometry::vertex> vertices);
 
 		bool m_is_initialized = false;
-		int m_frame_number = 0;
+		u64 m_frame_number = 0;
 		ref<pff_window> m_window{};
 		ref<PFF::layer_stack> m_layer_stack{};
 
