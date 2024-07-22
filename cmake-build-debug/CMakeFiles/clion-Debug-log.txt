@@ -1,0 +1,15 @@
+"C:\Program Files\JetBrains\CLion 2024.1.4\bin\cmake\win\x64\bin\cmake.exe" -DCMAKE_BUILD_TYPE=Debug "-DCMAKE_MAKE_PROGRAM=C:/Program Files/JetBrains/CLion 2024.1.4/bin/ninja/win/x64/ninja.exe" -G Ninja -S C:\Users\MariusPC\CLionProjects\PFF -B C:\Users\MariusPC\CLionProjects\PFF\cmake-build-debug
+-- Performing Test CMAKE_HAVE_LIBC_PTHREAD
+-- Performing Test CMAKE_HAVE_LIBC_PTHREAD - Success
+-- Found Threads: TRUE  
+-- Could NOT find Doxygen (missing: DOXYGEN_EXECUTABLE) 
+-- Including Win32 support
+-- Looking for dinput.h
+-- Looking for dinput.h - found
+-- Looking for xinput.h
+-- Looking for xinput.h - found
+-- Could NOT find simdjson (missing: simdjson_DIR)
+-- fastgltf: Found simdjson (Version 3.7.0)
+-- Configuring done (2.3s)
+-- Generating done (0.0s)
+-- Build files have been written to: C:/Users/MariusPC/CLionProjects/PFF/cmake-build-debug

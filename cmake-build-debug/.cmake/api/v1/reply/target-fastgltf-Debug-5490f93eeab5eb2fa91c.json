@@ -1,0 +1,307 @@
+{
+	"archive" : {},
+	"artifacts" : 
+	[
+		{
+			"path" : "PFF/vendor/fastgltf/libfastgltf.a"
+		}
+	],
+	"backtrace" : 1,
+	"backtraceGraph" : 
+	{
+		"commands" : 
+		[
+			"add_library",
+			"install",
+			"target_compile_options",
+			"fastgltf_compiler_flags",
+			"fastgltf_enable_debug_inlining",
+			"target_compile_definitions",
+			"target_include_directories",
+			"target_sources",
+			"fastgltf_add_source_directory"
+		],
+		"files" : 
+		[
+			"PFF/vendor/fastgltf/CMakeLists.txt",
+			"PFF/vendor/fastgltf/cmake/compiler_flags.cmake",
+			"PFF/vendor/fastgltf/cmake/add_source_directory.cmake"
+		],
+		"nodes" : 
+		[
+			{
+				"file" : 0
+			},
+			{
+				"command" : 0,
+				"file" : 0,
+				"line" : 32,
+				"parent" : 0
+			},
+			{
+				"command" : 1,
+				"file" : 0,
+				"line" : 114,
+				"parent" : 0
+			},
+			{
+				"command" : 3,
+				"file" : 0,
+				"line" : 37,
+				"parent" : 0
+			},
+			{
+				"command" : 2,
+				"file" : 1,
+				"line" : 16,
+				"parent" : 3
+			},
+			{
+				"command" : 2,
+				"file" : 1,
+				"line" : 24,
+				"parent" : 3
+			},
+			{
+				"command" : 4,
+				"file" : 0,
+				"line" : 38,
+				"parent" : 0
+			},
+			{
+				"command" : 2,
+				"file" : 1,
+				"line" : 35,
+				"parent" : 6
+			},
+			{
+				"command" : 5,
+				"file" : 0,
+				"line" : 102,
+				"parent" : 0
+			},
+			{
+				"command" : 5,
+				"file" : 0,
+				"line" : 101,
+				"parent" : 0
+			},
+			{
+				"command" : 5,
+				"file" : 0,
+				"line" : 103,
+				"parent" : 0
+			},
+			{
+				"command" : 5,
+				"file" : 0,
+				"line" : 100,
+				"parent" : 0
+			},
+			{
+				"command" : 5,
+				"file" : 0,
+				"line" : 97,
+				"parent" : 0
+			},
+			{
+				"command" : 6,
+				"file" : 0,
+				"line" : 40,
+				"parent" : 0
+			},
+			{
+				"command" : 6,
+				"file" : 0,
+				"line" : 92,
+				"parent" : 0
+			},
+			{
+				"command" : 8,
+				"file" : 0,
+				"line" : 91,
+				"parent" : 0
+			},
+			{
+				"command" : 7,
+				"file" : 2,
+				"line" : 11,
+				"parent" : 15
+			},
+			{
+				"command" : 7,
+				"file" : 2,
+				"line" : 14,
+				"parent" : 15
+			}
+		]
+	},
+	"compileGroups" : 
+	[
+		{
+			"compileCommandFragments" : 
+			[
+				{
+					"fragment" : "-g -fdiagnostics-color=always"
+				},
+				{
+					"backtrace" : 4,
+					"fragment" : "-Og"
+				},
+				{
+					"backtrace" : 5,
+					"fragment" : "-flax-vector-conversions"
+				},
+				{
+					"backtrace" : 7,
+					"fragment" : "-finline-functions"
+				}
+			],
+			"defines" : 
+			[
+				{
+					"backtrace" : 8,
+					"define" : "FASTGLTF_DISABLE_CUSTOM_MEMORY_POOL=0"
+				},
+				{
+					"backtrace" : 9,
+					"define" : "FASTGLTF_ENABLE_DEPRECATED_EXT=0"
+				},
+				{
+					"backtrace" : 10,
+					"define" : "FASTGLTF_USE_64BIT_FLOAT=0"
+				},
+				{
+					"backtrace" : 11,
+					"define" : "FASTGLTF_USE_CUSTOM_SMALLVECTOR=0"
+				},
+				{
+					"backtrace" : 12,
+					"define" : "SIMDJSON_TARGET_VERSION=\"3.7.0\""
+				}
+			],
+			"includes" : 
+			[
+				{
+					"backtrace" : 13,
+					"path" : "C:/Users/MariusPC/CLionProjects/PFF/PFF/vendor/fastgltf/include"
+				},
+				{
+					"backtrace" : 14,
+					"path" : "C:/Users/MariusPC/CLionProjects/PFF/PFF/vendor/fastgltf/deps/simdjson"
+				}
+			],
+			"language" : "CXX",
+			"sourceIndexes" : 
+			[
+				0,
+				1,
+				8
+			]
+		}
+	],
+	"id" : "fastgltf::@fbc01253de890b66def5",
+	"install" : 
+	{
+		"destinations" : 
+		[
+			{
+				"backtrace" : 2,
+				"path" : "lib"
+			}
+		],
+		"prefix" : 
+		{
+			"path" : "C:/Program Files (x86)/PFF"
+		}
+	},
+	"name" : "fastgltf",
+	"nameOnDisk" : "libfastgltf.a",
+	"paths" : 
+	{
+		"build" : "PFF/vendor/fastgltf",
+		"source" : "PFF/vendor/fastgltf"
+	},
+	"sourceGroups" : 
+	[
+		{
+			"name" : "Source Files",
+			"sourceIndexes" : 
+			[
+				0,
+				1,
+				8
+			]
+		},
+		{
+			"name" : "Header Files",
+			"sourceIndexes" : 
+			[
+				2,
+				3,
+				4,
+				5,
+				6,
+				7,
+				9
+			]
+		}
+	],
+	"sources" : 
+	[
+		{
+			"backtrace" : 1,
+			"compileGroupIndex" : 0,
+			"path" : "PFF/vendor/fastgltf/src/fastgltf.cpp",
+			"sourceGroupIndex" : 0
+		},
+		{
+			"backtrace" : 1,
+			"compileGroupIndex" : 0,
+			"path" : "PFF/vendor/fastgltf/src/base64.cpp",
+			"sourceGroupIndex" : 0
+		},
+		{
+			"backtrace" : 1,
+			"path" : "PFF/vendor/fastgltf/include/fastgltf/base64.hpp",
+			"sourceGroupIndex" : 1
+		},
+		{
+			"backtrace" : 1,
+			"path" : "PFF/vendor/fastgltf/include/fastgltf/glm_element_traits.hpp",
+			"sourceGroupIndex" : 1
+		},
+		{
+			"backtrace" : 1,
+			"path" : "PFF/vendor/fastgltf/include/fastgltf/core.hpp",
+			"sourceGroupIndex" : 1
+		},
+		{
+			"backtrace" : 1,
+			"path" : "PFF/vendor/fastgltf/include/fastgltf/tools.hpp",
+			"sourceGroupIndex" : 1
+		},
+		{
+			"backtrace" : 1,
+			"path" : "PFF/vendor/fastgltf/include/fastgltf/types.hpp",
+			"sourceGroupIndex" : 1
+		},
+		{
+			"backtrace" : 1,
+			"path" : "PFF/vendor/fastgltf/include/fastgltf/util.hpp",
+			"sourceGroupIndex" : 1
+		},
+		{
+			"backtrace" : 16,
+			"compileGroupIndex" : 0,
+			"path" : "PFF/vendor/fastgltf/deps/simdjson/simdjson.cpp",
+			"sourceGroupIndex" : 0
+		},
+		{
+			"backtrace" : 17,
+			"path" : "PFF/vendor/fastgltf/deps/simdjson/simdjson.h",
+			"sourceGroupIndex" : 1
+		}
+	],
+	"type" : "STATIC_LIBRARY"
+}
