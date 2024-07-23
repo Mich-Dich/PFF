@@ -1,0 +1,268 @@
+{
+	"configurations" : 
+	[
+		{
+			"directories" : 
+			[
+				{
+					"build" : ".",
+					"childIndexes" : 
+					[
+						1,
+						6
+					],
+					"hasInstallRule" : true,
+					"jsonFile" : "directory-.-Debug-d0094a50bb2071803777.json",
+					"minimumCMakeVersion" : 
+					{
+						"string" : "3.8"
+					},
+					"projectIndex" : 0,
+					"source" : "."
+				},
+				{
+					"build" : "PFF",
+					"childIndexes" : 
+					[
+						2,
+						4,
+						5
+					],
+					"hasInstallRule" : true,
+					"jsonFile" : "directory-PFF-Debug-4b59f112729f1e060894.json",
+					"minimumCMakeVersion" : 
+					{
+						"string" : "3.8"
+					},
+					"parentIndex" : 0,
+					"projectIndex" : 0,
+					"source" : "PFF",
+					"targetIndexes" : 
+					[
+						0
+					]
+				},
+				{
+					"build" : "PFF/vendor/glfw",
+					"childIndexes" : 
+					[
+						3
+					],
+					"hasInstallRule" : true,
+					"jsonFile" : "directory-PFF.vendor.glfw-Debug-a2dd9e3c1c4e07624abc.json",
+					"minimumCMakeVersion" : 
+					{
+						"string" : "3.4"
+					},
+					"parentIndex" : 1,
+					"projectIndex" : 1,
+					"source" : "PFF/vendor/glfw",
+					"targetIndexes" : 
+					[
+						5
+					]
+				},
+				{
+					"build" : "PFF/vendor/glfw/src",
+					"hasInstallRule" : true,
+					"jsonFile" : "directory-PFF.vendor.glfw.src-Debug-0739fd09431863496999.json",
+					"minimumCMakeVersion" : 
+					{
+						"string" : "3.4"
+					},
+					"parentIndex" : 2,
+					"projectIndex" : 1,
+					"source" : "PFF/vendor/glfw/src",
+					"targetIndexes" : 
+					[
+						3,
+						6
+					]
+				},
+				{
+					"build" : "PFF/vendor/imgui",
+					"jsonFile" : "directory-PFF.vendor.imgui-Debug-8f12071c2095059e1bc4.json",
+					"minimumCMakeVersion" : 
+					{
+						"string" : "3.10"
+					},
+					"parentIndex" : 1,
+					"projectIndex" : 2,
+					"source" : "PFF/vendor/imgui",
+					"targetIndexes" : 
+					[
+						4
+					]
+				},
+				{
+					"build" : "PFF/vendor/fastgltf",
+					"hasInstallRule" : true,
+					"jsonFile" : "directory-PFF.vendor.fastgltf-Debug-2b24c7dce3663e23ccc8.json",
+					"minimumCMakeVersion" : 
+					{
+						"string" : "3.12"
+					},
+					"parentIndex" : 1,
+					"projectIndex" : 3,
+					"source" : "PFF/vendor/fastgltf",
+					"targetIndexes" : 
+					[
+						2
+					]
+				},
+				{
+					"build" : "PFF_editor",
+					"jsonFile" : "directory-PFF_editor-Debug-f9719241183ae647a5b4.json",
+					"minimumCMakeVersion" : 
+					{
+						"string" : "3.8"
+					},
+					"parentIndex" : 0,
+					"projectIndex" : 4,
+					"source" : "PFF_editor",
+					"targetIndexes" : 
+					[
+						1
+					]
+				}
+			],
+			"name" : "Debug",
+			"projects" : 
+			[
+				{
+					"childIndexes" : 
+					[
+						1,
+						2,
+						3,
+						4
+					],
+					"directoryIndexes" : 
+					[
+						0,
+						1
+					],
+					"name" : "PFF",
+					"targetIndexes" : 
+					[
+						0
+					]
+				},
+				{
+					"directoryIndexes" : 
+					[
+						2,
+						3
+					],
+					"name" : "GLFW",
+					"parentIndex" : 0,
+					"targetIndexes" : 
+					[
+						3,
+						5,
+						6
+					]
+				},
+				{
+					"directoryIndexes" : 
+					[
+						4
+					],
+					"name" : "imgui",
+					"parentIndex" : 0,
+					"targetIndexes" : 
+					[
+						4
+					]
+				},
+				{
+					"directoryIndexes" : 
+					[
+						5
+					],
+					"name" : "fastgltf",
+					"parentIndex" : 0,
+					"targetIndexes" : 
+					[
+						2
+					]
+				},
+				{
+					"directoryIndexes" : 
+					[
+						6
+					],
+					"name" : "PFF_editor",
+					"parentIndex" : 0,
+					"targetIndexes" : 
+					[
+						1
+					]
+				}
+			],
+			"targets" : 
+			[
+				{
+					"directoryIndex" : 1,
+					"id" : "PFF::@d834ae9919c0d734dfe7",
+					"jsonFile" : "target-PFF-Debug-48563f77a6aed2ae9597.json",
+					"name" : "PFF",
+					"projectIndex" : 0
+				},
+				{
+					"directoryIndex" : 6,
+					"id" : "PFF_editor::@6667e5d771d87b8438cf",
+					"jsonFile" : "target-PFF_editor-Debug-3b224844ec97148d7c1e.json",
+					"name" : "PFF_editor",
+					"projectIndex" : 4
+				},
+				{
+					"directoryIndex" : 5,
+					"id" : "fastgltf::@fbc01253de890b66def5",
+					"jsonFile" : "target-fastgltf-Debug-63dc6f0d5e36bf46993c.json",
+					"name" : "fastgltf",
+					"projectIndex" : 3
+				},
+				{
+					"directoryIndex" : 3,
+					"id" : "glfw::@3178b7fcc859b22e01ba",
+					"jsonFile" : "target-glfw-Debug-fca104579e46b3388716.json",
+					"name" : "glfw",
+					"projectIndex" : 1
+				},
+				{
+					"directoryIndex" : 4,
+					"id" : "imgui::@51d7c2bdb2ec2a76b1b4",
+					"jsonFile" : "target-imgui-Debug-c8b8832df906f552e98f.json",
+					"name" : "imgui",
+					"projectIndex" : 2
+				},
+				{
+					"directoryIndex" : 2,
+					"id" : "uninstall::@77a8f09441b53d3f8dfc",
+					"jsonFile" : "target-uninstall-Debug-f136d47cd3c91f3f3e0e.json",
+					"name" : "uninstall",
+					"projectIndex" : 1
+				},
+				{
+					"directoryIndex" : 3,
+					"id" : "update_mappings::@3178b7fcc859b22e01ba",
+					"jsonFile" : "target-update_mappings-Debug-679071eb21d72ca855c8.json",
+					"name" : "update_mappings",
+					"projectIndex" : 1
+				}
+			]
+		}
+	],
+	"kind" : "codemodel",
+	"paths" : 
+	{
+		"build" : "C:/Users/MariusPC/Documents/PFF/out/build/x64-Debug",
+		"source" : "C:/Users/MariusPC/Documents/PFF"
+	},
+	"version" : 
+	{
+		"major" : 2,
+		"minor" : 6
+	}
+}
