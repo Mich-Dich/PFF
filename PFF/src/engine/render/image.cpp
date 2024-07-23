@@ -73,10 +73,24 @@ namespace PFF {
 
 	image::~image() {
 
-		CORE_LOG_SHUTDOWN();
-		//vkDestroySampler(GET_RENDERER->get_device(), m_sampler, nullptr);
 		//vkDestroyImageView(GET_RENDERER->get_device(), get_image_view(), nullptr);
 		//vmaDestroyImage(GET_RENDERER->get_allocator(), get_image(), get_allocation());
+
+		//if (m_is_initalized) {
+
+		//	CORE_LOG(Debug, "m_image_view: " << m_image_view << " m_image: " << m_image << " m_allocation: " << m_allocation);
+		//	GET_RENDERER->submit_resource_free([&] {
+
+		//		vkDestroyImageView(GET_RENDERER->get_device(), m_image_view, nullptr);
+		//		vmaDestroyImage(GET_RENDERER->get_allocator(), m_image, m_allocation);
+
+		//		if (m_descriptor_set != nullptr)
+		//			ImGui_ImplVulkan_RemoveTexture(m_descriptor_set);
+		//	});
+		//	m_is_initalized = false;
+		//}
+
+		CORE_LOG_SHUTDOWN();
 	}
 
 	void image::allocate_memory(void* data, VkExtent3D size, image_format format, bool mipmapped, VkImageUsageFlags usage) {
@@ -132,6 +146,7 @@ namespace PFF {
 		view_info.subresourceRange.levelCount = img_info.mipLevels;
 		VK_CHECK_S(vkCreateImageView(GET_RENDERER->get_device(), &view_info, nullptr, &m_image_view));
 
+		m_is_initalized = true;
 	}
 
 	VkDescriptorSet image::get_descriptor_set() {

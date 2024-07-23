@@ -52,7 +52,17 @@ namespace PFF {
 		LOG(Trace, "Detaching editor_layer");
 	}
 
-	void editor_layer::on_update(f32 delta_time) { }
+	void editor_layer::on_update(f32 delta_time) {
+	
+		// First pass to mark items for removal
+		auto it = std::remove_if(m_editor_windows.begin(), m_editor_windows.end(),
+			[](const std::unique_ptr<PFF::editor_window>& editor_window) {
+				return editor_window->should_close();
+			});
+
+		// Erase the removed items
+		m_editor_windows.erase(it, m_editor_windows.end());
+	}
 
 	void editor_layer::on_event(event& event) { }
 
@@ -78,14 +88,8 @@ namespace PFF {
 		PFF::toolkit::todo::window_todo_list();
 
 		// First pass to mark items for removal
-		auto it = std::remove_if(m_editor_windows.begin(), m_editor_windows.end(),
-			[](const std::unique_ptr<PFF::editor_window>& editor_window) {
+		for (const auto& editor_window : m_editor_windows)
 				editor_window->window();
-				return editor_window->should_close();
-			});
-
-		// Erase the removed items
-		m_editor_windows.erase(it, m_editor_windows.end());
 
 		if (style_editor)
 			ImGui::ShowStyleEditor();

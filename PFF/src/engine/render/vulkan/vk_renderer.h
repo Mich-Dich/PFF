@@ -49,10 +49,10 @@ namespace PFF::render::vulkan {
 
 		// --------------- data ---------------
 	private:
-		std::deque<std::function<void()>> m_deletors{};
-		std::vector<std::pair<std::type_index, void*>> m_pointers{};
-		VkDevice m_device{};
-		VmaAllocator m_allocator{};
+		std::deque<std::function<void()>>				m_deletors{};
+		std::vector<std::pair<std::type_index, void*>>	m_pointers{};
+		VkDevice										m_dq_device{};
+		VmaAllocator									m_dq_allocator{};
 	};
 
 
@@ -63,15 +63,14 @@ namespace PFF::render::vulkan {
 		~vk_renderer();
 
 		FORCEINLINE f32 get_aspect_ratio()			{ return 1.f; };			// TODO: finish
-		PFF_DEFAULT_GETTERS(VmaAllocator,			allocator);
-		PFF_DEFAULT_GETTERS(VkDevice,				device);
-
 		PFF_DEFAULT_GETTERS(VkPhysicalDevice,		chosenGPU);
-
 		PFF_DEFAULT_GETTER(VkSampler,				texture_sampler);
 		PFF_DEFAULT_GETTER(VkSampler,				default_sampler_linear);
 		PFF_DEFAULT_GETTER(VkSampler,				default_sampler_nearest);
-
+		PFF_DEFAULT_GETTER(VkDevice, device);
+		PFF_DEFAULT_GETTER(VmaAllocator, allocator);
+		
+		
 		// !!!!!!!!!!!!!!!! DEV !!!!!!!!!!!!!!!!!!!!!!
 		void setup();
 
@@ -213,10 +212,10 @@ namespace PFF::render::vulkan {
 		VkDescriptorSetLayout						m_gpu_scene_data_descriptor_layout;
 
 		// ---------------------------- default textures ---------------------------- 
-		image										m_white_image;
-		image										m_black_image;
-		image										m_grey_image;
-		image										m_error_checkerboard_image;
+		ref<image>									m_white_image;
+		ref<image>									m_black_image;
+		ref<image>									m_grey_image;
+		ref<image>									m_error_checkerboard_image;
 		VkSampler									m_default_sampler_linear;
 		VkSampler									m_default_sampler_nearest;
 		VkDescriptorSetLayout						m_single_image_descriptor_layout;

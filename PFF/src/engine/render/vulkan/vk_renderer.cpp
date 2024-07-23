@@ -40,15 +40,19 @@ namespace PFF::render::vulkan {
 
 
 	void deletion_queue:: setup(VkDevice device, VmaAllocator allocator) {
-		m_device = device;
-		m_allocator = allocator;
+		
+		m_dq_device = device; 
+		m_dq_allocator = allocator;
 	}
 
 	void deletion_queue::cleanup() {
+		
+		CORE_LOG(Info, "deletion_queue::cleanup()");
 
-		vmaDestroyAllocator(m_allocator);
-		m_allocator = nullptr;
-		m_device = nullptr;
+		m_dq_device = nullptr;
+		m_dq_allocator = nullptr;
+
+		CORE_LOG_SHUTDOWN();
 	}
 
 	void deletion_queue::push_func(std::function<void()>&& function) { m_deletors.push_back(function); }
@@ -57,8 +61,7 @@ namespace PFF::render::vulkan {
 
 #define IS_OF_TYPE(name)							entry.first == std::type_index(typeid(name))
 #define USE_AS(name)								static_cast<name>(entry.second)
-#define VK_DESTROY_FUNC(name)						if (IS_OF_TYPE(Vk##name))	{vkDestroy##name(m_device, USE_AS(Vk##name), nullptr); }
-														
+#define VK_DESTROY_FUNC(name)						if (IS_OF_TYPE(Vk##name))	{vkDestroy##name(m_dq_device, USE_AS(Vk##name), nullptr); }
 
 		for (auto it = m_deletors.rbegin(); it != m_deletors.rend(); it++)
 			(*it)();
@@ -76,15 +79,23 @@ namespace PFF::render::vulkan {
 
 			else if (IS_OF_TYPE(descriptor_allocator*)) {
 
-				USE_AS(descriptor_allocator*)->clear_descriptors(m_device);
-				USE_AS(descriptor_allocator*)->destroy_pool(m_device);
+				USE_AS(descriptor_allocator*)->clear_descriptors(m_dq_device);
+				USE_AS(descriptor_allocator*)->destroy_pool(m_dq_device);
 			}
 
 			else if (IS_OF_TYPE(image*)) {
 
 				image* loc_image = USE_AS(image*);
-				vkDestroyImageView(m_device, loc_image->get_image_view(), nullptr);
-				vmaDestroyImage(m_allocator, loc_image->get_image(), loc_image->get_allocation());
+				vkDestroyImageView(m_dq_device, loc_image->get_image_view(), nullptr);
+				vmaDestroyImage(m_dq_allocator, loc_image->get_image(), loc_image->get_allocation());
+			}
+			
+			else if (IS_OF_TYPE(ref<image>*)) {
+
+				ref<image>& loc_image= *USE_AS(ref<image>*);
+				vkDestroyImageView(m_dq_device, loc_image->get_image_view(), nullptr);
+				vmaDestroyImage(m_dq_allocator, loc_image->get_image(), loc_image->get_allocation());
+				loc_image.reset();
 			}
 
 			else
@@ -180,12 +191,12 @@ namespace PFF::render::vulkan {
 	}
 
 	vk_renderer::~vk_renderer() { 
-
+		
 		if (!m_is_initialized)
 			return;
 
 		vkDeviceWaitIdle(m_device);
-		//imgui_shutdown();
+		m_state = system_state::inactive; 
 		
 		for (auto frame : m_frames) {
 
@@ -203,6 +214,7 @@ namespace PFF::render::vulkan {
 		
 		destroy_swapchain();
 		vkDestroySurfaceKHR(m_instance, m_surface, nullptr);
+		vmaDestroyAllocator(m_allocator);
 		vkDestroyDevice(m_device, nullptr);
 		vkb::destroy_debug_utils_messenger(m_instance, m_debug_messenger);
 		vkDestroyInstance(m_instance, nullptr);
@@ -353,13 +365,6 @@ namespace PFF::render::vulkan {
 		//wait until the gpu has finished rendering the last frame. Timeout of 1 second
 		VK_CHECK_S(vkWaitForFences(m_device, 1, &get_current_frame().render_fence, true, 1000000000));
 
-		// Free resources in queue
-		{
-			for (auto& func : s_resource_free_queue[m_frame_number % FRAME_COUNT])
-				func();
-			s_resource_free_queue[m_frame_number % FRAME_COUNT].clear();
-		}
-
 		get_current_frame().deletion_queue.flush();
 		get_current_frame().frame_descriptors.clear_pools(m_device);
 
@@ -440,7 +445,7 @@ namespace PFF::render::vulkan {
 
 				ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, ImVec2(0, 0));
 				ImGui::PushStyleVar(ImGuiStyleVar_WindowBorderSize, 0);
-				ImGui::Begin("viewport", nullptr, window_flags);
+				ImGui::Begin("Viewport##PFF_Engine", nullptr, window_flags);
 					ImGui::PopStyleVar(2);
 					
 					// display rendred image
@@ -540,6 +545,14 @@ namespace PFF::render::vulkan {
 			resize_swapchain();
 		}
 
+		// Free resources in queue
+		{
+			for (auto& func : s_resource_free_queue[m_frame_number % FRAME_COUNT])
+				func();
+			s_resource_free_queue[m_frame_number % FRAME_COUNT].clear();
+		}
+
+
 		if (m_frame_number > 184467440737095)
 			m_frame_number = m_frame_number % FRAME_COUNT;
 
@@ -601,7 +614,10 @@ namespace PFF::render::vulkan {
 
 	void vk_renderer::submit_resource_free(std::function<void()>&& func) {
 
-		s_resource_free_queue[m_frame_number % FRAME_COUNT].emplace_back(func);
+		if (m_state == system_state::active)
+			s_resource_free_queue[m_frame_number % FRAME_COUNT].emplace_back(func);
+		else
+			func();		// If renderer suspended/inactive, resource_free should always be possible
 	}
 
 	// =======================================================================================================================================================================================
@@ -725,17 +741,16 @@ namespace PFF::render::vulkan {
 			for (auto mesh : T_test_meshes) 
 				mesh->mesh_buffers = upload_mesh(mesh->m_indices, mesh->m_vertices);
 		}
-		
 
 		//3 default textures, white, grey, black. 1 pixel each
 		u32 white = glm::packUnorm4x8(glm::vec4(1, 1, 1, 1));
-		m_white_image = image((void*)&white, 1, 1, image_format::RGBA);
+		m_white_image = create_ref<image>((void*)&white, 1, 1, image_format::RGBA);
 
 		u32 grey = glm::packUnorm4x8(glm::vec4(0.4f, 0.44f, 0.4f, 1));
-		m_black_image = image((void*)&grey, 1, 1, image_format::RGBA);
+		m_black_image = create_ref<image>((void*)&grey, 1, 1, image_format::RGBA);
 
 		u32 black = glm::packUnorm4x8(glm::vec4(0, 0, 0, 1));	// TODO: chnage A to 1
-		m_grey_image = image((void*)&black, 1, 1, image_format::RGBA);
+		m_grey_image = create_ref<image>((void*)&black, 1, 1, image_format::RGBA);
 
 		//checkerboard image
 		const int EDGE_LENGTH = 2;
@@ -744,7 +759,7 @@ namespace PFF::render::vulkan {
 		for (int x = 0; x < EDGE_LENGTH; x++)
 			for (int y = 0; y < EDGE_LENGTH; y++)
 				pixels[y * EDGE_LENGTH + x] = ((x % EDGE_LENGTH) ^ (y % EDGE_LENGTH)) ? grey : color;
-		m_error_checkerboard_image = image(pixels.data(), EDGE_LENGTH, EDGE_LENGTH, image_format::RGBA);
+		m_error_checkerboard_image = create_ref<image>(pixels.data(), EDGE_LENGTH, EDGE_LENGTH, image_format::RGBA);
 
 		VkSamplerCreateInfo sampler{};
 		sampler.sType = VK_STRUCTURE_TYPE_SAMPLER_CREATE_INFO;
@@ -1162,7 +1177,7 @@ namespace PFF::render::vulkan {
 		VkDescriptorSet imageSet = get_current_frame().frame_descriptors.allocate(m_device, m_single_image_descriptor_layout);
 		{
 			descriptor_writer writer;
-			writer.write_image(0, m_error_checkerboard_image.get_image_view(), m_default_sampler_nearest, VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL, VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER);
+			writer.write_image(0, m_error_checkerboard_image->get_image_view(), m_default_sampler_nearest, VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL, VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER);
 			writer.update_set(m_device, imageSet);
 		}
 		vkCmdBindDescriptorSets(cmd, VK_PIPELINE_BIND_POINT_GRAPHICS, m_mesh_pipeline_layout, 0, 1, &imageSet, 0, nullptr);

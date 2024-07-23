@@ -182,7 +182,7 @@ namespace PFF::UI {
 
 		UI::set_next_window_pos_in_window(location);
 		ImGui::SetNextWindowBgAlpha(0.8f); // Transparent background
-		if (ImGui::Begin("performance_timer", &m_show_FPS_window, window_flags)) {
+		if (ImGui::Begin("Performance_display##PFF_Engine", &m_show_FPS_window, window_flags)) {
 
 			// Get the current style
 			ImGuiStyle& style = ImGui::GetStyle();
@@ -196,23 +196,24 @@ namespace PFF::UI {
 			ImVec2 curser_pos;
 			ImVec2 textSize;
 
-			ImGui::Text("performance timer");
-			ImGui::Separator();
-			if (m_limit_fps)
-				ImGui::Text("current fps    %4d/%4d", m_current_fps, m_target_fps);
-			else
-				ImGui::Text("current fps    %4d", m_current_fps);
+			if (UI::begin_table("Performance Display", true, ImVec2(200.0f, 0))) {
 
-			// work_time
-			snprintf(formattedText, sizeof(formattedText), "%5.2f ms", m_work_time);
-			UI::progressbar_with_text("work time:", formattedText, work_percent, 70.f, 70.f);
+				if (m_limit_fps)
+					UI::table_row("FPS", util::format_string(std::setw(4), m_current_fps, " / ", std::setw(4), m_target_fps));
+				else
+					UI::table_row("FPS", util::format_string(std::setw(4), m_current_fps));
 
-			//sleep time
-			snprintf(formattedText, sizeof(formattedText), "%5.2f ms", m_sleep_time);
-			UI::progressbar_with_text("sleep time ", formattedText, sleep_percent, 70.f, 70.f);
+				snprintf(formattedText, sizeof(formattedText), "%5.2f ms", m_work_time);
+				UI::table_row_progressbar("work time:", formattedText, work_percent);
+
+				snprintf(formattedText, sizeof(formattedText), "%5.2f ms", m_sleep_time);
+				UI::table_row_progressbar("sleep time:", formattedText, sleep_percent);
+
+
+				UI::end_table();
+			}
 
 			UI::next_window_position_selector(location, m_show_FPS_window);
-
 		}
 		ImGui::End();
 	}

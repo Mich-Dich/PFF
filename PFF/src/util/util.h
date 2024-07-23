@@ -197,6 +197,15 @@ namespace PFF {
         // --------------------------------------------------------------------------------------------------------------------
         // STRING MANIPULATION
         // --------------------------------------------------------------------------------------------------------------------
+        
+        
+        // Variadic template function to handle multiple arguments
+        template<typename... Args>
+        std::string format_string(Args&&... args) {
+            std::ostringstream oss;
+            (oss << ... << std::forward<Args>(args));
+            return oss.str();
+        }
 
         // @brief Converts a value of type T to its string representation.
         // @brief Can handle conversion from various types such as: arithmetic types, boolean, glm::vec2, glm::vec3, glm::vec4, ImVec2, ImVec4, and glm::mat4

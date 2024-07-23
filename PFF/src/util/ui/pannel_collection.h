@@ -29,30 +29,38 @@ namespace PFF::UI {
 	// @brief Draws a vertical separation line.
 	PFF_API void seperation_vertical();
 
-	PFF_API bool add_gray_button(const char* lable, const ImVec2& size = { 0, 0 });
+
+	PFF_API bool add_gray_button(const char* label, const ImVec2& size = { 0, 0 });
+
 
 	// @brief Draws text using a larger font.
 	// @param [text] The text to be drawn.
 	PFF_API void big_text(const char* text, bool wrapped = false);
 
+
 	// @brief Displays a help marker with tooltip containing the provided description.
 	// @param [desc] The description text to be displayed in the tooltip.
 	PFF_API void help_marker(const char* desc);
+
 
 	// @brief Adjusts the current ImGui cursor position by adding the specified horizontal and vertical shift offsets.
 	// @param [shift_x] The horizontal shift offset.
 	// @param [shift_y] The vertical shift offset.
 	PFF_API void shift_cursor_pos(const f32 shift_x, const f32 shift_y);
 
-	PFF_API void progressbar_with_text(const char* lable, const char* progress_bar_text, f32 percent, f32 lable_size = 50.f, f32 progressbar_size_x = 50.f, f32 progressbar_size_y = 1.f);
 
-	// @brief This function sets up an ImGui table with two columns, where the first column is resizable and the second column fills the remaining available area
+	PFF_API void progressbar_with_text(const char* label, const char* progress_bar_text, f32 percent, f32 label_size = 50.f, f32 progressbar_size_x = 50.f, f32 progressbar_size_y = 1.f);
+
+
+	// @brief This function sets up an ImGui table with two columns, where the first column is resizable and the second column fills the remaining availabel area
 	// @brief CAUTION - you need to call UI::end_table() at the end of the table;
-	// @param [lable] Is used to identify the table
-	PFF_API void begin_table(std::string_view lable, bool display_name = true, ImVec2 size = ImVec2(0,0) );
+	// @param [label] Is used to identify the table
+	PFF_API bool begin_table(std::string_view label, bool display_name = true, ImVec2 size = ImVec2(0,0), f32 inner_width = 0.0f, bool set_columns_width = true, f32 columns_width_percentage = 0.5f);
 
+	
 	// @brief Ends the table started with UI::begin_table().
 	PFF_API void end_table();
+
 
 	// @brief This function draws a custom frame with two separate sections: [left_side] and [right_side].
 	//          The width of the first column is specified by [width_left_side]. Both sections are contained within
@@ -79,8 +87,73 @@ namespace PFF::UI {
 	PFF_API bool table_row_slider(std::string_view label, int& value, int min_value = 0, int max_value = 1, ImGuiInputTextFlags flags = ImGuiInputTextFlags_None);
 
 
-	// @brief Add
 	PFF_API void table_row(std::function<void()> first_colum, std::function<void()> second_colum);
+
+
+	void table_row(std::string_view label, std::string_view value);
+
+
+	// @brief Adds a row to an ImGui table with a label and corresponding value input field.
+	// @tparam [T] The type of the value.
+	// @param [label] The label for the row.
+	// @param [value] The value to be displayed or edited.
+	// @param [flags] Flags controlling the behavior of the input field.
+	template<typename T>
+	bool table_row(std::string_view label, T& value, f32 drag_speed = 0.01f, f32 min_value = 0.f, f32 max_value = 0.f, ImGuiInputTextFlags flags = ImGuiInputTextFlags_None) {
+
+		ImGuiStyle& style = ImGui::GetStyle();
+		ImVec2 current_item_spacing = style.ItemSpacing;
+		flags |= ImGuiInputTextFlags_AllowTabInput;
+
+		ImGui::TableNextRow();
+		ImGui::TableSetColumnIndex(0);
+		ImGui::Text("%s", label.data());
+
+		ImGui::TableSetColumnIndex(1);
+
+		std::string loc_label = "##" + *label.data();
+
+		if constexpr (std::is_same_v<T, bool>) {
+
+			ImGui::Text("%s", util::bool_to_str(value));
+			return false;
+		}
+
+		else if constexpr (std::is_arithmetic_v<T>) {
+
+			ImGui::SetNextItemWidth(ImGui::GetColumnWidth());
+			return ImGui::DragFloat(loc_label.c_str(), &value, drag_speed, min_value, max_value, "%.2f", flags);
+		}
+
+		else if constexpr (std::is_same_v<T, glm::vec2> || std::is_same_v<T, ImVec2>) {
+
+			ImGui::SetNextItemWidth(ImGui::GetColumnWidth());
+			return ImGui::DragFloat2(loc_label.c_str(), &value[0], drag_speed, min_value, max_value, "%.2f", flags);
+		}
+
+		else if constexpr (std::is_same_v<T, glm::vec3>) {
+
+			ImGui::SetNextItemWidth(ImGui::GetColumnWidth());
+			return ImGui::DragFloat3(loc_label.c_str(), &value[0], drag_speed, min_value, max_value, "%.2f", flags);
+		}
+
+		else if constexpr (std::is_same_v<T, glm::vec4> || std::is_same_v<T, ImVec4>) {
+
+			ImGui::SetNextItemWidth(ImGui::GetColumnWidth());
+			return ImGui::DragFloat4(loc_label.c_str(), &value[0], drag_speed, min_value, max_value, "%.2f", flags);
+		}
+
+		else if constexpr (std::is_convertible_v<T, std::string>) {
+
+			ImGui::Text("%s", std::to_string(value).c_str());
+			return false;
+		}
+
+		return false;
+	}
+
+
+	void table_row_progressbar(std::string_view label, const char* progress_bar_text, const f32 percent, const bool auto_resize = true, const f32 progressbar_size_x = 50.f, const f32 progressbar_size_y = 1.f);
 
 
 	// @brief Renders a slider within a table row in an ImGui interface.
@@ -142,65 +215,6 @@ namespace PFF::UI {
 
 		if constexpr (std::is_same_v<T, glm::vec4> || std::is_same_v<T, ImVec4>)
 			return ImGui::SliderFloat4(loc_label.c_str(), &value[0], min_value, max_value, "%.2f", flags);
-
-		return false;
-	}
-
-	// @brief Adds a row to an ImGui table with a label and corresponding value input field.
-	// @tparam [T] The type of the value.
-	// @param [label] The label for the row.
-	// @param [value] The value to be displayed or edited.
-	// @param [flags] Flags controlling the behavior of the input field.
-	template<typename T>
-	bool table_row(std::string_view label, T& value, f32 drag_speed = 0.01f, f32 min_value = 0.f, f32 max_value = 0.f, ImGuiInputTextFlags flags = ImGuiInputTextFlags_None) {
-
-		ImGuiStyle& style = ImGui::GetStyle();
-		ImVec2 current_item_spacing = style.ItemSpacing;
-		flags |= ImGuiInputTextFlags_AllowTabInput;
-
-		ImGui::TableNextRow();
-		ImGui::TableSetColumnIndex(0);
-		ImGui::Text("%s", label.data());
-
-		ImGui::TableSetColumnIndex(1);
-
-		std::string loc_lable = "##" + *label.data();
-
-		if constexpr (std::is_same_v<T, bool>) {
-
-			ImGui::Text("%s", util::bool_to_str(value));
-			return false;
-		}
-
-		else if constexpr (std::is_arithmetic_v<T>) {
-
-			ImGui::SetNextItemWidth(ImGui::GetColumnWidth());
-			return ImGui::DragFloat(loc_lable.c_str(), &value, drag_speed, min_value, max_value, "%.2f", flags);
-		}
-
-		else if constexpr (std::is_same_v<T, glm::vec2> || std::is_same_v<T, ImVec2>) {
-
-			ImGui::SetNextItemWidth(ImGui::GetColumnWidth());
-			return ImGui::DragFloat2(loc_lable.c_str(), &value[0], drag_speed, min_value, max_value, "%.2f", flags);
-		}
-
-		else if constexpr (std::is_same_v<T, glm::vec3>) {
-
-			ImGui::SetNextItemWidth(ImGui::GetColumnWidth());
-			return ImGui::DragFloat3(loc_lable.c_str(), &value[0], drag_speed, min_value, max_value, "%.2f", flags);
-		}
-
-		else if constexpr (std::is_same_v<T, glm::vec4> || std::is_same_v<T, ImVec4>) {
-
-			ImGui::SetNextItemWidth(ImGui::GetColumnWidth());
-			return ImGui::DragFloat4(loc_lable.c_str(), &value[0], drag_speed, min_value, max_value, "%.2f", flags);
-		}
-
-		else if constexpr (std::is_convertible_v<T, std::string>) {
-
-			ImGui::Text("%s", std::to_string(value).c_str());
-			return false;
-		}
 
 		return false;
 	}

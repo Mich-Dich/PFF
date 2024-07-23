@@ -98,9 +98,9 @@ namespace PFF {
 		//m_layerstack.pop_layer(m_world_layer);
 		//delete m_world_layer;
 
+		m_layerstack.reset();
 		m_renderer.reset();
 		m_window.reset();
-		m_layerstack.reset();
 
 		CORE_LOG_SHUTDOWN();
 		PFF_PROFILE_END_SESSION();

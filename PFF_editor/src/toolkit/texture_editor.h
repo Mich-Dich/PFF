@@ -12,7 +12,7 @@ namespace PFF::toolkit {
 		void window() override;
 
 	private:
-		image m_image;
+		ref<image> m_image;
 
 	};
 

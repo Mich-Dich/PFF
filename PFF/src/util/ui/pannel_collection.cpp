@@ -86,7 +86,7 @@ namespace PFF::UI {
 
 	void progressbar_with_text(const char* lable, const char* progress_bar_text, f32 percent, f32 lable_size, f32 progressbar_size_x, f32 progressbar_size_y) {
 
-		PFF_PROFILE_FUNCTION();
+		//PFF_PROFILE_FUNCTION();
 
 		ImVec2 curser_pos;
 		ImVec2 progressbar_size;
@@ -170,16 +170,29 @@ namespace PFF::UI {
 	}
 
 
-	void begin_table(std::string_view lable, bool display_name, ImVec2 size) {
+	bool begin_table(std::string_view lable, bool display_name, ImVec2 size, f32 inner_width, bool set_columns_width, f32 columns_width_percentage) {
 
 		if (display_name)
 			ImGui::Text("%s:", lable.data());
 
-		// setup table and columns
 		ImGuiTableFlags flags = ImGuiTableFlags_Resizable;
-		ImGui::BeginTable(lable.data(), 2, flags, size);
-		ImGui::TableSetupColumn("##one", ImGuiTableColumnFlags_NoHeaderLabel);
-		ImGui::TableSetupColumn("##two", ImGuiTableColumnFlags_NoHeaderLabel | ImGuiTableColumnFlags_NoResize);
+		if (ImGui::BeginTable(lable.data(), 2, flags, size, inner_width)) {
+
+			// setup table and columns
+			if (size.x > 0.0f && set_columns_width) {
+
+				float column_width = size.x * columns_width_percentage;
+				ImGui::TableSetupColumn("##one", ImGuiTableColumnFlags_NoHeaderLabel | ImGuiTableColumnFlags_WidthFixed, column_width);
+				ImGui::TableSetupColumn("##two", ImGuiTableColumnFlags_NoHeaderLabel | ImGuiTableColumnFlags_WidthStretch);
+			} else {
+
+				ImGui::TableSetupColumn("##one", ImGuiTableColumnFlags_NoHeaderLabel);
+				ImGui::TableSetupColumn("##two", ImGuiTableColumnFlags_NoHeaderLabel | ImGuiTableColumnFlags_NoResize);
+			}
+
+			return true;
+		}
+		return false;
 	}
 
 
@@ -256,6 +269,34 @@ namespace PFF::UI {
 		first_colum();
 		ImGui::TableSetColumnIndex(1);
 		second_colum();
+	}
+
+	void table_row(std::string_view label, std::string_view value) {
+
+		ImGui::TableNextRow();
+		ImGui::TableSetColumnIndex(0);
+		ImGui::Text("%s", label.data());
+
+		ImGui::TableSetColumnIndex(1);
+
+		ImGui::Text("%s", value.data());
+	}
+
+	void table_row_progressbar(std::string_view label, const char* progress_bar_text, const f32 percent, const bool auto_resize, const f32 progressbar_size_x, const f32 progressbar_size_y) {
+
+
+		ImGui::TableNextRow();
+		ImGui::TableSetColumnIndex(0);
+		ImGui::Text("%s", label.data());
+
+		ImGui::TableSetColumnIndex(1);
+
+		float column_width = progressbar_size_x;
+		if (auto_resize)
+			if (ImGuiTable* table = ImGui::GetCurrentTable())
+				column_width = table->Columns[1].WidthGiven;
+		
+		UI::progressbar_with_text("", progress_bar_text, percent, 0.0f, column_width, progressbar_size_y);
 	}
 
 }
