@@ -15,6 +15,7 @@
 
 // TEST 
 #include "application.h"
+#include "engine/render/renderer.h"
 //#include "engine/render/renderer.h"
 //#include "engine/render/vk_swapchain.h"
 
@@ -72,7 +73,8 @@ namespace PFF {
 
 		window_main_title_bar();
 		window_main_content();
-		
+
+		window_main_viewport();
 		window_general_debugger();
 		window_outliner();
 		window_details();
@@ -223,6 +225,98 @@ namespace PFF {
 			ImGui::End();
 		}
 
+		ImGui::End();
+	}
+
+	void editor_layer::window_main_viewport() {
+
+		ImGuiWindowFlags window_flags = 0//ImGuiWindowFlags_NoResize
+			| ImGuiWindowFlags_NoScrollbar
+			| ImGuiWindowFlags_NoScrollWithMouse
+			| ImGuiWindowFlags_NoCollapse
+			| ImGuiWindowFlags_NoBackground | ImGuiWindowFlags_DockNodeHost
+			//| ImGuiWindowFlags_NoDecoration
+			;
+
+		ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, ImVec2(0, 0));
+		ImGui::PushStyleVar(ImGuiStyleVar_WindowBorderSize, 0);
+		if (ImGui::Begin("Viewport##PFF_Engine", nullptr, window_flags)) {
+
+			ImGui::PopStyleVar(2);
+			// display rendred image
+			ImVec2 viewport_size = ImGui::GetWindowSize();
+			viewport_size.y -= ImGui::GetFrameHeight();
+
+			application::get().get_renderer()->set_imugi_viewport_size(glm::u32vec2(viewport_size.x, viewport_size.y));
+
+			auto* buffer = application::get().get_renderer()->get_draw_image();
+
+			ImVec2 viewport_uv = {
+				std::max(std::min(viewport_size.x / buffer->get_width(), 1.f), 0.f),
+				std::max(std::min(viewport_size.y / buffer->get_height(), 1.f), 0.f) };
+			ImGui::Image(buffer->get_descriptor_set(), ImVec2{ viewport_size.x, viewport_size.y }, ImVec2{ 0,0 }, viewport_uv);
+
+			// show debug data
+			application::get().get_imgui_layer()->show_FPS();
+			window_renderer_backgrond_effect();
+		}
+		ImGui::End();
+	}
+
+	void editor_layer::window_renderer_backgrond_effect() {
+
+		if (!m_show_renderer_backgrond_effect)
+			return;
+
+
+		static UI::window_pos location = UI::window_pos::top_right;
+
+		ImGuiWindowFlags window_flags = (
+			ImGuiWindowFlags_NoDecoration |
+			ImGuiWindowFlags_NoDocking |
+			ImGuiWindowFlags_AlwaysAutoResize |
+			ImGuiWindowFlags_NoSavedSettings |
+			ImGuiWindowFlags_NoFocusOnAppearing |
+			ImGuiWindowFlags_NoNav);
+		if (location != UI::window_pos::custom)
+			window_flags |= ImGuiWindowFlags_NoMove;
+
+		UI::set_next_window_pos_in_window(location);
+		ImGui::SetNextWindowBgAlpha(0.8f); // Transparent background
+		if (ImGui::Begin("Render Debug", &m_show_renderer_backgrond_effect, window_flags)) {
+
+			render::compute_effect& selected = application::get().get_renderer()->get_current_background_effect();
+			int& background_effect_index = application::get().get_renderer()->get_current_background_effect_index();
+
+			if (UI::begin_table("renderer background values")) {
+
+				UI::table_row_slider("Effects", background_effect_index, 0, application::get().get_renderer()->get_number_of_background_effects() -1 );
+
+				if (background_effect_index == 0) {}
+
+				else if (background_effect_index == 1) {
+
+					UI::table_row_slider("top color", selected.data.data1);
+					UI::table_row_slider("bottom color", selected.data.data2);
+
+				} else if (background_effect_index == 2) {
+
+					UI::table_row_slider<glm::vec3>("bottom color", (glm::vec3&)selected.data.data1);
+					UI::table_row_slider<f32>("star amount", selected.data.data1[3]);
+
+				} else {
+
+					UI::table_row_slider("data 1", selected.data.data1);
+					UI::table_row_slider("data 2", selected.data.data2);
+					UI::table_row_slider("data 3", selected.data.data3);
+					UI::table_row_slider("data 4", selected.data.data4);
+				}
+
+				UI::end_table();
+			}
+
+			UI::next_window_position_selector(location, m_show_renderer_backgrond_effect);
+		}
 		ImGui::End();
 	}
 

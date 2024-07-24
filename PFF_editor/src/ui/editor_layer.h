@@ -27,13 +27,17 @@ namespace PFF {
 
 		// ImGui windows
 		void window_main_title_bar();
+		void window_main_viewport();
+		void window_renderer_backgrond_effect();
 		void window_general_debugger();
-		void window_main_content();
+
 		void window_outliner();
 		void window_details();
 		void window_world_settings();
 		void window_content_browser_0();
 		void window_content_browser_1();
+		
+		void window_main_content();
 
 		void window_graphics_engine_settings();
 		void window_editor_settings();
@@ -44,9 +48,10 @@ namespace PFF {
 		//void progressbar(f32 percent, f32 min_size_x = 0.0f, f32 min_size_y = 0.0f);
 		void main_menu_bar();
 
-		bool m_show_options = false;
-		bool m_show_general_debugger = true;
 		bool m_show_main_menu_bar = false;
+		bool m_show_renderer_backgrond_effect = false;
+		bool m_show_general_debugger = true;
+		bool m_show_options = false;
 		bool m_show_outliner = true;
 		bool m_show_details = false;
 		bool m_show_world_settings = false;

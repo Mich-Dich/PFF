@@ -105,6 +105,7 @@ namespace PFF {
 		});
 
 		GET_RENDERER->destroy_buffer(uploadbuffer);
+		m_is_initalized = true;
 	}
 
 	void image::allocate_image(VkExtent3D size, VkFormat format, VkImageUsageFlags usage, bool mipmapped) {
@@ -139,17 +140,13 @@ namespace PFF {
 
 		if (m_is_initalized) {
 
-			CORE_LOG(Debug, "m_image_view: " << m_image_view << " m_image: " << m_image << " m_allocation: " << m_allocation);
 			GET_RENDERER->submit_resource_free([image = m_image, image_view = m_image_view, allocation = m_allocation, descriptor_set = m_descriptor_set] {
 				
-				CORE_LOG(Warn, "image_view: " << image_view);
 				vkDestroyImageView(GET_RENDERER->get_device(), image_view, nullptr);
-				CORE_LOG(Warn, "image: " << image);
 				vmaDestroyImage(GET_RENDERER->get_allocator(), image, allocation);
-				CORE_LOG(Warn, "DONE");
 
-				//if (descriptor_set != nullptr)
-				//	ImGui_ImplVulkan_RemoveTexture(descriptor_set);
+				if (descriptor_set != nullptr)
+					ImGui_ImplVulkan_RemoveTexture(descriptor_set);
 			});
 
 			m_image = VK_NULL_HANDLE;
@@ -168,7 +165,11 @@ namespace PFF {
 		return m_descriptor_set;
 	};
 
-#endif
+	VkDescriptorSet image::generate_descriptor_set(VkSampler sampler, VkImageLayout layout) {
 
+		return m_descriptor_set = (VkDescriptorSet)ImGui_ImplVulkan_AddTexture(sampler, m_image_view, layout);
+	};
+
+#endif
 
 }

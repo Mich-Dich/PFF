@@ -49,6 +49,25 @@ namespace PFF::render {
 		VkPipelineLayout	layout;
 	};
 
+
+	struct compute_push_constants {
+
+		glm::vec4				data1;
+		glm::vec4				data2;
+		glm::vec4				data3;
+		glm::vec4				data4;
+	};
+
+	struct compute_effect {
+
+		const char* name{};
+#if defined PFF_RENDER_API_VULKAN
+		VkPipeline				pipeline{};
+		VkPipelineLayout		layout{};
+#endif
+		compute_push_constants	data{};
+	};
+
 	struct material_instance {
 
 		material_pipeline*	pipeline;
@@ -81,8 +100,12 @@ namespace PFF::render {
 
 		FORCEINLINE static render_api get_api() { return s_render_api; }
 		FORCEINLINE static void set_api(render_api api) { s_render_api = api; }
-
 		FORCEINLINE void set_active_camera(ref<camera> camera) { m_active_camera = camera; }
+		FORCEINLINE compute_effect& get_current_background_effect() { return m_background_effects[m_current_background_effect]; }
+
+		FORCEINLINE int get_number_of_background_effects() { return static_cast<int>(m_background_effects.size()); }
+		PFF_GETTER(int&, current_background_effect_index, m_current_background_effect);
+
 
 		virtual void* get_rendered_image() = 0;
 
@@ -106,12 +129,17 @@ namespace PFF::render {
 		virtual void immediate_submit(std::function<void()>&& function) = 0;
 		virtual void enable_vsync(bool enable) = 0;
 
-		static render_api s_render_api;
-		system_state m_state = system_state::inactive;
+		static render_api							s_render_api;
+		system_state								m_state = system_state::inactive;
 
-		bool m_imgui_initalized = false;
-		bool m_render_swapchain = false;	// false => will display rendered image in a imgui window TRUE: will display rendered image directly into GLFW_window
-		ref<camera> m_active_camera{};
+		bool										m_imgui_initalized = false;
+		bool										m_render_swapchain = false;	// FALSE: will display rendered image in a imgui window    TRUE: will display rendered image directly into GLFW_window
+		ref<camera>									m_active_camera{};
+
+	protected:
+		std::vector<compute_effect> 				m_background_effects{};
+		int											m_current_background_effect = 2;
+
 	private:
 
 	};

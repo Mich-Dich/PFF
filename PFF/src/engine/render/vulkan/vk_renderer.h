@@ -16,22 +16,6 @@ namespace PFF::render::vulkan {
 	class deletion_queue;
 	constexpr u32 FRAME_COUNT = 2;
 
-	struct compute_push_constants {
-	
-		glm::vec4				data1;
-		glm::vec4				data2;
-		glm::vec4				data3;
-		glm::vec4				data4;
-	};
-
-	struct compute_effect {
-
-		const char*				name{};
-		VkPipeline				pipeline{};
-		VkPipelineLayout		layout{};
-		compute_push_constants	data{};
-	};
-
 
 	class deletion_queue {
 	public:
@@ -67,10 +51,17 @@ namespace PFF::render::vulkan {
 		PFF_DEFAULT_GETTER(VkSampler,				texture_sampler);
 		PFF_DEFAULT_GETTER(VkSampler,				default_sampler_linear);
 		PFF_DEFAULT_GETTER(VkSampler,				default_sampler_nearest);
-		PFF_DEFAULT_GETTER(VkDevice, device);
-		PFF_DEFAULT_GETTER(VmaAllocator, allocator);
+		PFF_DEFAULT_GETTER(VkDevice,				device);
+		PFF_DEFAULT_GETTER(VmaAllocator,			allocator);
 		
+		PFF_DEFAULT_SETTER(glm::u32vec2,			imugi_viewport_size);
+				
 		
+
+		FORCEINLINE image* get_draw_image() { return &m_draw_image; }
+
+
+
 		// !!!!!!!!!!!!!!!! DEV !!!!!!!!!!!!!!!!!!!!!!
 		void setup();
 
@@ -194,8 +185,6 @@ namespace PFF::render::vulkan {
 		VkCommandBuffer								m_immCommandBuffer{};
 		VkCommandPool								m_immCommandPool{};
 		VkDescriptorPool							m_imgui_desc_pool{};
-		std::vector<compute_effect> 				m_background_effects{};
-		int											m_current_background_effect = 2;
 
 		// ---------------------------- triangle pipeline ---------------------------- 
 		//VkPipelineLayout							m_triangle_pipeline_layout{};

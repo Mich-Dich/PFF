@@ -87,11 +87,8 @@ namespace PFF {
 		delete m_imgui_layer;
 
 
-		for (size_t x = 0; x < m_timers.size(); x++) {
-
+		for (size_t x = 0; x < m_timers.size(); x++)
 			util::cancel_timer(m_timers[x]);
-
-		}
 		m_timers.clear();
 
 		//m_current_map.reset();

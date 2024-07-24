@@ -54,7 +54,7 @@ namespace PFF::UI {
 		void on_update(const f32 delta_time) override;
 		void on_event(event& event) override;
 		void on_imgui_render() override;
-		void show_FPS();
+		void PFF_API show_FPS();
 		
 		PFF_API_EDITOR ImFont* get_font(const std::string& name = "default");
 

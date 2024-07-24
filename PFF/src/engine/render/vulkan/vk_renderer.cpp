@@ -85,7 +85,7 @@ namespace PFF::render::vulkan {
 
 			else if (IS_OF_TYPE(image*)) {
 
-				CORE_LOG(Warn, "Deleting image with the [image*]")
+				CORE_LOG(Warn, "Deleting image with the [image]")
 				image* loc_image = USE_AS(image*);
 				vkDestroyImageView(m_dq_device, loc_image->get_image_view(), nullptr);
 				vmaDestroyImage(m_dq_allocator, loc_image->get_image(), loc_image->get_allocation());
@@ -93,15 +93,11 @@ namespace PFF::render::vulkan {
 			
 			else if (IS_OF_TYPE(ref<image>*)) {
 
-				CORE_LOG(Warn, "Deleting image with the [ref<image>*]")
-
+				CORE_LOG(Warn, "Deleting image with the [ref<image>]")
 				ref<image>& loc_image= *USE_AS(ref<image>*);
-				//vkDestroyImageView(m_dq_device, loc_image->get_image_view(), nullptr);
-				//vmaDestroyImage(m_dq_allocator, loc_image->get_image(), loc_image->get_allocation());
-
-				//vkDestroyImageView(m_device, img->get_image_view(), nullptr);
-				//vmaDestroyImage(m_allocator, img->get_image(), img->get_allocation());
-
+				vkDestroyImageView(m_dq_device, loc_image->get_image_view(), nullptr);
+				vmaDestroyImage(m_dq_allocator, loc_image->get_image(), loc_image->get_allocation());
+				loc_image->force_initalized_to_FALSE();
 				loc_image.reset();
 			}
 
@@ -340,7 +336,7 @@ namespace PFF::render::vulkan {
 		VK_CHECK_S(vkCreateSampler(m_device, &samplerInfo, nullptr, &m_texture_sampler));
 		// }  ===========================================================================================
 
-		m_imugi_image_dset = ImGui_ImplVulkan_AddTexture(m_texture_sampler, m_draw_image.get_image_view(), VK_IMAGE_LAYOUT_GENERAL);
+		m_draw_image.generate_descriptor_set(m_texture_sampler, VK_IMAGE_LAYOUT_GENERAL);
 
 		m_deletion_queue.push_pointer(m_texture_sampler);
 
@@ -355,7 +351,6 @@ namespace PFF::render::vulkan {
 
 	void vk_renderer::imgui_shutdown() { 
 
-		//ImGui_ImplVulkan_RemoveTexture(m_imugi_image_dset);
 		ImGui_ImplVulkan_Shutdown();
 		ImGui_ImplGlfw_Shutdown();
 		vkDestroyDescriptorPool(m_device, m_imgui_desc_pool, nullptr);
@@ -375,8 +370,10 @@ namespace PFF::render::vulkan {
 		get_current_frame().deletion_queue.flush();
 		get_current_frame().frame_descriptors.clear_pools(m_device);
 		{	// Free resources in queue
-			for (auto& func : s_resource_free_queue[m_frame_number % FRAME_COUNT])
+			for (auto& func : s_resource_free_queue[m_frame_number % FRAME_COUNT]) {
+				CORE_LOG(Info, "Executing free QUEUE")
 				func();
+			}
 
 			s_resource_free_queue[m_frame_number % FRAME_COUNT].clear();
 		}
@@ -439,75 +436,8 @@ namespace PFF::render::vulkan {
 			ImGui_ImplGlfw_NewFrame();
 			ImGui::NewFrame();
 
-			for (layer* layer : *m_layer_stack) {
-
-				// LOG(Trace, "drawing imgui of layer [" << layer->get_name() << "]");
+			for (layer* layer : *m_layer_stack) 
 				layer->on_imgui_render();
-			}
-
-			if (!m_render_swapchain) {
-
-				ImGuiWindowFlags window_flags = 0//ImGuiWindowFlags_NoResize
-					| ImGuiWindowFlags_NoScrollbar
-					| ImGuiWindowFlags_NoScrollWithMouse 
-					| ImGuiWindowFlags_NoCollapse 
-					| ImGuiWindowFlags_NoBackground 
-					//| ImGuiWindowFlags_NoDecoration
-					;
-
-
-				ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, ImVec2(0, 0));
-				ImGui::PushStyleVar(ImGuiStyleVar_WindowBorderSize, 0);
-				ImGui::Begin("Viewport##PFF_Engine", nullptr, window_flags);
-					ImGui::PopStyleVar(2);
-					
-					// display rendred image
-					ImVec2 viewport_size = ImGui::GetWindowSize();
-					viewport_size.y -= ImGui::GetFrameHeight();
-					m_imugi_viewport_size = glm::u32vec2(viewport_size.x, viewport_size.y);
-					ImVec2 viewport_uv = { 
-						std::max(std::min(viewport_size.x / m_draw_image.get_width(), 1.f), 0.f),
-						std::max(std::min(viewport_size.y / m_draw_image.get_height(), 1.f), 0.f)};
-					ImGui::Image(m_imugi_image_dset, ImVec2{ viewport_size.x, viewport_size.y }, ImVec2{0,0}, viewport_uv);
-
-					// show debug data
-					application::get().get_imgui_layer()->show_FPS();
-
-				ImGui::End();
-			}
-
-
-			if (ImGui::Begin("Render Debug")) {
-
-				compute_effect& selected = m_background_effects[m_current_background_effect];
-
-				UI::begin_table("renderer background values");
-					UI::table_row_slider("Effects", m_current_background_effect, 0, static_cast<int>(m_background_effects.size() - 1) );
-
-					if (m_current_background_effect == 0) { } 
-					
-					else if (m_current_background_effect == 1) {
-
-						UI::table_row_slider("top color", selected.data.data1);
-						UI::table_row_slider("bottom color", selected.data.data2);
-
-					} else if (m_current_background_effect == 2) {
-
-						UI::table_row_slider<glm::vec3>("bottom color", (glm::vec3&)selected.data.data1);
-						UI::table_row_slider<f32>("star amount", selected.data.data1[3]);
-
-					} else {
-
-						UI::table_row_slider("data 1", selected.data.data1);
-						UI::table_row_slider("data 2", selected.data.data2);
-						UI::table_row_slider("data 3", selected.data.data3);
-						UI::table_row_slider("data 4", selected.data.data4);
-					}
-
-				UI::end_table();
-
-			}
-			ImGui::End();
 
 			ImGui::EndFrame();
 			ImGui::Render();
