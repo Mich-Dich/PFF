@@ -98,6 +98,7 @@ namespace PFF::render::vulkan {
 		vk_buffer create_buffer(size_t allocSize, VkBufferUsageFlags usage, VmaMemoryUsage memoryUsage);
 		void destroy_buffer(const vk_buffer& buffer);
 
+
 	private:
 
 		friend class deletion_queue;

@@ -75,21 +75,7 @@ namespace PFF {
 
 		//vkDestroyImageView(GET_RENDERER->get_device(), get_image_view(), nullptr);
 		//vmaDestroyImage(GET_RENDERER->get_allocator(), get_image(), get_allocation());
-
-		//if (m_is_initalized) {
-
-		//	CORE_LOG(Debug, "m_image_view: " << m_image_view << " m_image: " << m_image << " m_allocation: " << m_allocation);
-		//	GET_RENDERER->submit_resource_free([&] {
-
-		//		vkDestroyImageView(GET_RENDERER->get_device(), m_image_view, nullptr);
-		//		vmaDestroyImage(GET_RENDERER->get_allocator(), m_image, m_allocation);
-
-		//		if (m_descriptor_set != nullptr)
-		//			ImGui_ImplVulkan_RemoveTexture(m_descriptor_set);
-		//	});
-		//	m_is_initalized = false;
-		//}
-
+		release();
 		CORE_LOG_SHUTDOWN();
 	}
 
@@ -147,6 +133,31 @@ namespace PFF {
 		VK_CHECK_S(vkCreateImageView(GET_RENDERER->get_device(), &view_info, nullptr, &m_image_view));
 
 		m_is_initalized = true;
+	}
+
+	void image::release() {
+
+		if (m_is_initalized) {
+
+			CORE_LOG(Debug, "m_image_view: " << m_image_view << " m_image: " << m_image << " m_allocation: " << m_allocation);
+			GET_RENDERER->submit_resource_free([image = m_image, image_view = m_image_view, allocation = m_allocation, descriptor_set = m_descriptor_set] {
+				
+				CORE_LOG(Warn, "image_view: " << image_view);
+				vkDestroyImageView(GET_RENDERER->get_device(), image_view, nullptr);
+				CORE_LOG(Warn, "image: " << image);
+				vmaDestroyImage(GET_RENDERER->get_allocator(), image, allocation);
+				CORE_LOG(Warn, "DONE");
+
+				//if (descriptor_set != nullptr)
+				//	ImGui_ImplVulkan_RemoveTexture(descriptor_set);
+			});
+
+			m_image = VK_NULL_HANDLE;
+			m_image_view = VK_NULL_HANDLE;
+			m_allocation = nullptr;
+			m_descriptor_set = VK_NULL_HANDLE;
+			m_is_initalized = false;
+		}
 	}
 
 	VkDescriptorSet image::get_descriptor_set() {

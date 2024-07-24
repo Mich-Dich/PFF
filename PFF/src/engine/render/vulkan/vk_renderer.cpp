@@ -85,6 +85,7 @@ namespace PFF::render::vulkan {
 
 			else if (IS_OF_TYPE(image*)) {
 
+				CORE_LOG(Warn, "Deleting image with the [image*]")
 				image* loc_image = USE_AS(image*);
 				vkDestroyImageView(m_dq_device, loc_image->get_image_view(), nullptr);
 				vmaDestroyImage(m_dq_allocator, loc_image->get_image(), loc_image->get_allocation());
@@ -92,9 +93,15 @@ namespace PFF::render::vulkan {
 			
 			else if (IS_OF_TYPE(ref<image>*)) {
 
+				CORE_LOG(Warn, "Deleting image with the [ref<image>*]")
+
 				ref<image>& loc_image= *USE_AS(ref<image>*);
-				vkDestroyImageView(m_dq_device, loc_image->get_image_view(), nullptr);
-				vmaDestroyImage(m_dq_allocator, loc_image->get_image(), loc_image->get_allocation());
+				//vkDestroyImageView(m_dq_device, loc_image->get_image_view(), nullptr);
+				//vmaDestroyImage(m_dq_allocator, loc_image->get_image(), loc_image->get_allocation());
+
+				//vkDestroyImageView(m_device, img->get_image_view(), nullptr);
+				//vmaDestroyImage(m_allocator, img->get_image(), img->get_allocation());
+
 				loc_image.reset();
 			}
 
@@ -367,6 +374,12 @@ namespace PFF::render::vulkan {
 
 		get_current_frame().deletion_queue.flush();
 		get_current_frame().frame_descriptors.clear_pools(m_device);
+		{	// Free resources in queue
+			for (auto& func : s_resource_free_queue[m_frame_number % FRAME_COUNT])
+				func();
+
+			s_resource_free_queue[m_frame_number % FRAME_COUNT].clear();
+		}
 
 		uint32_t swapchain_image_index;
 		VkResult e = vkAcquireNextImageKHR(m_device, m_swapchain, 1000000000, get_current_frame().swapchain_semaphore, nullptr, &swapchain_image_index);
@@ -544,14 +557,6 @@ namespace PFF::render::vulkan {
 			m_resize_nedded = true;
 			resize_swapchain();
 		}
-
-		// Free resources in queue
-		{
-			for (auto& func : s_resource_free_queue[m_frame_number % FRAME_COUNT])
-				func();
-			s_resource_free_queue[m_frame_number % FRAME_COUNT].clear();
-		}
-
 
 		if (m_frame_number > 184467440737095)
 			m_frame_number = m_frame_number % FRAME_COUNT;
