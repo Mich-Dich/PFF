@@ -30,3 +30,10 @@ set_target_properties(PFF_editor PROPERTIES
     RUNTIME_OUTPUT_DIRECTORY_MINSIZEREL ${CMAKE_BINARY_DIR}/../bin
     RUNTIME_OUTPUT_DIRECTORY_RELWITHDEBINFO ${CMAKE_BINARY_DIR}/../bin
 )
+
+add_custom_command(TARGET PFF_editor POST_BUILD
+    COMMAND ${CMAKE_COMMAND} -E make_directory ${CMAKE_BINARY_DIR}/../bin/assets
+    COMMAND ${CMAKE_COMMAND} -E copy_if_different
+        ${CMAKE_CURRENT_SOURCE_DIR}/assets/logo.png
+        ${CMAKE_BINARY_DIR}/../bin/assets/logo.png
+)
