@@ -39,7 +39,6 @@ namespace PFF {
 		
 		void window_main_content();
 
-		void window_graphics_engine_settings();
 		void window_editor_settings();
 		void window_general_settings();
 

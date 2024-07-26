@@ -16,20 +16,20 @@
 // Constructors
 // ---------------------------------------------------------------------------------------------------------------------------------------
 
-#define DELETE_COPY(name)								name(const name&) = delete;								\
+#define DELETE_COPY(name)								name(const name&) = delete;													\
 														name& operator=(const name&) = delete
 
-#define DELETE_MOVE(name)								name(name&&) = delete;									\
+#define DELETE_MOVE(name)								name(name&&) = delete;														\
 														name& operator=(name&&) = delete
 
-#define DELETE_COPY_MOVE(name)							name(const name&) = delete;								\
-														name& operator=(const name&) = delete;					\
-														name(name&&) = delete;									\
+#define DELETE_COPY_MOVE(name)							name(const name&) = delete;													\
+														name& operator=(const name&) = delete;										\
+														name(name&&) = delete;														\
 														name& operator=(name&&) = delete
 
-#define PFF_DEFAULT_CONSTRUCTORS(name)					public: \
-														name() = default;					\
-														name(const name&) = default;	\
+#define PFF_DEFAULT_CONSTRUCTORS(name)					public:																		\
+														name() = default;															\
+														name(const name&) = default;												\
 														name(name&&) = default;
 
 #define PFF_DEFAULT_COPY_CONSTRUCTOR(name)				name(const name& other) = default;
@@ -45,23 +45,36 @@ name& operator=(name&&) = default;
 // getters && setters
 // ---------------------------------------------------------------------------------------------------------------------------------------
 
+// ------------------------------------------- getters -------------------------------------------
 #define PFF_DEFAULT_GETTER(type, name)					FORCEINLINE type get_##name() { return m_##name;}
-#define PFF_GETTER(type, func_name, var_name)	FORCEINLINE type get_##func_name() { return var_name;}
-
+#define PFF_DEFAULT_GETTER_C(type, name)				FORCEINLINE type get_##name() const { return m_##name;}
 #define PFF_DEFAULT_GETTER_POINTER(type, name)			FORCEINLINE type* get_##name##_pointer() { return &m_##name;}
 
-#define PFF_DEFAULT_GETTERS(type, name)					PFF_DEFAULT_GETTER(type, name)						\
+#define PFF_DEFAULT_GETTERS(type, name)					PFF_DEFAULT_GETTER(type, name)												\
 														PFF_DEFAULT_GETTER_POINTER(type, name)
 
+#define PFF_DEFAULT_GETTERS_C(type, name)				PFF_DEFAULT_GETTER_C(type, name)											\
+														PFF_DEFAULT_GETTER_POINTER(type, name)
 
+#define PFF_GETTER(type, func_name, var_name)			FORCEINLINE type get_##func_name() { return var_name;}
+#define PFF_GETTER_C(type, func_name, var_name)			FORCEINLINE const type get_##func_name() const { return var_name;}
+
+
+// ------------------------------------------- setters -------------------------------------------
 #define PFF_DEFAULT_SETTER(type, name)					FORCEINLINE void set_##name(type name) { m_##name = name;}
+#define PFF_SETTER(type, func_name, var_name)			FORCEINLINE void set_##func_name(type name) { var_name = name;}
 
-#define PFF_DEFAULT_GETTER_SETTER(type, name)			PFF_DEFAULT_GETTER(type, name)				\
+
+// ------------------------------------------- both togetter -------------------------------------------
+#define PFF_DEFAULT_GETTER_SETTER(type, name)			PFF_DEFAULT_GETTER(type, name)												\
 														PFF_DEFAULT_SETTER(type, name)
 
-#define PFF_DEFAULT_GETTER_SETTER_ALL(type, name)		PFF_DEFAULT_SETTER(type, name)				\
-														PFF_DEFAULT_GETTER(type, name)				\
-														PFF_DEFAULT_GETTER_POINTER(type, name)		
+#define PFF_DEFAULT_GETTER_SETTER_C(type, name)			PFF_DEFAULT_GETTER_C(type, name)											\
+														PFF_DEFAULT_SETTER(type, name)
+
+#define PFF_DEFAULT_GETTER_SETTER_ALL(type, name)		PFF_DEFAULT_SETTER(type, name)												\
+														PFF_DEFAULT_GETTER(type, name)												\
+														PFF_DEFAULT_GETTER_POINTER(type, name)
 
 // ---------------------------------------------------------------------------------------------------------------------------------------
 // bit manipulation

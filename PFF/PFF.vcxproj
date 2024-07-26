@@ -199,6 +199,7 @@ IF EXIST ..\bin\Release-windows-x86_64\PFF\PFF.dll\ (xcopy /Q /E /Y /I ..\bin\Re
     </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClInclude Include="src\engine\render\material.h" />
     <ClInclude Include="src\PFF.h" />
     <ClInclude Include="src\application.h" />
     <ClInclude Include="src\engine\Events\Event.h" />
@@ -269,6 +270,7 @@ IF EXIST ..\bin\Release-windows-x86_64\PFF\PFF.dll\ (xcopy /Q /E /Y /I ..\bin\Re
     <ClCompile Include="src\engine\layer\world_layer.cpp" />
     <ClCompile Include="src\engine\platform\pff_window.cpp" />
     <ClCompile Include="src\engine\render\image.cpp" />
+    <ClCompile Include="src\engine\render\material.cpp" />
     <ClCompile Include="src\engine\render\render_util.cpp" />
     <ClCompile Include="src\engine\render\vulkan\vendor\VkBootstrap.cpp" />
     <ClCompile Include="src\engine\render\vulkan\vk_descriptor.cpp" />

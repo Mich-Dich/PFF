@@ -218,7 +218,7 @@ namespace PFF {
 					if (key_binding_details->trigger_flags & INPUT_ACTION_TRIGGER_KEY_TAP) {
 
 						CORE_LOG(Warn, "INPUT_ACTION_TRIGGER_KEY_TAP - not implemented yet");
-						action->time_stamp = time_now;
+						action->m_time_stamp = time_now;
 					}
 
 					if (m_buffer)

@@ -72,9 +72,7 @@ namespace PFF {
 	}
 
 	image::~image() {
-
-		//vkDestroyImageView(GET_RENDERER->get_device(), get_image_view(), nullptr);
-		//vmaDestroyImage(GET_RENDERER->get_allocator(), get_image(), get_allocation());
+		
 		release();
 		CORE_LOG_SHUTDOWN();
 	}
@@ -141,7 +139,7 @@ namespace PFF {
 		if (m_is_initalized) {
 
 			GET_RENDERER->submit_resource_free([image = m_image, image_view = m_image_view, allocation = m_allocation, descriptor_set = m_descriptor_set] {
-				
+
 				vkDestroyImageView(GET_RENDERER->get_device(), image_view, nullptr);
 				vmaDestroyImage(GET_RENDERER->get_allocator(), image, allocation);
 

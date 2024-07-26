@@ -82,7 +82,6 @@ namespace PFF {
 		window_content_browser_0();
 		window_content_browser_1();
 
-		window_graphics_engine_settings();
 		window_editor_settings();
 		window_general_settings();
 
@@ -249,7 +248,7 @@ namespace PFF {
 
 			application::get().get_renderer()->set_imugi_viewport_size(glm::u32vec2(viewport_size.x, viewport_size.y));
 
-			auto* buffer = application::get().get_renderer()->get_draw_image();
+			auto* buffer = application::get().get_renderer()->get_draw_image_pointer();
 
 			ImVec2 viewport_uv = {
 				std::max(std::min(viewport_size.x / buffer->get_width(), 1.f), 0.f),
@@ -476,8 +475,6 @@ namespace PFF {
 
 		ImGui::End();
 	}
-
-	void editor_layer::window_graphics_engine_settings() { }
 
 	void editor_layer::window_editor_settings() { }
 

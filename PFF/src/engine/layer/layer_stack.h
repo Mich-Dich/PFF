@@ -4,8 +4,7 @@ namespace PFF {
 	
 	class layer;
 
-	class PFF_API layer_stack {
-	
+	class PFF_API layer_stack {	
 	public:
 		layer_stack();
 		~layer_stack();

@@ -6,10 +6,11 @@
 #include "engine/game_objects/camera.h"
 
 #include "engine/render/image.h"
+#include "engine/world/components.h"
 
 #if defined PFF_RENDER_API_VULKAN
-#include "engine/render/vulkan/vk_descriptor.h"
-#include "engine/render/vulkan/vk_types.h"
+	#include "engine/render/vulkan/vk_descriptor.h"
+	#include "engine/render/vulkan/vk_types.h"
 #endif
 
 namespace PFF::render {
@@ -36,18 +37,6 @@ namespace PFF::render {
 #endif
 	};
 
-	enum class material_pass : u8 {
-
-		MainColor,
-		Transparent,
-		Other
-	};
-
-	struct material_pipeline {
-
-		VkPipeline			pipeline;
-		VkPipelineLayout	layout;
-	};
 
 
 	struct compute_push_constants {
@@ -61,22 +50,13 @@ namespace PFF::render {
 	struct compute_effect {
 
 		const char* name{};
+		compute_push_constants	data{};
 #if defined PFF_RENDER_API_VULKAN
 		VkPipeline				pipeline{};
 		VkPipelineLayout		layout{};
 #endif
-		compute_push_constants	data{};
 	};
-
-	struct material_instance {
-
-		material_pipeline*	pipeline;
-#if defined PFF_RENDER_API_VULKAN
-		VkDescriptorSet		material_set;
-#endif
-		material_pass		pass_type;
-	};
-
+	
 	struct GPU_scene_data {
 
 		glm::mat4			view;
@@ -87,10 +67,20 @@ namespace PFF::render {
 		glm::vec4			sunlight_color;
 	};
 
+	struct draw_context {
+		std::vector<PFF::mesh_component> opaque_surfaces;
+	};
 
 	// ------------------------------------------------------------------------------------------------------------------------
 	// RENDERER FUNCTIONALLITY
 	// ------------------------------------------------------------------------------------------------------------------------
+
+	// base class for a renderable dynamic object
+	class I_renderable {
+
+		virtual void Draw(const glm::mat4& topMatrix, draw_context& ctx) = 0;
+	};
+
 
 
 	class renderer {

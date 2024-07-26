@@ -7,13 +7,14 @@
 #endif
 
 namespace PFF {
-
+    
+    //class render::vulkan::vk_renderer;
+    
     enum class PFF_API image_format {
         None = 0,
         RGBA,
         RGBA32F
     };
-    
 
     class PFF_API image {
     public:
@@ -46,7 +47,6 @@ namespace PFF {
     private:
 
         //friend class render::vulkan::vk_renderer;
-
         void allocate_memory(void* data, VkExtent3D size, image_format format, bool mipmapped = false, VkImageUsageFlags usage = VK_IMAGE_USAGE_SAMPLED_BIT);
         void allocate_image(VkExtent3D size, VkFormat format, VkImageUsageFlags usage, bool mipmapped = false);
         void release();

@@ -35,7 +35,7 @@ namespace PFF {
 
 		auto serializer_option = force_override ? serializer::option::save_to_file : serializer::option::load_from_file;
 
-		serializer::yaml(config::get_filepath_from_configtype(config::file::input), action->name, serializer_option)
+		serializer::yaml(config::get_filepath_from_configtype(config::file::input), action->m_name, serializer_option)
 			.entry(KEY_VALUE(action->triger_when_paused))
 			.entry(KEY_VALUE(action->duration_in_sec))
 			.entry(KEY_VALUE(action->value))

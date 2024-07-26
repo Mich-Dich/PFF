@@ -210,6 +210,7 @@
     <ClInclude Include="src\util\util.h">
       <Filter>util</Filter>
     </ClInclude>
+    <ClInclude Include="src\engine\render\material.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="src\application.cpp" />
@@ -303,5 +304,6 @@
     <ClCompile Include="src\util\util.cpp">
       <Filter>util</Filter>
     </ClCompile>
+    <ClCompile Include="src\engine\render\material.cpp" />
   </ItemGroup>
 </Project>

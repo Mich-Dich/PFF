@@ -36,6 +36,13 @@
 namespace PFF::render::vulkan {
 
 
+
+
+#define RESORCE_RELASE_TEST 1
+
+
+
+
 	static std::vector<std::vector<std::function<void()>>> s_resource_free_queue;
 
 
@@ -95,10 +102,16 @@ namespace PFF::render::vulkan {
 
 				CORE_LOG(Warn, "Deleting image with the [ref<image>]")
 				ref<image>& loc_image= *USE_AS(ref<image>*);
+
+#if RESORCE_RELASE_TEST
+				loc_image.reset();
+#else
 				vkDestroyImageView(m_dq_device, loc_image->get_image_view(), nullptr);
 				vmaDestroyImage(m_dq_allocator, loc_image->get_image(), loc_image->get_allocation());
 				loc_image->force_initalized_to_FALSE();
 				loc_image.reset();
+#endif // RESORCE_RELASE_TEST
+
 			}
 
 			else
@@ -199,7 +212,7 @@ namespace PFF::render::vulkan {
 			return;
 
 		vkDeviceWaitIdle(m_device);
-		m_state = system_state::inactive; 
+		m_state = system_state::inactive;
 		
 		for (auto frame : m_frames) {
 
@@ -211,6 +224,8 @@ namespace PFF::render::vulkan {
 			frame.frame_descriptors.clear_pools(m_device);
 			frame.deletion_queue.flush();
 		}
+
+		m_metal_rough_material.release_resources(m_device);
 
 		m_deletion_queue.flush();
 		m_deletion_queue.cleanup();
@@ -875,11 +890,13 @@ namespace PFF::render::vulkan {
 
 	void vk_renderer::init_pipelines() {
 
-		//COMPUTE PIPELINES	
+		// COMPUTE PIPELINES	
 		init_pipelines_background();
 
 		// GRAPHICS PIPELINES
 		init_pipeline_mesh();
+
+		m_metal_rough_material.build_pipelines();
 	}
 
 	void vk_renderer::init_pipelines_background() {
@@ -1247,14 +1264,14 @@ namespace PFF::render::vulkan {
 			indexCopy.srcOffset = vertexBufferSize;
 			indexCopy.size = indexBufferSize;
 			vkCmdCopyBuffer(cmd, staging.buffer, new_mesh.index_buffer.buffer, 1, &indexCopy);
-			});
+		});
 
 		destroy_buffer(staging);
 		m_deletion_queue.push_func([=]() {
 
 			destroy_buffer(new_mesh.vertex_buffer);
 			destroy_buffer(new_mesh.index_buffer);
-			});
+		});
 		
 		return new_mesh;
 	}

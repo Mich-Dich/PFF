@@ -5,6 +5,8 @@
 #include "engine/platform/pff_window.h"
 #include "engine/geometry/mesh.h"
 
+#include "engine/render/material.h"
+
 #include <typeindex>
 //#include "vk_types.h"
 //#include <vulkan/vulkan.h>
@@ -57,9 +59,11 @@ namespace PFF::render::vulkan {
 		PFF_DEFAULT_SETTER(glm::u32vec2,			imugi_viewport_size);
 				
 		
+		PFF_DEFAULT_GETTER(VkDescriptorSetLayout,	gpu_scene_data_descriptor_layout);
 
-		FORCEINLINE image* get_draw_image() { return &m_draw_image; }
 
+		PFF_DEFAULT_GETTER_POINTER(image,			draw_image)
+		PFF_DEFAULT_GETTER_POINTER(image,			depth_image)
 
 
 		// !!!!!!!!!!!!!!!! DEV !!!!!!!!!!!!!!!!!!!!!!
@@ -209,6 +213,8 @@ namespace PFF::render::vulkan {
 		VkSampler									m_default_sampler_linear;
 		VkSampler									m_default_sampler_nearest;
 		VkDescriptorSetLayout						m_single_image_descriptor_layout;
+		material_instance							m_default_material;
+		material									m_metal_rough_material;
 
 	};
 }
