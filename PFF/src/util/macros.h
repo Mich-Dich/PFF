@@ -2,6 +2,14 @@
 
 #define ARRAY_SIZE(array)								(sizeof(array) / sizeof(array[0]))
 
+
+#include "core_config.h"
+
+#ifdef PFF_RENDER_API_VULKAN
+	#define RENDERER									PFF::render::vulkan::vk_renderer
+	#define GET_RENDERER								PFF::render::vulkan::vk_renderer::get()
+#endif
+
 // ---------------------------------------------------------------------------------------------------------------------------------------
 // implisite casting
 // ---------------------------------------------------------------------------------------------------------------------------------------
@@ -16,13 +24,16 @@
 // Constructors
 // ---------------------------------------------------------------------------------------------------------------------------------------
 
-#define DELETE_COPY(name)								name(const name&) = delete;													\
+#define DELETE_COPY(name)								public:																		\
+														name(const name&) = delete;													\
 														name& operator=(const name&) = delete
 
-#define DELETE_MOVE(name)								name(name&&) = delete;														\
+#define DELETE_MOVE(name)								public:																		\
+														name(name&&) = delete;														\
 														name& operator=(name&&) = delete
 
-#define DELETE_COPY_MOVE(name)							name(const name&) = delete;													\
+#define DELETE_COPY_MOVE(name)							public:																		\
+														name(const name&) = delete;													\
 														name& operator=(const name&) = delete;										\
 														name(name&&) = delete;														\
 														name& operator=(name&&) = delete
@@ -32,7 +43,8 @@
 														name(const name&) = default;												\
 														name(name&&) = default;
 
-#define PFF_DEFAULT_COPY_CONSTRUCTOR(name)				name(const name& other) = default;
+#define PFF_DEFAULT_COPY_CONSTRUCTOR(name)				public:																		\
+														name(const name& other) = default;
 
 /*
 name(const name&) = default;

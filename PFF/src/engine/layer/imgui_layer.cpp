@@ -115,7 +115,7 @@ namespace PFF::UI {
 	
 		IMGUI_CHECKVERSION();
 		m_context = ImGui::CreateContext();
-		application::get().get_renderer()->imgui_init();
+		GET_RENDERER.imgui_init();
 
 		// Load fonts
 		auto io = ImGui::GetIO();
@@ -131,7 +131,7 @@ namespace PFF::UI {
 		m_fonts["giant"] = io.Fonts->AddFontFromFileTTF("../PFF/assets/fonts/Open_Sans/static/OpenSans-Bold.ttf", 30.f);
 		io.FontDefault = m_fonts["default"];
 
-		application::get().get_renderer()->imgui_create_fonts();
+		GET_RENDERER.imgui_create_fonts();
 		load_UI_data();
 	}
 
@@ -141,7 +141,7 @@ namespace PFF::UI {
 		LOG(Trace, "detach imgui layer");
 
 		//serialize(serializer::option::save_to_file);
-		application::get().get_renderer()->imgui_shutdown();
+		GET_RENDERER.imgui_shutdown();
 		ImGui::DestroyContext(m_context);
 	}
 

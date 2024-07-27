@@ -28,9 +28,9 @@ namespace PFF {
 
 	application* application::s_instance = nullptr;
 
-#if defined PFF_RENDER_API_VULKAN
-	ref<PFF::render::vulkan::vk_renderer> application::m_renderer;
-#endif
+//#if defined PFF_RENDER_API_VULKAN
+//	ref<PFF::render::vulkan::vk_renderer> application::vk_renderer;
+//#endif
 
 	ref<pff_window> application::m_window;
 	//world_layer* application::m_world_layer;
@@ -63,13 +63,12 @@ namespace PFF {
 		// ---------------------------------------- renderer ----------------------------------------
 
 #if defined PFF_RENDER_API_VULKAN
-		m_renderer = create_ref<render::vulkan::vk_renderer>(m_window, m_layerstack);
-		m_renderer->setup();
+		GET_RENDERER.setup(m_window, m_layerstack);
 #endif
 		// ---------------------------------------- layers ----------------------------------------
 		m_world_layer = new world_layer();
 		m_layerstack->push_layer(m_world_layer);
-		m_renderer->set_active_camera(m_world_layer->get_editor_camera());
+		GET_RENDERER.set_active_camera(m_world_layer->get_editor_camera());
 
 		m_imgui_layer = new UI::imgui_layer();
 		m_layerstack->push_overlay(m_imgui_layer);
@@ -81,7 +80,7 @@ namespace PFF {
 
 		PFF_PROFILE_BEGIN_SESSION("shutdown", "benchmarks", "PFF_benchmark_shutdown.json");
 		
-		m_renderer->set_state(system_state::inactive);
+		GET_RENDERER.set_state(system_state::inactive);
 
 		m_layerstack->pop_overlay(m_imgui_layer);
 		delete m_imgui_layer;
@@ -96,7 +95,7 @@ namespace PFF {
 		//delete m_world_layer;
 
 		m_layerstack.reset();
-		m_renderer.reset();
+		GET_RENDERER.shutdown();
 		m_window.reset();
 
 		CORE_LOG_SHUTDOWN();
@@ -142,12 +141,12 @@ namespace PFF {
 				layer->on_update(m_delta_time);
 
 			render(m_delta_time);					// client render
-			m_renderer->draw_frame(m_delta_time);	// engine render
+			GET_RENDERER.draw_frame(m_delta_time);	// engine render
 
 			fps_timer.limit_fps(m_limit_fps, m_fps, m_delta_time, m_work_time, m_sleep_time);
 		}
 
-		m_renderer->wait_idle();
+		GET_RENDERER.wait_idle();
 		
 		CORE_ASSERT(shutdown(), "client application is shutdown", "client-defint shutdown() has failed");			// init user code / potentally make every actor have own function (like UNREAL)
 
@@ -189,7 +188,7 @@ namespace PFF {
 		CORE_ASSERT(init(), "client application is intalized", "client-defint init() has failed");			// init user code / potentally make every actor have own function (like UNREAL)
 
 		// ---------------------------------------- finished setup ----------------------------------------
-		m_renderer->set_state(system_state::active);
+		GET_RENDERER.set_state(system_state::active);
 		m_is_titlebar_hovered = false;
 		m_running = true;
 
@@ -236,12 +235,12 @@ namespace PFF {
 
 		PFF_PROFILE_FUNCTION();
 
-		m_renderer->set_size(event.get_width(), event.get_height());
+		GET_RENDERER.set_size(event.get_width(), event.get_height());
 
 		// m_camera.set_orthographic_projection(-aspect, aspect, -1, 1, 0, 10);
 		// m_camera.set_view_YXZ(glm::vec3(-1.0f, -2.0f, -3.0f), glm::vec3(0.0f));
 		// m_camera.set_view_direction(glm::vec3{ 0.0f }, glm::vec3{ 0.5f, 0.0f, 1.0f });
-		//m_world_layer->get_editor_camera()->set_aspect_ratio(m_renderer->get_aspect_ratio());
+		//m_world_layer->get_editor_camera()->set_aspect_ratio(vk_renderer->get_aspect_ratio());
 
 		return true;
 	}
@@ -252,7 +251,7 @@ namespace PFF {
 
 		fps_timer.limit_fps(false, m_fps, m_delta_time, m_work_time, m_sleep_time);
 		// m_imgui_layer->set_fps_values(m_limit_fps, (m_focus ? m_target_fps : m_nonefocus_fps), m_fps, static_cast<f32>(m_work_time * 1000), static_cast<f32>(m_sleep_time * 1000));
-		m_renderer->refresh(m_delta_time);
+		GET_RENDERER.refresh(m_delta_time);
 		return true;
 	}
 

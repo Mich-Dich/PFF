@@ -99,10 +99,10 @@ namespace PFF::render::vulkan {
         return newPool;
     }
 
-    VkDescriptorPool descriptor_allocator_growable::create_pool(VkDevice device, u32 set_count, std::vector<PoolSizeRatio> pool_ratios) {
+    VkDescriptorPool descriptor_allocator_growable::create_pool(VkDevice device, u32 set_count, std::vector<pool_size_ratio> pool_ratios) {
 
         std::vector<VkDescriptorPoolSize> poolSizes;
-        for (PoolSizeRatio ratio : pool_ratios) {
+        for (pool_size_ratio ratio : pool_ratios) {
 
             VkDescriptorPoolSize loc_desc_size{};
             loc_desc_size.type = ratio.type;
@@ -122,7 +122,7 @@ namespace PFF::render::vulkan {
         return newPool;
     }
     
-    void descriptor_allocator_growable::init(VkDevice device, u32 maxSets, std::vector<PoolSizeRatio> poolRatios) {
+    void descriptor_allocator_growable::init(VkDevice device, u32 maxSets, std::vector<pool_size_ratio> poolRatios) {
 
         ratios.clear();
 

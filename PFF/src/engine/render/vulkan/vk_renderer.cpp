@@ -30,20 +30,17 @@
 
 #include "util/ui/pannel_collection.h"
 
-
 #include "vk_renderer.h"
 
 namespace PFF::render::vulkan {
 
-
-
-
-#define RESORCE_RELASE_TEST 1
-
-
-
+	vk_renderer vk_renderer::s_instance;
 
 	static std::vector<std::vector<std::function<void()>>> s_resource_free_queue;
+
+
+
+
 
 
 	void deletion_queue:: setup(VkDevice device, VmaAllocator allocator) {
@@ -54,11 +51,9 @@ namespace PFF::render::vulkan {
 
 	void deletion_queue::cleanup() {
 		
-		CORE_LOG(Info, "deletion_queue::cleanup()");
-
 		m_dq_device = nullptr;
 		m_dq_allocator = nullptr;
-
+		
 		CORE_LOG_SHUTDOWN();
 	}
 
@@ -84,6 +79,10 @@ namespace PFF::render::vulkan {
 			else VK_DESTROY_FUNC(Pipeline)
 			else VK_DESTROY_FUNC(PipelineLayout)
 
+			else if (IS_OF_TYPE(ref<image>*))						{ USE_AS(ref<image>*)->reset(); }
+			else if (IS_OF_TYPE(vk_buffer*))						{ GET_RENDERER.destroy_buffer(*USE_AS(vk_buffer*)); }
+			else if (IS_OF_TYPE(descriptor_allocator_growable*))	{ USE_AS(descriptor_allocator_growable*)->destroy_pools(m_dq_device); }
+
 			else if (IS_OF_TYPE(descriptor_allocator*)) {
 
 				USE_AS(descriptor_allocator*)->clear_descriptors(m_dq_device);
@@ -92,26 +91,9 @@ namespace PFF::render::vulkan {
 
 			else if (IS_OF_TYPE(image*)) {
 
-				CORE_LOG(Warn, "Deleting image with the [image]")
 				image* loc_image = USE_AS(image*);
 				vkDestroyImageView(m_dq_device, loc_image->get_image_view(), nullptr);
 				vmaDestroyImage(m_dq_allocator, loc_image->get_image(), loc_image->get_allocation());
-			}
-			
-			else if (IS_OF_TYPE(ref<image>*)) {
-
-				CORE_LOG(Warn, "Deleting image with the [ref<image>]")
-				ref<image>& loc_image= *USE_AS(ref<image>*);
-
-#if RESORCE_RELASE_TEST
-				loc_image.reset();
-#else
-				vkDestroyImageView(m_dq_device, loc_image->get_image_view(), nullptr);
-				vmaDestroyImage(m_dq_allocator, loc_image->get_image(), loc_image->get_allocation());
-				loc_image->force_initalized_to_FALSE();
-				loc_image.reset();
-#endif // RESORCE_RELASE_TEST
-
 			}
 
 			else
@@ -122,8 +104,10 @@ namespace PFF::render::vulkan {
 
 	// ============================================= setup  ============================================= 
 
-	vk_renderer::vk_renderer(ref<pff_window> window, ref<PFF::layer_stack> layer_stack)
-		: m_window(window), m_layer_stack(layer_stack) {
+	void vk_renderer::setup(ref<pff_window> window, ref<PFF::layer_stack> layer_stack) {
+
+		m_window = window;
+		m_layer_stack = layer_stack;
 
 		CORE_LOG_INIT();
 
@@ -172,7 +156,7 @@ namespace PFF::render::vulkan {
 		// Get the VkDevice handle used in the rest of a vulkan application
 		m_device = vkbDevice.device;
 		m_chosenGPU = physicalDevice.physical_device;
-		
+
 		// use vkbootstrap to get a Graphics queue
 		m_graphics_queue = vkbDevice.get_queue(vkb::QueueType::graphics).value();
 		m_graphics_queue_family = vkbDevice.get_queue_index(vkb::QueueType::graphics).value();
@@ -192,9 +176,7 @@ namespace PFF::render::vulkan {
 		for (int i = 0; i < FRAME_COUNT; i++)
 			m_frames[i].deletion_queue.setup(m_device, m_allocator);
 
-	}
 
-	void vk_renderer::setup() {
 
 		init_commands();
 		init_swapchain();
@@ -206,7 +188,7 @@ namespace PFF::render::vulkan {
 		m_is_initialized = true;
 	}
 
-	vk_renderer::~vk_renderer() { 
+	void vk_renderer::shutdown() {
 		
 		if (!m_is_initialized)
 			return;
@@ -224,8 +206,6 @@ namespace PFF::render::vulkan {
 			frame.frame_descriptors.clear_pools(m_device);
 			frame.deletion_queue.flush();
 		}
-
-		m_metal_rough_material.release_resources(m_device);
 
 		m_deletion_queue.flush();
 		m_deletion_queue.cleanup();
@@ -728,6 +708,27 @@ namespace PFF::render::vulkan {
 		m_deletion_queue.push_pointer(&m_error_checkerboard_image);
 		m_deletion_queue.push_pointer(m_default_sampler_linear);
 		m_deletion_queue.push_pointer(m_default_sampler_nearest);
+
+		// =========================================================== DEFAULT MATERIAL =========================================================== 
+
+		//set the uniform buffer for the material data
+		vk_buffer material_constant = create_buffer(sizeof(material::material_constants), VK_BUFFER_USAGE_UNIFORM_BUFFER_BIT, VMA_MEMORY_USAGE_CPU_TO_GPU);
+
+		//write the buffer
+		material::material_constants* scene_uniform_data = (material::material_constants*)material_constant.allocation->GetMappedData();
+		scene_uniform_data->color_factors = glm::vec4{ 1, 1, 1, 1 };
+		scene_uniform_data->metal_rough_factors = glm::vec4{ 1, 0.5, 0, 0 };
+
+		m_deletion_queue.push_func([=]() { destroy_buffer(material_constant); });
+
+		material::material_resources material_resources;						//default the material textures
+		material_resources.color_image = m_error_checkerboard_image;
+		material_resources.color_sampler = m_default_sampler_linear;
+		material_resources.metal_rough_image = m_error_checkerboard_image;
+		material_resources.metal_rough_sampler = m_default_sampler_linear;
+		material_resources.data_buffer = material_constant.buffer;
+		material_resources.data_buffer_offset = 0;
+		m_default_material = m_metal_rough_material.write_material(material_pass::main_color, material_resources, m_global_descriptor_allocator);
 	}
 
 	void vk_renderer::init_swapchain() {
@@ -826,11 +827,11 @@ namespace PFF::render::vulkan {
 	void vk_renderer::init_descriptors() {
 
 		//create a descriptor pool that will hold 10 sets with 1 image each
-		std::vector<descriptor_allocator::pool_size_ratio> sizes = {
+		std::vector<descriptor_allocator_growable::pool_size_ratio> sizes = {
 			{ VK_DESCRIPTOR_TYPE_STORAGE_IMAGE, 1 },
-			//{ VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER, 1 }
+			{ VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER, 1 }
 		};
-		global_descriptor_allocator.init_pool(m_device, 10, sizes);
+		m_global_descriptor_allocator.init(m_device, 10, sizes);
 
 		{
 			//make the descriptor set layout for our compute draw
@@ -838,7 +839,7 @@ namespace PFF::render::vulkan {
 			builder.add_binding(0, VK_DESCRIPTOR_TYPE_STORAGE_IMAGE);
 			builder.add_binding(1, VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER);
 			m_draw_image_descriptor_layout = builder.build(m_device, VK_SHADER_STAGE_COMPUTE_BIT);
-			m_draw_image_descriptors = global_descriptor_allocator.allocate(m_device, m_draw_image_descriptor_layout);
+			m_draw_image_descriptors = m_global_descriptor_allocator.allocate(m_device, m_draw_image_descriptor_layout);
 		}
 
 		{
@@ -847,8 +848,10 @@ namespace PFF::render::vulkan {
 			writer.update_set(m_device, m_draw_image_descriptors);
 		}
 		
-		m_deletion_queue.push_pointer(&global_descriptor_allocator);
 		m_deletion_queue.push_pointer(m_draw_image_descriptor_layout);
+		m_deletion_queue.push_pointer(m_single_image_descriptor_layout);
+		m_deletion_queue.push_pointer(m_gpu_scene_data_descriptor_layout);
+		m_deletion_queue.push_func([&] { m_global_descriptor_allocator.destroy_pools(m_device); });
 		
 		{
 			descriptor_layout_builder builder;
@@ -861,7 +864,7 @@ namespace PFF::render::vulkan {
 		for (int i = 0; i < FRAME_COUNT; i++) {
 
 			// create a descriptor pool
-			std::vector<descriptor_allocator_growable::PoolSizeRatio> frame_sizes = {
+			std::vector<descriptor_allocator_growable::pool_size_ratio> frame_sizes = {
 				{ VK_DESCRIPTOR_TYPE_STORAGE_IMAGE, 3 },
 				{ VK_DESCRIPTOR_TYPE_STORAGE_BUFFER, 3 },
 				{ VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER, 3 },
@@ -871,9 +874,7 @@ namespace PFF::render::vulkan {
 			m_frames[i].frame_descriptors = descriptor_allocator_growable{};
 			m_frames[i].frame_descriptors.init(m_device, 1000, frame_sizes);
 
-			m_deletion_queue.push_func([=]() {
-				m_frames[i].frame_descriptors.destroy_pools(m_device);
-			});
+			m_deletion_queue.push_func([=]() { m_frames[i].frame_descriptors.destroy_pools(m_device); });
 		}
 
 		{
@@ -897,13 +898,14 @@ namespace PFF::render::vulkan {
 		init_pipeline_mesh();
 
 		m_metal_rough_material.build_pipelines();
+		m_deletion_queue.push_func([&] { m_metal_rough_material.release_resources(); });
 	}
 
 	void vk_renderer::init_pipelines_background() {
 
 		VkPushConstantRange pushConstant{};
 		pushConstant.offset = 0;
-		pushConstant.size = sizeof(compute_push_constants);
+		pushConstant.size = sizeof(render::compute_push_constants);
 		pushConstant.stageFlags = VK_SHADER_STAGE_COMPUTE_BIT;
 
 		VkPipelineLayoutCreateInfo computeLayout_CI{};
@@ -935,7 +937,7 @@ namespace PFF::render::vulkan {
 		CORE_ASSERT(util::load_shader_module("../PFF/shaders/gradient.comp.spv", m_device, &grid_shader), "", "Error when building the compute shader");
 		compute_pipeline_CI.stage.module = grid_shader;		//change the shader module only
 
-		compute_effect grid{};
+		render::compute_effect grid{};
 		grid.layout = m_gradient_pipeline_layout;
 		grid.name = "sky";
 
@@ -949,7 +951,7 @@ namespace PFF::render::vulkan {
 		CORE_ASSERT(util::load_shader_module("../PFF/shaders/gradient_color.comp.spv", m_device, &gradient_shader), "", "Error when building the compute shader");
 		compute_pipeline_CI.stage.module = gradient_shader;	//change the shader module only
 
-		compute_effect gradient{};
+		render::compute_effect gradient{};
 		gradient.layout = m_gradient_pipeline_layout;
 		gradient.name = "gradient";
 		// --------------- default gradient color --------------- 
@@ -966,7 +968,7 @@ namespace PFF::render::vulkan {
 		CORE_ASSERT(util::load_shader_module("../PFF/shaders/sky.comp.spv", m_device, &sky_shader), "", "Error when building the compute shader");
 		compute_pipeline_CI.stage.module = sky_shader;		//change the shader module only
 
-		compute_effect sky{};
+		render::compute_effect sky{};
 		sky.layout = m_gradient_pipeline_layout;
 		sky.name = "sky";
 		// --------------- default sky parameters --------------- 
@@ -1083,12 +1085,12 @@ namespace PFF::render::vulkan {
 
 	void vk_renderer::draw_internal(VkCommandBuffer cmd) {
 
-		compute_effect& effect = m_background_effects[m_current_background_effect];
+		render::compute_effect& effect = m_background_effects[m_current_background_effect];
 
 		// bind the gradient drawing compute pipeline
 		vkCmdBindPipeline(cmd, VK_PIPELINE_BIND_POINT_COMPUTE, effect.pipeline);
 		vkCmdBindDescriptorSets(cmd, VK_PIPELINE_BIND_POINT_COMPUTE, m_gradient_pipeline_layout, 0, 1, &m_draw_image_descriptors, 0, nullptr);		// bind desc_set containing the draw_image for compute pipeline
-		vkCmdPushConstants(cmd, m_gradient_pipeline_layout, VK_SHADER_STAGE_COMPUTE_BIT, 0, sizeof(compute_push_constants), &effect.data);
+		vkCmdPushConstants(cmd, m_gradient_pipeline_layout, VK_SHADER_STAGE_COMPUTE_BIT, 0, sizeof(render::compute_push_constants), &effect.data);
 
 		// execute the compute pipeline dispatch. We are using 16x16 workgroup size so we need to divide by it
 		vkCmdDispatch(cmd, static_cast<u32>(std::ceil(m_draw_extent.width / 16.0)), static_cast<u32>(std::ceil(m_draw_extent.height / 16.0)), 1);
@@ -1099,19 +1101,19 @@ namespace PFF::render::vulkan {
 		// ========================================== create GPU global scene data ==========================================
 
 		//allocate a new uniform buffer for the scene data
-		vk_buffer gpuSceneDataBuffer = create_buffer(sizeof(GPU_scene_data), VK_BUFFER_USAGE_UNIFORM_BUFFER_BIT, VMA_MEMORY_USAGE_CPU_TO_GPU);
+		vk_buffer gpuSceneDataBuffer = create_buffer(sizeof(render::GPU_scene_data), VK_BUFFER_USAGE_UNIFORM_BUFFER_BIT, VMA_MEMORY_USAGE_CPU_TO_GPU);
 
 		//add it to the deletion queue of this frame so it gets deleted once its been used
 		get_current_frame().deletion_queue.push_func([=]() { destroy_buffer(gpuSceneDataBuffer); });
 
 		//write the buffer
-		GPU_scene_data* sceneUniformData = (GPU_scene_data*)gpuSceneDataBuffer.allocation->GetMappedData();
-		*sceneUniformData = m_scene_data;
+		render::GPU_scene_data* scene_uniform_data = (render::GPU_scene_data*)gpuSceneDataBuffer.allocation->GetMappedData();
+		*scene_uniform_data = m_scene_data;
 
 		//create a descriptor set that binds that buffer and update it
 		VkDescriptorSet globalDescriptor = get_current_frame().frame_descriptors.allocate(m_device, m_gpu_scene_data_descriptor_layout);
 		descriptor_writer writer;
-		writer.write_buffer(0, gpuSceneDataBuffer.buffer, sizeof(GPU_scene_data), 0, VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER);
+		writer.write_buffer(0, gpuSceneDataBuffer.buffer, sizeof(render::GPU_scene_data), 0, VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER);
 		writer.update_set(m_device, globalDescriptor);
 
 		// ==========================================  ==========================================
@@ -1231,11 +1233,11 @@ namespace PFF::render::vulkan {
 	void vk_renderer::destroy_buffer(const vk_buffer& buffer) { vmaDestroyBuffer(m_allocator, buffer.buffer, buffer.allocation); }
 
 
-	GPU_mesh_buffers vk_renderer::upload_mesh(std::vector<u32> indices, std::vector<PFF::geometry::vertex> vertices) {
+	render::GPU_mesh_buffers vk_renderer::upload_mesh(std::vector<u32> indices, std::vector<PFF::geometry::vertex> vertices) {
 
 		const size_t vertexBufferSize = vertices.size() * sizeof(PFF::geometry::vertex);
 		const size_t indexBufferSize = indices.size() * sizeof(u32);
-		GPU_mesh_buffers new_mesh{};
+		render::GPU_mesh_buffers new_mesh{};
 		new_mesh.vertex_buffer = create_buffer(vertexBufferSize, VK_BUFFER_USAGE_STORAGE_BUFFER_BIT | VK_BUFFER_USAGE_TRANSFER_DST_BIT | VK_BUFFER_USAGE_SHADER_DEVICE_ADDRESS_BIT, VMA_MEMORY_USAGE_GPU_ONLY);
 		
 		//find the adress of the vertex buffer

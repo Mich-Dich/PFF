@@ -17,7 +17,6 @@
 
 #include "image.h"
 
-#define GET_RENDERER					application::get().get_renderer()
 
 namespace PFF {
 
@@ -41,7 +40,7 @@ namespace PFF {
 		static uint32_t get_vulkan_memory_type(VkMemoryPropertyFlags properties, u32 type_bits) {
 			
 			VkPhysicalDeviceMemoryProperties prop;
-			vkGetPhysicalDeviceMemoryProperties(GET_RENDERER->get_chosenGPU(), &prop);
+			vkGetPhysicalDeviceMemoryProperties(GET_RENDERER.get_chosenGPU(), &prop);
 			for (uint32_t i = 0; i < prop.memoryTypeCount; i++) {
 				if ((prop.memoryTypes[i].propertyFlags & properties) == properties && type_bits & (1 << i))
 					return i;
@@ -80,11 +79,11 @@ namespace PFF {
 	void image::allocate_memory(void* data, VkExtent3D size, image_format format, bool mipmapped, VkImageUsageFlags usage) {
 
 		size_t data_size = size.depth * size.width * size.height * util::bytes_per_pixel(format);
-		vk_buffer uploadbuffer = GET_RENDERER->create_buffer(data_size, VK_BUFFER_USAGE_TRANSFER_SRC_BIT, VMA_MEMORY_USAGE_CPU_TO_GPU);
+		vk_buffer uploadbuffer = GET_RENDERER.create_buffer(data_size, VK_BUFFER_USAGE_TRANSFER_SRC_BIT, VMA_MEMORY_USAGE_CPU_TO_GPU);
 		memcpy(uploadbuffer.info.pMappedData, data, data_size);
 		allocate_image(size, util::image_format_to_vulkan_vormat(format), usage | VK_IMAGE_USAGE_TRANSFER_DST_BIT | VK_IMAGE_USAGE_TRANSFER_SRC_BIT, mipmapped);
 
-		GET_RENDERER->immediate_submit([&](VkCommandBuffer cmd) {
+		GET_RENDERER.immediate_submit([&](VkCommandBuffer cmd) {
 
 			render::vulkan::util::transition_image(cmd, m_image, VK_IMAGE_LAYOUT_UNDEFINED, VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL);
 
@@ -102,7 +101,7 @@ namespace PFF {
 			render::vulkan::util::transition_image(cmd, m_image, VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL, VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL);
 		});
 
-		GET_RENDERER->destroy_buffer(uploadbuffer);
+		GET_RENDERER.destroy_buffer(uploadbuffer);
 		m_is_initalized = true;
 	}
 
@@ -119,7 +118,7 @@ namespace PFF {
 		VmaAllocationCreateInfo allocinfo = {};
 		allocinfo.usage = VMA_MEMORY_USAGE_GPU_ONLY;
 		allocinfo.requiredFlags = VkMemoryPropertyFlags(VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT);
-		VK_CHECK_S(vmaCreateImage(GET_RENDERER->get_allocator(), &img_info, &allocinfo, &m_image, &m_allocation, nullptr));
+		VK_CHECK_S(vmaCreateImage(GET_RENDERER.get_allocator(), &img_info, &allocinfo, &m_image, &m_allocation, nullptr));
 
 		// if the format is a depth format, we will need to have it use the correct aspect flag
 		VkImageAspectFlags aspectFlag = VK_IMAGE_ASPECT_COLOR_BIT;
@@ -129,7 +128,7 @@ namespace PFF {
 		// build a image-view for the image
 		VkImageViewCreateInfo view_info = render::vulkan::init::imageview_create_info(format, m_image, aspectFlag);
 		view_info.subresourceRange.levelCount = img_info.mipLevels;
-		VK_CHECK_S(vkCreateImageView(GET_RENDERER->get_device(), &view_info, nullptr, &m_image_view));
+		VK_CHECK_S(vkCreateImageView(GET_RENDERER.get_device(), &view_info, nullptr, &m_image_view));
 
 		m_is_initalized = true;
 	}
@@ -138,10 +137,10 @@ namespace PFF {
 
 		if (m_is_initalized) {
 
-			GET_RENDERER->submit_resource_free([image = m_image, image_view = m_image_view, allocation = m_allocation, descriptor_set = m_descriptor_set] {
+			GET_RENDERER.submit_resource_free([image = m_image, image_view = m_image_view, allocation = m_allocation, descriptor_set = m_descriptor_set] {
 
-				vkDestroyImageView(GET_RENDERER->get_device(), image_view, nullptr);
-				vmaDestroyImage(GET_RENDERER->get_allocator(), image, allocation);
+				vkDestroyImageView(GET_RENDERER.get_device(), image_view, nullptr);
+				vmaDestroyImage(GET_RENDERER.get_allocator(), image, allocation);
 
 				if (descriptor_set != nullptr)
 					ImGui_ImplVulkan_RemoveTexture(descriptor_set);
@@ -158,7 +157,7 @@ namespace PFF {
 	VkDescriptorSet image::get_descriptor_set() {
 
 		if (m_descriptor_set == nullptr)
-			m_descriptor_set = (VkDescriptorSet)ImGui_ImplVulkan_AddTexture(GET_RENDERER->get_default_sampler_nearest(), m_image_view, VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL);
+			m_descriptor_set = (VkDescriptorSet)ImGui_ImplVulkan_AddTexture(GET_RENDERER.get_default_sampler_nearest(), m_image_view, VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL);
 
 		return m_descriptor_set;
 	};

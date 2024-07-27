@@ -40,9 +40,9 @@ namespace PFF {
 
 		// static
 #if defined PFF_RENDER_API_VULKAN
-		FORCEINLINE static ref<PFF::render::vulkan::vk_renderer> get_renderer()		{ return m_renderer; }
+		FORCEINLINE static RENDERER& get_renderer()										{ return GET_RENDERER; }
 #endif
-		FORCEINLINE static application& get()										{ return *s_instance; }
+		FORCEINLINE static application& get()											{ return *s_instance; }
 		//FORCEINLINE static ref<pff_window> get_window()								{ return m_window; }
 		//FORCEINLINE UI::imgui_layer* get_imgui_layer()								{ return m_imgui_layer; }
 		//FORCEINLINE world_layer* get_world_layer()									{ return m_world_layer; }
@@ -51,8 +51,10 @@ namespace PFF {
 		PFF_DEFAULT_GETTER(UI::imgui_layer*,		imgui_layer);
 		PFF_DEFAULT_GETTER(world_layer*,			world_layer);
 
+#if defined PFF_RENDER_API_VULKAN
+		FORCEINLINE static void set_render_state(system_state state)				{ GET_RENDERER.set_state(state); }
+#endif
 		//FORCEINLINE ref<game_map> get_current_map()								{ return m_world_layer->get_current_map(); }
-		FORCEINLINE static void set_render_state(system_state state)				{ m_renderer->set_state(state); }
 		FORCEINLINE static void close_application()									{ m_running = false; }
 		FORCEINLINE static bool is_titlebar_hovered()								{ return m_is_titlebar_hovered; }
 
@@ -91,9 +93,9 @@ namespace PFF {
 
 		static application* s_instance;
 
-#if defined PFF_RENDER_API_VULKAN
-		static ref<PFF::render::vulkan::vk_renderer> m_renderer;
-#endif
+//#if defined PFF_RENDER_API_VULKAN
+//		static ref<PFF::render::vulkan::vk_renderer> m_renderer;
+//#endif
 
 		static ref<pff_window> m_window;
 		static bool m_is_titlebar_hovered;

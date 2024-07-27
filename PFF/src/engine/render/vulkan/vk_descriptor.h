@@ -29,12 +29,12 @@ namespace PFF::render::vulkan {
     struct descriptor_allocator_growable {
     public:
       
-        struct PoolSizeRatio {
+        struct pool_size_ratio {
             VkDescriptorType type;
             float ratio;
         };
 
-        void init(VkDevice device, u32 initialSets, std::vector<PoolSizeRatio> poolRatios);
+        void init(VkDevice device, u32 initialSets, std::vector<pool_size_ratio> poolRatios);
         void clear_pools(VkDevice device);
         void destroy_pools(VkDevice device);
         VkDescriptorSet allocate(VkDevice device, VkDescriptorSetLayout layout, void* pNext = nullptr);
@@ -42,9 +42,9 @@ namespace PFF::render::vulkan {
     private:
 
         VkDescriptorPool get_pool(VkDevice device);
-        VkDescriptorPool create_pool(VkDevice device, u32 set_count, std::vector<PoolSizeRatio> pool_ratios);
+        VkDescriptorPool create_pool(VkDevice device, u32 set_count, std::vector<pool_size_ratio> pool_ratios);
 
-        std::vector<PoolSizeRatio> ratios;
+        std::vector<pool_size_ratio> ratios;
         std::vector<VkDescriptorPool> full_pools;
         std::vector<VkDescriptorPool> ready_pools;
         u32 sets_per_pool = 1;

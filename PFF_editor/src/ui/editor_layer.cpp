@@ -246,9 +246,9 @@ namespace PFF {
 			ImVec2 viewport_size = ImGui::GetWindowSize();
 			viewport_size.y -= ImGui::GetFrameHeight();
 
-			application::get().get_renderer()->set_imugi_viewport_size(glm::u32vec2(viewport_size.x, viewport_size.y));
+			application::get().get_renderer().set_imugi_viewport_size(glm::u32vec2(viewport_size.x, viewport_size.y));
 
-			auto* buffer = application::get().get_renderer()->get_draw_image_pointer();
+			auto* buffer = application::get().get_renderer().get_draw_image_pointer();
 
 			ImVec2 viewport_uv = {
 				std::max(std::min(viewport_size.x / buffer->get_width(), 1.f), 0.f),
@@ -284,12 +284,12 @@ namespace PFF {
 		ImGui::SetNextWindowBgAlpha(0.8f); // Transparent background
 		if (ImGui::Begin("Render Debug", &m_show_renderer_backgrond_effect, window_flags)) {
 
-			render::compute_effect& selected = application::get().get_renderer()->get_current_background_effect();
-			int& background_effect_index = application::get().get_renderer()->get_current_background_effect_index();
+			render::compute_effect& selected = application::get().get_renderer().get_current_background_effect();
+			int& background_effect_index = application::get().get_renderer().get_current_background_effect_index();
 
 			if (UI::begin_table("renderer background values")) {
 
-				UI::table_row_slider("Effects", background_effect_index, 0, application::get().get_renderer()->get_number_of_background_effects() -1 );
+				UI::table_row_slider("Effects", background_effect_index, 0, application::get().get_renderer().get_number_of_background_effects() -1 );
 
 				if (background_effect_index == 0) {}
 

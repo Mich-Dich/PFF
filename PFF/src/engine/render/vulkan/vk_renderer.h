@@ -45,8 +45,9 @@ namespace PFF::render::vulkan {
 	class vk_renderer : public PFF::render::renderer {
 	public:
 
-		vk_renderer(ref<pff_window> window, ref<PFF::layer_stack> layer_stack);
-		~vk_renderer();
+		vk_renderer(const vk_renderer&) = delete;
+
+		static vk_renderer& get() { return s_instance; }
 
 		FORCEINLINE f32 get_aspect_ratio()			{ return 1.f; };			// TODO: finish
 		PFF_DEFAULT_GETTERS(VkPhysicalDevice,		chosenGPU);
@@ -67,7 +68,8 @@ namespace PFF::render::vulkan {
 
 
 		// !!!!!!!!!!!!!!!! DEV !!!!!!!!!!!!!!!!!!!!!!
-		void setup();
+		void setup(ref<pff_window> window, ref<PFF::layer_stack> layer_stack);
+		void shutdown();
 
 		// --------------- general ----------------
 		void draw_frame(f32 delta_time) override;
@@ -96,18 +98,21 @@ namespace PFF::render::vulkan {
 
 	private:
 
+		vk_renderer() {}
+		static vk_renderer s_instance;
+
 		friend class deletion_queue;
 
 		struct FrameData {
 
-			VkSemaphore						swapchain_semaphore{}, render_semaphore{};
-			VkFence							render_fence{};
+			VkSemaphore								swapchain_semaphore{}, render_semaphore{};
+			VkFence									render_fence{};
 
-			VkCommandPool					command_pool{};
-			VkCommandBuffer					main_command_buffer{};
+			VkCommandPool							command_pool{};
+			VkCommandBuffer							main_command_buffer{};
 
-			deletion_queue					deletion_queue{};
-			descriptor_allocator_growable	frame_descriptors;
+			deletion_queue							deletion_queue{};
+			descriptor_allocator_growable			frame_descriptors;
 
 		};
 
@@ -135,7 +140,7 @@ namespace PFF::render::vulkan {
 
 		// TIP: Note that this pattern is not very efficient, as CPU is waiting for the GPU command to fully execute before continuing with our CPU side logic
 		//		This is should be put on a background thread, whose sole job is to execute uploads like this one, and deleting/reusing the staging buffers.
-		GPU_mesh_buffers upload_mesh(std::vector<u32> indices, std::vector<PFF::geometry::vertex> vertices);
+		render::GPU_mesh_buffers upload_mesh(std::vector<u32> indices, std::vector<PFF::geometry::vertex> vertices);
 
 		bool m_is_initialized = false;
 		u64 m_frame_number = 0;
@@ -176,7 +181,8 @@ namespace PFF::render::vulkan {
 		glm::u32vec2								m_imugi_viewport_size{100};
 
 		// ---------------------------- descriptors ---------------------------- 
-		descriptor_allocator						global_descriptor_allocator{};
+		//descriptor_allocator						global_descriptor_allocator{};
+		descriptor_allocator_growable				m_global_descriptor_allocator;
 		VkDescriptorSet								m_draw_image_descriptors{};
 		VkDescriptorSetLayout						m_draw_image_descriptor_layout{};
 		
@@ -202,7 +208,7 @@ namespace PFF::render::vulkan {
 		std::vector<ref<PFF::geometry::mesh>>		T_test_meshes;
 
 		// ---------------------------- GPU side global scene data ---------------------------- 
-		GPU_scene_data								m_scene_data;
+		render::GPU_scene_data						m_scene_data;
 		VkDescriptorSetLayout						m_gpu_scene_data_descriptor_layout;
 
 		// ---------------------------- default textures ---------------------------- 
