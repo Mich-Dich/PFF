@@ -205,7 +205,7 @@ namespace PFF::render::vulkan {
 		VkPipeline									m_mesh_pipeline{};
 
 		//vk_GPU_mesh_buffers		T_rectangle;
-		std::vector<ref<PFF::geometry::mesh>>		T_test_meshes;
+		std::vector<ref<PFF::geometry::mesh_asset>>	T_test_meshes;
 
 		// ---------------------------- GPU side global scene data ---------------------------- 
 		render::GPU_scene_data						m_scene_data;

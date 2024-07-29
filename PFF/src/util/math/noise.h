@@ -57,44 +57,44 @@
 namespace PFF::util {
 
     enum class noise_type {
-        OpenSimplex2,
-        OpenSimplex2S,
-        Cellular,
-        Perlin,
-        ValueCubic,
-        Value
+        open_simplex2,
+        open_simplex2S,
+        cellular,
+        perlin,
+        value_cubic,
+        value
     };
 
     enum class rotation_type_3D {
-        None,
-        ImproveXYPlanes,
-        ImproveXZPlanes
+        none,
+        improve_XY_planes,
+        improve_XZ_planes
     };
 
     enum class fractal_type {
-        None,
+        none,
         FBm,
-        Ridged,
-        PingPong,
-        DomainWarpProgressive,
-        DomainWarpIndependent
+        ridged,
+        ping_pong,
+        domain_warp_progressive,
+        domain_warp_independent
     };
 
     enum class cellular_distance_function {
-        Euclidean,
-        EuclideanSq,
-        Manhattan,
-        Hybrid
+        euclidean,
+        euclideanSq,
+        manhattan,
+        hybrid
     };
 
     enum class cellular_return_type {
-        CellValue,
-        Distance,
-        Distance2,
-        Distance2Add,
-        Distance2Sub,
-        Distance2Mul,
-        Distance2Div
+        cell_value,
+        distance,
+        distance_2,
+        distance_2Add,
+        distance_2Sub,
+        distance_2Mul,
+        distance_2Div
     };
 
     enum class domain_warp_type {
@@ -135,7 +135,7 @@ namespace PFF::util {
         }
 
         // @brief Sets method for combining octaves in all fractal noise types
-        void SetFractalType(fractal_type fractalType) { m_fractal_type = fractalType; }
+        void Set_fractal_type(fractal_type fractalType) { m_fractal_type = fractalType; }
 
         // @brief Sets octave count for all fractal noise types 
         // @brief default: 3
@@ -195,10 +195,10 @@ namespace PFF::util {
             case fractal_type::FBm:
                 return GenFractalFBm(x, y);
 
-            case fractal_type::Ridged:
+            case fractal_type::ridged:
                 return GenFractalRidged(x, y);
 
-            case fractal_type::PingPong:
+            case fractal_type::ping_pong:
                 return GenFractalPingPong(x, y);
 
             default:
@@ -217,10 +217,10 @@ namespace PFF::util {
             case fractal_type::FBm:
                 return GenFractalFBm(x, y, z);
 
-            case fractal_type::Ridged:
+            case fractal_type::ridged:
                 return GenFractalRidged(x, y, z);
 
-            case fractal_type::PingPong:
+            case fractal_type::ping_pong:
                 return GenFractalPingPong(x, y, z);
 
             default:
@@ -285,19 +285,19 @@ namespace PFF::util {
         };
 
         int                         m_seed = 1337;
-        noise_type                  m_noise_type = noise_type::OpenSimplex2;
+        noise_type                  m_noise_type = noise_type::open_simplex2;
         float                       m_frequency = 0.01f;
-        rotation_type_3D            m_rotation_type_3D = rotation_type_3D::None;
+        rotation_type_3D            m_rotation_type_3D = rotation_type_3D::none;
         transform_type_3D           m_transform_type_3D = transform_type_3D::DefaultOpenSimplex2;
-        fractal_type                m_fractal_type = fractal_type::None;
+        fractal_type                m_fractal_type = fractal_type::none;
         int                         m_octaves = 3;
         float                       m_lacunarity = 2.0f;
         float                       m_gain = 0.5f;
         float                       m_weighted_strength = 0.0f;
         float                       m_ping_pong_strength = 2.0f;
         float                       m_fractal_bounding = 1 / 1.75f;
-        cellular_distance_function  m_cellular_distance_function = cellular_distance_function::EuclideanSq;
-        cellular_return_type        m_cellular_return_type = cellular_return_type::Distance;
+        cellular_distance_function  m_cellular_distance_function = cellular_distance_function::euclideanSq;
+        cellular_return_type        m_cellular_return_type = cellular_return_type::distance;
         float                       m_cellular_jitter_modifier = 1.0f;
         domain_warp_type            mDomainWarpType = domain_warp_type::OpenSimplex2;
         transform_type_3D           mWarpTransformType3D = transform_type_3D::DefaultOpenSimplex2;
@@ -468,22 +468,22 @@ namespace PFF::util {
         template <typename FNfloat>
         float GenNoiseSingle(int seed, FNfloat x, FNfloat y) const {
             switch (m_noise_type) {
-            case noise_type::OpenSimplex2:
+            case noise_type::open_simplex2:
                 return SingleSimplex(seed, x, y);
 
-            case noise_type::OpenSimplex2S:
+            case noise_type::open_simplex2S:
                 return SingleOpenSimplex2S(seed, x, y);
 
-            case noise_type::Cellular:
+            case noise_type::cellular:
                 return SingleCellular(seed, x, y);
 
-            case noise_type::Perlin:
+            case noise_type::perlin:
                 return SinglePerlin(seed, x, y);
 
-            case noise_type::ValueCubic:
+            case noise_type::value_cubic:
                 return SingleValueCubic(seed, x, y);
 
-            case noise_type::Value:
+            case noise_type::value:
                 return SingleValue(seed, x, y);
             default:
                 return 0;
@@ -493,22 +493,22 @@ namespace PFF::util {
         template <typename FNfloat>
         float GenNoiseSingle(int seed, FNfloat x, FNfloat y, FNfloat z) const {
             switch (m_noise_type) {
-            case noise_type::OpenSimplex2:
+            case noise_type::open_simplex2:
                 return SingleOpenSimplex2(seed, x, y, z);
 
-            case noise_type::OpenSimplex2S:
+            case noise_type::open_simplex2S:
                 return SingleOpenSimplex2S(seed, x, y, z);
 
-            case noise_type::Cellular:
+            case noise_type::cellular:
                 return SingleCellular(seed, x, y, z);
 
-            case noise_type::Perlin:
+            case noise_type::perlin:
                 return SinglePerlin(seed, x, y, z);
 
-            case noise_type::ValueCubic:
+            case noise_type::value_cubic:
                 return SingleValueCubic(seed, x, y, z);
 
-            case noise_type::Value:
+            case noise_type::value:
                 return SingleValue(seed, x, y, z);
             default:
                 return 0;
@@ -524,8 +524,8 @@ namespace PFF::util {
             y *= m_frequency;
 
             switch (m_noise_type) {
-            case noise_type::OpenSimplex2:
-            case noise_type::OpenSimplex2S:
+            case noise_type::open_simplex2:
+            case noise_type::open_simplex2S:
             {
                 const FNfloat SQRT3 = (FNfloat)1.7320508075688772935274463415059;
                 const FNfloat F2 = 0.5f * (SQRT3 - 1);
@@ -546,7 +546,7 @@ namespace PFF::util {
             z *= m_frequency;
 
             switch (m_transform_type_3D) {
-            case TransformType3D::ImproveXYPlanes:
+            case TransformType3D::improve_XY_planes:
             {
                 FNfloat xy = x + y;
                 FNfloat s2 = xy * -(FNfloat)0.211324865405187;
@@ -556,7 +556,7 @@ namespace PFF::util {
                 z += xy * (FNfloat)0.577350269189626;
             }
             break;
-            case TransformType3D::ImproveXZPlanes:
+            case TransformType3D::improveXZ_planes:
             {
                 FNfloat xz = x + z;
                 FNfloat s2 = xz * -(FNfloat)0.211324865405187;
@@ -566,7 +566,7 @@ namespace PFF::util {
                 y += xz * (FNfloat)0.577350269189626;
             }
             break;
-            case TransformType3D::DefaultOpenSimplex2:
+            case TransformType3D::default_open_simplex2:
             {
                 const FNfloat R3 = (FNfloat)(2.0 / 3.0);
                 FNfloat r = (x + y + z) * R3; // Rotation, not skew
@@ -582,16 +582,16 @@ namespace PFF::util {
 
         void update_transform_type_3D() {
             switch (m_rotation_type_3D) {
-            case rotation_type_3D::ImproveXYPlanes:
+            case rotation_type_3D::improve_XY_planes:
                 m_transform_type_3D = transform_type_3D::ImproveXYPlanes;
                 break;
-            case rotation_type_3D::ImproveXZPlanes:
+            case rotation_type_3D::improve_XZ_planes:
                 m_transform_type_3D = transform_type_3D::ImproveXZPlanes;
                 break;
             default:
                 switch (m_noise_type) {
-                case noise_type::OpenSimplex2:
-                case noise_type::OpenSimplex2S:
+                case noise_type::open_simplex2:
+                case noise_type::open_simplex2S:
                     m_transform_type_3D = transform_type_3D::DefaultOpenSimplex2;
                     break;
                 default:
@@ -662,10 +662,10 @@ namespace PFF::util {
 
         void update_warp_transform_type_3D() {
             switch (m_rotation_type_3D) {
-            case rotation_type_3D::ImproveXYPlanes:
+            case rotation_type_3D::improve_XY_planes:
                 mWarpTransformType3D = transform_type_3D::ImproveXYPlanes;
                 break;
-            case rotation_type_3D::ImproveXZPlanes:
+            case rotation_type_3D::improve_XZ_planes:
                 mWarpTransformType3D = transform_type_3D::ImproveXZPlanes;
                 break;
             default:
@@ -1264,8 +1264,8 @@ namespace PFF::util {
 
             switch (m_cellular_distance_function) {
             default:
-            case cellular_distance_function::Euclidean:
-            case cellular_distance_function::EuclideanSq:
+            case cellular_distance_function::euclidean:
+            case cellular_distance_function::euclideanSq:
                 for (int xi = xr - 1; xi <= xr + 1; xi++) {
                     int yPrimed = yPrimedBase;
 
@@ -1288,7 +1288,7 @@ namespace PFF::util {
                     xPrimed += PrimeX;
                 }
                 break;
-            case cellular_distance_function::Manhattan:
+            case cellular_distance_function::manhattan:
                 for (int xi = xr - 1; xi <= xr + 1; xi++) {
                     int yPrimed = yPrimedBase;
 
@@ -1311,7 +1311,7 @@ namespace PFF::util {
                     xPrimed += PrimeX;
                 }
                 break;
-            case cellular_distance_function::Hybrid:
+            case cellular_distance_function::hybrid:
                 for (int xi = xr - 1; xi <= xr + 1; xi++) {
                     int yPrimed = yPrimedBase;
 
@@ -1336,33 +1336,33 @@ namespace PFF::util {
                 break;
             }
 
-            if (m_cellular_distance_function == cellular_distance_function::Euclidean && m_cellular_return_type >= cellular_return_type::Distance) {
+            if (m_cellular_distance_function == cellular_distance_function::euclidean && m_cellular_return_type >= cellular_return_type::distance) {
                 distance0 = FastSqrt(distance0);
 
-                if (m_cellular_return_type >= cellular_return_type::Distance2) {
+                if (m_cellular_return_type >= cellular_return_type::distance_2) {
                     distance1 = FastSqrt(distance1);
                 }
             }
 
             switch (m_cellular_return_type) {
-            case cellular_return_type::CellValue:
+            case cellular_return_type::cell_value:
                 return closestHash * (1 / 2147483648.0f);
-            case cellular_return_type::Distance:
+            case cellular_return_type::distance:
                 return distance0 - 1;
 
-            case cellular_return_type::Distance2:
+            case cellular_return_type::distance_2:
                 return distance1 - 1;
 
-            case cellular_return_type::Distance2Add:
+            case cellular_return_type::distance_2Add:
                 return (distance1 + distance0) * 0.5f - 1;
 
-            case cellular_return_type::Distance2Sub:
+            case cellular_return_type::distance_2Sub:
                 return distance1 - distance0 - 1;
 
-            case cellular_return_type::Distance2Mul:
+            case cellular_return_type::distance_2Mul:
                 return distance1 * distance0 * 0.5f - 1;
 
-            case cellular_return_type::Distance2Div:
+            case cellular_return_type::distance_2Div:
                 return distance0 / distance1 - 1;
             default:
                 return 0;
@@ -1386,8 +1386,8 @@ namespace PFF::util {
             int zPrimedBase = (zr - 1) * PrimeZ;
 
             switch (m_cellular_distance_function) {
-            case cellular_distance_function::Euclidean:
-            case cellular_distance_function::EuclideanSq:
+            case cellular_distance_function::euclidean:
+            case cellular_distance_function::euclideanSq:
                 for (int xi = xr - 1; xi <= xr + 1; xi++) {
                     int yPrimed = yPrimedBase;
 

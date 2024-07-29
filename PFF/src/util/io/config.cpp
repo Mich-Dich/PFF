@@ -40,6 +40,7 @@ namespace PFF {
                 CORE_LOG(Trace, "Confirmed existence of config file: [" << file_path << "]");
                 config_file.close();
             }
+
         }
 
         /*

@@ -26,6 +26,8 @@
 #include "util/UI/pannel_collection.h"
 #include "engine/layer/layer_stack.h"
 #include "engine/layer/layer.h"
+#include "engine/world/map.h"
+
 #include <cstdlib> // for system calls (conpieling shaders)
 
 #include "util/ui/pannel_collection.h"
@@ -560,7 +562,7 @@ namespace PFF::render::vulkan {
 
 #if 0
 		T_test_meshes = IO::mesh_loader::load_gltf_meshes("../PFF/assets/meshes/basicmesh.glb").value();
-#elif 0
+#elif 1
 		T_test_meshes = IO::mesh_loader::load_gltf_meshes("../PFF/assets/meshes/BP-688.glb").value();
 #else	// procedural terrain test
 
@@ -576,8 +578,8 @@ namespace PFF::render::vulkan {
 			PFF_PROFILE_SCOPE("Procedural Grid Mesh");
 #endif
 		
-		PFF::util::noise noise(PFF::util::noise_type::Perlin);
-		noise.SetFractalType(PFF::util::fractal_type::FBm);
+		PFF::util::noise noise(PFF::util::noise_type::perlin);
+		noise.Set_fractal_type(PFF::util::fractal_type::FBm);
 		noise.set_frequency(0.005f);
 		noise.set_fractal_octaves(4);
 		noise.set_fractal_lacunarity(2.3f);
@@ -1166,6 +1168,9 @@ namespace PFF::render::vulkan {
 		GPU_draw_push_constants push_constants;
 		push_constants.world_matrix = projection * view;
 		
+
+
+
 		// draw dummy mesh
 		push_constants.vertex_buffer = T_test_meshes[selected_mesh]->mesh_buffers.vertex_buffer_address;
 		vkCmdPushConstants(cmd, m_mesh_pipeline_layout, VK_SHADER_STAGE_VERTEX_BIT, 0, sizeof(GPU_draw_push_constants), &push_constants);
@@ -1173,6 +1178,127 @@ namespace PFF::render::vulkan {
 
 		for (u64 y = 0; y < T_test_meshes[selected_mesh]->surfaces.size(); y++)
 			vkCmdDrawIndexed(cmd, T_test_meshes[selected_mesh]->surfaces[y].count, 1, T_test_meshes[selected_mesh]->surfaces[y].startIndex, 0, 0);
+
+
+
+
+
+
+
+
+// world_layer is a layer in the layerstack of the engine, it contains maps. // A large ingame world can be split in diffrent chunks (maps)
+// active_maps is a list of maps the engine should display, a map can be as large as you want
+#define PROCCESS 0
+
+#if PROCCESS == 0
+
+		// PROCCESS V0
+		// 1. get world_layer
+		// 2. get active_maps from world_layer
+		// 3. get all mesh components
+		// 4. draw all mesh components
+
+		// pro:
+			// all code for rendering is in one place
+			
+
+		// con:
+
+
+		// loop over all maps in worlds
+		auto& all_maps = application::get().get_world_layer()->get_maps();
+		for (ref<map> loc_map : all_maps) {
+
+			if (!loc_map->is_active())		// skip maps that are not-loaded/hidden
+				continue;
+
+			// get every entity with [transform] and [mesh]
+			auto group = loc_map->get_registry().group<transform_component>(entt::get<mesh_component>);
+			for (auto entity : group) {
+
+				// Draw every surface in mesh_asset
+				auto& [transform, mesh_comp] = group.get<transform_component, mesh_component>(entity);
+				for (auto& loc_surface : mesh_comp.mesh_asset->surfaces) {
+
+					vkCmdBindPipeline(cmd, VK_PIPELINE_BIND_POINT_GRAPHICS, mesh_comp.material->pipeline->pipeline);
+					vkCmdBindDescriptorSets(cmd, VK_PIPELINE_BIND_POINT_GRAPHICS, mesh_comp.material->pipeline->layout, 0, 1, &globalDescriptor, 0, nullptr);
+					vkCmdBindDescriptorSets(cmd, VK_PIPELINE_BIND_POINT_GRAPHICS, mesh_comp.material->pipeline->layout, 1, 1, &mesh_comp.material->material_set, 0, nullptr);
+
+					vkCmdBindIndexBuffer(cmd, mesh_comp.mesh_asset->mesh_buffers.index_buffer.buffer, 0, VK_INDEX_TYPE_UINT32);
+
+					GPU_draw_push_constants push_constants;
+					push_constants.vertex_buffer = mesh_comp.mesh_asset->mesh_buffers.vertex_buffer_address;
+					push_constants.world_matrix = transform.get_transform() + mesh_comp.transform;
+					vkCmdPushConstants(cmd, mesh_comp.material->pipeline->layout, VK_SHADER_STAGE_VERTEX_BIT, 0, sizeof(GPU_draw_push_constants), &push_constants);
+
+					vkCmdDrawIndexed(cmd, loc_surface.count, 1, loc_surface.startIndex, 0, 0);
+				}
+			}
+		}
+
+#elif PROCCESS == 1
+
+		// PROCCESS V1
+		// 1. get world_layer
+		// 2. get active_maps from world_layer
+		// 3. get all entities from registry in active_maps
+		// 4. draw all mesh_components of all entities
+
+		// pro:
+			// all code for rendering is in one place
+
+
+		// con:
+
+		auto& all_maps = application::get().get_world_layer()->get_maps();
+		for (ref<map> loc_map : all_maps) {
+
+			if (!loc_map->is_active())		// skip maps that are not-loaded/hidden
+				continue;
+
+
+		}
+
+#elif PROCCESS == 2
+
+		// PROCCESS V2
+		// 1. call world_layer function from renderer to submit meshes
+		// 2. world_layer delegates the call to any map it wants to draw
+		// 3. map submits all meshes to renderer
+
+		// pro:
+			// lets every map individually decide what to render
+
+		// con:
+			// a lot more function calls
+			// rendering code is scatered through code_base
+
+		// application::get().get_world_layer()->notefy_maps_to_render();
+
+		// bulk of implementation would be in [world_lsyer] and [maps]
+
+#endif
+
+
+
+
+				//for (const RenderObject& draw : mainDrawContext.OpaqueSurfaces) {
+
+				//	vkCmdBindPipeline(cmd, VK_PIPELINE_BIND_POINT_GRAPHICS, draw.material->pipeline->pipeline);
+				//	vkCmdBindDescriptorSets(cmd, VK_PIPELINE_BIND_POINT_GRAPHICS, draw.material->pipeline->layout, 0, 1, &globalDescriptor, 0, nullptr);
+				//	vkCmdBindDescriptorSets(cmd, VK_PIPELINE_BIND_POINT_GRAPHICS, draw.material->pipeline->layout, 1, 1, &draw.material->materialSet, 0, nullptr);
+
+				//	vkCmdBindIndexBuffer(cmd, draw.indexBuffer, 0, VK_INDEX_TYPE_UINT32);
+
+				//	GPUDrawPushConstants pushConstants;
+				//	pushConstants.vertexBuffer = draw.vertexBufferAddress;
+				//	pushConstants.worldMatrix = draw.transform;
+				//	vkCmdPushConstants(cmd, draw.material->pipeline->layout, VK_SHADER_STAGE_VERTEX_BIT, 0, sizeof(GPUDrawPushConstants), &pushConstants);
+
+				//	vkCmdDrawIndexed(cmd, draw.indexCount, 1, draw.firstIndex, 0, 0);
+				//}
+
+
 
 
 		vkCmdEndRendering(cmd);

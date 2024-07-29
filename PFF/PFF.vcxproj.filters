@@ -211,6 +211,7 @@
       <Filter>util</Filter>
     </ClInclude>
     <ClInclude Include="src\engine\render\material.h" />
+    <ClInclude Include="src\util\math\math.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="src\application.cpp" />
@@ -305,5 +306,6 @@
       <Filter>util</Filter>
     </ClCompile>
     <ClCompile Include="src\engine\render\material.cpp" />
+    <ClCompile Include="src\util\math\math.cpp" />
   </ItemGroup>
 </Project>

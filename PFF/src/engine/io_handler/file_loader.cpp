@@ -24,11 +24,9 @@ namespace PFF::IO {
 
     namespace mesh_loader {
 
-        std::optional<std::vector<ref<PFF::geometry::mesh>>> load_gltf_meshes(std::filesystem::path file_path) {
+        std::optional<std::vector<ref<PFF::geometry::mesh_asset>>> load_gltf_meshes(std::filesystem::path file_path) {
 
-            CORE_LOG(Trace, "Loading GLTF: " << file_path );
-
-            CORE_VALIDATE(std::filesystem::exists(file_path), return {}, "", "provided file path does not exist");
+            CORE_VALIDATE(std::filesystem::exists(file_path), return {}, "Loading GLTF: " << file_path, "provided file path does not exist");
 
             fastgltf::GltfDataBuffer data;
             data.loadFromFile(file_path);
@@ -42,7 +40,7 @@ namespace PFF::IO {
             fastgltf::Asset gltf;
             gltf = std::move(load.get());
 
-            std::vector<ref<geometry::mesh>> meshes{};
+            std::vector<ref<geometry::mesh_asset>> meshes{};
 
             // use the same vectors for all meshes so that the memory doesnt reallocate as often
 
@@ -50,7 +48,7 @@ namespace PFF::IO {
             //std::vector<geometry::vertex> vertices;
             for (fastgltf::Mesh& mesh : gltf.meshes) {
 
-                geometry::mesh loc_mesh{};
+                geometry::mesh_asset loc_mesh{};
                 loc_mesh.name = mesh.name;
 
                 // clear the mesh arrays each mesh, we dont want to merge them by error
@@ -129,7 +127,7 @@ namespace PFF::IO {
                 }
 
                 // new_mesh.meshBuffers = engine->uploadMesh(indices, vertices);
-                meshes.emplace_back(create_ref<geometry::mesh>(std::move(loc_mesh)));
+                meshes.emplace_back(create_ref<geometry::mesh_asset>(std::move(loc_mesh)));
             }
 
             return meshes;

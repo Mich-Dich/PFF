@@ -20,7 +20,7 @@ namespace PFF {
 	class window_close_event;
 	class window_refresh_event;
 	class window_focus_event;
-	class game_map;
+	class map;
 	class camera;
 
 	class PFF_API application {
@@ -43,10 +43,6 @@ namespace PFF {
 		FORCEINLINE static RENDERER& get_renderer()										{ return GET_RENDERER; }
 #endif
 		FORCEINLINE static application& get()											{ return *s_instance; }
-		//FORCEINLINE static ref<pff_window> get_window()								{ return m_window; }
-		//FORCEINLINE UI::imgui_layer* get_imgui_layer()								{ return m_imgui_layer; }
-		//FORCEINLINE world_layer* get_world_layer()									{ return m_world_layer; }
-
 		PFF_DEFAULT_GETTER(static ref<pff_window>,	window);
 		PFF_DEFAULT_GETTER(UI::imgui_layer*,		imgui_layer);
 		PFF_DEFAULT_GETTER(world_layer*,			world_layer);
@@ -54,7 +50,7 @@ namespace PFF {
 #if defined PFF_RENDER_API_VULKAN
 		FORCEINLINE static void set_render_state(system_state state)				{ GET_RENDERER.set_state(state); }
 #endif
-		//FORCEINLINE ref<game_map> get_current_map()								{ return m_world_layer->get_current_map(); }
+		//FORCEINLINE ref<map> get_current_map()								{ return m_world_layer->get_current_map(); }
 		FORCEINLINE static void close_application()									{ m_running = false; }
 		FORCEINLINE static bool is_titlebar_hovered()								{ return m_is_titlebar_hovered; }
 
@@ -105,7 +101,7 @@ namespace PFF {
 
 		ref<layer_stack> m_layerstack{};
 		std::vector<event> m_event_queue;		// TODO: change to queue
-		ref<game_map> m_current_map = nullptr;
+		ref<map> m_current_map = nullptr;
 
 		bool m_focus = true;
 		f32 m_last_frame_time = 0.f;

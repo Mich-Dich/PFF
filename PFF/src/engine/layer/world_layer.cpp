@@ -8,13 +8,26 @@
 
 namespace PFF {
 	
-	world_layer::world_layer() { CORE_LOG_INIT(); }
+	world_layer::world_layer() { 
+
+		CORE_LOG(Error, "CONSTRUCTING WORLD_LAYER"); 
+
+		m_maps.emplace_back( create_ref<map>() );
+
+		CORE_LOG_INIT();
+	}
 
 	world_layer::~world_layer() { CORE_LOG_SHUTDOWN(); }
 
+
+	void world_layer::register_player_controller(ref<player_controller> player_controller) {
+
+		m_player_controller = player_controller;
+		m_player_controller->set_world_layer_ref(this);
+	}
+
 	void world_layer::on_attach() {
 	
-		//m_current_map = std::make_shared<game_map>();			// only a dummy map
 		m_editor_camera = std::make_shared<camera>();
 		m_editor_camera->set_view_direction(glm::vec3{ 0.0f }, glm::vec3{ 0.5f, 0.0f, 1.0f });
 		//m_editor_camera.set_orthographic_projection(-aspect, aspect, -1, 1, 0, 10);
@@ -30,7 +43,6 @@ namespace PFF {
 
 		m_player_controller.reset();
 		m_editor_camera.reset();
-		//m_current_map.reset();
 		
 		CORE_LOG(Trace, "detaching world_layer");
 	}

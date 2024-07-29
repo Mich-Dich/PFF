@@ -1,7 +1,7 @@
 #pragma once
 
 #include "util/pffpch.h"
-#include "engine/render/renderer.h"
+#include "engine/render/render_public_data.h"
 
 namespace PFF::geometry {
 
@@ -18,37 +18,44 @@ namespace PFF::geometry {
     //    PFF::render::vk_GPU_mesh_buffers mesh_buffers;
     //};
 
-    // wierd layout because alignement limitations on GPU
+    // wierd layout because of alignement limitations on GPU
     struct vertex {
 
-        glm::vec3           position;
-        float               uv_x;
-        glm::vec3           normal;
-        float               uv_y;
-        glm::vec4           color;
-
-        vertex()
-            : position(glm::vec3()), uv_x(0), normal(glm::vec3()), uv_y(0), color(glm::vec4()) {}
-
+        vertex() {}
         vertex(const glm::vec3& pos, const glm::vec3& norm, const glm::vec4& col, float u_x, float u_y)
-            : position(pos), normal(norm), color(col), uv_x(u_x), uv_y(u_y){}
+            : position(pos), normal(norm), color(col), uv_x(u_x), uv_y(u_y) {}
+
+        glm::vec3                           position{};
+        float                               uv_x = 0;
+        glm::vec3                           normal{};
+        float                               uv_y = 0;
+        glm::vec4                           color{};
     };
 
 
-	class mesh {
-	public:
+    struct mesh_asset {
 
-		mesh(std::vector<u32> indices = {}, std::vector<vertex> vertices = {})
+        mesh_asset(std::vector<u32> indices = {}, std::vector<vertex> vertices = {})
 			: m_indices(indices), m_vertices(vertices) {};
 
 		std::string							name{};
 		std::vector<Geo_surface>			surfaces{};
         PFF::render::GPU_mesh_buffers	    mesh_buffers{};
-
 		std::vector<u32>					m_indices{};
 		std::vector<vertex>					m_vertices{};
-	private:
-
 	};
+//
+//    struct render_object {
+//
+//        u32					index_count;
+//        u32					first_index;
+//        glm::mat4			transform_offset;		// offset from the parent => can build chains
+//        material_instance*  material;
+//#if defined PFF_RENDER_API_VULKAN
+//        VkBuffer			index_buffer;
+//        VkDeviceAddress		vertex_buffer_address;
+//#endif
+//    };
+
 
 }

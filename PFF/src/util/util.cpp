@@ -1,6 +1,5 @@
 
 #include <util/pffpch.h>
-#include "util.h"
 
 #ifdef PFF_PLATFORM_WINDOWS
     #include <Windows.h>
@@ -9,6 +8,7 @@
     #include <ctime>
 #endif
 
+#include "util.h"
 
 namespace PFF::util {
 

@@ -21,7 +21,7 @@ namespace PFF {
 
 			CORE_ASSERT(!has_component<T>(), "", "Entity already has component!");
 			T& component = m_map->m_registry.emplace<T>(m_entity_handle, std::forward<Args>(args)...);
-			m_map->on_component_added<T>(*this, component);
+			//m_map->on_component_added<T>(*this, component);
 			return component;
 		}
 
@@ -29,7 +29,7 @@ namespace PFF {
 		T& add_or_replace_component(Args&&... args) {
 			
 			T& component = m_map->m_registry.emplace_or_replace<T>(m_entity_handle, std::forward<Args>(args)...);
-			m_map->on_component_added<T>(*this, component);
+			//m_map->on_component_added<T>(*this, component);
 			return component;
 		}
 

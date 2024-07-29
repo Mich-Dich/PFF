@@ -40,8 +40,8 @@
 
 #define PFF_DEFAULT_CONSTRUCTORS(name)					public:																		\
 														name() = default;															\
-														name(const name&) = default;												\
-														name(name&&) = default;
+														name(const name&) = default;												
+														//name(name&&) = default;
 
 #define PFF_DEFAULT_COPY_CONSTRUCTOR(name)				public:																		\
 														name(const name& other) = default;
