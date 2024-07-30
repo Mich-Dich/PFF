@@ -48,7 +48,7 @@ namespace PFF {
 		void main_menu_bar();
 
 		bool m_show_main_menu_bar = false;
-		bool m_show_renderer_backgrond_effect = false;
+		bool m_show_renderer_backgrond_effect = true;
 		bool m_show_general_debugger = true;
 		bool m_show_options = false;
 		bool m_show_outliner = true;

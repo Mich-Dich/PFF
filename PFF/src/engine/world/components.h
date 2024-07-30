@@ -79,6 +79,9 @@ namespace PFF {
 
 		PFF_DEFAULT_CONSTRUCTORS(mesh_component);
 
+		mesh_component(ref<PFF::geometry::mesh_asset> mesh_asset_ref)
+			: mesh_asset(mesh_asset_ref) {}
+
 		glm::mat4							transform = glm::mat4(1);
 		bool								shoudl_render = true;
 		ref<PFF::geometry::mesh_asset>		mesh_asset;

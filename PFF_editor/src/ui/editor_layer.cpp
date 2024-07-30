@@ -233,9 +233,8 @@ namespace PFF {
 			| ImGuiWindowFlags_NoScrollbar
 			| ImGuiWindowFlags_NoScrollWithMouse
 			| ImGuiWindowFlags_NoCollapse
-			| ImGuiWindowFlags_NoBackground | ImGuiWindowFlags_DockNodeHost
-			//| ImGuiWindowFlags_NoDecoration
-			;
+			| ImGuiWindowFlags_NoBackground 
+			| ImGuiWindowFlags_DockNodeHost;
 
 		ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, ImVec2(0, 0));
 		ImGui::PushStyleVar(ImGuiStyleVar_WindowBorderSize, 0);
@@ -267,8 +266,7 @@ namespace PFF {
 		if (!m_show_renderer_backgrond_effect)
 			return;
 
-
-		static UI::window_pos location = UI::window_pos::top_right;
+		static UI::window_pos location = UI::window_pos::top_left;
 
 		ImGuiWindowFlags window_flags = (
 			ImGuiWindowFlags_NoDecoration |
@@ -287,7 +285,7 @@ namespace PFF {
 			render::compute_effect& selected = application::get().get_renderer().get_current_background_effect();
 			int& background_effect_index = application::get().get_renderer().get_current_background_effect_index();
 
-			if (UI::begin_table("renderer background values")) {
+			if (UI::begin_table("renderer background values", true, ImVec2(300, 0),0, true, 0.3f)) {
 
 				UI::table_row_slider("Effects", background_effect_index, 0, application::get().get_renderer().get_number_of_background_effects() -1 );
 

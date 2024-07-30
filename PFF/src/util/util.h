@@ -287,6 +287,65 @@ namespace PFF {
                 DEBUG_BREAK();		// Input value is not supported
         }
 
+        template<typename T>
+        constexpr std::string to_string(const T& src_value) {
+
+            std::string dest_string;
+            if constexpr (std::is_same_v<T, bool>) { return bool_to_str(src_value); }
+
+            else if constexpr (std::is_arithmetic_v<T>) { return std::to_string(src_value); }
+
+            else if constexpr (std::is_convertible_v<T, std::string>) {
+
+                //LOG(Fatal, "called: convert_to_string() with string");
+                dest_string = src_value;
+                //std::replace(dest_string.begin(), dest_string.end(), ' ', '%');
+                std::replace(dest_string.begin(), dest_string.end(), '\n', '$');
+                return;
+            }
+
+            else if constexpr (std::is_same_v<T, glm::vec2> || std::is_same_v<T, ImVec2>) {
+
+                std::ostringstream oss;
+                oss << src_value.x << ' ' << src_value.y;
+                return oss.str();
+            }
+
+            else if constexpr (std::is_same_v<T, glm::vec3>) {
+
+                std::ostringstream oss;
+                oss << src_value.x << ' ' << src_value.y << ' ' << src_value.z;
+                return oss.str();
+            }
+
+            else if constexpr (std::is_same_v<T, glm::vec4> || std::is_same_v<T, ImVec4>) {
+
+                std::ostringstream oss;
+                oss << std::fixed << std::setprecision(4)
+                    << src_value.x << ' ' << src_value.y << ' ' << src_value.z << ' ' << src_value.w;
+                return oss.str();
+            }
+
+            else if constexpr (std::is_enum_v<T>) { return std::to_string(static_cast<std::underlying_type_t<T>>(src_value)); }
+
+            // Matrix of size 4         TODO: move into seperate template for all matrixes
+            else if constexpr (std::is_same_v<T, glm::mat4>) {
+
+                std::ostringstream oss;
+                for (int i = 0; i < 4; ++i) {
+                    for (int j = 0; j < 4; ++j) {
+                        oss << src_value[i][j];
+                        if (i != 3 || j != 3) // Not the last element
+                            oss << ' ';
+                    }
+                }
+                return oss.str();
+            }
+
+            else
+                DEBUG_BREAK();		// Input value is not supported
+        }
+
 
         // @brief Converts a string representation to a value of type T.
         // @brief Can handle conversion into various types such as: arithmetic types, boolean, glm::vec2, glm::vec3, glm::vec4, ImVec2, ImVec4, and glm::mat4.

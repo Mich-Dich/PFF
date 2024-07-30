@@ -1102,7 +1102,7 @@ namespace PFF::render::vulkan {
 
 		// ========================================== create GPU global scene data ==========================================
 
-		//allocate a new uniform buffer for the scene data
+		// allocate a new uniform buffer for the scene data
 		vk_buffer gpuSceneDataBuffer = create_buffer(sizeof(render::GPU_scene_data), VK_BUFFER_USAGE_UNIFORM_BUFFER_BIT, VMA_MEMORY_USAGE_CPU_TO_GPU);
 
 		//add it to the deletion queue of this frame so it gets deleted once its been used
@@ -1117,27 +1117,14 @@ namespace PFF::render::vulkan {
 		descriptor_writer writer;
 		writer.write_buffer(0, gpuSceneDataBuffer.buffer, sizeof(render::GPU_scene_data), 0, VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER);
 		writer.update_set(m_device, globalDescriptor);
-
 		// ==========================================  ==========================================
 
-		//begin a render pass connected to our draw image
+		// begin a render pass connected to our draw image
 		VkRenderingAttachmentInfo color_attachment = init::attachment_info(m_draw_image.get_image_view(), nullptr, VK_IMAGE_LAYOUT_GENERAL);
 		VkRenderingAttachmentInfo depth_attachment = init::depth_attachment_info(m_depth_image.get_image_view(), VK_IMAGE_LAYOUT_DEPTH_ATTACHMENT_OPTIMAL);
 		VkRenderingInfo render_info = init::rendering_info(m_draw_extent, &color_attachment, &depth_attachment);
 
 		vkCmdBeginRendering(cmd, &render_info);
-		vkCmdBindPipeline(cmd, VK_PIPELINE_BIND_POINT_GRAPHICS, m_mesh_pipeline);
-
-
-		//bind a texture
-		VkDescriptorSet imageSet = get_current_frame().frame_descriptors.allocate(m_device, m_single_image_descriptor_layout);
-		{
-			descriptor_writer writer;
-			writer.write_image(0, m_error_checkerboard_image->get_image_view(), m_default_sampler_nearest, VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL, VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER);
-			writer.update_set(m_device, imageSet);
-		}
-		vkCmdBindDescriptorSets(cmd, VK_PIPELINE_BIND_POINT_GRAPHICS, m_mesh_pipeline_layout, 0, 1, &imageSet, 0, nullptr);
-
 
 		//set dynamic viewport and scissor
 		VkViewport viewport = {};
@@ -1155,35 +1142,12 @@ namespace PFF::render::vulkan {
 		scissor.extent.width = m_draw_extent.width;
 		scissor.extent.height = m_draw_extent.height;
 		vkCmdSetScissor(cmd, 0, 1, &scissor);
-		
+
 		// NOTE: Note that 10000 is “near” and 0.1 is “far”. And reversing the depth, so that depth 1 is the near plane, and depth 0 the far plane.
 		//		 This is a technique that greatly increases the quality of depth testing.
 		glm::mat4 projection = glm::perspective(glm::radians(m_active_camera->get_perspective_fov_y()), (float)m_draw_extent.width / (float)m_draw_extent.height, 100000.f, 0.1f);
 		projection[1][1] *= -1;				// invert the Y direction on projection matrix
 		glm::mat4 view = m_active_camera->get_view();
-		
-		const int selected_mesh = 0;
-		const int selected_surface = 0;
-
-		GPU_draw_push_constants push_constants;
-		push_constants.world_matrix = projection * view;
-		
-
-
-
-		// draw dummy mesh
-		push_constants.vertex_buffer = T_test_meshes[selected_mesh]->mesh_buffers.vertex_buffer_address;
-		vkCmdPushConstants(cmd, m_mesh_pipeline_layout, VK_SHADER_STAGE_VERTEX_BIT, 0, sizeof(GPU_draw_push_constants), &push_constants);
-		vkCmdBindIndexBuffer(cmd, T_test_meshes[selected_mesh]->mesh_buffers.index_buffer.buffer, 0, VK_INDEX_TYPE_UINT32);
-
-		for (u64 y = 0; y < T_test_meshes[selected_mesh]->surfaces.size(); y++)
-			vkCmdDrawIndexed(cmd, T_test_meshes[selected_mesh]->surfaces[y].count, 1, T_test_meshes[selected_mesh]->surfaces[y].startIndex, 0, 0);
-
-
-
-
-
-
 
 
 // world_layer is a layer in the layerstack of the engine, it contains maps. // A large ingame world can be split in diffrent chunks (maps)
@@ -1201,16 +1165,32 @@ namespace PFF::render::vulkan {
 		// pro:
 			// all code for rendering is in one place
 			
-
 		// con:
+
+//#define USE_DEDICATED_PIPELINE
+#ifndef USE_DEDICATED_PIPELINE
+		// TODO: remove binding of dummy pipeline and use dedicated mesh.vert.spv/mesh.frag.spv shaders
+		vkCmdBindPipeline(cmd, VK_PIPELINE_BIND_POINT_GRAPHICS, m_mesh_pipeline);
+		VkDescriptorSet imageSet = get_current_frame().frame_descriptors.allocate(m_device, m_single_image_descriptor_layout);  // bind a texture
+		{
+			descriptor_writer writer;
+			writer.write_image(0, m_error_checkerboard_image->get_image_view(), m_default_sampler_nearest, VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL, VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER);
+			writer.update_set(m_device, imageSet);
+		}
+		vkCmdBindDescriptorSets(cmd, VK_PIPELINE_BIND_POINT_GRAPHICS, m_mesh_pipeline_layout, 0, 1, &imageSet, 0, nullptr);
+#endif // USE_DEDICATED_PIPELINE
 
 
 		// loop over all maps in worlds
 		auto& all_maps = application::get().get_world_layer()->get_maps();
 		for (ref<map> loc_map : all_maps) {
 
-			if (!loc_map->is_active())		// skip maps that are not-loaded/hidden
+			if (!loc_map->is_active())		// skip maps that are not-loaded/hidden/disabled
 				continue;
+
+			// TODO: add high-level culling for maps that don't need rendering
+				// bounds check
+				// frustum culling
 
 			// get every entity with [transform] and [mesh]
 			auto group = loc_map->get_registry().group<transform_component>(entt::get<mesh_component>);
@@ -1218,21 +1198,25 @@ namespace PFF::render::vulkan {
 
 				// Draw every surface in mesh_asset
 				auto& [transform, mesh_comp] = group.get<transform_component, mesh_component>(entity);
-				for (auto& loc_surface : mesh_comp.mesh_asset->surfaces) {
 
-					vkCmdBindPipeline(cmd, VK_PIPELINE_BIND_POINT_GRAPHICS, mesh_comp.material->pipeline->pipeline);
-					vkCmdBindDescriptorSets(cmd, VK_PIPELINE_BIND_POINT_GRAPHICS, mesh_comp.material->pipeline->layout, 0, 1, &globalDescriptor, 0, nullptr);
-					vkCmdBindDescriptorSets(cmd, VK_PIPELINE_BIND_POINT_GRAPHICS, mesh_comp.material->pipeline->layout, 1, 1, &mesh_comp.material->material_set, 0, nullptr);
+				// TODO: add culling for geometry that doesn't need to be drawns
+					// frustum culling
 
-					vkCmdBindIndexBuffer(cmd, mesh_comp.mesh_asset->mesh_buffers.index_buffer.buffer, 0, VK_INDEX_TYPE_UINT32);
+#ifdef USE_DEDICATED_PIPELINE
+				// bind material
+				vkCmdBindPipeline(cmd, VK_PIPELINE_BIND_POINT_GRAPHICS, mesh_comp.material->pipeline->pipeline);
+				vkCmdBindDescriptorSets(cmd, VK_PIPELINE_BIND_POINT_GRAPHICS, mesh_comp.material->pipeline->layout, 0, 1, &globalDescriptor, 0, nullptr);
+				vkCmdBindDescriptorSets(cmd, VK_PIPELINE_BIND_POINT_GRAPHICS, mesh_comp.material->pipeline->layout, 1, 1, &mesh_comp.material->material_set, 0, nullptr);
+#endif
+				GPU_draw_push_constants push_constants;
+				push_constants.world_matrix = projection * view * transform.get_transform() * mesh_comp.transform;
+				push_constants.vertex_buffer = mesh_comp.mesh_asset->mesh_buffers.vertex_buffer_address;
+				vkCmdPushConstants(cmd, mesh_comp.material->pipeline->layout, VK_SHADER_STAGE_VERTEX_BIT, 0, sizeof(GPU_draw_push_constants), &push_constants);
 
-					GPU_draw_push_constants push_constants;
-					push_constants.vertex_buffer = mesh_comp.mesh_asset->mesh_buffers.vertex_buffer_address;
-					push_constants.world_matrix = transform.get_transform() + mesh_comp.transform;
-					vkCmdPushConstants(cmd, mesh_comp.material->pipeline->layout, VK_SHADER_STAGE_VERTEX_BIT, 0, sizeof(GPU_draw_push_constants), &push_constants);
+				vkCmdBindIndexBuffer(cmd, mesh_comp.mesh_asset->mesh_buffers.index_buffer.buffer, 0, VK_INDEX_TYPE_UINT32);
 
-					vkCmdDrawIndexed(cmd, loc_surface.count, 1, loc_surface.startIndex, 0, 0);
-				}
+				for (u64 x = 0; x < mesh_comp.mesh_asset->surfaces.size(); x++)
+					vkCmdDrawIndexed(cmd, mesh_comp.mesh_asset->surfaces[x].count, 1, mesh_comp.mesh_asset->surfaces[x].startIndex, 0, 0);
 			}
 		}
 
@@ -1278,30 +1262,9 @@ namespace PFF::render::vulkan {
 		// bulk of implementation would be in [world_lsyer] and [maps]
 
 #endif
-
-
-
-
-				//for (const RenderObject& draw : mainDrawContext.OpaqueSurfaces) {
-
-				//	vkCmdBindPipeline(cmd, VK_PIPELINE_BIND_POINT_GRAPHICS, draw.material->pipeline->pipeline);
-				//	vkCmdBindDescriptorSets(cmd, VK_PIPELINE_BIND_POINT_GRAPHICS, draw.material->pipeline->layout, 0, 1, &globalDescriptor, 0, nullptr);
-				//	vkCmdBindDescriptorSets(cmd, VK_PIPELINE_BIND_POINT_GRAPHICS, draw.material->pipeline->layout, 1, 1, &draw.material->materialSet, 0, nullptr);
-
-				//	vkCmdBindIndexBuffer(cmd, draw.indexBuffer, 0, VK_INDEX_TYPE_UINT32);
-
-				//	GPUDrawPushConstants pushConstants;
-				//	pushConstants.vertexBuffer = draw.vertexBufferAddress;
-				//	pushConstants.worldMatrix = draw.transform;
-				//	vkCmdPushConstants(cmd, draw.material->pipeline->layout, VK_SHADER_STAGE_VERTEX_BIT, 0, sizeof(GPUDrawPushConstants), &pushConstants);
-
-				//	vkCmdDrawIndexed(cmd, draw.indexCount, 1, draw.firstIndex, 0, 0);
-				//}
-
-
-
-
+	
 		vkCmdEndRendering(cmd);
+
 	}
 
 	void vk_renderer::draw_imgui(VkCommandBuffer cmd, VkImageView targetImageView) {

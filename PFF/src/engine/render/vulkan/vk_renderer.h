@@ -66,8 +66,15 @@ namespace PFF::render::vulkan {
 		PFF_DEFAULT_GETTER_POINTER(image,			draw_image)
 		PFF_DEFAULT_GETTER_POINTER(image,			depth_image)
 
+		// ==========================================================================================================
+		// !!!!!!!!!!!!!!!! DEV-ONLY !!!!!!!!!!!!!!!!!!!!!!
+			ref<PFF::geometry::mesh_asset>	get_test_mesh() const { return T_test_meshes[0]; }
+			PFF_DEFAULT_GETTERS_C(material_instance, default_material);
+		// ==========================================================================================================
 
-		// !!!!!!!!!!!!!!!! DEV !!!!!!!!!!!!!!!!!!!!!!
+
+
+
 		void setup(ref<pff_window> window, ref<PFF::layer_stack> layer_stack);
 		void shutdown();
 

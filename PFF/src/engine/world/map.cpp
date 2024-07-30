@@ -4,6 +4,10 @@
 #include "components.h"
 #include "engine/world/entity.h"
 
+// !!!!!!!!!!!!!!!! DEV-ONLY !!!!!!!!!!!!!!!!!!!!!!
+#include "engine/render/vulkan/vk_renderer.h"
+
+
 #include "map.h"
 
 namespace PFF {
@@ -39,16 +43,30 @@ namespace PFF {
 		copy_component_if_exists<component...>(dst, src);
 	}
 
+	// =======================================================================================================================================
+	// - - - - - - - - MAP - - - - - - - - 
+	// =======================================================================================================================================
+
 	map::map() {
 
 		CORE_LOG(Error, "CONSTRUCTING MAP");
-		entt::entity entity = m_registry.create();
+
+		for (u32 x = 0; x < 15; x++) {
+			for (u32 y = 0; y < 10; y++) {
+
+				entity loc_entitiy = create_entity("Test entity for renderer: " + util::to_string(x) + " / " + util::to_string(y));
+
+				auto& transform_comp = loc_entitiy.add_component<transform_component>();
+				transform_comp.translation = glm::vec3(350 * x, 0, 750 * y);
+
+				auto& mesh_comp = loc_entitiy.add_component<mesh_component>();
+				mesh_comp.mesh_asset = GET_RENDERER.get_test_mesh();
+				mesh_comp.material = GET_RENDERER.get_default_material_pointer();
+			}
+		}
 	}
 
-	map::~map() {
-
-		entt::entity entity = m_registry.create();
-	}
+	map::~map() { }
 
 	ref<map> map::copy(ref<map> other) {
 		return ref<map>();
