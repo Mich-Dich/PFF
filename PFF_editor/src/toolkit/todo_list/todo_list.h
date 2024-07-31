@@ -1,11 +1,14 @@
 #pragma once
 
+//#include <PFF.h>
+#include "util/ui/imgui_markdown.h"
+
 #include <imgui_internal.h>
 
 namespace PFF::toolkit::todo {
 
 #define CHAR_BUFFER_DEFAULT_SIZE 256
-#define CHAR_BUFFER_DEFAULT_MULTIPLIER 20
+#define CHAR_BUFFER_DEFAULT_MULTIPLIER 16
 
 	// forward declareation
 	class todo_list_serializer;
@@ -84,7 +87,7 @@ namespace PFF::toolkit::todo {
 	// can define here because header is only included in editor_layer.cpp file
 	void serialize_todo_list(std::vector<topic>& m_topics, serializer::option option) {
 
-		PFF::serializer::yaml(config::get_filepath_from_configtype(config::file::editor), "todo_list", option)
+		PFF::serializer::yaml("./config/todo_list.yml", "todo_list", option)
 			.vector(KEY_VALUE(m_topics), [&](serializer::yaml& yaml, const u64 x) {
 
 				yaml.entry(KEY_VALUE(m_topics[x].name))
@@ -125,16 +128,29 @@ namespace PFF::toolkit::todo {
 		ImGuiViewport* viewport = ImGui::GetMainViewport();
 		ImGui::SetNextWindowPos(ImGui::GetMainViewport()->GetCenter(), ImGuiCond_Appearing, ImVec2(0.5f, 0.5f));
 		ImGui::SetNextWindowSize(ImVec2(viewport->Size.x - 500, viewport->Size.y - 300), ImGuiCond_Appearing);
-		ImGui::SetNextWindowViewport(viewport->ID);
+		//ImGui::SetNextWindowViewport(viewport->ID);
 
 		ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, ImVec2(0, 0));
-		if (!ImGui::Begin("ToDo List", &s_show_todo_list, window_flags)) {
+		bool is_window_begin = ImGui::Begin("ToDo List", &s_show_todo_list, window_flags);
+		ImGui::PopStyleVar();
+		
+		if (!is_window_begin) {
 
-			ImGui::PopStyleVar();
 			ImGui::End();
 			return;
 		}
-		ImGui::PopStyleVar();
+
+		//ImGuiID dockID = ImGui::GetWindowDockID();
+		//if (dockID != 0 && ImGui::DockSpaceOverViewport(ImGui::GetMainViewport(), ImGuiDockNodeFlags_None)) {
+		//	ImGui::Text("This window is docked.");
+		//} else {
+		//	if (ImGui::Button("Maximize Window")) {
+		//
+		//		ImVec2 screenSize = ImGui::GetMainViewport()->Size;
+		//		ImGui::SetWindowSize(screenSize);
+		//		ImGui::SetWindowPos(ImVec2(0, 0));
+		//	}
+		//}
 
 		static buffer::topic topic_buf{};
 		static buffer::task task_buf{};
@@ -224,7 +240,7 @@ namespace PFF::toolkit::todo {
 
 			ImGui::EndChild();
 		}
-		, [&] {
+		, [=] {
 
 			//ImGui::PushStyleColor(ImGuiCol_ChildBg, UI::THEME::highlited_window_bg);
 			ImGui::BeginChild("Child##for_todo_tasks");
@@ -243,6 +259,99 @@ namespace PFF::toolkit::todo {
 			char buf[32];
 
 			UI::shift_cursor_pos(0, 10);
+			if (task_buf.input_enabled) {
+
+				ImVec2 start_pos{};
+				const f32 max_width = ImGui::GetColumnWidth();
+				static bool use_markdown = false;
+
+				UI::custom_frame(max_width - 125, [&] {
+
+					start_pos = ImGui::GetCursorPos();
+					if (strlen(task_buf.name) == 0) {
+
+						UI::shift_cursor_pos(5, 4);
+						ImGui::Text("Title");
+						ImGui::SetCursorPos(start_pos);
+					}
+
+					{	// Title of new task
+
+						const ImVec2 input_size = { ImGui::GetColumnWidth(), (ImGui::GetTextLineHeight() * (float)util::count_lines(task_buf.name)) + ImGui::GetTextLineHeightWithSpacing() };
+						ImGui::InputTextMultiline("##new_task_title", task_buf.name, CHAR_BUFFER_DEFAULT_SIZE, input_size, 0);
+
+						{	// display number of charecters
+							auto pos_buffer = ImGui::GetCursorPos();
+							ImGui::SetCursorPos(start_pos);
+							UI::shift_cursor_pos(ImGui::GetColumnWidth() - 60, 4);
+							ImGui::Text("%d/%d", strlen(task_buf.name), CHAR_BUFFER_DEFAULT_SIZE);
+							ImGui::SetCursorPos(pos_buffer);
+						}
+
+						if (strlen(task_buf.description) == 0) {
+
+							start_pos = ImGui::GetCursorPos();
+							UI::shift_cursor_pos(5, use_markdown ? (4 + ImGui::GetStyle().CellPadding.y) : 4);
+							ImGui::Text("Description");
+							ImGui::SetCursorPos(start_pos);
+						}
+					}
+
+					f32 collum_width;
+					if (use_markdown) {
+
+						UI::begin_table("new_task_markdown_display", false);
+						UI::table_row([&] {
+							
+							start_pos = ImGui::GetCursorPos();
+							collum_width = ImGui::GetColumnWidth();
+							const ImVec2 description_input_size = { ImGui::GetColumnWidth(), (ImGui::GetTextLineHeight() * (float)util::count_lines(task_buf.description)) + ImGui::GetTextLineHeightWithSpacing() };
+							ImGui::InputTextMultiline("##new_task_description", task_buf.description, CHAR_BUFFER_DEFAULT_SIZE * CHAR_BUFFER_DEFAULT_MULTIPLIER, description_input_size,
+							ImGuiInputTextFlags_AllowTabInput | ImGuiInputTextFlags_Multiline | ImGuiInputTextFlags_NoHorizontalScroll);
+
+						}, [] {
+
+							UI::markdown(task_buf.description);
+						});
+						UI::end_table();
+
+					} else {
+
+						start_pos = ImGui::GetCursorPos();
+						collum_width = ImGui::GetColumnWidth();
+						const ImVec2 description_input_size = { ImGui::GetColumnWidth(), (ImGui::GetTextLineHeight() * (float)util::count_lines(task_buf.description)) + ImGui::GetTextLineHeightWithSpacing() };
+						ImGui::InputTextMultiline("##new_task_description", task_buf.description, CHAR_BUFFER_DEFAULT_SIZE * CHAR_BUFFER_DEFAULT_MULTIPLIER, description_input_size,
+							ImGuiInputTextFlags_AllowTabInput | ImGuiInputTextFlags_Multiline | ImGuiInputTextFlags_NoHorizontalScroll);
+					}
+
+					{	// display number of charecters
+						auto pos_buffer = ImGui::GetCursorPos();
+						ImGui::SetCursorPos(start_pos);
+						UI::shift_cursor_pos(collum_width - 60, 4);
+						ImGui::Text("%d/%d", strlen(task_buf.description), CHAR_BUFFER_DEFAULT_SIZE * CHAR_BUFFER_DEFAULT_MULTIPLIER);
+						ImGui::SetCursorPos(pos_buffer);
+					}
+
+				}, [&] {
+
+					if (ImGui::Button("Add##new_task_to_todo", button_size_small)) {
+
+						for (u64 x = 0; x < s_topics.size(); x++) {
+
+							if (s_topics[x].selected)
+								s_topics[x].add_task(task_buf);
+						}
+						task_buf.reset();
+					}
+
+					if(UI::toggle_button("NAME", use_markdown, ImVec2(100, 21)))
+						use_markdown = !use_markdown;
+
+					if (UI::add_gray_button(" X ##stop_adding_task_to_todo", button_size_small))
+						task_buf.reset();
+				});
+			}
+
 			for (u64 x = 0; x < s_topics.size(); x++) {
 
 				if (s_topics[x].selected) {
@@ -256,63 +365,12 @@ namespace PFF::toolkit::todo {
 							ImGui::SameLine();
 							UI::big_text(s_topics[x].tasks[y].title.c_str(), true);
 							UI::shift_cursor_pos(inner_offset_x + 5, 0);
-							ImGui::TextWrapped(s_topics[x].tasks[y].description.c_str());
+
+							// Display the contents of the description
+							UI::markdown(s_topics[x].tasks[y].description);
 						}
 					}
 				}
-			}
-
-			if (task_buf.input_enabled) {
-
-				ImVec2 start_pos{};
-				const f32 max_width = ImGui::GetColumnWidth();
-				//const ImVec2 button_size = { 50, 22 };
-				static bool show_hint_title = true;
-				static bool show_hint_descr = true;
-
-				UI::shift_cursor_pos(0, 10);
-				if (show_hint_title) {
-
-					start_pos = ImGui::GetCursorPos();
-					UI::shift_cursor_pos(5, 4);
-					ImGui::Text("Title");
-					ImGui::SetCursorPos(start_pos);
-				}
-				const int box_height_name = util::count_lines(task_buf.name);
-				const ImVec2 input_size = { max_width - 60, (ImGui::GetTextLineHeight() * (float)box_height_name) + ImGui::GetTextLineHeightWithSpacing() };
-				ImGui::InputTextMultiline("##new_task_title", task_buf.name, CHAR_BUFFER_DEFAULT_SIZE, input_size, 0);
-				show_hint_title = strlen(task_buf.name) == 0;
-
-				ImGui::SameLine();
-				if (ImGui::Button("Add##new_task_to_todo", button_size_small)) {
-
-					for (u64 x = 0; x < s_topics.size(); x++) {
-
-						if (s_topics[x].selected)
-							s_topics[x].add_task(task_buf);
-					}
-					task_buf.reset();
-				}
-
-				if (show_hint_descr) {
-
-					start_pos = ImGui::GetCursorPos();
-					UI::shift_cursor_pos(5, 4);
-					ImGui::Text("Description");
-					ImGui::SetCursorPos(start_pos);
-				}
-
-				const int box_height = util::count_lines(task_buf.description);
-				const ImVec2 description_input_size = { max_width - 60, (ImGui::GetTextLineHeight() * (float)box_height) + ImGui::GetTextLineHeightWithSpacing() };
-
-				ImGui::InputTextMultiline("##new_task_description", task_buf.description, CHAR_BUFFER_DEFAULT_SIZE* CHAR_BUFFER_DEFAULT_MULTIPLIER, description_input_size, 
-					ImGuiInputTextFlags_AllowTabInput | ImGuiInputTextFlags_Multiline | ImGuiInputTextFlags_NoHorizontalScroll);
-				show_hint_descr = strlen(task_buf.description) == 0;
-
-				ImGui::SameLine();
-
-				if (UI::add_gray_button(" X ##stop_adding_task_to_todo", button_size_small))
-					task_buf.reset();
 			}
 
 			ImGui::Spacing();
@@ -347,6 +405,6 @@ namespace PFF::toolkit::todo {
 		ImGui::End();
 	}
 
-}
 
-// , const std::string& filename = "testlog.txt"
+
+}

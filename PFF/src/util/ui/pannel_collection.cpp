@@ -135,11 +135,54 @@ namespace PFF::UI {
 		ImGui::PopStyleColor(3);
 		return result;
 	}
+	
+	bool toggle_button(const char* lable, bool& bool_var, const ImVec2& size) {
 
+		// show weaker color if toggle_bool is false
+		if (!bool_var) {
+
+			ImGui::PushStyleColor(ImGuiCol_Button, UI::action_color_00_faded);
+			ImGui::PushStyleColor(ImGuiCol_ButtonHovered, UI::action_color_00_weak);
+			ImGui::PushStyleColor(ImGuiCol_ButtonActive, UI::action_color_00_default);
+		}
+
+		const bool result = ImGui::Button("show Markdown", ImVec2(100, 21));
+
+		if (!bool_var)
+			ImGui::PopStyleColor(3);
+
+		return result;
+	}
 
 	void big_text(const char* text, bool wrapped) {
 
 		ImGui::PushFont(application::get().get_imgui_layer()->get_font("regular_big"));
+
+		if (wrapped)
+			ImGui::TextWrapped(text);
+		else
+			ImGui::Text(text);
+
+		ImGui::PopFont();
+	}
+
+
+	void text_bold(const char* text, bool wrapped) {
+
+		ImGui::PushFont(application::get().get_imgui_layer()->get_font("bold"));
+
+		if (wrapped)
+			ImGui::TextWrapped(text);
+		else
+			ImGui::Text(text);
+
+		ImGui::PopFont();
+	}
+
+
+	void text_italic(const char* text, bool wrapped) {
+
+		ImGui::PushFont(application::get().get_imgui_layer()->get_font("italic"));
 
 		if (wrapped)
 			ImGui::TextWrapped(text);

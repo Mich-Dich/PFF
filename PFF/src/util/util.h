@@ -450,6 +450,10 @@ namespace PFF {
 			return result;
 		}
 
+        PFF_API std::string add_spaces(const u32 multiple_of_indenting_spaces, u32 num_of_indenting_spaces = 2);
+
+        PFF_API u32 measure_indentation(const std::string& str, u32 num_of_indenting_spaces = 2);
+
         PFF_API int count_lines(const char* text);
 
         #define EXTRACT_AFTER_PFF(path) ([](const std::string& str) -> std::string {    \

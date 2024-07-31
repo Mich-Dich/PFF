@@ -25,7 +25,9 @@ namespace PFF::UI {
 
 	static ImVec4 main_color;
 	static ImVec4 main_titlebar_color;
-	
+
+	static ImVec4 action_color_00_faded;
+	static ImVec4 action_color_00_weak;
 	static ImVec4 action_color_00_default;
 	static ImVec4 action_color_00_hover;
 	static ImVec4 action_color_00_active;

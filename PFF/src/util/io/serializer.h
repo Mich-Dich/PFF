@@ -51,17 +51,17 @@ namespace PFF::serializer {
 				std::string buffer{};
 				if constexpr (PFF::util::is_vector<T>::value) {			// value is a vector
 
-					m_file_content << add_spaces(m_level_of_indention) << m_prefix << key_name << ":\n";
+					m_file_content << util::add_spaces(m_level_of_indention) << m_prefix << key_name << ":\n";
 					for (auto interation : value) {
 
 						PFF::util::convert_to_string<T::value_type>(interation, buffer);
-						m_file_content << add_spaces(m_level_of_indention + 1) << "- " << buffer << "\n";
+						m_file_content << util::add_spaces(m_level_of_indention + 1) << "- " << buffer << "\n";
 					}
 
 				} else {
 
 					PFF::util::convert_to_string<T>(value, buffer);
-					m_file_content << add_spaces(m_level_of_indention) << m_prefix << key_name << ": " << buffer << "\n";
+					m_file_content << util::add_spaces(m_level_of_indention) << m_prefix << key_name << ": " << buffer << "\n";
 				}
 
 			} else {				// load from file
@@ -142,7 +142,7 @@ namespace PFF::serializer {
 			if (m_option == PFF::serializer::option::save_to_file) {			// save to file
 
 				const u32 indent_buffer = vector_func_index != 1 ? m_level_of_indention - 1 : m_level_of_indention;
-				m_file_content << add_spaces(indent_buffer) << m_prefix << vector_name << ":\n";
+				m_file_content << util::add_spaces(indent_buffer) << m_prefix << vector_name << ":\n";
 				for (u64 x = 0; x < vector.size(); x++) {
 
 					// start of array element
@@ -180,7 +180,7 @@ namespace PFF::serializer {
 
 					// if line contains desired section enter inner-loop
 					//   has correct indentaion              has correct vector_name                          ends with double-point
-					if ((measure_indentation(line) == 0) && (line.find(vector_name) != std::string::npos) && (line.back() == ':')) {
+					if ((util::measure_indentation(line, NUM_OF_INDENTING_SPACES) == 0) && (line.find(vector_name) != std::string::npos) && (line.back() == ':')) {
 
 						found_section = true;
 
@@ -198,7 +198,7 @@ namespace PFF::serializer {
 							line = line.substr(NUM_OF_INDENTING_SPACES);
 
 							//  more indented                                        beginning of new sub-section
-							if (measure_indentation(line) != 0 || line.back() == ':' || line.front() == '-') {
+							if (util::measure_indentation(line, NUM_OF_INDENTING_SPACES) != 0 || line.back() == ':' || line.front() == '-') {
 
 								//m_file_content << line << "\n";
 								vector_of_file_content[index] << line << "\n";
@@ -249,9 +249,6 @@ namespace PFF::serializer {
 		void extract_key_value(std::string& key, std::string& value, std::string& line);
 
 		static const u32 NUM_OF_INDENTING_SPACES = 2;		// should not change
-
-		std::string add_spaces(const u32 multiple_of_indenting_spaces);
-		u32 measure_indentation(const std::string& str);
 
 		u32 m_level_of_indention = 0;
 		u64 vector_func_index = 0;

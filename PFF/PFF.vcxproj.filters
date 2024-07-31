@@ -212,6 +212,7 @@
     </ClInclude>
     <ClInclude Include="src\engine\render\material.h" />
     <ClInclude Include="src\util\math\math.h" />
+    <ClInclude Include="src\util\ui\imgui_markdown.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="src\application.cpp" />
@@ -307,5 +308,6 @@
     </ClCompile>
     <ClCompile Include="src\engine\render\material.cpp" />
     <ClCompile Include="src\util\math\math.cpp" />
+    <ClCompile Include="src\util\ui\imgui_markdown.cpp" />
   </ItemGroup>
 </Project>

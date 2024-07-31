@@ -56,7 +56,7 @@ namespace PFF {
 
 				entity loc_entitiy = create_entity("Test entity for renderer: " + util::to_string(x) + " / " + util::to_string(y));
 
-				auto& transform_comp = loc_entitiy.add_component<transform_component>();
+				auto& transform_comp = loc_entitiy.get_component<transform_component>();
 				transform_comp.translation = glm::vec3(350 * x, 0, 750 * y);
 
 				auto& mesh_comp = loc_entitiy.add_component<mesh_component>();
@@ -81,6 +81,7 @@ namespace PFF {
 		entity loc_entity = { m_registry.create(), this };
 		loc_entity.add_component<ID_component>(uuid);
 		loc_entity.add_component<tag_component>(name.empty() ? "Entity" : name);
+		loc_entity.add_component<transform_component>();
 
 		m_entity_map[uuid] = loc_entity;
 		return loc_entity;

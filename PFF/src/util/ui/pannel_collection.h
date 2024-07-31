@@ -32,11 +32,16 @@ namespace PFF::UI {
 
 	PFF_API bool add_gray_button(const char* label, const ImVec2& size = { 0, 0 });
 
+	PFF_API bool toggle_button(const char* lable, bool& bool_var, const ImVec2& size = { 0, 0 });
 
 	// @brief Draws text using a larger font.
 	// @param [text] The text to be drawn.
 	PFF_API void big_text(const char* text, bool wrapped = false);
 
+
+	PFF_API void text_bold(const char* text, bool wrapped = false);
+
+	PFF_API void text_italic(const char* text, bool wrapped = false);
 
 	// @brief Displays a help marker with tooltip containing the provided description.
 	// @param [desc] The description text to be displayed in the tooltip.

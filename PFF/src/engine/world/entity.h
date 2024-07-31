@@ -2,8 +2,8 @@
 #include "util/pffpch.h"
 
 #include <entt.hpp>
-#include "map.h"
 
+#include "map.h"
 #include "components.h"
 #include "util/UUID.h"
 
@@ -61,8 +61,8 @@ namespace PFF {
 
 	private:
 
-		entt::entity m_entity_handle{ entt::null };
-		map* m_map = nullptr;
+		entt::entity		m_entity_handle{ entt::null };
+		map*				m_map = nullptr;
 	};
 
 }

@@ -12,6 +12,8 @@
 #include "engine/game_objects/player_controller.h"
 #include "engine/layer/layer_stack.h"
 
+#include "util/ui/imgui_markdown.h"
+
 // #include "engine/geometry/basic_mesh.h"
 // #include "engine/geometry/dynamic_mesh.h"
 // #include "engine/geometry/static_mesh.h"

@@ -238,9 +238,11 @@ namespace PFF {
 
 		ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, ImVec2(0, 0));
 		ImGui::PushStyleVar(ImGuiStyleVar_WindowBorderSize, 0);
-		if (ImGui::Begin("Viewport##PFF_Engine", nullptr, window_flags)) {
+		bool is_window_begin = ImGui::Begin("Viewport##PFF_Engine", nullptr, window_flags);
+		ImGui::PopStyleVar(2);
 
-			ImGui::PopStyleVar(2);
+		if (is_window_begin) {
+
 			// display rendred image
 			ImVec2 viewport_size = ImGui::GetWindowSize();
 			viewport_size.y -= ImGui::GetFrameHeight();

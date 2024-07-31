@@ -238,6 +238,7 @@ IF EXIST ..\bin\Release-windows-x86_64\PFF\PFF.dll\ (xcopy /Q /E /Y /I ..\bin\Re
     <ClInclude Include="src\engine\world\map.h" />
     <ClInclude Include="src\entry_point.h" />
     <ClInclude Include="src\util\math\math.h" />
+    <ClInclude Include="src\util\ui\imgui_markdown.h" />
     <ClInclude Include="src\util\UUID.h" />
     <ClInclude Include="src\util\benchmarking\instrumentor.h" />
     <ClInclude Include="src\util\core_config.h" />
@@ -281,6 +282,7 @@ IF EXIST ..\bin\Release-windows-x86_64\PFF\PFF.dll\ (xcopy /Q /E /Y /I ..\bin\Re
     <ClCompile Include="src\engine\render\vulkan\vk_renderer.cpp" />
     <ClCompile Include="src\engine\world\map.cpp" />
     <ClCompile Include="src\util\math\math.cpp" />
+    <ClCompile Include="src\util\ui\imgui_markdown.cpp" />
     <ClCompile Include="src\util\UUID.cpp" />
     <ClCompile Include="src\util\io\config.cpp" />
     <ClCompile Include="src\util\io\io_handler.cpp" />

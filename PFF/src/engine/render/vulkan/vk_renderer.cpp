@@ -560,11 +560,17 @@ namespace PFF::render::vulkan {
 
 	void vk_renderer::init_default_data() {
 
-#if 0
+#define MESH_SOURCE 1
+
+#if MESH_SOURCE == 0
+		
 		T_test_meshes = IO::mesh_loader::load_gltf_meshes("../PFF/assets/meshes/basicmesh.glb").value();
-#elif 1
+
+#elif MESH_SOURCE == 1
+		
 		T_test_meshes = IO::mesh_loader::load_gltf_meshes("../PFF/assets/meshes/BP-688.glb").value();
-#else	// procedural terrain test
+
+#elif MESH_SOURCE == 2 	// procedural terrain test
 
 //#define PROFILE_GENERATION
 

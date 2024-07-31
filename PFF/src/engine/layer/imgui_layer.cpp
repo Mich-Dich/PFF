@@ -45,6 +45,8 @@ namespace PFF::UI {
 			.entry(KEY_VALUE(main_titlebar_color))
 
 			// color heightlight
+			.entry(KEY_VALUE(action_color_00_faded))
+			.entry(KEY_VALUE(action_color_00_weak))
 			.entry(KEY_VALUE(action_color_00_default))
 			.entry(KEY_VALUE(action_color_00_hover))
 			.entry(KEY_VALUE(action_color_00_active))
@@ -86,6 +88,8 @@ namespace PFF::UI {
 		main_titlebar_color = LERP_MAIN_COLOR_DARK(.5f);
 		default_item_width = 200.f;
 
+		action_color_00_faded = LERP_MAIN_COLOR_DARK(0.5f);
+		action_color_00_weak = LERP_MAIN_COLOR_DARK(0.6f);
 		action_color_00_default = LERP_MAIN_COLOR_DARK(0.7f);
 		action_color_00_hover = LERP_MAIN_COLOR_DARK(0.85f);
 		action_color_00_active = LERP_MAIN_COLOR_DARK(1.f);
@@ -328,9 +332,11 @@ namespace PFF::UI {
 				ImColor default_gray = IMCOLOR_GRAY(30);
 				ImColor default_gray_1 = IMCOLOR_GRAY(35);
 
+				action_color_00_faded = LERP_MAIN_COLOR_DARK(0.5f);
+				action_color_00_weak = LERP_MAIN_COLOR_DARK(0.6f);
 				action_color_00_default = LERP_MAIN_COLOR_DARK(0.7f);
 				action_color_00_hover = LERP_MAIN_COLOR_DARK(0.85f);
-				action_color_00_active = LERP_MAIN_COLOR_DARK(1.f);
+				action_color_00_active = LERP_MAIN_COLOR_DARK(0.92f);
 
 				action_color_gray_default = LERP_GRAY(0.15f);
 				action_color_gray_hover = LERP_GRAY(0.2f);

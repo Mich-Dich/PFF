@@ -89,6 +89,28 @@ namespace PFF::util {
         }
     }
 
+    std::string add_spaces(const u32 multiple_of_indenting_spaces, u32 num_of_indenting_spaces) {
+
+        if (multiple_of_indenting_spaces == 0)
+            return "";
+
+        return std::string(multiple_of_indenting_spaces * num_of_indenting_spaces, ' ');
+    }
+
+
+    u32 measure_indentation(const std::string& str, u32 num_of_indenting_spaces) {
+
+        u32 count = 0;
+        for (char ch : str) {
+            if (ch == ' ')
+                count++;
+            else
+                break; // Stop counting on non-space characters
+        }
+
+        return count / num_of_indenting_spaces;
+    }
+
     int count_lines(const char* text) {
 
         if (text[0] == '\0')

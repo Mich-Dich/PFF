@@ -52,7 +52,7 @@ namespace PFF::serializer {
 		while (std::getline(istream, line)) {
 
 			// is correct section
-			if (!found && (line.find(m_name + ":") != std::string::npos) && (measure_indentation(line) == 0)) {
+			if (!found && (line.find(m_name + ":") != std::string::npos) && (util::measure_indentation(line, NUM_OF_INDENTING_SPACES) == 0)) {
 
 				found = true;
 
@@ -62,7 +62,7 @@ namespace PFF::serializer {
 				// SKIP CONTENT
 				while (std::getline(istream, line)) {
 
-					if (line.back() == ':' && measure_indentation(line) == 0) {	// still in section ??
+					if (line.back() == ':' && util::measure_indentation(line, NUM_OF_INDENTING_SPACES) == 0) {	// still in section ??
 
 						updated_file << line + "\n";
 						break;
@@ -104,17 +104,17 @@ namespace PFF::serializer {
 				continue;
 			
 			// if line contains desired section enter inner-loop
-			if (line.find(m_name + ":") != std::string::npos && measure_indentation(line) == 0) {
+			if (line.find(m_name + ":") != std::string::npos && util::measure_indentation(line, NUM_OF_INDENTING_SPACES) == 0) {
 
 				found_section = true;
 
 				//     not end of file                   line has more leading spaces
-				while (std::getline(m_istream, line) && (measure_indentation(line) > SECTION_INDENTATION)) {
+				while (std::getline(m_istream, line) && (util::measure_indentation(line, NUM_OF_INDENTING_SPACES) > SECTION_INDENTATION)) {
 
 					line = line.substr(NUM_OF_INDENTING_SPACES);
 
 					//  more indented                                         is sub-section        is array-element
-					if ((measure_indentation(line) != SECTION_INDENTATION) || line.back() == ':' || line.front() == '-') {
+					if ((util::measure_indentation(line, NUM_OF_INDENTING_SPACES) != SECTION_INDENTATION) || line.back() == ':' || line.front() == '-') {
 
 						m_file_content << line << '\n';
 						continue;
@@ -150,7 +150,7 @@ namespace PFF::serializer {
 
 		if (m_option == PFF::serializer::option::save_to_file) {
 
-			m_file_content << add_spaces(m_level_of_indention - 1) << section_name << ":\n";
+			m_file_content << util::add_spaces(m_level_of_indention - 1, NUM_OF_INDENTING_SPACES) << section_name << ":\n";
 			sub_section_function(*this);
 
 		} else {	// load from file
@@ -177,7 +177,7 @@ namespace PFF::serializer {
 
 				// if line contains desired section enter inner-loop
 				//   has correct indentaion              has correct section_name                          ends with double-point
-				if ((measure_indentation(line) == 0) && (line.find(section_name) != std::string::npos) && (line.back() == ':')) {
+				if ((util::measure_indentation(line, NUM_OF_INDENTING_SPACES) == 0) && (line.find(section_name) != std::string::npos) && (line.back() == ':')) {
 
 					found_section = true;
 
@@ -186,7 +186,7 @@ namespace PFF::serializer {
 						line = line.substr(NUM_OF_INDENTING_SPACES);
 
 						//  more indented                                        beginning of new sub-section
-						if (measure_indentation(line) != 0 || line.back() == ':') {
+						if (util::measure_indentation(line, NUM_OF_INDENTING_SPACES) != 0 || line.back() == ':') {
 
 							m_file_content << line << "\n";
 							continue;
@@ -207,27 +207,6 @@ namespace PFF::serializer {
 
 		m_level_of_indention--;
 		return *this;
-	}
-
-	std::string yaml::add_spaces(const u32 multiple_of_indenting_spaces) {
-		
-		if (multiple_of_indenting_spaces == 0)
-			return "";
-
-		return std::string(multiple_of_indenting_spaces * NUM_OF_INDENTING_SPACES, ' ');
-	}
-
-	u32 yaml::measure_indentation(const std::string& str) {
-
-		u32 count = 0;
-		for (char ch : str) {
-			if (ch == ' ')
-				count++;
-			else
-				break; // Stop counting on non-space characters
-		}
-
-		return count / NUM_OF_INDENTING_SPACES;
 	}
 
 }
