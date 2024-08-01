@@ -124,7 +124,7 @@ namespace PFF::UI {
 	}
 
 
-	bool add_gray_button(const char* lable, const ImVec2& size) {
+	bool gray_button(const char* lable, const ImVec2& size) {
 
 		ImGui::PushStyleColor(ImGuiCol_Button, UI::action_color_gray_default);
 		ImGui::PushStyleColor(ImGuiCol_ButtonHovered, UI::action_color_gray_hover);
@@ -238,16 +238,17 @@ namespace PFF::UI {
 		return false;
 	}
 
+#define GRAY(value)		IM_COL32(value, value, value, 255);
 
 	void end_table() { ImGui::EndTable(); }
 
 	void custom_frame(const f32 width_left_side, std::function<void()> left_side, std::function<void()> right_side) {
 
 		ImGuiTableFlags flags = ImGuiTableFlags_None;
-		ImGui::PushStyleVar(ImGuiStyleVar_CellPadding, ImVec2(0, 0));
+		//ImGui::PushStyleVar(ImGuiStyleVar_CellPadding, ImVec2(0, 0));
 		if (ImGui::BeginTable("test_master_divider", 2, flags)) {
 
-			ImGui::PopStyleVar();
+			//ImGui::PopStyleVar();
 
 			// setup column
 			ImGui::TableSetupColumn("##one", ImGuiTableColumnFlags_WidthFixed, width_left_side);
@@ -258,10 +259,10 @@ namespace PFF::UI {
 			ImGui::TableSetColumnIndex(0);
 
 			// draw background
-			const ImVec4 color = UI::highlited_window_bg;
+			auto main_color = GRAY(40);
 			const ImVec2 uperleft_corner = ImGui::GetCursorScreenPos();
 			const ImVec2 lowerright_corner = { uperleft_corner.x + width_left_side ,uperleft_corner.y + ImGui::GetWindowHeight() };
-			ImGui::GetWindowDrawList()->AddRectFilled(uperleft_corner, lowerright_corner, PFF::UI::convert_color_to_int(color));
+			ImGui::GetWindowDrawList()->AddRectFilled(uperleft_corner, lowerright_corner, main_color /*PFF::UI::convert_color_to_int(color)*/);
 
 			shift_cursor_pos(0, ImGui::GetTextLineHeight());
 			ImGui::BeginGroup();
@@ -271,10 +272,12 @@ namespace PFF::UI {
 			ImGui::TableSetColumnIndex(1);
 			shift_cursor_pos(10, 10);
 
+			//ImGuiStyleVar_WindowPadding,       // ImVec2    WindowPadding
+			//ImGuiStyleVar_FramePadding,        // ImVec2    FramePadding
+			//ImGuiStyleVar_CellPadding,         // ImVec2    CellPadding
+
 			ImGui::BeginGroup();
-			ImGui::PushStyleVar(ImGuiStyleVar_FramePadding, ImVec2(5, 5));
 			right_side();
-			ImGui::PopStyleVar();
 			ImGui::EndGroup();
 
 			ImGui::EndTable();

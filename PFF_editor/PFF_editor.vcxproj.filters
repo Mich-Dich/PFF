@@ -46,6 +46,7 @@
     <ClInclude Include="src\util\util_editor.h">
       <Filter>util</Filter>
     </ClInclude>
+    <ClInclude Include="src\ui\engine_wiki.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="src\PFF_editor.cpp" />

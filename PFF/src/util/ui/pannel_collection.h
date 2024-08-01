@@ -18,7 +18,6 @@ namespace PFF::UI {
 		bottom_right = 5,
 	};
 
-
 	PFF_API void set_next_window_pos(window_pos location, f32 padding = 10.f);
 
 	PFF_API void set_next_window_pos_in_window(window_pos location, f32 padding = 10.f);
@@ -30,7 +29,7 @@ namespace PFF::UI {
 	PFF_API void seperation_vertical();
 
 
-	PFF_API bool add_gray_button(const char* label, const ImVec2& size = { 0, 0 });
+	PFF_API bool gray_button(const char* label, const ImVec2& size = { 0, 0 });
 
 	PFF_API bool toggle_button(const char* lable, bool& bool_var, const ImVec2& size = { 0, 0 });
 

@@ -12,6 +12,7 @@
 #include "toolkit/todo_list/todo_list.h"
 #include "toolkit/settings/graphics_engine_settings.h"
 #include "toolkit/texture_editor.h"
+#include "ui/engine_wiki.h"
 
 // TEST 
 #include "application.h"
@@ -87,6 +88,7 @@ namespace PFF {
 
 		PFF::toolkit::settings::window_graphics_engine();
 		PFF::toolkit::todo::window_todo_list();
+		PFF::UI::engine_wiki_window();
 
 		// First pass to mark items for removal
 		for (const auto& editor_window : m_editor_windows)
@@ -644,6 +646,7 @@ namespace PFF {
 				ImGui::MenuItem("ToDo List", "", &PFF::toolkit::todo::s_show_todo_list);
 				ImGui::MenuItem("Style Editor", "", &style_editor);
 				ImGui::MenuItem("Demo Window", "", &demo_window);
+				ImGui::MenuItem("Engine Wiki", "", &PFF::UI::show_engine_wiki);
 
 				ImGui::EndMenu();
 			}

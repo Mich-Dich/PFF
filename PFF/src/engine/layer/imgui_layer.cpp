@@ -26,7 +26,12 @@
 												(1.f - value) * 1.f + value * main_color.z, \
 												1.f }																		// Set [w] to be [1.f] to disable accidental transparency
 
+
 namespace PFF::UI {
+
+	static ImVec4 vector_multi(const ImVec4& vec_0, const ImVec4& vec_1) {
+		return ImVec4{ vec_0.x * vec_1.x, vec_0.y * vec_1.y, vec_0.z * vec_1.z, vec_0.w * vec_1.w };
+	}
 
 	void set_UI_theme_selection(theme_selection theme_selection) { UI_theme = theme_selection; }
 
@@ -34,6 +39,9 @@ namespace PFF::UI {
 
 		serializer::yaml(config::get_filepath_from_configtype(config::file::ui), "theme", option)
 			.entry(KEY_VALUE(m_font_size))
+			.entry(KEY_VALUE(m_font_size_header_0))
+			.entry(KEY_VALUE(m_font_size_header_1))
+			.entry(KEY_VALUE(m_font_size_header_2))
 			.entry(KEY_VALUE(m_big_font_size))
 			.entry(KEY_VALUE(UI_theme))
 			.entry(KEY_VALUE(enable_window_forder))
@@ -84,7 +92,7 @@ namespace PFF::UI {
 		
 		main_color = { .0f,	.4088f,	1.0f,	1.f };
 		enable_window_forder = false;
-		highlited_window_bg = LERP_GRAY(0.17f);
+		highlited_window_bg = LERP_GRAY(0.57f);
 		main_titlebar_color = LERP_MAIN_COLOR_DARK(.5f);
 		default_item_width = 200.f;
 
@@ -121,18 +129,24 @@ namespace PFF::UI {
 		m_context = ImGui::CreateContext();
 		GET_RENDERER.imgui_init();
 
+		std::filesystem::path base_path = std::filesystem::path("..") / "PFF" / "assets" / "fonts" / "Open_Sans" / "static";
+
 		// Load fonts
 		auto io = ImGui::GetIO();
 		io.FontAllowUserScaling = true;
-		m_fonts["default"] = io.Fonts->AddFontFromFileTTF("../PFF/assets/fonts/Open_Sans/static/OpenSans-Regular.ttf", m_font_size);
-		m_fonts["bold"] = io.Fonts->AddFontFromFileTTF("../PFF/assets/fonts/Open_Sans/static/OpenSans-Bold.ttf", m_font_size);
-		m_fonts["italic"] = io.Fonts->AddFontFromFileTTF("../PFF/assets/fonts/Open_Sans/static/OpenSans-Italic.ttf", m_font_size);
+		m_fonts["default"] =		io.Fonts->AddFontFromFileTTF((base_path / "OpenSans-Regular.ttf").string().c_str(), m_font_size);
+		m_fonts["bold"] =			io.Fonts->AddFontFromFileTTF((base_path / "OpenSans-Bold.ttf").string().c_str(), m_font_size);
+		m_fonts["italic"] =			io.Fonts->AddFontFromFileTTF((base_path / "OpenSans-Italic.ttf").string().c_str(), m_font_size);
 
-		m_fonts["regular_big"] = io.Fonts->AddFontFromFileTTF("../PFF/assets/fonts/Open_Sans/static/OpenSans-Regular.ttf", m_big_font_size);
-		m_fonts["bold_big"] = io.Fonts->AddFontFromFileTTF("../PFF/assets/fonts/Open_Sans/static/OpenSans-Bold.ttf", m_big_font_size);
-		m_fonts["italic_big"] = io.Fonts->AddFontFromFileTTF("../PFF/assets/fonts/Open_Sans/static/OpenSans-Italic.ttf", m_big_font_size);
+		m_fonts["regular_big"] =	io.Fonts->AddFontFromFileTTF((base_path / "OpenSans-Regular.ttf").string().c_str(), m_big_font_size);
+		m_fonts["bold_big"] =		io.Fonts->AddFontFromFileTTF((base_path / "OpenSans-Bold.ttf").string().c_str(), m_big_font_size);
+		m_fonts["italic_big"] =		io.Fonts->AddFontFromFileTTF((base_path / "OpenSans-Italic.ttf").string().c_str(), m_big_font_size);
 
-		m_fonts["giant"] = io.Fonts->AddFontFromFileTTF("../PFF/assets/fonts/Open_Sans/static/OpenSans-Bold.ttf", 30.f);
+		m_fonts["header_0"] =		io.Fonts->AddFontFromFileTTF((base_path / "OpenSans-Regular.ttf").string().c_str(), m_font_size_header_2);
+		m_fonts["header_1"] =		io.Fonts->AddFontFromFileTTF((base_path / "OpenSans-Regular.ttf").string().c_str(), m_font_size_header_1);
+		m_fonts["header_2"] =		io.Fonts->AddFontFromFileTTF((base_path / "OpenSans-Regular.ttf").string().c_str(), m_font_size_header_0);
+
+		m_fonts["giant"] =			io.Fonts->AddFontFromFileTTF((base_path / "OpenSans-Bold.ttf").string().c_str(), 30.f);
 		io.FontDefault = m_fonts["default"];
 
 		GET_RENDERER.imgui_create_fonts();
@@ -172,6 +186,21 @@ namespace PFF::UI {
 		if (!m_show_FPS_window)
 			return;
 
+		static auto last_update_time = std::chrono::steady_clock::now();
+		auto current_time = std::chrono::steady_clock::now();
+		
+		static const std::chrono::milliseconds update_interval(50);		// Time interval (15 milliseconds)
+		static const u32 array_size = 100;
+		static f32 frame_times[array_size] = {};
+		static u32 array_pointer = 0;
+
+		// Check if the time since the last update exceeds the update interval
+		if (current_time - last_update_time >= update_interval) {
+
+			frame_times[array_pointer % array_size] = (f32)m_current_fps;
+			array_pointer++;
+			last_update_time = current_time;
+		}
 		static UI::window_pos location = UI::window_pos::top_right;
 
 		ImGuiWindowFlags window_flags = (
@@ -188,11 +217,8 @@ namespace PFF::UI {
 		ImGui::SetNextWindowBgAlpha(0.8f); // Transparent background
 		if (ImGui::Begin("Performance_display##PFF_Engine", &m_show_FPS_window, window_flags)) {
 
-			// Get the current style
-			ImGuiStyle& style = ImGui::GetStyle();
-
 			// Get the line spacing(vertical padding around text)
-			f32 lineSpacing = style.ItemSpacing.y / 2;
+			f32 lineSpacing = ImGui::GetStyle().ItemSpacing.y / 2;
 			f32 fontSize = ImGui::GetFontSize();
 			f32 work_percent = static_cast<f32>(m_work_time / (m_work_time + m_sleep_time));
 			f32 sleep_percent = 1 - work_percent;
@@ -215,6 +241,53 @@ namespace PFF::UI {
 
 
 				UI::end_table();
+			}
+			
+			UI::shift_cursor_pos(0, 10);
+
+			ImGui::PushStyleVar(ImGuiStyleVar_FramePadding, ImVec2(0, 0));
+			ImGui::PushStyleColor(ImGuiCol_FrameBg, vector_multi(ImGui::GetStyleColorVec4(ImGuiCol_WindowBg), ImVec4{ 1, 1, 1, 0 }));
+			ImGui::PlotLines("##frame_times", frame_times, IM_ARRAYSIZE(frame_times), (array_pointer % array_size), (const char*)0, 0.0f, FLT_MAX, ImVec2(0, 70));
+			ImGui::PopStyleColor();
+			ImGui::PopStyleVar();
+
+			// Plot Lines
+			ImDrawList* draw_list = ImGui::GetWindowDrawList();
+			ImVec2 plot_size = ImGui::GetItemRectSize();
+			ImVec2 plot_pos = ImGui::GetItemRectMin();
+			ImVec2 plot_max_pos = { plot_pos.x + plot_size.x , plot_pos.y + plot_size.y };
+			static const char* fps_text = "  0 10 20 30 40 50 60 70 80 90100110120130140150160170180190200210220230240250260270280290300310320330340350360370380390400410420430450460470480490500510520530540550560570580590600610620630640650660670680690700710720730740750760770780790800810820830840850860870890900";
+			static const u32 offset = static_cast<u32>(ImGui::GetTextLineHeight() / 2);
+			static const u32 interval_thin = 10;
+			static const u64 interval_thick = 50;
+
+			f32 v_max = 0;
+			for (int i = 0; i < array_size; i++) {
+				const f32 v = frame_times[(array_pointer + i) % array_size];
+				if (v != v) // Ignore NaN values
+					continue;
+
+				v_max = math::max(v_max, v);
+			}
+			const f32 max_value = v_max;
+
+			u32 num_of_displayed_texts = 0;
+			u32 buffer = static_cast<u32>(max_value / 7);
+
+			for (u64 i = 0; i <= max_value; i += interval_thin) {
+
+				const char* text = fps_text + ((i / static_cast<u64>(interval_thin)) * 3);
+				float y = plot_max_pos.y - (i / max_value * plot_size.y);
+				ImU32 color = (i % interval_thick == 0) ? IM_COL32(action_color_00_active.x * 255, action_color_00_active.y * 255, action_color_00_active.z * 255, 255) : IM_COL32(200, 200, 200, 180);
+
+				if (i > (buffer) * num_of_displayed_texts) {
+
+					draw_list->AddLine(ImVec2(plot_pos.x, y), ImVec2(plot_max_pos.x - 55, y), color);
+					draw_list->AddText(ImVec2(plot_max_pos.x - 50, y - offset), color, text, text + 3);
+					draw_list->AddLine(ImVec2(plot_max_pos.x - 20, y), ImVec2(plot_max_pos.x, y), color);
+					num_of_displayed_texts++;
+				}
+
 			}
 
 			UI::next_window_position_selector(location, m_show_FPS_window);
@@ -342,13 +415,14 @@ namespace PFF::UI {
 				action_color_gray_hover = LERP_GRAY(0.2f);
 				action_color_gray_active = LERP_GRAY(0.25f);
 
-				highlited_window_bg = LERP_GRAY(0.17f);
+				//highlited_window_bg = LERP_GRAY(0.17f);
+				highlited_window_bg = LERP_GRAY(0.57f);
 				main_titlebar_color = LERP_MAIN_COLOR_DARK(.5f);
 
 				colors[ImGuiCol_Text]					= IMCOLOR_GRAY(255);
 				colors[ImGuiCol_TextDisabled]			= IMCOLOR_GRAY(180);
 				colors[ImGuiCol_WindowBg]				= default_gray;
-				colors[ImGuiCol_ChildBg]				= IMCOLOR_GRAY(35);
+				colors[ImGuiCol_ChildBg]				= default_gray;
 				colors[ImGuiCol_PopupBg]				= IMCOLOR_GRAY(20);
 				colors[ImGuiCol_Border]					= LERP_GRAY_A(.43f, .5f);
 				colors[ImGuiCol_BorderShadow]			= LERP_GRAY_A(.12f, .5f);
@@ -420,7 +494,7 @@ namespace PFF::UI {
 				colors[ImGuiCol_TextDisabled]			= LERP_GRAY(.7f);
 				colors[ImGuiCol_WindowBg]				= LERP_GRAY(.25f);
 				colors[ImGuiCol_ChildBg]				= LERP_GRAY(.25f);
-				colors[ImGuiCol_PopupBg]				= LERP_GRAY(.2f);
+				colors[ImGuiCol_PopupBg]				= LERP_GRAY(.25f);
 				colors[ImGuiCol_Border]					= LERP_GRAY_A(0.2f, .50f);
 				colors[ImGuiCol_BorderShadow]			= LERP_GRAY(.12f);
 				colors[ImGuiCol_FrameBg]				= LERP_GRAY_A(.75f, .75f);

@@ -130,9 +130,9 @@ namespace PFF::toolkit::todo {
 		ImGui::SetNextWindowSize(ImVec2(viewport->Size.x - 500, viewport->Size.y - 300), ImGuiCond_Appearing);
 		//ImGui::SetNextWindowViewport(viewport->ID);
 
-		ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, ImVec2(0, 0));
+		//ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, ImVec2(0, 0));
 		bool is_window_begin = ImGui::Begin("ToDo List", &s_show_todo_list, window_flags);
-		ImGui::PopStyleVar();
+		//ImGui::PopStyleVar();
 		
 		if (!is_window_begin) {
 
@@ -194,7 +194,7 @@ namespace PFF::toolkit::todo {
 				};
 
 				ImGui::SameLine();
-				if (UI::add_gray_button(" X ##cancle_todo_add_topic"))
+				if (UI::gray_button(" X ##cancle_todo_add_topic"))
 					topic_buf.reset();
 
 				//ImGui::EndHorizontal();
@@ -224,7 +224,7 @@ namespace PFF::toolkit::todo {
 				ImGui::SameLine();
 				if (s_topics[n].hovered) {
 
-					if (UI::add_gray_button(buf, { inner_padding, 22 }))
+					if (UI::gray_button(buf, { inner_padding, 22 }))
 						remove_topic(n);
 					else
 						s_topics[n].hovered = ImGui::IsItemHovered();
@@ -242,22 +242,15 @@ namespace PFF::toolkit::todo {
 		}
 		, [=] {
 
-			//ImGui::PushStyleColor(ImGuiCol_ChildBg, UI::THEME::highlited_window_bg);
-			ImGui::BeginChild("Child##for_todo_tasks");
-			//ImGui::PopStyleColor();
-
 			const ImVec2 start_pos = ImGui::GetCursorPos();
 			UI::big_text("Open Tasks");
 
-			//ImGui::SameLine();
 			ImGui::SetCursorPos(start_pos);
-			//ImGui::SetCursorPosX(start_pos.x + (ImGui::GetColumnWidth() - button_size.x));
 			PFF::UI::shift_cursor_pos((ImGui::GetColumnWidth() - button_size.x - 10), 0);
 			if (ImGui::Button("New##add_new_todo_task", button_size))
 				task_buf.input_enabled = true;
 
 			char buf[32];
-
 			UI::shift_cursor_pos(0, 10);
 			if (task_buf.input_enabled) {
 
@@ -347,7 +340,7 @@ namespace PFF::toolkit::todo {
 					if(UI::toggle_button("NAME", use_markdown, ImVec2(100, 21)))
 						use_markdown = !use_markdown;
 
-					if (UI::add_gray_button(" X ##stop_adding_task_to_todo", button_size_small))
+					if (UI::gray_button(" X ##stop_adding_task_to_todo", button_size_small))
 						task_buf.reset();
 				});
 			}
@@ -399,7 +392,6 @@ namespace PFF::toolkit::todo {
 				ImGui::Unindent();
 			}
 
-			ImGui::EndChild();
 		});
 
 		ImGui::End();
