@@ -1159,6 +1159,8 @@ namespace PFF::render::vulkan {
 // world_layer is a layer in the layerstack of the engine, it contains maps. // A large ingame world can be split in diffrent chunks (maps)
 // active_maps is a list of maps the engine should display, a map can be as large as you want
 #define PROCCESS 0
+		
+		m_renderer_metrik.reset();
 
 #if PROCCESS == 0
 
@@ -1208,6 +1210,55 @@ namespace PFF::render::vulkan {
 				// TODO: add culling for geometry that doesn't need to be drawns
 					// frustum culling
 
+
+
+
+
+
+				// ------------------------------------ Frustum Culling (Mesh-assets) ------------------------------------ 
+				std::array<glm::vec3, 8> corners{
+					glm::vec3 { 1, 1, 1 },
+					glm::vec3 { 1, 1, -1 },
+					glm::vec3 { 1, -1, 1 },
+					glm::vec3 { 1, -1, -1 },
+					glm::vec3 { -1, 1, 1 },
+					glm::vec3 { -1, 1, -1 },
+					glm::vec3 { -1, -1, 1 },
+					glm::vec3 { -1, -1, -1 },
+				};
+
+				// projection * view
+
+				glm::mat4 matrix = projection * view * (glm::mat4)transform;
+				glm::vec3 min = { 1.5, 1.5, 1.5 };
+				glm::vec3 max = { -1.5, -1.5, -1.5 };
+
+				for (int x = 0; x < 8; x++) {
+					
+					glm::vec4 v = matrix * glm::vec4(mesh_comp.mesh_asset->bounds.origin + (corners[x] * mesh_comp.mesh_asset->bounds.extents), 1.f);	// project each corner into clip space
+
+					// perspective correction
+					v.x = v.x / v.w;
+					v.y = v.y / v.w;
+					v.z = v.z / v.w;
+
+					min = glm::min(glm::vec3{ v.x, v.y, v.z }, min);
+					max = glm::max(glm::vec3{ v.x, v.y, v.z }, max);
+				}
+
+				// check the clip space box is within the view
+				if (min.z > 1.f || max.z < 0.f || min.x > 1.f || max.x < -1.f || min.y > 1.f || max.y < -1.f)
+					continue;
+
+
+
+
+
+
+
+
+				m_renderer_metrik.mesh_draw++;
+
 #ifdef USE_DEDICATED_PIPELINE
 				// bind material
 				vkCmdBindPipeline(cmd, VK_PIPELINE_BIND_POINT_GRAPHICS, mesh_comp.material->pipeline->pipeline);
@@ -1215,14 +1266,19 @@ namespace PFF::render::vulkan {
 				vkCmdBindDescriptorSets(cmd, VK_PIPELINE_BIND_POINT_GRAPHICS, mesh_comp.material->pipeline->layout, 1, 1, &mesh_comp.material->material_set, 0, nullptr);
 #endif
 				GPU_draw_push_constants push_constants;
-				push_constants.world_matrix = projection * view * transform.get_transform() * mesh_comp.transform;
+				push_constants.world_matrix = projection * view * (glm::mat4)transform * mesh_comp.transform;
 				push_constants.vertex_buffer = mesh_comp.mesh_asset->mesh_buffers.vertex_buffer_address;
 				vkCmdPushConstants(cmd, mesh_comp.material->pipeline->layout, VK_SHADER_STAGE_VERTEX_BIT, 0, sizeof(GPU_draw_push_constants), &push_constants);
 
 				vkCmdBindIndexBuffer(cmd, mesh_comp.mesh_asset->mesh_buffers.index_buffer.buffer, 0, VK_INDEX_TYPE_UINT32);
 
-				for (u64 x = 0; x < mesh_comp.mesh_asset->surfaces.size(); x++)
+				for (u64 x = 0; x < mesh_comp.mesh_asset->surfaces.size(); x++) {
+
 					vkCmdDrawIndexed(cmd, mesh_comp.mesh_asset->surfaces[x].count, 1, mesh_comp.mesh_asset->surfaces[x].startIndex, 0, 0);
+
+					m_renderer_metrik.vertecies += (u64)mesh_comp.mesh_asset->surfaces[x].count / 3;
+					m_renderer_metrik.draw_calls++;
+				}
 			}
 		}
 

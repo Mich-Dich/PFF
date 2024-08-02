@@ -260,7 +260,30 @@ namespace PFF {
 
 			// show debug data
 			application::get().get_imgui_layer()->show_FPS();
+			application::get().get_imgui_layer()->show_renderer_metrik();
 			window_renderer_backgrond_effect();
+
+			if (ImGui::BeginPopupContextWindow()) {
+
+				ImGui::Text("Performance Analysis");
+				ImGui::Separator();
+				ImGui::Checkbox("Show FPS window", application::get().get_imgui_layer()->get_show_FPS_window_pointer());
+				ImGui::Checkbox("Show renderer metrik", application::get().get_imgui_layer()->get_show_renderer_metrik_pointer());
+				ImGui::Checkbox("Show render background settings", &m_show_renderer_backgrond_effect);
+				ImGui::Separator();
+
+				//ImGui::Separator();
+				//ImGui::Text("Debugging Options");
+
+				//ImGui::Checkbox("Enable Frame Timing", &m_enable_frame_timing);
+				//ImGui::Checkbox("Show Performance Metrics", &m_show_performance_metrics);
+				//ImGui::Checkbox("Show Shader hotspots", &m_show_performance_metrics);
+
+				//ImGui::Separator();
+				
+				ImGui::EndPopup();
+			}
+
 		}
 		ImGui::End();
 	}
@@ -270,7 +293,7 @@ namespace PFF {
 		if (!m_show_renderer_backgrond_effect)
 			return;
 
-		static UI::window_pos location = UI::window_pos::top_left;
+		static UI::window_pos location = UI::window_pos::bottom_left;
 
 		ImGuiWindowFlags window_flags = (
 			ImGuiWindowFlags_NoDecoration |
@@ -316,7 +339,7 @@ namespace PFF {
 				UI::end_table();
 			}
 
-			UI::next_window_position_selector(location, m_show_renderer_backgrond_effect);
+			UI::next_window_position_selector_popup(location, m_show_renderer_backgrond_effect);
 		}
 		ImGui::End();
 	}

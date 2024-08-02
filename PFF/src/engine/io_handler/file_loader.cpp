@@ -116,6 +116,19 @@ namespace PFF::IO {
                             loc_mesh.m_vertices[initial_vtx + index].color = v;
                             });
                     }
+
+                    //loop the vertices of this surface, find min/max bounds
+                    glm::vec3 minpos = loc_mesh.m_vertices[initial_vtx].position;
+                    glm::vec3 maxpos = loc_mesh.m_vertices[initial_vtx].position;
+                    for (size_t x = initial_vtx; x < loc_mesh.m_vertices.size(); x++) {
+                        minpos = glm::min(minpos, loc_mesh.m_vertices[x].position);
+                        maxpos = glm::max(maxpos, loc_mesh.m_vertices[x].position);
+                    }
+                    // calculate origin and extents from the min/max, use extent lenght for radius
+                    new_surface.bounds.origin = (maxpos + minpos) / 2.f;
+                    new_surface.bounds.extents = (maxpos - minpos) / 2.f;
+                    new_surface.bounds.sphereRadius = glm::length(new_surface.bounds.extents);
+
                     loc_mesh.surfaces.push_back(new_surface);
                 }
 
@@ -126,12 +139,22 @@ namespace PFF::IO {
                         vtx.color = glm::vec4(vtx.normal, 1.f);
                 }
 
+                // calc mesh_asset bounds based on surfaces
+                glm::vec3 minpos = loc_mesh.surfaces[0].bounds.origin - loc_mesh.surfaces[0].bounds.extents;
+                glm::vec3 maxpos = loc_mesh.surfaces[0].bounds.origin + loc_mesh.surfaces[0].bounds.extents;
+                for (size_t x = 0; x < loc_mesh.surfaces.size(); x++) {
+                    minpos = glm::min(minpos, loc_mesh.surfaces[x].bounds.origin - loc_mesh.surfaces[x].bounds.extents);
+                    maxpos = glm::max(maxpos, loc_mesh.surfaces[x].bounds.origin + loc_mesh.surfaces[x].bounds.extents);
+                }
+                loc_mesh.bounds.origin = (maxpos + minpos) / 2.f;
+                loc_mesh.bounds.extents = (maxpos - minpos) / 2.f;
+                loc_mesh.bounds.sphereRadius = glm::length(loc_mesh.bounds.extents);
+
                 // new_mesh.meshBuffers = engine->uploadMesh(indices, vertices);
                 meshes.emplace_back(create_ref<geometry::mesh_asset>(std::move(loc_mesh)));
             }
 
             return meshes;
-
         }
 
     }

@@ -44,6 +44,23 @@ namespace PFF::util {
 
         return result;
     }
+    
+
+    void high_precision_sleep(f32 duration_in_milliseconds) {
+
+        static const f32 estimated_deviation = 10.0f;
+        auto loc_duration_in_milliseconds = std::chrono::duration_cast<std::chrono::milliseconds>( std::chrono::duration<f32>(duration_in_milliseconds) ).count();
+        auto target_time = std::chrono::high_resolution_clock::now() + std::chrono::milliseconds(static_cast<int>(loc_duration_in_milliseconds));
+        
+        std::this_thread::sleep_for(std::chrono::milliseconds(static_cast<int>(loc_duration_in_milliseconds - estimated_deviation)));
+
+        // Busy wait for the remaining time
+        while (std::chrono::high_resolution_clock::now() < target_time)
+            ;
+
+        //auto actual_sleep_time = std::chrono::duration_cast<std::chrono::milliseconds>( std::chrono::high_resolution_clock::now() - target_time + std::chrono::milliseconds(static_cast<int>(duration_in_milliseconds)) ).count();
+        //CORE_LOG(Debug, "left over time: " << actual_sleep_time << " ms");
+    }
 
     system_time get_system_time() {
 

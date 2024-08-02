@@ -48,7 +48,9 @@ namespace PFF::UI {
 		imgui_layer();
 		~imgui_layer();
 
-		FORCEINLINE ImGuiContext* get_context() { return m_context; }
+		PFF_DEFAULT_GETTER(ImGuiContext*, context)
+		PFF_DEFAULT_GETTER_SETTER_ALL(bool, show_FPS_window);
+		PFF_DEFAULT_GETTER_SETTER_ALL(bool, show_renderer_metrik);
 		//FORCEINLINE bool is_render_clear_enabled() const { return m_clear_enabled; }
 
 		void on_attach() override;
@@ -56,6 +58,8 @@ namespace PFF::UI {
 		void on_update(const f32 delta_time) override;
 		void on_event(event& event) override;
 		void on_imgui_render() override;
+		
+		void PFF_API show_renderer_metrik();
 		void PFF_API show_FPS();
 		
 		PFF_API_EDITOR ImFont* get_font(const std::string& name = "default");
@@ -64,12 +68,15 @@ namespace PFF::UI {
 
 	private:
 
+		void serialize(serializer::option option);
+
 		// ------------------------- general -------------------------
 		ImGuiContext* m_context{};
 		std::unordered_map<std::string, ImFont*> m_fonts{};
 
 		// ------------------------- performance display -------------------------
 		bool m_show_FPS_window = true;
+		bool m_show_renderer_metrik = true;
 		f32 m_work_time = 0.f, m_sleep_time = 0.f;
 		u32 m_target_fps = 0, m_current_fps = 0;
 		bool m_limit_fps = false;

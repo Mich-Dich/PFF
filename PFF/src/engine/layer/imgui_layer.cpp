@@ -35,6 +35,13 @@ namespace PFF::UI {
 
 	void set_UI_theme_selection(theme_selection theme_selection) { UI_theme = theme_selection; }
 
+	void imgui_layer::serialize(serializer::option option) {
+
+		serializer::yaml(config::get_filepath_from_configtype(config::file::ui), "performance_display", option)
+			.entry(KEY_VALUE(m_show_FPS_window))
+			.entry(KEY_VALUE(m_show_renderer_metrik));
+	}
+
 	static void serialize(serializer::option option) {
 
 		serializer::yaml(config::get_filepath_from_configtype(config::file::ui), "theme", option)
@@ -128,6 +135,8 @@ namespace PFF::UI {
 		IMGUI_CHECKVERSION();
 		m_context = ImGui::CreateContext();
 		GET_RENDERER.imgui_init();
+		
+		serialize(serializer::option::load_from_file);
 
 		std::filesystem::path base_path = std::filesystem::path("..") / "PFF" / "assets" / "fonts" / "Open_Sans" / "static";
 
@@ -158,7 +167,7 @@ namespace PFF::UI {
 		
 		LOG(Trace, "detach imgui layer");
 
-		//serialize(serializer::option::save_to_file);
+		serialize(serializer::option::save_to_file);
 		GET_RENDERER.imgui_shutdown();
 		ImGui::DestroyContext(m_context);
 	}
@@ -181,6 +190,47 @@ namespace PFF::UI {
 	}
 
 
+	void imgui_layer::show_renderer_metrik() {
+
+		if (!m_show_renderer_metrik)
+			return;
+
+		static UI::window_pos location = UI::window_pos::top_left;
+		ImGuiWindowFlags window_flags = (
+			ImGuiWindowFlags_NoDecoration |
+			ImGuiWindowFlags_NoDocking |
+			ImGuiWindowFlags_AlwaysAutoResize |
+			ImGuiWindowFlags_NoSavedSettings |
+			ImGuiWindowFlags_NoFocusOnAppearing |
+			ImGuiWindowFlags_NoNav);
+		if (location != UI::window_pos::custom)
+			window_flags |= ImGuiWindowFlags_NoMove;
+
+		static char formatted_text[32];
+
+		UI::set_next_window_pos_in_window(location);
+		ImGui::SetNextWindowBgAlpha(0.8f); // Transparent background
+		if (ImGui::Begin("Renderer Metrik##PFF_Engine", &m_show_FPS_window, window_flags)) {
+
+			if (UI::begin_table("Performance Display", true, ImVec2(200.0f, 0))) {
+
+				auto* metrik = PFF::render::vulkan::vk_renderer::get().get_renderer_metrik_pointer();
+				UI::table_row_text("mesh draws", "%d", metrik->mesh_draw);
+				UI::table_row_text("draw calls", "%d", metrik->draw_calls);
+				UI::table_row_text("vertecies", "%d", metrik->vertecies);
+
+				UI::table_row_text("work time", "%d", metrik->work_time);
+				UI::table_row_text("sleep time", "%d", metrik->sleep_time);
+
+				UI::end_table();
+			}
+
+			UI::next_window_position_selector_popup(location, m_show_renderer_metrik);
+		}
+		ImGui::End();
+	}
+
+
 	void imgui_layer::show_FPS() {
 
 		if (!m_show_FPS_window)
@@ -188,7 +238,7 @@ namespace PFF::UI {
 
 		static auto last_update_time = std::chrono::steady_clock::now();
 		auto current_time = std::chrono::steady_clock::now();
-		
+
 		static const std::chrono::milliseconds update_interval(50);		// Time interval (15 milliseconds)
 		static const u32 array_size = 100;
 		static f32 frame_times[array_size] = {};
@@ -198,11 +248,11 @@ namespace PFF::UI {
 		if (current_time - last_update_time >= update_interval) {
 
 			frame_times[array_pointer % array_size] = (f32)m_current_fps;
-			array_pointer++;
+			array_pointer = (array_pointer + 1) % array_size;
 			last_update_time = current_time;
 		}
-		static UI::window_pos location = UI::window_pos::top_right;
 
+		static UI::window_pos location = UI::window_pos::top_right;
 		ImGuiWindowFlags window_flags = (
 			ImGuiWindowFlags_NoDecoration |
 			ImGuiWindowFlags_NoDocking |
@@ -222,9 +272,11 @@ namespace PFF::UI {
 			f32 fontSize = ImGui::GetFontSize();
 			f32 work_percent = static_cast<f32>(m_work_time / (m_work_time + m_sleep_time));
 			f32 sleep_percent = 1 - work_percent;
-			char formattedText[32];
+			char formatted_text[32];
 			ImVec2 curser_pos;
 			ImVec2 textSize;
+
+			ImGui::Text("ImGui FPS: %5.2f", ImGui::GetIO().Framerate);
 
 			if (UI::begin_table("Performance Display", true, ImVec2(200.0f, 0))) {
 
@@ -233,11 +285,11 @@ namespace PFF::UI {
 				else
 					UI::table_row("FPS", util::format_string(std::setw(4), m_current_fps));
 
-				snprintf(formattedText, sizeof(formattedText), "%5.2f ms", m_work_time);
-				UI::table_row_progressbar("work time:", formattedText, work_percent);
+				snprintf(formatted_text, sizeof(formatted_text), "%5.2f ms", m_work_time);
+				UI::table_row_progressbar("work time:", formatted_text, work_percent);
 
-				snprintf(formattedText, sizeof(formattedText), "%5.2f ms", m_sleep_time);
-				UI::table_row_progressbar("sleep time:", formattedText, sleep_percent);
+				snprintf(formatted_text, sizeof(formatted_text), "%5.2f ms", m_sleep_time);
+				UI::table_row_progressbar("sleep time:", formatted_text, sleep_percent);
 
 
 				UI::end_table();
@@ -274,6 +326,24 @@ namespace PFF::UI {
 			u32 num_of_displayed_texts = 0;
 			u32 buffer = static_cast<u32>(max_value / 7);
 
+			// FREE SECTION FOR TEXT
+			//		begin:	55 from right
+			//		end:	20 from right
+
+#if 0
+			static const u32 NUM_OF_VERTICAL_LINES = 10;
+			for (u32 x = 0; x < NUM_OF_VERTICAL_LINES; x++) {
+
+				ImU32 color = (x == NUM_OF_VERTICAL_LINES-1) ? IM_COL32(action_color_00_active.x * 255, action_color_00_active.y * 255, action_color_00_active.z * 255, 255) : IM_COL32(200, 200, 200, 180);
+				
+				f32 multi = (f32) ((array_pointer + (x * NUM_OF_VERTICAL_LINES)) % array_size) / array_size;
+				f32 line_x_position = plot_max_pos.x - (plot_size.x * multi);
+
+				if(line_x_position <= plot_max_pos.x - 50 || line_x_position >= plot_max_pos.x - 20)
+					draw_list->AddLine(ImVec2(line_x_position, plot_pos.y - 5), ImVec2(line_x_position, plot_max_pos.y), color);
+			}
+#endif
+
 			for (u64 i = 0; i <= max_value; i += interval_thin) {
 
 				const char* text = fps_text + ((i / static_cast<u64>(interval_thin)) * 3);
@@ -283,14 +353,32 @@ namespace PFF::UI {
 				if (i > (buffer) * num_of_displayed_texts) {
 
 					draw_list->AddLine(ImVec2(plot_pos.x, y), ImVec2(plot_max_pos.x - 55, y), color);
-					draw_list->AddText(ImVec2(plot_max_pos.x - 50, y - offset), color, text, text + 3);
+					draw_list->AddText(ImVec2(plot_max_pos.x - 50, y - offset), IM_COL32(200, 200, 200, 180), text, text + 3);
 					draw_list->AddLine(ImVec2(plot_max_pos.x - 20, y), ImVec2(plot_max_pos.x, y), color);
 					num_of_displayed_texts++;
 				}
 
 			}
 
-			UI::next_window_position_selector(location, m_show_FPS_window);
+			if (ImGui::BeginPopupContextWindow()) {
+
+				static u32 min_fps = 1;
+				static u32 max_fps = 1000;
+				if (UI::begin_table("Performance Display", true, ImVec2(200.0f, 0))) {
+
+					if (UI::table_row_drag_scalar<u32>("target FPS", application::get().get_target_fps_ref(), "%u FPS", min_fps, max_fps))
+						application::get().set_fps_settings(true, application::get().get_target_fps());
+
+					if (UI::table_row_drag_scalar<u32>("Non-focus FPS", application::get().get_nonefocus_fps_ref(), "%u FPS", min_fps, max_fps))
+						application::get().set_fps_settings(false, application::get().get_nonefocus_fps());
+
+					UI::end_table();
+				}
+
+				UI::next_window_position_selector(location, m_show_FPS_window);
+
+				ImGui::EndPopup();
+			}
 		}
 		ImGui::End();
 	}

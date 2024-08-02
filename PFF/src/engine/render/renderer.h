@@ -21,6 +21,18 @@ namespace PFF::render {
 	// DATA STRUCTURES
 	// ------------------------------------------------------------------------------------------------------------------------
 
+	struct renderer_metrik {
+		u32 mesh_draw = 0;
+		u32 draw_calls = 0;
+		u64 vertecies = 0;
+		f32 sleep_time = 0.f,	work_time = 0.f;
+
+		void reset() {
+			draw_calls = mesh_draw = 0;
+			vertecies = 0;
+			sleep_time = work_time = 0.f;
+		}
+	};
 
 	// ------------------------------------------------------------------------------------------------------------------------
 	// RENDERER FUNCTIONALLITY
@@ -31,14 +43,14 @@ namespace PFF::render {
 		
 		virtual ~renderer() {};
 
-		FORCEINLINE static render_api get_api() { return s_render_api; }
-		FORCEINLINE static void set_api(render_api api) { s_render_api = api; }
-		FORCEINLINE void set_active_camera(ref<camera> camera) { m_active_camera = camera; }
-		FORCEINLINE compute_effect& get_current_background_effect() { return m_background_effects[m_current_background_effect]; }
+		PFF_GETTER(int&, current_background_effect_index,				m_current_background_effect);
+		PFF_DEFAULT_GETTERS(renderer_metrik,							renderer_metrik)
 
-		FORCEINLINE int get_number_of_background_effects() { return static_cast<int>(m_background_effects.size()); }
-		PFF_GETTER(int&, current_background_effect_index, m_current_background_effect);
-
+		FORCEINLINE static render_api get_api()							{ return s_render_api; }
+		FORCEINLINE static void set_api(render_api api)					{ s_render_api = api; }
+		FORCEINLINE void set_active_camera(ref<camera> camera)			{ m_active_camera = camera; }
+		FORCEINLINE compute_effect& get_current_background_effect()		{ return m_background_effects[m_current_background_effect]; }
+		FORCEINLINE int get_number_of_background_effects()				{ return static_cast<int>(m_background_effects.size()); }
 
 		virtual void* get_rendered_image() = 0;
 
@@ -68,6 +80,8 @@ namespace PFF::render {
 		bool										m_imgui_initalized = false;
 		bool										m_render_swapchain = false;	// FALSE: will display rendered image in a imgui window    TRUE: will display rendered image directly into GLFW_window
 		ref<camera>									m_active_camera{};
+
+		renderer_metrik								m_renderer_metrik{};
 
 	protected:
 		std::vector<compute_effect> 				m_background_effects{};

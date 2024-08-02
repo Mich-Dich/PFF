@@ -18,52 +18,54 @@ namespace PFF::UI {
 		bottom_right = 5,
 	};
 
-	PFF_API void set_next_window_pos(window_pos location, f32 padding = 10.f);
+	PFF_API FORCEINLINE void set_next_window_pos(window_pos location, f32 padding = 10.f);
 
-	PFF_API void set_next_window_pos_in_window(window_pos location, f32 padding = 10.f);
+	PFF_API FORCEINLINE void set_next_window_pos_in_window(window_pos location, f32 padding = 10.f);
 
-	PFF_API void next_window_position_selector(window_pos& position, bool& show_window);
+	PFF_API FORCEINLINE void next_window_position_selector(window_pos& position, bool& show_window);
+
+	PFF_API FORCEINLINE void next_window_position_selector_popup(window_pos& position, bool& show_window);
 
 
 	// @brief Draws a vertical separation line.
-	PFF_API void seperation_vertical();
+	PFF_API FORCEINLINE void seperation_vertical();
 
 
-	PFF_API bool gray_button(const char* label, const ImVec2& size = { 0, 0 });
+	PFF_API FORCEINLINE bool gray_button(const char* label, const ImVec2& size = { 0, 0 });
 
-	PFF_API bool toggle_button(const char* lable, bool& bool_var, const ImVec2& size = { 0, 0 });
+	PFF_API FORCEINLINE bool toggle_button(const char* lable, bool& bool_var, const ImVec2& size = { 0, 0 });
 
 	// @brief Draws text using a larger font.
 	// @param [text] The text to be drawn.
-	PFF_API void big_text(const char* text, bool wrapped = false);
+	PFF_API FORCEINLINE void big_text(const char* text, bool wrapped = false);
 
 
-	PFF_API void text_bold(const char* text, bool wrapped = false);
+	PFF_API FORCEINLINE void text_bold(const char* text, bool wrapped = false);
 
-	PFF_API void text_italic(const char* text, bool wrapped = false);
+	PFF_API FORCEINLINE void text_italic(const char* text, bool wrapped = false);
 
 	// @brief Displays a help marker with tooltip containing the provided description.
 	// @param [desc] The description text to be displayed in the tooltip.
-	PFF_API void help_marker(const char* desc);
+	PFF_API FORCEINLINE void help_marker(const char* desc);
 
 
 	// @brief Adjusts the current ImGui cursor position by adding the specified horizontal and vertical shift offsets.
 	// @param [shift_x] The horizontal shift offset.
 	// @param [shift_y] The vertical shift offset.
-	PFF_API void shift_cursor_pos(const f32 shift_x, const f32 shift_y);
+	PFF_API FORCEINLINE void shift_cursor_pos(const f32 shift_x, const f32 shift_y);
 
 
-	PFF_API void progressbar_with_text(const char* label, const char* progress_bar_text, f32 percent, f32 label_size = 50.f, f32 progressbar_size_x = 50.f, f32 progressbar_size_y = 1.f);
+	PFF_API FORCEINLINE void progressbar_with_text(const char* label, const char* progress_bar_text, f32 percent, f32 label_size = 50.f, f32 progressbar_size_x = 50.f, f32 progressbar_size_y = 1.f);
 
 
 	// @brief This function sets up an ImGui table with two columns, where the first column is resizable and the second column fills the remaining availabel area
 	// @brief CAUTION - you need to call UI::end_table() at the end of the table;
 	// @param [label] Is used to identify the table
-	PFF_API bool begin_table(std::string_view label, bool display_name = true, ImVec2 size = ImVec2(0,0), f32 inner_width = 0.0f, bool set_columns_width = true, f32 columns_width_percentage = 0.5f);
+	PFF_API FORCEINLINE bool begin_table(std::string_view label, bool display_name = true, ImVec2 size = ImVec2(0,0), f32 inner_width = 0.0f, bool set_columns_width = true, f32 columns_width_percentage = 0.5f);
 
 	
 	// @brief Ends the table started with UI::begin_table().
-	PFF_API void end_table();
+	PFF_API FORCEINLINE void end_table();
 
 
 	// @brief This function draws a custom frame with two separate sections: [left_side] and [right_side].
@@ -72,7 +74,7 @@ namespace PFF::UI {
 	// @param [width_left_side] The fixed width of the first column.
 	// @param [left_side] The function representing the content of the left side.
 	// @param [right_side] The function representing the content of the right side.
-	PFF_API void custom_frame(const f32 width_left_side, std::function<void()> left_side, std::function<void()> right_side);
+	PFF_API FORCEINLINE void custom_frame(const f32 width_left_side, std::function<void()> left_side, std::function<void()> right_side);
 
 	
 	// @brief Renders an integer slider within a table row in an ImGui interface.
@@ -88,13 +90,16 @@ namespace PFF::UI {
 	// @param flags Optional ImGui input text flags.
 	// 
 	// @return true if the value was changed by the slider, false otherwise.
-	PFF_API bool table_row_slider(std::string_view label, int& value, int min_value = 0, int max_value = 1, ImGuiInputTextFlags flags = ImGuiInputTextFlags_None);
+	PFF_API FORCEINLINE bool table_row_slider(std::string_view label, int& value, int min_value = 0, int max_value = 1, ImGuiInputTextFlags flags = ImGuiInputTextFlags_None);
 
 
-	PFF_API void table_row(std::function<void()> first_colum, std::function<void()> second_colum);
+	PFF_API FORCEINLINE void table_row(std::function<void()> first_colum, std::function<void()> second_colum);
 
 
-	void table_row(std::string_view label, std::string_view value);
+	PFF_API FORCEINLINE void table_row_text(std::string_view label, const char* format, ...);
+
+
+	PFF_API FORCEINLINE void table_row(std::string_view label, std::string_view value);
 
 
 	// @brief Adds a row to an ImGui table with a label and corresponding value input field.
@@ -157,7 +162,7 @@ namespace PFF::UI {
 	}
 
 
-	void table_row_progressbar(std::string_view label, const char* progress_bar_text, const f32 percent, const bool auto_resize = true, const f32 progressbar_size_x = 50.f, const f32 progressbar_size_y = 1.f);
+	PFF_API FORCEINLINE void table_row_progressbar(std::string_view label, const char* progress_bar_text, const f32 percent, const bool auto_resize = true, const f32 progressbar_size_x = 50.f, const f32 progressbar_size_y = 1.f);
 
 
 	// @brief Renders a slider within a table row in an ImGui interface.
@@ -184,7 +189,7 @@ namespace PFF::UI {
 	// 
 	// @return true if the value was changed by the slider, false otherwise.
 	template<typename T>
-	bool table_row_slider(std::string_view label, T& value, f32 min_value = 0.f, f32 max_value = 1.f, ImGuiInputTextFlags flags = ImGuiInputTextFlags_None) {
+	bool table_row_slider(std::string_view label, T& value, f32 min_value = 0.f, f32 max_value = 1.f, f32 draw_speed = 0.2f, ImGuiInputTextFlags flags = ImGuiInputTextFlags_None) {
 
 		ImGuiStyle& style = ImGui::GetStyle();
 		ImVec2 current_item_spacing = style.ItemSpacing;
@@ -219,6 +224,41 @@ namespace PFF::UI {
 
 		if constexpr (std::is_same_v<T, glm::vec4> || std::is_same_v<T, ImVec4>)
 			return ImGui::SliderFloat4(loc_label.c_str(), &value[0], min_value, max_value, "%.2f", flags);
+
+		return false;
+	}
+	
+	
+	template<typename T>
+	bool table_row_drag_scalar(std::string_view label, T& value, const char* format, T min_value = (T)0, T max_value = (T)1, f32 draw_speed = 0.2f, ImGuiInputTextFlags flags = ImGuiInputTextFlags_None) {
+
+		ImGuiStyle& style = ImGui::GetStyle();
+		ImVec2 current_item_spacing = style.ItemSpacing;
+		flags |= ImGuiInputTextFlags_AllowTabInput;
+
+		ImGui::TableNextRow();
+		ImGui::TableSetColumnIndex(0);
+		ImGui::Text("%s", label.data());
+
+		ImGui::TableSetColumnIndex(1);
+
+		// Copy non-space characters from label to loc_label
+		std::string loc_label = "##";
+		loc_label.reserve(label.size() + 2);
+		std::remove_copy_if(label.begin(), label.end(), std::back_inserter(loc_label), [](char c) {
+			return std::isspace(static_cast<unsigned char>(c));
+		});
+
+		ImGui::SetNextItemWidth(ImGui::GetColumnWidth());
+
+		if constexpr (std::is_same_v<T, int>)
+			return ImGui::SliderInt(loc_label.c_str(), &value, static_cast<int>(min_value), static_cast<int>(max_value), "%d", flags);
+
+		if constexpr (std::is_same_v<T, f32> || std::is_same_v<T, f64>)
+			return ImGui::SliderFloat(loc_label.c_str(), &value, min_value, max_value, "%.2f", flags);
+
+		if constexpr (std::is_same_v<T, u32>)
+			return ImGui::DragScalar(loc_label.c_str(), ImGuiDataType_U32, &value, 0.2f, (const void*)&min_value, (const void*)&max_value, format);
 
 		return false;
 	}

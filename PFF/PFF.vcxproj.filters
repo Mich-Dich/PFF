@@ -201,9 +201,6 @@
     <ClInclude Include="src\util\platform\windows_util.h">
       <Filter>util\platform</Filter>
     </ClInclude>
-    <ClInclude Include="src\util\timer.h">
-      <Filter>util</Filter>
-    </ClInclude>
     <ClInclude Include="src\util\ui\pannel_collection.h">
       <Filter>util\ui</Filter>
     </ClInclude>
@@ -295,9 +292,6 @@
       <Filter>util</Filter>
     </ClCompile>
     <ClCompile Include="src\util\pffpch.cpp">
-      <Filter>util</Filter>
-    </ClCompile>
-    <ClCompile Include="src\util\timer.cpp">
       <Filter>util</Filter>
     </ClCompile>
     <ClCompile Include="src\util\ui\pannel_collection.cpp">

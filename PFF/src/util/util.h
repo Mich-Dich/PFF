@@ -77,6 +77,16 @@ namespace PFF {
 
 
 
+        // @brief Pauses the execution of the current thread for a specified duration with high precision.
+        //          This function first uses `std::this_thread::sleep_for` to sleep for nearly the entire duration,
+        //          adjusting for an estimated deviation to account for inaccuracies in sleep timing. 
+        //          Following this, it performs a busy wait to ensure that the total sleep time is as accurate as possible,
+        //          considering that the operating system's sleep function may not be perfectly precise.
+        // @param [duration_in_milliseconds] The duration for which the thread should be paused. The function converts this
+        //          value to milliseconds and adjusts for an estimated deviation before performing a busy wait until
+        //          the desired wake-up time.
+        PFF_API void high_precision_sleep(f32 duration_in_milliseconds);
+
 
         system_time get_system_time();
 

@@ -21,8 +21,8 @@ namespace PFF {
 			: translation(translation) {}
 		transform_component(const glm::mat4& transform) { math::decompose_transform(transform, translation, rotation, scale); }
 
-		operator glm::mat4& () { return get_transform(); }
-		operator const glm::mat4& () const { return get_transform(); }
+		operator glm::mat4 () { return get_transform(); }
+		operator const glm::mat4 () const { return get_transform(); }
 
 		glm::vec3 translation = { 0.0f, 0.0f, 0.0f };
 		glm::vec3 rotation = { 0.0f, 0.0f, 0.0f };
@@ -30,7 +30,7 @@ namespace PFF {
 
 	//private:
 
-		glm::mat4 get_transform() const {
+		FORCEINLINE glm::mat4 get_transform() const {
 
 			return glm::translate(glm::mat4(1.0f), translation)
 				* glm::toMat4(glm::quat(rotation))

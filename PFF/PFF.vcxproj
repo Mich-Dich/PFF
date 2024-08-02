@@ -253,7 +253,6 @@ IF EXIST ..\bin\Release-windows-x86_64\PFF\PFF.dll\ (xcopy /Q /E /Y /I ..\bin\Re
     <ClInclude Include="src\util\math\random.h" />
     <ClInclude Include="src\util\pffpch.h" />
     <ClInclude Include="src\util\platform\windows_util.h" />
-    <ClInclude Include="src\util\timer.h" />
     <ClInclude Include="src\util\ui\pannel_collection.h" />
     <ClInclude Include="src\util\util.h" />
   </ItemGroup>
@@ -291,7 +290,6 @@ IF EXIST ..\bin\Release-windows-x86_64\PFF\PFF.dll\ (xcopy /Q /E /Y /I ..\bin\Re
     <ClCompile Include="src\util\pffpch.cpp">
       <PrecompiledHeader>Create</PrecompiledHeader>
     </ClCompile>
-    <ClCompile Include="src\util\timer.cpp" />
     <ClCompile Include="src\util\ui\pannel_collection.cpp" />
     <ClCompile Include="src\util\util.cpp" />
   </ItemGroup>

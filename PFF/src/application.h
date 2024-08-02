@@ -6,7 +6,6 @@
 #include "engine/layer/imgui_layer.h"
 #include "engine/layer/world_layer.h"
 #include "engine/render/renderer.h"
-#include "util/timer.h"
 
 #include "engine/render/renderer.h"
 #include "engine/render/vulkan/vk_renderer.h"
@@ -34,7 +33,11 @@ namespace PFF {
 		FORCEINLINE f64 get_delta_time() const										{ return m_delta_time; }
 		FORCEINLINE USE_IN_EDITOR void push_overlay(layer* overlay)					{ m_layerstack->push_overlay(overlay); }
 		FORCEINLINE USE_IN_EDITOR void pop_overlay(layer* overlay)					{ m_layerstack->pop_overlay(overlay); }
-		FORCEINLINE u32 get_target_fps() const										{ return m_target_fps; }
+		
+		//FORCEINLINE u32 get_target_fps() const									{ return m_target_fps; }
+		PFF_DEFAULT_GETTERS(u32,													target_fps)
+		PFF_DEFAULT_GETTERS(u32,													nonefocus_fps)
+
 		FORCEINLINE bool get_limit_fps() const										{ return m_limit_fps; }
 		FORCEINLINE void set_titlebar_hovered(bool value)							{ m_is_titlebar_hovered = value; }
 
@@ -58,7 +61,11 @@ namespace PFF {
 		std::future<void>& add_future(std::future<void>& future, std::shared_ptr<std::pair<std::atomic<bool>, std::condition_variable>>& shared_state);
 		void remove_timer(std::future<void>& future);
 		void run();
-		void limit_fps(const bool new_value, const u32 new_limit = 60);
+
+		// [set_target_fps] if true: set the fps-limit for if the window is focused, if false: set the fps-limit for if the window is not focused
+		void set_fps_settings(const bool set_for_engine_focused, const u32 new_limit);
+
+		void limit_fps(const bool new_value, const u32 new_limit);
 		FORCEINLINE void capture_cursor();
 		FORCEINLINE void release_cursor();
 		FORCEINLINE void minimize_window();
@@ -74,24 +81,26 @@ namespace PFF {
 		virtual bool render(const f32 delta_time) { return true; };
 		virtual bool shutdown() { return true; };
 
+		// ---------------------- fps control ---------------------- 
+		void set_fps_settings(u32 target_fps);
+		void start_fps_measurement();
+		void end_fps_measurement(f32& work_time);
+		void limit_fps();
+
 	private:
 
 		void client_init();
 		void client_shutdown();
 
+		void serialize(serializer::option option);
+		
 		void on_event(event& event);
 		bool on_window_close(window_close_event& event);
 		bool on_window_resize(window_resize_event& event);
 		bool on_window_refresh(window_refresh_event& event);
 		bool on_window_focus(window_focus_event& event);
 
-		//scope_ref<basic_mesh> createCubeModel(glm::vec3 offset);
-
 		static application* s_instance;
-
-//#if defined PFF_RENDER_API_VULKAN
-//		static ref<PFF::render::vulkan::vk_renderer> m_renderer;
-//#endif
 
 		static ref<pff_window> m_window;
 		static bool m_is_titlebar_hovered;
@@ -104,21 +113,20 @@ namespace PFF {
 		ref<map> m_current_map = nullptr;
 
 		bool m_focus = true;
-		f32 m_last_frame_time = 0.f;
 		bool m_limit_fps = true;
 		u32 m_target_fps = 60;
 		u32 m_nonefocus_fps = 30;
 		u32 m_fps{};
 		f32 m_delta_time = 0.f;
 		f32 m_work_time{}, m_sleep_time{};
-		timer fps_timer;
+		f32 target_duration{};
+		f32 m_last_frame_time = 0.f;
 
 		// vector to store futures (from timer_async and other std::async tasks)
 		std::vector<util::timer> m_timers{};
 		std::mutex m_global_futures_mutex{}; // Mutex to protect global_futures
 
 	};
-
 
 	// to be defined in Client
 	application* create_application();

@@ -58,27 +58,34 @@ namespace PFF::UI {
 
 	void next_window_position_selector(window_pos& position, bool& show_window) {
 
+		if (ImGui::MenuItem("custom", NULL, position == window_pos::custom))
+			position = window_pos::custom;
+
+		if (ImGui::MenuItem("center", NULL, position == window_pos::center))
+			position = window_pos::center;
+
+		if (ImGui::MenuItem("top-left", NULL, position == window_pos::top_left))
+			position = window_pos::top_left;
+
+		if (ImGui::MenuItem("top-right", NULL, position == window_pos::top_right))
+			position = window_pos::top_right;
+
+		if (ImGui::MenuItem("bottom-left", NULL, position == window_pos::bottom_left))
+			position = window_pos::bottom_left;
+
+		if (ImGui::MenuItem("bottom-right", NULL, position == window_pos::bottom_right))
+			position = window_pos::bottom_right;
+
+		if (show_window && ImGui::MenuItem("close"))
+			show_window = false;
+	}
+	
+	void next_window_position_selector_popup(window_pos& position, bool& show_window) {
+
 		if (ImGui::BeginPopupContextWindow()) {
-			if (ImGui::MenuItem("custom", NULL, position == window_pos::custom))
-				position = window_pos::custom;
 
-			if (ImGui::MenuItem("center", NULL, position == window_pos::center))
-				position = window_pos::center;
+			next_window_position_selector(position, show_window);
 
-			if (ImGui::MenuItem("top-left", NULL, position == window_pos::top_left))
-				position = window_pos::top_left;
-
-			if (ImGui::MenuItem("top-right", NULL, position == window_pos::top_right))
-				position = window_pos::top_right;
-
-			if (ImGui::MenuItem("bottom-left", NULL, position == window_pos::bottom_left))
-				position = window_pos::bottom_left;
-
-			if (ImGui::MenuItem("bottom-right", NULL, position == window_pos::bottom_right))
-				position = window_pos::bottom_right;
-
-			if (show_window && ImGui::MenuItem("close"))
-				show_window = false;
 			ImGui::EndPopup();
 		}
 	}
@@ -315,6 +322,20 @@ namespace PFF::UI {
 		first_colum();
 		ImGui::TableSetColumnIndex(1);
 		second_colum();
+	}
+	
+	void table_row_text(std::string_view label, const char* format, ...) {
+
+		ImGui::TableNextRow();
+		ImGui::TableSetColumnIndex(0);
+		ImGui::Text("%s", label.data());
+
+		ImGui::TableSetColumnIndex(1);
+
+		va_list args;
+		va_start(args, format);
+		ImGui::TextV(format, args);
+		va_end(args);
 	}
 
 	void table_row(std::string_view label, std::string_view value) {

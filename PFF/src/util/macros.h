@@ -59,10 +59,12 @@ name& operator=(name&&) = default;
 
 // ------------------------------------------- getters -------------------------------------------
 #define PFF_DEFAULT_GETTER(type, name)					FORCEINLINE type get_##name() { return m_##name;}
+#define PFF_DEFAULT_GETTER_REF(type, name)				FORCEINLINE type& get_##name##_ref() { return m_##name;}
 #define PFF_DEFAULT_GETTER_C(type, name)				FORCEINLINE type get_##name() const { return m_##name;}
 #define PFF_DEFAULT_GETTER_POINTER(type, name)			FORCEINLINE type* get_##name##_pointer() { return &m_##name;}
 
 #define PFF_DEFAULT_GETTERS(type, name)					PFF_DEFAULT_GETTER(type, name)												\
+														PFF_DEFAULT_GETTER_REF(type, name)											\
 														PFF_DEFAULT_GETTER_POINTER(type, name)
 
 #define PFF_DEFAULT_GETTERS_C(type, name)				PFF_DEFAULT_GETTER_C(type, name)											\
