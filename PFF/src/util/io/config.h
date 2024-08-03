@@ -32,11 +32,6 @@ namespace PFF::config {
 
 	PFF_API_EDITOR std::string get_filepath_from_configtype_ini(file type);
 
-	// @brief Converts a configuration file type enum to its corresponding string representation.
-	// @param [type] The configuration file type to be converted.
-	// @return [std::string] The string representation of the given configuration file type.
-    PFF_API_EDITOR std::string file_type_to_string(file type);
-
 	// @brief Checks for the existence of a configuration in the specified file, updates it if (found && override == true), and adds if not found.
 	// @param [target_config_file] The type of configuration file to be checked/updated.
 	// @param [section] The section within the configuration file where the key-value pair is located.

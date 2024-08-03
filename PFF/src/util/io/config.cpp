@@ -20,6 +20,8 @@ namespace PFF {
 
     namespace config {
 
+        FORCEINLINE std::string file_type_to_string(file type);
+
         //
         void init() {
 

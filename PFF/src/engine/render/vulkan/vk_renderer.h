@@ -145,6 +145,9 @@ namespace PFF::render::vulkan {
 		void draw_imgui(VkCommandBuffer cmd, VkImageView targetImageView);
 		void create_swapchain(u32 width, u32 height);
 
+		bool is_bounds_in_frustum(const glm::mat4& pro_view, const PFF::geometry::bounds& bounds, const glm::mat4& transform);
+		void serialize(const PFF::serializer::option option);
+
 		// TIP: Note that this pattern is not very efficient, as CPU is waiting for the GPU command to fully execute before continuing with our CPU side logic
 		//		This is should be put on a background thread, whose sole job is to execute uploads like this one, and deleting/reusing the staging buffers.
 		render::GPU_mesh_buffers upload_mesh(std::vector<u32> indices, std::vector<PFF::geometry::vertex> vertices);

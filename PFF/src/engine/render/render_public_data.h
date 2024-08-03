@@ -40,11 +40,11 @@ namespace PFF::render {
 
 	struct compute_effect {
 
-		const char* name{};
-		compute_push_constants	data{};
+		const char*					name{};
+		compute_push_constants		data{};
 #if defined PFF_RENDER_API_VULKAN
-		VkPipeline				pipeline{};
-		VkPipelineLayout		layout{};
+		VkPipeline					pipeline{};
+		VkPipelineLayout			layout{};
 #endif
 	};
 
@@ -52,14 +52,13 @@ namespace PFF::render {
 
 		glm::mat4			view;
 		glm::mat4			proj;
-		glm::mat4			view_proj;
+		glm::mat4			proj_view;
 		glm::vec4			ambient_color;
 		glm::vec4			sunlight_direction;		// w for sun power
 		glm::vec4			sunlight_color;
 	};
 	
 	
-//
 //	enum class material_pass : u8 {
 //
 //		MainColor,

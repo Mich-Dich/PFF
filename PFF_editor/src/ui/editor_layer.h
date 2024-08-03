@@ -23,6 +23,8 @@ namespace PFF {
 
 	private:
 
+		void serialize(serializer::option option);
+		
 		std::vector<std::unique_ptr<editor_window>> m_editor_windows{};
 
 		// ImGui windows

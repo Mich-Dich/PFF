@@ -12,10 +12,10 @@ namespace PFF {
 	void material::build_pipelines() {
 
 		VkShaderModule meshFragShader;
-		CORE_ASSERT(render::vulkan::util::load_shader_module("../PFF/shaders/mesh.frag.spv", GET_RENDERER.get_device(), &meshFragShader), "", "Error when building the triangle fragment shader module");
+		CORE_ASSERT(render::vulkan::util::load_shader_module("../PFF/shaders/mesh.frag.spv", GET_RENDERER.get_device(), &meshFragShader), "Loaded shader: mesh.frag.spv", "Error when building the triangle fragment shader module");
 
 		VkShaderModule meshVertexShader;
-		CORE_ASSERT(render::vulkan::util::load_shader_module("../PFF/shaders/mesh.vert.spv", GET_RENDERER.get_device(), &meshVertexShader), "", "Error when building the triangle vertex shader module");
+		CORE_ASSERT(render::vulkan::util::load_shader_module("../PFF/shaders/mesh.vert.spv", GET_RENDERER.get_device(), &meshVertexShader), "Loaded shader: mesh.vert.spv", "Error when building the triangle vertex shader module");
 
 		VkPushConstantRange matrix_range{};
 		matrix_range.offset = 0;
@@ -77,7 +77,8 @@ namespace PFF {
 		vkDestroyPipeline(device, opaque_pipeline.pipeline, nullptr);
 	}
 
-	material_instance material::write_material(material_pass pass, const material_resources& resources, render::vulkan::descriptor_allocator_growable& descriptor_allocator) {
+	// TODO: rename to "create_instance()"
+	material_instance material::create_instance(material_pass pass, const material_resources& resources, render::vulkan::descriptor_allocator_growable& descriptor_allocator) {
 
 		material_instance loc_mat_inst;
 		loc_mat_inst.pass_type = pass;

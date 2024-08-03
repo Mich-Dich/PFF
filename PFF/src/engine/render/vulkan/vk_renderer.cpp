@@ -197,7 +197,8 @@ namespace PFF::render::vulkan {
 
 		vkDeviceWaitIdle(m_device);
 		m_state = system_state::inactive;
-		
+		serialize(PFF::serializer::option::save_to_file);
+
 		for (auto frame : m_frames) {
 
 			vkDestroyCommandPool(m_device, frame.command_pool, nullptr);
@@ -680,6 +681,8 @@ namespace PFF::render::vulkan {
 				mesh->mesh_buffers = upload_mesh(mesh->m_indices, mesh->m_vertices);
 		}
 
+		serialize(PFF::serializer::option::load_from_file);
+
 		//3 default textures, white, grey, black. 1 pixel each
 		u32 white = glm::packUnorm4x8(glm::vec4(1, 1, 1, 1));
 		m_white_image = create_ref<image>((void*)&white, 1, 1, image_format::RGBA);
@@ -717,6 +720,12 @@ namespace PFF::render::vulkan {
 		m_deletion_queue.push_pointer(m_default_sampler_linear);
 		m_deletion_queue.push_pointer(m_default_sampler_nearest);
 
+		// =========================================================== DEFAULT SCENE DATA =========================================================== 
+
+		m_scene_data.sunlight_color = glm::vec4(0.2f, 0.2f, 0.2f, 1.0f);
+		m_scene_data.ambient_color = glm::vec4(0.2f, 0.2f, 0.2f, 1.0f);
+		m_scene_data.sunlight_direction = glm::vec4(0.2f, 0.2f, 0.2f, 1.0f);
+
 		// =========================================================== DEFAULT MATERIAL =========================================================== 
 
 		//set the uniform buffer for the material data
@@ -730,13 +739,26 @@ namespace PFF::render::vulkan {
 		m_deletion_queue.push_func([=]() { destroy_buffer(material_constant); });
 
 		material::material_resources material_resources;						//default the material textures
-		material_resources.color_image = m_error_checkerboard_image;
+		material_resources.color_image = m_white_image;
 		material_resources.color_sampler = m_default_sampler_linear;
-		material_resources.metal_rough_image = m_error_checkerboard_image;
+		material_resources.metal_rough_image = m_white_image;
 		material_resources.metal_rough_sampler = m_default_sampler_linear;
 		material_resources.data_buffer = material_constant.buffer;
 		material_resources.data_buffer_offset = 0;
-		m_default_material = m_metal_rough_material.write_material(material_pass::main_color, material_resources, m_global_descriptor_allocator);
+		m_default_material = m_metal_rough_material.create_instance(material_pass::main_color, material_resources, m_global_descriptor_allocator);
+	}
+
+	void vk_renderer::serialize(const PFF::serializer::option option) {
+
+		PFF::serializer::yaml(config::get_filepath_from_configtype(config::file::engine), "renderer_background_effect", option)
+			.entry("current_background_effect", m_current_background_effect)
+			.vector(KEY_VALUE(m_background_effects), [=](serializer::yaml& yaml, const u64 x) {
+				yaml.entry(KEY_VALUE(m_background_effects[x].name))
+				.entry("data_0", m_background_effects[x].data.data1)
+				.entry("data_1", m_background_effects[x].data.data2)
+				.entry("data_2", m_background_effects[x].data.data3)
+				.entry("data_3", m_background_effects[x].data.data4);
+			});
 	}
 
 	void vk_renderer::init_swapchain() {
@@ -947,7 +969,7 @@ namespace PFF::render::vulkan {
 
 		render::compute_effect grid{};
 		grid.layout = m_gradient_pipeline_layout;
-		grid.name = "sky";
+		grid.name = "grid";
 
 		VK_CHECK_S(vkCreateComputePipelines(m_device, VK_NULL_HANDLE, 1, &compute_pipeline_CI, nullptr, &grid.pipeline));
 		m_background_effects.emplace_back(grid);
@@ -1108,30 +1130,6 @@ namespace PFF::render::vulkan {
 
 		// ========================================== create GPU global scene data ==========================================
 
-		// allocate a new uniform buffer for the scene data
-		vk_buffer gpuSceneDataBuffer = create_buffer(sizeof(render::GPU_scene_data), VK_BUFFER_USAGE_UNIFORM_BUFFER_BIT, VMA_MEMORY_USAGE_CPU_TO_GPU);
-
-		//add it to the deletion queue of this frame so it gets deleted once its been used
-		get_current_frame().deletion_queue.push_func([=]() { destroy_buffer(gpuSceneDataBuffer); });
-
-		//write the buffer
-		render::GPU_scene_data* scene_uniform_data = (render::GPU_scene_data*)gpuSceneDataBuffer.allocation->GetMappedData();
-		*scene_uniform_data = m_scene_data;
-
-		//create a descriptor set that binds that buffer and update it
-		VkDescriptorSet globalDescriptor = get_current_frame().frame_descriptors.allocate(m_device, m_gpu_scene_data_descriptor_layout);
-		descriptor_writer writer;
-		writer.write_buffer(0, gpuSceneDataBuffer.buffer, sizeof(render::GPU_scene_data), 0, VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER);
-		writer.update_set(m_device, globalDescriptor);
-		// ==========================================  ==========================================
-
-		// begin a render pass connected to our draw image
-		VkRenderingAttachmentInfo color_attachment = init::attachment_info(m_draw_image.get_image_view(), nullptr, VK_IMAGE_LAYOUT_GENERAL);
-		VkRenderingAttachmentInfo depth_attachment = init::depth_attachment_info(m_depth_image.get_image_view(), VK_IMAGE_LAYOUT_DEPTH_ATTACHMENT_OPTIMAL);
-		VkRenderingInfo render_info = init::rendering_info(m_draw_extent, &color_attachment, &depth_attachment);
-
-		vkCmdBeginRendering(cmd, &render_info);
-
 		//set dynamic viewport and scissor
 		VkViewport viewport = {};
 		viewport.x = 0;
@@ -1149,45 +1147,51 @@ namespace PFF::render::vulkan {
 		scissor.extent.height = m_draw_extent.height;
 		vkCmdSetScissor(cmd, 0, 1, &scissor);
 
-		// NOTE: Note that 10000 is “near” and 0.1 is “far”. And reversing the depth, so that depth 1 is the near plane, and depth 0 the far plane.
-		//		 This is a technique that greatly increases the quality of depth testing.
-		glm::mat4 projection = glm::perspective(glm::radians(m_active_camera->get_perspective_fov_y()), (float)m_draw_extent.width / (float)m_draw_extent.height, 100000.f, 0.1f);
-		projection[1][1] *= -1;				// invert the Y direction on projection matrix
-		glm::mat4 view = m_active_camera->get_view();
+		m_scene_data.view = m_active_camera->get_view();
+		m_scene_data.proj = glm::perspective(glm::radians(m_active_camera->get_perspective_fov_y()), (float)m_draw_extent.width / (float)m_draw_extent.height, 100000.f, 0.1f);
+		m_scene_data.proj[1][1] *= -1;				// invert the Y direction on projection matrix
+		m_scene_data.proj_view = m_scene_data.proj * m_scene_data.view;
 
+		// allocate a new uniform buffer for the scene data
+		vk_buffer gpuSceneDataBuffer = create_buffer(sizeof(render::GPU_scene_data), VK_BUFFER_USAGE_UNIFORM_BUFFER_BIT, VMA_MEMORY_USAGE_CPU_TO_GPU);
 
-// world_layer is a layer in the layerstack of the engine, it contains maps. // A large ingame world can be split in diffrent chunks (maps)
-// active_maps is a list of maps the engine should display, a map can be as large as you want
-#define PROCCESS 0
-		
+		//add it to the deletion queue of this frame so it gets deleted once its been used
+		get_current_frame().deletion_queue.push_func([=]() { destroy_buffer(gpuSceneDataBuffer); });
+
+		//write the buffer
+		render::GPU_scene_data* scene_uniform_data = (render::GPU_scene_data*)gpuSceneDataBuffer.allocation->GetMappedData();
+		*scene_uniform_data = m_scene_data;
+
+		//create a descriptor set that binds that buffer and update it
+		VkDescriptorSet globalDescriptor = get_current_frame().frame_descriptors.allocate(m_device, m_gpu_scene_data_descriptor_layout);
+		descriptor_writer writer;
+		writer.write_buffer(0, gpuSceneDataBuffer.buffer, sizeof(render::GPU_scene_data), 0, VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER);
+		writer.update_set(m_device, globalDescriptor);
+
+		VkRenderingAttachmentInfo color_attachment = init::attachment_info(m_draw_image.get_image_view(), nullptr, VK_IMAGE_LAYOUT_GENERAL);					// begin a render pass connected to our draw image
+		VkRenderingAttachmentInfo depth_attachment = init::depth_attachment_info(m_depth_image.get_image_view(), VK_IMAGE_LAYOUT_DEPTH_ATTACHMENT_OPTIMAL);
+		VkRenderingInfo render_info = init::rendering_info(m_draw_extent, &color_attachment, &depth_attachment);
+
+		vkCmdBeginRendering(cmd, &render_info);
+
 		m_renderer_metrik.reset();
 
+#define PROCCESS 0
 #if PROCCESS == 0
 
-		// PROCCESS V0
-		// 1. get world_layer
-		// 2. get active_maps from world_layer
-		// 3. get all mesh components
-		// 4. draw all mesh components
+		/*
+			PROCCESS V0
+			1. get world_layer
+			2. get active_maps from world_layer
+			3. get all mesh components
+			4. draw all mesh components
 
-		// pro:
-			// all code for rendering is in one place
+			pro:
+				all code for rendering is in one place
 			
-		// con:
-
-//#define USE_DEDICATED_PIPELINE
-#ifndef USE_DEDICATED_PIPELINE
-		// TODO: remove binding of dummy pipeline and use dedicated mesh.vert.spv/mesh.frag.spv shaders
-		vkCmdBindPipeline(cmd, VK_PIPELINE_BIND_POINT_GRAPHICS, m_mesh_pipeline);
-		VkDescriptorSet imageSet = get_current_frame().frame_descriptors.allocate(m_device, m_single_image_descriptor_layout);  // bind a texture
-		{
-			descriptor_writer writer;
-			writer.write_image(0, m_error_checkerboard_image->get_image_view(), m_default_sampler_nearest, VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL, VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER);
-			writer.update_set(m_device, imageSet);
-		}
-		vkCmdBindDescriptorSets(cmd, VK_PIPELINE_BIND_POINT_GRAPHICS, m_mesh_pipeline_layout, 0, 1, &imageSet, 0, nullptr);
-#endif // USE_DEDICATED_PIPELINE
-
+			con:
+		 
+		*/
 
 		// loop over all maps in worlds
 		auto& all_maps = application::get().get_world_layer()->get_maps();
@@ -1197,81 +1201,38 @@ namespace PFF::render::vulkan {
 				continue;
 
 			// TODO: add high-level culling for maps that don't need rendering
-				// bounds check
+				// oclution culling
 				// frustum culling
 
 			// get every entity with [transform] and [mesh]
 			auto group = loc_map->get_registry().group<transform_component>(entt::get<mesh_component>);
 			for (auto entity : group) {
-
-				// Draw every surface in mesh_asset
 				auto& [transform, mesh_comp] = group.get<transform_component, mesh_component>(entity);
 
 				// TODO: add culling for geometry that doesn't need to be drawns
-					// frustum culling
+					// oclution culling
 
-
-
-
-
-
-				// ------------------------------------ Frustum Culling (Mesh-assets) ------------------------------------ 
-				std::array<glm::vec3, 8> corners{
-					glm::vec3 { 1, 1, 1 },
-					glm::vec3 { 1, 1, -1 },
-					glm::vec3 { 1, -1, 1 },
-					glm::vec3 { 1, -1, -1 },
-					glm::vec3 { -1, 1, 1 },
-					glm::vec3 { -1, 1, -1 },
-					glm::vec3 { -1, -1, 1 },
-					glm::vec3 { -1, -1, -1 },
-				};
-
-				// projection * view
-
-				glm::mat4 matrix = projection * view * (glm::mat4)transform;
-				glm::vec3 min = { 1.5, 1.5, 1.5 };
-				glm::vec3 max = { -1.5, -1.5, -1.5 };
-
-				for (int x = 0; x < 8; x++) {
-					
-					glm::vec4 v = matrix * glm::vec4(mesh_comp.mesh_asset->bounds.origin + (corners[x] * mesh_comp.mesh_asset->bounds.extents), 1.f);	// project each corner into clip space
-
-					// perspective correction
-					v.x = v.x / v.w;
-					v.y = v.y / v.w;
-					v.z = v.z / v.w;
-
-					min = glm::min(glm::vec3{ v.x, v.y, v.z }, min);
-					max = glm::max(glm::vec3{ v.x, v.y, v.z }, max);
-				}
-
-				// check the clip space box is within the view
-				if (min.z > 1.f || max.z < 0.f || min.x > 1.f || max.x < -1.f || min.y > 1.f || max.y < -1.f)
+#if 1
+				if (!is_bounds_in_frustum(m_scene_data.proj_view, mesh_comp.mesh_asset->bounds, (glm::mat4)transform))
 					continue;
-
-
-
-
-
-
-
-
-				m_renderer_metrik.mesh_draw++;
-
-#ifdef USE_DEDICATED_PIPELINE
-				// bind material
-				vkCmdBindPipeline(cmd, VK_PIPELINE_BIND_POINT_GRAPHICS, mesh_comp.material->pipeline->pipeline);
-				vkCmdBindDescriptorSets(cmd, VK_PIPELINE_BIND_POINT_GRAPHICS, mesh_comp.material->pipeline->layout, 0, 1, &globalDescriptor, 0, nullptr);
-				vkCmdBindDescriptorSets(cmd, VK_PIPELINE_BIND_POINT_GRAPHICS, mesh_comp.material->pipeline->layout, 1, 1, &mesh_comp.material->material_set, 0, nullptr);
 #endif
+
+#if 0
+				material_instance* loc_material = (mesh_comp.material != nullptr) ? mesh_comp.material : &m_default_material;
+#else
+				material_instance* loc_material = &m_default_material;
+#endif
+				vkCmdBindPipeline(cmd, VK_PIPELINE_BIND_POINT_GRAPHICS, loc_material->pipeline->pipeline);
+				vkCmdBindDescriptorSets(cmd, VK_PIPELINE_BIND_POINT_GRAPHICS, loc_material->pipeline->layout, 0, 1, &globalDescriptor, 0, nullptr);
+				vkCmdBindDescriptorSets(cmd, VK_PIPELINE_BIND_POINT_GRAPHICS, loc_material->pipeline->layout, 1, 1, &loc_material->material_set, 0, nullptr);
+				vkCmdBindIndexBuffer(cmd, mesh_comp.mesh_asset->mesh_buffers.index_buffer.buffer, 0, VK_INDEX_TYPE_UINT32);
+
 				GPU_draw_push_constants push_constants;
-				push_constants.world_matrix = projection * view * (glm::mat4)transform * mesh_comp.transform;
+				push_constants.world_matrix = (glm::mat4)transform * mesh_comp.transform;
 				push_constants.vertex_buffer = mesh_comp.mesh_asset->mesh_buffers.vertex_buffer_address;
 				vkCmdPushConstants(cmd, mesh_comp.material->pipeline->layout, VK_SHADER_STAGE_VERTEX_BIT, 0, sizeof(GPU_draw_push_constants), &push_constants);
 
-				vkCmdBindIndexBuffer(cmd, mesh_comp.mesh_asset->mesh_buffers.index_buffer.buffer, 0, VK_INDEX_TYPE_UINT32);
-
+				// Draw every surface in mesh_asset
 				for (u64 x = 0; x < mesh_comp.mesh_asset->surfaces.size(); x++) {
 
 					vkCmdDrawIndexed(cmd, mesh_comp.mesh_asset->surfaces[x].count, 1, mesh_comp.mesh_asset->surfaces[x].startIndex, 0, 0);
@@ -1279,22 +1240,25 @@ namespace PFF::render::vulkan {
 					m_renderer_metrik.vertecies += (u64)mesh_comp.mesh_asset->surfaces[x].count / 3;
 					m_renderer_metrik.draw_calls++;
 				}
+				m_renderer_metrik.mesh_draw++;
 			}
 		}
 
 #elif PROCCESS == 1
 
-		// PROCCESS V1
-		// 1. get world_layer
-		// 2. get active_maps from world_layer
-		// 3. get all entities from registry in active_maps
-		// 4. draw all mesh_components of all entities
+		/*
+			PROCCESS V1
+			1. get world_layer
+			2. get active_maps from world_layer
+			3. get all entities from registry in active_maps
+			4. draw all mesh_components of all entities
 
-		// pro:
-			// all code for rendering is in one place
+			pro:
+				all code for rendering is in one place
 
 
-		// con:
+			con:
+		*/
 
 		auto& all_maps = application::get().get_world_layer()->get_maps();
 		for (ref<map> loc_map : all_maps) {
@@ -1307,26 +1271,63 @@ namespace PFF::render::vulkan {
 
 #elif PROCCESS == 2
 
-		// PROCCESS V2
-		// 1. call world_layer function from renderer to submit meshes
-		// 2. world_layer delegates the call to any map it wants to draw
-		// 3. map submits all meshes to renderer
+		/*
+			PROCCESS V2
+			1. call world_layer function from renderer to submit meshes
+			2. world_layer delegates the call to any map it wants to draw
+			3. map submits all meshes to renderer
 
-		// pro:
-			// lets every map individually decide what to render
+			pro:
+				lets every map individually decide what to render
 
-		// con:
-			// a lot more function calls
-			// rendering code is scatered through code_base
+			con:
+				a lot more function calls
+				rendering code is scatered through code_base
 
-		// application::get().get_world_layer()->notefy_maps_to_render();
+			application::get().get_world_layer()->notefy_maps_to_render();
 
-		// bulk of implementation would be in [world_lsyer] and [maps]
+			bulk of implementation would be in [world_lsyer] and [maps]
+		*/
 
 #endif
 	
 		vkCmdEndRendering(cmd);
 
+	}
+
+	bool vk_renderer::is_bounds_in_frustum(const glm::mat4& pro_view, const PFF::geometry::bounds& bounds, const glm::mat4& transform) {
+
+		std::array<glm::vec3, 8> corners{
+			glm::vec3 { 1, 1, 1 },
+			glm::vec3 { 1, 1, -1 },
+			glm::vec3 { 1, -1, 1 },
+			glm::vec3 { 1, -1, -1 },
+			glm::vec3 { -1, 1, 1 },
+			glm::vec3 { -1, 1, -1 },
+			glm::vec3 { -1, -1, 1 },
+			glm::vec3 { -1, -1, -1 },
+		};
+
+		// projection * view
+
+		glm::mat4 matrix = pro_view * transform;
+		glm::vec3 min = { 1.5, 1.5, 1.5 };
+		glm::vec3 max = { -1.5, -1.5, -1.5 };
+
+		for (int x = 0; x < 8; x++) {
+			glm::vec4 v = matrix * glm::vec4(bounds.origin + (corners[x] * bounds.extents), 1.f);	// project each corner into clip space
+
+			// perspective correction
+			v.x = v.x / v.w;
+			v.y = v.y / v.w;
+			v.z = v.z / v.w;
+
+			min = glm::min(glm::vec3{ v.x, v.y, v.z }, min);
+			max = glm::max(glm::vec3{ v.x, v.y, v.z }, max);
+		}
+
+		// check the clip space box is within the view
+		return !(min.z > 1.f || max.z < 0.f || min.x > 1.f || max.x < -1.f || min.y > 1.f || max.y < -1.f);
 	}
 
 	void vk_renderer::draw_imgui(VkCommandBuffer cmd, VkImageView targetImageView) {

@@ -63,7 +63,7 @@ namespace PFF {
 		void build_pipelines();
 		void release_resources();
 
-		material_instance write_material(material_pass pass, const material_resources& resources, render::vulkan::descriptor_allocator_growable& descriptor_allocator);
+		material_instance create_instance(material_pass pass, const material_resources& resources, render::vulkan::descriptor_allocator_growable& descriptor_allocator);
 #endif
 
 	};

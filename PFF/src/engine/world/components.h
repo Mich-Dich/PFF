@@ -85,7 +85,7 @@ namespace PFF {
 		glm::mat4							transform = glm::mat4(1);
 		bool								shoudl_render = true;
 		ref<PFF::geometry::mesh_asset>		mesh_asset;
-		material_instance*					material;					// TODO: currently uses one material for all surfaces in mesh_asset, change so it can use diffrent materials
+		material_instance*					material = nullptr;					// TODO: currently uses one material for all surfaces in mesh_asset, change so it can use diffrent materials
 	};
 
 

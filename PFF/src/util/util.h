@@ -377,6 +377,15 @@ namespace PFF {
                 return;
             }
 
+            else if constexpr (std::is_same_v<T, const char*>) {
+
+                std::string temp_str = src_string;
+                std::replace(temp_str.begin(), temp_str.end(), '%', ' ');
+                std::replace(temp_str.begin(), temp_str.end(), '$', '\n');
+                dest_value = temp_str.c_str();
+                return;
+            }
+            
             else if constexpr (std::is_convertible_v<T, std::string>) {
 
                 dest_value = src_string;

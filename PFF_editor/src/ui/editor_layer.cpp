@@ -34,23 +34,18 @@ namespace PFF {
 		LOG(Trace, "attaching editor_layer");
 		// inform GLFW window to hide title_bar
 		application::get().get_window()->show_titlebar(false);
-
-		//m_swapchain_supported_presentmodes = application::get().get_renderer()->get_swapchain_suported_present_modes();
-		//for (auto mode : m_swapchain_supported_presentmodes)
-		//	m_swapchain_supported_presentmodes_str.push_back(present_mode_to_str(mode));
-
-		//s_todo_list = new toolkit::todo::todo_list();
+		
+		serialize(serializer::option::load_from_file);
 	}
 
 	void editor_layer::on_detach() {
+
+		serialize(serializer::option::save_to_file);
 
 		for (auto& editor_window : m_editor_windows)
 			editor_window.reset();
 		m_editor_windows.clear();
 
-		//application::get().get_window()->show_titlebar(true);
-		//toolkit::todo::shutdown();					// only need to cal shutdown() to kill todo_list if editor shutsdown
-		//delete s_todo_list;
 		LOG(Trace, "Detaching editor_layer");
 	}
 
@@ -99,6 +94,26 @@ namespace PFF {
 
 		if (demo_window)
 			ImGui::ShowDemoWindow();
+	}
+
+
+	void editor_layer::serialize(serializer::option option) {
+
+		serializer::yaml(config::get_filepath_from_configtype(config::file::editor), "performance_display", option)
+			.entry("show_main_menu_bar", m_show_main_menu_bar)
+			.entry("show_renderer_backgrond_effect", m_show_renderer_backgrond_effect)
+			.entry("show_general_debugger", m_show_general_debugger)
+			.entry("show_options", m_show_options)
+			.entry("show_outliner", m_show_outliner)
+			.entry("show_details", m_show_details)
+			.entry("show_world_settings", m_show_world_settings)
+			.entry("show_content_browser_0", m_show_content_browser_0)
+			.entry("show_content_browser_1", m_show_content_browser_1)
+			.entry("show_graphics_engine_settings", m_show_graphics_engine_settings)
+			.entry("show_editor_settings", m_show_editor_settings)
+			.entry("show_general_settings", m_show_general_settings)
+			.entry("show_style_editor", style_editor)
+			.entry("show_demo_window", demo_window);
 	}
 
 
