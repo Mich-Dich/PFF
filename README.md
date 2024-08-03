@@ -13,7 +13,7 @@
 
 ### Here are screenshots that show the current state of PFF.
 
-![first_image](/.github/resources/PFF_editor_4lyAmXu471.png?raw=true "image of the editor as it is now")
+![first_image](/.github/resources/PFF_editor_CfQonJ3asw.png?raw=true "image of the editor as it is now")
 
 ## Getting Started
 To get started with PFF, follow these simple steps:
@@ -48,6 +48,8 @@ Your game (main class) has to inherit from the `application` class.
 ## Documentation
 
 To help you get familiar with PFF, a [wiki](https://github.com/Mich-Dich/PFF/wiki) is available and currently under development. The wiki will provide detailed documentation, guides, and examples to assist you in navigating and utilizing the framework effectively. Check back regularly for updates as more content is added.
+
+You can also find this wiki in the editor under: Windows->Engine Wiki
 
 
 ## Procedural Generation Unleashed
