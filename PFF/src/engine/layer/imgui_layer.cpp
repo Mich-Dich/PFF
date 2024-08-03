@@ -276,8 +276,6 @@ namespace PFF::UI {
 			ImVec2 curser_pos;
 			ImVec2 textSize;
 
-			ImGui::Text("ImGui FPS: %5.2f", ImGui::GetIO().Framerate);
-
 			if (UI::begin_table("Performance Display", true, ImVec2(200.0f, 0))) {
 
 				if (m_limit_fps)
