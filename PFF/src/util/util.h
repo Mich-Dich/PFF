@@ -308,7 +308,6 @@ namespace PFF {
 
                 //LOG(Fatal, "called: convert_to_string() with string");
                 dest_string = src_value;
-                //std::replace(dest_string.begin(), dest_string.end(), ' ', '%');
                 std::replace(dest_string.begin(), dest_string.end(), '\n', '$');
                 return;
             }
@@ -380,7 +379,6 @@ namespace PFF {
             else if constexpr (std::is_same_v<T, const char*>) {
 
                 std::string temp_str = src_string;
-                std::replace(temp_str.begin(), temp_str.end(), '%', ' ');
                 std::replace(temp_str.begin(), temp_str.end(), '$', '\n');
                 dest_value = temp_str.c_str();
                 return;
@@ -389,7 +387,6 @@ namespace PFF {
             else if constexpr (std::is_convertible_v<T, std::string>) {
 
                 dest_value = src_string;
-                std::replace(dest_value.begin(), dest_value.end(), '%', ' ');
                 std::replace(dest_value.begin(), dest_value.end(), '$', '\n');
                 return;
             }

@@ -1237,7 +1237,7 @@ namespace PFF::render::vulkan {
 
 					vkCmdDrawIndexed(cmd, mesh_comp.mesh_asset->surfaces[x].count, 1, mesh_comp.mesh_asset->surfaces[x].startIndex, 0, 0);
 
-					m_renderer_metrik.vertecies += (u64)mesh_comp.mesh_asset->surfaces[x].count / 3;
+					m_renderer_metrik.triangles += (u64)mesh_comp.mesh_asset->surfaces[x].count / 3;
 					m_renderer_metrik.draw_calls++;
 				}
 				m_renderer_metrik.mesh_draw++;

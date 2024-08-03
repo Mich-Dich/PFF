@@ -24,12 +24,12 @@ namespace PFF::render {
 	struct renderer_metrik {
 		u32 mesh_draw = 0;
 		u32 draw_calls = 0;
-		u64 vertecies = 0;
+		u64 triangles = 0;
 		f32 sleep_time = 0.f,	work_time = 0.f;
 
 		void reset() {
 			draw_calls = mesh_draw = 0;
-			vertecies = 0;
+			triangles = 0;
 			sleep_time = work_time = 0.f;
 		}
 	};

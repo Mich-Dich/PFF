@@ -217,7 +217,7 @@ namespace PFF::UI {
 				auto* metrik = PFF::render::vulkan::vk_renderer::get().get_renderer_metrik_pointer();
 				UI::table_row_text("mesh draws", "%d", metrik->mesh_draw);
 				UI::table_row_text("draw calls", "%d", metrik->draw_calls);
-				UI::table_row_text("vertecies", "%d", metrik->vertecies);
+				UI::table_row_text("triangles", "%d", metrik->triangles);
 
 				UI::table_row_text("work time", "%d", metrik->work_time);
 				UI::table_row_text("sleep time", "%d", metrik->sleep_time);
