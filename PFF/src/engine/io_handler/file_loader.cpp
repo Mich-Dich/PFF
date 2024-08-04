@@ -51,11 +51,15 @@ namespace PFF::IO {
                 geometry::mesh_asset loc_mesh{};
                 loc_mesh.name = mesh.name;
 
+                CORE_LOG(Trace, "name of surface: " << mesh.name)
+
                 // clear the mesh arrays each mesh, we dont want to merge them by error
                 loc_mesh.m_indices.clear();
                 loc_mesh.m_vertices.clear();
 
                 for (auto&& p : mesh.primitives) {
+
+                    CORE_LOG(Trace, "name of surface: " << mesh.name)
 
                     geometry::Geo_surface new_surface;
                     new_surface.startIndex = (u32)loc_mesh.m_indices.size();

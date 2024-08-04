@@ -184,7 +184,7 @@ namespace PFF {
 		ImGui::Button("##titlebar_drag_zone", ImVec2(button_area_width, m_titlebar_height));
 #endif // 1
 
-		application::get().set_titlebar_hovered(ImGui::IsItemHovered());
+		application::get().set_is_titlebar_hovered(ImGui::IsItemHovered());
 		ImGui::SetItemAllowOverlap();
 
 		// LOGO

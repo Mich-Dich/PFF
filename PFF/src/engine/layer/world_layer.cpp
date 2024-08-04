@@ -10,8 +10,6 @@ namespace PFF {
 	
 	world_layer::world_layer() { 
 
-		CORE_LOG(Error, "CONSTRUCTING WORLD_LAYER"); 
-
 		m_maps.emplace_back( create_ref<map>() );
 
 		CORE_LOG_INIT();

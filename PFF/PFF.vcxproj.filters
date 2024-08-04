@@ -110,6 +110,9 @@
     <ClInclude Include="src\engine\render\image.h">
       <Filter>engine\render</Filter>
     </ClInclude>
+    <ClInclude Include="src\engine\render\material.h">
+      <Filter>engine\render</Filter>
+    </ClInclude>
     <ClInclude Include="src\engine\render\render_public_data.h">
       <Filter>engine\render</Filter>
     </ClInclude>
@@ -189,6 +192,9 @@
     <ClInclude Include="src\util\math\constance.h">
       <Filter>util\math</Filter>
     </ClInclude>
+    <ClInclude Include="src\util\math\math.h">
+      <Filter>util\math</Filter>
+    </ClInclude>
     <ClInclude Include="src\util\math\noise.h">
       <Filter>util\math</Filter>
     </ClInclude>
@@ -201,15 +207,15 @@
     <ClInclude Include="src\util\platform\windows_util.h">
       <Filter>util\platform</Filter>
     </ClInclude>
+    <ClInclude Include="src\util\ui\imgui_markdown.h">
+      <Filter>util\ui</Filter>
+    </ClInclude>
     <ClInclude Include="src\util\ui\pannel_collection.h">
       <Filter>util\ui</Filter>
     </ClInclude>
     <ClInclude Include="src\util\util.h">
       <Filter>util</Filter>
     </ClInclude>
-    <ClInclude Include="src\engine\render\material.h" />
-    <ClInclude Include="src\util\math\math.h" />
-    <ClInclude Include="src\util\ui\imgui_markdown.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="src\application.cpp" />
@@ -252,6 +258,9 @@
     <ClCompile Include="src\engine\render\image.cpp">
       <Filter>engine\render</Filter>
     </ClCompile>
+    <ClCompile Include="src\engine\render\material.cpp">
+      <Filter>engine\render</Filter>
+    </ClCompile>
     <ClCompile Include="src\engine\render\render_util.cpp">
       <Filter>engine\render</Filter>
     </ClCompile>
@@ -291,8 +300,14 @@
     <ClCompile Include="src\util\logger.cpp">
       <Filter>util</Filter>
     </ClCompile>
+    <ClCompile Include="src\util\math\math.cpp">
+      <Filter>util\math</Filter>
+    </ClCompile>
     <ClCompile Include="src\util\pffpch.cpp">
       <Filter>util</Filter>
+    </ClCompile>
+    <ClCompile Include="src\util\ui\imgui_markdown.cpp">
+      <Filter>util\ui</Filter>
     </ClCompile>
     <ClCompile Include="src\util\ui\pannel_collection.cpp">
       <Filter>util\ui</Filter>
@@ -300,8 +315,5 @@
     <ClCompile Include="src\util\util.cpp">
       <Filter>util</Filter>
     </ClCompile>
-    <ClCompile Include="src\engine\render\material.cpp" />
-    <ClCompile Include="src\util\math\math.cpp" />
-    <ClCompile Include="src\util\ui\imgui_markdown.cpp" />
   </ItemGroup>
 </Project>

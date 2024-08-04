@@ -38,7 +38,7 @@ namespace PFF {
 	class instrumentor {
 	public:
 
-		DELETE_COPY(instrumentor);
+		PFF_DELETE_COPY_CONSTRUCTOR(instrumentor);
 
 		void begin_session(const std::string& name, const std::string& directory, const std::string& filename = "result.json") {
 			

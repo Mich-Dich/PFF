@@ -26,19 +26,20 @@ layout(buffer_reference, std430) readonly buffer VertexBuffer{
 layout( push_constant ) uniform constants
 {
 	mat4 render_matrix;
-	VertexBuffer vertexBuffer;
+	VertexBuffer vertex_buffer;
 } PushConstants;
 
 void main() 
 {
-	Vertex v = PushConstants.vertexBuffer.vertices[gl_VertexIndex];
+	Vertex v = PushConstants.vertex_buffer.vertices[gl_VertexIndex];
 	
 	vec4 position = vec4(v.position, 1.0f);
 
 	gl_Position =  scene_data.viewproj * PushConstants.render_matrix *position;
 
 	outNormal = (PushConstants.render_matrix * vec4(v.normal, 0.f)).xyz;
-	outColor = v.color.xyz * material_data.color_factors.xyz;	
+	// outColor = v.color.xyz;
+	outColor = material_data.color_factors.xyz;
 	outUV.x = v.uv_x;
 	outUV.y = v.uv_y;
 }

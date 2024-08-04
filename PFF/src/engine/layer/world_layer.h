@@ -14,7 +14,7 @@ namespace PFF {
 		world_layer();
 		~world_layer();
 
-		DELETE_COPY(world_layer);
+		PFF_DELETE_COPY_CONSTRUCTOR(world_layer);
 
 		PFF_DEFAULT_GETTER_C(ref<camera>, editor_camera)
 		PFF_DEFAULT_GETTER_C(const std::vector<ref<map>>&, maps)

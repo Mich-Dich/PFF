@@ -243,6 +243,8 @@ namespace PFF::UI {
 		static const u32 array_size = 100;
 		static f32 frame_times[array_size] = {};
 		static u32 array_pointer = 0;
+		
+		const f32 averagefps = math::calc_arrayaverage(frame_times, array_size);
 
 		// Check if the time since the last update exceeds the update interval
 		if (current_time - last_update_time >= update_interval) {
@@ -276,12 +278,14 @@ namespace PFF::UI {
 			ImVec2 curser_pos;
 			ImVec2 textSize;
 
-			if (UI::begin_table("Performance Display", true, ImVec2(200.0f, 0))) {
+			if (UI::begin_table("Performance Display", true, ImVec2(240.0f, 0),0, true, 0.35f)) {
 
 				if (m_limit_fps)
-					UI::table_row("FPS", util::format_string(std::setw(4), m_current_fps, " / ", std::setw(4), m_target_fps));
-				else
-					UI::table_row("FPS", util::format_string(std::setw(4), m_current_fps));
+					snprintf(formatted_text, sizeof(formatted_text), "%4d/%4d  average: %5.2f", m_current_fps, m_target_fps, averagefps);
+				else 
+					snprintf(formatted_text, sizeof(formatted_text), "%4d  average: %5.2f", m_current_fps, averagefps);
+
+				UI::table_row_text("FPS", formatted_text);
 
 				snprintf(formatted_text, sizeof(formatted_text), "%5.2f ms", m_work_time);
 				UI::table_row_progressbar("work time:", formatted_text, work_percent);

@@ -10,8 +10,8 @@ namespace PFF {
 
 		window_resize_event(u32 width, u32 height) : m_width(width), m_height(height) {}
 
-		FORCEINLINE u32 get_width() const { return m_width; }
-		FORCEINLINE u32 get_height() const { return m_height; }
+		PFF_DEFAULT_GETTER_C(u32, width);
+		PFF_DEFAULT_GETTER_C(u32, height);
 
 		EVENT_CLASS_STRING("window resize event [" << m_width << ", " << m_height << "]");
 		EVENT_CLASS_TYPE(WindowResize);
@@ -26,7 +26,7 @@ namespace PFF {
 
 		window_focus_event(bool focus) : m_focus(focus) {}
 
-		FORCEINLINE bool get_focus() const { return m_focus; }
+		PFF_DEFAULT_GETTER_C(bool, focus);
 
 		EVENT_CLASS_STRING("window focus event");
 		EVENT_CLASS_TYPE(WindowFocus);

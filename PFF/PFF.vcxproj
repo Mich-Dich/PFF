@@ -199,7 +199,6 @@ IF EXIST ..\bin\Release-windows-x86_64\PFF\PFF.dll\ (xcopy /Q /E /Y /I ..\bin\Re
     </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <ClInclude Include="src\engine\render\material.h" />
     <ClInclude Include="src\PFF.h" />
     <ClInclude Include="src\application.h" />
     <ClInclude Include="src\engine\Events\Event.h" />
@@ -220,6 +219,7 @@ IF EXIST ..\bin\Release-windows-x86_64\PFF\PFF.dll\ (xcopy /Q /E /Y /I ..\bin\Re
     <ClInclude Include="src\engine\layer\world_layer.h" />
     <ClInclude Include="src\engine\platform\pff_window.h" />
     <ClInclude Include="src\engine\render\image.h" />
+    <ClInclude Include="src\engine\render\material.h" />
     <ClInclude Include="src\engine\render\render_public_data.h" />
     <ClInclude Include="src\engine\render\render_util.h" />
     <ClInclude Include="src\engine\render\renderer.h" />
@@ -237,8 +237,6 @@ IF EXIST ..\bin\Release-windows-x86_64\PFF\PFF.dll\ (xcopy /Q /E /Y /I ..\bin\Re
     <ClInclude Include="src\engine\world\entity.h" />
     <ClInclude Include="src\engine\world\map.h" />
     <ClInclude Include="src\entry_point.h" />
-    <ClInclude Include="src\util\math\math.h" />
-    <ClInclude Include="src\util\ui\imgui_markdown.h" />
     <ClInclude Include="src\util\UUID.h" />
     <ClInclude Include="src\util\benchmarking\instrumentor.h" />
     <ClInclude Include="src\util\core_config.h" />
@@ -249,10 +247,12 @@ IF EXIST ..\bin\Release-windows-x86_64\PFF\PFF.dll\ (xcopy /Q /E /Y /I ..\bin\Re
     <ClInclude Include="src\util\logger.h" />
     <ClInclude Include="src\util\macros.h" />
     <ClInclude Include="src\util\math\constance.h" />
+    <ClInclude Include="src\util\math\math.h" />
     <ClInclude Include="src\util\math\noise.h" />
     <ClInclude Include="src\util\math\random.h" />
     <ClInclude Include="src\util\pffpch.h" />
     <ClInclude Include="src\util\platform\windows_util.h" />
+    <ClInclude Include="src\util\ui\imgui_markdown.h" />
     <ClInclude Include="src\util\ui\pannel_collection.h" />
     <ClInclude Include="src\util\util.h" />
   </ItemGroup>
@@ -280,16 +280,16 @@ IF EXIST ..\bin\Release-windows-x86_64\PFF\PFF.dll\ (xcopy /Q /E /Y /I ..\bin\Re
     <ClCompile Include="src\engine\render\vulkan\vk_pipeline.cpp" />
     <ClCompile Include="src\engine\render\vulkan\vk_renderer.cpp" />
     <ClCompile Include="src\engine\world\map.cpp" />
-    <ClCompile Include="src\util\math\math.cpp" />
-    <ClCompile Include="src\util\ui\imgui_markdown.cpp" />
     <ClCompile Include="src\util\UUID.cpp" />
     <ClCompile Include="src\util\io\config.cpp" />
     <ClCompile Include="src\util\io\io_handler.cpp" />
     <ClCompile Include="src\util\io\serializer.cpp" />
     <ClCompile Include="src\util\logger.cpp" />
+    <ClCompile Include="src\util\math\math.cpp" />
     <ClCompile Include="src\util\pffpch.cpp">
       <PrecompiledHeader>Create</PrecompiledHeader>
     </ClCompile>
+    <ClCompile Include="src\util\ui\imgui_markdown.cpp" />
     <ClCompile Include="src\util\ui\pannel_collection.cpp" />
     <ClCompile Include="src\util\util.cpp" />
   </ItemGroup>

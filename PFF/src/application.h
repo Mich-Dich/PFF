@@ -5,7 +5,7 @@
 #include "engine/layer/layer_stack.h"			// need to include this for some reason
 #include "engine/layer/imgui_layer.h"
 #include "engine/layer/world_layer.h"
-#include "engine/render/renderer.h"
+//#include "engine/render/renderer.h"
 
 #include "engine/render/renderer.h"
 #include "engine/render/vulkan/vk_renderer.h"
@@ -13,7 +13,7 @@
 namespace PFF {
 
 	class pff_window;
-	//class renderer;
+	class renderer;
 	class event;
 	class window_resize_event;
 	class window_close_event;
@@ -28,35 +28,26 @@ namespace PFF {
 		application();
 		virtual ~application();
 
-		DELETE_COPY(application);
+		PFF_DELETE_COPY_CONSTRUCTOR(application);
 
-		FORCEINLINE f64 get_delta_time() const										{ return m_delta_time; }
-		FORCEINLINE USE_IN_EDITOR void push_overlay(layer* overlay)					{ m_layerstack->push_overlay(overlay); }
-		FORCEINLINE USE_IN_EDITOR void pop_overlay(layer* overlay)					{ m_layerstack->pop_overlay(overlay); }
-		
-		//FORCEINLINE u32 get_target_fps() const									{ return m_target_fps; }
-		PFF_DEFAULT_GETTERS(u32,													target_fps)
-		PFF_DEFAULT_GETTERS(u32,													nonefocus_fps)
+		PFF_DEFAULT_GETTER_C(f64,											delta_time)
+		PFF_DEFAULT_GETTER_C(u32,											target_fps)
+		PFF_DEFAULT_GETTERS(u32,											target_fps)
+		PFF_DEFAULT_GETTERS(u32,											nonefocus_fps)
+		PFF_DEFAULT_GETTERS(bool,											limit_fps)
+		PFF_DEFAULT_GETTER(static ref<pff_window>,							window);
+		PFF_DEFAULT_GETTER(UI::imgui_layer*,								imgui_layer);
+		PFF_DEFAULT_GETTER(world_layer*,									world_layer);
 
-		FORCEINLINE bool get_limit_fps() const										{ return m_limit_fps; }
-		FORCEINLINE void set_titlebar_hovered(bool value)							{ m_is_titlebar_hovered = value; }
+		PFF_DEFAULT_GETTER_SETTER(bool,										is_titlebar_hovered)
+			
+		FORCEINLINE static application& get()								{ return *s_instance; }
+		FORCEINLINE static void close_application()							{ m_running = false; }
+		FORCEINLINE static RENDERER& get_renderer()							{ return GET_RENDERER; }
+		FORCEINLINE static void set_render_state(system_state state)		{ GET_RENDERER.set_state(state); }
 
-		// static
-#if defined PFF_RENDER_API_VULKAN
-		FORCEINLINE static RENDERER& get_renderer()										{ return GET_RENDERER; }
-#endif
-		FORCEINLINE static application& get()											{ return *s_instance; }
-		PFF_DEFAULT_GETTER(static ref<pff_window>,	window);
-		PFF_DEFAULT_GETTER(UI::imgui_layer*,		imgui_layer);
-		PFF_DEFAULT_GETTER(world_layer*,			world_layer);
-
-#if defined PFF_RENDER_API_VULKAN
-		FORCEINLINE static void set_render_state(system_state state)				{ GET_RENDERER.set_state(state); }
-#endif
-		//FORCEINLINE ref<map> get_current_map()								{ return m_world_layer->get_current_map(); }
-		FORCEINLINE static void close_application()									{ m_running = false; }
-		FORCEINLINE static bool is_titlebar_hovered()								{ return m_is_titlebar_hovered; }
-
+		FORCEINLINE USE_IN_EDITOR void push_overlay(layer* overlay)			{ m_layerstack->push_overlay(overlay); }
+		FORCEINLINE USE_IN_EDITOR void pop_overlay(layer* overlay)			{ m_layerstack->pop_overlay(overlay); }
 
 		std::future<void>& add_future(std::future<void>& future, std::shared_ptr<std::pair<std::atomic<bool>, std::condition_variable>>& shared_state);
 		void remove_timer(std::future<void>& future);
@@ -76,10 +67,10 @@ namespace PFF {
 		void get_fps_values(bool& limit_fps, u32& target_fps, u32& current_fps, f32& work_time, f32& sleep_time);
 
 		// ---------------------- client defined ---------------------- 
-		virtual bool init() { return true; };
-		virtual bool update(const f32 delta_time) { return true; };
-		virtual bool render(const f32 delta_time) { return true; };
-		virtual bool shutdown() { return true; };
+		virtual bool init()							{ return true; };
+		virtual bool update(const f32 delta_time)	{ return true; };
+		virtual bool render(const f32 delta_time)	{ return true; };
+		virtual bool shutdown()						{ return true; };
 
 		// ---------------------- fps control ---------------------- 
 		void set_fps_settings(u32 target_fps);

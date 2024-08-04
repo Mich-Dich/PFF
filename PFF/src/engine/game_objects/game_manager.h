@@ -8,7 +8,7 @@ namespace PFF{
 	class game_manager {
 	public:
 
-		DELETE_COPY(game_manager);
+		PFF_DELETE_COPY_CONSTRUCTOR(game_manager);
 
 		static game_manager& instance() {
 			static game_manager instance;

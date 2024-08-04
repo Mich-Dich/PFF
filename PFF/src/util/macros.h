@@ -24,27 +24,27 @@
 // Constructors
 // ---------------------------------------------------------------------------------------------------------------------------------------
 
-#define DELETE_COPY(name)								public:																		\
-														name(const name&) = delete;													\
-														name& operator=(const name&) = delete
+#define PFF_DELETE_COPY_CONSTRUCTOR(name)				public:																	\
+															name(const name&) = delete;											\
+															name& operator=(const name&) = delete
 
-#define DELETE_MOVE(name)								public:																		\
-														name(name&&) = delete;														\
-														name& operator=(name&&) = delete
+#define PFF__DELETE_MOVE_CONSTRUCTOR(name)				public:																	\
+															name(name&&) = delete;												\
+															name& operator=(name&&) = delete
 
-#define DELETE_COPY_MOVE(name)							public:																		\
-														name(const name&) = delete;													\
-														name& operator=(const name&) = delete;										\
-														name(name&&) = delete;														\
-														name& operator=(name&&) = delete
+#define PFF_DELETE_COPY_MOVE_CONSTRUCTOR(name)			public:																	\
+															name(const name&) = delete;											\
+															name& operator=(const name&) = delete;								\
+															name(name&&) = delete;												\
+															name& operator=(name&&) = delete
 
-#define PFF_DEFAULT_CONSTRUCTORS(name)					public:																		\
-														name() = default;															\
-														name(const name&) = default;												
-														//name(name&&) = default;
+#define PFF_DEFAULT_CONSTRUCTORS(name)					public:																	\
+															name() = default;													\
+															name(const name&) = default;											
+															//name(name&&) = default;
 
-#define PFF_DEFAULT_COPY_CONSTRUCTOR(name)				public:																		\
-														name(const name& other) = default;
+#define PFF_DEFAULT_COPY_CONSTRUCTOR(name)				public:																	\
+															name(const name& other) = default;
 
 /*
 name(const name&) = default;
@@ -76,7 +76,7 @@ name& operator=(name&&) = default;
 
 // ------------------------------------------- setters -------------------------------------------
 #define PFF_DEFAULT_SETTER(type, name)					FORCEINLINE void set_##name(type name) { m_##name = name;}
-#define PFF_SETTER(type, func_name, var_name)			FORCEINLINE void set_##func_name(type name) { var_name = name;}
+#define PFF_SETTER(type, func_name, var_name)			FORCEINLINE void set_##func_name(type value) { var_name = value;}
 
 
 // ------------------------------------------- both togetter -------------------------------------------

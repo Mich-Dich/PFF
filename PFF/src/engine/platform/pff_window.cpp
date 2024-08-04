@@ -177,7 +177,7 @@ namespace PFF {
 
 		glfwSetTitlebarHitTestCallback(m_Window, [](GLFWwindow* window, int x, int y, int* hit) {
 			
-			*hit = application::get().is_titlebar_hovered();
+			*hit = application::get().get_is_titlebar_hovered();
 		});
 
 		glfwSetWindowPosCallback(m_Window, [](GLFWwindow* window, int x, int y) {

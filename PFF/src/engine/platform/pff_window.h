@@ -48,7 +48,7 @@ namespace PFF {
 		pff_window(window_attrib attributes = window_attrib());
 		~pff_window();
 
-		DELETE_COPY(pff_window);
+		PFF_DELETE_COPY_CONSTRUCTOR(pff_window);
 
 		FORCEINLINE bool is_vsync() const { return m_data.vsync; }
 		FORCEINLINE u32 get_width() const { return m_data.width; }

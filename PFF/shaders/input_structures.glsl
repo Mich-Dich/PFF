@@ -12,6 +12,8 @@ layout(set = 1, binding = 0) uniform GLTF_material_data{
 
 	vec4 color_factors;
 	vec4 metal_rough_factors;
+	int color_tex_ID;
+	int metalrough_tex_ID;
 	
 } material_data;
 

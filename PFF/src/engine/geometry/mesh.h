@@ -7,10 +7,11 @@ namespace PFF::geometry {
     
     struct bounds {
 
-        glm::vec3   origin;
-        f32         sphereRadius;
-        glm::vec3   extents;
+        glm::vec3   origin{};
+        f32         sphereRadius{};
+        glm::vec3   extents{};
     };
+
 
     struct Geo_surface {
 

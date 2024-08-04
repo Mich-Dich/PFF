@@ -109,7 +109,7 @@ IF EXIST $(SolutionDir)\PFF_editor\assets\ (xcopy /Q /E /Y /I $(SolutionDir)\PFF
       <PrecompiledHeader>Use</PrecompiledHeader>
       <PrecompiledHeaderFile>util/pch_editor.h</PrecompiledHeaderFile>
       <WarningLevel>Level3</WarningLevel>
-      <PreprocessorDefinitions>PFF_USING_EDITOR;ENGINE_NAME=PFF;PROJECT_NAME=PFF_editor;PFF_INSIDE_EDITOR;PFF_PLATFORM_WINDOWS;PFF_RELEASE_WITH_DEBUG_INFO;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions>PFF_USING_EDITOR;ENGINE_NAME=PFF;PROJECT_NAME=PFF_editor;PFF_INSIDE_EDITOR;PFF_PLATFORM_WINDOWS;EDITOR_RELEASE_WITH_DEBUG_INFO;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <AdditionalIncludeDirectories>src;assets;content;..\PFF\src;..\PFF\vendor\entt\include;..\PFF\vendor\glm;..\PFF\vendor\imgui;..\PFF\vendor\imgui\backends;C:\VulkanSDK\1.3.250.1\Include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <DebugInformationFormat>ProgramDatabase</DebugInformationFormat>
       <Optimization>MaxSpeed</Optimization>

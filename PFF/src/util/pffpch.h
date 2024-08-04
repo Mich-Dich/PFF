@@ -31,6 +31,7 @@
 #include <set>
 #include <array>
 #include <type_traits>
+#include <xmmintrin.h>
 
 #include <stdio.h>
 #include <cstdarg>

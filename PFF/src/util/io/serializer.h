@@ -20,7 +20,7 @@ namespace PFF::serializer {
 		yaml(const std::string& filename, const std::string& section_name, option option);
 		~yaml();
 		
-		DELETE_COPY_MOVE(yaml);
+		PFF_DELETE_COPY_MOVE_CONSTRUCTOR(yaml);
 
 		// @brief This function adds or looks for a subsection with the specified section name in the YAML file.
 		//          If the serializer option is set to [save_to_file], it adds the subsection to the YAML content

@@ -45,7 +45,8 @@ namespace PFF::render::vulkan {
 	class vk_renderer : public PFF::render::renderer {
 	public:
 
-		vk_renderer(const vk_renderer&) = delete;
+		PFF_DELETE_COPY_CONSTRUCTOR(vk_renderer);
+		//vk_renderer(const vk_renderer&) = delete;
 
 		static vk_renderer& get() { return s_instance; }
 
@@ -58,10 +59,8 @@ namespace PFF::render::vulkan {
 		PFF_DEFAULT_GETTER(VmaAllocator,			allocator);
 		
 		PFF_DEFAULT_SETTER(glm::u32vec2,			imugi_viewport_size);
-				
-		
-		PFF_DEFAULT_GETTER(VkDescriptorSetLayout,	gpu_scene_data_descriptor_layout);
 
+		PFF_DEFAULT_GETTER(VkDescriptorSetLayout,	gpu_scene_data_descriptor_layout);
 
 		PFF_DEFAULT_GETTER_POINTER(image,			draw_image)
 		PFF_DEFAULT_GETTER_POINTER(image,			depth_image)
@@ -71,9 +70,6 @@ namespace PFF::render::vulkan {
 			ref<PFF::geometry::mesh_asset>	get_test_mesh() const { return T_test_meshes[0]; }
 			PFF_DEFAULT_GETTERS_C(material_instance, default_material);
 		// ==========================================================================================================
-
-
-
 
 		void setup(ref<pff_window> window, ref<PFF::layer_stack> layer_stack);
 		void shutdown();
@@ -145,7 +141,8 @@ namespace PFF::render::vulkan {
 		void draw_imgui(VkCommandBuffer cmd, VkImageView targetImageView);
 		void create_swapchain(u32 width, u32 height);
 
-		bool is_bounds_in_frustum(const glm::mat4& pro_view, const PFF::geometry::bounds& bounds, const glm::mat4& transform);
+		void calc_frustum_planes(const glm::mat4& pro_view);
+		bool is_bounds_in_frustum(const PFF::geometry::bounds& bounds, const glm::mat4& transform);
 		void serialize(const PFF::serializer::option option);
 
 		// TIP: Note that this pattern is not very efficient, as CPU is waiting for the GPU command to fully execute before continuing with our CPU side logic
@@ -231,6 +228,9 @@ namespace PFF::render::vulkan {
 		VkDescriptorSetLayout						m_single_image_descriptor_layout;
 		material_instance							m_default_material;
 		material									m_metal_rough_material;
+
+
+		std::array<glm::vec4, 6>					m_view_frustum{};
 
 	};
 }

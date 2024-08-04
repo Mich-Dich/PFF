@@ -21,20 +21,29 @@ namespace PFF {
 			: translation(translation) {}
 		transform_component(const glm::mat4& transform) { math::decompose_transform(transform, translation, rotation, scale); }
 
-		operator glm::mat4 () { return get_transform(); }
-		operator const glm::mat4 () const { return get_transform(); }
+		operator glm::mat4 () { return update_transform(); }
+		operator const glm::mat4 () { return update_transform(); }
 
 		glm::vec3 translation = { 0.0f, 0.0f, 0.0f };
 		glm::vec3 rotation = { 0.0f, 0.0f, 0.0f };
 		glm::vec3 scale	= { 1.0f, 1.0f, 1.0f };
 
-	//private:
+	private:
 
-		FORCEINLINE glm::mat4 get_transform() const {
+		bool needs_updating = true;
+		glm::mat4 transform = glm::mat4(1);
 
-			return glm::translate(glm::mat4(1.0f), translation)
-				* glm::toMat4(glm::quat(rotation))
-				* glm::scale(glm::mat4(1.0f), scale);
+		FORCEINLINE glm::mat4 update_transform() {
+
+			if (needs_updating) {
+
+				needs_updating = false;
+				return transform = glm::translate(glm::mat4(1.0f), translation)
+					* glm::toMat4(glm::quat(rotation))
+					* glm::scale(glm::mat4(1.0f), scale);
+			}
+
+			return transform;
 		}
 	};
 

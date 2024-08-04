@@ -568,14 +568,18 @@ namespace PFF::render::vulkan {
 		T_test_meshes = IO::mesh_loader::load_gltf_meshes("../PFF/assets/meshes/basicmesh.glb").value();
 
 #elif MESH_SOURCE == 1
+
+		T_test_meshes = IO::mesh_loader::load_gltf_meshes("../PFF/assets/meshes/grass_001.glb").value();
+
+#elif MESH_SOURCE == 2
 		
 		T_test_meshes = IO::mesh_loader::load_gltf_meshes("../PFF/assets/meshes/BP-688.glb").value();
 
-#elif MESH_SOURCE == 2 	// procedural terrain test
+#elif MESH_SOURCE == 3 	// procedural terrain test
 
 //#define PROFILE_GENERATION
 
-		geometry::mesh loc_mesh{};
+		geometry::mesh_asset loc_mesh{};
 		loc_mesh.name = "procedural_test";
 
 #ifdef PROFILE_GENERATION
@@ -671,7 +675,7 @@ namespace PFF::render::vulkan {
 		}
 #endif
 		
-		T_test_meshes.emplace_back(create_ref<geometry::mesh>(std::move(loc_mesh)));
+		T_test_meshes.emplace_back(create_ref<geometry::mesh_asset>(std::move(loc_mesh)));
 		
 #endif
 
@@ -722,8 +726,8 @@ namespace PFF::render::vulkan {
 
 		// =========================================================== DEFAULT SCENE DATA =========================================================== 
 
-		m_scene_data.sunlight_color = glm::vec4(0.2f, 0.2f, 0.2f, 1.0f);
-		m_scene_data.ambient_color = glm::vec4(0.2f, 0.2f, 0.2f, 1.0f);
+		m_scene_data.sunlight_color = glm::vec4(1.f, 1.f, 1.f, 10.f);
+		m_scene_data.ambient_color = glm::vec4(1.f, 1.f, 1.f, 1.f);
 		m_scene_data.sunlight_direction = glm::vec4(0.2f, 0.2f, 0.2f, 1.0f);
 
 		// =========================================================== DEFAULT MATERIAL =========================================================== 
@@ -739,9 +743,9 @@ namespace PFF::render::vulkan {
 		m_deletion_queue.push_func([=]() { destroy_buffer(material_constant); });
 
 		material::material_resources material_resources;						//default the material textures
-		material_resources.color_image = m_white_image;
+		material_resources.color_image = m_error_checkerboard_image;
 		material_resources.color_sampler = m_default_sampler_linear;
-		material_resources.metal_rough_image = m_white_image;
+		material_resources.metal_rough_image = m_error_checkerboard_image;
 		material_resources.metal_rough_sampler = m_default_sampler_linear;
 		material_resources.data_buffer = material_constant.buffer;
 		material_resources.data_buffer_offset = 0;
@@ -1176,6 +1180,11 @@ namespace PFF::render::vulkan {
 
 		m_renderer_metrik.reset();
 
+#define USE_FRUSTUM_CULLING
+#ifdef USE_FRUSTUM_CULLING
+		calc_frustum_planes(m_scene_data.proj_view);
+#endif
+
 #define PROCCESS 0
 #if PROCCESS == 0
 
@@ -1212,16 +1221,12 @@ namespace PFF::render::vulkan {
 				// TODO: add culling for geometry that doesn't need to be drawns
 					// oclution culling
 
-#if 1
-				if (!is_bounds_in_frustum(m_scene_data.proj_view, mesh_comp.mesh_asset->bounds, (glm::mat4)transform))
+#ifdef USE_FRUSTUM_CULLING
+				if (!is_bounds_in_frustum(mesh_comp.mesh_asset->bounds, (glm::mat4)transform))
 					continue;
 #endif
 
-#if 0
 				material_instance* loc_material = (mesh_comp.material != nullptr) ? mesh_comp.material : &m_default_material;
-#else
-				material_instance* loc_material = &m_default_material;
-#endif
 				vkCmdBindPipeline(cmd, VK_PIPELINE_BIND_POINT_GRAPHICS, loc_material->pipeline->pipeline);
 				vkCmdBindDescriptorSets(cmd, VK_PIPELINE_BIND_POINT_GRAPHICS, loc_material->pipeline->layout, 0, 1, &globalDescriptor, 0, nullptr);
 				vkCmdBindDescriptorSets(cmd, VK_PIPELINE_BIND_POINT_GRAPHICS, loc_material->pipeline->layout, 1, 1, &loc_material->material_set, 0, nullptr);
@@ -1295,39 +1300,86 @@ namespace PFF::render::vulkan {
 
 	}
 
-	bool vk_renderer::is_bounds_in_frustum(const glm::mat4& pro_view, const PFF::geometry::bounds& bounds, const glm::mat4& transform) {
+//
+//#if 0
+//	std::array<glm::vec3, 8> corners{
+//		glm::vec3 { 1, 1, 1 },
+//		glm::vec3 { 1, 1, -1 },
+//		glm::vec3 { 1, -1, 1 },
+//		glm::vec3 { 1, -1, -1 },
+//		glm::vec3 { -1, 1, 1 },
+//		glm::vec3 { -1, 1, -1 },
+//		glm::vec3 { -1, -1, 1 },
+//		glm::vec3 { -1, -1, -1 },
+//	};
+//
+//	glm::mat4 matrix = pro_view * transform;
+//	glm::vec3 min = { 1.5, 1.5, 1.5 };
+//	glm::vec3 max = { -1.5, -1.5, -1.5 };
+//
+//	for (int x = 0; x < 8; x++) {
+//		glm::vec4 v = matrix * glm::vec4(bounds.origin + (corners[x] * bounds.extents), 1.f);	// project each corner into clip space
+//
+//		// perspective correction
+//		v.x = v.x / v.w;
+//		v.y = v.y / v.w;
+//		v.z = v.z / v.w;
+//
+//		min = glm::min(glm::vec3{ v.x, v.y, v.z }, min);
+//		max = glm::max(glm::vec3{ v.x, v.y, v.z }, max);
+//	}
+//
+//	// check the clip space box is within the view
+//	return !(min.z > 1.f || max.z < 0.f || min.x > 1.f || max.x < -1.f || min.y > 1.f || max.y < -1.f);
+//#else
 
-		std::array<glm::vec3, 8> corners{
-			glm::vec3 { 1, 1, 1 },
-			glm::vec3 { 1, 1, -1 },
-			glm::vec3 { 1, -1, 1 },
-			glm::vec3 { 1, -1, -1 },
-			glm::vec3 { -1, 1, 1 },
-			glm::vec3 { -1, 1, -1 },
-			glm::vec3 { -1, -1, 1 },
-			glm::vec3 { -1, -1, -1 },
-		};
+	void vk_renderer::calc_frustum_planes(const glm::mat4& pro_view) {
+	
+		glm::mat4 m = glm::transpose(pro_view);
+		m_view_frustum[0] = glm::vec4(m[3][0] + m[0][0], m[3][1] + m[0][1], m[3][2] + m[0][2], m[3][3] + m[0][3]);  // Left plane
+		m_view_frustum[1] = glm::vec4(m[3][0] - m[0][0], m[3][1] - m[0][1], m[3][2] - m[0][2], m[3][3] - m[0][3]);  // Right plane
+		m_view_frustum[2] = glm::vec4(m[3][0] + m[1][0], m[3][1] + m[1][1], m[3][2] + m[1][2], m[3][3] + m[1][3]);  // Bottom plane
+		m_view_frustum[3] = glm::vec4(m[3][0] - m[1][0], m[3][1] - m[1][1], m[3][2] - m[1][2], m[3][3] - m[1][3]);  // Top plane
+		m_view_frustum[4] = glm::vec4(m[3][0] + m[2][0], m[3][1] + m[2][1], m[3][2] + m[2][2], m[3][3] + m[2][3]);  // Near plane
+		m_view_frustum[5] = glm::vec4(m[3][0] - m[2][0], m[3][1] - m[2][1], m[3][2] - m[2][2], m[3][3] - m[2][3]);  // Far plane
 
-		// projection * view
+		// Normalize planes
+		for (auto& plane : m_view_frustum) {
+			__m128 plane_sse = _mm_set_ps(plane.w, plane.z, plane.y, plane.x);  // Load plane into SSE registers
+			__m128 length = _mm_sqrt_ps(_mm_dp_ps(plane_sse, plane_sse, 0x7F));  // Compute length of the plane vector
+			plane_sse = _mm_div_ps(plane_sse, length);  // Normalize the plane
+			_mm_store_ps(&plane.x, plane_sse);  // Store normalized plane back
+		}
+	}
 
-		glm::mat4 matrix = pro_view * transform;
-		glm::vec3 min = { 1.5, 1.5, 1.5 };
-		glm::vec3 max = { -1.5, -1.5, -1.5 };
+	bool vk_renderer::is_bounds_in_frustum(const PFF::geometry::bounds& bounds, const glm::mat4& transform) {
 
-		for (int x = 0; x < 8; x++) {
-			glm::vec4 v = matrix * glm::vec4(bounds.origin + (corners[x] * bounds.extents), 1.f);	// project each corner into clip space
+		// Transform the sphere's center using the transform matrix
+		glm::vec4 transformedCenter = transform * glm::vec4(bounds.origin, 1.0f);
+		__m128 sphereCenter = _mm_set_ps(transformedCenter.w, transformedCenter.z, transformedCenter.y, transformedCenter.x);
 
-			// perspective correction
-			v.x = v.x / v.w;
-			v.y = v.y / v.w;
-			v.z = v.z / v.w;
+		// Iterate through each plane
+		for (const auto& plane : m_view_frustum) {
+			__m128 planeNormal = _mm_set_ps(0.0f, plane.z, plane.y, plane.x);
+			__m128 planeW = _mm_set1_ps(plane.w);
 
-			min = glm::min(glm::vec3{ v.x, v.y, v.z }, min);
-			max = glm::max(glm::vec3{ v.x, v.y, v.z }, max);
+			// Compute the distance from the sphere's center to the plane
+			__m128 dotProduct = _mm_dp_ps(sphereCenter, planeNormal, 0x7);
+			__m128 distance = _mm_add_ps(dotProduct, planeW);
+
+			// Compare distance with negative sphere radius
+			__m128 sphereRadius = _mm_set1_ps(bounds.sphereRadius);
+			__m128 negSphereRadius = _mm_sub_ps(_mm_setzero_ps(), sphereRadius);
+
+			__m128 comparison = _mm_cmplt_ps(distance, negSphereRadius);
+
+			// Check if any plane is outside the sphere's radius
+			if (_mm_movemask_ps(comparison) != 0) {
+				return false;
+			}
 		}
 
-		// check the clip space box is within the view
-		return !(min.z > 1.f || max.z < 0.f || min.x > 1.f || max.x < -1.f || min.y > 1.f || max.y < -1.f);
+		return true;
 	}
 
 	void vk_renderer::draw_imgui(VkCommandBuffer cmd, VkImageView targetImageView) {

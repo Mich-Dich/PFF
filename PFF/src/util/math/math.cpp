@@ -73,4 +73,30 @@ namespace PFF::math {
 
 		return true;
 	}
+
+
+	f32 calc_arrayaverage(const f32* array, u32 size) {
+
+		if (size <= 0)
+			return 0.f;
+
+		__m128 sum = _mm_setzero_ps();
+		u32 i = 0;
+
+		for (; i <= size - 4; i += 4) {                     // Process 4 floats at a time
+			__m128 values = _mm_loadu_ps(&array[i]);
+			sum = _mm_add_ps(sum, values);
+		}
+
+		// Horizontal addition to get the total sum
+		f32 temp[4];
+		_mm_storeu_ps(temp, sum);
+		f32 total_sum = temp[0] + temp[1] + temp[2] + temp[3];
+
+		for (; i < size; ++i)                               // Handle remaining elements
+			total_sum += array[i];
+
+		return total_sum / size;
+	}
+
 }

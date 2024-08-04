@@ -6,6 +6,8 @@ namespace PFF::math {
 
 	bool decompose_transform(const glm::mat4& transform, glm::vec3& translation, glm::vec3& rotation, glm::vec3& scale);
 
+    PFF_API FORCEINLINE f32 calc_arrayaverage(const f32* array, u32 size);
+
     template<typename T>
     static FORCEINLINE T min(T left, T right) { return left < right ? left : right; }
 
@@ -20,6 +22,10 @@ namespace PFF::math {
 
     template<typename T>
     static FORCEINLINE void swap(T& a, T& b) { T tmp = a; a = b; b = tmp; }
+
+    // Absolute value function
+    template<typename T>
+    static FORCEINLINE T abs(T value) { return value < 0 ? -value : value; }
 
     template<typename T>
     static FORCEINLINE T add_clamp_overflow(T a, T b, T min, T max) { if (b < 0 && (a < min - b)) return min; if (b > 0 && (a > max - b)) return max; return a + b; }

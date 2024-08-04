@@ -34,12 +34,8 @@ namespace PFF::render::util {
 		std::string system_command;
 		std::string compield_file{};
 		compield_file = absolute_path.string() + ".spv";
-
-#if defined(PFF_PLATFORM_WINDOWS)
-		system_command = "..\\PFF\\vendor\\vulkan-glslc\\glslc.exe " + absolute_path.string() + " -o " + compield_file;
-#elif
-		system_command = "../PFF/vendor/vulkan-glslc/glslc.exe " + absolute_path.string() + " -o " + compield_file;
-#endif
+		std::filesystem::path path_to_glsl_exe = std::filesystem::path("..") / "PFF" / "vendor" / "vulkan-glslc" / "glslc.exe";
+		system_command = path_to_glsl_exe.string() + " " + absolute_path.string() + " -o " + compield_file;
 
 		if (std::filesystem::exists(compield_file)) {
 			if (std::filesystem::last_write_time(absolute_path).time_since_epoch().count() < std::filesystem::last_write_time(compield_file).time_since_epoch().count()) {
