@@ -192,8 +192,11 @@ namespace PFF::UI {
 
 	void imgui_layer::show_renderer_metrik() {
 
+#ifdef PFF_DEBUG								// renderer metrik is only collected in debug mode
 		if (!m_show_renderer_metrik)
 			return;
+
+		static const u32 const_array_size = sizeof(f32) * 100;
 
 		static UI::window_pos location = UI::window_pos::top_left;
 		ImGuiWindowFlags window_flags = (
@@ -212,22 +215,60 @@ namespace PFF::UI {
 		ImGui::SetNextWindowBgAlpha(0.8f); // Transparent background
 		if (ImGui::Begin("Renderer Metrik##PFF_Engine", &m_show_FPS_window, window_flags)) {
 
-			if (UI::begin_table("Performance Display", true, ImVec2(200.0f, 0))) {
+			auto* metrik = PFF::render::vulkan::vk_renderer::get().get_renderer_metrik_pointer();
+			if (UI::begin_table("Performance Display", true, ImVec2(250.0f, 0))) {
 
-				auto* metrik = PFF::render::vulkan::vk_renderer::get().get_renderer_metrik_pointer();
 				UI::table_row_text("mesh draws", "%d", metrik->mesh_draw);
 				UI::table_row_text("draw calls", "%d", metrik->draw_calls);
 				UI::table_row_text("triangles", "%d", metrik->triangles);
-
-				UI::table_row_text("work time", "%d", metrik->work_time);
-				UI::table_row_text("sleep time", "%d", metrik->sleep_time);
-
+				
 				UI::end_table();
 			}
+
+			UI::shift_cursor_pos(0, 10);
+
+			static const auto renderer_draw_plot_col = ImVec4(0.f, 0.61f, 0.f, 1.00f);
+			static const auto draw_geometry_plot_col = ImVec4(0.f, 0.9f, 1.f, 1.00f);
+			static const auto waiting_idle_plot_col = ImVec4(0.9f, 0.f, 1.f, 1.00f);
+			const f32 plot_max_value = PFF::math::max(math::calc_array_max(metrik->renderer_draw_time, 100), math::calc_array_max(metrik->draw_geometry_time, 100));
+
+			const ImVec2 plot_pos = ImGui::GetCursorPos();
+			ImGui::PushStyleVar(ImGuiStyleVar_FramePadding, ImVec2(0, 0));
+			ImGui::PushStyleColor(ImGuiCol_FrameBg, vector_multi(ImGui::GetStyleColorVec4(ImGuiCol_WindowBg), ImVec4{ 1, 1, 1, 0 }));
+
+			ImGui::PushStyleColor(ImGuiCol_PlotLines, renderer_draw_plot_col);
+			ImGui::PlotLines("##metrik_renderer_draw_time", metrik->renderer_draw_time, 100, metrik->current_index, (const char*)0, 0.0f, plot_max_value, ImVec2(0, 70));
+			ImGui::PopStyleColor();
+
+			ImGui::SetCursorPos(plot_pos);
+			ImGui::PushStyleColor(ImGuiCol_PlotLines, draw_geometry_plot_col);
+			ImGui::PlotLines("##metrik_draw_geometry_time", metrik->draw_geometry_time, 100, metrik->current_index, (const char*)0, 0.0f, plot_max_value, ImVec2(0, 70));
+			ImGui::PopStyleColor();
+
+			ImGui::SetCursorPos(plot_pos);
+			ImGui::PushStyleColor(ImGuiCol_PlotLines, waiting_idle_plot_col);
+			ImGui::PlotLines("##metrik_draw_geometry_time", metrik->waiting_idle_time, 100, metrik->current_index, (const char*)0, 0.0f, plot_max_value, ImVec2(0, 70));
+			ImGui::PopStyleColor();
+			
+			ImGui::PopStyleColor();
+			ImGui::PopStyleVar();
+
+			static const u32 offset = static_cast<u32>(ImGui::GetTextLineHeight() / 2);
+			ImVec2 plot_size = ImGui::GetItemRectSize();
+			ImGui::SetCursorPos({ plot_pos.x + plot_size.x, plot_pos.y - offset });
+			ImGui::Text("- %5.2f ms", plot_max_value);
+
+			ImGui::SetCursorPos({ plot_pos.x, plot_pos.y + plot_size.y + offset });
+			ImGui::TextColored(renderer_draw_plot_col, "- renderer work");
+			ImGui::SameLine();
+			ImGui::TextColored(draw_geometry_plot_col, " - drawing geometry");
+			ImGui::SameLine();
+			ImGui::TextColored(waiting_idle_plot_col, " - waiting for GPU");
 
 			UI::next_window_position_selector_popup(location, m_show_renderer_metrik);
 		}
 		ImGui::End();
+#endif
 	}
 
 
@@ -244,7 +285,7 @@ namespace PFF::UI {
 		static f32 frame_times[array_size] = {};
 		static u32 array_pointer = 0;
 		
-		const f32 averagefps = math::calc_arrayaverage(frame_times, array_size);
+		const f32 averagefps = math::calc_array_average(frame_times, array_size);
 
 		// Check if the time since the last update exceeds the update interval
 		if (current_time - last_update_time >= update_interval) {
@@ -301,7 +342,7 @@ namespace PFF::UI {
 
 			ImGui::PushStyleVar(ImGuiStyleVar_FramePadding, ImVec2(0, 0));
 			ImGui::PushStyleColor(ImGuiCol_FrameBg, vector_multi(ImGui::GetStyleColorVec4(ImGuiCol_WindowBg), ImVec4{ 1, 1, 1, 0 }));
-			ImGui::PlotLines("##frame_times", frame_times, IM_ARRAYSIZE(frame_times), (array_pointer % array_size), (const char*)0, 0.0f, FLT_MAX, ImVec2(0, 70));
+			ImGui::PlotLines("##frame_times", frame_times, array_size, (array_pointer % array_size), (const char*)0, 0.0f, FLT_MAX, ImVec2(0, 70));
 			ImGui::PopStyleColor();
 			ImGui::PopStyleVar();
 
@@ -315,15 +356,8 @@ namespace PFF::UI {
 			static const u32 interval_thin = 10;
 			static const u64 interval_thick = 50;
 
-			f32 v_max = 0;
-			for (int i = 0; i < array_size; i++) {
-				const f32 v = frame_times[(array_pointer + i) % array_size];
-				if (v != v) // Ignore NaN values
-					continue;
 
-				v_max = math::max(v_max, v);
-			}
-			const f32 max_value = v_max;
+			const f32 max_value = math::calc_array_max(frame_times, 100);
 
 			u32 num_of_displayed_texts = 0;
 			u32 buffer = static_cast<u32>(max_value / 7);

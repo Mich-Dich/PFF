@@ -75,7 +75,7 @@ namespace PFF::math {
 	}
 
 
-	f32 calc_arrayaverage(const f32* array, u32 size) {
+	f32 calc_array_average(const f32* array, u32 size) {
 
 		if (size <= 0)
 			return 0.f;
@@ -97,6 +97,38 @@ namespace PFF::math {
 			total_sum += array[i];
 
 		return total_sum / size;
+	}
+	
+	f32 calc_array_max(const f32* array, u32 size) {
+
+		if (size <= 0)
+			return 0.f;
+
+		__m128 max = _mm_set1_ps(-FLT_MAX);
+
+		u32 i = 0;
+		for (; i <= size - 4; i += 4) {                     // Process 4 floats at a time
+			__m128 values = _mm_loadu_ps(&array[i]);
+			max = _mm_max_ps(max, values);
+		}
+
+		f32 temp[4];
+		_mm_storeu_ps(temp, max);
+
+		f32 max_value = temp[0];
+		for (u32 x = 1; x < 4; ++x) {
+			if (temp[x] > max_value) {
+				max_value = temp[x];
+			}
+		}
+
+		for (; i < size; ++i) {
+			if (array[i] > max_value) {
+				max_value = array[i];
+			}
+		}
+
+		return max_value;
 	}
 
 }

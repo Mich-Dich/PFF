@@ -3,6 +3,16 @@
 #include "util/pffpch.h"
 #include "engine/render/render_public_data.h"
 
+namespace PFF {
+
+    enum class mobility {
+        locked,
+        movable,
+        dynamic,
+    };
+
+}
+
 namespace PFF::geometry {
     
     struct bounds {
@@ -11,6 +21,7 @@ namespace PFF::geometry {
         f32         sphereRadius{};
         glm::vec3   extents{};
     };
+    
 
 
     struct Geo_surface {

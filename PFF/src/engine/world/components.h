@@ -11,6 +11,9 @@
 #define GLM_ENABLE_EXPERIMENTAL
 #include <glm/gtx/quaternion.hpp>
 
+#include <xmmintrin.h>   // SSE
+#include <smmintrin.h>   // SSE4.1 (for matrix multiplication)
+
 namespace PFF {
 
 	struct transform_component {
@@ -21,8 +24,8 @@ namespace PFF {
 			: translation(translation) {}
 		transform_component(const glm::mat4& transform) { math::decompose_transform(transform, translation, rotation, scale); }
 
-		operator glm::mat4 () { return update_transform(); }
-		operator const glm::mat4 () { return update_transform(); }
+		operator glm::mat4& () { return get_transform(); }
+		operator const glm::mat4& () { return get_transform(); }
 
 		glm::vec3 translation = { 0.0f, 0.0f, 0.0f };
 		glm::vec3 rotation = { 0.0f, 0.0f, 0.0f };
@@ -33,14 +36,26 @@ namespace PFF {
 		bool needs_updating = true;
 		glm::mat4 transform = glm::mat4(1);
 
-		FORCEINLINE glm::mat4 update_transform() {
+		FORCEINLINE glm::mat4& get_transform() {
 
 			if (needs_updating) {
-
 				needs_updating = false;
-				return transform = glm::translate(glm::mat4(1.0f), translation)
-					* glm::toMat4(glm::quat(rotation))
-					* glm::scale(glm::mat4(1.0f), scale);
+
+				glm::mat4 translation_matrix = glm::mat4(1.0f);
+				glm::mat4 scale_matrix = glm::mat4(1.0f);
+				glm::mat4 rotation_matrix = glm::mat4(1.0f);
+
+				translation_matrix[3] = glm::vec4(translation.x, translation.y, translation.z, 1.0f);
+				
+				scale_matrix[0][0] = scale.x;
+				scale_matrix[1][1] = scale.y;
+				scale_matrix[2][2] = scale.z;
+
+				glm::quat quaternion(rotation);
+				rotation_matrix = glm::toMat4(quaternion);
+
+				// Combine matrices using SIMD
+				transform = translation_matrix * rotation_matrix * scale_matrix;
 			}
 
 			return transform;
@@ -91,6 +106,7 @@ namespace PFF {
 		mesh_component(ref<PFF::geometry::mesh_asset> mesh_asset_ref)
 			: mesh_asset(mesh_asset_ref) {}
 
+		mobility							mobility = mobility::locked;
 		glm::mat4							transform = glm::mat4(1);
 		bool								shoudl_render = true;
 		ref<PFF::geometry::mesh_asset>		mesh_asset;

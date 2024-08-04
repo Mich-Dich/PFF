@@ -28,6 +28,10 @@
 #include "engine/layer/layer.h"
 #include "engine/world/map.h"
 
+#include <glm/gtc/matrix_transform.hpp>
+#define GLM_ENABLE_EXPERIMENTAL
+#include <glm/gtx/quaternion.hpp>
+
 #include <cstdlib> // for system calls (conpieling shaders)
 
 #include "util/ui/pannel_collection.h"
@@ -39,6 +43,17 @@ namespace PFF::render::vulkan {
 	vk_renderer vk_renderer::s_instance;
 
 	static std::vector<std::vector<std::function<void()>>> s_resource_free_queue;
+
+
+
+
+
+#if	PFF_DEBUG
+	#define COLLECT_PERFORMANCE_DATA
+#endif
+
+
+
 
 
 
@@ -361,9 +376,19 @@ namespace PFF::render::vulkan {
 
 		if (m_state != system_state::active)
 			return;
-		
-		//wait until the gpu has finished rendering the last frame. Timeout of 1 second
-		VK_CHECK_S(vkWaitForFences(m_device, 1, &get_current_frame().render_fence, true, 1000000000));
+
+#ifdef COLLECT_PERFORMANCE_DATA
+		m_renderer_metrik.reset();
+		{
+			PFF::stopwatch loc_stopwatch(&m_renderer_metrik.waiting_idle_time[m_renderer_metrik.current_index]);
+#endif // COLLECT_PERFORMANCE_DATA
+
+		VK_CHECK_S(vkWaitForFences(m_device, 1, &get_current_frame().render_fence, true, 1000000000));		//wait until the gpu has finished rendering the last frame. Timeout of 1 second
+
+#ifdef COLLECT_PERFORMANCE_DATA
+		}
+		PFF::stopwatch loc_stopwatch(&m_renderer_metrik.renderer_draw_time[m_renderer_metrik.current_index]);
+#endif // COLLECT_PERFORMANCE_DATA
 
 		get_current_frame().deletion_queue.flush();
 		get_current_frame().frame_descriptors.clear_pools(m_device);
@@ -561,7 +586,7 @@ namespace PFF::render::vulkan {
 
 	void vk_renderer::init_default_data() {
 
-#define MESH_SOURCE 1
+#define MESH_SOURCE 2
 
 #if MESH_SOURCE == 0
 		
@@ -1132,8 +1157,11 @@ namespace PFF::render::vulkan {
 
 	void vk_renderer::draw_geometry(VkCommandBuffer cmd) {
 
-		// ========================================== create GPU global scene data ==========================================
+#ifdef COLLECT_PERFORMANCE_DATA
+		PFF::stopwatch loc_stopwatch(&m_renderer_metrik.draw_geometry_time[m_renderer_metrik.current_index]);
+#endif // COLLECT_PERFORMANCE_DATA
 
+		// ========================================== create GPU global scene data ==========================================
 		//set dynamic viewport and scissor
 		VkViewport viewport = {};
 		viewport.x = 0;
@@ -1176,35 +1204,13 @@ namespace PFF::render::vulkan {
 		VkRenderingAttachmentInfo depth_attachment = init::depth_attachment_info(m_depth_image.get_image_view(), VK_IMAGE_LAYOUT_DEPTH_ATTACHMENT_OPTIMAL);
 		VkRenderingInfo render_info = init::rendering_info(m_draw_extent, &color_attachment, &depth_attachment);
 
+		calc_frustum_planes(m_scene_data.proj_view);
+
 		vkCmdBeginRendering(cmd, &render_info);
 
-		m_renderer_metrik.reset();
-
-#define USE_FRUSTUM_CULLING
-#ifdef USE_FRUSTUM_CULLING
-		calc_frustum_planes(m_scene_data.proj_view);
-#endif
-
-#define PROCCESS 0
-#if PROCCESS == 0
-
-		/*
-			PROCCESS V0
-			1. get world_layer
-			2. get active_maps from world_layer
-			3. get all mesh components
-			4. draw all mesh components
-
-			pro:
-				all code for rendering is in one place
-			
-			con:
-		 
-		*/
-
 		// loop over all maps in worlds
-		auto& all_maps = application::get().get_world_layer()->get_maps();
-		for (ref<map> loc_map : all_maps) {
+		const auto& all_maps = application::get().get_world_layer()->get_maps();
+		for (const ref<map> loc_map : all_maps) {
 
 			if (!loc_map->is_active())		// skip maps that are not-loaded/hidden/disabled
 				continue;
@@ -1214,124 +1220,56 @@ namespace PFF::render::vulkan {
 				// frustum culling
 
 			// get every entity with [transform] and [mesh]
-			auto group = loc_map->get_registry().group<transform_component>(entt::get<mesh_component>);
-			for (auto entity : group) {
-				auto& [transform, mesh_comp] = group.get<transform_component, mesh_component>(entity);
+			const auto group = loc_map->get_registry().group<transform_component>(entt::get<mesh_component>);
+			for (const auto entity : group) {
+				const auto& [transform, mesh_comp] = group.get<transform_component, mesh_component>(entity);
 
-				// TODO: add culling for geometry that doesn't need to be drawns
+
+				if (!is_bounds_in_frustum(mesh_comp.mesh_asset->bounds, (glm::mat4&)transform))
+					continue;
+				
+				// TODO: add more culling for geometry that doesn't need to be drawns
 					// oclution culling
 
-#ifdef USE_FRUSTUM_CULLING
-				if (!is_bounds_in_frustum(mesh_comp.mesh_asset->bounds, (glm::mat4)transform))
-					continue;
-#endif
-
+				// TODO: only bind pipeline when its diffrent than previous pipeline
 				material_instance* loc_material = (mesh_comp.material != nullptr) ? mesh_comp.material : &m_default_material;
 				vkCmdBindPipeline(cmd, VK_PIPELINE_BIND_POINT_GRAPHICS, loc_material->pipeline->pipeline);
 				vkCmdBindDescriptorSets(cmd, VK_PIPELINE_BIND_POINT_GRAPHICS, loc_material->pipeline->layout, 0, 1, &globalDescriptor, 0, nullptr);
 				vkCmdBindDescriptorSets(cmd, VK_PIPELINE_BIND_POINT_GRAPHICS, loc_material->pipeline->layout, 1, 1, &loc_material->material_set, 0, nullptr);
-				vkCmdBindIndexBuffer(cmd, mesh_comp.mesh_asset->mesh_buffers.index_buffer.buffer, 0, VK_INDEX_TYPE_UINT32);
 
 				GPU_draw_push_constants push_constants;
-				push_constants.world_matrix = (glm::mat4)transform * mesh_comp.transform;
+				switch (mesh_comp.mobility) {
+					case mobility::locked:		push_constants.world_matrix = mesh_comp.transform; break;
+					case mobility::movable:		push_constants.world_matrix = mesh_comp.transform; break;		// TODO: meeds to check if object moved
+					case mobility::dynamic:		
+					default:					push_constants.world_matrix = (glm::mat4&)transform * mesh_comp.transform; break;
+				}
 				push_constants.vertex_buffer = mesh_comp.mesh_asset->mesh_buffers.vertex_buffer_address;
 				vkCmdPushConstants(cmd, mesh_comp.material->pipeline->layout, VK_SHADER_STAGE_VERTEX_BIT, 0, sizeof(GPU_draw_push_constants), &push_constants);
 
+				vkCmdBindIndexBuffer(cmd, mesh_comp.mesh_asset->mesh_buffers.index_buffer.buffer, 0, VK_INDEX_TYPE_UINT32);
+				
 				// Draw every surface in mesh_asset
 				for (u64 x = 0; x < mesh_comp.mesh_asset->surfaces.size(); x++) {
 
+					// POSIBLE OPIMIZATION - Collect all transforms of mesh_comp pointing to same mesh_asset and draw indexed
 					vkCmdDrawIndexed(cmd, mesh_comp.mesh_asset->surfaces[x].count, 1, mesh_comp.mesh_asset->surfaces[x].startIndex, 0, 0);
 
+#ifdef COLLECT_PERFORMANCE_DATA
 					m_renderer_metrik.triangles += (u64)mesh_comp.mesh_asset->surfaces[x].count / 3;
 					m_renderer_metrik.draw_calls++;
+#endif // COLLECT_PERFORMANCE_DATA
+
 				}
+#ifdef COLLECT_PERFORMANCE_DATA
 				m_renderer_metrik.mesh_draw++;
+#endif // COLLECT_PERFORMANCE_DATA
 			}
 		}
 
-#elif PROCCESS == 1
-
-		/*
-			PROCCESS V1
-			1. get world_layer
-			2. get active_maps from world_layer
-			3. get all entities from registry in active_maps
-			4. draw all mesh_components of all entities
-
-			pro:
-				all code for rendering is in one place
-
-
-			con:
-		*/
-
-		auto& all_maps = application::get().get_world_layer()->get_maps();
-		for (ref<map> loc_map : all_maps) {
-
-			if (!loc_map->is_active())		// skip maps that are not-loaded/hidden
-				continue;
-
-
-		}
-
-#elif PROCCESS == 2
-
-		/*
-			PROCCESS V2
-			1. call world_layer function from renderer to submit meshes
-			2. world_layer delegates the call to any map it wants to draw
-			3. map submits all meshes to renderer
-
-			pro:
-				lets every map individually decide what to render
-
-			con:
-				a lot more function calls
-				rendering code is scatered through code_base
-
-			application::get().get_world_layer()->notefy_maps_to_render();
-
-			bulk of implementation would be in [world_lsyer] and [maps]
-		*/
-
-#endif
-	
 		vkCmdEndRendering(cmd);
-
 	}
 
-//
-//#if 0
-//	std::array<glm::vec3, 8> corners{
-//		glm::vec3 { 1, 1, 1 },
-//		glm::vec3 { 1, 1, -1 },
-//		glm::vec3 { 1, -1, 1 },
-//		glm::vec3 { 1, -1, -1 },
-//		glm::vec3 { -1, 1, 1 },
-//		glm::vec3 { -1, 1, -1 },
-//		glm::vec3 { -1, -1, 1 },
-//		glm::vec3 { -1, -1, -1 },
-//	};
-//
-//	glm::mat4 matrix = pro_view * transform;
-//	glm::vec3 min = { 1.5, 1.5, 1.5 };
-//	glm::vec3 max = { -1.5, -1.5, -1.5 };
-//
-//	for (int x = 0; x < 8; x++) {
-//		glm::vec4 v = matrix * glm::vec4(bounds.origin + (corners[x] * bounds.extents), 1.f);	// project each corner into clip space
-//
-//		// perspective correction
-//		v.x = v.x / v.w;
-//		v.y = v.y / v.w;
-//		v.z = v.z / v.w;
-//
-//		min = glm::min(glm::vec3{ v.x, v.y, v.z }, min);
-//		max = glm::max(glm::vec3{ v.x, v.y, v.z }, max);
-//	}
-//
-//	// check the clip space box is within the view
-//	return !(min.z > 1.f || max.z < 0.f || min.x > 1.f || max.x < -1.f || min.y > 1.f || max.y < -1.f);
-//#else
 
 	void vk_renderer::calc_frustum_planes(const glm::mat4& pro_view) {
 	
@@ -1352,35 +1290,28 @@ namespace PFF::render::vulkan {
 		}
 	}
 
+	
 	bool vk_renderer::is_bounds_in_frustum(const PFF::geometry::bounds& bounds, const glm::mat4& transform) {
 
 		// Transform the sphere's center using the transform matrix
 		glm::vec4 transformedCenter = transform * glm::vec4(bounds.origin, 1.0f);
-		__m128 sphereCenter = _mm_set_ps(transformedCenter.w, transformedCenter.z, transformedCenter.y, transformedCenter.x);
+		__m128 center = _mm_set_ps(1.0f, transformedCenter.z, transformedCenter.y, transformedCenter.x);
+		__m128 radius = _mm_set1_ps(bounds.sphereRadius + 1);				// add some distance to reduce clipping
 
-		// Iterate through each plane
 		for (const auto& plane : m_view_frustum) {
-			__m128 planeNormal = _mm_set_ps(0.0f, plane.z, plane.y, plane.x);
-			__m128 planeW = _mm_set1_ps(plane.w);
-
-			// Compute the distance from the sphere's center to the plane
-			__m128 dotProduct = _mm_dp_ps(sphereCenter, planeNormal, 0x7);
-			__m128 distance = _mm_add_ps(dotProduct, planeW);
-
-			// Compare distance with negative sphere radius
-			__m128 sphereRadius = _mm_set1_ps(bounds.sphereRadius);
-			__m128 negSphereRadius = _mm_sub_ps(_mm_setzero_ps(), sphereRadius);
-
-			__m128 comparison = _mm_cmplt_ps(distance, negSphereRadius);
-
-			// Check if any plane is outside the sphere's radius
-			if (_mm_movemask_ps(comparison) != 0) {
+			__m128 planeVec = _mm_set_ps(plane.w, plane.z, plane.y, plane.x);
+			__m128 dotProduct = _mm_dp_ps(center, planeVec, 0x7F);
+			__m128 distance = _mm_add_ps(dotProduct, _mm_set1_ps(plane.w));
+			__m128 negRadius = _mm_sub_ps(_mm_setzero_ps(), radius);
+			__m128 result = _mm_cmpgt_ps(distance, negRadius);
+			int mask = _mm_movemask_ps(result);
+			if (mask != 0xF)   // If any plane is outside, return false
 				return false;
-			}
 		}
 
 		return true;
 	}
+
 
 	void vk_renderer::draw_imgui(VkCommandBuffer cmd, VkImageView targetImageView) {
 

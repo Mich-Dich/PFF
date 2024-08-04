@@ -49,9 +49,9 @@ namespace PFF {
 
 	map::map() {
 
-#define ADD_MESH_PROCESS 3
+#define ADD_MESH_PROCESS 1
 
-#if ADD_MESH_PROCESS == 1
+#if ADD_MESH_PROCESS == 0
 		
 		entity loc_entitiy = create_entity("Test entity for renderer");
 
@@ -62,7 +62,7 @@ namespace PFF {
 		mesh_comp.mesh_asset = GET_RENDERER.get_test_mesh();
 		mesh_comp.material = GET_RENDERER.get_default_material_pointer();
 
-#elif ADD_MESH_PROCESS == 2
+#elif ADD_MESH_PROCESS == 1
 
 		for (u32 x = 0; x < 15; x++) {
 			for (u32 y = 0; y < 10; y++) {
@@ -75,10 +75,13 @@ namespace PFF {
 				auto& mesh_comp = loc_entitiy.add_component<mesh_component>();
 				mesh_comp.mesh_asset = GET_RENDERER.get_test_mesh();
 				mesh_comp.material = GET_RENDERER.get_default_material_pointer();
+
+				// ============== ONLY FOR STATIC OBJECTS ==============
+				mesh_comp.transform = (glm::mat4&)transform_comp * mesh_comp.transform;
 			}
 		}
 
-#elif ADD_MESH_PROCESS == 3
+#elif ADD_MESH_PROCESS == 2
 
 		for (u32 x = 0; x < 30; x++) {
 			for (u32 y = 0; y < 30; y++) {
@@ -87,22 +90,24 @@ namespace PFF {
 
 				auto& transform_comp = loc_entitiy.get_component<transform_component>();
 				transform_comp.translation = glm::vec3(5 * x, 0, 5 * y);
-				transform_comp.scale = glm::vec3(10);
+				transform_comp.scale = glm::vec3(1);
 
 				auto& mesh_comp = loc_entitiy.add_component<mesh_component>();
 				mesh_comp.mesh_asset = GET_RENDERER.get_test_mesh();
 				mesh_comp.material = GET_RENDERER.get_default_material_pointer();
+
+				// ============== ONLY FOR STATIC OBJECTS ==============
+				mesh_comp.transform = (glm::mat4&)transform_comp * mesh_comp.transform;
 			}
 		}
+
 #endif //  ADD_MESH_PROCESS == 1
 		
 	}
 
 	map::~map() { }
 
-	ref<map> map::copy(ref<map> other) {
-		return ref<map>();
-	}
+	ref<map> map::copy(ref<map> other) { return ref<map>(); }
 
 	// =============================================================== entity ===============================================================
 

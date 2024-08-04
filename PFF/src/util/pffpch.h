@@ -70,6 +70,7 @@
 #include "util/util.h"
 #include "util/benchmarking/instrumentor.h"
 #include "util/io/serializer.h"
+#include "util/benchmarking/stopwatch.h"
 //#include "util/math/random.h"
 
 // ==================================================================================  for application use  ==================================================================================

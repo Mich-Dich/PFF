@@ -27,7 +27,15 @@ namespace PFF::render {
 		u64 triangles = 0;
 		f32 sleep_time = 0.f,	work_time = 0.f;
 
+		u16 current_index = 0;
+		f32 renderer_draw_time[100] = {};
+		f32 draw_geometry_time[100] = {};
+		f32 waiting_idle_time[100] = {};
+
 		void reset() {
+
+			current_index = (current_index + 1) % 100;
+
 			draw_calls = mesh_draw = 0;
 			triangles = 0;
 			sleep_time = work_time = 0.f;

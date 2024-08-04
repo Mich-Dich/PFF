@@ -216,6 +216,7 @@
     <ClInclude Include="src\util\util.h">
       <Filter>util</Filter>
     </ClInclude>
+    <ClInclude Include="src\util\benchmarking\stopwatch.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="src\application.cpp" />
@@ -315,5 +316,6 @@
     <ClCompile Include="src\util\util.cpp">
       <Filter>util</Filter>
     </ClCompile>
+    <ClCompile Include="src\util\benchmarking\stopwatch.cpp" />
   </ItemGroup>
 </Project>

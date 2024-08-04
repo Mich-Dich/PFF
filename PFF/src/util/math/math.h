@@ -6,7 +6,9 @@ namespace PFF::math {
 
 	bool decompose_transform(const glm::mat4& transform, glm::vec3& translation, glm::vec3& rotation, glm::vec3& scale);
 
-    PFF_API FORCEINLINE f32 calc_arrayaverage(const f32* array, u32 size);
+    PFF_API FORCEINLINE f32 calc_array_average(const f32* array, u32 size);
+
+    PFF_API FORCEINLINE f32 calc_array_max(const f32* array, u32 size);
 
     template<typename T>
     static FORCEINLINE T min(T left, T right) { return left < right ? left : right; }
