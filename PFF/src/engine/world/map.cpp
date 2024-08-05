@@ -49,7 +49,7 @@ namespace PFF {
 
 	map::map() {
 
-#define ADD_MESH_PROCESS 1
+#define ADD_MESH_PROCESS 2
 
 #if ADD_MESH_PROCESS == 0
 		
@@ -65,7 +65,7 @@ namespace PFF {
 #elif ADD_MESH_PROCESS == 1
 
 		for (u32 x = 0; x < 15; x++) {
-			for (u32 y = 0; y < 10; y++) {
+			for (u32 y = 0; y < 25; y++) {
 
 				entity loc_entitiy = create_entity("Test entity for renderer: " + util::to_string(x) + " / " + util::to_string(y));
 
@@ -83,14 +83,14 @@ namespace PFF {
 
 #elif ADD_MESH_PROCESS == 2
 
-		for (u32 x = 0; x < 30; x++) {
-			for (u32 y = 0; y < 30; y++) {
+		for (u32 x = 0; x < 50; x++) {
+			for (u32 y = 0; y < 50; y++) {
 
 				entity loc_entitiy = create_entity("Test entity for renderer: " + util::to_string(x) + " / " + util::to_string(y));
 
 				auto& transform_comp = loc_entitiy.get_component<transform_component>();
-				transform_comp.translation = glm::vec3(5 * x, 0, 5 * y);
-				transform_comp.scale = glm::vec3(1);
+				transform_comp.translation = glm::vec3(50 * x, 0, 50 * y);
+				transform_comp.scale = glm::vec3(10);
 
 				auto& mesh_comp = loc_entitiy.add_component<mesh_component>();
 				mesh_comp.mesh_asset = GET_RENDERER.get_test_mesh();

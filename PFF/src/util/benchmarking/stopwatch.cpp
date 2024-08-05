@@ -13,6 +13,11 @@ namespace PFF {
         return (*m_result_pointer = elapsed.count() / 1000.f);
     }
 
+    void stopwatch::restart() {
+
+        _start();
+    }
+
 
     void stopwatch::_start() { m_start_point = std::chrono::system_clock::now(); }
 

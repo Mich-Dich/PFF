@@ -113,6 +113,15 @@ namespace PFF {
 		material_instance*					material = nullptr;					// TODO: currently uses one material for all surfaces in mesh_asset, change so it can use diffrent materials
 	};
 
+	// ==================== IN-DEV ====================
+	struct static_mesh_comp {
+
+		glm::mat4							transform = glm::mat4(1);
+		ref<PFF::geometry::mesh_asset>		mesh_asset;
+		material_instance*					material = nullptr;					// TODO: currently uses one material for all surfaces in mesh_asset, change so it can use diffrent materials
+	};
+	// ==================== IN-DEV ====================
+
 
 
 	template<typename... component>

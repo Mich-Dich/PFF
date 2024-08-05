@@ -379,6 +379,7 @@ namespace PFF::render::vulkan {
 
 #ifdef COLLECT_PERFORMANCE_DATA
 		m_renderer_metrik.reset();
+		PFF::stopwatch loc_stopwatch(&m_renderer_metrik.renderer_draw_time[m_renderer_metrik.current_index]);
 		{
 			PFF::stopwatch loc_stopwatch(&m_renderer_metrik.waiting_idle_time[m_renderer_metrik.current_index]);
 #endif // COLLECT_PERFORMANCE_DATA
@@ -387,7 +388,6 @@ namespace PFF::render::vulkan {
 
 #ifdef COLLECT_PERFORMANCE_DATA
 		}
-		PFF::stopwatch loc_stopwatch(&m_renderer_metrik.renderer_draw_time[m_renderer_metrik.current_index]);
 #endif // COLLECT_PERFORMANCE_DATA
 
 		get_current_frame().deletion_queue.flush();
@@ -418,12 +418,12 @@ namespace PFF::render::vulkan {
 
 		if (m_imgui_initalized && !m_render_swapchain) {
 
-			m_draw_extent.width = std::min(m_draw_image.get_width(), m_imugi_viewport_size.x) * (u32)m_render_scale;
-			m_draw_extent.height = std::min(m_draw_image.get_height(), m_imugi_viewport_size.y) * (u32)m_render_scale;
+			m_draw_extent.width = math::min(m_draw_image.get_width(), m_imugi_viewport_size.x) * (u32)m_render_scale;
+			m_draw_extent.height = math::min(m_draw_image.get_height(), m_imugi_viewport_size.y) * (u32)m_render_scale;
 		} else {
 
-			m_draw_extent.width = std::min(m_swapchain_extent.width, m_draw_image.get_width()) * (u32)m_render_scale;
-			m_draw_extent.height = std::min(m_swapchain_extent.height, m_draw_image.get_height()) * (u32)m_render_scale;
+			m_draw_extent.width = math::min(m_swapchain_extent.width, m_draw_image.get_width()) * (u32)m_render_scale;
+			m_draw_extent.height = math::min(m_swapchain_extent.height, m_draw_image.get_height()) * (u32)m_render_scale;
 		}
 
 		VK_CHECK_S(vkBeginCommandBuffer(cmd, &cmdBeginInfo));
@@ -586,7 +586,7 @@ namespace PFF::render::vulkan {
 
 	void vk_renderer::init_default_data() {
 
-#define MESH_SOURCE 2
+#define MESH_SOURCE 1
 
 #if MESH_SOURCE == 0
 		
@@ -1216,14 +1216,13 @@ namespace PFF::render::vulkan {
 				continue;
 
 			// TODO: add high-level culling for maps that don't need rendering
-				// oclution culling
 				// frustum culling
+				// oclution culling? (maps may be to big, so occusion may not make sense)
 
 			// get every entity with [transform] and [mesh]
 			const auto group = loc_map->get_registry().group<transform_component>(entt::get<mesh_component>);
 			for (const auto entity : group) {
 				const auto& [transform, mesh_comp] = group.get<transform_component, mesh_component>(entity);
-
 
 				if (!is_bounds_in_frustum(mesh_comp.mesh_asset->bounds, (glm::mat4&)transform))
 					continue;
@@ -1259,8 +1258,8 @@ namespace PFF::render::vulkan {
 					m_renderer_metrik.triangles += (u64)mesh_comp.mesh_asset->surfaces[x].count / 3;
 					m_renderer_metrik.draw_calls++;
 #endif // COLLECT_PERFORMANCE_DATA
-
 				}
+
 #ifdef COLLECT_PERFORMANCE_DATA
 				m_renderer_metrik.mesh_draw++;
 #endif // COLLECT_PERFORMANCE_DATA
@@ -1270,48 +1269,56 @@ namespace PFF::render::vulkan {
 		vkCmdEndRendering(cmd);
 	}
 
-
+	// called once per frame
 	void vk_renderer::calc_frustum_planes(const glm::mat4& pro_view) {
 	
 		glm::mat4 m = glm::transpose(pro_view);
-		m_view_frustum[0] = glm::vec4(m[3][0] + m[0][0], m[3][1] + m[0][1], m[3][2] + m[0][2], m[3][3] + m[0][3]);  // Left plane
-		m_view_frustum[1] = glm::vec4(m[3][0] - m[0][0], m[3][1] - m[0][1], m[3][2] - m[0][2], m[3][3] - m[0][3]);  // Right plane
-		m_view_frustum[2] = glm::vec4(m[3][0] + m[1][0], m[3][1] + m[1][1], m[3][2] + m[1][2], m[3][3] + m[1][3]);  // Bottom plane
-		m_view_frustum[3] = glm::vec4(m[3][0] - m[1][0], m[3][1] - m[1][1], m[3][2] - m[1][2], m[3][3] - m[1][3]);  // Top plane
-		m_view_frustum[4] = glm::vec4(m[3][0] + m[2][0], m[3][1] + m[2][1], m[3][2] + m[2][2], m[3][3] + m[2][3]);  // Near plane
-		m_view_frustum[5] = glm::vec4(m[3][0] - m[2][0], m[3][1] - m[2][1], m[3][2] - m[2][2], m[3][3] - m[2][3]);  // Far plane
+		m_view_frustum[0] = glm::vec4(m[3][0] + m[0][0], m[3][1] + m[0][1], m[3][2] + m[0][2], m[3][3] + m[0][3]);  // left plane
+		m_view_frustum[1] = glm::vec4(m[3][0] - m[0][0], m[3][1] - m[0][1], m[3][2] - m[0][2], m[3][3] - m[0][3]);  // right plane
+		m_view_frustum[2] = glm::vec4(m[3][0] + m[1][0], m[3][1] + m[1][1], m[3][2] + m[1][2], m[3][3] + m[1][3]);  // bottom plane
+		m_view_frustum[3] = glm::vec4(m[3][0] - m[1][0], m[3][1] - m[1][1], m[3][2] - m[1][2], m[3][3] - m[1][3]);  // top plane
+		m_view_frustum[4] = glm::vec4(m[3][0] + m[2][0], m[3][1] + m[2][1], m[3][2] + m[2][2], m[3][3] + m[2][3]);  // near plane
+		m_view_frustum[5] = glm::vec4(m[3][0] - m[2][0], m[3][1] - m[2][1], m[3][2] - m[2][2], m[3][3] - m[2][3]);  // far plane
 
-		// Normalize planes
+		// normalize planes
 		for (auto& plane : m_view_frustum) {
-			__m128 plane_sse = _mm_set_ps(plane.w, plane.z, plane.y, plane.x);  // Load plane into SSE registers
-			__m128 length = _mm_sqrt_ps(_mm_dp_ps(plane_sse, plane_sse, 0x7F));  // Compute length of the plane vector
-			plane_sse = _mm_div_ps(plane_sse, length);  // Normalize the plane
-			_mm_store_ps(&plane.x, plane_sse);  // Store normalized plane back
+			__m128 plane_sse = _mm_set_ps(plane.w, plane.z, plane.y, plane.x);
+			__m128 length = _mm_sqrt_ps(_mm_dp_ps(plane_sse, plane_sse, 0x7F));
+			plane_sse = _mm_div_ps(plane_sse, length);
+			_mm_store_ps(&plane.x, plane_sse);
 		}
 	}
 
-	
+	// called for every object (map-chunk/mesh/...)
 	bool vk_renderer::is_bounds_in_frustum(const PFF::geometry::bounds& bounds, const glm::mat4& transform) {
 
-		// Transform the sphere's center using the transform matrix
-		glm::vec4 transformedCenter = transform * glm::vec4(bounds.origin, 1.0f);
-		__m128 center = _mm_set_ps(1.0f, transformedCenter.z, transformedCenter.y, transformedCenter.x);
-		__m128 radius = _mm_set1_ps(bounds.sphereRadius + 1);				// add some distance to reduce clipping
+		// transform the sphere's center
+		glm::vec4 transformed_center = transform * glm::vec4(bounds.origin, 1.0f);
+		__m128 center = _mm_set_ps(1.0f, transformed_center.z, transformed_center.y, transformed_center.x);
+
+		// transform the sphere's radius with transform scale
+		glm::vec4 transformed_radius_vec = transform * glm::vec4(bounds.sphere_radius, bounds.sphere_radius, bounds.sphere_radius, 0.0f);
+		float transformed_radius = glm::length(glm::vec3(transformed_radius_vec));
+
+		__m128 radius = _mm_set1_ps(transformed_radius);				// add some distance to reduce clipping
+		__m128 neg_radius = _mm_sub_ps(_mm_setzero_ps(), radius);
 
 		for (const auto& plane : m_view_frustum) {
-			__m128 planeVec = _mm_set_ps(plane.w, plane.z, plane.y, plane.x);
-			__m128 dotProduct = _mm_dp_ps(center, planeVec, 0x7F);
-			__m128 distance = _mm_add_ps(dotProduct, _mm_set1_ps(plane.w));
-			__m128 negRadius = _mm_sub_ps(_mm_setzero_ps(), radius);
-			__m128 result = _mm_cmpgt_ps(distance, negRadius);
-			int mask = _mm_movemask_ps(result);
-			if (mask != 0xF)   // If any plane is outside, return false
+			__m128 plane_vec = _mm_set_ps(plane.w, plane.z, plane.y, plane.x);
+			__m128 dot_product = _mm_dp_ps(center, plane_vec, 0x7F);
+			__m128 distance = _mm_add_ps(dot_product, _mm_set1_ps(plane.w));
+			__m128 result = _mm_cmpgt_ps(distance, neg_radius);
+			if (_mm_movemask_ps(result) != 0xF)								// at least one plane is outside, return false
 				return false;
 		}
 
 		return true;
 	}
 
+		//I don't need to negate radius. Just switch the comparison to _mm_cmple_ps(distance, radius);
+		//Im not scaling the radius of the sphere through the transform.
+		//I need something like:
+		//	// PSOIDE CODE: transformed_radius = length(transform * vec4(radius, radius, radius, 0.f))
 
 	void vk_renderer::draw_imgui(VkCommandBuffer cmd, VkImageView targetImageView) {
 

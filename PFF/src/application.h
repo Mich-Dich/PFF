@@ -5,9 +5,7 @@
 #include "engine/layer/layer_stack.h"			// need to include this for some reason
 #include "engine/layer/imgui_layer.h"
 #include "engine/layer/world_layer.h"
-//#include "engine/render/renderer.h"
 
-#include "engine/render/renderer.h"
 #include "engine/render/vulkan/vk_renderer.h"
 
 namespace PFF {

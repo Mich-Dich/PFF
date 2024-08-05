@@ -15,11 +15,11 @@ namespace PFF {
 
 namespace PFF::geometry {
     
-    struct bounds {
+    struct bounds {     
 
         glm::vec3   origin{};
-        f32         sphereRadius{};
-        glm::vec3   extents{};
+        f32         sphere_radius{};
+        glm::vec3   extents{};          // AABB
     };
     
 

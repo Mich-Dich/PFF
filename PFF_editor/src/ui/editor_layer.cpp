@@ -251,6 +251,7 @@ namespace PFF {
 			| ImGuiWindowFlags_NoScrollWithMouse
 			| ImGuiWindowFlags_NoCollapse
 			| ImGuiWindowFlags_NoBackground 
+			| ImGuiWindowFlags_NoTitleBar
 			| ImGuiWindowFlags_DockNodeHost;
 
 		ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, ImVec2(0, 0));
@@ -261,8 +262,7 @@ namespace PFF {
 		if (is_window_begin) {
 
 			// display rendred image
-			ImVec2 viewport_size = ImGui::GetWindowSize();
-			viewport_size.y -= ImGui::GetFrameHeight();
+			ImVec2 viewport_size = ImGui::GetContentRegionAvail();
 
 			application::get().get_renderer().set_imugi_viewport_size(glm::u32vec2(viewport_size.x, viewport_size.y));
 
