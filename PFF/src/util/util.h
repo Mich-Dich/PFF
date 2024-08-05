@@ -45,9 +45,8 @@ namespace PFF {
 
         return std::make_unique<T>(std::forward<args>(arguments)...);
     }
-    
-    // ================================================= utilitys =================================================
 
+    // ================================================= utilitys =================================================
 	namespace util {
 
         // @brief Searches for the last occurrence of the specified delimiter in the input string,

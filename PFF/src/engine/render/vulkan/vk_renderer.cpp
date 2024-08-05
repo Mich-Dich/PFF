@@ -1292,6 +1292,8 @@ namespace PFF::render::vulkan {
 	// called for every object (map-chunk/mesh/...)
 	bool vk_renderer::is_bounds_in_frustum(const PFF::geometry::bounds& bounds, const glm::mat4& transform) {
 
+		PFF_SCOPED_BENCHMARK(1000000, "frustum culling")
+
 		// transform the sphere's center
 		glm::vec4 transformed_center = transform * glm::vec4(bounds.origin, 1.0f);
 		__m128 center = _mm_set_ps(1.0f, transformed_center.z, transformed_center.y, transformed_center.x);
