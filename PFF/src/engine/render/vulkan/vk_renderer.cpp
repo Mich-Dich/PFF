@@ -716,19 +716,19 @@ namespace PFF::render::vulkan {
 		u32 white = glm::packUnorm4x8(glm::vec4(1, 1, 1, 1));
 		m_white_image = create_ref<image>((void*)&white, 1, 1, image_format::RGBA);
 
-		u32 grey = glm::packUnorm4x8(glm::vec4(0.4f, 0.44f, 0.4f, 1));
-		m_black_image = create_ref<image>((void*)&grey, 1, 1, image_format::RGBA);
+		u32 gray = glm::packUnorm4x8(glm::vec4(0.6f, 0.6f, 0.6f, 0.f));
+		m_grey_image = create_ref<image>((void*)&gray, 1, 1, image_format::RGBA);
 
-		u32 black = glm::packUnorm4x8(glm::vec4(0, 0, 0, 1));	// TODO: chnage A to 1
-		m_grey_image = create_ref<image>((void*)&black, 1, 1, image_format::RGBA);
+		u32 black = glm::packUnorm4x8(glm::vec4(0, 0, 0, 1));
+		m_black_image = create_ref<image>((void*)&black, 1, 1, image_format::RGBA);
 
 		//checkerboard image
 		const int EDGE_LENGTH = 2;
-		u32 color = glm::packUnorm4x8(glm::vec4(0.2f, 0.2f, 0.2f, 1));
+		u32 color = glm::packUnorm4x8(glm::vec4(0.8f, 0.8f, 0.8f, 1));
 		std::array<u32, EDGE_LENGTH * EDGE_LENGTH > pixels; //for checkerboard texture
 		for (int x = 0; x < EDGE_LENGTH; x++)
 			for (int y = 0; y < EDGE_LENGTH; y++)
-				pixels[y * EDGE_LENGTH + x] = ((x % EDGE_LENGTH) ^ (y % EDGE_LENGTH)) ? grey : color;
+				pixels[y * EDGE_LENGTH + x] = ((x % EDGE_LENGTH) ^ (y % EDGE_LENGTH)) ? gray : color;
 		m_error_checkerboard_image = create_ref<image>(pixels.data(), EDGE_LENGTH, EDGE_LENGTH, image_format::RGBA);
 
 		VkSamplerCreateInfo sampler{};
@@ -751,8 +751,8 @@ namespace PFF::render::vulkan {
 
 		// =========================================================== DEFAULT SCENE DATA =========================================================== 
 
-		m_scene_data.sunlight_color = glm::vec4(1.f, 1.f, 1.f, 10.f);
-		m_scene_data.ambient_color = glm::vec4(1.f, 1.f, 1.f, 1.f);
+		m_scene_data.sunlight_color = glm::vec4(1.f, 1.f, 1.f, 0.01f);
+		m_scene_data.ambient_color = glm::vec4(1.f, 1.f, 1.f, 0.001f);
 		m_scene_data.sunlight_direction = glm::vec4(0.2f, 0.2f, 0.2f, 1.0f);
 
 		// =========================================================== DEFAULT MATERIAL =========================================================== 
@@ -769,9 +769,9 @@ namespace PFF::render::vulkan {
 
 		material::material_resources material_resources;						//default the material textures
 		material_resources.color_image = m_error_checkerboard_image;
-		material_resources.color_sampler = m_default_sampler_linear;
+		material_resources.color_sampler = m_default_sampler_nearest;
 		material_resources.metal_rough_image = m_error_checkerboard_image;
-		material_resources.metal_rough_sampler = m_default_sampler_linear;
+		material_resources.metal_rough_sampler = m_default_sampler_nearest;
 		material_resources.data_buffer = material_constant.buffer;
 		material_resources.data_buffer_offset = 0;
 		m_default_material = m_metal_rough_material.create_instance(material_pass::main_color, material_resources, m_global_descriptor_allocator);
@@ -1271,7 +1271,9 @@ namespace PFF::render::vulkan {
 
 	// called once per frame
 	void vk_renderer::calc_frustum_planes(const glm::mat4& pro_view) {
-	
+
+		PFF_SCOPED_BENCHMARK(700, "calc frustum planes ", PFF::duration_precision::microseconds);
+
 		glm::mat4 m = glm::transpose(pro_view);
 		m_view_frustum[0] = glm::vec4(m[3][0] + m[0][0], m[3][1] + m[0][1], m[3][2] + m[0][2], m[3][3] + m[0][3]);  // left plane
 		m_view_frustum[1] = glm::vec4(m[3][0] - m[0][0], m[3][1] - m[0][1], m[3][2] - m[0][2], m[3][3] - m[0][3]);  // right plane
@@ -1292,17 +1294,13 @@ namespace PFF::render::vulkan {
 	// called for every object (map-chunk/mesh/...)
 	bool vk_renderer::is_bounds_in_frustum(const PFF::geometry::bounds& bounds, const glm::mat4& transform) {
 
-		PFF_SCOPED_BENCHMARK(1000000, "frustum culling")
+		PFF_SCOPED_BENCHMARK(1000000, "frustum bounds check", PFF::duration_precision::microseconds);
 
-		// transform the sphere's center
 		glm::vec4 transformed_center = transform * glm::vec4(bounds.origin, 1.0f);
 		__m128 center = _mm_set_ps(1.0f, transformed_center.z, transformed_center.y, transformed_center.x);
 
-		// transform the sphere's radius with transform scale
-		glm::vec4 transformed_radius_vec = transform * glm::vec4(bounds.sphere_radius, bounds.sphere_radius, bounds.sphere_radius, 0.0f);
-		float transformed_radius = glm::length(glm::vec3(transformed_radius_vec));
-
-		__m128 radius = _mm_set1_ps(transformed_radius);				// add some distance to reduce clipping
+		f32 transformed_radius = glm::length(transform * glm::vec4(bounds.sphere_radius, bounds.sphere_radius, bounds.sphere_radius, 0.0f));
+		__m128 radius = _mm_set1_ps(transformed_radius);
 		__m128 neg_radius = _mm_sub_ps(_mm_setzero_ps(), radius);
 
 		for (const auto& plane : m_view_frustum) {
@@ -1313,14 +1311,8 @@ namespace PFF::render::vulkan {
 			if (_mm_movemask_ps(result) != 0xF)								// at least one plane is outside, return false
 				return false;
 		}
-
 		return true;
 	}
-
-		//I don't need to negate radius. Just switch the comparison to _mm_cmple_ps(distance, radius);
-		//Im not scaling the radius of the sphere through the transform.
-		//I need something like:
-		//	// PSOIDE CODE: transformed_radius = length(transform * vec4(radius, radius, radius, 0.f))
 
 	void vk_renderer::draw_imgui(VkCommandBuffer cmd, VkImageView targetImageView) {
 

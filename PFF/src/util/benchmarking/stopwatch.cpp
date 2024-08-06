@@ -13,16 +13,23 @@ namespace PFF::benchmarking {
         if (single_duration == -1.f)
             return true;
 
-        if (number_of_values >= num_of_tests)
+        if (m_number_of_values >= m_num_of_tests)
             return false;
 
-        durations += single_duration;
-        number_of_values++;
+        m_durations += single_duration;
+        m_number_of_values++;
 
-        if (number_of_values >= num_of_tests) {
+        if (m_number_of_values >= m_num_of_tests) {
 
-            f64 duration_average = durations / (f64)number_of_values;
-            CORE_LOG(Info, message << " => sample count: " << number_of_values << "average duration: " << duration_average << " ms");
+            std::string precition_string;
+            switch (m_presition) {
+                case PFF::duration_precision::microseconds:     precition_string = " microseconds"; break;
+                default:
+                case PFF::duration_precision::miliseconds:      precition_string = " miliseconds"; break;
+                case PFF::duration_precision::seconds:          precition_string = " seconds"; break;
+            }
+
+            CORE_LOG(Info, m_message << " => sample count: " << m_number_of_values << " average duration: " << (m_durations / (f64)m_number_of_values) << precition_string);
         }
 
         return true;
@@ -33,12 +40,21 @@ namespace PFF::benchmarking {
 
 namespace PFF {
 
-
 	f32 stopwatch::stop() {
 
         std::chrono::system_clock::time_point end_point = std::chrono::system_clock::now();
-        auto elapsed = std::chrono::duration_cast<std::chrono::microseconds>(end_point - m_start_point);      //convert to microseconds (integer), and then come back to miliseconds
-        return (*m_result_pointer = elapsed.count() / 1000.f);
+
+        switch (m_presition) {
+            case PFF::duration_precision::microseconds:
+                return (*m_result_pointer = std::chrono::duration_cast<std::chrono::nanoseconds>(end_point - m_start_point).count() / 1000.f);
+
+            default:
+            case PFF::duration_precision::miliseconds:
+                return (*m_result_pointer = std::chrono::duration_cast<std::chrono::microseconds>(end_point - m_start_point).count() / 1000.f);
+
+            case PFF::duration_precision::seconds:
+                return (*m_result_pointer = std::chrono::duration_cast<std::chrono::milliseconds>(end_point - m_start_point).count() / 1000.f);
+        }
     }
 
     void stopwatch::restart() {

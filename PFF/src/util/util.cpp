@@ -13,6 +13,27 @@
 
 namespace PFF::util {
 
+    float random::get_f32(f32 min, f32 max) {
+        std::uniform_real_distribution<f32> dist(min, max);
+        return dist(engine);
+    }
+
+    f64 random::get_f64(f64 min, f64 max) {
+        std::uniform_real_distribution<f64> dist(min, max);
+        return dist(engine);
+    }
+
+    u32 random::get_u32(u32 min, u32 max) {
+        std::uniform_int_distribution<u32> dist(min, max);
+        return dist(engine);
+    }
+
+    u64 random::get_u64(u64 min, u64 max) {
+        std::uniform_int_distribution<u64> dist(min, max);
+        return dist(engine);
+    }
+
+
     void extract_part_after_delimiter(std::string& dest, const std::string& input, const char* delimiter) {
 
         size_t found = input.find_last_of(delimiter);

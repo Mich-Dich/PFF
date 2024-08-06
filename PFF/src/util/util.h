@@ -49,6 +49,43 @@ namespace PFF {
     // ================================================= utilitys =================================================
 	namespace util {
 
+        // @brief A class that provides methods for generating random numbers of various types.
+        //        It utilizes the Mersenne Twister pseudo-random number generator for high-quality randomness.
+        //        The class can generate floating-point numbers and unsigned integers within specified ranges.
+        class PFF_API random {
+        public:
+
+            random(u32 seed = std::random_device{}()) 
+                : engine(seed) {}
+
+            // @brief Generates a random floating-point number in the range [min, max].
+            // @param [min] The minimum value of the random number range.
+            // @param [max] The maximum value of the random number range.
+            // @return A random floating-point number between min and max.
+            FORCEINLINE float get_f32(f32 min = 0.0f, f32 max = 1.0f);
+
+            // @brief Generates a random double-precision floating-point number in the range [min, max].
+            // @param [min] The minimum value of the random number range.
+            // @param [max] The maximum value of the random number range.
+            // @return A random double-precision floating-point number between min and max.
+            FORCEINLINE f64 get_f64(f64 min = 0.0, f64 max = 1.0);
+
+            // @brief Generates a random unsigned 32-bit integer in the range [min, max].
+            // @param [min] The minimum value of the random number range.
+            // @param [max] The maximum value of the random number range.
+            // @return A random unsigned 32-bit integer between min and max.
+            FORCEINLINE u32 get_u32(u32 min = 0, u32 max = std::numeric_limits<u32>::max());
+
+            // @brief Generates a random unsigned 64-bit integer in the range [min, max].
+            // @param [min] The minimum value of the random number range.
+            // @param [max] The maximum value of the random number range.
+            // @return A random unsigned 64-bit integer between min and max.
+            FORCEINLINE u64 get_u64(u64 min = 0, u64 max = std::numeric_limits<u64>::max());
+
+        private:
+            std::mt19937                            engine; // Mersenne Twister pseudo-random generator
+        };
+
         // @brief Searches for the last occurrence of the specified delimiter in the input string,
         //          and if found, extracts the substring after the delimiter into the 'dest' string.
         //          If the delimiter is not found, the 'dest' string remains unchanged.

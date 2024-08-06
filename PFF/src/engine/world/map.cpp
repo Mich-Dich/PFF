@@ -49,6 +49,18 @@ namespace PFF {
 
 	map::map() {
 
+
+		entity loc_entitiy = create_entity("editor_origin_grid");
+
+		auto& transform_comp = loc_entitiy.get_component<transform_component>();
+		transform_comp.translation = glm::vec3(0);
+		transform_comp.rotation = glm::vec3(0);
+
+		auto& mesh_comp = loc_entitiy.add_component<mesh_component>();			
+		mesh_comp.mesh_asset = GET_RENDERER.get_test_mesh();					// get correct mesh
+		mesh_comp.material = GET_RENDERER.get_default_material_pointer();		// get correct shader
+
+
 #define ADD_MESH_PROCESS 2
 
 #if ADD_MESH_PROCESS == 0
@@ -65,12 +77,13 @@ namespace PFF {
 #elif ADD_MESH_PROCESS == 1
 
 		for (u32 x = 0; x < 15; x++) {
-			for (u32 y = 0; y < 25; y++) {
+			for (u32 y = 0; y < 10; y++) {
 
 				entity loc_entitiy = create_entity("Test entity for renderer: " + util::to_string(x) + " / " + util::to_string(y));
 
 				auto& transform_comp = loc_entitiy.get_component<transform_component>();
-				transform_comp.translation = glm::vec3(350 * x, 0, 750 * y);
+				transform_comp.translation = glm::vec3(35 * x, 0, 75 * y);
+				transform_comp.scale = glm::vec3(0.1f);
 
 				auto& mesh_comp = loc_entitiy.add_component<mesh_component>();
 				mesh_comp.mesh_asset = GET_RENDERER.get_test_mesh();
@@ -83,22 +96,23 @@ namespace PFF {
 
 #elif ADD_MESH_PROCESS == 2
 
-		for (u32 x = 0; x < 50; x++) {
-			for (u32 y = 0; y < 50; y++) {
+		const f32 field_size = 20.f;
+		util::random loc_random{};
 
-				entity loc_entitiy = create_entity("Test entity for renderer: " + util::to_string(x) + " / " + util::to_string(y));
+		for (u32 x = 0; x < 2000; x++) {
 
-				auto& transform_comp = loc_entitiy.get_component<transform_component>();
-				transform_comp.translation = glm::vec3(50 * x, 0, 50 * y);
-				transform_comp.scale = glm::vec3(10);
+			entity loc_entitiy = create_entity("Test entity for renderer: " + util::to_string(x));
 
-				auto& mesh_comp = loc_entitiy.add_component<mesh_component>();
-				mesh_comp.mesh_asset = GET_RENDERER.get_test_mesh();
-				mesh_comp.material = GET_RENDERER.get_default_material_pointer();
+			auto& transform_comp = loc_entitiy.get_component<transform_component>();
+			transform_comp.translation = glm::vec3(loc_random.get_f32(-field_size, field_size), 0, loc_random.get_f32(-field_size, field_size));
+			transform_comp.rotation = glm::vec3(0, loc_random.get_f32(0.f, 2 * glm::pi<f32>()), 0);
 
-				// ============== ONLY FOR STATIC OBJECTS ==============
-				mesh_comp.transform = (glm::mat4&)transform_comp * mesh_comp.transform;
-			}
+			auto& mesh_comp = loc_entitiy.add_component<mesh_component>();
+			mesh_comp.mesh_asset = GET_RENDERER.get_test_mesh();
+			mesh_comp.material = GET_RENDERER.get_default_material_pointer();
+
+			// ============== ONLY FOR STATIC OBJECTS ==============
+			mesh_comp.transform = (glm::mat4&)transform_comp * mesh_comp.transform;
 		}
 
 #endif //  ADD_MESH_PROCESS == 1
