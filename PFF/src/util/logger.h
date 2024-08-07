@@ -9,18 +9,16 @@
 	#define DEBUG_BREAK() __debugbreak()
 #endif // !DEBUG_BREAK
 
-#define PROJECT_FOLDER			"PFF"
-
 namespace PFF {
 
-	class Exception : public std::runtime_error {
+	class exception : public std::runtime_error {
 	public:
 		using std::runtime_error::runtime_error;
 	};
 
-	namespace Logger {
+	namespace logger {
 
-		enum LogMsgSeverity {
+		enum log_msg_severity {
 			Trace = 0,
 			Debug = 1,
 			Info = 2,
@@ -33,7 +31,7 @@ namespace PFF {
 		// Initializes the logging system.
 		// @param [Format] The initial log format.
 		// @return [bool] Returns true if the initialization is successful, false otherwise.
-		PFF_API bool Init(const std::string& format);
+		PFF_API bool init(const std::string& format);
 
 		// Formating the LogMessages can be customised with the following tags
 		// to format all following Log Messages use: set_Formating(char* format);
@@ -63,12 +61,12 @@ namespace PFF {
 		// @param $E		Color End			from here the color ends
 		// @param $C		Text				Formated Message with variables
 		// @param $Z		New Line			Adds a new Line to the log
-		PFF_API void Set_Format(const std::string& format);
+		PFF_API void set_format(const std::string& format);
 
 		//Restores the previous log message format
 		//	@brief This function swaps the current log message format with the previously stored backup.
 		//	It is useful for reverting to a previous format after temporary changes.
-		PFF_API void Use_Format_Backup();
+		PFF_API void use_format_backup();
 
 		// Define witch log levels should be written to log file directly and witch should be buffered
 		// @param 0    =>   write all logs directly to log file
@@ -79,17 +77,17 @@ namespace PFF {
 		PFF_API void set_buffer_Level(int newLevel);
 
 
-		void LogMsg(LogMsgSeverity level, const char* fileName, const char* funcName, int line, const char* message);
+		void log_msg(log_msg_severity level, const char* fileName, const char* funcName, int line, const char* message);
 
 
-		class PFF_API LogMessage : public std::ostringstream {
+		class PFF_API log_message : public std::ostringstream {
 
 		public:
-			LogMessage(LogMsgSeverity severity, const char* fileName, const char* funcName, int line);
-			~LogMessage();
+			log_message(log_msg_severity severity, const char* fileName, const char* funcName, int line);
+			~log_message();
 
 		private:
-			LogMsgSeverity m_Severity;
+			log_msg_severity m_Severity;
 			const char* m_FileName;
 			const char* m_FuncName;
 			int m_Line;
@@ -110,36 +108,36 @@ namespace PFF {
 //  ===================================================================================  Core Logger  ===================================================================================
 #if defined(PFF_INSIDE_ENGINE) || defined(PFF_INSIDE_EDITOR)
 
-	#define CORE_LOG_Fatal(message)				{ PFF::Logger::LogMessage(PFF::Logger::LogMsgSeverity::Fatal,__FILE__,__FUNCTION__,__LINE__).flush() << message; }
-	#define CORE_LOG_Error(message)				{ PFF::Logger::LogMessage(PFF::Logger::LogMsgSeverity::Error,__FILE__,__FUNCTION__,__LINE__).flush() << message; }
+	#define CORE_LOG_Fatal(message)				{ PFF::logger::log_message(PFF::logger::log_msg_severity::Fatal,__FILE__,__FUNCTION__,__LINE__).flush() << message; }
+	#define CORE_LOG_Error(message)				{ PFF::logger::log_message(PFF::logger::log_msg_severity::Error,__FILE__,__FUNCTION__,__LINE__).flush() << message; }
 
 	#if CORE_LOG_LEVEL_ENABLED >= 1
-		#define CORE_LOG_Warn(message)				{ PFF::Logger::LogMessage(PFF::Logger::LogMsgSeverity::Warn,__FILE__,__FUNCTION__,__LINE__).flush() << message; }
+		#define CORE_LOG_Warn(message)				{ PFF::logger::log_message(PFF::logger::log_msg_severity::Warn,__FILE__,__FUNCTION__,__LINE__).flush() << message; }
 	#else
 		#define CORE_LOG_Warn(message)				{;}
 	#endif
 
 	#if CORE_LOG_LEVEL_ENABLED >= 2
-		#define CORE_LOG_Info(message)				{ PFF::Logger::LogMessage(PFF::Logger::LogMsgSeverity::Info,__FILE__,__FUNCTION__,__LINE__).flush() << message; }
+		#define CORE_LOG_Info(message)				{ PFF::logger::log_message(PFF::logger::log_msg_severity::Info,__FILE__,__FUNCTION__,__LINE__).flush() << message; }
 	#else
 		#define CORE_LOG_Info(message)				{;}
 	#endif
 
 	#if CORE_LOG_LEVEL_ENABLED >= 3
-		#define CORE_LOG_Debug(message)				{ PFF::Logger::LogMessage(PFF::Logger::LogMsgSeverity::Debug,__FILE__,__FUNCTION__,__LINE__).flush() << message; }
+		#define CORE_LOG_Debug(message)				{ PFF::logger::log_message(PFF::logger::log_msg_severity::Debug,__FILE__,__FUNCTION__,__LINE__).flush() << message; }
 	#else
 		#define CORE_LOG_Debug(message)				{;}
 	#endif
 
 	#if CORE_LOG_LEVEL_ENABLED >= 4
-		#define CORE_LOG_Trace(message)				{ PFF::Logger::LogMessage(PFF::Logger::LogMsgSeverity::Trace,__FILE__,__FUNCTION__,__LINE__).flush() << message; }
-		#define CORE_LOG_SEPERATOR					PFF::Logger::Set_Format("$C$Z");									\
-														CORE_LOG_Trace(PFF::Logger::SeperatorStringSmall)				\
-														PFF::Logger::Use_Format_Backup();
+		#define CORE_LOG_Trace(message)				{ PFF::logger::log_message(PFF::logger::log_msg_severity::Trace,__FILE__,__FUNCTION__,__LINE__).flush() << message; }
+		#define CORE_LOG_SEPERATOR					PFF::logger::set_format("$C$Z");									\
+														CORE_LOG_Trace(PFF::logger::SeperatorStringSmall)				\
+														PFF::logger::use_format_backup();
 
-		#define CORE_LOG_SEPERATOR_BIG				PFF::Logger::Set_Format("$C$Z");									\
-														CORE_LOG_Trace(PFF::Logger::SeperatorStringBig)				\
-														PFF::Logger::Use_Format_Backup();
+		#define CORE_LOG_SEPERATOR_BIG				PFF::logger::set_format("$C$Z");									\
+														CORE_LOG_Trace(PFF::logger::SeperatorStringBig)				\
+														PFF::logger::use_format_backup();
 	#else
 		#define CORE_LOG_Trace(message, ...)		{;}
 		#define CORE_LOG_SEPERATOR					{;}
@@ -198,31 +196,31 @@ namespace PFF {
 
 //  ===================================================================================  Client Logger  ===================================================================================
 
-#define LOG_Fatal(message)						{ PFF::Logger::LogMessage(PFF::Logger::LogMsgSeverity::Fatal,__FILE__,__FUNCTION__,__LINE__) << message; }
-#define LOG_Error(message)						{ PFF::Logger::LogMessage(PFF::Logger::LogMsgSeverity::Error,__FILE__,__FUNCTION__,__LINE__) << message; }
+#define LOG_Fatal(message)						{ PFF::logger::log_message(PFF::logger::log_msg_severity::Fatal,__FILE__,__FUNCTION__,__LINE__) << message; }
+#define LOG_Error(message)						{ PFF::logger::log_message(PFF::logger::log_msg_severity::Error,__FILE__,__FUNCTION__,__LINE__) << message; }
 
 #if LOG_LEVEL_ENABLED >= 1
-	#define LOG_Warn(message, ...)					{ PFF::Logger::LogMessage(PFF::Logger::LogMsgSeverity::Warn,__FILE__,__FUNCTION__,__LINE__) << message; }
+	#define LOG_Warn(message, ...)				{ PFF::logger::log_message(PFF::logger::log_msg_severity::Warn,__FILE__,__FUNCTION__,__LINE__) << message; }
 #else
-	#define LOG_Warn(message, ...)					{;}
+	#define LOG_Warn(message, ...)				{;}
 #endif
 
 #if LOG_LEVEL_ENABLED >= 2
-	#define LOG_Info(message, ...)					{ PFF::Logger::LogMessage(PFF::Logger::LogMsgSeverity::Info,__FILE__,__FUNCTION__,__LINE__) << message; }
+	#define LOG_Info(message, ...)				{ PFF::logger::log_message(PFF::logger::log_msg_severity::Info,__FILE__,__FUNCTION__,__LINE__) << message; }
 #else
-	#define LOG_Info(message, ...)					{;}
+	#define LOG_Info(message, ...)				{;}
 #endif
 
 #if LOG_LEVEL_ENABLED >= 3
-	#define LOG_Debug(message, ...)					{ PFF::Logger::LogMessage(PFF::Logger::LogMsgSeverity::Debug,__FILE__,__FUNCTION__,__LINE__) << message; }
+	#define LOG_Debug(message, ...)				{ PFF::logger::log_message(PFF::logger::log_msg_severity::Debug,__FILE__,__FUNCTION__,__LINE__) << message; }
 #else
-	#define LOG_Debug(message, ...)					{;}
+	#define LOG_Debug(message, ...)				{;}
 #endif
 
 #if LOG_LEVEL_ENABLED >= 4
-	#define LOG_Trace(message, ...)					{ PFF::Logger::LogMessage(PFF::Logger::LogMsgSeverity::Trace,__FILE__,__FUNCTION__,__LINE__) << message; }
+	#define LOG_Trace(message, ...)				{ PFF::logger::log_message(PFF::logger::log_msg_severity::Trace,__FILE__,__FUNCTION__,__LINE__) << message; }
 #else
-	#define LOG_Trace(message, ...)					{;}
+	#define LOG_Trace(message, ...)				{;}
 #endif
 
 #define LOG(severity, message)					LOG_##severity(message)
@@ -266,6 +264,6 @@ namespace PFF {
 	#define VALIDATE_S(expr, ReturnCommand)												if (!(expr)) { ReturnCommand; }
 #endif // ENABLE_LOGGING_OF_CLIENT_VALIDATION
 
-	#define LOG_INIT()							LOG(Trace, "init");
-	#define LOG_SHUTDOWN()						LOG(Trace, "shutdown");
 
+#define LOG_INIT()							LOG(Trace, "init");
+#define LOG_SHUTDOWN()						LOG(Trace, "shutdown");

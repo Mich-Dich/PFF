@@ -15,13 +15,13 @@
 ## Getting Started
  To get started with PFF, follow these simple steps:
  1. Clone the repository using:
- ```
- git clone --recursive https://github.com/Mich-Dich/PFF
- ```
+  ```
+git clone --recursive https://github.com/Mich-Dich/PFF 
+  ```
  2. Execute the following file to create a VS 2022 solution:
- ```
- AutoGenerateSolution.bat
- ```
+  ```
+AutoGenerateSolution.bat
+  ```
 For detailed instructions and setup guides, refer to the [Getting Started](link-to-getting-started-page) page.
 ## Dependencies
  PFF relies on the following dependencies:

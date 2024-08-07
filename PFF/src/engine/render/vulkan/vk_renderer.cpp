@@ -1272,7 +1272,7 @@ namespace PFF::render::vulkan {
 	// called once per frame
 	void vk_renderer::calc_frustum_planes(const glm::mat4& pro_view) {
 
-		PFF_SCOPED_BENCHMARK(700, "calc frustum planes ", PFF::duration_precision::microseconds);
+		//PFF_SCOPED_BENCHMARK(700, "calc frustum planes ", PFF::duration_precision::microseconds);
 
 		glm::mat4 m = glm::transpose(pro_view);
 		m_view_frustum[0] = glm::vec4(m[3][0] + m[0][0], m[3][1] + m[0][1], m[3][2] + m[0][2], m[3][3] + m[0][3]);  // left plane
@@ -1294,7 +1294,7 @@ namespace PFF::render::vulkan {
 	// called for every object (map-chunk/mesh/...)
 	bool vk_renderer::is_bounds_in_frustum(const PFF::geometry::bounds& bounds, const glm::mat4& transform) {
 
-		PFF_SCOPED_BENCHMARK(1000000, "frustum bounds check", PFF::duration_precision::microseconds);
+		//PFF_SCOPED_BENCHMARK(1000000, "frustum bounds check", PFF::duration_precision::microseconds);
 
 		glm::vec4 transformed_center = transform * glm::vec4(bounds.origin, 1.0f);
 		__m128 center = _mm_set_ps(1.0f, transformed_center.z, transformed_center.y, transformed_center.x);

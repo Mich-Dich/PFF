@@ -2,7 +2,6 @@
 
 #define ARRAY_SIZE(array)								(sizeof(array) / sizeof(array[0]))
 
-
 #include "core_config.h"
 
 #ifdef PFF_RENDER_API_VULKAN

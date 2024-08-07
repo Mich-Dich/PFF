@@ -1,7 +1,7 @@
 todo_list:
   m_topics:
   - name: Engine
-    selected: true
+    selected: false
     tasks:
     - title: add [stop_watch] as functionallity to utils
       description: [stop_watch] should suport the following functions:$- start/stop$- measure duration of a scope$- present result in diffrent formats (s/ms/ns/min)
@@ -35,4 +35,13 @@ todo_list:
       done: true
     - title: make Task editable
       description: 
+      done: false
+  - name: Editor
+    selected: true
+    tasks:
+    - title: Add markdown parser for imgui
+      description: 
+      done: true
+    - title: Add github Wiki to engine
+      description: makes updating of the wiki simpler
       done: false

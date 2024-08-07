@@ -61,8 +61,7 @@ namespace PFF {
 		mesh_comp.material = GET_RENDERER.get_default_material_pointer();		// get correct shader
 
 
-#define ADD_MESH_PROCESS 2
-
+#define ADD_MESH_PROCESS 3
 #if ADD_MESH_PROCESS == 0
 		
 		entity loc_entitiy = create_entity("Test entity for renderer");

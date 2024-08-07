@@ -6,6 +6,27 @@
 #include "application.h"
 
 
+static FORCEINLINE ImVec2  operator*(const ImVec2& lhs, const float rhs) { return ImVec2(lhs.x * rhs, lhs.y * rhs); }
+static FORCEINLINE ImVec2  operator/(const ImVec2& lhs, const float rhs) { return ImVec2(lhs.x / rhs, lhs.y / rhs); }
+static FORCEINLINE ImVec2  operator+(const ImVec2& lhs, const ImVec2& rhs) { return ImVec2(lhs.x + rhs.x, lhs.y + rhs.y); }
+static FORCEINLINE ImVec2  operator-(const ImVec2& lhs, const ImVec2& rhs) { return ImVec2(lhs.x - rhs.x, lhs.y - rhs.y); }
+static FORCEINLINE ImVec2  operator*(const ImVec2& lhs, const ImVec2& rhs) { return ImVec2(lhs.x * rhs.x, lhs.y * rhs.y); }
+static FORCEINLINE ImVec2  operator/(const ImVec2& lhs, const ImVec2& rhs) { return ImVec2(lhs.x / rhs.x, lhs.y / rhs.y); }
+static FORCEINLINE ImVec2  operator-(const ImVec2& lhs) { return ImVec2(-lhs.x, -lhs.y); }
+static FORCEINLINE ImVec2& operator*=(ImVec2& lhs, const float rhs) { lhs.x *= rhs; lhs.y *= rhs; return lhs; }
+static FORCEINLINE ImVec2& operator/=(ImVec2& lhs, const float rhs) { lhs.x /= rhs; lhs.y /= rhs; return lhs; }
+static FORCEINLINE ImVec2& operator+=(ImVec2& lhs, const ImVec2& rhs) { lhs.x += rhs.x; lhs.y += rhs.y; return lhs; }
+static FORCEINLINE ImVec2& operator-=(ImVec2& lhs, const ImVec2& rhs) { lhs.x -= rhs.x; lhs.y -= rhs.y; return lhs; }
+static FORCEINLINE ImVec2& operator*=(ImVec2& lhs, const ImVec2& rhs) { lhs.x *= rhs.x; lhs.y *= rhs.y; return lhs; }
+static FORCEINLINE ImVec2& operator/=(ImVec2& lhs, const ImVec2& rhs) { lhs.x /= rhs.x; lhs.y /= rhs.y; return lhs; }
+static FORCEINLINE bool    operator==(const ImVec2& lhs, const ImVec2& rhs) { return lhs.x == rhs.x && lhs.y == rhs.y; }
+static FORCEINLINE bool    operator!=(const ImVec2& lhs, const ImVec2& rhs) { return lhs.x != rhs.x || lhs.y != rhs.y; }
+static FORCEINLINE ImVec4  operator+(const ImVec4& lhs, const ImVec4& rhs) { return ImVec4(lhs.x + rhs.x, lhs.y + rhs.y, lhs.z + rhs.z, lhs.w + rhs.w); }
+static FORCEINLINE ImVec4  operator-(const ImVec4& lhs, const ImVec4& rhs) { return ImVec4(lhs.x - rhs.x, lhs.y - rhs.y, lhs.z - rhs.z, lhs.w - rhs.w); }
+static FORCEINLINE ImVec4  operator*(const ImVec4& lhs, const ImVec4& rhs) { return ImVec4(lhs.x * rhs.x, lhs.y * rhs.y, lhs.z * rhs.z, lhs.w * rhs.w); }
+static FORCEINLINE bool    operator==(const ImVec4& lhs, const ImVec4& rhs) { return lhs.x == rhs.x && lhs.y == rhs.y && lhs.z == rhs.z && lhs.w == rhs.w; }
+static FORCEINLINE bool    operator!=(const ImVec4& lhs, const ImVec4& rhs) { return lhs.x != rhs.x || lhs.y != rhs.y || lhs.z != rhs.z || lhs.w != rhs.w; }
+
 namespace PFF::UI {
 
 	enum class window_pos {
@@ -17,6 +38,7 @@ namespace PFF::UI {
 		bottom_left = 4,
 		bottom_right = 5,
 	};
+
 
 	PFF_API FORCEINLINE void set_next_window_pos(window_pos location, f32 padding = 10.f);
 
@@ -53,6 +75,11 @@ namespace PFF::UI {
 	// @param [shift_x] The horizontal shift offset.
 	// @param [shift_y] The vertical shift offset.
 	PFF_API FORCEINLINE void shift_cursor_pos(const f32 shift_x, const f32 shift_y);
+
+	// @brief Adjusts the current ImGui cursor position by adding the specified horizontal and vertical shift offsets.
+	// @param [shift_x] The horizontal shift offset.
+	// @param [shift_y] The vertical shift offset.
+	PFF_API FORCEINLINE void shift_cursor_pos(const ImVec2 shift);
 
 
 	PFF_API FORCEINLINE void progressbar_with_text(const char* label, const char* progress_bar_text, f32 percent, f32 label_size = 50.f, f32 progressbar_size_x = 50.f, f32 progressbar_size_y = 1.f);

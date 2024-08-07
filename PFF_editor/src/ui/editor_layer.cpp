@@ -113,6 +113,7 @@ namespace PFF {
 			.entry("show_editor_settings", m_show_editor_settings)
 			.entry("show_general_settings", m_show_general_settings)
 			.entry("show_style_editor", style_editor)
+			.entry("show_engine_wiki", PFF::UI::show_engine_wiki)
 			.entry("show_demo_window", demo_window);
 	}
 

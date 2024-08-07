@@ -138,25 +138,32 @@ namespace PFF::UI {
 		
 		serialize(serializer::option::load_from_file);
 
-		std::filesystem::path base_path = std::filesystem::path("..") / "PFF" / "assets" / "fonts" / "Open_Sans" / "static";
+		std::filesystem::path base_path = std::filesystem::path("..") / "PFF" / "assets" / "fonts";
+		std::filesystem::path OpenSans_path = base_path / "Open_Sans" / "static";
+		std::filesystem::path Inconsolata_path = base_path / "Inconsolata" / "static";
 
 		// Load fonts
 		auto io = ImGui::GetIO();
 		io.FontAllowUserScaling = true;
-		m_fonts["default"] =		io.Fonts->AddFontFromFileTTF((base_path / "OpenSans-Regular.ttf").string().c_str(), m_font_size);
-		m_fonts["bold"] =			io.Fonts->AddFontFromFileTTF((base_path / "OpenSans-Bold.ttf").string().c_str(), m_font_size);
-		m_fonts["italic"] =			io.Fonts->AddFontFromFileTTF((base_path / "OpenSans-Italic.ttf").string().c_str(), m_font_size);
+		m_fonts["regular"] =		io.Fonts->AddFontFromFileTTF((OpenSans_path/ "OpenSans-Regular.ttf").string().c_str(), m_font_size);
+		m_fonts["bold"] =			io.Fonts->AddFontFromFileTTF((OpenSans_path/ "OpenSans-Bold.ttf").string().c_str(), m_font_size);
+		m_fonts["italic"] =			io.Fonts->AddFontFromFileTTF((OpenSans_path/ "OpenSans-Italic.ttf").string().c_str(), m_font_size);
 
-		m_fonts["regular_big"] =	io.Fonts->AddFontFromFileTTF((base_path / "OpenSans-Regular.ttf").string().c_str(), m_big_font_size);
-		m_fonts["bold_big"] =		io.Fonts->AddFontFromFileTTF((base_path / "OpenSans-Bold.ttf").string().c_str(), m_big_font_size);
-		m_fonts["italic_big"] =		io.Fonts->AddFontFromFileTTF((base_path / "OpenSans-Italic.ttf").string().c_str(), m_big_font_size);
+		m_fonts["regular_big"] =	io.Fonts->AddFontFromFileTTF((OpenSans_path / "OpenSans-Regular.ttf").string().c_str(), m_big_font_size);
+		m_fonts["bold_big"] =		io.Fonts->AddFontFromFileTTF((OpenSans_path / "OpenSans-Bold.ttf").string().c_str(), m_big_font_size);
+		m_fonts["italic_big"] =		io.Fonts->AddFontFromFileTTF((OpenSans_path / "OpenSans-Italic.ttf").string().c_str(), m_big_font_size);
 
-		m_fonts["header_0"] =		io.Fonts->AddFontFromFileTTF((base_path / "OpenSans-Regular.ttf").string().c_str(), m_font_size_header_2);
-		m_fonts["header_1"] =		io.Fonts->AddFontFromFileTTF((base_path / "OpenSans-Regular.ttf").string().c_str(), m_font_size_header_1);
-		m_fonts["header_2"] =		io.Fonts->AddFontFromFileTTF((base_path / "OpenSans-Regular.ttf").string().c_str(), m_font_size_header_0);
+		m_fonts["header_0"] =		io.Fonts->AddFontFromFileTTF((OpenSans_path / "OpenSans-Regular.ttf").string().c_str(), m_font_size_header_2);
+		m_fonts["header_1"] =		io.Fonts->AddFontFromFileTTF((OpenSans_path / "OpenSans-Regular.ttf").string().c_str(), m_font_size_header_1);
+		m_fonts["header_2"] =		io.Fonts->AddFontFromFileTTF((OpenSans_path / "OpenSans-Regular.ttf").string().c_str(), m_font_size_header_0);
 
-		m_fonts["giant"] =			io.Fonts->AddFontFromFileTTF((base_path / "OpenSans-Bold.ttf").string().c_str(), 30.f);
-		io.FontDefault = m_fonts["default"];
+		m_fonts["giant"] =			io.Fonts->AddFontFromFileTTF((OpenSans_path / "OpenSans-Bold.ttf").string().c_str(), 30.f);
+
+		// C:\CustomGameEngine\PFF\PFF\assets\fonts\Inconsolata\static
+		//Inconsolata-Regular
+		m_fonts["monospace_regular"] = io.Fonts->AddFontFromFileTTF((Inconsolata_path / "Inconsolata-Regular.ttf").string().c_str(), m_font_size * 0.92f);
+
+		io.FontDefault = m_fonts["regular"];
 
 		GET_RENDERER.imgui_create_fonts();
 		load_UI_data();

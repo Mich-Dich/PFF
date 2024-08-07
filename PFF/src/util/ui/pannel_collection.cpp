@@ -93,6 +93,18 @@ namespace PFF::UI {
 	}
 
 
+	void shift_cursor_pos(const f32 shift_x, const f32 shift_y) {
+
+		auto current_pos = ImGui::GetCursorPos();
+		ImGui::SetCursorPos({ current_pos.x + shift_x, current_pos.y + shift_y });
+	}
+
+	void shift_cursor_pos(const ImVec2 shift) {
+
+		auto current_pos = ImGui::GetCursorPos();
+		ImGui::SetCursorPos({ current_pos.x + shift.x, current_pos.y + shift.y });
+	}
+
 	void progressbar_with_text(const char* lable, const char* progress_bar_text, f32 percent, f32 lable_size, f32 progressbar_size_x, f32 progressbar_size_y) {
 
 		//PFF_PROFILE_FUNCTION();
@@ -214,12 +226,6 @@ namespace PFF::UI {
 		}
 	}
 
-
-	void shift_cursor_pos(const f32 shift_x, const f32 shift_y) {
-
-		auto current_pos = ImGui::GetCursorPos();
-		ImGui::SetCursorPos({ current_pos.x + shift_x, current_pos.y + shift_y });
-	}
 
 
 	bool begin_table(std::string_view lable, bool display_name, ImVec2 size, f32 inner_width, bool set_columns_width, f32 columns_width_percentage) {

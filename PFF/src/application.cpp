@@ -42,7 +42,7 @@ namespace PFF {
 		PFF_PROFILE_BEGIN_SESSION("startup", "benchmarks", "PFF_benchmark_startup.json");
 		PFF_PROFILE_FUNCTION();
 
-		PFF::Logger::Init("[$B$T:$J$E] [$B$L$X $I - $P:$G$E] $C$Z");
+		PFF::logger::init("[$B$T:$J$E] [$B$L$X $I - $P:$G$E] $C$Z");
 		CORE_ASSERT(!s_instance, "", "Application already exists");
 
 		CORE_LOG_INIT();

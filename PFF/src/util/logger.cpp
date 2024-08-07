@@ -12,14 +12,14 @@
 #include "logger.h"
 
 
-namespace PFF::Logger {
+namespace PFF::logger {
     static int enable_ANSI_escape_codes();
 }
 
 #if defined PFF_PLATFORM_WINDOWS
 
     #include <Windows.h>
-    static int PFF::Logger::enable_ANSI_escape_codes() {
+    static int PFF::logger::enable_ANSI_escape_codes() {
 
         // Enable ANSI escape codes
         HANDLE hOut = GetStdHandle(STD_OUTPUT_HANDLE);
@@ -68,6 +68,7 @@ namespace PFF::Logger {
 
 #endif
 
+#define PROJECT_FOLDER                  "PFF"
 
 #define SHORTEN_FILE_PATH(text)         (strstr(text, PROJECT_FOLDER) ? strstr(text, PROJECT_FOLDER) + strlen(PROJECT_FOLDER) + 1 : text)
 #define SHORT_FILE(text)                (strrchr(text, '\\') ? strrchr(text, '\\') + 1 : text)
@@ -75,11 +76,11 @@ namespace PFF::Logger {
 
 
 
-namespace PFF::Logger {
+namespace PFF::logger {
 
     static const char* SeperatorStringBig = "====================================================================================================================";
     static const char* SeperatorStringSmall = "--------------------------------------------------------------------------------------------------------------------";
-    static const char* SeverityNames[LogMsgSeverity::NUM_SEVERITIES]{ "TRACE", "DEBUG", "INFO", "WARN", "ERROR", "FATAL" };
+    static const char* SeverityNames[log_msg_severity::NUM_SEVERITIES]{ "TRACE", "DEBUG", "INFO", "WARN", "ERROR", "FATAL" };
     static std::string LogFileName = "logFile.txt";
     static std::string LogCoreFileName = "logFileCORE.txt";
     static std::string LogMessageFormat = "[$B$T:$J$E] [$B$L$X - $A - $F:$G$E] $C$Z";
@@ -89,7 +90,7 @@ namespace PFF::Logger {
     static std::string ConsoleRESET = "\x1b[97m\x1b[40m";
     static int Buffer_Level;
     static int LegLevelToBuffer = 3;
-    static const char* ConsoleColorTable[LogMsgSeverity::NUM_SEVERITIES] = {
+    static const char* ConsoleColorTable[log_msg_severity::NUM_SEVERITIES] = {
         "\x1b[90m",           // Gray
         "\x1b[94m",           // Blue
         "\x1b[92m",           // Green
@@ -100,7 +101,7 @@ namespace PFF::Logger {
 
     // ================================================================= public functions =================================================================
 
-    bool Init(const std::string& format) {
+    bool init(const std::string& format) {
 
         enable_ANSI_escape_codes();
 
@@ -110,7 +111,7 @@ namespace PFF::Logger {
         LogCoreFileName = (file_dir + "/engine.log").c_str();
         LogFileName = (file_dir + "/" + PROJECT_NAME + ".log").c_str();
 
-        Set_Format(format);
+        set_format(format);
 
         std::ostringstream Init_Message;
         Init_Message.flush();
@@ -150,14 +151,14 @@ namespace PFF::Logger {
     }
 
     // change Format for all following messages
-    void Set_Format(const std::string& format) {
+    void set_format(const std::string& format) {
 
         LogMessageFormat_BACKUP = LogMessageFormat;
         LogMessageFormat = format;
     }
 
     // Use previous Format
-    void Use_Format_Backup() {
+    void use_format_backup() {
 
         std::string m_buffer = LogMessageFormat;
         LogMessageFormat = LogMessageFormat_BACKUP;
@@ -173,7 +174,7 @@ namespace PFF::Logger {
 
     }
 
-    void LogMsg(LogMsgSeverity level, const char* fileName, const char* funcName, int line, const char* message) {
+    void log_msg(log_msg_severity level, const char* fileName, const char* funcName, int line, const char* message) {
 
         if (strlen(message) == 0)
             return;
@@ -208,7 +209,7 @@ namespace PFF::Logger {
                 case 'L':   Format_Filled << SeverityNames[level]; break;
 
                     // Alignment
-                case 'X':   if (level == LogMsgSeverity::Info || level == LogMsgSeverity::Warn) { Format_Filled << " "; } break;
+                case 'X':   if (level == log_msg_severity::Info || level == log_msg_severity::Warn) { Format_Filled << " "; } break;
 
                     // Alignment
                 case 'Z':   Format_Filled << std::endl; break;
@@ -291,12 +292,12 @@ namespace PFF::Logger {
     }
 
 
-    LogMessage::LogMessage(LogMsgSeverity severity, const char* fileName, const char* funcName, int line) :
+    log_message::log_message(log_msg_severity severity, const char* fileName, const char* funcName, int line) :
         m_Severity(severity), m_FileName(fileName), m_FuncName(funcName), m_Line(line) {}
 
-    LogMessage::~LogMessage() {
+    log_message::~log_message() {
 
-        LogMsg(m_Severity, m_FileName, m_FuncName, m_Line, str().c_str());
+        log_msg(m_Severity, m_FileName, m_FuncName, m_Line, str().c_str());
     }
 
     

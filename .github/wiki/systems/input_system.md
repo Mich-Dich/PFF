@@ -1,45 +1,51 @@
-## Input System Overview
+# Input System
+ The input system in the PFF engine is designed to handle various user inputs through a structured and flexible approach. This system allows for the creation and management of input actions, which can be mapped to different keys or mouse events. The following sections will provide an in-depth look at the key components and their functionalities.
+ ## Input Action Definitions
+  In the `src/engine/io_handler/input_action.h` file, various constants and structures are defined to handle input actions.
+  ### Trigger and Modifier Flags
+   These flags define how and when input actions are triggered or modified. They are categorized into key triggers, mouse triggers, and modifiers.
 
-The input system in the PFF engine is designed to handle various user inputs through a structured and flexible approach. This system allows for the creation and management of input actions, which can be mapped to different keys or mouse events. The following sections will provide an in-depth look at the key components and their functionalities.
+   - **Key Trigger Flags**   sda 
+     - `INPUT_ACTION_TRIGGER_KEY_DOWN`: Activates input when a key is pressed down (this can repeat).
+     - `INPUT_ACTION_TRIGGER_KEY_UP`: Activates input when a key is released (this can repeat).
+     - `INPUT_ACTION_TRIGGER_KEY_HOLD`: Activates input when a key is held down longer than a specified duration.
+     - `INPUT_ACTION_TRIGGER_KEY_TAP`: Activates input when a key is pressed and released within a specified duration.
+     - `INPUT_ACTION_TRIGGER_KEY_MOVE_DOWN`: Activates input when starting to press a key.
+     - `INPUT_ACTION_TRIGGER_KEY_MOVE_UP`: Activates input when releasing a key.
+   
+   - **Mouse Trigger Flags**
+     - `INPUT_ACTION_TRIGGER_MOUSE_POSITIVE`: Activates input for positive mouse actions.
+     - `INPUT_ACTION_TRIGGER_MOUSE_NEGATIVE`: Activates input for negative mouse actions.
+     - `INPUT_ACTION_TRIGGER_MOUSE_POS_AND_NEG`: Activates input for both positive and negative mouse actions.
+   
+   - **Modifier Flags**
+     - `INPUT_ACTION_MODEFIER_NONE`: Never activate input.
+     - `INPUT_ACTION_MODEFIER_NEGATE`: Negate the input action.
+     - `INPUT_ACTION_MODEFIER_USE_VEC_NORMAL`: Use vector normalization.
+     - `INPUT_ACTION_MODEFIER_AXIS_1_NEGATIVE`: Use the negative value of the first axis.
+     - `INPUT_ACTION_MODEFIER_AXIS_2`: Use the second axis.
+     - `INPUT_ACTION_MODEFIER_AXIS_2_NEGATIVE`: Use the negative value of the second axis.
+     - `INPUT_ACTION_MODEFIER_AXIS_3`: Use the third axis.
+     - `INPUT_ACTION_MODEFIER_AXIS_3_NEGATIVE`: Use the negative value of the third axis.
+     - `INPUT_ACTION_MODEFIER_AUTO_RESET`: Automatically reset the input action.
+     - `INPUT_ACTION_MODEFIER_AUTO_RESET_ALL`: Automatically reset all input actions.
 
-### Input Action Definitions
+ ## Input Action Struct
+  The `input_action` struct is the core component of the input system. It defines an input action with various attributes such as description, trigger conditions, and data type.
+  
+  ```cpp
+f32 measured_time{};
+{
+    PFF::stopwatch loc_stopwatch(&measured_time, PFF::duration_precision::microseconds);
 
-In the `src/engine/io_handler/input_action.h` file, various constants and structures are defined to handle input actions.
+    // Perform operations to time
+}
 
-#### Trigger and Modifier Flags
-
-These flags define how and when input actions are triggered or modified. They are categorized into key triggers, mouse triggers, and modifiers.
-
-- **Key Trigger Flags**   sda 
-  - `INPUT_ACTION_TRIGGER_KEY_DOWN`: Activates input when a key is pressed down (this can repeat).
-  - `INPUT_ACTION_TRIGGER_KEY_UP`: Activates input when a key is released (this can repeat).
-  - `INPUT_ACTION_TRIGGER_KEY_HOLD`: Activates input when a key is held down longer than a specified duration.
-  - `INPUT_ACTION_TRIGGER_KEY_TAP`: Activates input when a key is pressed and released within a specified duration.
-  - `INPUT_ACTION_TRIGGER_KEY_MOVE_DOWN`: Activates input when starting to press a key.
-  - `INPUT_ACTION_TRIGGER_KEY_MOVE_UP`: Activates input when releasing a key.
-
-- **Mouse Trigger Flags**
-  - `INPUT_ACTION_TRIGGER_MOUSE_POSITIVE`: Activates input for positive mouse actions.
-  - `INPUT_ACTION_TRIGGER_MOUSE_NEGATIVE`: Activates input for negative mouse actions.
-  - `INPUT_ACTION_TRIGGER_MOUSE_POS_AND_NEG`: Activates input for both positive and negative mouse actions.
-
-- **Modifier Flags**
-  - `INPUT_ACTION_MODEFIER_NONE`: Never activate input.
-  - `INPUT_ACTION_MODEFIER_NEGATE`: Negate the input action.
-  - `INPUT_ACTION_MODEFIER_USE_VEC_NORMAL`: Use vector normalization.
-  - `INPUT_ACTION_MODEFIER_AXIS_1_NEGATIVE`: Use the negative value of the first axis.
-  - `INPUT_ACTION_MODEFIER_AXIS_2`: Use the second axis.
-  - `INPUT_ACTION_MODEFIER_AXIS_2_NEGATIVE`: Use the negative value of the second axis.
-  - `INPUT_ACTION_MODEFIER_AXIS_3`: Use the third axis.
-  - `INPUT_ACTION_MODEFIER_AXIS_3_NEGATIVE`: Use the negative value of the third axis.
-  - `INPUT_ACTION_MODEFIER_AUTO_RESET`: Automatically reset the input action.
-  - `INPUT_ACTION_MODEFIER_AUTO_RESET_ALL`: Automatically reset all input actions.
-
-### Input Action Struct
-
-The `input_action` struct is the core component of the input system. It defines an input action with various attributes such as description, trigger conditions, and data type.
-
-```cpp
+// [measured_time] now contains the elapsed time in microseconds
+  ```
+  
+  
+  ```cpp
 struct input_action {
     // Attributes
     std::string description;
@@ -51,24 +57,22 @@ struct input_action {
     std::vector<input::key_binding_details> keys_bindings;
 
     // Methods
-    input_action(bool triger_when_paused = false, u16 flags = 0, input::action_type value = input::action_type::boolean, f32 duration_in_sec = 0.0f, std::vector<input::key_binding_details> keys_bindings = {});
-    const size_t get_length() const;
-    input::key_binding_details* get_key(u32 index);
-    void set_name(std::string_view name);
-    std::string_view get_name() const;
+    const size_t                    get_length() const;
+    input::key_binding_details*     get_key(u32 index);
+    void                            set_name(std::string_view name);
+    std::string_view                get_name() const;
 
 private:
-    std::string m_name;
-    input_action_data target;
-    std::chrono::time_point<std::chrono::steady_clock> time_stamp;
+    std::string                                         m_name;
+    input_action_data                                   target;
+    std::chrono::time_point<std::chrono::steady_clock>  time_stamp;
 };
-```
+  ``` 
 
-### Key Binding Details
+ ## Key Binding Details
+  The `key_binding_details` struct defines the details of a key binding, including the key code, trigger flags, and modifier flags.
 
-The `key_binding_details` struct defines the details of a key binding, including the key code, trigger flags, and modifier flags.
-
-```cpp
+  ```cpp
 struct key_binding_details {
     key_code key;
     u16 trigger_flags;
@@ -78,47 +82,25 @@ struct key_binding_details {
     key_binding_details();
     key_binding_details(key_code key, u16 trigger_flags = 0, u16 modefier_flags = 0);
 };
-```
+  ```
 
-### Input Mapping
+ ## Input Mapping
+  The `input_mapping` class manages the registration and retrieval of input actions. It ensures that default values are retained unless explicitly changed by the player.
 
-The `input_mapping` class manages the registration and retrieval of input actions. It ensures that default values are retained unless explicitly changed by the player.
+  ### Registering Input Actions
+   Input actions are registered using the `REGISTER_INPUT_ACTION` macro, which sets the name of the action and calls the `register_action` method.
 
-#### Registering Input Actions
-
-Input actions are registered using the `REGISTER_INPUT_ACTION` macro, which sets the name of the action and calls the `register_action` method.
-
-```cpp
+   ```cpp
 #define REGISTER_INPUT_ACTION(action) action.set_name(#action); register_action(&action, FORCE_OVERRIDE);
-```
+   ```
 
-The `register_action` method loads or saves the input action settings from/to the `input.ini` file.
+   The `register_action` method loads or saves the input action settings from/to the `input.ini` file.
 
-```cpp
-void input_mapping::register_action(input_action* action, bool force_override) {
-    auto serializer_option = force_override ? serializer::option::save_to_file : serializer::option::load_from_file;
 
-    serializer::yaml(config::get_filepath_from_configtype(config::file::input), action->name, serializer_option)
-        .entry(KEY_VALUE(action->triger_when_paused))
-        .entry(KEY_VALUE(action->duration_in_sec))
-        .entry(KEY_VALUE(action->value))
-        .vector(KEY_VALUE(action->keys_bindings), [&](serializer::yaml& yaml, u64 x) {
-            std::string key_name = key_code_to_string(action->keys_bindings[x].key);
-            yaml.entry(KEY_VALUE(key_name));
-            action->keys_bindings[x].key = string_to_key_code(key_name);
-            yaml.entry(KEY_VALUE(action->keys_bindings[x].trigger_flags));
-            yaml.entry(KEY_VALUE(action->keys_bindings[x].modefier_flags));
-        });
+# Example: Editor Inputs
+ An example of how the input system is used can be found in the `PFF_editor/src/controller/editor_inputs.h` file. Here, various input actions are defined for the editor, such as moving the camera and toggling the FPS limiter.
 
-    m_actions.emplace_back(action);
-}
-```
-
-### Example: Editor Inputs
-
-An example of how the input system is used can be found in the `PFF_editor/src/controller/editor_inputs.h` file. Here, various input actions are defined for the editor, such as moving the camera and toggling the FPS limiter.
-
-```cpp
+ ```cpp
 class editor_inputs: public PFF::input_mapping {
 public:
     editor_inputs();
@@ -174,6 +156,5 @@ editor_inputs::editor_inputs() {
 
    // Additional input actions are defined similarly...
 }
-```
-
-This system allows for a flexible and customizable input handling mechanism, enabling developers to define and manage various input actions efficiently.
+ ```
+ 

@@ -24,22 +24,60 @@ namespace PFF::UI {
 	
 	void display_directory_tree(const std::filesystem::path& dir_path, int depth = 0) {
 
-		//static std::string selected_file;
-		for (const auto& entry : std::filesystem::directory_iterator(dir_path)) {
+        std::vector<std::filesystem::directory_entry> directories;
+        std::vector<std::filesystem::directory_entry> files;
+        std::filesystem::directory_entry home_file;
 
-			std::string indent(depth * 2, ' ');
-			if (entry.is_directory()) {
-				if (ImGui::TreeNode((indent + entry.path().filename().string()).c_str())) {
-					display_directory_tree(entry.path(), depth + 1);
-					ImGui::TreePop();
-				}
-			}
-			
-			else if (UI::gray_button((indent + entry.path().filename().string()).c_str()))
-				wiki_text = read_file_to_string(entry.path());
-			
-		}
+        // Collect directories and files
+        for (const auto& entry : std::filesystem::directory_iterator(dir_path)) {
+            if (entry.is_directory()) {
+                directories.push_back(entry);
+            } else {
+                if (entry.path().extension() == ".md") {
+                    if (entry.path().filename() == "home.md") {
+                        home_file = entry;  // Save the home file separately
+                    } else {
+                        files.push_back(entry);
+                    }
+                }
+            }
+        }
 
+        // Sort directories and files
+        std::sort(directories.begin(), directories.end(),
+            [](const std::filesystem::directory_entry& a, const std::filesystem::directory_entry& b) { return a.path().filename().string() < b.path().filename().string(); }
+        );
+        std::sort(files.begin(), files.end(),
+            [](const std::filesystem::directory_entry& a, const std::filesystem::directory_entry& b) { return a.path().filename().string() < b.path().filename().string(); }
+        );
+
+        std::string indent(depth * 2, ' ');
+
+        // Display home file first if it exists
+        if (!home_file.path().empty()) {
+            std::string filename = home_file.path().filename().replace_extension("").string();
+            std::replace(filename.begin(), filename.end(), '_', ' ');
+
+            if (UI::gray_button((indent + filename).c_str()))
+                wiki_text = read_file_to_string(home_file.path());
+        }
+
+        // Display sorted directories
+        for (const auto& dir_entry : directories) {
+            if (ImGui::TreeNode((indent + dir_entry.path().filename().string()).c_str())) {
+                display_directory_tree(dir_entry.path(), depth + 1);
+                ImGui::TreePop();
+            }
+        }
+
+        // Display sorted files
+        for (const auto& file_entry : files) {
+            std::string filename = file_entry.path().filename().replace_extension("").string();
+            std::replace(filename.begin(), filename.end(), '_', ' ');
+
+            if (UI::gray_button((indent + filename).c_str()))
+                wiki_text = read_file_to_string(file_entry.path());
+        }
 	}
 
 	void engine_wiki_window() {
