@@ -2,6 +2,7 @@
 
 #include "engine/layer/layer.h"
 #include "engine/io_handler/input_mapping.h"
+#include "editor_window.h"
 
 struct ImGuiContext;
 
@@ -26,6 +27,8 @@ namespace PFF {
 		void serialize(serializer::option option);
 		
 		std::vector<std::unique_ptr<editor_window>> m_editor_windows{};
+
+		void draw_main_world_window();		// can only have 1 open at a time
 
 		// ImGui windows
 		void window_main_title_bar();

@@ -226,6 +226,8 @@ namespace PFF::UI {
 			if (UI::begin_table("Performance Display", true, ImVec2(280, 0))) {
 
 				UI::table_row_text("mesh draws", "%d", metrik->mesh_draw);
+				UI::table_row_text("material binding count", "%d", metrik->material_binding_count);
+				UI::table_row_text("pipline binding count", "%d", metrik->pipline_binding_count);
 				UI::table_row_text("draw calls", "%d", metrik->draw_calls);
 				UI::table_row_text("triangles", "%d", metrik->triangles);
 				
@@ -248,17 +250,17 @@ namespace PFF::UI {
 			ImGui::PushStyleColor(ImGuiCol_FrameBg, vector_multi(ImGui::GetStyleColorVec4(ImGuiCol_WindowBg), ImVec4{ 0, 0, 0, 0 }));
 
 			ImGui::PushStyleColor(ImGuiCol_PlotLines, renderer_draw_plot_col);
-			ImGui::PlotLines("##metrik_renderer_draw_time", metrik->renderer_draw_time, 100, metrik->current_index, (const char*)0, 0.0f, plot_max_value, ImVec2(280, 100));
+			ImGui::PlotLines("##metrik_renderer_draw_time", metrik->renderer_draw_time, 200, metrik->current_index, (const char*)0, 0.0f, plot_max_value, ImVec2(280, 100));
 			ImGui::PopStyleColor();
 
 			ImGui::SetCursorPos(cursor_pos);
 			ImGui::PushStyleColor(ImGuiCol_PlotLines, draw_geometry_plot_col);
-			ImGui::PlotLines("##metrik_draw_geometry_time", metrik->draw_geometry_time, 100, metrik->current_index, (const char*)0, 0.0f, plot_max_value, ImVec2(280, 100));
+			ImGui::PlotLines("##metrik_draw_geometry_time", metrik->draw_geometry_time, 200, metrik->current_index, (const char*)0, 0.0f, plot_max_value, ImVec2(280, 100));
 			ImGui::PopStyleColor();
 
 			ImGui::SetCursorPos(cursor_pos);
 			ImGui::PushStyleColor(ImGuiCol_PlotLines, waiting_idle_plot_col);
-			ImGui::PlotLines("##metrik_draw_geometry_time", metrik->waiting_idle_time, 100, metrik->current_index, (const char*)0, 0.0f, plot_max_value, ImVec2(280, 100));
+			ImGui::PlotLines("##metrik_draw_geometry_time", metrik->waiting_idle_time, 200, metrik->current_index, (const char*)0, 0.0f, plot_max_value, ImVec2(280, 100));
 			ImGui::PopStyleColor();
 
 			ImGui::PopStyleColor();

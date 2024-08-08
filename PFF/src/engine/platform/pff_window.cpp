@@ -19,10 +19,7 @@ namespace PFF {
 
 	static bool s_GLFWinitialized = false;
 		
-	static void GLFW_error_callback(int errorCode, const char* description) {
-
-		CORE_LOG(Error, "[GLFW Error: " << errorCode << "]: " << description);
-	}
+	static FORCEINLINE void GLFW_error_callback(int errorCode, const char* description) { CORE_LOG(Error, "[GLFW Error: " << errorCode << "]: " << description); }
 	
 	// =============================================================================  serializer  =============================================================================
 

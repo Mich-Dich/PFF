@@ -49,6 +49,7 @@
     <ClInclude Include="src\util\util_editor.h">
       <Filter>util</Filter>
     </ClInclude>
+    <ClInclude Include="src\ui\editor_window.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="src\PFF_editor.cpp" />
@@ -65,5 +66,6 @@
     <ClCompile Include="src\util\pch_editor.cpp">
       <Filter>util</Filter>
     </ClCompile>
+    <ClCompile Include="src\ui\editor_window.cpp" />
   </ItemGroup>
 </Project>

@@ -40,20 +40,13 @@
 
 namespace PFF::render::vulkan {
 
-	vk_renderer vk_renderer::s_instance;
-
-	static std::vector<std::vector<std::function<void()>>> s_resource_free_queue;
-
-
-
-
-
 #if	PFF_DEBUG
 	#define COLLECT_PERFORMANCE_DATA
 #endif
 
+	vk_renderer vk_renderer::s_instance;
 
-
+	static std::vector<std::vector<std::function<void()>>> s_resource_free_queue;
 
 
 
@@ -1186,8 +1179,6 @@ namespace PFF::render::vulkan {
 
 		// allocate a new uniform buffer for the scene data
 		vk_buffer gpuSceneDataBuffer = create_buffer(sizeof(render::GPU_scene_data), VK_BUFFER_USAGE_UNIFORM_BUFFER_BIT, VMA_MEMORY_USAGE_CPU_TO_GPU);
-
-		//add it to the deletion queue of this frame so it gets deleted once its been used
 		get_current_frame().deletion_queue.push_func([=]() { destroy_buffer(gpuSceneDataBuffer); });
 
 		//write the buffer
@@ -1207,6 +1198,9 @@ namespace PFF::render::vulkan {
 		calc_frustum_planes(m_scene_data.proj_view);
 
 		vkCmdBeginRendering(cmd, &render_info);
+
+		material_instance* last_material = nullptr;
+		material_pipeline* last_pipeline = nullptr;
 
 		// loop over all maps in worlds
 		const auto& all_maps = application::get().get_world_layer()->get_maps();
@@ -1230,11 +1224,22 @@ namespace PFF::render::vulkan {
 				// TODO: add more culling for geometry that doesn't need to be drawns
 					// oclution culling
 
-				// TODO: only bind pipeline when its diffrent than previous pipeline
+				// only bind material and pipeline when needed
 				material_instance* loc_material = (mesh_comp.material != nullptr) ? mesh_comp.material : &m_default_material;
-				vkCmdBindPipeline(cmd, VK_PIPELINE_BIND_POINT_GRAPHICS, loc_material->pipeline->pipeline);
-				vkCmdBindDescriptorSets(cmd, VK_PIPELINE_BIND_POINT_GRAPHICS, loc_material->pipeline->layout, 0, 1, &globalDescriptor, 0, nullptr);
-				vkCmdBindDescriptorSets(cmd, VK_PIPELINE_BIND_POINT_GRAPHICS, loc_material->pipeline->layout, 1, 1, &loc_material->material_set, 0, nullptr);
+				if (last_material != loc_material) {
+					
+					last_material = loc_material;
+					material_pipeline* loc_pipeline = (mesh_comp.material->pipeline != nullptr) ? mesh_comp.material->pipeline : m_default_material.pipeline;
+					if (last_pipeline != loc_pipeline) {
+
+						last_pipeline = loc_pipeline;
+						vkCmdBindPipeline(cmd, VK_PIPELINE_BIND_POINT_GRAPHICS, loc_pipeline->pipeline);
+						vkCmdBindDescriptorSets(cmd, VK_PIPELINE_BIND_POINT_GRAPHICS, loc_pipeline->layout, 0, 1, &globalDescriptor, 0, nullptr);
+						m_renderer_metrik.pipline_binding_count++;
+					}
+					vkCmdBindDescriptorSets(cmd, VK_PIPELINE_BIND_POINT_GRAPHICS, loc_material->pipeline->layout, (u32)1, (u32)1, &loc_material->material_set, (u32)0, nullptr);
+					m_renderer_metrik.material_binding_count++;
+				}
 
 				GPU_draw_push_constants push_constants;
 				switch (mesh_comp.mobility) {
@@ -1244,7 +1249,7 @@ namespace PFF::render::vulkan {
 					default:					push_constants.world_matrix = (glm::mat4&)transform * mesh_comp.transform; break;
 				}
 				push_constants.vertex_buffer = mesh_comp.mesh_asset->mesh_buffers.vertex_buffer_address;
-				vkCmdPushConstants(cmd, mesh_comp.material->pipeline->layout, VK_SHADER_STAGE_VERTEX_BIT, 0, sizeof(GPU_draw_push_constants), &push_constants);
+				vkCmdPushConstants(cmd, mesh_comp.material->pipeline->layout, VK_SHADER_STAGE_VERTEX_BIT, (u32)0, sizeof(GPU_draw_push_constants), &push_constants);
 
 				vkCmdBindIndexBuffer(cmd, mesh_comp.mesh_asset->mesh_buffers.index_buffer.buffer, 0, VK_INDEX_TYPE_UINT32);
 				

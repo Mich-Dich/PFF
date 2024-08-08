@@ -5,30 +5,8 @@
 
 // main files
 #include "application.h"
+#include "ui/editor_window.h"
 
 // UI related files
 //#include "ui/panels/pannel_collection.h"
 //#include "engine/color_theme.h"
-
-
-namespace PFF {
-
-	class editor_window {
-	public:
-
-		editor_window() {};
-		virtual ~editor_window() {};
-		virtual void window() {};
-
-		FORCEINLINE bool should_close() const { return !show_window; }
-
-	protected:
-		void make_window_name(const char* base_name);
-		std::string window_name{};
-		bool show_window = true;
-
-	private:
-
-	};
-
-}

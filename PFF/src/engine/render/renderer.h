@@ -21,26 +21,6 @@ namespace PFF::render {
 	// DATA STRUCTURES
 	// ------------------------------------------------------------------------------------------------------------------------
 
-	struct renderer_metrik {
-		u32 mesh_draw = 0;
-		u32 draw_calls = 0;
-		u64 triangles = 0;
-		f32 sleep_time = 0.f,	work_time = 0.f;
-
-		u16 current_index = 0;
-		f32 renderer_draw_time[100] = {};
-		f32 draw_geometry_time[100] = {};
-		f32 waiting_idle_time[100] = {};
-
-		void reset() {
-
-			current_index = (current_index + 1) % 100;
-
-			draw_calls = mesh_draw = 0;
-			triangles = 0;
-			sleep_time = work_time = 0.f;
-		}
-	};
 
 	// ------------------------------------------------------------------------------------------------------------------------
 	// RENDERER FUNCTIONALLITY
@@ -50,6 +30,8 @@ namespace PFF::render {
 	public:
 		
 		virtual ~renderer() {};
+
+		struct renderer_metrik;
 
 		PFF_GETTER(int&, current_background_effect_index,				m_current_background_effect);
 		PFF_DEFAULT_GETTERS(renderer_metrik,							renderer_metrik)
@@ -89,9 +71,31 @@ namespace PFF::render {
 		bool										m_render_swapchain = false;	// FALSE: will display rendered image in a imgui window    TRUE: will display rendered image directly into GLFW_window
 		ref<camera>									m_active_camera{};
 
+		struct renderer_metrik {
+
+			u32 mesh_draw = 0, draw_calls = 0;
+			u64 triangles = 0;
+			f32 sleep_time = 0.f, work_time = 0.f;
+			u32 material_binding_count = 0, pipline_binding_count = 0;
+
+			f32 renderer_draw_time[200] = {};
+			f32 draw_geometry_time[200] = {};
+			f32 waiting_idle_time[200] = {};
+			u16 current_index = 0;
+
+			void reset() {
+
+				current_index = (current_index + 1) % 200;
+
+				material_binding_count = pipline_binding_count = draw_calls = mesh_draw = 0;
+				triangles = 0;
+				sleep_time = work_time = 0.f;
+			}
+		};
 		renderer_metrik								m_renderer_metrik{};
 
 	protected:
+
 		std::vector<compute_effect> 				m_background_effects{};
 		int											m_current_background_effect = 2;
 

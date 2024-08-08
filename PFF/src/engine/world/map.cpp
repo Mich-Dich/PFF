@@ -61,7 +61,7 @@ namespace PFF {
 		mesh_comp.material = GET_RENDERER.get_default_material_pointer();		// get correct shader
 
 
-#define ADD_MESH_PROCESS 3
+#define ADD_MESH_PROCESS 2
 #if ADD_MESH_PROCESS == 0
 		
 		entity loc_entitiy = create_entity("Test entity for renderer");
@@ -96,7 +96,11 @@ namespace PFF {
 #elif ADD_MESH_PROCESS == 2
 
 		const f32 field_size = 20.f;
+
+
 		util::random loc_random{};
+		loc_random.get_f32(0.f, 2 * glm::pi<f32>());
+
 
 		for (u32 x = 0; x < 2000; x++) {
 

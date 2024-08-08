@@ -70,32 +70,37 @@ namespace PFF {
 		window_main_title_bar();
 		window_main_content();
 
-		window_main_viewport();
-		window_general_debugger();
-		window_outliner();
-		window_details();
-		window_world_settings();
-		window_content_browser_0();
-		window_content_browser_1();
+		draw_main_world_window();
 
-		window_editor_settings();
-		window_general_settings();
-
-		PFF::toolkit::settings::window_graphics_engine();
-		PFF::toolkit::todo::window_todo_list();
-		PFF::UI::engine_wiki_window();
+		window_general_debugger();								// TODO: convert into editor window
+		window_world_settings();								// TODO: convert into editor window
+		window_editor_settings();								// TODO: convert into editor window
+		window_general_settings();								// TODO: convert into editor window
+		PFF::toolkit::settings::window_graphics_engine();		// TODO: convert into editor window
+		PFF::toolkit::todo::window_todo_list();					// TODO: convert into editor window
+		PFF::UI::engine_wiki_window();							// TODO: convert into editor window
 
 		// First pass to mark items for removal
 		for (const auto& editor_window : m_editor_windows)
 				editor_window->window();
 
+#ifdef EDITOR_DEBUG
 		if (style_editor)
 			ImGui::ShowStyleEditor();
 
 		if (demo_window)
 			ImGui::ShowDemoWindow();
+#endif
 	}
 
+	void editor_layer::draw_main_world_window() {
+
+		window_main_viewport();
+		window_content_browser_0();
+		window_content_browser_1();
+		window_outliner();
+		window_details();
+	}
 
 	void editor_layer::serialize(serializer::option option) {
 
@@ -687,6 +692,21 @@ namespace PFF {
 				ImGui::MenuItem("Demo Window", "", &demo_window);
 				ImGui::MenuItem("Engine Wiki", "", &PFF::UI::show_engine_wiki);
 
+				// IN DEV
+				ImGui::SeparatorText("Settings");
+				ImGui::MenuItem("world_settings", "", &m_show_world_settings);
+				ImGui::MenuItem("graphics_engine_settings", "", &m_show_graphics_engine_settings);
+				ImGui::MenuItem("editor_settings", "", &m_show_editor_settings);
+				ImGui::MenuItem("general_settings", "", &m_show_general_settings);
+
+				ImGui::Separator();		
+				ImGui::MenuItem("general_debugger", "", &m_show_general_debugger);
+				ImGui::MenuItem("options", "", &m_show_options);
+				ImGui::MenuItem("outliner", "", &m_show_outliner);
+				ImGui::MenuItem("details", "", &m_show_details);
+				ImGui::MenuItem("content_browser_0", "", &m_show_content_browser_0);
+				ImGui::MenuItem("content_browser_1", "", &m_show_content_browser_1);
+
 				ImGui::EndMenu();
 			}
 
@@ -734,4 +754,3 @@ namespace PFF {
 //		ImGuiWindowFlags_NoNav 							ImGuiWindowFlags_NoNavInputs | ImGuiWindowFlags_NoNavFocus,
 //		ImGuiWindowFlags_NoDecoration 					ImGuiWindowFlags_NoTitleBar | ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoScrollbar | ImGuiWindowFlags_NoCollapse,
 //		ImGuiWindowFlags_NoInputs 						ImGuiWindowFlags_NoMouseInputs | ImGuiWindowFlags_NoNavInputs | ImGuiWindowFlags_NoNavFocus,
-//	

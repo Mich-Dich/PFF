@@ -179,6 +179,7 @@ IF EXIST $(SolutionDir)\PFF_editor\assets\ (xcopy /Q /E /Y /I $(SolutionDir)\PFF
     <ClInclude Include="src\toolkit\texture_editor.h" />
     <ClInclude Include="src\toolkit\todo_list\todo_list.h" />
     <ClInclude Include="src\ui\editor_layer.h" />
+    <ClInclude Include="src\ui\editor_window.h" />
     <ClInclude Include="src\ui\engine_wiki.h" />
     <ClInclude Include="src\util\pch_editor.h" />
     <ClInclude Include="src\util\util_editor.h" />
@@ -189,6 +190,7 @@ IF EXIST $(SolutionDir)\PFF_editor\assets\ (xcopy /Q /E /Y /I $(SolutionDir)\PFF
     <ClCompile Include="src\entry.cpp" />
     <ClCompile Include="src\toolkit\texture_editor.cpp" />
     <ClCompile Include="src\ui\editor_layer.cpp" />
+    <ClCompile Include="src\ui\editor_window.cpp" />
     <ClCompile Include="src\util\pch_editor.cpp">
       <PrecompiledHeader>Create</PrecompiledHeader>
     </ClCompile>
