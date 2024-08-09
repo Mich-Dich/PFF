@@ -2,9 +2,10 @@
 #include "util/pffpch.h"
 
 #include "components.h"
-#include "engine/world/entity.h"
+#include "entity_script.h"
+#include "entity.h"
 
-// !!!!!!!!!!!!!!!! DEV-ONLY !!!!!!!!!!!!!!!!!!!!!!
+// !!!!!!!!!!!!!!!! DEV-ONLY !!!!!!!!!!!!!!!!!!!!!!		should beremoved after asset_manager is made
 #include "engine/render/vulkan/vk_renderer.h"
 
 
@@ -60,8 +61,16 @@ namespace PFF {
 		mesh_comp.mesh_asset = GET_RENDERER.get_test_mesh();					// get correct mesh
 		mesh_comp.material = GET_RENDERER.get_default_material_pointer();		// get correct shader
 
+		class test_script : public entity_script {
+		public:
+			void on_create() override { CORE_LOG(Debug, "Creating test_script instance") }
+			void on_destroy() override { }
+			void on_update(f32 delta_time) override { CORE_LOG(Info, "Time: " << delta_time); }
+		};
+		loc_entitiy.add_script_component<test_script>();
 
-#define ADD_MESH_PROCESS 2
+
+#define ADD_MESH_PROCESS 3
 #if ADD_MESH_PROCESS == 0
 		
 		entity loc_entitiy = create_entity("Test entity for renderer");
@@ -182,12 +191,56 @@ namespace PFF {
 
 	// =============================================================== runtime/simulation ===============================================================
 
-	void map::on_runtime_start() { }
+//#define RUNTIME_IMPLEMENTED
 
-	void map::on_runtime_stop() { }
+	void map::on_runtime_start() {
+	
+#ifdef RUNTIME_IMPLEMENTED
+		// inatnciate every script		TODO: optimize load time by only loading what is needed
+		m_registry.view<script_component>().each([=](auto entity, auto& script_comp) {
+
+			script_comp.instance = script_comp.create_script();
+			script_comp.instance->m_entity = PFF::entity{ entity, this };
+			script_comp.instance->on_create();
+		});
+#endif // RUNTIME_IMPLEMENTED
+	}
+
+	void map::on_runtime_stop() {
+
+#ifdef RUNTIME_IMPLEMENTED
+		// Destroy every script that is still running
+		m_registry.view<script_component>().each([=](auto entity, auto& script_comp) {
+			script_comp.destroy_script(script_comp);
+		});
+#endif // RUNTIME_IMPLEMENTED
+	}
 
 	void map::on_simulation_start() { }
 
 	void map::on_simulation_stop() { }
+
+	void map::on_update(const f32 delta_time) {
+
+#ifdef RUNTIME_IMPLEMENTED
+		m_registry.view<script_component>().each([=](auto entity, auto& script_comp) {
+			script_comp.instance->on_update(delta_time);
+		});
+#else
+		m_registry.view<script_component>().each([=](auto entity, auto& script_comp) {
+			
+			// ==================== DEV-ONLY (move to on_runtime_start()) ====================
+			if (!script_comp.instance) {
+
+				script_comp.instance = script_comp.create_script();
+				script_comp.instance->m_entity = PFF::entity{ entity, this };
+				script_comp.instance->on_create();
+			}
+
+			script_comp.instance->on_update(delta_time);
+
+		});
+#endif // RUNTIME_IMPLEMENTED
+	}
 
 }

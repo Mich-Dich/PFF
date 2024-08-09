@@ -76,6 +76,8 @@ namespace PFF {
 		void on_simulation_start();
 		void on_simulation_stop();
 
+		void on_update(const f32 delta_time);
+
 
 	private:
 

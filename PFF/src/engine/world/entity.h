@@ -1,15 +1,17 @@
+#pragma once
 
 #include "util/pffpch.h"
 
 #include <entt.hpp>
 
+//#include "entity_script.h"
+#include "util/UUID.h"
 #include "map.h"
 #include "components.h"
-#include "util/UUID.h"
 
 namespace PFF {
 
-	class entity {
+	class PFF_API entity {
 	public:
 
 		PFF_DEFAULT_CONSTRUCTORS(entity);
@@ -17,35 +19,31 @@ namespace PFF {
 			: m_entity_handle(handle), m_map(map) { }
 
 		template<typename T, typename... Args>
-		T& add_component(Args&&... args) {
+		FORCEINLINE T& add_component(Args&&... args) {
 
 			CORE_ASSERT(!has_component<T>(), "", "Entity already has component!");
-			T& component = m_map->m_registry.emplace<T>(m_entity_handle, std::forward<Args>(args)...);
-			//m_map->on_component_added<T>(*this, component);
-			return component;
+			return  m_map->m_registry.emplace<T>(m_entity_handle, std::forward<Args>(args)...);
 		}
 
 		template<typename T, typename... Args>
-		T& add_or_replace_component(Args&&... args) {
-			
-			T& component = m_map->m_registry.emplace_or_replace<T>(m_entity_handle, std::forward<Args>(args)...);
-			//m_map->on_component_added<T>(*this, component);
-			return component;
-		}
+		FORCEINLINE T& add_or_replace_component(Args&&... args) { return  m_map->m_registry.emplace_or_replace<T>(m_entity_handle, std::forward<Args>(args)...); }
 
 		template<typename T>
-		T& get_component() {
+		FORCEINLINE T& get_component() {
 
 			CORE_ASSERT(has_component<T>(), "", "Entity does not have component!");
 			return m_map->m_registry.get<T>(m_entity_handle);
 		}
 
 		template<typename T>
-		void remove_component() {
+		FORCEINLINE void remove_component() {
 
 			CORE_ASSERT(has_component<T>(), "", "Entity does not have component!");
 			m_map->m_registry.remove<T>(m_entity_handle);
 		}
+
+		template<typename T>
+		FORCEINLINE void add_script_component() { add_component<script_component>().bind<T>(); }
 
 		template<typename T>
 		bool has_component() { return m_map->m_registry.view<T>().contains(m_entity_handle); }

@@ -217,6 +217,7 @@
       <Filter>util</Filter>
     </ClInclude>
     <ClInclude Include="src\util\benchmarking\stopwatch.h" />
+    <ClInclude Include="src\engine\world\entity_script.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="src\application.cpp" />

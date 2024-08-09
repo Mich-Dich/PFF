@@ -50,12 +50,9 @@ namespace PFF {
 		PFF_PROFILE_FUNCTION();
 
 		m_player_controller->update_internal(delta_time);
-		
-		//for (auto& obj : m_current_map->get_all_game_objects()) {
-		//
-		//	obj.second.transform.rotation += glm::mod(obj.second.rotation_speed * delta_time, two_pi<f32>());
-		//	obj.second.transform.translation += obj.second.movement_speed * delta_time;
-		//}
+	
+		for (const auto& map : m_maps)
+			map->on_update(delta_time);
 		
 	}
 

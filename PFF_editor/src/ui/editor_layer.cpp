@@ -70,10 +70,11 @@ namespace PFF {
 		window_main_title_bar();
 		window_main_content();
 
+
+		//ImGui::DockSpaceOverViewport(ImGui::GetMainViewport());
+
 		draw_main_world_window();
 
-		window_general_debugger();								// TODO: convert into editor window
-		window_world_settings();								// TODO: convert into editor window
 		window_editor_settings();								// TODO: convert into editor window
 		window_general_settings();								// TODO: convert into editor window
 		PFF::toolkit::settings::window_graphics_engine();		// TODO: convert into editor window
@@ -94,12 +95,33 @@ namespace PFF {
 	}
 
 	void editor_layer::draw_main_world_window() {
+		
+		ImGuiWindowFlags window_flags = 0//ImGuiWindowFlags_NoResize
+			| ImGuiWindowFlags_NoScrollbar
+			| ImGuiWindowFlags_NoScrollWithMouse
+			| ImGuiWindowFlags_NoCollapse ;
 
-		window_main_viewport();
-		window_content_browser_0();
-		window_content_browser_1();
-		window_outliner();
-		window_details();
+		ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, ImVec2(0, 0));
+		ImGui::PushStyleVar(ImGuiStyleVar_WindowBorderSize, 0);
+		bool is_window_begin = ImGui::Begin("World##PFF_main_world_window", nullptr, window_flags);
+		ImGui::PopStyleVar(2);
+
+		if (is_window_begin) {
+
+			ImGuiID dockspace_id = ImGui::GetID("EditorDockspace");
+			ImGui::DockSpace(dockspace_id, ImVec2(0.0f, 0.0f), ImGuiDockNodeFlags_PassthruCentralNode);
+
+			window_general_debugger();								// TODO: convert into editor window
+			window_world_settings();								// TODO: convert into editor window
+			window_main_viewport();
+			window_content_browser_0();
+			window_content_browser_1();
+			window_outliner();
+			window_details();
+
+		}
+		ImGui::End();
+
 	}
 
 	void editor_layer::serialize(serializer::option option) {

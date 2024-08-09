@@ -7,7 +7,6 @@
 #include "engine/geometry/mesh.h"
 
 #include <glm/gtc/matrix_transform.hpp>
-
 #define GLM_ENABLE_EXPERIMENTAL
 #include <glm/gtx/quaternion.hpp>
 
@@ -113,23 +112,61 @@ namespace PFF {
 		material_instance*					material = nullptr;					// TODO: currently uses one material for all surfaces in mesh_asset, change so it can use diffrent materials
 	};
 
-	// ==================== IN-DEV ====================
-	struct static_mesh_comp {
+	// ============================================================ IN-DEV ============================================================
+
+	struct static_mesh_component {
+
+		PFF_DEFAULT_CONSTRUCTORS(static_mesh_component);
 
 		glm::mat4							transform = glm::mat4(1);
 		ref<PFF::geometry::mesh_asset>		mesh_asset;
 		material_instance*					material = nullptr;					// TODO: currently uses one material for all surfaces in mesh_asset, change so it can use diffrent materials
 	};
-	// ==================== IN-DEV ====================
 
+	class entity_script;
 
+	// @brief This component should not be used directly, but through the API of entity
+	// @brief		example: 
+	// @brief		class test_script : public entity_script {
+	// @brief		public:
+	// @brief			void on_create() { LOG(Info, "Creating instance") }
+	// @brief			void on_destroy() {}
+	// @brief			void on_update(f32 delta_time) { LOG(Trace, "time: " << delta_time); }
+	// @brief		};
+	// @brief		entitiy.add_script_component<test_script>();
+	struct script_component {
+	private:
+
+		template<typename T>
+		void bind() {
+
+			create_script = []() { return static_cast<entity_script*>(new T()); };
+			destroy_script = [](script_component* script_comp) { delete script_comp->instance; script_comp->instance = nullptr; };
+		}
+
+		entity_script*	instance = nullptr;
+		entity_script*	(*create_script)();
+		void			(*destroy_script)(script_component*);
+
+		friend class map;
+		friend class entity;
+
+		// I chose to use inheritence (virtual functions) because the marginal cost of v-tables is much less than of a heavy component
+		// the version with virtual function had a size of around [328 bytes] now its [24 bytes]
+	};
+
+	// => EnTT hates empty structs!
+	//struct procedural_mesh_component {
+	//};
+
+	// ============================================================ IN-DEV ============================================================
 
 	template<typename... component>
 	struct component_group { };
 
 	using all_components =
 		component_group<
-			transform_component, ID_component, tag_component, mesh_component
+			transform_component, ID_component, tag_component, mesh_component, static_mesh_component, script_component //, procedural_mesh_component
 		>;
 
 }

@@ -162,6 +162,7 @@ namespace PFF::UI {
 		// C:\CustomGameEngine\PFF\PFF\assets\fonts\Inconsolata\static
 		//Inconsolata-Regular
 		m_fonts["monospace_regular"] = io.Fonts->AddFontFromFileTTF((Inconsolata_path / "Inconsolata-Regular.ttf").string().c_str(), m_font_size * 0.92f);
+		m_fonts["monospace_regular_big"] = io.Fonts->AddFontFromFileTTF((Inconsolata_path / "Inconsolata-Regular.ttf").string().c_str(), m_big_font_size * 1.92f);
 
 		io.FontDefault = m_fonts["regular"];
 
@@ -204,6 +205,7 @@ namespace PFF::UI {
 			return;
 
 		static const u32 const_array_size = sizeof(f32) * 100;
+		static bool show_graphs = true;
 
 		static UI::window_pos location = UI::window_pos::top_left;
 		ImGuiWindowFlags window_flags = (
@@ -234,79 +236,89 @@ namespace PFF::UI {
 				UI::end_table();
 			}
 
-			UI::shift_cursor_pos(0, 10);
+			if (show_graphs) {
 
-			static const auto renderer_draw_plot_col = ImVec4(0.f, 0.61f, 0.f, 1.00f);
-			static const auto draw_geometry_plot_col = ImVec4(0.f, 0.9f, 1.f, 1.00f);
-			static const auto waiting_idle_plot_col = ImVec4(0.9f, 0.f, 1.f, 1.00f);
+				UI::shift_cursor_pos(0, 10);
 
-			// calc the maximum value but ensuring its atleast 1.f
-			const f32 plot_max_value = math::max(1.f,	math::max(math::calc_array_max(metrik->renderer_draw_time, 100), math::max(
-														math::calc_array_max(metrik->draw_geometry_time, 100),
-														math::calc_array_max(metrik->waiting_idle_time, 100))));
+				static const auto renderer_draw_plot_col = ImVec4(0.f, 0.61f, 0.f, 1.00f);
+				static const auto draw_geometry_plot_col = ImVec4(0.f, 0.9f, 1.f, 1.00f);
+				static const auto waiting_idle_plot_col = ImVec4(0.9f, 0.f, 1.f, 1.00f);
 
-			ImVec2 cursor_pos = ImGui::GetCursorPos();
-			ImGui::PushStyleVar(ImGuiStyleVar_FramePadding, ImVec2(0, 0));
-			ImGui::PushStyleColor(ImGuiCol_FrameBg, vector_multi(ImGui::GetStyleColorVec4(ImGuiCol_WindowBg), ImVec4{ 0, 0, 0, 0 }));
+				// calc the maximum value but ensuring its atleast 1.f
+				const f32 plot_max_value = math::max(1.f,	math::max(math::calc_array_max(metrik->renderer_draw_time, 100), math::max(
+															math::calc_array_max(metrik->draw_geometry_time, 100),
+															math::calc_array_max(metrik->waiting_idle_time, 100))));
 
-			ImGui::PushStyleColor(ImGuiCol_PlotLines, renderer_draw_plot_col);
-			ImGui::PlotLines("##metrik_renderer_draw_time", metrik->renderer_draw_time, 200, metrik->current_index, (const char*)0, 0.0f, plot_max_value, ImVec2(280, 100));
-			ImGui::PopStyleColor();
+				ImVec2 cursor_pos = ImGui::GetCursorPos();
+				ImGui::PushStyleVar(ImGuiStyleVar_FramePadding, ImVec2(0, 0));
+				ImGui::PushStyleColor(ImGuiCol_FrameBg, vector_multi(ImGui::GetStyleColorVec4(ImGuiCol_WindowBg), ImVec4{ 0, 0, 0, 0 }));
 
-			ImGui::SetCursorPos(cursor_pos);
-			ImGui::PushStyleColor(ImGuiCol_PlotLines, draw_geometry_plot_col);
-			ImGui::PlotLines("##metrik_draw_geometry_time", metrik->draw_geometry_time, 200, metrik->current_index, (const char*)0, 0.0f, plot_max_value, ImVec2(280, 100));
-			ImGui::PopStyleColor();
+				ImGui::PushStyleColor(ImGuiCol_PlotLines, renderer_draw_plot_col);
+				ImGui::PlotLines("##metrik_renderer_draw_time", metrik->renderer_draw_time, 200, metrik->current_index, (const char*)0, 0.0f, plot_max_value, ImVec2(280, 100));
+				ImGui::PopStyleColor();
 
-			ImGui::SetCursorPos(cursor_pos);
-			ImGui::PushStyleColor(ImGuiCol_PlotLines, waiting_idle_plot_col);
-			ImGui::PlotLines("##metrik_draw_geometry_time", metrik->waiting_idle_time, 200, metrik->current_index, (const char*)0, 0.0f, plot_max_value, ImVec2(280, 100));
-			ImGui::PopStyleColor();
+				ImGui::SetCursorPos(cursor_pos);
+				ImGui::PushStyleColor(ImGuiCol_PlotLines, draw_geometry_plot_col);
+				ImGui::PlotLines("##metrik_draw_geometry_time", metrik->draw_geometry_time, 200, metrik->current_index, (const char*)0, 0.0f, plot_max_value, ImVec2(280, 100));
+				ImGui::PopStyleColor();
 
-			ImGui::PopStyleColor();
-			ImGui::PopStyleVar();
+				ImGui::SetCursorPos(cursor_pos);
+				ImGui::PushStyleColor(ImGuiCol_PlotLines, waiting_idle_plot_col);
+				ImGui::PlotLines("##metrik_draw_geometry_time", metrik->waiting_idle_time, 200, metrik->current_index, (const char*)0, 0.0f, plot_max_value, ImVec2(280, 100));
+				ImGui::PopStyleColor();
 
-			ImVec2 plot_pos = ImGui::GetItemRectMin();
-			ImVec2 plot_size = ImGui::GetItemRectSize();
+				ImGui::PopStyleColor();
+				ImGui::PopStyleVar();
 
-			cursor_pos = ImGui::GetCursorPos();
-			static const u32 offset = static_cast<u32>(ImGui::GetTextLineHeight() / 2);
+				ImVec2 plot_pos = ImGui::GetItemRectMin();
+				ImVec2 plot_size = ImGui::GetItemRectSize();
 
-#if 1
-			// Plot Lines
-			static const char* fps_text = " 0 ms 1 ms 2 ms 3 ms 4 ms 5 ms 6 ms 7 ms 8 ms 9 ms10 ms11 ms12 ms13 ms14 ms15 ms16 ms17 ms18 ms19 ms20 ms21 ms22 ms23 ms24 ms25 ms26 ms27 ms28 ms29 ms30 ms31 ms32 ms33 ms34 ms35 ms36 ms37 ms38 ms39 ms40 ms41 ms42 ms43 ms44 ms45 ms46 ms47 ms48 ms49 ms50 ms51 ms52 ms53 ms54 ms55 ms56 ms57 ms58 ms59 ms60 ms61 ms62 ms63 ms64 ms65 ms66 ms67 ms68 ms69 ms70 ms71 ms72 ms73 ms74 ms75 ms76 ms77 ms78 ms79 ms80 ms81 ms82 ms83 ms84 ms85 ms86 ms87 ms88 ms89 ms90 ms91 ms92 ms93 ms94 ms95 ms96 ms97 ms98 ms99 ms";
-			ImDrawList* draw_list = ImGui::GetWindowDrawList();
-			ImVec2 plot_max_pos = { plot_pos.x + plot_size.x , plot_pos.y + plot_size.y };
-			static const u32 interval = (plot_max_value > 100) ? 10 : 1;
-			static const u32 text_size = 5;
-			static const u64 text_begin_offset = (plot_max_value > 100) ? text_size * 10 : 0;
+				cursor_pos = ImGui::GetCursorPos();
+				static const u32 offset = static_cast<u32>(ImGui::GetTextLineHeight() / 2);
 
-			u32 num_of_displayed_texts = 0;
-			u32 buffer = static_cast<u32>(plot_max_value / 8);
-			for (u32 x = 0; x < plot_max_value - 1; x += interval) {
+	#if 1
+				// Plot Lines
+				static const char* const fps_text = " 0 ms 1 ms 2 ms 3 ms 4 ms 5 ms 6 ms 7 ms 8 ms 9 ms10 ms11 ms12 ms13 ms14 ms15 ms16 ms17 ms18 ms19 ms20 ms21 ms22 ms23 ms24 ms25 ms26 ms27 ms28 ms29 ms30 ms31 ms32 ms33 ms34 ms35 ms36 ms37 ms38 ms39 ms40 ms41 ms42 ms43 ms44 ms45 ms46 ms47 ms48 ms49 ms50 ms51 ms52 ms53 ms54 ms55 ms56 ms57 ms58 ms59 ms60 ms61 ms62 ms63 ms64 ms65 ms66 ms67 ms68 ms69 ms70 ms71 ms72 ms73 ms74 ms75 ms76 ms77 ms78 ms79 ms80 ms81 ms82 ms83 ms84 ms85 ms86 ms87 ms88 ms89 ms90 ms91 ms92 ms93 ms94 ms95 ms96 ms97 ms98 ms99 ms";
+				ImDrawList* draw_list = ImGui::GetWindowDrawList();
+				ImVec2 plot_max_pos = { plot_pos.x + plot_size.x , plot_pos.y + plot_size.y };
+				static const u32 interval = (plot_max_value > 100) ? 10 : 1;
+				static const u32 text_size = 5;
+				static const u64 text_begin_offset = (plot_max_value > 100) ? text_size * 10 : 0;
 
-				if (x > (buffer) * num_of_displayed_texts) {
+				u32 num_of_displayed_texts = 0;
+				u32 buffer = static_cast<u32>(plot_max_value / 8);
+				for (u32 x = 0; x < plot_max_value - 1; x += interval) {
 
-					const char* text = fps_text + (math::min<u64>(98, x + text_begin_offset) * text_size);
-					float y = plot_max_pos.y - (x / plot_max_value * plot_size.y);
-					ImU32 color = (x % 5 == 0) ? IM_COL32(action_color_00_active.x * 255, action_color_00_active.y * 255, action_color_00_active.z * 255, 255) : IM_COL32(200, 200, 200, 180);
+					if (x > (buffer) * num_of_displayed_texts) {
 
-					f32 y_pos = plot_max_pos.y - (x / plot_max_value * plot_size.y);
-					draw_list->AddLine(ImVec2(plot_pos.x, y), ImVec2(plot_max_pos.x - 55, y), color);
-					draw_list->AddText(ImVec2(plot_max_pos.x - 50, y - offset), IM_COL32(200, 200, 200, 180), text, text + text_size);
-					draw_list->AddLine(ImVec2(plot_max_pos.x - 15, y), ImVec2(plot_max_pos.x, y), color);
-					num_of_displayed_texts++;
+						const char* text = fps_text + (math::min<u64>(98, x + text_begin_offset) * text_size);
+						float y = plot_max_pos.y - (x / plot_max_value * plot_size.y);
+						ImU32 color = (x % 5 == 0) ? IM_COL32(action_color_00_active.x * 255, action_color_00_active.y * 255, action_color_00_active.z * 255, 255) : IM_COL32(200, 200, 200, 180);
+
+						f32 y_pos = plot_max_pos.y - (x / plot_max_value * plot_size.y);
+						draw_list->AddLine(ImVec2(plot_pos.x, y), ImVec2(plot_max_pos.x - 55, y), color);
+						draw_list->AddText(ImVec2(plot_max_pos.x - 50, y - offset), IM_COL32(200, 200, 200, 180), text, text + text_size);
+						draw_list->AddLine(ImVec2(plot_max_pos.x - 15, y), ImVec2(plot_max_pos.x, y), color);
+						num_of_displayed_texts++;
+					}
 				}
+	#endif
+
+				ImGui::TextColored(renderer_draw_plot_col, "- render total %5.2f ms", metrik->renderer_draw_time[metrik->current_index]);
+				ImGui::SameLine();
+				ImGui::TextColored(draw_geometry_plot_col, " - drawing geometry %5.2f ms", metrik->draw_geometry_time[metrik->current_index]);
+
+				ImGui::TextColored(waiting_idle_plot_col, " - waiting for GPU %5.2f ms", metrik->waiting_idle_time[metrik->current_index]);
 			}
-#endif
 
-			ImGui::TextColored(renderer_draw_plot_col, "- render total %5.2f ms", metrik->renderer_draw_time[metrik->current_index]);
-			ImGui::SameLine();
-			ImGui::TextColored(draw_geometry_plot_col, " - drawing geometry %5.2f ms", metrik->draw_geometry_time[metrik->current_index]);
+			if (ImGui::BeginPopupContextWindow()) {
 
-			ImGui::TextColored(waiting_idle_plot_col, " - waiting for GPU %5.2f ms", metrik->waiting_idle_time[metrik->current_index]);
+				ImGui::Checkbox("show timing graphs", &show_graphs);
 
-			UI::next_window_position_selector_popup(location, m_show_renderer_metrik);
+				UI::next_window_position_selector(location, m_show_renderer_metrik);
+
+				ImGui::EndPopup();
+			}
 		}
 		ImGui::End();
 #endif
@@ -325,6 +337,9 @@ namespace PFF::UI {
 		static const u32 array_size = 100;
 		static f32 frame_times[array_size] = {};
 		static u32 array_pointer = 0;
+
+		static bool show_progress_bars = true;
+		static bool show_graph = true;
 		
 		const f32 averagefps = math::calc_array_average(frame_times, array_size);
 
@@ -369,11 +384,13 @@ namespace PFF::UI {
 
 				UI::table_row_text("FPS", formatted_text);
 
-				snprintf(formatted_text, sizeof(formatted_text), "%5.2f ms", m_work_time);
-				UI::table_row_progressbar("work time:", formatted_text, work_percent);
+				if (show_progress_bars) {
+					snprintf(formatted_text, sizeof(formatted_text), "%5.2f ms", m_work_time);
+					UI::table_row_progressbar("work time:", formatted_text, work_percent);
 
-				snprintf(formatted_text, sizeof(formatted_text), "%5.2f ms", m_sleep_time);
-				UI::table_row_progressbar("sleep time:", formatted_text, sleep_percent);
+					snprintf(formatted_text, sizeof(formatted_text), "%5.2f ms", m_sleep_time);
+					UI::table_row_progressbar("sleep time:", formatted_text, sleep_percent);
+				}
 
 
 				UI::end_table();
@@ -381,58 +398,43 @@ namespace PFF::UI {
 			
 			UI::shift_cursor_pos(0, 10);
 
-			ImGui::PushStyleVar(ImGuiStyleVar_FramePadding, ImVec2(0, 0));
-			ImGui::PushStyleColor(ImGuiCol_FrameBg, vector_multi(ImGui::GetStyleColorVec4(ImGuiCol_WindowBg), ImVec4{ 1, 1, 1, 0 }));
-			ImGui::PlotLines("##frame_times", frame_times, array_size, (array_pointer % array_size), (const char*)0, 0.0f, FLT_MAX, ImVec2(0, 70));
-			ImGui::PopStyleColor();
-			ImGui::PopStyleVar();
+			if (show_graph) {
 
-			// Plot Lines
-			ImDrawList* draw_list = ImGui::GetWindowDrawList();
-			ImVec2 plot_size = ImGui::GetItemRectSize();
-			ImVec2 plot_pos = ImGui::GetItemRectMin();
-			ImVec2 plot_max_pos = { plot_pos.x + plot_size.x , plot_pos.y + plot_size.y };
-			static const char* fps_text = "  0 10 20 30 40 50 60 70 80 90100110120130140150160170180190200210220230240250260270280290300310320330340350360370380390400410420430450460470480490500510520530540550560570580590600610620630640650660670680690700710720730740750760770780790800810820830840850860870890900910920930940950960970980990";
-			static const u32 offset = static_cast<u32>(ImGui::GetTextLineHeight() / 2);
-			static const u32 interval_thin = 10;
-			static const u64 interval_thick = 50;
+				ImGui::PushStyleVar(ImGuiStyleVar_FramePadding, ImVec2(0, 0));
+				ImGui::PushStyleColor(ImGuiCol_FrameBg, vector_multi(ImGui::GetStyleColorVec4(ImGuiCol_WindowBg), ImVec4{ 1, 1, 1, 0 }));
+				ImGui::PlotLines("##frame_times", frame_times, array_size, (array_pointer % array_size), (const char*)0, 0.0f, FLT_MAX, ImVec2(0, 70));
+				ImGui::PopStyleColor();
+				ImGui::PopStyleVar();
+
+				// Plot Lines
+				ImDrawList* draw_list = ImGui::GetWindowDrawList();
+				ImVec2 plot_size = ImGui::GetItemRectSize();
+				ImVec2 plot_pos = ImGui::GetItemRectMin();
+				ImVec2 plot_max_pos = { plot_pos.x + plot_size.x , plot_pos.y + plot_size.y };
+				static const char* const fps_text = "  0 10 20 30 40 50 60 70 80 90100110120130140150160170180190200210220230240250260270280290300310320330340350360370380390400410420430450460470480490500510520530540550560570580590600610620630640650660670680690700710720730740750760770780790800810820830840850860870890900910920930940950960970980990";
+				static const u32 offset = static_cast<u32>(ImGui::GetTextLineHeight() / 2);
+				static const u32 interval_thin = 10;
+				static const u64 interval_thick = 50;
 
 
-			const f32 max_value = math::calc_array_max(frame_times, 100);
+				const f32 max_value = math::calc_array_max(frame_times, 100);
 
-			u32 num_of_displayed_texts = 0;
-			u32 buffer = static_cast<u32>(max_value / 10);
+				u32 num_of_displayed_texts = 0;
+				u32 buffer = static_cast<u32>(max_value / 10);
 
-			// FREE SECTION FOR TEXT
-			//		begin:	55 from right
-			//		end:	20 from right
+				for (u64 i = 0; i <= max_value; i += interval_thin) {
 
-#if 0
-			static const u32 NUM_OF_VERTICAL_LINES = 10;
-			for (u32 x = 0; x < NUM_OF_VERTICAL_LINES; x++) {
+					if (i > (buffer) * num_of_displayed_texts) {
 
-				ImU32 color = (x == NUM_OF_VERTICAL_LINES-1) ? IM_COL32(action_color_00_active.x * 255, action_color_00_active.y * 255, action_color_00_active.z * 255, 255) : IM_COL32(200, 200, 200, 180);
-				
-				f32 multi = (f32) ((array_pointer + (x * NUM_OF_VERTICAL_LINES)) % array_size) / array_size;
-				f32 line_x_position = plot_max_pos.x - (plot_size.x * multi);
+						const char* text = fps_text + (math::min<u64>(98, i / static_cast<u64>(interval_thin)) * 3);
+						float y = plot_max_pos.y - (i / max_value * plot_size.y);
+						ImU32 color = (i % interval_thick == 0) ? IM_COL32(action_color_00_active.x * 255, action_color_00_active.y * 255, action_color_00_active.z * 255, 255) : IM_COL32(200, 200, 200, 180);
 
-				if(line_x_position <= plot_max_pos.x - 50 || line_x_position >= plot_max_pos.x - 20)
-					draw_list->AddLine(ImVec2(line_x_position, plot_pos.y - 5), ImVec2(line_x_position, plot_max_pos.y), color);
-			}
-#endif
-
-			for (u64 i = 0; i <= max_value; i += interval_thin) {
-
-				if (i > (buffer) * num_of_displayed_texts) {
-
-					const char* text = fps_text + (math::min<u64>(98, i / static_cast<u64>(interval_thin)) * 3);
-					float y = plot_max_pos.y - (i / max_value * plot_size.y);
-					ImU32 color = (i % interval_thick == 0) ? IM_COL32(action_color_00_active.x * 255, action_color_00_active.y * 255, action_color_00_active.z * 255, 255) : IM_COL32(200, 200, 200, 180);
-
-					draw_list->AddLine(ImVec2(plot_pos.x, y), ImVec2(plot_max_pos.x - 55, y), color);
-					draw_list->AddText(ImVec2(plot_max_pos.x - 50, y - offset), IM_COL32(200, 200, 200, 180), text, text + 3);
-					draw_list->AddLine(ImVec2(plot_max_pos.x - 20, y), ImVec2(plot_max_pos.x, y), color);
-					num_of_displayed_texts++;
+						draw_list->AddLine(ImVec2(plot_pos.x, y), ImVec2(plot_max_pos.x - 55, y), color);
+						draw_list->AddText(ImVec2(plot_max_pos.x - 50, y - offset), IM_COL32(200, 200, 200, 180), text, text + 3);
+						draw_list->AddLine(ImVec2(plot_max_pos.x - 20, y), ImVec2(plot_max_pos.x, y), color);
+						num_of_displayed_texts++;
+					}
 				}
 			}
 
@@ -450,6 +452,9 @@ namespace PFF::UI {
 
 					UI::end_table();
 				}
+
+				ImGui::Checkbox("show progress bars", &show_progress_bars);
+				ImGui::Checkbox("show FPS graph", &show_graph);
 
 				UI::next_window_position_selector(location, m_show_FPS_window);
 
