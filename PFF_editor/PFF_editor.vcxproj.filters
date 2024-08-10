@@ -4,6 +4,12 @@
     <Filter Include="controller">
       <UniqueIdentifier>{09C867BF-F57F-A90C-5E87-82684A5E44FD}</UniqueIdentifier>
     </Filter>
+    <Filter Include="resource_management">
+      <UniqueIdentifier>{89094B2A-F56A-2838-7ED8-6EEAEA385FF7}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="resource_management\factories">
+      <UniqueIdentifier>{5874F3EC-C48C-DA16-8D39-6AB0F9106FB0}</UniqueIdentifier>
+    </Filter>
     <Filter Include="toolkit">
       <UniqueIdentifier>{AB7025F0-1750-A48B-2068-2F628CC60AED}</UniqueIdentifier>
     </Filter>
@@ -28,6 +34,9 @@
     <ClInclude Include="src\controller\editor_inputs.h">
       <Filter>controller</Filter>
     </ClInclude>
+    <ClInclude Include="src\resource_management\factories\static_mesh_factory.h">
+      <Filter>resource_management\factories</Filter>
+    </ClInclude>
     <ClInclude Include="src\toolkit\settings\graphics_engine_settings.h">
       <Filter>toolkit\settings</Filter>
     </ClInclude>
@@ -40,6 +49,9 @@
     <ClInclude Include="src\ui\editor_layer.h">
       <Filter>ui</Filter>
     </ClInclude>
+    <ClInclude Include="src\ui\editor_window.h">
+      <Filter>ui</Filter>
+    </ClInclude>
     <ClInclude Include="src\ui\engine_wiki.h">
       <Filter>ui</Filter>
     </ClInclude>
@@ -49,7 +61,8 @@
     <ClInclude Include="src\util\util_editor.h">
       <Filter>util</Filter>
     </ClInclude>
-    <ClInclude Include="src\ui\editor_window.h" />
+    <ClInclude Include="src\ui\content_browser.h" />
+    <ClInclude Include="src\ui\mesh_import_window.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="src\PFF_editor.cpp" />
@@ -57,15 +70,22 @@
       <Filter>controller</Filter>
     </ClCompile>
     <ClCompile Include="src\entry.cpp" />
+    <ClCompile Include="src\resource_management\factories\static_mesh_factory.cpp">
+      <Filter>resource_management\factories</Filter>
+    </ClCompile>
     <ClCompile Include="src\toolkit\texture_editor.cpp">
       <Filter>toolkit</Filter>
     </ClCompile>
     <ClCompile Include="src\ui\editor_layer.cpp">
       <Filter>ui</Filter>
     </ClCompile>
+    <ClCompile Include="src\ui\editor_window.cpp">
+      <Filter>ui</Filter>
+    </ClCompile>
     <ClCompile Include="src\util\pch_editor.cpp">
       <Filter>util</Filter>
     </ClCompile>
-    <ClCompile Include="src\ui\editor_window.cpp" />
+    <ClCompile Include="src\ui\content_browser.cpp" />
+    <ClCompile Include="src\ui\mesh_import_window.cpp" />
   </ItemGroup>
 </Project>

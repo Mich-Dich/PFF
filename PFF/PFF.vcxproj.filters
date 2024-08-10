@@ -31,14 +31,20 @@
     <Filter Include="engine\render\vulkan\vendor">
       <UniqueIdentifier>{A74BFF18-1359-2DFF-9C3F-29EA084CF9B5}</UniqueIdentifier>
     </Filter>
+    <Filter Include="engine\resource_management">
+      <UniqueIdentifier>{EEA768EB-DAB7-14BC-4371-79DA2FA00355}</UniqueIdentifier>
+    </Filter>
     <Filter Include="engine\world">
       <UniqueIdentifier>{125715B7-FEB9-A45B-A73F-DD11938170DE}</UniqueIdentifier>
     </Filter>
+    <Filter Include="procedural">
+      <UniqueIdentifier>{7630F501-62E8-364F-CBEF-0FABB7C6D13F}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="project">
+      <UniqueIdentifier>{7CC43AC3-E8A3-B95E-F1BB-44355D1A20C0}</UniqueIdentifier>
+    </Filter>
     <Filter Include="util">
       <UniqueIdentifier>{43339F7C-2F6A-A00D-D856-8610C46C1C0F}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="util\benchmarking">
-      <UniqueIdentifier>{FB59FD75-6770-FB0B-B0E7-862D1C3DCC93}</UniqueIdentifier>
     </Filter>
     <Filter Include="util\io">
       <UniqueIdentifier>{4AE65B48-B6C5-DAE3-BFDD-65BA2B3C4145}</UniqueIdentifier>
@@ -48,6 +54,9 @@
     </Filter>
     <Filter Include="util\platform">
       <UniqueIdentifier>{1767156D-8327-91A3-4C62-DA20B8E1D57F}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="util\profiling">
+      <UniqueIdentifier>{9CDF88AE-88AD-7CB4-7141-EDDA5DAE5819}</UniqueIdentifier>
     </Filter>
     <Filter Include="util\ui">
       <UniqueIdentifier>{D0E75B48-3CC7-DAE3-45DF-65BAB13D4145}</UniqueIdentifier>
@@ -82,9 +91,6 @@
     </ClInclude>
     <ClInclude Include="src\engine\geometry\mesh.h">
       <Filter>engine\geometry</Filter>
-    </ClInclude>
-    <ClInclude Include="src\engine\io_handler\file_loader.h">
-      <Filter>engine\io_handler</Filter>
     </ClInclude>
     <ClInclude Include="src\engine\io_handler\input_action.h">
       <Filter>engine\io_handler</Filter>
@@ -152,21 +158,30 @@
     <ClInclude Include="src\engine\render\vulkan\vk_types.h">
       <Filter>engine\render\vulkan</Filter>
     </ClInclude>
+    <ClInclude Include="src\engine\resource_management\static_mesh_asset_manager.h">
+      <Filter>engine\resource_management</Filter>
+    </ClInclude>
     <ClInclude Include="src\engine\world\components.h">
       <Filter>engine\world</Filter>
     </ClInclude>
     <ClInclude Include="src\engine\world\entity.h">
       <Filter>engine\world</Filter>
     </ClInclude>
+    <ClInclude Include="src\engine\world\entity_script.h">
+      <Filter>engine\world</Filter>
+    </ClInclude>
     <ClInclude Include="src\engine\world\map.h">
       <Filter>engine\world</Filter>
     </ClInclude>
     <ClInclude Include="src\entry_point.h" />
+    <ClInclude Include="src\procedural\procedural_mesh_script.h">
+      <Filter>procedural</Filter>
+    </ClInclude>
+    <ClInclude Include="src\project\project_data_struct.h">
+      <Filter>project</Filter>
+    </ClInclude>
     <ClInclude Include="src\util\UUID.h">
       <Filter>util</Filter>
-    </ClInclude>
-    <ClInclude Include="src\util\benchmarking\instrumentor.h">
-      <Filter>util\benchmarking</Filter>
     </ClInclude>
     <ClInclude Include="src\util\core_config.h">
       <Filter>util</Filter>
@@ -207,6 +222,12 @@
     <ClInclude Include="src\util\platform\windows_util.h">
       <Filter>util\platform</Filter>
     </ClInclude>
+    <ClInclude Include="src\util\profiling\instrumentor.h">
+      <Filter>util\profiling</Filter>
+    </ClInclude>
+    <ClInclude Include="src\util\profiling\stopwatch.h">
+      <Filter>util\profiling</Filter>
+    </ClInclude>
     <ClInclude Include="src\util\ui\imgui_markdown.h">
       <Filter>util\ui</Filter>
     </ClInclude>
@@ -216,8 +237,6 @@
     <ClInclude Include="src\util\util.h">
       <Filter>util</Filter>
     </ClInclude>
-    <ClInclude Include="src\util\benchmarking\stopwatch.h" />
-    <ClInclude Include="src\engine\world\entity_script.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="src\application.cpp" />
@@ -235,9 +254,6 @@
     </ClCompile>
     <ClCompile Include="src\engine\geometry\mesh.cpp">
       <Filter>engine\geometry</Filter>
-    </ClCompile>
-    <ClCompile Include="src\engine\io_handler\file_loader.cpp">
-      <Filter>engine\io_handler</Filter>
     </ClCompile>
     <ClCompile Include="src\engine\io_handler\input_mapping.cpp">
       <Filter>engine\io_handler</Filter>
@@ -284,6 +300,9 @@
     <ClCompile Include="src\engine\render\vulkan\vk_renderer.cpp">
       <Filter>engine\render\vulkan</Filter>
     </ClCompile>
+    <ClCompile Include="src\engine\resource_management\static_mesh_asset_manager.cpp">
+      <Filter>engine\resource_management</Filter>
+    </ClCompile>
     <ClCompile Include="src\engine\world\map.cpp">
       <Filter>engine\world</Filter>
     </ClCompile>
@@ -308,6 +327,9 @@
     <ClCompile Include="src\util\pffpch.cpp">
       <Filter>util</Filter>
     </ClCompile>
+    <ClCompile Include="src\util\profiling\stopwatch.cpp">
+      <Filter>util\profiling</Filter>
+    </ClCompile>
     <ClCompile Include="src\util\ui\imgui_markdown.cpp">
       <Filter>util\ui</Filter>
     </ClCompile>
@@ -317,6 +339,5 @@
     <ClCompile Include="src\util\util.cpp">
       <Filter>util</Filter>
     </ClCompile>
-    <ClCompile Include="src\util\benchmarking\stopwatch.cpp" />
   </ItemGroup>
 </Project>

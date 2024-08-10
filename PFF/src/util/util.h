@@ -124,7 +124,9 @@ namespace PFF {
         PFF_API void high_precision_sleep(f32 duration_in_milliseconds);
 
 
-        system_time get_system_time();
+        PFF_API std::filesystem::path file_dialog();
+
+        PFF_API system_time get_system_time();
 
         //@brief Checks the validity of a pointer.
         //@param [ptr] Pointer to check.

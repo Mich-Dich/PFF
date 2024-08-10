@@ -1,13 +1,16 @@
 todo_list:
   m_topics:
   - name: Engine
-    selected: false
+    selected: true
     tasks:
     - title: add [stop_watch] as functionallity to utils
       description: [stop_watch] should suport the following functions:$- start/stop$- measure duration of a scope$- present result in diffrent formats (s/ms/ns/min)
       done: false
     - title: Implement Binary Serializer with the Same API as YAML Serializer
       description: ### Develop a binary serializer that mirrors the API and functionality of the existing YAML serializer.$$- **API Design and Compatibility**:$  - Design the binary serializer to use the same function signatures, options, and chaining method as the YAML serializer (`PFF::serializer::yaml`).$  - Ensure that the binary serializer supports the same operations, including handling of primitive data types, structs, and vectors.$$- **Binary Serialization Implementation**:$  - Implement the main class for the binary serializer in the `PFF::serializer` namespace, named `binary`.$  - Develop the `entry` method for serializing and deserializing individual data fields.$  - Implement the `vector` method to handle the serialization of vectors, ensuring compatibility with custom structs.$  $- **File Handling**:$  - Implement efficient file I/O operations for binary data.$$- **Testing and Validation**:$  - Write unit tests to validate that the binary serializer correctly handles various data types and complex structures, including nested vectors and structs.$  - Compare the serialized data to ensure consistency in functionality between the YAML and binary serializers.$  $- **Performance Optimization**:$  - Optimize the binary serializer for speed and memory usage, ensuring that it outperforms the YAML serializer in scenarios where a binary format is preferable.$  $- **Documentation**:$  - Document the binary serializer API, providing clear examples that mirror those in the YAML serializer documentation.$  - Update the GitHub Wiki with a new section for binary serialization, explaining its usage, function signatures, and any differences in behavior compared to the YAML serializer.$
+      done: false
+    - title: Make serializer capable of creating subsections $
+      description: For example: serializing a struct$
       done: false
   - name: Renderer
     selected: false
@@ -37,7 +40,7 @@ todo_list:
       description: 
       done: false
   - name: Editor
-    selected: true
+    selected: false
     tasks:
     - title: Add markdown parser for imgui
       description: 

@@ -27,12 +27,8 @@ namespace PFF {
 
 	application* application::s_instance = nullptr;
 
-//#if defined PFF_RENDER_API_VULKAN
-//	ref<PFF::render::vulkan::vk_renderer> application::vk_renderer;
-//#endif
-
-	ref<pff_window> application::m_window;
 	//world_layer* application::m_world_layer;
+	ref<pff_window> application::m_window;
 	bool application::m_is_titlebar_hovered;
 	bool application::m_running;
 
@@ -50,6 +46,8 @@ namespace PFF {
 
 		// ---------------------------------------- general subsystems ----------------------------------------
 		config::init();
+
+		// LOAD PROJECT_DATA
 
 		serialize(serializer::option::load_from_file);
 		set_fps_settings(m_target_fps);

@@ -38,13 +38,17 @@ project "PFF_editor"
 		"%{IncludeDir.glm}",
 		"%{IncludeDir.ImGui}",
 		"%{IncludeDir.ImGui}/backends/",
-		
+		"%{IncludeDir.fastgltf}",
+		"%{IncludeDir.tinyobjloader}",
+		"%{IncludeDir.stb_image}",
+
 		"C:/VulkanSDK/1.3.250.1/Include",
 	}
 
 	links
 	{
 		"ImGui",
+		"fastgltf",
 		"PFF",
 	}
 	

@@ -67,12 +67,6 @@ namespace PFF::render::vulkan {
 		PFF_DEFAULT_GETTER_POINTER(image,			draw_image)
 		PFF_DEFAULT_GETTER_POINTER(image,			depth_image)
 
-		// ==========================================================================================================
-		// !!!!!!!!!!!!!!!! DEV-ONLY !!!!!!!!!!!!!!!!!!!!!!
-			ref<PFF::geometry::mesh_asset>	get_test_mesh() const { return T_test_meshes[0]; }
-			PFF_DEFAULT_GETTERS_C(material_instance, default_material);
-		// ==========================================================================================================
-
 		void setup(ref<pff_window> window, ref<PFF::layer_stack> layer_stack);
 		void shutdown();
 
@@ -212,9 +206,6 @@ namespace PFF::render::vulkan {
 		// ---------------------------- mesh pipeline ---------------------------- 
 		VkPipelineLayout							m_mesh_pipeline_layout{};
 		VkPipeline									m_mesh_pipeline{};
-
-		//vk_GPU_mesh_buffers		T_rectangle;
-		std::vector<ref<PFF::geometry::mesh_asset>>	T_test_meshes;
 
 		// ---------------------------- GPU side global scene data ---------------------------- 
 		render::GPU_scene_data						m_scene_data;

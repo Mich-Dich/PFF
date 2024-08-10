@@ -3,18 +3,26 @@
 #include "engine/layer/layer.h"
 #include "engine/io_handler/input_mapping.h"
 #include "editor_window.h"
+#include "content_browser.h"
 
 struct ImGuiContext;
 
 namespace PFF {
 	
-	class renderer; 
+	class renderer;
+	//class content_browser;
 
 	class editor_layer : public layer {
 	public:
 
 		editor_layer(ImGuiContext* context);
 		~editor_layer();
+
+		template<typename window_type, typename... Args>
+		void add_window(Args&&... args) {
+			static_assert(std::is_base_of<editor_window, window_type>::value, "[window_type] must derive from editor_window");
+			m_editor_windows.emplace_back(create_scoped_ref<window_type>(std::forward<Args>(args)...));
+		}
 
 		void on_attach() override;
 		void on_detach() override;
@@ -26,7 +34,7 @@ namespace PFF {
 
 		void serialize(serializer::option option);
 		
-		std::vector<std::unique_ptr<editor_window>> m_editor_windows{};
+		std::vector<scope_ref<editor_window>> m_editor_windows{};
 
 		void draw_main_world_window();		// can only have 1 open at a time
 
@@ -39,8 +47,6 @@ namespace PFF {
 		void window_outliner();
 		void window_details();
 		void window_world_settings();
-		void window_content_browser_0();
-		void window_content_browser_1();
 		
 		void window_main_content();
 
@@ -67,6 +73,8 @@ namespace PFF {
 
 		bool style_editor = false;
 		bool demo_window = true;
+
+		content_browser m_content_browser{};
 
 		std::vector<VkPresentModeKHR> m_swapchain_supported_presentmodes;
 		std::vector<const char*> m_swapchain_supported_presentmodes_str;

@@ -298,7 +298,28 @@ namespace PFF::UI {
 			ImGui::EndTable();
 		}
 	}
+	
+	void custom_frame_NEW(const f32 width_left_side, const bool can_resize, const ImU32 color_left_side, std::function<void()> left_side, std::function<void()> right_side) {
 
+		static ImGuiChildFlags child_flags = ImGuiChildFlags_Border | ImGuiChildFlags_AlwaysUseWindowPadding;
+		auto content_region = ImGui::GetContentRegionAvail();
+
+		ImGui::PushStyleColor(ImGuiCol_ChildBg, color_left_side);
+		ImGui::BeginChild("Red", ImVec2(width_left_side, content_region.y), can_resize ? child_flags | ImGuiChildFlags_ResizeX : child_flags, ImGuiWindowFlags_None);
+		ImGui::PopStyleColor();
+
+		left_side();
+
+		ImGui::EndChild();
+		ImGui::SameLine();
+		content_region = ImGui::GetContentRegionAvail();
+		ImGui::BeginChild("Green", content_region, child_flags, ImGuiWindowFlags_None);
+
+		right_side();
+
+		ImGui::EndChild();
+
+	}
 
 	bool table_row_slider(std::string_view label, int& value, int min_value, int max_value, ImGuiInputTextFlags flags) {
 

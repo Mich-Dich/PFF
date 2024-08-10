@@ -25,6 +25,8 @@ project "PFF"
 		"src/**.h",
 		"src/**.cpp",
 		"src/**.embeded",
+		"**..pffproj",
+		"**..pff",
 	}
 
 	includedirs
@@ -36,8 +38,6 @@ project "PFF"
 		"%{IncludeDir.glfw}/include",
 		"%{IncludeDir.ImGui}",
 		"%{IncludeDir.ImGui}/backends/",
-		"%{IncludeDir.fastgltf}",
-		"%{IncludeDir.tinyobjloader}",
 		"%{IncludeDir.stb_image}",
 		"%{IncludeDir.entt}",
 		"%{IncludeDir.VulkanSDK}",
@@ -47,7 +47,6 @@ project "PFF"
 	{
 		"glfw",
 		"imgui",
-		"fastgltf",
         "%{Library.Vulkan}",
 	}
 

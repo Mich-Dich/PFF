@@ -22,8 +22,6 @@ namespace PFF::geometry {
         glm::vec3   extents{};          // AABB
     };
     
-
-
     struct Geo_surface {
 
         u32         startIndex;
@@ -51,13 +49,13 @@ namespace PFF::geometry {
     struct mesh_asset {
 
         mesh_asset(std::vector<u32> indices = {}, std::vector<vertex> vertices = {})
-			: m_indices(indices), m_vertices(vertices) {};
+			: indices(indices), vertices(vertices) {};
 
 		std::string							name{};
+        PFF::render::GPU_mesh_buffers	    mesh_buffers{};     // GPU side buffers
 		std::vector<Geo_surface>			surfaces{};
-        PFF::render::GPU_mesh_buffers	    mesh_buffers{};
-		std::vector<u32>					m_indices{};
-		std::vector<vertex>					m_vertices{};
+		std::vector<u32>					indices{};
+		std::vector<vertex>					vertices{};
         bounds                              bounds;
 
 	};

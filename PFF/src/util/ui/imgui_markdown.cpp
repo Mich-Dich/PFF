@@ -5,7 +5,7 @@
 #include <stdint.h>
 
 #include "application.h"
-#include "util/benchmarking/stopwatch.h"
+#include "util/profiling/stopwatch.h"
 #include "pannel_collection.h"
 
 #include "imgui_markdown.h"
@@ -279,7 +279,7 @@ namespace PFF::UI {
     // render markdown
     void markdown(const char* markdown_text, size_t markdown_length) {
 
-        PFF_SCOPED_BENCHMARK(700, "markdown imgui convertion", PFF::duration_precision::microseconds);
+        PFF_SCOPED_PROFILER(700, "markdown imgui convertion", PFF::duration_precision::microseconds);
 
         const float line_height = ImGui::GetTextLineHeight();
         button_size = ImVec2(line_height + ((ImGui::GetTextLineHeightWithSpacing() - line_height) * 2));

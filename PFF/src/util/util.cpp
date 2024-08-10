@@ -3,9 +3,15 @@
 
 #ifdef PFF_PLATFORM_WINDOWS
     #include <Windows.h>
+    #include <commdlg.h>
+    #include <iostream>
+    #include <tchar.h> // For _T() macros
 #elif defined PFF_PLATFORM_LINUX || defined PFF_PLATFORM_MAC
     #include <sys/time.h>
     #include <ctime>
+
+    // TODO: import libs needed for file_dialog
+
 #endif
 
 
@@ -32,7 +38,6 @@ namespace PFF::util {
         std::uniform_int_distribution<u64> dist(min, max);
         return dist(engine);
     }
-
 
     void extract_part_after_delimiter(std::string& dest, const std::string& input, const char* delimiter) {
 
@@ -83,6 +88,41 @@ namespace PFF::util {
         //auto actual_sleep_time = std::chrono::duration_cast<std::chrono::milliseconds>( std::chrono::high_resolution_clock::now() - target_time + std::chrono::milliseconds(static_cast<int>(duration_in_milliseconds)) ).count();
         //CORE_LOG(Debug, "left over time: " << actual_sleep_time << " ms");
     }
+
+    std::filesystem::path file_dialog() {
+
+#ifdef PFF_PLATFORM_WINDOWS
+
+        OPENFILENAME ofn;       // common dialog box structure
+        char szFile[260];       // buffer for file name
+
+        // Initialize OPENFILENAME
+        ZeroMemory(&ofn, sizeof(ofn));
+        ofn.lStructSize = sizeof(ofn);
+        ofn.hwndOwner = NULL;
+        ofn.lpstrFile = (LPWSTR)szFile;
+        ofn.lpstrFile[0] = '\0';
+        ofn.nMaxFile = sizeof(szFile);
+        ofn.lpstrFilter = _T("All Files\0*.*\0Text Files\0*.TXT\0");
+        ofn.nFilterIndex = 1;
+        ofn.lpstrFileTitle = NULL;
+        ofn.nMaxFileTitle = 0;
+        ofn.lpstrInitialDir = NULL;
+        ofn.Flags = OFN_PATHMUSTEXIST | OFN_FILEMUSTEXIST;
+
+        // Display the Open File dialog box 
+        if (GetOpenFileName(&ofn) == TRUE)
+            return std::filesystem::path(ofn.lpstrFile);
+
+        return std::filesystem::path();
+
+#elif defined PFF_PLATFORM_LINUX || defined PFF_PLATFORM_MAC
+
+#endif
+
+    }
+
+
 
     system_time get_system_time() {
 

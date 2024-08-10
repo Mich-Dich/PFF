@@ -7,10 +7,10 @@
 
 namespace PFF {
 
-    namespace benchmarking {
+    namespace Profiling {
 
 
-        bool simple_bencharking::add_value() {
+        bool simple_profiler::add_value() {
 
             if (single_duration == -1.f)
                 return true;

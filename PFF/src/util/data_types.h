@@ -18,30 +18,42 @@ typedef long double f128;
 
 typedef unsigned long long handle;
 
-struct system_time {
+namespace PFF {
 
-	unsigned short year;
-	unsigned short month;
-	unsigned short day_of_week;
-	unsigned short day;
-	unsigned short hour;
-	unsigned short minute;
-	unsigned short secund;
-	unsigned short millisecends;
-};
+	struct version {
+		u16 major{};
+		u16 minor{};
+		u16 patch{};
+	};
 
-enum class error_code {
-	success = 0,
-	generic_not_found,
-	error_opening_file,
-	line_not_found,
-};
+	struct system_time {
 
-enum class system_state {
-	active,
-	suspended,
-	inactive,
-};
+		unsigned short year;
+		unsigned short month;
+		unsigned short day_of_week;
+		unsigned short day;
+		unsigned short hour;
+		unsigned short minute;
+		unsigned short secund;
+		unsigned short millisecends;
+	};
+
+	enum class error_code {
+		success = 0,
+		generic_not_found,
+		file_not_found,
+		error_opening_file,
+		system_path_not_free,
+		line_not_found,
+	};
+
+	enum class system_state {
+		active,
+		suspended,
+		inactive,
+	};
+
+}
 
 #define CONFIG_DIR				"./config/"
 #define FILE_EXTENSION_CONFIG	".yml"

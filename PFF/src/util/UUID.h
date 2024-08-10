@@ -2,12 +2,13 @@
 
 namespace PFF {
 
-	class UUID {
+	class PFF_API UUID {
 	public:
 
 		PFF_DEFAULT_COPY_CONSTRUCTOR(UUID);
 		UUID();
 		UUID(u64 uuid);
+		~UUID();
 
 		operator u64() const { return m_UUID; }
 

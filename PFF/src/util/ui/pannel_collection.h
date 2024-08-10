@@ -103,7 +103,10 @@ namespace PFF::UI {
 	// @param [right_side] The function representing the content of the right side.
 	PFF_API FORCEINLINE void custom_frame(const f32 width_left_side, std::function<void()> left_side, std::function<void()> right_side);
 
-	
+
+	PFF_API FORCEINLINE void custom_frame_NEW(const f32 width_left_side, const bool can_resize, const ImU32 color_left_side, std::function<void()> left_side, std::function<void()> right_side);
+
+
 	// @brief Renders an integer slider within a table row in an ImGui interface.
 	// 
 	// This function creates a row in an ImGui table, sets the label in the first column,

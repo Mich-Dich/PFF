@@ -53,7 +53,7 @@ namespace PFF {
 	
 		// First pass to mark items for removal
 		auto it = std::remove_if(m_editor_windows.begin(), m_editor_windows.end(),
-			[](const std::unique_ptr<PFF::editor_window>& editor_window) {
+			[](const scope_ref<PFF::editor_window>& editor_window) {
 				return editor_window->should_close();
 			});
 
@@ -114,8 +114,9 @@ namespace PFF {
 			window_general_debugger();								// TODO: convert into editor window
 			window_world_settings();								// TODO: convert into editor window
 			window_main_viewport();
-			window_content_browser_0();
-			window_content_browser_1();
+
+			m_content_browser.window();
+
 			window_outliner();
 			window_details();
 
@@ -141,6 +142,9 @@ namespace PFF {
 			.entry("show_general_settings", m_show_general_settings)
 			.entry("show_style_editor", style_editor)
 			.entry("show_engine_wiki", PFF::UI::show_engine_wiki)
+
+			.entry("show_todo_lis", PFF::toolkit::todo::s_show_todo_list)
+
 			.entry("show_demo_window", demo_window);
 	}
 
@@ -518,28 +522,6 @@ namespace PFF {
 
 		ImGuiWindowFlags window_flags{};
 		if (ImGui::Begin("World Settings", &m_show_world_settings, window_flags)) {}
-
-		ImGui::End();
-	}
-
-	void editor_layer::window_content_browser_0() {
-
-		if (!m_show_content_browser_0)
-			return;
-
-		ImGuiWindowFlags window_flags{};
-		if (ImGui::Begin("Content Browser", &m_show_content_browser_0, window_flags)) {}
-
-		ImGui::End();
-	}
-
-	void editor_layer::window_content_browser_1() {
-
-		if (!m_show_content_browser_1)
-			return;
-
-		ImGuiWindowFlags window_flags{};
-		if (ImGui::Begin("Content Browser 2", &m_show_content_browser_1, window_flags)) {}
 
 		ImGui::End();
 	}

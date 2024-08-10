@@ -26,6 +26,8 @@ namespace PFF {
 		//        -> add/remove map
 		//        -> check for map
 
+		FORCEINLINE void add_map(const ref<map> map) { m_maps.emplace_back(map); }
+
 		virtual void on_attach();
 		virtual void on_detach();
 		virtual void on_update(const f32 delta_time);

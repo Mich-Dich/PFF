@@ -126,9 +126,8 @@ namespace PFF::toolkit::todo {
 		const ImVec2 window_padding = { style->WindowPadding.x + 10.f, style->WindowPadding.y + 35.f };
 
 		ImGuiViewport* viewport = ImGui::GetMainViewport();
-		ImGui::SetNextWindowPos(ImGui::GetMainViewport()->GetCenter(), ImGuiCond_Appearing, ImVec2(0.5f, 0.5f));
-		ImGui::SetNextWindowSize(ImVec2(viewport->Size.x - 500, viewport->Size.y - 300), ImGuiCond_Appearing);
-		//ImGui::SetNextWindowViewport(viewport->ID);
+		//ImGui::SetNextWindowPos(ImGui::GetMainViewport()->GetCenter(), ImGuiCond_Appearing, ImVec2(0.5f, 0.5f));
+		//ImGui::SetNextWindowSize(ImVec2(viewport->Size.x - 500, viewport->Size.y - 300), ImGuiCond_Appearing);
 
 		//ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, ImVec2(0, 0));
 		bool is_window_begin = ImGui::Begin("ToDo List", &s_show_todo_list, window_flags);
@@ -160,7 +159,7 @@ namespace PFF::toolkit::todo {
 		const ImVec2 button_size = { 50.f, ImGui::GetTextLineHeightWithSpacing() + style->FramePadding.y * 2 };
 		const ImVec2 button_size_small = { 50.f, 21 };
 
-		UI::custom_frame(first_width, [&] {
+		UI::custom_frame_NEW(first_width, false, IM_COL32(37, 37, 37, 255), [&] {
 
 			const f32 start_pos = ImGui::GetCursorPosX();
 			const f32 inner_padding = 20.f;

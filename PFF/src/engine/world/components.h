@@ -98,6 +98,7 @@ namespace PFF {
 // ----------------------------------------------------------------------------------------------------------------------------
 
 
+	// MAYBE: move to file private_components => this file should not be exposed to the user
 	struct mesh_component {
 
 		PFF_DEFAULT_CONSTRUCTORS(mesh_component);
@@ -105,11 +106,13 @@ namespace PFF {
 		mesh_component(ref<PFF::geometry::mesh_asset> mesh_asset_ref)
 			: mesh_asset(mesh_asset_ref) {}
 
+		UUID								mesh_asset_ID = 0;					// used when loading and requesting a mesh from asset_manager
+
 		mobility							mobility = mobility::locked;
-		glm::mat4							transform = glm::mat4(1);
+		glm::mat4							transform = glm::mat4(1);			// TODO: remove because every entity can only have 1 mesh_comp, use parenting system instead
 		bool								shoudl_render = true;
 		ref<PFF::geometry::mesh_asset>		mesh_asset;
-		material_instance*					material = nullptr;					// TODO: currently uses one material for all surfaces in mesh_asset, change so it can use diffrent materials
+		material_instance*					material = nullptr;					// TODO: currently uses one material for all surfaces in mesh_asset, change so it can use diffrent materials per furface
 	};
 
 	// ============================================================ IN-DEV ============================================================
@@ -155,9 +158,20 @@ namespace PFF {
 		// the version with virtual function had a size of around [328 bytes] now its [24 bytes]
 	};
 
-	// => EnTT hates empty structs!
-	//struct procedural_mesh_component {
-	//};
+	struct procedural_mesh_component {
+
+		template<typename T>
+		void bind() {
+
+			create_script = []() { return static_cast<entity_script*>(new T()); };
+			destroy_script = [](script_component* script_comp) { delete script_comp->instance; script_comp->instance = nullptr; };
+		}
+
+		entity_script* instance = nullptr;
+		entity_script* (*create_script)();
+		void			(*destroy_script)(script_component*);
+	
+	};
 
 	// ============================================================ IN-DEV ============================================================
 

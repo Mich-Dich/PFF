@@ -6,8 +6,6 @@
 
 namespace PFF {
 
-	//class entity;
-
 	class PFF_API entity_script {
 	public:
 

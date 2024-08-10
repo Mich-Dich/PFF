@@ -68,9 +68,9 @@
 
 #include "macros.h"
 #include "util/util.h"
-#include "util/benchmarking/instrumentor.h"
+#include "util/profiling/stopwatch.h"
+#include "util/profiling/instrumentor.h"
 #include "util/io/serializer.h"
-#include "util/benchmarking/stopwatch.h"
 //#include "util/math/random.h"
 
 // ==================================================================================  for application use  ==================================================================================

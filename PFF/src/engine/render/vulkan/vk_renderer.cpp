@@ -18,7 +18,6 @@
 #include "engine/layer/imgui_layer.h"
 
 // ========== misc ============
-#include "engine/io_handler/file_loader.h"
 #include "engine/platform/pff_window.h"
 #include "GLFW/glfw3.h"
 #include "application.h"
@@ -31,7 +30,6 @@
 #include <glm/gtc/matrix_transform.hpp>
 #define GLM_ENABLE_EXPERIMENTAL
 #include <glm/gtx/quaternion.hpp>
-
 #include <cstdlib> // for system calls (conpieling shaders)
 
 #include "util/ui/pannel_collection.h"
@@ -578,130 +576,6 @@ namespace PFF::render::vulkan {
 	// ================================================================================ INIT FUNCTION ================================================================================
 
 	void vk_renderer::init_default_data() {
-
-#define MESH_SOURCE 1
-
-#if MESH_SOURCE == 0
-		
-		T_test_meshes = IO::mesh_loader::load_gltf_meshes("../PFF/assets/meshes/basicmesh.glb").value();
-
-#elif MESH_SOURCE == 1
-
-		T_test_meshes = IO::mesh_loader::load_gltf_meshes("../PFF/assets/meshes/grass_001.glb").value();
-
-#elif MESH_SOURCE == 2
-		
-		T_test_meshes = IO::mesh_loader::load_gltf_meshes("../PFF/assets/meshes/BP-688.glb").value();
-
-#elif MESH_SOURCE == 3 	// procedural terrain test
-
-//#define PROFILE_GENERATION
-
-		geometry::mesh_asset loc_mesh{};
-		loc_mesh.name = "procedural_test";
-
-#ifdef PROFILE_GENERATION
-		for (size_t i = 0; i < 10; i++) {
-			loc_mesh = geometry::mesh{};		// reset
-			CORE_LOG(Trace, "starting mesh generation iteration: " << i);
-			PFF_PROFILE_SCOPE("Procedural Grid Mesh");
-#endif
-		
-		PFF::util::noise noise(PFF::util::noise_type::perlin);
-		noise.Set_fractal_type(PFF::util::fractal_type::FBm);
-		noise.set_frequency(0.005f);
-		noise.set_fractal_octaves(4);
-		noise.set_fractal_lacunarity(2.3f);
-
-		const glm::ivec2 grid_size = glm::ivec2(5);			// number of grid tiles
-		const glm::vec2 grid_tile_size = glm::ivec2(1000);	// size of a grid tile
-		const glm::vec2 grid_resolution = glm::ivec2(100);
-		const int iterations_x = static_cast<u32>(grid_size.x * grid_resolution.x);
-		const int iterations_y = static_cast<u32>(grid_size.y * grid_resolution.y);
-
-		const glm::vec2 offset = glm::vec2(
-			(static_cast<f32>(grid_size.x) / 2) * grid_tile_size.x,
-			(static_cast<f32>(grid_size.y) / 2) * grid_tile_size.y
-		);
-		const glm::vec2 pos_multiplier = glm::vec2(
-			(grid_tile_size.x / grid_resolution.x),
-			(grid_tile_size.y / grid_resolution.y)
-		);
-		
-		{
-#ifdef PROFILE_GENERATION
-			PFF_PROFILE_SCOPE("Procedural Grid Mesh - resize vectors");
-#endif
-			loc_mesh.m_vertices.resize((iterations_x + 1) * (iterations_y + 1));
-			loc_mesh.m_indices.resize((iterations_x * iterations_y) * 6);
-		}
-
-		{
-#ifdef PROFILE_GENERATION
-			PFF_PROFILE_SCOPE("Procedural Grid Mesh - generate vertexes");
-#endif
-			int counter_vert = 0;
-			for (int y = 0; y <= iterations_y; ++y) {
-				for (int x = 0; x <= iterations_x; ++x) {
-
-					loc_mesh.m_vertices[counter_vert] = geometry::vertex(
-						glm::vec3(
-							(x * pos_multiplier.x) - offset.x,
-							noise.get_noise((f32)x, (f32)y) * 500.f,
-							(y * pos_multiplier.y) - offset.y
-						),
-						{ 0, 0, 1 },
-						glm::vec4{ 1.f },
-						static_cast<f32>(x) / grid_resolution.x,
-						static_cast<f32>(y) / grid_resolution.y
-					);
-					counter_vert++;
-				}
-			}
-		}
-			
-		{
-#ifdef PROFILE_GENERATION
-			PFF_PROFILE_SCOPE("Procedural Grid Mesh - generate triange");
-#endif
-			int counter = 0;
-			for (int y = 0; y < iterations_y; y++) {
-				for (int x = 0; x < iterations_x; x++) {
-
-					int top_left = y * ((iterations_x)+1) + x;
-					int top_right = top_left + 1;
-					int bottom_left = (y + 1) * ((iterations_x)+1) + x;
-					int bottom_right = bottom_left + 1;
-
-					loc_mesh.m_indices[counter + 0] = top_left;
-					loc_mesh.m_indices[counter + 1] = bottom_left;
-					loc_mesh.m_indices[counter + 2] = top_right;
-
-					loc_mesh.m_indices[counter + 3] = top_right;
-					loc_mesh.m_indices[counter + 4] = bottom_left;
-					loc_mesh.m_indices[counter + 5] = bottom_right;
-					counter += 6;
-				}
-			}
-		}
-
-		geometry::Geo_surface new_surface{};
-		new_surface.count = static_cast<int>(loc_mesh.m_indices.size());
-		loc_mesh.surfaces.push_back(new_surface);
-
-#ifdef PROFILE_GENERATION
-		}
-#endif
-		
-		T_test_meshes.emplace_back(create_ref<geometry::mesh_asset>(std::move(loc_mesh)));
-		
-#endif
-
-		if (T_test_meshes.size() > 0) {
-
-			for (auto mesh : T_test_meshes) 
-				mesh->mesh_buffers = upload_mesh(mesh->m_indices, mesh->m_vertices);
-		}
 
 		serialize(PFF::serializer::option::load_from_file);
 
@@ -1277,7 +1151,7 @@ namespace PFF::render::vulkan {
 	// called once per frame
 	void vk_renderer::calc_frustum_planes(const glm::mat4& pro_view) {
 
-		//PFF_SCOPED_BENCHMARK(700, "calc frustum planes ", PFF::duration_precision::microseconds);
+		//PFF_SCOPED_PROFILER(700, "calc frustum planes ", PFF::duration_precision::microseconds);
 
 		glm::mat4 m = glm::transpose(pro_view);
 		m_view_frustum[0] = glm::vec4(m[3][0] + m[0][0], m[3][1] + m[0][1], m[3][2] + m[0][2], m[3][3] + m[0][3]);  // left plane
@@ -1299,7 +1173,7 @@ namespace PFF::render::vulkan {
 	// called for every object (map-chunk/mesh/...)
 	bool vk_renderer::is_bounds_in_frustum(const PFF::geometry::bounds& bounds, const glm::mat4& transform) {
 
-		//PFF_SCOPED_BENCHMARK(1000000, "frustum bounds check", PFF::duration_precision::microseconds);
+		//PFF_SCOPED_PROFILER(1000000, "frustum bounds check", PFF::duration_precision::microseconds);
 
 		glm::vec4 transformed_center = transform * glm::vec4(bounds.origin, 1.0f);
 		__m128 center = _mm_set_ps(1.0f, transformed_center.z, transformed_center.y, transformed_center.x);
@@ -1373,7 +1247,7 @@ namespace PFF::render::vulkan {
 
 	void vk_renderer::destroy_buffer(const vk_buffer& buffer) { vmaDestroyBuffer(m_allocator, buffer.buffer, buffer.allocation); }
 
-
+	
 	render::GPU_mesh_buffers vk_renderer::upload_mesh(std::vector<u32> indices, std::vector<PFF::geometry::vertex> vertices) {
 
 		const size_t vertexBufferSize = vertices.size() * sizeof(PFF::geometry::vertex);
