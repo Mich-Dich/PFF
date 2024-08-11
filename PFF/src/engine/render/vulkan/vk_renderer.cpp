@@ -21,7 +21,6 @@
 #include "engine/platform/pff_window.h"
 #include "GLFW/glfw3.h"
 #include "application.h"
-#include "util/io/serializer.h"
 #include "util/UI/pannel_collection.h"
 #include "engine/layer/layer_stack.h"
 #include "engine/layer/layer.h"
@@ -274,10 +273,9 @@ namespace PFF::render::vulkan {
 		io.ConfigFlags |= ImGuiConfigFlags_DockingEnable;           // Enable Docking
 		//io.ConfigFlags |= ImGuiConfigFlags_ViewportsNoTaskBarIcons;
 		//io.ConfigFlags |= ImGuiConfigFlags_ViewportsNoMerge;
-		io.IniFilename = NULL;
+		io.IniFilename = NULL;										// save data in custom file
 
 		// check for imgui ini-file or copy from default file
-		CORE_LOG(Error, "String: " << UI::ini_file_location << "   c_string: " << UI::ini_file_location.string().c_str());
 		if (!std::filesystem::exists(UI::ini_file_location)) {
 
 			std::ofstream file(UI::ini_file_location);
@@ -291,7 +289,6 @@ namespace PFF::render::vulkan {
 			default_config_file.close();
 			file.close();
 		}
-
 		ImGui::LoadIniSettingsFromDisk(UI::ini_file_location.string().c_str());
 
 

@@ -55,6 +55,8 @@ namespace PFF {
 
 }
 
+#define PFF_ASSET_EXTENTION		".pffasset"
+#define PFF_PROJECT_EXTENTION	".pffproj"
 #define CONFIG_DIR				"config"
 #define FILE_EXTENSION_CONFIG	".yml"
 #define FILE_EXTENSION_INI		".ini"

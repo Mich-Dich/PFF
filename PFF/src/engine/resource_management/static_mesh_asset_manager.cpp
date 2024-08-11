@@ -141,12 +141,10 @@ namespace PFF {
 
 	}
 
-	//template<typename T>
-	//static bool cointains()
 
 	ref<geometry::mesh_asset> static_mesh_asset_manager::get_from_path(const std::filesystem::path path) {
 
-		CORE_VALIDATE(path.extension() == ".sm", return nullptr, "", "Provided path is not a static_mesh");
+		CORE_VALIDATE(path.extension() == PFF_ASSET_EXTENTION, return nullptr, "", "Provided path is not a static_mesh");
 
 
 
@@ -173,6 +171,18 @@ namespace PFF {
 
 	// TODO: Iterate over every ref and check for refrence_count
 	//			if the count is 1 it means only the asset manager is holding onto the asset and it should be released
+
+	void serialize_mesh(const std::filesystem::path filename, ref<geometry::mesh_asset> mesh_asset, general_file_header& general_header, static_mesh_header& static_mesh_header, const serializer::option option) {
+
+			serializer::binary(filename, "gltf_mesh_data", option)
+				.entry(general_header)
+				.entry(static_mesh_header)
+				.vector(mesh_asset->surfaces)
+				.vector(mesh_asset->vertices)
+				.vector(mesh_asset->indices)
+				.entry(mesh_asset->bounds);
+
+	}
 
 }
 

@@ -94,6 +94,19 @@ namespace PFF::util {
         //CORE_LOG(Debug, "left over time: " << actual_sleep_time << " ms");
     }
 
+    bool util::is_valid_project_dir(const std::filesystem::path& path) {
+
+        if (!std::filesystem::exists(path) || !std::filesystem::is_directory(path))
+            return false;
+
+        for (const auto& entry : std::filesystem::directory_iterator(path)) {
+            if (entry.is_regular_file() && entry.path().extension() == PFF_PROJECT_EXTENTION)
+                return true; // found a project file
+        }
+
+        return false;
+    }
+
     std::filesystem::path file_dialog() {
 
 #ifdef PFF_PLATFORM_WINDOWS

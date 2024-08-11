@@ -22,6 +22,7 @@ namespace PFF {
 
 
 		ImGuiWindowFlags window_flags = ImGuiWindowFlags_NoDocking;
+		ImGui::SetNextWindowSize(ImVec2(300, 500), ImGuiCond_Appearing);
 		ImGui::SetNextWindowPos(ImGui::GetMainViewport()->GetCenter(), ImGuiCond_Appearing, ImVec2(0.5f, 0.5f));
 
 		if (ImGui::Begin("mesh importer", &show_window, window_flags)) {
@@ -50,6 +51,8 @@ namespace PFF {
 			ImGui::SameLine();
 			if (ImGui::Button("Import", ImVec2(width, 0))) {
 
+				PFF::mesh_factory::import_gltf_mesh(source_path, destination_path, loc_load_options);
+				show_window = false;
 			}
 
 		}

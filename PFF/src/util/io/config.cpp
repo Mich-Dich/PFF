@@ -25,22 +25,8 @@ namespace PFF {
 
             PFF_PROFILE_FUNCTION();
 
-            io_handler::create_directory(project_dir / CONFIG_DIR);
-            for (int i = 0; i <= static_cast<int>(file::input); ++i) {
-
-                std::filesystem::path file_path = project_dir / CONFIG_DIR / (config::file_type_to_string(static_cast<file>(i)) + FILE_EXTENSION_CONFIG);
-                std::ofstream config_file(file_path, std::ios::app);
-                if (!config_file.is_open()) {
-
-                    CORE_LOG(Error, "Failed to open/create config file: [" << file_path << "]");
-                    return;
-                }
-
-                CORE_LOG(Trace, "Confirmed existence of config file: [" << file_path << "]");
-                config_file.close();
-            }
-
             io_handler::create_directory(PFF_dir / CONFIG_DIR);
+            CORE_LOG(Trace, "Checking Engine config files at: " << PFF_dir / CONFIG_DIR);
             for (int i = 0; i <= static_cast<int>(file::input); ++i) {
 
                 std::filesystem::path file_path = PFF_dir / CONFIG_DIR / (config::file_type_to_string(static_cast<file>(i)) + FILE_EXTENSION_CONFIG);
@@ -50,8 +36,20 @@ namespace PFF {
                     CORE_LOG(Error, "Failed to open/create config file: [" << file_path << "]");
                     return;
                 }
+                config_file.close();
+            }
 
-                CORE_LOG(Trace, "Confirmed existence of config file: [" << file_path << "]");
+            io_handler::create_directory(project_dir / CONFIG_DIR);
+            CORE_LOG(Trace, "Checking project config files at: " << project_dir / CONFIG_DIR);
+            for (int i = 0; i <= static_cast<int>(file::input); ++i) {
+
+                std::filesystem::path file_path = project_dir / CONFIG_DIR / (config::file_type_to_string(static_cast<file>(i)) + FILE_EXTENSION_CONFIG);
+                std::ofstream config_file(file_path, std::ios::app);
+                if (!config_file.is_open()) {
+
+                    CORE_LOG(Error, "Failed to open/create config file: [" << file_path << "]");
+                    return;
+                }
                 config_file.close();
             }
 

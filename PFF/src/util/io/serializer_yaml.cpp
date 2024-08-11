@@ -1,7 +1,7 @@
 
 #include "util/pffpch.h"
 
-#include "serializer.h"
+#include "serializer_yaml.h"
 
 namespace PFF::serializer {
 
@@ -22,7 +22,7 @@ namespace PFF::serializer {
 
 		if (m_option == option::load_from_file)
 			deserialize();
-		
+
 		else {
 
 			m_file_content << section_name << ":\n";
@@ -69,7 +69,7 @@ namespace PFF::serializer {
 				}
 			}
 
-			else 
+			else
 				updated_file << line + "\n";
 		}
 
@@ -91,7 +91,7 @@ namespace PFF::serializer {
 		CORE_ASSERT(!m_name.empty(), "", "name of section to find is empty");
 
 		m_istream = std::ifstream(m_filename);
-		CORE_VALIDATE(m_istream.is_open(), return *this,"", "file-stream is not open");
+		CORE_VALIDATE(m_istream.is_open(), return *this, "", "file-stream is not open");
 
 		const u32 SECTION_INDENTATION = 0;
 		bool found_section = false;
@@ -101,7 +101,7 @@ namespace PFF::serializer {
 			// skip empty lines or comments
 			if (line.empty() || line.front() == '#')
 				continue;
-			
+
 			// if line contains desired section enter inner-loop
 			if (line.find(m_name + ":") != std::string::npos && util::measure_indentation(line, NUM_OF_INDENTING_SPACES) == 0) {
 

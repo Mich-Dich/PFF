@@ -21,7 +21,6 @@ namespace PFF {
 	PFF_editor::PFF_editor() {
 
 		m_editor_data.editor_executable_path = util::get_executable_path();
-		CORE_LOG(Info, "path: " << m_editor_data.editor_executable_path);
 
 		m_editor_layer = new editor_layer(application::get().get_imgui_layer()->get_context());
 		push_overlay(m_editor_layer);
@@ -29,9 +28,9 @@ namespace PFF {
 		LOG(Trace, "register editor controller");
 		m_editor_controller = std::make_shared<editor_controller>();
 		register_player_controller(m_editor_controller);
-				
-		serialize(serializer::option::load_from_file);	
-		if (!std::filesystem::exists(m_editor_data.current_project))
+		
+		serialize(serializer::option::load_from_file);
+		if (!util::is_valid_project_dir(m_editor_data.current_project))
 			m_editor_data.current_project = util::file_dialog().parent_path();
 
 		application::get().set_project_path(m_editor_data.current_project);			// save project directory in application

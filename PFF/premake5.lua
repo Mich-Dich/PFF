@@ -40,6 +40,7 @@ project "PFF"
 		"%{IncludeDir.ImGui}/backends/",
 		"%{IncludeDir.stb_image}",
 		"%{IncludeDir.entt}",
+		
 		"%{IncludeDir.VulkanSDK}",
 	}
 	

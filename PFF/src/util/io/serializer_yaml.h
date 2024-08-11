@@ -1,25 +1,15 @@
 #pragma once
 
-#define TEST_NAME_CONVERTION(variable)		extract_vaiable_name(#variable)
-#define SERIALIZE_KEY_VALUE(variable)		serialize_key_value(extract_vaiable_name(#variable), variable);
-
-// @brief used with [PFF::serializer] to shorten the PFF::serializer::yaml::entry call
-#define KEY_VALUE(var)						PFF::util::extract_vaiable_name(#var), var
+#include "serializer_data.h"
 
 namespace PFF::serializer {
 
-	enum class option {
-
-		save_to_file,
-		load_from_file,
-	};
-	
 	class PFF_API yaml {
 	public:
 
 		yaml(const std::filesystem::path filename, const std::string& section_name, option option);
 		~yaml();
-		
+
 		PFF_DELETE_COPY_MOVE_CONSTRUCTOR(yaml);
 
 		// @brief This function adds or looks for a subsection with the specified section name in the YAML file.
@@ -91,7 +81,7 @@ namespace PFF::serializer {
 
 								// remove indentation                       remove "- " (array element marker)
 								line = line.substr(NUM_OF_INDENTING_SPACES + 2);
-								PFF:util::convert_from_string(line, buffer);
+							PFF:util::convert_from_string(line, buffer);
 								value.emplace_back(buffer);
 							}
 
@@ -118,7 +108,7 @@ namespace PFF::serializer {
 			m_prefix = m_prefix_fallback;
 			return *this;
 		}
-		
+
 		// @brief This function is responsible for serializing or deserializing a vector variable to or from
 		//          the YAML file based on the specified serialization option. If the option is set to save to file,
 		//          it serializes each element of the vector individually and writes them to the YAML file. If the option
@@ -136,7 +126,7 @@ namespace PFF::serializer {
 
 			vector_func_index++;
 
-			if (vector_func_index != 1) 
+			if (vector_func_index != 1)
 				m_level_of_indention++;
 
 			if (m_option == PFF::serializer::option::save_to_file) {			// save to file
@@ -150,7 +140,7 @@ namespace PFF::serializer {
 					m_prefix_fallback = "  ";
 					vector_function(*this, x);
 				}
-		
+
 				m_prefix = "";
 				m_prefix_fallback = "";
 
@@ -268,9 +258,4 @@ namespace PFF::serializer {
 		std::ifstream m_istream{};
 	};
 
-	/*
-	class binary {
-
-	}
-	*/
 }

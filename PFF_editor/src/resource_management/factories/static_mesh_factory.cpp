@@ -11,9 +11,7 @@
 #include <fastgltf/util.hpp>
 #include <fastgltf/tools.hpp>
 
-#include "util/io/serializer.h"
-
-//#include "engine/render/renderer.h"
+#include "engine/resource_management/mesh_headers.h"
 
 #include "static_mesh_factory.h"
 
@@ -52,8 +50,8 @@ namespace PFF::mesh_factory {
 
             CORE_LOG(Trace, "name of surface: " << mesh.name)
 
-                // clear the mesh arrays each mesh, we dont want to merge them by error
-                loc_mesh.indices.clear();
+            // clear the mesh arrays each mesh, we dont want to merge them by error
+            loc_mesh.indices.clear();
             loc_mesh.vertices.clear();
 
             for (auto&& p : mesh.primitives) {
@@ -166,10 +164,11 @@ namespace PFF::mesh_factory {
         // TODO: check if source_path is valid
         // TODO: check if destination_path is free
 
+        CORE_LOG(Trace, "source_path: " << source_path << " destination_path: " << destination_path);
+
         // load file from source_path and
         std::optional<std::vector<ref<PFF::geometry::mesh_asset>>> loc_mesh_assets = load_gltf_meshes(source_path);
-        CORE_VALIDATE(loc_mesh_assets.has_value(), return false, "", "Failed to load meshes");
-
+        CORE_VALIDATE(loc_mesh_assets.has_value(), return false, "loaded source file", "Failed to load meshes");
 
         if (options.combine_meshes) {
 
@@ -177,6 +176,8 @@ namespace PFF::mesh_factory {
             metadata.mesh_index = 0;
 
             // TODO: serialize mesh_asset into new file
+            CORE_LOG(Warn, "Not implemented yet");
+            return false;
 
         } else {
 
@@ -184,26 +185,24 @@ namespace PFF::mesh_factory {
 
                 static_mesh_file_metadata metadata{};
                 metadata.name = loc_mesh_assets.value()[x]->name;
-                metadata.source_file = source_path;
-                metadata.mesh_index = x;
 
-                // TODO: serialize mesh_asset into new file
+                general_file_header general_header{};
+                general_header.type = mesh_type::static_mesh;
 
-                std::filesystem::path output_path = destination_path / metadata.name / ".sm";
+                static_mesh_header static_mesh_header{};
+                static_mesh_header.version = 1;
+                static_mesh_header.mesh_index = x;
+                //static_mesh_header.source_file = source_path;
 
-                CORE_LOG(Info, "saving to :" << output_path);
+                std::filesystem::path output_path = destination_path / (metadata.name + PFF_ASSET_EXTENTION);
 
+                serialize_mesh(output_path, loc_mesh_assets.value()[x], general_header, static_mesh_header, serializer::option::save_to_file);
             }
-
         }
 
-        // engine format:
+        CORE_LOG(Trace, "FUNCTION END");
 
-            // file_metadata
-            // 
-            // binary_blob
-
-        return false;
+        return true;
     }
 
 }

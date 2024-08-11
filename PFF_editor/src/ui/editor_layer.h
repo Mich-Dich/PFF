@@ -74,7 +74,7 @@ namespace PFF {
 		bool style_editor = false;
 		bool demo_window = true;
 
-		content_browser m_content_browser{};
+		content_browser m_content_browser;
 
 		std::vector<VkPresentModeKHR> m_swapchain_supported_presentmodes;
 		std::vector<const char*> m_swapchain_supported_presentmodes_str;

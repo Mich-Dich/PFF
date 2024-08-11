@@ -50,6 +50,10 @@ namespace PFF {
 		serializer::yaml(config::get_filepath_from_configtype(util::get_executable_path(), config::file::editor), "editor_data", serializer::option::load_from_file)
 			.entry("last_opened_project", project_path);
 
+		// ========================================================== TODO ==========================================================
+		//		Editor needs to set the [project_path] in the yaml file bevor starting the engine <= IMPORTANT
+		// ========================================================== TODO ==========================================================
+
 		config::init(project_path, util::get_executable_path());
 
 		// LOAD PROJECT_DATA

@@ -11,6 +11,12 @@ namespace PFF {
 
 		void window() override;
 
+	private:
+		
+		FORCEINLINE void show_directory_tree(const std::filesystem::path& path);
+
+		std::filesystem::path		m_project_directory;
+		std::filesystem::path		m_selected_directory;
 	};
 
 }

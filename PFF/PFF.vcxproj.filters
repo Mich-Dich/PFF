@@ -158,6 +158,9 @@
     <ClInclude Include="src\engine\render\vulkan\vk_types.h">
       <Filter>engine\render\vulkan</Filter>
     </ClInclude>
+    <ClInclude Include="src\engine\resource_management\mesh_headers.h">
+      <Filter>engine\resource_management</Filter>
+    </ClInclude>
     <ClInclude Include="src\engine\resource_management\static_mesh_asset_manager.h">
       <Filter>engine\resource_management</Filter>
     </ClInclude>
@@ -195,7 +198,7 @@
     <ClInclude Include="src\util\io\io_handler.h">
       <Filter>util\io</Filter>
     </ClInclude>
-    <ClInclude Include="src\util\io\serializer.h">
+    <ClInclude Include="src\util\io\serializer_data.h">
       <Filter>util\io</Filter>
     </ClInclude>
     <ClInclude Include="src\util\logger.h">
@@ -237,6 +240,8 @@
     <ClInclude Include="src\util\util.h">
       <Filter>util</Filter>
     </ClInclude>
+    <ClInclude Include="src\util\io\serializer_binary.h" />
+    <ClInclude Include="src\util\io\serializer_yaml.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="src\application.cpp" />
@@ -315,9 +320,6 @@
     <ClCompile Include="src\util\io\io_handler.cpp">
       <Filter>util\io</Filter>
     </ClCompile>
-    <ClCompile Include="src\util\io\serializer.cpp">
-      <Filter>util\io</Filter>
-    </ClCompile>
     <ClCompile Include="src\util\logger.cpp">
       <Filter>util</Filter>
     </ClCompile>
@@ -339,5 +341,7 @@
     <ClCompile Include="src\util\util.cpp">
       <Filter>util</Filter>
     </ClCompile>
+    <ClCompile Include="src\util\io\serializer_binary.cpp" />
+    <ClCompile Include="src\util\io\serializer_yaml.cpp" />
   </ItemGroup>
 </Project>

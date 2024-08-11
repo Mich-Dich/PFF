@@ -123,6 +123,7 @@ namespace PFF {
         //          the desired wake-up time.
         PFF_API void high_precision_sleep(f32 duration_in_milliseconds);
 
+        PFF_API_EDITOR bool is_valid_project_dir(const std::filesystem::path& path);
 
         PFF_API std::filesystem::path file_dialog();
 
