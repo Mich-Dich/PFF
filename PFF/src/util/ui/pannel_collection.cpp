@@ -367,6 +367,18 @@ namespace PFF::UI {
 		va_end(args);
 	}
 
+	void table_row(std::string_view label, bool& value) {
+
+		ImGui::TableNextRow();
+		ImGui::TableSetColumnIndex(0);
+		ImGui::Text("%s", label.data());
+
+		ImGui::TableSetColumnIndex(1);
+
+		ImGui::Checkbox(label.data(), &value);
+		//ImGui::Text("%s", value.data());
+	}
+
 	void table_row(std::string_view label, std::string_view value) {
 
 		ImGui::TableNextRow();

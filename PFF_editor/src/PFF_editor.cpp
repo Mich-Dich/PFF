@@ -1,6 +1,8 @@
 
 #include "util/pch_editor.h"
 
+#include "project/project_data_struct.h"
+
 #include "PFF_editor.h"
 
 
@@ -9,10 +11,17 @@ namespace PFF {
 	void PFF_editor::serialize(serializer::option option) {
 
 		// list all serialize functions
+
+		serializer::yaml(config::get_filepath_from_configtype(util::get_executable_path(), config::file::editor), "editor_data", option)
+			.entry("last_opened_project", m_editor_data.current_project);
+
 		m_editor_controller->serialize(option);
 	}
 
 	PFF_editor::PFF_editor() {
+
+		m_editor_data.editor_executable_path = util::get_executable_path();
+		CORE_LOG(Info, "path: " << m_editor_data.editor_executable_path);
 
 		m_editor_layer = new editor_layer(application::get().get_imgui_layer()->get_context());
 		push_overlay(m_editor_layer);
@@ -22,6 +31,10 @@ namespace PFF {
 		register_player_controller(m_editor_controller);
 				
 		serialize(serializer::option::load_from_file);	
+		if (!std::filesystem::exists(m_editor_data.current_project))
+			m_editor_data.current_project = util::file_dialog().parent_path();
+
+		application::get().set_project_path(m_editor_data.current_project);			// save project directory in application
 	}
 
 	PFF_editor::~PFF_editor() {
@@ -34,14 +47,7 @@ namespace PFF {
 		CORE_LOG_SHUTDOWN();
 	}
 
-	bool PFF_editor::init() { 
-	
-		LOG(Info, "initalizing the editor");
-
-
-
-
-
+	bool PFF_editor::init() {
 
 		// TODO: load the map specefied in the project settings as editor_start_world
 		ref<map> loc_map = create_ref<map>();
@@ -57,12 +63,8 @@ namespace PFF {
 		//mesh_comp.material = material_instance_asset_manager::get().get_default_material_pointer();
 
 		get_world_layer()->add_map( loc_map );
-
-
-
-
-
 		
+
 		return true;
 	}
 

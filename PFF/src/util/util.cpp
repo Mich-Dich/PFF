@@ -6,11 +6,16 @@
     #include <commdlg.h>
     #include <iostream>
     #include <tchar.h> // For _T() macros
-#elif defined PFF_PLATFORM_LINUX || defined PFF_PLATFORM_MAC
+
+#elif defined PFF_PLATFORM_LINUX 
     #include <sys/time.h>
     #include <ctime>
+    #include <unistd.h>             // for [get_executable_path]
+    #error TODO: import libs needed for [file_dialog]
 
-    // TODO: import libs needed for file_dialog
+#elif defined PFF_PLATFORM_MAC
+    #include <mach-o/dyld.h>        // for [get_executable_path]
+    #error TODO: import libs needed for [file_dialog]
 
 #endif
 
@@ -122,6 +127,41 @@ namespace PFF::util {
 
     }
 
+
+    std::filesystem::path get_executable_path() {
+
+#ifdef PFF_PLATFORM_WINDOWS
+
+        wchar_t path[MAX_PATH];
+        if (GetModuleFileNameW(NULL, path, MAX_PATH)) {
+            std::filesystem::path execPath(path);
+            return execPath.parent_path();
+        }
+
+#elif defined PFF_PLATFORM_LINUX 
+        
+        char path[1024];
+        ssize_t len = readlink("/proc/self/exe", path, sizeof(path) - 1);
+        if (len != -1) {
+            path[len] = '\0'; // Null-terminate the string
+            std::filesystem::path execPath(path);
+            return execPath.parent_path();
+        }
+
+#elif defined PFF_PLATFORM_MAC
+
+        char path[1024];
+        uint32_t size = sizeof(path);
+        if (_NSGetExecutablePath(path, &size) == 0) {
+            std::filesystem::path execPath(path);
+            return execPath.parent_path();
+        }
+
+#endif
+
+        std::cerr << "Error retrieving the executable path." << std::endl;
+        return std::filesystem::path();
+    }
 
 
     system_time get_system_time() {

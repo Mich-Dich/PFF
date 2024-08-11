@@ -55,7 +55,7 @@ namespace PFF {
 
 }
 
-#define CONFIG_DIR				"./config/"
+#define CONFIG_DIR				"config"
 #define FILE_EXTENSION_CONFIG	".yml"
 #define FILE_EXTENSION_INI		".ini"
 

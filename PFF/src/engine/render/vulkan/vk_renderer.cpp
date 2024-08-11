@@ -274,15 +274,16 @@ namespace PFF::render::vulkan {
 		io.ConfigFlags |= ImGuiConfigFlags_DockingEnable;           // Enable Docking
 		//io.ConfigFlags |= ImGuiConfigFlags_ViewportsNoTaskBarIcons;
 		//io.ConfigFlags |= ImGuiConfigFlags_ViewportsNoMerge;
-		io.IniFilename = UI::ini_file_location.c_str();
+		io.IniFilename = NULL;
 
 		// check for imgui ini-file or copy from default file
+		CORE_LOG(Error, "String: " << UI::ini_file_location << "   c_string: " << UI::ini_file_location.string().c_str());
 		if (!std::filesystem::exists(UI::ini_file_location)) {
 
 			std::ofstream file(UI::ini_file_location);
 			CORE_ASSERT(file.is_open(), "", "Failed to open [" << UI::ini_file_location << "] default: [" << io.IniFilename << "]");
 
-			std::ifstream default_config_file("./defaults/imgui_config.ini");
+			std::ifstream default_config_file(PFF::util::get_executable_path() / "defaults" / "imgui_config.ini");
 			CORE_ASSERT(default_config_file.is_open(), "", "Failed to open [default_config_file]");
 
 			file << default_config_file.rdbuf();
@@ -290,6 +291,9 @@ namespace PFF::render::vulkan {
 			default_config_file.close();
 			file.close();
 		}
+
+		ImGui::LoadIniSettingsFromDisk(UI::ini_file_location.string().c_str());
+
 
 		CORE_ASSERT(ImGui_ImplGlfw_InitForVulkan(m_window->get_window(), true), "", "Failed to initalize imgui -> init GLFW for Vulkan");
 
@@ -354,6 +358,8 @@ namespace PFF::render::vulkan {
 
 
 	void vk_renderer::imgui_shutdown() { 
+
+		ImGui::SaveIniSettingsToDisk(UI::ini_file_location.string().c_str());
 
 		ImGui_ImplVulkan_Shutdown();
 		ImGui_ImplGlfw_Shutdown();
@@ -646,7 +652,7 @@ namespace PFF::render::vulkan {
 
 	void vk_renderer::serialize(const PFF::serializer::option option) {
 
-		PFF::serializer::yaml(config::get_filepath_from_configtype(config::file::engine), "renderer_background_effect", option)
+		PFF::serializer::yaml(config::get_filepath_from_configtype(application::get().get_project_path(), config::file::engine), "renderer_background_effect", option)
 			.entry("current_background_effect", m_current_background_effect)
 			.vector(KEY_VALUE(m_background_effects), [=](serializer::yaml& yaml, const u64 x) {
 				yaml.entry(KEY_VALUE(m_background_effects[x].name))
@@ -881,8 +887,8 @@ namespace PFF::render::vulkan {
 		gradient.layout = m_gradient_pipeline_layout;
 		gradient.name = "gradient";
 		// --------------- default gradient color --------------- 
-		gradient.data.data1 = glm::vec4(1.f, 0.f, 0.f, 1.f);
-		gradient.data.data2 = glm::vec4(0.f, 0.f, 1.f, 1.f);
+		gradient.data.data1 = glm::vec4(0.24f, 0.24f, 0.24f, 1.f);
+		gradient.data.data2 = glm::vec4(0.24f, 0.24f, 0.24f, 1.f);
 
 		VK_CHECK_S(vkCreateComputePipelines(m_device, VK_NULL_HANDLE, 1, &compute_pipeline_CI, nullptr, &gradient.pipeline));
 		m_background_effects.emplace_back(gradient);

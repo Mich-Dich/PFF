@@ -26,16 +26,24 @@ namespace PFF {
 
 		if (ImGui::Begin("mesh importer", &show_window, window_flags)) {
 
-			ImGui::Text("Source: %s", (source_path.string().c_str()));
-			ImGui::SameLine();
-			if (ImGui::Button("Select New##mesh_import_window"))
-				source_path = util::file_dialog();
+			//ImGui::Text("Source: %s", (source_path.string().c_str()));
+
+
+
+
+			UI::begin_table("Mesh Import Settings");
+
+			UI::table_row_text("Source", (source_path.string().c_str()));
+			UI::table_row("combine meshes", loc_load_options.combine_meshes);
+			UI::table_row("auto generate LODs", loc_load_options.auto_generate_LODs);
+			
+			UI::end_table();
+
 
 
 
 
 			const f32 width = ImGui::GetContentRegionAvail().x / 2 - (ImGui::GetStyle().ItemSpacing.x * 2);
-
 			if (ImGui::Button("Cancle", ImVec2(width, 0)))
 				show_window = false;
 

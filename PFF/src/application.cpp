@@ -45,7 +45,12 @@ namespace PFF {
 		s_instance = this;
 
 		// ---------------------------------------- general subsystems ----------------------------------------
-		config::init();
+
+		// ======================================= DEV force load project dir ======================================= 
+		serializer::yaml(config::get_filepath_from_configtype(util::get_executable_path(), config::file::editor), "editor_data", serializer::option::load_from_file)
+			.entry("last_opened_project", project_path);
+
+		config::init(project_path, util::get_executable_path());
 
 		// LOAD PROJECT_DATA
 
@@ -210,7 +215,7 @@ namespace PFF {
 
 	void application::serialize(serializer::option option) {
 
-		serializer::yaml(config::get_filepath_from_configtype(config::file::engine), "FPS_control", option)
+		serializer::yaml(config::get_filepath_from_configtype(application::get().get_project_path(), config::file::engine), "FPS_control", option)
 			.entry(KEY_VALUE(m_limit_fps))
 			.entry(KEY_VALUE(m_target_fps))
 			.entry(KEY_VALUE(m_nonefocus_fps));

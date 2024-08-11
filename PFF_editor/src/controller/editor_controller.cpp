@@ -3,6 +3,8 @@
 //#include <engine/Events/Event.h>
 
 #include "application.h"
+#include "PFF_editor.h"
+
 #include "editor_inputs.h"
 #include "engine/layer/world_layer.h"
 
@@ -54,7 +56,7 @@ namespace PFF {
 
 	void editor_controller::serialize(serializer::option option) {
 
-		serializer::yaml(config::get_filepath_from_configtype(config::file::editor), "editor_camera", option)
+		serializer::yaml(config::get_filepath_from_configtype(PFF_editor::get().get_project_path(), config::file::editor), "editor_camera", option)
 			.entry(KEY_VALUE(m_camera_pos))
 			.entry(KEY_VALUE(m_camera_direction))
 			.entry(KEY_VALUE(m_move_speed));

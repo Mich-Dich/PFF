@@ -26,11 +26,15 @@ namespace PFF::config {
 	// @brief Initializes the configuration files by creating necessary directories and default files.
 	// @param [config_dir] The directory where configuration files will be stored.
 	// @return [void] This function does not have a return value.
-    PFF_API_EDITOR void init();
-			
-	PFF_API_EDITOR std::string get_filepath_from_configtype(file type);
+    PFF_API_EDITOR void init(std::filesystem::path project_dir, std::filesystem::path PFF_dir);
 
-	PFF_API_EDITOR std::string get_filepath_from_configtype_ini(file type);
+	PFF_API_EDITOR FORCEINLINE std::string file_type_to_string(file type);
+
+	//PFF_API_EDITOR std::filesystem::path get_filepath_from_configtype(file type);
+
+	PFF_API_EDITOR std::filesystem::path get_filepath_from_configtype(std::filesystem::path root, file type);
+
+	PFF_API_EDITOR std::filesystem::path get_filepath_from_configtype_ini(std::filesystem::path root, file type);
 
 	// @brief Checks for the existence of a configuration in the specified file, updates it if (found && override == true), and adds if not found.
 	// @param [target_config_file] The type of configuration file to be checked/updated.

@@ -3,7 +3,7 @@
 #include "util/pffpch.h"
 #include "util/UUID.h"
 
-namespace PFF::project {
+namespace PFF {
 
 	struct project_data {
 

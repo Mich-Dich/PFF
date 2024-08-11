@@ -28,6 +28,9 @@ namespace PFF {
 
 		PFF_DELETE_COPY_CONSTRUCTOR(application);
 
+		FORCEINLINE std::filesystem::path get_project_path()				{ return project_path; }
+		FORCEINLINE void set_project_path(std::filesystem::path path)		{ project_path = path; }
+
 		PFF_DEFAULT_GETTER_C(f64,											delta_time)
 		PFF_DEFAULT_GETTER_C(u32,											target_fps)
 		PFF_DEFAULT_GETTERS(u32,											target_fps)
@@ -115,6 +118,7 @@ namespace PFF {
 		std::vector<util::timer> m_timers{};
 		std::mutex m_global_futures_mutex{}; // Mutex to protect global_futures
 
+		std::filesystem::path	project_path{};
 	};
 
 	// to be defined in Client

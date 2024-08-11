@@ -28,7 +28,7 @@ namespace PFF {
 		if (option == serializer::option::save_to_file && window_attributes->window_size_state == window_size_state::minimised)
 			window_attributes->window_size_state = window_size_state::windowed;
 
-		serializer::yaml(config::get_filepath_from_configtype(config::file::editor), "window_attributes", option)
+		serializer::yaml(config::get_filepath_from_configtype(util::get_executable_path(), config::file::editor), "window_attributes", option)
 			.entry(KEY_VALUE(window_attributes->title))
 			.entry(KEY_VALUE(window_attributes->pos_x))
 			.entry(KEY_VALUE(window_attributes->pos_y))
@@ -289,7 +289,9 @@ namespace PFF {
 	void pff_window::get_monitor_size(int* width, int* height) {
 
 		auto monitor = glfwGetWindowMonitor(m_Window);
-		CORE_VALIDATE(monitor, monitor = glfwGetPrimaryMonitor(), "", "Failed to get user defined monitor, switching to main monitor");
+		if (!monitor)
+			monitor = glfwGetPrimaryMonitor();
+
 		auto video_mode = glfwGetVideoMode(monitor);
 
 		*width = video_mode->width;

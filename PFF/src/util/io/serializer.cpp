@@ -7,11 +7,10 @@ namespace PFF::serializer {
 
 	// ================================================== yaml ==================================================
 
-	yaml::yaml(const std::string& filename, const std::string& section_name, option option)
+	yaml::yaml(const std::filesystem::path filename, const std::string& section_name, option option)
 		: m_filename(filename), m_name(section_name), m_option(option) {
 
-		std::string path{};
-		util::extract_part_befor_delimiter(path, filename, "/");
+		std::filesystem::path path = filename.parent_path();
 		CORE_ASSERT(io_handler::create_directory(path), "", "Could not create file-path");
 
 		// make shure the file exists

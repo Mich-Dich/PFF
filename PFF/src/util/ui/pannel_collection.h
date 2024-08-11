@@ -128,6 +128,7 @@ namespace PFF::UI {
 
 	PFF_API FORCEINLINE void table_row_text(std::string_view label, const char* format, ...);
 
+	PFF_API FORCEINLINE void table_row(std::string_view label, bool& value);
 
 	PFF_API FORCEINLINE void table_row(std::string_view label, std::string_view value);
 

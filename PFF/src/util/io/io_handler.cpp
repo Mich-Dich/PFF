@@ -38,7 +38,7 @@ namespace PFF::io_handler {
 	}
 
 	// 
-	bool create_directory(const std::string& path) {
+	bool create_directory(const std::filesystem::path& path) {
 
 		// Check if the directory exists
 		if (!std::filesystem::is_directory(path)) {

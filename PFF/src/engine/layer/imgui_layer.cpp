@@ -37,14 +37,14 @@ namespace PFF::UI {
 
 	void imgui_layer::serialize(serializer::option option) {
 
-		serializer::yaml(config::get_filepath_from_configtype(config::file::ui), "performance_display", option)
+		serializer::yaml(config::get_filepath_from_configtype(application::get().get_project_path(), config::file::ui), "performance_display", option)
 			.entry(KEY_VALUE(m_show_FPS_window))
 			.entry(KEY_VALUE(m_show_renderer_metrik));
 	}
 
 	static void serialize(serializer::option option) {
 
-		serializer::yaml(config::get_filepath_from_configtype(config::file::ui), "theme", option)
+		serializer::yaml(config::get_filepath_from_configtype(application::get().get_project_path(), config::file::ui), "theme", option)
 			.entry(KEY_VALUE(m_font_size))
 			.entry(KEY_VALUE(m_font_size_header_0))
 			.entry(KEY_VALUE(m_font_size_header_1))

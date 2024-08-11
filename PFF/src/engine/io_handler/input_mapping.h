@@ -35,11 +35,15 @@ namespace PFF {
 		//@param [name] The name of the input action.
 		//@param [action] Reference to the input_action struct to be registered and configured.
 		void register_action(input_action* action, bool force_override);
+		void register_action(input_action* action, bool force_override, std::filesystem::path path);
 
 		std::vector<input_action*>::iterator begin() { return m_actions.begin(); }
 		std::vector<input_action*>::iterator end() { return m_actions.end(); }
 
 	private:
+		
+		void serialize_action(input_action* action, bool force_override, std::filesystem::path path);
+
 		std::vector<input_action*> m_actions{};
 
 	};

@@ -126,7 +126,11 @@ namespace PFF {
 
         PFF_API std::filesystem::path file_dialog();
 
+        PFF_API std::filesystem::path get_executable_path();
+
         PFF_API system_time get_system_time();
+
+
 
         //@brief Checks the validity of a pointer.
         //@param [ptr] Pointer to check.
@@ -275,6 +279,12 @@ namespace PFF {
                 return;
             }
 
+            else if constexpr (std::is_same_v<T, std::filesystem::path>) {
+
+                dest_string = src_value.string();
+                return;
+            }
+
             else if constexpr (std::is_convertible_v<T, std::string>) {
 
                 //LOG(Fatal, "called: convert_to_string() with string");
@@ -338,58 +348,9 @@ namespace PFF {
         constexpr std::string to_string(const T& src_value) {
 
             std::string dest_string;
-            if constexpr (std::is_same_v<T, bool>) { return bool_to_str(src_value); }
 
-            else if constexpr (std::is_arithmetic_v<T>) { return std::to_string(src_value); }
-
-            else if constexpr (std::is_convertible_v<T, std::string>) {
-
-                //LOG(Fatal, "called: convert_to_string() with string");
-                dest_string = src_value;
-                std::replace(dest_string.begin(), dest_string.end(), '\n', '$');
-                return;
-            }
-
-            else if constexpr (std::is_same_v<T, glm::vec2> || std::is_same_v<T, ImVec2>) {
-
-                std::ostringstream oss;
-                oss << src_value.x << ' ' << src_value.y;
-                return oss.str();
-            }
-
-            else if constexpr (std::is_same_v<T, glm::vec3>) {
-
-                std::ostringstream oss;
-                oss << src_value.x << ' ' << src_value.y << ' ' << src_value.z;
-                return oss.str();
-            }
-
-            else if constexpr (std::is_same_v<T, glm::vec4> || std::is_same_v<T, ImVec4>) {
-
-                std::ostringstream oss;
-                oss << std::fixed << std::setprecision(4)
-                    << src_value.x << ' ' << src_value.y << ' ' << src_value.z << ' ' << src_value.w;
-                return oss.str();
-            }
-
-            else if constexpr (std::is_enum_v<T>) { return std::to_string(static_cast<std::underlying_type_t<T>>(src_value)); }
-
-            // Matrix of size 4         TODO: move into seperate template for all matrixes
-            else if constexpr (std::is_same_v<T, glm::mat4>) {
-
-                std::ostringstream oss;
-                for (int i = 0; i < 4; ++i) {
-                    for (int j = 0; j < 4; ++j) {
-                        oss << src_value[i][j];
-                        if (i != 3 || j != 3) // Not the last element
-                            oss << ' ';
-                    }
-                }
-                return oss.str();
-            }
-
-            else
-                DEBUG_BREAK();		// Input value is not supported
+            convert_to_string<T>(src_value, dest_string);
+            return dest_string;
         }
 
 
@@ -411,6 +372,12 @@ namespace PFF {
             else if constexpr (std::is_arithmetic_v<T>) {
 
                 dest_value = util::str_to_num<T>(src_string);
+                return;
+            }
+
+            else if constexpr (std::is_same_v<T, std::filesystem::path>) {
+
+                dest_value = src_string;
                 return;
             }
 

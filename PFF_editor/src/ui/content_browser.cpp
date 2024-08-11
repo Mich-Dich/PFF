@@ -65,7 +65,12 @@ namespace PFF {
 		if (ImGui::Button(" import ##content_browser_import")) {
 
 			std::filesystem::path source_path = util::file_dialog();
-			static_cast<PFF_editor&>(application::get()).get_editor_layer()->add_window<mesh_import_window>( source_path, selected_directory );
+
+			if (source_path.extension() == ".gltf" || source_path.extension() == ".glb")
+				PFF_editor::get().get_editor_layer()->add_window<mesh_import_window>( source_path, selected_directory );
+
+			// TODO: add more import dialogs depending on extention
+
 		}
 		
 		UI::custom_frame_NEW(350, true, IM_COL32(37, 37, 37, 255), []() {
@@ -73,6 +78,7 @@ namespace PFF {
 			show_directory_tree(project_directory / "content");
 
 		}, []() {
+
 
 
 		});

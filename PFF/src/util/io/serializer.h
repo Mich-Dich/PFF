@@ -17,7 +17,7 @@ namespace PFF::serializer {
 	class PFF_API yaml {
 	public:
 
-		yaml(const std::string& filename, const std::string& section_name, option option);
+		yaml(const std::filesystem::path filename, const std::string& section_name, option option);
 		~yaml();
 		
 		PFF_DELETE_COPY_MOVE_CONSTRUCTOR(yaml);
