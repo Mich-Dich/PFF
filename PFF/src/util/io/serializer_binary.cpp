@@ -39,15 +39,3 @@ namespace PFF::serializer {
 	}
 
 }
-
-
-//// TODO:   !!!!!!!  REWRITE  !!!!!!!  THIS IS UGLY AND UNSAVE  !!!!!!!
-//file.write(reinterpret_cast<const char*>(&general_header), sizeof(general_file_header));
-//file.write(reinterpret_cast<const char*>(&static_mesh_header), sizeof(PFF::static_mesh_header));
-//
-//file.write(reinterpret_cast<const char*>(&loc_mesh_assets.value()[x]->bounds), sizeof(geometry::bounds));
-//file.write(reinterpret_cast<const char*>(loc_mesh_assets.value()[x]->surfaces.data()), sizeof(geometry::Geo_surface)* loc_mesh_assets.value()[x]->surfaces.size());
-//file.write(reinterpret_cast<const char*>(loc_mesh_assets.value()[x]->vertices.data()), sizeof(geometry::vertex)* loc_mesh_assets.value()[x]->vertices.size());
-//file.write(reinterpret_cast<const char*>(loc_mesh_assets.value()[x]->indices.data()), sizeof(u32)* loc_mesh_assets.value()[x]->indices.size());
-//
-//file.close();

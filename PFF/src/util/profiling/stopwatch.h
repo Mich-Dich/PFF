@@ -3,52 +3,11 @@
 
 namespace PFF {
 
-    enum class duration_precision {
+    enum class PFF_API duration_precision {
         microseconds,
         milliseconds,
         seconds,
     };
-
-#ifdef PFF_DEBUG
-    namespace Profiling {
-
-#define PFF_SCOPED_PROFILER(num_of_tests, message, profile_duration_precision)      static PFF::Profiling::simple_profiler loc_simple_profiler(num_of_tests, message, profile_duration_precision);      \
-                                                                                    PFF::stopwatch loc_stopwatch_for_profiling(&loc_simple_profiler.single_duration, profile_duration_precision);       \
-                                                                                    if (loc_simple_profiler.add_value())                                                                                \
-                                                                                        loc_stopwatch_for_profiling.restart()
-
-    
-#define PFF_DURATION_microseconds       " microseconds"
-#define PFF_DURATION_miliseconds        " milliseconds"
-#define PFF_DURATION_seconds            " seconds"
-
-#define PFF_PROFILER_LOOP(num_of_iterations, message, profile_duration_precision, func)                                                                                                                        \
-            {                                                                                                                                                                                         \
-                f32 duration = -1.f;                                                                                                                                                                  \
-                {   PFF::stopwatch loc_stpowatch(&duration);                                                                                                                                          \
-                    for (size_t x = 0; x < num_of_iterations; x++) { func }                                                                                                                           \
-                } CORE_LOG(Info, message << " => sample count: " << num_of_iterations << " average duration: " << (duration / (f64)num_of_iterations) << PFF_DURATION_##profile_duration_precision);  \
-            }
-
-        class simple_profiler {
-        public:
-
-            simple_profiler(u64 num_of_tests, std::string message, PFF::duration_precision presition = PFF::duration_precision::milliseconds)
-                : m_num_of_tests(num_of_tests), m_message(message), m_presition(presition) {}
-
-            bool add_value();
-            f32  single_duration = -1.f;
-
-        private:
-            duration_precision  m_presition{};
-            std::string         m_message{};
-            u64                 m_num_of_tests{};
-            f64                 m_durations{};
-            u32                 m_number_of_values{};
-        };
-
-    }
-#endif
 
     // @brief This is a lightweit stopwatch that is automaticlly started when creating an instance.
     //        It can either store the elapsed time in a provided float pointer when the stopwatch is stopped/destroyed, 

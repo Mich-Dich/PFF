@@ -82,6 +82,8 @@ namespace PFF {
             // @return A random unsigned 64-bit integer between min and max.
             FORCEINLINE u64 get_u64(u64 min = 0, u64 max = std::numeric_limits<u64>::max());
 
+            FORCEINLINE std::string get_string(const size_t length);
+
         private:
             std::mt19937                            engine; // Mersenne Twister pseudo-random generator
         };

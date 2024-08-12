@@ -44,6 +44,17 @@ namespace PFF::util {
         return dist(engine);
     }
 
+    std::string util::random::get_string(const size_t length) {
+
+        const std::string charset = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789";
+        std::uniform_int_distribution<size_t> dist(0, charset.size() - 1);
+
+        std::string result;
+        result.resize(length);
+        std::generate(result.begin(), result.end(), [&]() { return charset[dist(engine)]; });
+        return result;
+    }
+
     void extract_part_after_delimiter(std::string& dest, const std::string& input, const char* delimiter) {
 
         size_t found = input.find_last_of(delimiter);

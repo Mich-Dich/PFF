@@ -14,6 +14,9 @@ namespace PFF {
 	class PFF_API entity {
 	public:
 
+		template<typename T>
+		bool has_component() { return m_map->m_registry.view<T>().contains(m_entity_handle); }
+
 		PFF_DEFAULT_CONSTRUCTORS(entity);
 		entity(entt::entity handle, map* map)
 			: m_entity_handle(handle), m_map(map) { }
@@ -44,9 +47,6 @@ namespace PFF {
 
 		template<typename T>
 		FORCEINLINE void add_script_component() { add_component<script_component>().bind<T>(); }
-
-		template<typename T>
-		bool has_component() { return m_map->m_registry.view<T>().contains(m_entity_handle); }
 
 		operator bool()							const { return (m_entity_handle != entt::null); }
 		operator entt::entity()					const { return m_entity_handle; }
