@@ -45,6 +45,8 @@ namespace PFF::render::vulkan {
 
 	static std::vector<std::vector<std::function<void()>>> s_resource_free_queue;
 
+	static std::vector<std::unordered_map<std::function<void()>, u16>> s_resource_free_queue_TEST;		// use u16 as a counter to free resources after all command buffers are free
+
 
 
 
@@ -202,6 +204,7 @@ namespace PFF::render::vulkan {
 
 		vkDeviceWaitIdle(m_device);
 		m_state = system_state::inactive;
+
 		serialize(PFF::serializer::option::save_to_file);
 
 		for (auto frame : m_frames) {
@@ -229,6 +232,19 @@ namespace PFF::render::vulkan {
 		m_layer_stack.reset();
 
 		CORE_LOG_SHUTDOWN();
+	}
+
+	void vk_renderer::resource_free() {
+
+		vkDeviceWaitIdle(m_device);
+
+		// Free resources in queue
+		for (auto& queue : s_resource_free_queue) {
+			for (auto& func : queue)
+				func();
+		}
+		s_resource_free_queue.clear();
+
 	}
 
 	// =======================================================================================================================================================================================
@@ -384,18 +400,22 @@ namespace PFF::render::vulkan {
 		}
 #endif // COLLECT_PERFORMANCE_DATA
 
-		get_current_frame().deletion_queue.flush();
-		get_current_frame().frame_descriptors.clear_pools(m_device);
-		{	// Free resources in queue
-			for (auto& func : s_resource_free_queue[m_frame_number % FRAME_COUNT]) {
-				CORE_LOG(Info, "Executing free QUEUE")
+		VK_CHECK_S(vkResetFences(m_device, 1, &get_current_frame().render_fence));
+
+
+		// Free resources 
+		{
+			for (auto& func : s_resource_free_queue[(m_frame_number) % FRAME_COUNT]) {
+				CORE_LOG(Info, "Executing free QUEUE");
 				func();
 			}
+			s_resource_free_queue[(m_frame_number) % FRAME_COUNT].clear();
 
-			s_resource_free_queue[m_frame_number % FRAME_COUNT].clear();
+			get_current_frame().deletion_queue.flush();
+			get_current_frame().frame_descriptors.clear_pools(m_device);
 		}
 
-		uint32_t swapchain_image_index;
+		u32 swapchain_image_index;
 		VkResult e = vkAcquireNextImageKHR(m_device, m_swapchain, 1000000000, get_current_frame().swapchain_semaphore, nullptr, &swapchain_image_index);
 		if (e == VK_ERROR_OUT_OF_DATE_KHR) {
 			m_resize_nedded = true;
@@ -403,10 +423,9 @@ namespace PFF::render::vulkan {
 			return;					// this skips a frame, but it fine
 		}
 
-		VK_CHECK_S(vkResetFences(m_device, 1, &get_current_frame().render_fence));
-
 		VkCommandBuffer cmd = get_current_frame().main_command_buffer;
 		VK_CHECK_S(vkResetCommandBuffer(cmd, 0));
+
 
 		VkCommandBufferBeginInfo cmdBeginInfo = init::command_buffer_begin_info(VK_COMMAND_BUFFER_USAGE_ONE_TIME_SUBMIT_BIT);
 

@@ -55,18 +55,8 @@ namespace PFF {
 		transform_comp.rotation = glm::vec3(0);
 
 		auto& mesh_comp = loc_entitiy.add_component<mesh_component>();			
-		mesh_comp.mesh_asset = static_mesh_asset_manager::get_from_path("Plane.pffasset");
+		mesh_comp.mesh_asset = static_mesh_asset_manager::get_from_path("meshes/Plane.pffasset");
 		//mesh_comp.material = GET_RENDERER.get_default_material_pointer();		// get correct shader
-
-
-		//// Posible API designe
-		//auto& mesh_comp = loc_entitiy.add_component<mesh_component>();
-		//mesh_comp.mesh_asset = static_mesh_asset_manager::get_from_path(std::filesystem::path("path/to/asset.sm"));
-
-		//		get_mesh then opens the file at that location and reads the UUID
-		//		that is then used to load the asset from/into the registy
-		//		that is returned
-
 
 
 

@@ -303,23 +303,43 @@ namespace PFF::UI {
 
 		static ImGuiChildFlags child_flags = ImGuiChildFlags_Border | ImGuiChildFlags_AlwaysUseWindowPadding;
 		auto content_region = ImGui::GetContentRegionAvail();
+		const ImVec2 start_pos = ImGui::GetCursorScreenPos();
 
+		ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, ImVec2(0, 0));
 		ImGui::PushStyleColor(ImGuiCol_ChildBg, color_left_side);
-		ImGui::BeginChild("Red", ImVec2(width_left_side, content_region.y), can_resize ? child_flags | ImGuiChildFlags_ResizeX : child_flags, ImGuiWindowFlags_None);
+		ImGui::BeginChild("LEFT_SIDE", ImVec2(width_left_side, content_region.y), can_resize ? child_flags | ImGuiChildFlags_ResizeX : child_flags, ImGuiWindowFlags_None);
 		ImGui::PopStyleColor();
 
+		UI::shift_cursor_pos(2, 4);
 		left_side();
+		
+		{
+			const auto width = ImGui::GetContentRegionAvail().x;
+			
+			ImDrawList* draw_list = ImGui::GetWindowDrawList();
+			ImU32 begin_col = IM_COL32(0, 0, 0, 0);
+			ImU32 end_col = IM_COL32(0, 0, 0, 110);
+			const f32 padding = ImGui::GetStyle().WindowPadding.x;
+
+			draw_list->AddRectFilledMultiColor(
+				ImVec2(start_pos.x + width + padding - 40, start_pos.y-20),
+				ImVec2(start_pos.x + width + padding, start_pos.y + content_region.y),
+				begin_col, end_col, end_col, begin_col);
+			
+		}
 
 		ImGui::EndChild();
+		ImGui::PopStyleVar();
+
 		ImGui::SameLine();
 		content_region = ImGui::GetContentRegionAvail();
-		ImGui::BeginChild("Green", content_region, child_flags, ImGuiWindowFlags_None);
+		ImGui::BeginChild("RIGHT_SIDE", content_region, child_flags, ImGuiWindowFlags_None);
 
 		right_side();
 
 		ImGui::EndChild();
-
 	}
+
 
 	bool table_row_slider(std::string_view label, int& value, int min_value, int max_value, ImGuiInputTextFlags flags) {
 

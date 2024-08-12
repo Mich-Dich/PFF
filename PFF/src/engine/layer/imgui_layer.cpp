@@ -123,7 +123,9 @@ namespace PFF::UI {
 	}
 
 	imgui_layer::~imgui_layer() { 
-		
+
+		GET_RENDERER.imgui_shutdown();
+		ImGui::DestroyContext(m_context);
 		CORE_LOG_SHUTDOWN();
 	}
 
@@ -176,8 +178,6 @@ namespace PFF::UI {
 		LOG(Trace, "detach imgui layer");
 
 		serialize(serializer::option::save_to_file);
-		GET_RENDERER.imgui_shutdown();
-		ImGui::DestroyContext(m_context);
 	}
 
 
@@ -598,9 +598,9 @@ namespace PFF::UI {
 				colors[ImGuiCol_FrameBg]				= LERP_GRAY_A(.06f, .54f);
 				colors[ImGuiCol_FrameBgHovered]			= LERP_GRAY_A(.19f, .4f);
 				colors[ImGuiCol_FrameBgActive]			= LERP_GRAY_A(.3f, .67f);
-				colors[ImGuiCol_TitleBg]				= default_gray;
-				colors[ImGuiCol_TitleBgActive]			= default_gray;
-				colors[ImGuiCol_TitleBgCollapsed]		= default_gray;
+				colors[ImGuiCol_TitleBg]				= IMCOLOR_GRAY(22);
+				colors[ImGuiCol_TitleBgActive]			= IMCOLOR_GRAY(22);
+				colors[ImGuiCol_TitleBgCollapsed]		= IMCOLOR_GRAY(22);
 				colors[ImGuiCol_MenuBarBg]				= LERP_GRAY(.1f);
 				colors[ImGuiCol_ScrollbarBg]			= LERP_GRAY(0.23f);
 				colors[ImGuiCol_ScrollbarGrab]			= action_color_00_default;

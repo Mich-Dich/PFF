@@ -70,6 +70,15 @@ namespace PFF {
 		allocate_memory(data, VkExtent3D{width, height, 1}, format, mipmapped);
 	}
 
+	image::image(std::filesystem::path image_path, image_format format, bool mipmapped) {
+
+		int channels;
+		int width = 0, height = 0;
+		void* data = stbi_load(image_path.string().c_str(), &(int)width, &(int)height, &channels, 4);
+		allocate_memory(data, VkExtent3D{ (u32)width, (u32)height, 1 }, format, mipmapped);
+		stbi_image_free(data);
+	}
+
 	image::~image() {
 		
 		release();
@@ -160,12 +169,34 @@ namespace PFF {
 			m_descriptor_set = (VkDescriptorSet)ImGui_ImplVulkan_AddTexture(GET_RENDERER.get_default_sampler_nearest(), m_image_view, VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL);
 
 		return m_descriptor_set;
-	};
+	}
 
 	VkDescriptorSet image::generate_descriptor_set(VkSampler sampler, VkImageLayout layout) {
 
 		return m_descriptor_set = (VkDescriptorSet)ImGui_ImplVulkan_AddTexture(sampler, m_image_view, layout);
-	};
+	}
+
+	void* image::decode(const void* data, u64 length, u32& outWidth, u32& outHeight) {
+
+		int width, height, channels;
+		u8* buffer = nullptr;
+		u16 size = 0;
+
+		buffer = stbi_load_from_memory((const stbi_uc*)data, (int)length, &width, &height, &channels, 4);
+		size = width * height * 4;
+
+		outWidth = width;
+		outHeight = height;
+
+		return buffer;
+	}
+
+	void* image::load(std::filesystem::path path, u64 length, u32& outWidth, u32& outHeight) {
+
+		//stbi_load();
+
+		return nullptr;
+	}
 
 #endif
 

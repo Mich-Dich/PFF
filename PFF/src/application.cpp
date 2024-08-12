@@ -89,10 +89,6 @@ namespace PFF {
 		GET_RENDERER.set_state(system_state::inactive);
 		serialize(serializer::option::save_to_file);
 
-		m_layerstack->pop_overlay(m_imgui_layer);
-		delete m_imgui_layer;
-
-
 		for (size_t x = 0; x < m_timers.size(); x++)
 			util::cancel_timer(m_timers[x]);
 		m_timers.clear();
@@ -101,8 +97,16 @@ namespace PFF {
 		//m_layerstack.pop_layer(m_world_layer);
 		//delete m_world_layer;
 
-		m_layerstack.reset();
+		GET_RENDERER.resource_free();
+
+		m_layerstack->pop_overlay(m_imgui_layer);
+		delete m_imgui_layer;
+
 		GET_RENDERER.shutdown();
+
+
+		m_layerstack.reset();
+
 		m_window.reset();
 
 		CORE_LOG_SHUTDOWN();

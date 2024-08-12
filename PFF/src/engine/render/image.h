@@ -25,6 +25,7 @@ namespace PFF {
         image() = default;
         image(void* data, VkExtent3D size, image_format format, bool mipmapped = false);
         image(void* data, u32 width, u32 height, image_format format, bool mipmapped = false);
+        image(std::filesystem::path image_path, image_format format, bool mipmapped = false);
         ~image();
 
         PFF_DEFAULT_GETTER_SETTER_ALL(VkImage,          image);
@@ -36,6 +37,9 @@ namespace PFF {
         FORCEINLINE u32 get_height()                    const { return m_image_extent.height; }
         VkDescriptorSet get_descriptor_set();
         VkDescriptorSet generate_descriptor_set(VkSampler sampler, VkImageLayout layout = VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL);
+
+        static void* decode(const void* data, u64 length, u32& outWidth, u32& outHeight);
+        static void* load(std::filesystem::path path, u64 length, u32& outWidth, u32& outHeight);
 
     private:
 

@@ -69,6 +69,7 @@ namespace PFF::render::vulkan {
 
 		void setup(ref<pff_window> window, ref<PFF::layer_stack> layer_stack);
 		void shutdown();
+		void resource_free();
 
 		// --------------- general ----------------
 		void draw_frame(f32 delta_time) override;
