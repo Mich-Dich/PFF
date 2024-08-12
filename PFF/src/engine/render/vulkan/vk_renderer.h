@@ -94,6 +94,9 @@ namespace PFF::render::vulkan {
 		vk_buffer create_buffer(size_t allocSize, VkBufferUsageFlags usage, VmaMemoryUsage memoryUsage);
 		void destroy_buffer(const vk_buffer& buffer);
 
+		// TIP: Note that this pattern is not very efficient, as CPU is waiting for the GPU command to fully execute before continuing with our CPU side logic
+		//		This is should be put on a background thread, whose sole job is to execute uploads like this one, and deleting/reusing the staging buffers.
+		render::GPU_mesh_buffers upload_mesh(std::vector<u32> indices, std::vector<PFF::geometry::vertex> vertices);
 
 	private:
 
@@ -140,10 +143,6 @@ namespace PFF::render::vulkan {
 		void calc_frustum_planes(const glm::mat4& pro_view);
 		bool is_bounds_in_frustum(const PFF::geometry::bounds& bounds, const glm::mat4& transform);
 		void serialize(const PFF::serializer::option option);
-
-		// TIP: Note that this pattern is not very efficient, as CPU is waiting for the GPU command to fully execute before continuing with our CPU side logic
-		//		This is should be put on a background thread, whose sole job is to execute uploads like this one, and deleting/reusing the staging buffers.
-		render::GPU_mesh_buffers upload_mesh(std::vector<u32> indices, std::vector<PFF::geometry::vertex> vertices);
 
 		bool m_is_initialized = false;
 		u64 m_frame_number = 0;

@@ -191,8 +191,8 @@ namespace PFF::mesh_factory {
 
                 static_mesh_header static_mesh_header{};
                 static_mesh_header.version = 1;
+                static_mesh_header.source_file = source_path;
                 static_mesh_header.mesh_index = x;
-                //static_mesh_header.source_file = source_path;
 
                 std::filesystem::path output_path = destination_path / (metadata.name + PFF_ASSET_EXTENTION);
 

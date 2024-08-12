@@ -5,9 +5,7 @@
 #include "mesh_import_window.h"
 #include "PFF_editor.h"
 
-// DEV-ONLY
-#define PFF_DEBUG
-#include "util/profiling/instrumentor.h"
+#include "engine/resource_management/static_mesh_asset_manager.h"
 
 #include "content_browser.h"
 
@@ -57,14 +55,14 @@ namespace PFF {
 	content_browser::content_browser() { 
 
 		m_project_directory = PFF_editor::get().get_project_path();
-		m_selected_directory = m_project_directory / "content";
+		m_selected_directory = m_project_directory / CONTENT_DIR;
 		window_name = "Content Browser"; 
 	}
 
-	struct TEST_STRUCT {
+	//struct TEST_STRUCT {
 
-		std::filesystem::path		path;
-	};
+	//	std::filesystem::path		path;
+	//};
 
 	void content_browser::window() {
 
@@ -85,52 +83,9 @@ namespace PFF {
 
 		}
 
-		ImGui::SameLine();
-		if (ImGui::Button(" DO some useless stuff ")) {
-			
-			util::random loc_random{};
-
-			std::stringstream ss_befor{};
-			std::stringstream ss_after{};
-
-			//CORE_LOG(Info, "Testing Serialization");
-
-			{
-				TEST_STRUCT test{};
-
-				u64 length = loc_random.get_u64(10, 30);
-				test.path = std::filesystem::path("start");
-				for (u64 x = 0; x < length; x++) {
-
-					u64 str_length = loc_random.get_u64(10, 30);
-					test.path /= loc_random.get_string((size_t)str_length);
-				}
-
-				serializer::binary(PFF_editor::get().get_project_path() / "TEST.txt", "some_stuff", serializer::option::save_to_file)
-					.entry(test.path);
-
-				ss_befor << util::to_string(test.path);
-				CORE_LOG(Trace, "befor: " << ss_befor.str());
-			}
-
-			TEST_STRUCT result{};
-
-			{
-				serializer::binary(PFF_editor::get().get_project_path() / "TEST.txt", "some_stuff", serializer::option::load_from_file)
-					.entry(result.path);
-			}
-
-			ss_after << util::to_string(result.path);
-			CORE_LOG(Trace, "befor: " << ss_after.str());
-
-			// Compare the strings
-			CORE_ASSERT(ss_befor.str() == ss_after.str(), "", "Error");
-
-		}
-
 		UI::custom_frame_NEW(350, true, IM_COL32(37, 37, 37, 255), [&]() {
 			
-			show_directory_tree(m_project_directory / "content");
+			show_directory_tree(m_project_directory / CONTENT_DIR);
 
 		}, []() {
 

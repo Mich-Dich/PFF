@@ -54,8 +54,8 @@ namespace PFF {
 		transform_comp.translation = glm::vec3(0);
 		transform_comp.rotation = glm::vec3(0);
 
-		//auto& mesh_comp = loc_entitiy.add_component<mesh_component>();			
-		//mesh_comp.mesh_asset = GET_RENDERER.get_test_mesh();					// get correct mesh
+		auto& mesh_comp = loc_entitiy.add_component<mesh_component>();			
+		mesh_comp.mesh_asset = static_mesh_asset_manager::get_from_path("Plane.pffasset");
 		//mesh_comp.material = GET_RENDERER.get_default_material_pointer();		// get correct shader
 
 
@@ -200,6 +200,20 @@ namespace PFF {
 		if (m_system_state != system_state::inactive)
 			m_system_state = should_pause ? system_state::suspended : system_state::active;
 	}
+
+
+	template<typename T>
+	FORCEINLINE void map::on_component_added(entity entity, T& component) {
+
+		if constexpr (std::is_same_v<T, mesh_component>) {
+
+			//if (component.material != nullptr) 
+			//	component = &m_default_material;
+
+			CORE_LOG(Error, "Added mesh comp <= STILL NEED TO CHECK FOR DEFAULT MATERIAL");
+		}
+	}
+
 
 	// =============================================================== runtime/simulation ===============================================================
 

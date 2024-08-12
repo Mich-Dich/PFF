@@ -1,18 +1,75 @@
 
 #include "util/pffpch.h"
 
+#include "application.h"
+#include "engine/render/vulkan/vk_renderer.h"
+
 #include "static_mesh_asset_manager.h"
 
 namespace PFF {
 
+
+	/*	GUIDLINE:
+			meshes can be requested by path relative to the project content folder
+			uploaded meshes will be heald alive with a ref<> from this manager		// manager will loop over refs periodicly and release them if count is 1 (only used here)
+
+	*/
+
+
 	static_mesh_asset_manager static_mesh_asset_manager::s_instance;
+
+	// start with PFF_editor::get().get_project_dir() / CONTENT_DIR
+	//void static_mesh_asset_manager::register_all_static_mesh_assets(const std::filesystem::path& path) {
+
+	//	m_uploaded_mesh_assets["sfsgdfg"] = nullptr;
+
+	//	static ImGuiTreeNodeFlags base_flags = ImGuiTreeNodeFlags_SpanAvailWidth;
+	//	for (const auto& entry : std::filesystem::directory_iterator(path)) {
+
+	//		if (!entry.is_directory())
+	//			continue;
+
+	//		bool has_sub_folders = false;
+	//		for (const auto& sub_entry : std::filesystem::directory_iterator(entry.path())) {		// <= HERE I GET AN ERROR
+	//			if (!sub_entry.is_directory())
+	//				continue;
+
+	//			has_sub_folders = true;
+	//			break;
+	//		}
+
+	//		if (has_sub_folders) {
+
+	//			bool buffer = ImGui::TreeNodeEx(entry.path().filename().string().c_str(), base_flags);
+	//			if (ImGui::IsItemClicked())
+	//				m_selected_directory = entry.path();
+
+	//			if (buffer) {
+
+	//				show_directory_tree(entry.path());
+	//				ImGui::TreePop();
+	//			}
+
+	//		} else {
+
+	//			ImGui::TreeNodeEx(entry.path().filename().string().c_str(), base_flags | ImGuiTreeNodeFlags_Leaf | ImGuiTreeNodeFlags_NoTreePushOnOpen);
+	//			if (ImGui::IsItemClicked() && !ImGui::IsItemToggledOpen())
+	//				m_selected_directory = entry.path();
+
+	//		}
+	//	}
+
+	//}
 
 	static_mesh_asset_manager::static_mesh_asset_manager() {
 	
 		// TODO: loop over content directory to load a map of all static_mesh_assets	(only the map)
+
+		//register_all_static_mesh_assets(application::get().get_project_path() / CONTENT_DIR);
+
+
 		
 
-		// T_test_meshes = PFF::mesh_factory::load_gltf_meshes("../PFF/assets/meshes/grass_001.glb").value();
 
 
 
@@ -144,26 +201,32 @@ namespace PFF {
 
 	ref<geometry::mesh_asset> static_mesh_asset_manager::get_from_path(const std::filesystem::path path) {
 
-		CORE_VALIDATE(path.extension() == PFF_ASSET_EXTENTION, return nullptr, "", "Provided path is not a static_mesh");
+		CORE_VALIDATE(path.extension() == PFF_ASSET_EXTENTION, return nullptr, "", "Provided path is not a static mesh asset");
+		//return nullptr;		// NOT FINISHED YET
 
+		std::filesystem::path mesh_path = application::get().get_project_path() / CONTENT_DIR / path;
 
-
-
-		return nullptr;		// NOT FINISHED YET
-
-
-
-
-		if (s_instance.m_mesh_asset_map.find(path) == s_instance.m_mesh_asset_map.end())
-			return s_instance.m_mesh_asset_map[path];
+		if (s_instance.m_uploaded_mesh_assets.find(mesh_path) != s_instance.m_uploaded_mesh_assets.end())
+			return s_instance.m_uploaded_mesh_assets[mesh_path];
 
 		else {
 
-			// TODO:: load from disk	=> shoudld be in engine format
-			//geometry::mesh_asset loc_mesh = load_from_disk(path);
-						
-			//s_instance.m_mesh_asset_map[path] = create_ref<geometry::mesh_asset>(loc_mesh);				// save pointer in map
-			return s_instance.m_mesh_asset_map[path];
+			general_file_header general_header{};
+			static_mesh_header static_mesh_header{};
+
+			s_instance.m_uploaded_mesh_assets[mesh_path] = create_ref<geometry::mesh_asset>();
+			serialize_mesh(mesh_path, s_instance.m_uploaded_mesh_assets[mesh_path], general_header, static_mesh_header, serializer::option::load_from_file);
+
+			// TODO: validate deserialized headers
+			CORE_LOG(Info, "Deserialized mesh => general_header: " << (u64)general_header.type);
+			CORE_LOG(Info, "Deserialized mesh => static_mesh_header: " << static_mesh_header.version
+				<< " | "<< static_mesh_header.source_file
+				<< " | "<< static_mesh_header.mesh_index);
+
+			// upload mesh to GPU
+			s_instance.m_uploaded_mesh_assets[mesh_path]->mesh_buffers = GET_RENDERER.upload_mesh(s_instance.m_uploaded_mesh_assets[mesh_path]->indices, s_instance.m_uploaded_mesh_assets[mesh_path]->vertices);
+
+			return s_instance.m_uploaded_mesh_assets[mesh_path];
 		}
 
 		return nullptr;
@@ -176,10 +239,12 @@ namespace PFF {
 
 			serializer::binary(filename, "gltf_mesh_data", option)
 				.entry(general_header)
-				.entry(static_mesh_header)
-				.vector(mesh_asset->surfaces)
-				.vector(mesh_asset->vertices)
-				.vector(mesh_asset->indices)
+				.entry(static_mesh_header.version)
+				.entry(static_mesh_header.source_file)
+				.entry(static_mesh_header.mesh_index)
+				.entry(mesh_asset->surfaces)
+				.entry(mesh_asset->vertices)
+				.entry(mesh_asset->indices)
 				.entry(mesh_asset->bounds);
 
 	}
@@ -194,4 +259,3 @@ namespace PFF {
 //ref<PFF::geometry::mesh_asset>	get_test_mesh() const { return T_test_meshes[0]; }
 //PFF_DEFAULT_GETTERS_C(material_instance, default_material);
 //// ==========================================================================================================
-

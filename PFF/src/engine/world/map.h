@@ -81,6 +81,9 @@ namespace PFF {
 
 	private:
 
+		template<typename T>
+		FORCEINLINE void on_component_added(entity entity, T& component);
+
 		friend class entity;
 
 		glm::mat4								m_transform;					// transform of map (map could be a small chunk of the ingame world)

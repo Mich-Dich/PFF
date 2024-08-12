@@ -78,11 +78,9 @@ namespace PFF::serializer {
 		template<typename T>
 		binary& vector(std::vector<T>& vector, std::function<void(PFF::serializer::yaml&, const u64 iteration)> vector_function) {
 
-			// TODO: implement
-
+			CORE_LOG(Error, "NOT IMPLEMENTED YET");
 			return *this;
 		}
-
 
 
 	private:

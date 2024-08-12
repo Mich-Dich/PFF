@@ -9,7 +9,7 @@
 namespace PFF {
 
 
-	static std::filesystem::path project_dir = std::filesystem::path("C:\\") / "CustomGameEngine" / "PFF" / "test_project" / "content";
+	static std::filesystem::path project_dir = std::filesystem::path("C:\\") / "CustomGameEngine" / "PFF" / "test_project" / CONTENT_DIR;
 
 
 	void mesh_import_window::window() {

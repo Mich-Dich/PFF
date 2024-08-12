@@ -1103,6 +1103,13 @@ namespace PFF::render::vulkan {
 
 				// only bind material and pipeline when needed
 				material_instance* loc_material = (mesh_comp.material != nullptr) ? mesh_comp.material : &m_default_material;
+
+
+				// ============================== DEV-ONLY ==============================
+					mesh_comp.material = loc_material;
+				// ============================== DEV-ONLY ==============================
+
+
 				if (last_material != loc_material) {
 					
 					last_material = loc_material;
