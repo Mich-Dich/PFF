@@ -242,6 +242,7 @@
     </ClInclude>
     <ClInclude Include="src\util\io\serializer_binary.h" />
     <ClInclude Include="src\util\io\serializer_yaml.h" />
+    <ClInclude Include="src\engine\resource_management\headers.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="src\application.cpp" />

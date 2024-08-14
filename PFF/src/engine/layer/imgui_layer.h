@@ -2,10 +2,15 @@
 
 #include <imgui.h>
 
+#include <imgui.h>
+
 #include "engine/layer/layer.h"
-//#include "util/io/serializer.h"
 
 namespace PFF::UI {
+
+	#define LERP_GRAY(value)					{value, value, value, 1.f }
+	#define IMCOLOR_GRAY(value)					ImColor{value, value, value, 255 }
+
 
 	FORCEINLINE static u32 convert_color_to_int(const ImVec4& color) { return IM_COL32(255 * color.x, 255 * color.y, 255 * color.z, 255 * color.w); }
 
@@ -20,7 +25,7 @@ namespace PFF::UI {
 	static f32  m_font_size = 15.f, m_font_size_header_0 = 19.f, m_font_size_header_1 = 23.f, m_font_size_header_2 = 27.f, m_big_font_size = 18.f;
 	static theme_selection UI_theme = theme_selection::dark;
 	static bool enable_window_forder;
-	static ImVec4 highlited_window_bg;
+	static ImVec4 highlited_window_bg = LERP_GRAY(0.57f);
 	static f32 default_item_width;
 
 	static ImVec4 main_color;
@@ -31,10 +36,13 @@ namespace PFF::UI {
 	static ImVec4 action_color_00_default;
 	static ImVec4 action_color_00_hover;
 	static ImVec4 action_color_00_active;
-	
-	static ImVec4 action_color_gray_default;
-	static ImVec4 action_color_gray_hover;
-	static ImVec4 action_color_gray_active;
+
+	static ImColor default_gray = IMCOLOR_GRAY(30);
+	static ImColor default_gray_1 = IMCOLOR_GRAY(35);
+
+	static ImVec4 action_color_gray_default = LERP_GRAY(0.2f);
+	static ImVec4 action_color_gray_hover = LERP_GRAY(0.27f);
+	static ImVec4 action_color_gray_active = LERP_GRAY(0.35f);
 
 	void PFF_API set_UI_theme_selection(theme_selection theme_selection);
 	void PFF_API enable_window_border(bool enable);

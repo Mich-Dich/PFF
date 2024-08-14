@@ -22,18 +22,18 @@ namespace PFF {
     };
 
     // ---------------------- GENERAL ------------------------------------------------------------------------------------------------------
-    struct general_file_header {
+    struct general_mesh_file_header {
 
         mesh_type       type;
     };
     // -------------------------------------------------------------------------------------------------------------------------------------
 
     // ---------------------- SPECIFIC -----------------------------------------------------------------------------------------------------
-	struct static_mesh_header {
+	struct static_mesh_file_header {
 
-		u16                     version;
-        std::filesystem::path   source_file;        // need to also save path_size
-        size_t                  mesh_index;         // index of this mesh from the original gltf-file
+		u16                     version{};
+        std::filesystem::path   source_file{};        // need to also save path_size
+        size_t                  mesh_index{};         // index of this mesh from the original gltf-file
 	};
 
     // ...

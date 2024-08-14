@@ -12,6 +12,7 @@
 #include <fastgltf/tools.hpp>
 
 #include "engine/resource_management/mesh_headers.h"
+#include "engine/resource_management/headers.h"
 
 #include "static_mesh_factory.h"
 
@@ -184,19 +185,24 @@ namespace PFF::mesh_factory {
             for (size_t x = 0; x < loc_mesh_assets.value().size(); x++) {
 
                 static_mesh_file_metadata metadata{};
-                metadata.name = loc_mesh_assets.value()[x]->name;
+                metadata.name = source_path.filename().replace_extension("").string() + "_" + loc_mesh_assets.value()[x]->name;
 
-                general_file_header general_header{};
-                general_header.type = mesh_type::static_mesh;
+                asset_file_header asset_file_header{};
+                asset_file_header.type = file_type::mesh;
+                asset_file_header.version = current_asset_file_header_version;
+                asset_file_header.timestamp = util::get_system_time();
 
-                static_mesh_header static_mesh_header{};
+                general_mesh_file_header general_mesh_header{};
+                general_mesh_header.type = mesh_type::static_mesh;
+
+                static_mesh_file_header static_mesh_header{};
                 static_mesh_header.version = 1;
                 static_mesh_header.source_file = source_path;
                 static_mesh_header.mesh_index = x;
 
                 std::filesystem::path output_path = destination_path / (metadata.name + PFF_ASSET_EXTENTION);
 
-                serialize_mesh(output_path, loc_mesh_assets.value()[x], general_header, static_mesh_header, serializer::option::save_to_file);
+                serialize_mesh(output_path, loc_mesh_assets.value()[x], asset_file_header, general_mesh_header, static_mesh_header, serializer::option::save_to_file);
             }
         }
 

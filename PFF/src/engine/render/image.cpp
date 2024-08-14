@@ -166,7 +166,7 @@ namespace PFF {
 	VkDescriptorSet image::get_descriptor_set() {
 
 		if (m_descriptor_set == nullptr)
-			m_descriptor_set = (VkDescriptorSet)ImGui_ImplVulkan_AddTexture(GET_RENDERER.get_default_sampler_nearest(), m_image_view, VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL);
+			m_descriptor_set = (VkDescriptorSet)ImGui_ImplVulkan_AddTexture(GET_RENDERER.get_default_sampler_linear(), m_image_view, VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL);
 
 		return m_descriptor_set;
 	}

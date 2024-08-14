@@ -99,6 +99,8 @@ namespace PFF::logger {
         "\x1b[41m\x1b[30m",   // Red Background
     };
 
+    // [$B$T:$J$E] [$B$L$X $I - $P:$G$E] $C$Z
+
     // ================================================================= public functions =================================================================
 
     bool init(const std::string& format) {
@@ -235,36 +237,36 @@ namespace PFF::logger {
 
                     // ------------------------------------  Time  -------------------------------------------------------------------------------
                     // Clock hh:mm:ss
-                case 'T':   Format_Filled << std::setw(2) << std::setfill('0') << loc_system_time.hour
-                        << ":" << std::setw(2) << std::setfill('0') << loc_system_time.minute
-                        << ":" << std::setw(2) << std::setfill('0') << loc_system_time.secund; break;
+                case 'T':   Format_Filled << std::setw(2) << std::setfill('0') << (u16)loc_system_time.hour
+                        << ":" << std::setw(2) << std::setfill('0') << (u16)loc_system_time.minute
+                        << ":" << std::setw(2) << std::setfill('0') << (u16)loc_system_time.secund; break;
 
                     // Clock secunde
-                case 'H':   Format_Filled << std::setw(2) << std::setfill('0') << loc_system_time.hour; break;
+                case 'H':   Format_Filled << std::setw(2) << std::setfill('0') << (u16)loc_system_time.hour; break;
 
                     // Clock minute
-                case 'M':   Format_Filled << std::setw(2) << std::setfill('0') << loc_system_time.minute; break;
+                case 'M':   Format_Filled << std::setw(2) << std::setfill('0') << (u16)loc_system_time.minute; break;
 
                     // Clock second
-                case 'S':   Format_Filled << std::setw(2) << std::setfill('0') << loc_system_time.secund; break;
+                case 'S':   Format_Filled << std::setw(2) << std::setfill('0') << (u16)loc_system_time.secund; break;
 
                     // Clock millisec.
-                case 'J':   Format_Filled << std::setw(3) << std::setfill('0') << loc_system_time.millisecends; break;
+                case 'J':   Format_Filled << std::setw(3) << std::setfill('0') << (u16)loc_system_time.millisecends; break;
 
                     // ------------------------------------  Date  -------------------------------------------------------------------------------
                     // Data yyyy/mm/dd
-                case 'N':   Format_Filled << std::setw(4) << std::setfill('0') << loc_system_time.year
-                        << "/" << std::setw(2) << std::setfill('0') << loc_system_time.month
-                        << "/" << std::setw(2) << std::setfill('0') << loc_system_time.day; break;
+                case 'N':   Format_Filled << std::setw(4) << std::setfill('0') << (u16)loc_system_time.year
+                        << "/" << std::setw(2) << std::setfill('0') << (u16)loc_system_time.month
+                        << "/" << std::setw(2) << std::setfill('0') << (u16)loc_system_time.day; break;
 
                     // Year
-                case 'Y':   Format_Filled << std::setw(4) << std::setfill('0') << loc_system_time.year; break;
+                case 'Y':   Format_Filled << std::setw(4) << std::setfill('0') << (u16)loc_system_time.year; break;
 
                     // Month
-                case 'O':   Format_Filled << std::setw(2) << std::setfill('0') << loc_system_time.month; break;
+                case 'O':   Format_Filled << std::setw(2) << std::setfill('0') << (u16)loc_system_time.month; break;
 
                     // Day
-                case 'D':   Format_Filled << std::setw(2) << std::setfill('0') << loc_system_time.day; break;
+                case 'D':   Format_Filled << std::setw(2) << std::setfill('0') << (u16)loc_system_time.day; break;
 
                     // ------------------------------------  Default  -------------------------------------------------------------------------------
                 default: break;

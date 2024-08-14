@@ -10,8 +10,8 @@ namespace PFF {
 
 
 	/*	GUIDLINE:
-			meshes can be requested by path relative to the project content folder
-			uploaded meshes will be heald alive with a ref<> from this manager		// manager will loop over refs periodicly and release them if count is 1 (only used here)
+			meshes can be requested by path relative to the project [content] folder
+			uploaded meshes will be held alive with a ref<> from this manager		// manager will loop over refs periodicly and release them if count is 1 (only used here)
 
 	*/
 
@@ -211,11 +211,12 @@ namespace PFF {
 
 		else {
 
-			general_file_header general_header{};
-			static_mesh_header static_mesh_header{};
+			asset_file_header asset_file_header{};
+			general_mesh_file_header general_header{};
+			static_mesh_file_header static_mesh_header{};
 
 			s_instance.m_uploaded_mesh_assets[mesh_path] = create_ref<geometry::mesh_asset>();
-			serialize_mesh(mesh_path, s_instance.m_uploaded_mesh_assets[mesh_path], general_header, static_mesh_header, serializer::option::load_from_file);
+			serialize_mesh(mesh_path, s_instance.m_uploaded_mesh_assets[mesh_path], asset_file_header, general_header, static_mesh_header, serializer::option::load_from_file);
 
 			// TODO: validate deserialized headers
 			CORE_LOG(Info, "Deserialized mesh => general_header: " << (u64)general_header.type);
@@ -235,17 +236,19 @@ namespace PFF {
 	// TODO: Iterate over every ref and check for refrence_count
 	//			if the count is 1 it means only the asset manager is holding onto the asset and it should be released
 
-	void serialize_mesh(const std::filesystem::path filename, ref<geometry::mesh_asset> mesh_asset, general_file_header& general_header, static_mesh_header& static_mesh_header, const serializer::option option) {
+	void serialize_mesh(const std::filesystem::path filename, ref<geometry::mesh_asset> mesh_asset,
+		asset_file_header& asset_file_header, general_mesh_file_header& general_header, static_mesh_file_header& static_mesh_header, const serializer::option option) {
 
-			serializer::binary(filename, "gltf_mesh_data", option)
-				.entry(general_header)
-				.entry(static_mesh_header.version)
-				.entry(static_mesh_header.source_file)
-				.entry(static_mesh_header.mesh_index)
-				.entry(mesh_asset->surfaces)
-				.entry(mesh_asset->vertices)
-				.entry(mesh_asset->indices)
-				.entry(mesh_asset->bounds);
+		serializer::binary(filename, "PFF_asset_file", option)
+			.entry(asset_file_header)
+			.entry(general_header)
+			.entry(static_mesh_header.version)
+			.entry(static_mesh_header.source_file)
+			.entry(static_mesh_header.mesh_index)
+			.entry(mesh_asset->surfaces)
+			.entry(mesh_asset->vertices)
+			.entry(mesh_asset->indices)
+			.entry(mesh_asset->bounds);
 
 	}
 

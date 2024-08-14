@@ -62,6 +62,8 @@ namespace PFF {
 
 		m_data.height -= 35;
 		m_data.width -= 8;
+		math::max<u32>(m_data.height, 0);
+		math::max<u32>(m_data.width, 0);
 		m_Window = glfwCreateWindow(static_cast<int>(m_data.width), static_cast<int>(m_data.height), m_data.title.c_str(), nullptr, nullptr);
 
 		CORE_ASSERT(glfwVulkanSupported(), "", "GLFW does not support Vulkan");

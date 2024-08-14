@@ -39,6 +39,24 @@ namespace PFF::UI {
 		bottom_right = 5,
 	};
 
+	enum class mouse_interation {
+
+		none,
+		hovered,
+		single_click,
+		double_click,
+		right_click,
+		right_double_click,
+	};
+
+
+	PFF_API FORCEINLINE bool is_holvering_window();
+
+	PFF_API FORCEINLINE bool is_item_double_clicked();
+
+	PFF_API FORCEINLINE mouse_interation get_mouse_interation_on_item();
+
+	PFF_API FORCEINLINE std::string wrap_text_at_underscore(const std::string& text, float wrap_width);
 
 	PFF_API FORCEINLINE void set_next_window_pos(window_pos location, f32 padding = 10.f);
 

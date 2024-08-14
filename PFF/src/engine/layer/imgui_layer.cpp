@@ -17,8 +17,6 @@
 #define PFF_UI_ACTIVE_THEME					PFF::UI::THEME::current_theme
 
 #define LERP_GRAY_A(value, alpha)			{value, value, value, alpha }
-#define LERP_GRAY(value)					{value, value, value, 1.f }
-#define IMCOLOR_GRAY(value)					ImColor{value, value, value, 255 }
 //#define COLOR_INT_CONVERTION(color)			IM_COL32(255 * color.x, 255 * color.y, 255 * color.z, 255 * color.w)
 #define LERP_MAIN_COLOR_DARK(value)			{main_color.x * value, main_color.y * value, main_color.z * value, 1.f }		// Set [w] to be [1.f] to disable accidental transparency
 #define LERP_MAIN_COLOR_LIGHT(value)		{	(1.f - value) * 1.f + value * main_color.x, \
@@ -108,10 +106,6 @@ namespace PFF::UI {
 		action_color_00_default = LERP_MAIN_COLOR_DARK(0.7f);
 		action_color_00_hover = LERP_MAIN_COLOR_DARK(0.85f);
 		action_color_00_active = LERP_MAIN_COLOR_DARK(1.f);
-
-		action_color_gray_default = LERP_GRAY(0.2f);
-		action_color_gray_hover = LERP_GRAY(0.27f);
-		action_color_gray_active = LERP_GRAY(0.35f);
 
 		//{
 		//	u32 w, h;
@@ -571,9 +565,6 @@ namespace PFF::UI {
 
 			case PFF::UI::theme_selection::dark: {
 
-				ImColor default_gray = IMCOLOR_GRAY(30);
-				ImColor default_gray_1 = IMCOLOR_GRAY(35);
-
 				action_color_00_faded = LERP_MAIN_COLOR_DARK(0.5f);
 				action_color_00_weak = LERP_MAIN_COLOR_DARK(0.6f);
 				action_color_00_default = LERP_MAIN_COLOR_DARK(0.7f);
@@ -584,7 +575,6 @@ namespace PFF::UI {
 				action_color_gray_hover = LERP_GRAY(0.2f);
 				action_color_gray_active = LERP_GRAY(0.25f);
 
-				//highlited_window_bg = LERP_GRAY(0.17f);
 				highlited_window_bg = LERP_GRAY(0.57f);
 				main_titlebar_color = LERP_MAIN_COLOR_DARK(.5f);
 

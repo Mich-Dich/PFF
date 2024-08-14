@@ -24,7 +24,7 @@ namespace PFF {
 		template<typename T, typename... Args>
 		FORCEINLINE T& add_component(Args&&... args) {
 
-			CORE_ASSERT(!this->has_component<T>(), "", "Entity already has component!");
+			ASSERT(!this->has_component<T>(), "", "Entity already has component!");
 			T& component = m_map->m_registry.emplace<T>(m_entity_handle, std::forward<Args>(args)...);
 			m_map->on_component_added<T>(*this, component);
 			return component;
@@ -41,14 +41,14 @@ namespace PFF {
 		template<typename T>
 		FORCEINLINE T& get_component() {
 
-			CORE_ASSERT(this->has_component<T>(), "", "Entity does not have component!");
+			ASSERT(this->has_component<T>(), "", "Entity does not have component!");
 			return m_map->m_registry.get<T>(m_entity_handle);
 		}
 
 		template<typename T>
 		FORCEINLINE void remove_component() {
 
-			CORE_ASSERT(this->has_component<T>(), "", "Entity does not have component!");
+			ASSERT(this->has_component<T>(), "", "Entity does not have component!");
 			m_map->m_registry.remove<T>(m_entity_handle);
 		}
 

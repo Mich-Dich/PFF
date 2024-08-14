@@ -24,6 +24,7 @@ namespace PFF {
 		std::filesystem::path		m_partial_selected_directory;
 
 		ref<image>					m_folder_image;
+		ref<image>					m_world_image;
 		ref<image>					m_mesh_asset_image;
 		ImVec2						m_icon_size;
 	};

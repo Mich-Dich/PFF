@@ -21,22 +21,29 @@ typedef unsigned long long handle;
 namespace PFF {
 
 	struct version {
+
+		version() {}
+		version(u16 major, u16  minor, u16  patch)
+			:major(major), minor(minor), patch(patch) {}
+
 		u16 major{};
 		u16 minor{};
 		u16 patch{};
 	};
 
+//#pragma pack(1)
 	struct system_time {
 
-		unsigned short year;
-		unsigned short month;
-		unsigned short day_of_week;
-		unsigned short day;
-		unsigned short hour;
-		unsigned short minute;
-		unsigned short secund;
-		unsigned short millisecends;
+		u16 year;
+		u8 month;
+		u8 day;
+		u8 day_of_week;
+		u8 hour;
+		u8 minute;
+		u8 secund;
+		u16 millisecends;
 	};
+//#pragma pack(pop)
 
 	enum class error_code {
 		success = 0,

@@ -47,21 +47,20 @@ namespace PFF {
 
 	map::map() {
 
+		//{
+		//	entity loc_entitiy = create_entity("editor_origin_grid");
 
-		entity loc_entitiy = create_entity("editor_origin_grid");
+		//	auto& transform_comp = loc_entitiy.get_component<transform_component>();
+		//	transform_comp.translation = glm::vec3(0);
+		//	transform_comp.rotation = glm::vec3(0);
 
-		auto& transform_comp = loc_entitiy.get_component<transform_component>();
-		transform_comp.translation = glm::vec3(0);
-		transform_comp.rotation = glm::vec3(0);
-
-		auto& mesh_comp = loc_entitiy.add_component<mesh_component>();			
-		mesh_comp.mesh_asset = static_mesh_asset_manager::get_from_path("meshes/Plane.pffasset");
-		//mesh_comp.material = GET_RENDERER.get_default_material_pointer();		// get correct shader
-
-
-
+		//	auto& mesh_comp = loc_entitiy.add_component<mesh_component>();			
+		//	mesh_comp.mesh_asset = static_mesh_asset_manager::get_from_path("meshes/grass_002_Plane.pffasset");
+		//	//mesh_comp.material = GET_RENDERER.get_default_material_pointer();		// get correct shader
+		//}
 
 
+		
 		//class test_script : public entity_script {
 		//public:
 		//	void on_create() override { CORE_LOG(Debug, "Creating test_script instance") }
@@ -69,8 +68,6 @@ namespace PFF {
 		//	void on_update(f32 delta_time) override { CORE_LOG(Info, "Time: " << delta_time); }
 		//};
 		//loc_entitiy.add_script_component<test_script>();
-
-
 
 #define ADD_MESH_PROCESS 3
 #if ADD_MESH_PROCESS == 0

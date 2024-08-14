@@ -276,24 +276,32 @@ namespace PFF {
                 return;
             }
 
-            else if constexpr (std::is_arithmetic_v<T>) {
+            else if constexpr (std::is_same_v<T, PFF::version>) {
 
-                dest_string = std::to_string(src_value);
+                std::ostringstream oss;
+                oss << src_value.major << ' ' << src_value.minor << ' ' << src_value.patch;
+                dest_string = oss.str();
+                return;
+            }
+
+            else if constexpr (std::is_same_v<T, PFF::system_time>) {
+
+                std::ostringstream oss;
+                oss << (u16)src_value.year
+                    << ' ' << (u16)src_value.month
+                    << ' ' << (u16)src_value.day
+                    << ' ' << (u16)src_value.day_of_week
+                    << ' ' << (u16)src_value.hour
+                    << ' ' << (u16)src_value.minute
+                    << ' ' << (u16)src_value.secund
+                    << ' ' << (u16)src_value.millisecends;
+                dest_string = oss.str();
                 return;
             }
 
             else if constexpr (std::is_same_v<T, std::filesystem::path>) {
 
                 dest_string = src_value.string();
-                return;
-            }
-
-            else if constexpr (std::is_convertible_v<T, std::string>) {
-
-                //LOG(Fatal, "called: convert_to_string() with string");
-                dest_string = src_value;
-                //std::replace(dest_string.begin(), dest_string.end(), ' ', '%');
-                std::replace(dest_string.begin(), dest_string.end(), '\n', '$');
                 return;
             }
 
@@ -316,18 +324,11 @@ namespace PFF {
             else if constexpr (std::is_same_v<T, glm::vec4> || std::is_same_v<T, ImVec4>) {
 
                 std::ostringstream oss;
-                oss << std::fixed << std::setprecision(4) 
+                oss << std::fixed << std::setprecision(4)
                     << src_value.x << ' ' << src_value.y << ' ' << src_value.z << ' ' << src_value.w;
                 dest_string = oss.str();
                 return;
             }
-
-            else if constexpr (std::is_enum_v<T>) {
-
-                dest_string = std::to_string(static_cast<std::underlying_type_t<T>>(src_value));
-                return;
-            }
-
             // Matrix of size 4         TODO: move into seperate template for all matrixes
             else if constexpr (std::is_same_v<T, glm::mat4>) {
 
@@ -342,6 +343,28 @@ namespace PFF {
                 dest_string = oss.str();
                 return;
             }
+
+            else if constexpr (std::is_arithmetic_v<T>) {
+
+                dest_string = std::to_string(src_value);
+                return;
+            }
+
+            else if constexpr (std::is_convertible_v<T, std::string>) {
+
+                //LOG(Fatal, "called: convert_to_string() with string");
+                dest_string = src_value;
+                //std::replace(dest_string.begin(), dest_string.end(), ' ', '%');
+                std::replace(dest_string.begin(), dest_string.end(), '\n', '$');
+                return;
+            }
+
+            else if constexpr (std::is_enum_v<T>) {
+
+                dest_string = std::to_string(static_cast<std::underlying_type_t<T>>(src_value));
+                return;
+            }
+
 
             else
                 DEBUG_BREAK();		// Input value is not supported
@@ -372,9 +395,24 @@ namespace PFF {
                 return;
             }
 
-            else if constexpr (std::is_arithmetic_v<T>) {
+            else if constexpr (std::is_same_v<T, version>) {
 
-                dest_value = util::str_to_num<T>(src_string);
+                std::istringstream iss(src_string);
+                iss >> dest_value.major >> dest_value.minor >> dest_value.patch;
+                return;
+            }
+
+            else if constexpr (std::is_same_v<T, PFF::system_time>) {
+
+                std::istringstream iss(src_string);
+                iss >> dest_value.year
+                    >> dest_value.month
+                    >> dest_value.day
+                    >> dest_value.day_of_week
+                    >> dest_value.hour
+                    >> dest_value.minute
+                    >> dest_value.secund
+                    >> dest_value.millisecends;
                 return;
             }
 
@@ -389,13 +427,6 @@ namespace PFF {
                 std::string temp_str = src_string;
                 std::replace(temp_str.begin(), temp_str.end(), '$', '\n');
                 dest_value = temp_str.c_str();
-                return;
-            }
-            
-            else if constexpr (std::is_convertible_v<T, std::string>) {
-
-                dest_value = src_string;
-                std::replace(dest_value.begin(), dest_value.end(), '$', '\n');
                 return;
             }
 
@@ -420,12 +451,6 @@ namespace PFF {
                 return;
             }
 
-            else if constexpr (std::is_enum_v<T>) {
-
-                dest_value = static_cast<T>(std::stoi(src_string));
-                return;
-            }
-
             else if constexpr (std::is_same_v<T, glm::mat4> || std::is_same_v<T, glm::mat3>) {
 
                 int loc_size = 4;
@@ -438,6 +463,25 @@ namespace PFF {
                         iss >> dest_value[i][j];
                     }
                 }
+                return;
+            }
+
+            else if constexpr (std::is_arithmetic_v<T>) {
+
+                dest_value = util::str_to_num<T>(src_string);
+                return;
+            }
+
+            else if constexpr (std::is_convertible_v<T, std::string>) {
+
+                dest_value = src_string;
+                std::replace(dest_value.begin(), dest_value.end(), '$', '\n');
+                return;
+            }
+
+            else if constexpr (std::is_enum_v<T>) {
+
+                dest_value = static_cast<T>(std::stoi(src_string));
                 return;
             }
 

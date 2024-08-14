@@ -9,6 +9,70 @@
 
 namespace PFF::UI {
 
+	bool is_holvering_window() {
+
+		const ImVec2 mouse_pos = ImGui::GetMousePos();
+		const ImVec2 popup_pos = ImGui::GetWindowPos();
+		const ImVec2 popup_size = ImGui::GetWindowSize();
+		return (mouse_pos.x >= popup_pos.x && mouse_pos.x <= popup_pos.x + popup_size.x && mouse_pos.y >= popup_pos.y && mouse_pos.y <= popup_pos.y + popup_size.y);
+	}
+	
+	bool is_item_double_clicked() {
+
+		const ImVec2 item_pos = ImGui::GetItemRectMin();
+		const ImVec2 item_max = item_pos + ImGui::GetItemRectSize();
+		return ImGui::IsMouseHoveringRect(item_pos, item_max) && ImGui::IsMouseDoubleClicked(0);
+	}
+
+	mouse_interation get_mouse_interation_on_item() {
+
+		const ImVec2 item_pos = ImGui::GetItemRectMin();
+		const ImVec2 item_max = item_pos + ImGui::GetItemRectSize();
+
+		if (!ImGui::IsMouseHoveringRect(item_pos, item_max))
+			return mouse_interation::none;
+
+		if (ImGui::IsMouseClicked(ImGuiMouseButton_Right)) {
+			if (ImGui::IsMouseDoubleClicked(ImGuiMouseButton_Right))
+				return mouse_interation::right_double_click;
+			return mouse_interation::right_click;
+		}
+
+		if (ImGui::IsMouseClicked(ImGuiMouseButton_Left)) {
+			if (ImGui::IsMouseDoubleClicked(ImGuiMouseButton_Left))
+				return mouse_interation::double_click;
+			return mouse_interation::single_click;
+		}
+
+		return mouse_interation::hovered;
+	}
+
+	std::string wrap_text_at_underscore(const std::string& text, float wrap_width) {
+
+		std::stringstream ss(text);
+		std::string segment;
+		std::string wrapped_text;
+		float text_width = 0.0f;
+		float item_width = wrap_width;
+
+		// Split the text at underscores
+		while (std::getline(ss, segment, '_')) {
+			// Check if adding this segment exceeds the wrap width
+			if (text_width + ImGui::CalcTextSize(segment.c_str()).x > item_width) {
+				wrapped_text += "\n"; // Insert a line break if needed
+				text_width = 0.0f; // Reset the line width counter
+			}
+			wrapped_text += segment + "_"; // Add the segment with underscore
+			text_width += ImGui::CalcTextSize((wrapped_text + "_").c_str()).x; // Update the line width
+		}
+
+		// Remove the trailing underscore
+		if (!wrapped_text.empty() && wrapped_text.back() == '_') {
+			wrapped_text.pop_back();
+		}
+
+		return wrapped_text;
+	}
 
 	void set_next_window_pos(window_pos location, f32 padding) {
 
@@ -147,7 +211,7 @@ namespace PFF::UI {
 
 	bool gray_button(const char* lable, const ImVec2& size) {
 
-		ImGui::PushStyleColor(ImGuiCol_Button, UI::action_color_gray_default);
+		ImGui::PushStyleColor(ImGuiCol_Button, (ImU32)UI::default_gray);
 		ImGui::PushStyleColor(ImGuiCol_ButtonHovered, UI::action_color_gray_hover);
 		ImGui::PushStyleColor(ImGuiCol_ButtonActive, UI::action_color_gray_active);
 
