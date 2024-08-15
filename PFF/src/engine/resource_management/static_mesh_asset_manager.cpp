@@ -218,11 +218,8 @@ namespace PFF {
 			s_instance.m_uploaded_mesh_assets[mesh_path] = create_ref<geometry::mesh_asset>();
 			serialize_mesh(mesh_path, s_instance.m_uploaded_mesh_assets[mesh_path], asset_file_header, general_header, static_mesh_header, serializer::option::load_from_file);
 
-			// TODO: validate deserialized headers
-			CORE_LOG(Info, "Deserialized mesh => general_header: " << (u64)general_header.type);
-			CORE_LOG(Info, "Deserialized mesh => static_mesh_header: " << static_mesh_header.version
-				<< " | "<< static_mesh_header.source_file
-				<< " | "<< static_mesh_header.mesh_index);
+			CORE_ASSERT(asset_file_header.type == file_type::mesh, "", "Tryed to load an asset file that is not a mesh");
+			// TODO: validate deserialized headers [general_header] / [static_mesh_header]
 
 			// upload mesh to GPU
 			s_instance.m_uploaded_mesh_assets[mesh_path]->mesh_buffers = GET_RENDERER.upload_mesh(s_instance.m_uploaded_mesh_assets[mesh_path]->indices, s_instance.m_uploaded_mesh_assets[mesh_path]->vertices);

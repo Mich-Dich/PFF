@@ -127,6 +127,10 @@ namespace PFF {
 
         PFF_API_EDITOR bool is_valid_project_dir(const std::filesystem::path& path);
 
+        PFF_API std::filesystem::path extract_path_from_project_folder(const std::filesystem::path& full_path);
+
+        PFF_API std::filesystem::path extract_path_from_project_content_folder(const std::filesystem::path& full_path);
+
         PFF_API std::filesystem::path file_dialog();
 
         PFF_API std::filesystem::path get_executable_path();

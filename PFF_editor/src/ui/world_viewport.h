@@ -11,13 +11,12 @@ namespace PFF {
 		world_viewport_window();
 		~world_viewport_window();
 
-
 		void window() override;
+		FORCEINLINE virtual void show_possible_sub_window_options() override;
 
 	private:
 		
 		void serialize(serializer::option option);
-
 		void window_general_debugger();								// TODO: convert into editor window
 		void window_world_settings();								// TODO: convert into editor window
 		void window_main_viewport();
@@ -28,6 +27,8 @@ namespace PFF {
 		bool m_show_renderer_backgrond_effect = false;
 		bool m_show_world_settings = false;
 		bool m_show_general_debugger = true;
+		bool m_show_content_browser_0 = true;
+		bool m_show_content_browser_1 = false;
 		bool m_show_details = false;
 		bool m_show_outliner = true;
 		content_browser m_content_browser;

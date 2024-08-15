@@ -159,7 +159,7 @@ namespace PFF::toolkit::todo {
 		const ImVec2 button_size = { 50.f, ImGui::GetTextLineHeightWithSpacing() + style->FramePadding.y * 2 };
 		const ImVec2 button_size_small = { 50.f, 21 };
 
-		UI::custom_frame_NEW(first_width, false, IM_COL32(37, 37, 37, 255), [&] {
+		UI::custom_frame_NEW(first_width, false, UI::default_gray_1, [&] {
 
 			const f32 start_pos = ImGui::GetCursorPosX();
 			const f32 inner_padding = 20.f;
@@ -201,7 +201,7 @@ namespace PFF::toolkit::todo {
 
 			UI::shift_cursor_pos(inner_padding + 5, 10);
 
-			ImGui::PushStyleColor(ImGuiCol_ChildBg, UI::highlited_window_bg);
+			ImGui::PushStyleColor(ImGuiCol_ChildBg, (ImU32)UI::default_gray_1);
 			ImGui::BeginChild("Child##for_todo_topics", { inner_width + (inner_padding - 10), ImGui::GetContentRegionAvail().y - inner_padding }, true, 0);
 			ImGui::PopStyleColor();
 

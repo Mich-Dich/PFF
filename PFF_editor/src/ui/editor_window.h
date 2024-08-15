@@ -11,6 +11,7 @@ namespace PFF {
 		virtual void window() {};
 
 		FORCEINLINE bool should_close() const { return !show_window; }
+		FORCEINLINE virtual void show_possible_sub_window_options() {}
 
 	protected:
 		void make_window_name(const char* base_name);

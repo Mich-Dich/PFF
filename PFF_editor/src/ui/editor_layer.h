@@ -46,8 +46,6 @@ namespace PFF {
 
 		bool m_show_main_menu_bar = false;
 		bool m_show_options = false;
-		bool m_show_content_browser_0 = true;
-		bool m_show_content_browser_1 = false;
 		bool m_show_graphics_engine_settings = false;
 		bool m_show_editor_settings = false;
 		bool m_show_general_settings = false;

@@ -188,20 +188,6 @@ namespace PFF {
 			m_system_state = should_pause ? system_state::suspended : system_state::active;
 	}
 
-
-	template<typename T>
-	FORCEINLINE void map::on_component_added(entity entity, T& component) {
-
-		if constexpr (std::is_same_v<T, mesh_component>) {
-
-			//if (component.material != nullptr) 
-			//	component = &m_default_material;
-
-			CORE_LOG(Error, "Added mesh comp <= STILL NEED TO CHECK FOR DEFAULT MATERIAL");
-		}
-	}
-
-
 	// =============================================================== runtime/simulation ===============================================================
 
 //#define RUNTIME_IMPLEMENTED

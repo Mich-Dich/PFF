@@ -98,8 +98,6 @@ namespace PFF {
 		serializer::yaml(config::get_filepath_from_configtype(application::get().get_project_path(), config::file::editor), "windows_to_show", option)
 			.entry("show_main_menu_bar", m_show_main_menu_bar)
 			.entry("show_options", m_show_options)
-			.entry("show_content_browser_0", m_show_content_browser_0)
-			.entry("show_content_browser_1", m_show_content_browser_1)
 			.entry("show_graphics_engine_settings", m_show_graphics_engine_settings)
 			.entry("show_editor_settings", m_show_editor_settings)
 			.entry("show_general_settings", m_show_general_settings)
@@ -193,6 +191,14 @@ namespace PFF {
 		ImGui::PushFont(application::get().get_imgui_layer()->get_font("giant"));
 		ImGui::SetCursorPos(ImVec2(25, ((m_titlebar_height - ImGui::GetFontSize() + titlebar_vertical_offset) / 2)));
 		ImGui::Text("PFF Editor");
+		ImGui::PopFont();
+
+		// display project title
+		ImGui::PushFont(application::get().get_imgui_layer()->get_font("header_1"));
+		const static std::string project_name = application::get().get_project_data().name;
+		const auto project_name_size = ImGui::CalcTextSize(project_name.c_str());
+		ImGui::SetCursorPos(ImVec2(viewport->Size.x - (window_padding.x + (button_spaccing * 2) + (button_width * 3)) - project_name_size.x - 30, window_padding.y + titlebar_vertical_offset));
+		ImGui::Text(project_name.c_str());
 		ImGui::PopFont();
 
 		ImGui::SetCursorPos(ImVec2(viewport->Size.x - (window_padding.x + (button_spaccing * 2) + (button_width * 3)), window_padding.y + titlebar_vertical_offset));
@@ -440,18 +446,13 @@ namespace PFF {
 
 				// IN DEV
 				ImGui::SeparatorText("Settings");
-				//ImGui::MenuItem("world_settings", "", &m_show_world_settings);
 				ImGui::MenuItem("graphics_engine_settings", "", &m_show_graphics_engine_settings);
 				ImGui::MenuItem("editor_settings", "", &m_show_editor_settings);
 				ImGui::MenuItem("general_settings", "", &m_show_general_settings);
 
 				ImGui::Separator();		
-				//ImGui::MenuItem("general_debugger", "", &m_show_general_debugger);
-				ImGui::MenuItem("options", "", &m_show_options);
-				//ImGui::MenuItem("outliner", "", &m_show_outliner);
-				//ImGui::MenuItem("details", "", &m_show_details);
-				ImGui::MenuItem("content_browser_0", "", &m_show_content_browser_0);
-				ImGui::MenuItem("content_browser_1", "", &m_show_content_browser_1);
+
+				m_world_viewport_window.show_possible_sub_window_options();
 
 				ImGui::EndMenu();
 			}

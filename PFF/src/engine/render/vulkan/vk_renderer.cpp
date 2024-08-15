@@ -394,7 +394,7 @@ namespace PFF::render::vulkan {
 			PFF::stopwatch loc_stopwatch(&m_renderer_metrik.waiting_idle_time[m_renderer_metrik.current_index]);
 #endif // COLLECT_PERFORMANCE_DATA
 
-		VK_CHECK_S(vkWaitForFences(m_device, 1, &get_current_frame().render_fence, true, 1000000000));		//wait until the gpu has finished rendering the last frame. Timeout of 1 second
+		VK_CHECK_S(vkWaitForFences(m_device, 1, &get_current_frame().render_fence, true, 3000000000));		//wait until the gpu has finished rendering the last frame. Timeout of 3 second
 
 #ifdef COLLECT_PERFORMANCE_DATA
 		}

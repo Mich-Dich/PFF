@@ -78,13 +78,22 @@ namespace PFF {
 
 		void on_update(const f32 delta_time);
 
-
 	private:
 
 		template<typename T>
-		FORCEINLINE void on_component_added(entity entity, T& component);
+		FORCEINLINE void on_component_added(entity entity, T& component) {
+
+			if constexpr (std::is_same_v<T, mesh_component>) {
+
+				//if (component.material != nullptr) 
+				//	component = &m_default_material;
+
+				CORE_LOG(Error, "Added mesh comp <= STILL NEED TO CHECK FOR DEFAULT MATERIAL");
+			}
+		}
 
 		friend class entity;
+		friend class world_viewport_window;
 
 		glm::mat4								m_transform;					// transform of map (map could be a small chunk of the ingame world)
 		f64										m_width, m_length, m_height;	// size of map

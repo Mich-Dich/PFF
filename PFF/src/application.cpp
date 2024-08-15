@@ -48,13 +48,38 @@ namespace PFF {
 
 		// ======================================= DEV force load project dir ======================================= 
 		serializer::yaml(config::get_filepath_from_configtype(util::get_executable_path(), config::file::editor), "editor_data", serializer::option::load_from_file)
-			.entry("last_opened_project", project_path);
+			.entry("last_opened_project", m_project_path);
 
+		if (!m_project_path.empty()) {
+			for (const auto& entry : std::filesystem::directory_iterator(m_project_path)) {
+				
+				if (entry.is_directory() || entry.path().extension() != PFF_PROJECT_EXTENTION)
+					continue;
+				
+				serializer::yaml(entry.path(), "project_data", serializer::option::load_from_file)
+					.entry(KEY_VALUE(m_project_data.name))
+					//.entry(KEY_VALUE(m_project_data.ID))
+					.entry(KEY_VALUE(m_project_data.engine_version))
+					.entry(KEY_VALUE(m_project_data.project_version))
+					.entry(KEY_VALUE(m_project_data.build_path))
+					.entry(KEY_VALUE(m_project_data.start_world))
+					.entry(KEY_VALUE(m_project_data.editor_start_world))
+					.entry(KEY_VALUE(m_project_data.last_modified))
+					.entry(KEY_VALUE(m_project_data.description))
+					.vector("tags", m_project_data.tags, [&](serializer::yaml& inner, u64 x) {
+						inner.entry("tag", m_project_data.tags[x]);
+					});
+
+				break;
+			}
+		}
+
+					//m_project_data{};
 		// ========================================================== TODO ==========================================================
 		//		Editor needs to set the [project_path] in the yaml file bevor starting the engine <= IMPORTANT
 		// ========================================================== TODO ==========================================================
 
-		config::init(project_path, util::get_executable_path());
+		config::init(m_project_path, util::get_executable_path());
 
 		// LOAD PROJECT_DATA
 

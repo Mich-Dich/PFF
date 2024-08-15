@@ -169,7 +169,7 @@ namespace PFF::UI {
 
 		ImGui::TableSetColumnIndex(1);
 
-		std::string loc_label = "##" + *label.data();
+		const std::string loc_label = "##" + *label.data();
 
 		if constexpr (std::is_same_v<T, bool>) {
 

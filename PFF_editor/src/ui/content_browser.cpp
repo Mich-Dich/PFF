@@ -13,23 +13,6 @@ namespace PFF {
 	static ImGuiTreeNodeFlags base_flags = ImGuiTreeNodeFlags_OpenOnArrow | ImGuiTreeNodeFlags_OpenOnDoubleClick | ImGuiTreeNodeFlags_SpanAvailWidth;
 	static ImU32 background_color = IM_COL32(50, 50, 50, 255);
 
-	static std::filesystem::path extract_from_folder(const std::filesystem::path& full_path) {
-
-		std::string full_path_str = full_path.string();
-		std::string folder_marker = std::string(CONTENT_DIR);
-		size_t pos = full_path_str.find(folder_marker);
-		if (pos != std::string::npos) {
-		
-			std::string result_str = full_path_str.substr(pos);
-			return std::filesystem::path(result_str);
-		
-		} else {
-
-			CORE_LOG(Trace, "NOT FOUND");
-			return {};
-		}
-	}
-
 	// Function to display the search field and filtered results
 	static std::string search_query;
 	static void search_field_and_button(const std::filesystem::path& path) {
@@ -89,7 +72,7 @@ namespace PFF {
 	void content_browser::select_new_directory(const std::filesystem::path& path) {
 
 		m_selected_directory = path;
-		m_partial_selected_directory = extract_from_folder(m_selected_directory);
+		m_partial_selected_directory = util::extract_path_from_project_folder(path);
 	}
 
 

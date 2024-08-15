@@ -118,6 +118,39 @@ namespace PFF::util {
         return false;
     }
 
+    std::filesystem::path extract_path_from_project_folder(const std::filesystem::path& full_path) {
+
+        std::string full_path_str = full_path.string();
+        std::string folder_marker = std::string(CONTENT_DIR);
+        size_t pos = full_path_str.find(folder_marker);
+        if (pos != std::string::npos) {
+
+            std::string result_str = full_path_str.substr(pos);
+            return std::filesystem::path(result_str);
+
+        } else {
+
+            CORE_LOG(Trace, "NOT FOUND");
+            return {};
+        }
+    }
+
+    std::filesystem::path extract_path_from_project_content_folder(const std::filesystem::path& full_path) {
+
+        std::filesystem::path result;
+        bool start_adding = false;
+
+        for (const auto& part : full_path) {
+
+            if (start_adding)
+                result /= part;  // Add the part to the result path
+
+            if (part == std::string(CONTENT_DIR))
+                start_adding = true;
+        }
+        return result;
+    }
+
     std::filesystem::path file_dialog() {
 
 #ifdef PFF_PLATFORM_WINDOWS

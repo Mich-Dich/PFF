@@ -74,7 +74,13 @@ namespace PFF {
 		PFF_DEFAULT_CONSTRUCTORS(tag_component);
 		tag_component(const std::string& tag)
 			: tag(tag) {}
-		
+
+		//operator std::string () { return tag; }
+		//operator const std::string () { return tag; }
+		//
+		//operator char*() { return tag.c_str(); }
+		//operator const char*() { return tag.c_str(); }
+
 		std::string tag;
 	};
 	

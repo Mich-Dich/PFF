@@ -71,17 +71,17 @@ namespace PFF::serializer {
 
 						// if line contains desired section enter inner-loop
 						//   has correct indentaion                                 has correct section_name                      ends with double-point
-						if ((measure_indentation(line) == 0) && (line.find(key_name) != std::string::npos) && (line.back() == ':')) {
+						if ((util::measure_indentation(line) == 0) && (line.find(key_name) != std::string::npos) && (line.back() == ':')) {
 
 							found_section = true;
 							//LOG(Debug, "sub_section() found section => line: [" << line << "]");
 
 							//     not end of content                     has correct indentaion                                 doesn't end in double-points              
-							while (std::getline(m_file_content, line) && (measure_indentation(line) == 1) && (line.back() != ':')) {
+							while (std::getline(m_file_content, line) && (util::measure_indentation(line) == 1) && (line.back() != ':')) {
 
 								// remove indentation                       remove "- " (array element marker)
 								line = line.substr(NUM_OF_INDENTING_SPACES + 2);
-							PFF:util::convert_from_string(line, buffer);
+								PFF::util::convert_from_string(line, buffer);
 								value.emplace_back(buffer);
 							}
 
