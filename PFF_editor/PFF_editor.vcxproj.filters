@@ -61,6 +61,9 @@
     <ClInclude Include="src\ui\mesh_import_window.h">
       <Filter>ui</Filter>
     </ClInclude>
+    <ClInclude Include="src\ui\world_viewport.h">
+      <Filter>ui</Filter>
+    </ClInclude>
     <ClInclude Include="src\util\pch_editor.h">
       <Filter>util</Filter>
     </ClInclude>
@@ -90,6 +93,9 @@
       <Filter>ui</Filter>
     </ClCompile>
     <ClCompile Include="src\ui\mesh_import_window.cpp">
+      <Filter>ui</Filter>
+    </ClCompile>
+    <ClCompile Include="src\ui\world_viewport.cpp">
       <Filter>ui</Filter>
     </ClCompile>
     <ClCompile Include="src\util\pch_editor.cpp">

@@ -70,19 +70,19 @@ project "PFF_editor"
 		
 	filter "configurations:Debug"
 		buildoptions "/MDd"
-		defines "EDITOR_DEBUG"
+		defines "PFF_EDITOR_DEBUG"
 		runtime "Debug"
 		symbols "on"
 
 	filter "configurations:RelWithDebInfo"
-		defines "PFF_RELEASE_WITH_DEBUG_INFO"
+		defines "PFF_EDITOR_RELEASE_WITH_DEBUG_INFO"
 		runtime "Release"
 		symbols "on"
 		optimize "speed"
 
 	filter "configurations:Release"
 		buildoptions "/MD"
-		defines "EDITOR_RELEASE"
+		defines "PFF_EDITOR_RELEASE"
 		runtime "Release"
 		optimize "on"
 			

@@ -3,7 +3,7 @@
 #include "engine/layer/layer.h"
 #include "engine/io_handler/input_mapping.h"
 #include "editor_window.h"
-#include "content_browser.h"
+#include "world_viewport.h"
 
 struct ImGuiContext;
 
@@ -34,53 +34,36 @@ namespace PFF {
 
 		void serialize(serializer::option option);
 		
-		std::vector<scope_ref<editor_window>> m_editor_windows{};
-
-		void draw_main_world_window();		// can only have 1 open at a time
+		std::vector<scope_ref<editor_window>> m_editor_windows{};		// generic
 
 		// ImGui windows
 		void window_main_title_bar();
 		void window_main_viewport();
-		void window_renderer_backgrond_effect();
-		void window_general_debugger();
-
-		void window_outliner();
-		void window_details();
-		void window_world_settings();
-		
 		void window_main_content();
-
 		void window_editor_settings();
 		void window_general_settings();
-
-		//void set_next_window_pos(int16 location);
-		//void progressbar_with_text(f32 percent, const char* text, f32 min_size_x = 0.0f, f32 min_size_y = 0.0f);
-		//void progressbar(f32 percent, f32 min_size_x = 0.0f, f32 min_size_y = 0.0f);
 		void main_menu_bar();
 
 		bool m_show_main_menu_bar = false;
-		bool m_show_renderer_backgrond_effect = false;
-		bool m_show_general_debugger = true;
 		bool m_show_options = false;
-		bool m_show_outliner = true;
-		bool m_show_details = false;
-		bool m_show_world_settings = false;
 		bool m_show_content_browser_0 = true;
 		bool m_show_content_browser_1 = false;
 		bool m_show_graphics_engine_settings = false;
 		bool m_show_editor_settings = false;
 		bool m_show_general_settings = false;
 
+#ifdef PFF_EDITOR_DEBUG
 		bool style_editor = false;
 		bool demo_window = true;
+#endif
 
-		content_browser m_content_browser;
+		world_viewport_window				m_world_viewport_window{};
 
-		std::vector<VkPresentModeKHR> m_swapchain_supported_presentmodes;
-		std::vector<const char*> m_swapchain_supported_presentmodes_str;
+		std::vector<VkPresentModeKHR>		m_swapchain_supported_presentmodes;
+		std::vector<const char*>			m_swapchain_supported_presentmodes_str;
 
-		ImGuiContext* m_context;
-		f32 m_font_size = 16.0f;
-		f32 m_titlebar_height = 60.f;
+		ImGuiContext*						m_context;
+		f32									m_font_size = 16.0f;
+		f32									m_titlebar_height = 60.f;
 	};
 }

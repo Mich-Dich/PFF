@@ -47,6 +47,29 @@ namespace PFF::UI {
 		return mouse_interation::hovered;
 	}
 
+	mouse_interation get_mouse_interation_on_window() {
+
+		const ImVec2 item_pos = ImGui::GetWindowPos();
+		const ImVec2 item_max = item_pos + ImGui::GetWindowSize();
+
+		if (!ImGui::IsMouseHoveringRect(item_pos, item_max))
+			return mouse_interation::none;
+
+		if (ImGui::IsMouseClicked(ImGuiMouseButton_Right)) {
+			if (ImGui::IsMouseDoubleClicked(ImGuiMouseButton_Right))
+				return mouse_interation::right_double_click;
+			return mouse_interation::right_click;
+		}
+
+		if (ImGui::IsMouseClicked(ImGuiMouseButton_Left)) {
+			if (ImGui::IsMouseDoubleClicked(ImGuiMouseButton_Left))
+				return mouse_interation::double_click;
+			return mouse_interation::single_click;
+		}
+
+		return mouse_interation::hovered;
+	}
+
 	std::string wrap_text_at_underscore(const std::string& text, float wrap_width) {
 
 		std::stringstream ss(text);

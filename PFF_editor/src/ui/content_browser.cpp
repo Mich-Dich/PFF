@@ -17,13 +17,12 @@ namespace PFF {
 
 		std::string full_path_str = full_path.string();
 		std::string folder_marker = std::string(CONTENT_DIR);
-		CORE_LOG(Trace, "folder_marker: " << folder_marker << " full_path_str: " << full_path_str);
-
 		size_t pos = full_path_str.find(folder_marker);
-
 		if (pos != std::string::npos) {
+		
 			std::string result_str = full_path_str.substr(pos);
 			return std::filesystem::path(result_str);
+		
 		} else {
 
 			CORE_LOG(Trace, "NOT FOUND");
@@ -33,7 +32,7 @@ namespace PFF {
 
 	// Function to display the search field and filtered results
 	static std::string search_query;
-	static void DisplaySearchFieldAndButtons(const std::filesystem::path& path) {
+	static void search_field_and_button(const std::filesystem::path& path) {
 
 		ImVec2 input_text_size(180, 0); // Set width to 150 pixels, height to default
 		ImGui::SetNextItemWidth(input_text_size.x);
@@ -47,6 +46,26 @@ namespace PFF {
 
 	}
 
+	static void drop_target_to_move_file(const std::filesystem::path folder_path) {
+
+		if (ImGui::BeginDragDropTarget()) {
+
+			if (const ImGuiPayload* payload = ImGui::AcceptDragDropPayload("PROJECT_CONTENT_FILE")) {
+
+				const std::filesystem::path file_path = (const char*)payload->Data;
+				try {
+					
+					std::filesystem::path destination = folder_path / file_path.filename();
+					std::filesystem::rename(file_path, destination);
+					CORE_LOG(Info, "File moved successfully!");
+
+				} catch (const std::filesystem::filesystem_error& e)
+					CORE_LOG(Error, "Error: " << e.what());
+
+			}
+			ImGui::EndDragDropTarget();
+		}
+	}
 
 
 
@@ -55,7 +74,6 @@ namespace PFF {
 
 		m_project_directory = PFF_editor::get().get_project_path();
 		select_new_directory(m_project_directory / CONTENT_DIR);
-		window_name = "Content Browser";
 
 		// load folder image
 		m_folder_image = create_ref<image>(PFF_editor::get().get_editor_executable_path() / "assets" / "icons" / "folder.png", image_format::RGBA);
@@ -91,11 +109,14 @@ namespace PFF {
 				break;
 			}
 
+
 			if (has_sub_folders) {
 
 				bool buffer = ImGui::TreeNodeEx(entry.path().filename().string().c_str(), base_flags);
 				if (ImGui::IsItemClicked())
 					select_new_directory(entry.path());
+				
+				drop_target_to_move_file(entry.path());
 
 				if (buffer) {
 
@@ -109,7 +130,9 @@ namespace PFF {
 				if (ImGui::IsItemClicked() && !ImGui::IsItemToggledOpen())
 					select_new_directory(entry.path());
 
+				drop_target_to_move_file(entry.path());
 			}
+
 		}
 
 	}
@@ -172,11 +195,18 @@ namespace PFF {
 				break;
 			}
 
+			// Handle dropping files into the current directory
+			drop_target_to_move_file(entry.path());
+
 			// handle item wrapping
 			const float next_item_x2 = ImGui::GetItemRectMax().x + style.ItemSpacing.x + button_sz.x; // Expected position if next item was on the same line
 			if (next_item_x2 < window_visible_x2)
 				ImGui::SameLine();
 		}
+
+
+
+
 
 		for (const auto& entry : std::filesystem::directory_iterator(path)) {
 
@@ -298,11 +328,11 @@ namespace PFF {
 
 	void content_browser::window() {
 
-		if (!show_window)
-			return;
+		//if (!show_window)
+		//	return;
 
 		ImGuiWindowFlags window_flags = ImGuiWindowFlags_None;
-		ImGui::Begin(window_name.c_str(), &show_window, window_flags);
+		ImGui::Begin("Content Browser", nullptr, window_flags);
 
 		UI::custom_frame_NEW(350, true, UI::default_gray_1, [&]() {
 
@@ -332,7 +362,7 @@ namespace PFF {
 			
 			ImGui::SameLine();
 			UI::shift_cursor_pos(30, 0);
-			DisplaySearchFieldAndButtons(m_selected_directory);
+			search_field_and_button(m_selected_directory);
 
 			ImGui::SameLine();
 			UI::shift_cursor_pos(10, 0);
@@ -345,6 +375,7 @@ namespace PFF {
 					select_new_directory(m_project_directory / current_path);
 					break;
 				}
+				drop_target_to_move_file(m_project_directory / current_path);
 
 				if (part != m_partial_selected_directory.filename()) {
 

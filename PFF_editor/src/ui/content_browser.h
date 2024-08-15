@@ -4,16 +4,15 @@
 
 namespace PFF {
 
-	class content_browser : public editor_window {
+	class content_browser{
 	public:
 
 		content_browser();
 		~content_browser();
 
-		void window() override;
+		void window();
 
 	private:
-		
 
 		FORCEINLINE void select_new_directory(const std::filesystem::path& path);
 		FORCEINLINE void show_directory_tree(const std::filesystem::path& path);
