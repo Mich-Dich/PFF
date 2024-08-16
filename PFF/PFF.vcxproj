@@ -199,6 +199,7 @@ IF EXIST ..\bin\Release-windows-x86_64\PFF\PFF.dll\ (xcopy /Q /E /Y /I ..\bin\Re
     </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClInclude Include="src\engine\resource_management\mesh_serializer.h" />
     <ClInclude Include="src\PFF.h" />
     <ClInclude Include="src\application.h" />
     <ClInclude Include="src\engine\Events\Event.h" />
@@ -286,7 +287,9 @@ IF EXIST ..\bin\Release-windows-x86_64\PFF\PFF.dll\ (xcopy /Q /E /Y /I ..\bin\Re
     <ClCompile Include="src\engine\render\vulkan\vk_initializers.cpp" />
     <ClCompile Include="src\engine\render\vulkan\vk_pipeline.cpp" />
     <ClCompile Include="src\engine\render\vulkan\vk_renderer.cpp" />
+    <ClCompile Include="src\engine\resource_management\mesh_serializer.cpp" />
     <ClCompile Include="src\engine\resource_management\static_mesh_asset_manager.cpp" />
+    <ClCompile Include="src\engine\world\entity.cpp" />
     <ClCompile Include="src\engine\world\map.cpp" />
     <ClCompile Include="src\util\UUID.cpp" />
     <ClCompile Include="src\util\io\config.cpp" />

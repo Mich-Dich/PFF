@@ -9,6 +9,8 @@ namespace PFF::serializer {
 
 		PFF_DELETE_COPY_MOVE_CONSTRUCTOR(binary);
 
+		PFF_DEFAULT_GETTER(option, option);
+
 		binary(const std::filesystem::path filename, const std::string& section_name, option option);
 		~binary();
 

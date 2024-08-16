@@ -309,6 +309,12 @@ namespace PFF {
                 return;
             }
 
+            else if constexpr (std::is_same_v<T, PFF::UUID>) {
+
+                dest_string = std::to_string((u64)src_value);
+                return;
+            }
+
             else if constexpr (std::is_same_v<T, glm::vec2> || std::is_same_v<T, ImVec2>) {
 
                 std::ostringstream oss;
@@ -426,6 +432,12 @@ namespace PFF {
                 return;
             }
 
+            else if constexpr (std::is_same_v<T, PFF::UUID>) {
+
+                dest_value = util::str_to_num<u64>(src_string);
+                return;
+            }
+
             else if constexpr (std::is_same_v<T, const char*>) {
 
                 std::string temp_str = src_string;
@@ -478,7 +490,7 @@ namespace PFF {
 
             else if constexpr (std::is_convertible_v<T, std::string>) {
 
-                dest_value = src_string;
+                dest_value = src_string;                    // <= HERE
                 std::replace(dest_value.begin(), dest_value.end(), '$', '\n');
                 return;
             }

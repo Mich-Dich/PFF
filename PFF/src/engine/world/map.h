@@ -3,6 +3,8 @@
 #include <entt.hpp>
 #include <glm/glm.hpp>
 
+#include "engine/resource_management/mesh_serializer.h"
+
 namespace PFF {
 
 	class entity;
@@ -78,6 +80,8 @@ namespace PFF {
 
 		void on_update(const f32 delta_time);
 
+		void serialize(serializer::option option);
+
 	private:
 
 		template<typename T>
@@ -85,10 +89,39 @@ namespace PFF {
 
 			if constexpr (std::is_same_v<T, mesh_component>) {
 
-				//if (component.material != nullptr) 
-				//	component = &m_default_material;
+				CORE_ASSERT(!component.asset_path.empty(), "", "Provided path is empty");
 
-				CORE_LOG(Error, "Added mesh comp <= STILL NEED TO CHECK FOR DEFAULT MATERIAL");
+				asset_file_header asset_header;
+				general_mesh_file_header general_header;
+
+				auto serializer = serializer::binary(component.asset_path, "PFF_asset_file", serializer::option::load_from_file);
+				serialize_mesh_headers(serializer, asset_header, general_header);
+				CORE_ASSERT(asset_header.type == file_type::mesh, "", "Tryed to add mesh_component but provided asset_path is a mesh");
+
+				switch (general_header.type) {
+				case mesh_type::static_mesh: {
+
+					static_mesh_file_header static_mesh_header;
+					serialize_static_mesh_header(serializer, static_mesh_header);
+
+					component.mesh_asset = static_mesh_asset_manager::get_from_path(util::extract_path_from_project_content_folder(component.asset_path));
+
+					//TODO: check 
+					//		if (user defined a material_instance) || ([static_mesh_header] has a material_instance)
+					//		else use default_material
+					CORE_LOG(Error, "Added mesh comp <= STILL NEED TO CHECK FOR DEFAULT MATERIAL");
+
+				} break;
+
+				case mesh_type::dynamic_mesh:
+				case mesh_type::skeletal_mesh:
+				case mesh_type::mesh_collection:
+				case mesh_type::procedural_mesh:
+					CORE_LOG(Trace, "Adding of mesh_type not supported yet"); break;
+
+				default: CORE_LOG(Trace, "unidentified [mesh_type] used"); break;
+				}
+
 			}
 		}
 
@@ -100,6 +133,7 @@ namespace PFF {
 		entt::registry							m_registry;
 		std::unordered_map<UUID, entt::entity>	m_entity_map;
 		system_state							m_system_state = system_state::active;
+		std::filesystem::path					m_path;
 	};
 
 }

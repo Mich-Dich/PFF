@@ -59,7 +59,7 @@ namespace PFF::mesh_factory {
 
                 CORE_LOG(Trace, "name of surface: " << mesh.name)
 
-                    geometry::Geo_surface new_surface;
+                geometry::Geo_surface new_surface;
                 new_surface.startIndex = (u32)loc_mesh.indices.size();
                 new_surface.count = (u32)gltf.accessors[p.indicesAccessor.value()].count;
                 size_t initial_vtx = loc_mesh.vertices.size();
@@ -187,10 +187,10 @@ namespace PFF::mesh_factory {
                 static_mesh_file_metadata metadata{};
                 metadata.name = source_path.filename().replace_extension("").string() + "_" + loc_mesh_assets.value()[x]->name;
 
-                asset_file_header asset_file_header{};
-                asset_file_header.type = file_type::mesh;
-                asset_file_header.version = current_asset_file_header_version;
-                asset_file_header.timestamp = util::get_system_time();
+                asset_file_header asset_header{};
+                asset_header.type = file_type::mesh;
+                asset_header.version = current_asset_file_header_version;
+                asset_header.timestamp = util::get_system_time();
 
                 general_mesh_file_header general_mesh_header{};
                 general_mesh_header.type = mesh_type::static_mesh;
@@ -202,7 +202,7 @@ namespace PFF::mesh_factory {
 
                 std::filesystem::path output_path = destination_path / (metadata.name + PFF_ASSET_EXTENTION);
 
-                serialize_mesh(output_path, loc_mesh_assets.value()[x], asset_file_header, general_mesh_header, static_mesh_header, serializer::option::save_to_file);
+                serialize_mesh(output_path, loc_mesh_assets.value()[x], asset_header, general_mesh_header, static_mesh_header, serializer::option::save_to_file);
             }
         }
 

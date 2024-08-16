@@ -10,8 +10,8 @@
 #define GLM_ENABLE_EXPERIMENTAL
 #include <glm/gtx/quaternion.hpp>
 
-#include <xmmintrin.h>   // SSE
-#include <smmintrin.h>   // SSE4.1 (for matrix multiplication)
+//#include <xmmintrin.h>   // SSE
+//#include <smmintrin.h>   // SSE4.1 (for matrix multiplication)
 
 namespace PFF {
 
@@ -65,59 +65,51 @@ namespace PFF {
 
 		PFF_DEFAULT_CONSTRUCTORS(ID_component);
 
-		UUID ID;
+		UUID								ID;
 	};
 
-	// Tag component is a small string often used to find entities that have the same tag
+	/* MAYBE
+		// every entity has a unique name
+		struct name_component {
+
+			PFF_DEFAULT_CONSTRUCTORS(name_component);
+			name_component(const std::string& name)
+				: name(name) {}
+
+			std::string							name;
+		};
+	*/
+
+	// Tag component is a small string often used to find entities that have the same tag (eg: teammates, bullets, ...)
 	struct tag_component {
-		
+
 		PFF_DEFAULT_CONSTRUCTORS(tag_component);
 		tag_component(const std::string& tag)
 			: tag(tag) {}
 
-		//operator std::string () { return tag; }
-		//operator const std::string () { return tag; }
-		//
-		//operator char*() { return tag.c_str(); }
-		//operator const char*() { return tag.c_str(); }
-
-		std::string tag;
+		std::string							tag;
 	};
-	
+
 	// ------------------------------------------------------------------------------------------------------------------------
 	// MESH FOR RENDERER		=> need this component and the transform component
 	// ------------------------------------------------------------------------------------------------------------------------
 
-// ----------------------------------------------------------------------------------------------------------------------------
-	// TODO: Move this to a render_resourse_manager that automaticly uploads/removes meshes/materials to GPU
-
-//	struct mesh{
-//		u32					index_count;
-//		u32					first_index;
-//		glm::mat4			transform_offset;		// offset from the parent => can build chains
-//#if defined PFF_RENDER_API_VULKAN
-//		VkBuffer			index_buffer;
-//		VkDeviceAddress		vertex_bffer_address;
-//#endif
-//		material_instance*	material;
-//	};
-// ----------------------------------------------------------------------------------------------------------------------------
-
-
 	// MAYBE: move to file private_components => this file should not be exposed to the user
 	struct mesh_component {
+	public:
 
 		PFF_DEFAULT_CONSTRUCTORS(mesh_component);
 
 		mesh_component(ref<PFF::geometry::mesh_asset> mesh_asset_ref)
 			: mesh_asset(mesh_asset_ref) {}
 
-		UUID								mesh_asset_ID = 0;					// used when loading and requesting a mesh from asset_manager
-
 		mobility							mobility = mobility::locked;
 		glm::mat4							transform = glm::mat4(1);			// TODO: remove because every entity can only have 1 mesh_comp, use parenting system instead
 		bool								shoudl_render = true;
-		ref<PFF::geometry::mesh_asset>		mesh_asset;
+		std::filesystem::path				asset_path;
+
+	// MAYBE: make private
+		ref<PFF::geometry::mesh_asset>		mesh_asset = nullptr;
 		material_instance*					material = nullptr;					// TODO: currently uses one material for all surfaces in mesh_asset, change so it can use diffrent materials per furface
 	};
 
@@ -130,6 +122,19 @@ namespace PFF {
 		glm::mat4							transform = glm::mat4(1);
 		ref<PFF::geometry::mesh_asset>		mesh_asset;
 		material_instance*					material = nullptr;					// TODO: currently uses one material for all surfaces in mesh_asset, change so it can use diffrent materials
+	};
+
+	// can be used only when needed OR every entity has it		(leaning towarts sparing use)
+	struct relationship_component {
+
+		PFF_DEFAULT_CONSTRUCTORS(relationship_component);
+		relationship_component(const UUID parent_ID)
+			: parent_ID(parent_ID) {}
+		relationship_component(const UUID parent_ID, const std::vector<UUID> children_ID)
+			: parent_ID(parent_ID), children_ID(children_ID) {}
+
+		UUID								parent_ID;
+		std::vector<UUID>					children_ID;
 	};
 
 	class entity_script;

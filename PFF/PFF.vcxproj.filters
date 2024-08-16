@@ -249,6 +249,7 @@
     <ClInclude Include="src\util\util.h">
       <Filter>util</Filter>
     </ClInclude>
+    <ClInclude Include="src\engine\resource_management\mesh_serializer.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="src\application.cpp" />
@@ -354,5 +355,7 @@
     <ClCompile Include="src\util\util.cpp">
       <Filter>util</Filter>
     </ClCompile>
+    <ClCompile Include="src\engine\resource_management\mesh_serializer.cpp" />
+    <ClCompile Include="src\engine\world\entity.cpp" />
   </ItemGroup>
 </Project>

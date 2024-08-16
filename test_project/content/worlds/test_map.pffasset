@@ -1,0 +1,18 @@
+map_data:
+  file_header:
+    version: 1 0 0
+    type: 2
+    timestamp: 2024 8 16 5 11 14 12 785
+  data:
+    entity_0:
+      tag: SM_basicmesh_Cube
+      ID: 17532719058009118607
+      transform_component:
+        translation: 0 0 0
+        rotation: 0 0 0
+        scale: 1 1 1
+      mesh_component:
+        asset_path: C:\CustomGameEngine\PFF\test_project\content\meshes\basicmesh_Cube.pffasset
+        mobility: 0
+        shoudl_render: true
+        transform: 1 0 0 0 0 1 0 0 0 0 1 0 0 0 0 1

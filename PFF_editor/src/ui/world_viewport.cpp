@@ -258,8 +258,13 @@ namespace PFF {
 						transform_comp.translation = glm::vec3(0);
 						transform_comp.rotation = glm::vec3(0);
 
-						auto& mesh_comp = loc_entitiy.add_component<mesh_component>();
-						mesh_comp.mesh_asset = static_mesh_asset_manager::get_from_path(util::extract_path_from_project_content_folder(file_path));
+						mesh_component mesh_comp{};
+						mesh_comp.asset_path = file_path;
+						auto& loc_mesh_component = loc_entitiy.add_component<mesh_component>(mesh_comp);
+						CORE_LOG(Debug, "asset_path: " << loc_mesh_component.asset_path);
+
+
+						//mesh_comp.mesh_asset = static_mesh_asset_manager::get_from_path(util::extract_path_from_project_content_folder(file_path));
 						//mesh_comp.material = GET_RENDERER.get_default_material_pointer();		// get correct shader
 
 					} break;

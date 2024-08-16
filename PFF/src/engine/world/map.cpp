@@ -1,10 +1,14 @@
 
 #include "util/pffpch.h"
 
+#include "application.h"
 #include "components.h"
 #include "entity_script.h"
 #include "entity.h"
 #include "engine/resource_management/static_mesh_asset_manager.h"
+
+// serislization
+#include "engine/resource_management/headers.h"
 
 #include "map.h"
 
@@ -46,6 +50,9 @@ namespace PFF {
 	// =======================================================================================================================================
 
 	map::map() {
+
+		m_path = application::get().get_project_path() / CONTENT_DIR / "worlds" / "test_map.pffasset";
+		CORE_LOG(Debug, "m_path: " << m_path);
 
 		//{
 		//	entity loc_entitiy = create_entity("editor_origin_grid");
@@ -130,7 +137,10 @@ namespace PFF {
 		
 	}
 
-	map::~map() { }
+	map::~map() { 
+	
+		serialize(serializer::option::save_to_file);
+	}
 
 	ref<map> map::copy(ref<map> other) { return ref<map>(); }
 
@@ -240,6 +250,65 @@ namespace PFF {
 
 		});
 #endif // RUNTIME_IMPLEMENTED
+	}
+
+	void map::serialize(serializer::option option) {
+
+		asset_file_header file_header{};
+		file_header.version = version(1, 0, 0);
+		file_header.type = file_type::map;
+		file_header.timestamp = util::get_system_time();
+
+		serializer::yaml(m_path, "map_data", option)
+			.sub_section("file_header", [&](serializer::yaml& header_section) {
+
+				header_section.entry(KEY_VALUE(file_header.version))
+				.entry(KEY_VALUE(file_header.type))
+				.entry(KEY_VALUE(file_header.timestamp));
+			})
+			.sub_section("data", [&](serializer::yaml& data_section) {
+
+				//const auto view = ;
+				for (const auto entity_ID : m_registry.view<entt::entity>(/*entt::exclude<T>*/)) {
+
+					data_section.sub_section(("entity_" + util::num_to_str((u32)entity_ID)), [&](serializer::yaml& entity_section) {
+
+						entity loc_entity = entity(entity_ID, this);
+
+						auto& tag_comp = loc_entity.get_component<tag_component>();
+						entity_section.entry(KEY_VALUE(tag_comp.tag));
+
+						auto& ID_comp = loc_entity.get_component<ID_component>();
+						entity_section.entry(KEY_VALUE(ID_comp.ID));
+
+						if (loc_entity.has_component<transform_component>()) {
+							auto& transform_comp = loc_entity.get_component<transform_component>();
+							entity_section.sub_section("transform_component", [&](serializer::yaml& component_section) {
+
+								component_section.entry(KEY_VALUE(transform_comp.translation))
+								.entry(KEY_VALUE(transform_comp.rotation))
+								.entry(KEY_VALUE(transform_comp.scale));
+							});
+						}
+
+						if (loc_entity.has_component<mesh_component>()) {
+							auto& mesh_comp = loc_entity.get_component<mesh_component>();
+							entity_section.sub_section("mesh_component", [&](serializer::yaml& component_section) {
+
+								component_section.entry(KEY_VALUE(mesh_comp.asset_path))
+								.entry(KEY_VALUE(mesh_comp.mobility))
+								.entry(KEY_VALUE(mesh_comp.shoudl_render))
+								.entry(KEY_VALUE(mesh_comp.transform));
+
+							});
+						}
+
+					});
+
+				}
+			})
+			;
+
 	}
 
 }

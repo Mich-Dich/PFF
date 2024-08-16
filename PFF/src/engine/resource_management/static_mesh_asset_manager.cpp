@@ -3,6 +3,7 @@
 
 #include "application.h"
 #include "engine/render/vulkan/vk_renderer.h"
+#include "mesh_serializer.h"
 
 #include "static_mesh_asset_manager.h"
 
@@ -232,22 +233,6 @@ namespace PFF {
 
 	// TODO: Iterate over every ref and check for refrence_count
 	//			if the count is 1 it means only the asset manager is holding onto the asset and it should be released
-
-	void serialize_mesh(const std::filesystem::path filename, ref<geometry::mesh_asset> mesh_asset,
-		asset_file_header& asset_file_header, general_mesh_file_header& general_header, static_mesh_file_header& static_mesh_header, const serializer::option option) {
-
-		serializer::binary(filename, "PFF_asset_file", option)
-			.entry(asset_file_header)
-			.entry(general_header)
-			.entry(static_mesh_header.version)
-			.entry(static_mesh_header.source_file)
-			.entry(static_mesh_header.mesh_index)
-			.entry(mesh_asset->surfaces)
-			.entry(mesh_asset->vertices)
-			.entry(mesh_asset->indices)
-			.entry(mesh_asset->bounds);
-
-	}
 
 }
 
