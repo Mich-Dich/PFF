@@ -7,6 +7,9 @@
 #include "util/ui/pannel_collection.h"
 #include "engine/world/map.h"
 
+#include "engine/resource_management/static_mesh_asset_manager.h"
+#include "engine/resource_management/mesh_serializer.h"
+
 #include "world_viewport.h"
 
 namespace PFF {
@@ -74,6 +77,43 @@ namespace PFF {
 	// Sub windows
 	// ------------------------------------------------------------------------------------------------------------------------------------------------------------------
 
+	void world_viewport_window::display_entity_children(ref<map> loc_map, entity& entity) {
+
+		auto& relation_comp = entity.get_component<relationship_component>();
+		for (const auto child_ID : relation_comp.children_ID) {
+
+			PFF::entity child = loc_map->get_entity_by_UUID(child_ID);
+			const char* name = child.get_component<tag_component>().tag.c_str();
+
+			// Does have childer itself
+			if (child.get_component<relationship_component>().children_ID.size() > static_cast<size_t>(0)) {
+
+				ImGui::Text("O");		// TODO: replace with hide/show button
+				ImGui::SameLine();
+				const bool is_open = ImGui::TreeNodeEx(name,
+					outliner_base_flags | ((m_selected_entity == child) ? ImGuiTreeNodeFlags_Selected : 0));
+				
+				if (ImGui::IsItemClicked())
+					m_selected_entity = child;
+
+				if (is_open) {
+
+					display_entity_children(loc_map, child);
+					ImGui::TreePop();
+				}
+				continue;
+			}
+
+			// Does not have more childer
+			ImGui::Text("O");		// TODO: replace with hide/show button
+			ImGui::SameLine();
+			ImGui::TreeNodeEx(name,
+				outliner_base_flags | ImGuiTreeNodeFlags_Leaf | ImGuiTreeNodeFlags_NoTreePushOnOpen | ((m_selected_entity == child) ? ImGuiTreeNodeFlags_Selected : 0));
+			if (ImGui::IsItemClicked())
+				m_selected_entity = child;
+		}
+	}
+
 	void world_viewport_window::window_outliner() {
 
 		if (!m_show_outliner)
@@ -85,14 +125,49 @@ namespace PFF {
 		const auto& maps = application::get().get_world_layer()->get_maps();
 		for (const auto& loc_map : maps) {
 
-			const auto view = loc_map->m_registry.view<tag_component>(/*entt::exclude<T>*/);
-			for (const auto entity : view) {
+			for (const auto entity_ID : loc_map->m_registry.view<entt::entity>()) {
 
-				const auto& tag_comp = view.get<tag_component>(entity);
-				ImGui::Text(tag_comp.tag.c_str());
+				PFF::entity loc_entity = entity(entity_ID, loc_map.get());
+				const auto& tag_comp = loc_entity.get_component<tag_component>();
+
+				// has relationship
+				if (loc_entity.has_component<relationship_component>()) {
+
+					auto& relation_comp = loc_entity.get_component<relationship_component>();
+					if (relation_comp.parent_ID != 0)	// skip all children in main display (will be displayed in [display_entity_children()])
+						continue;
+
+					ImGui::Text("O");		// TODO: replace with hide/show button
+					ImGui::SameLine();
+					const bool is_open = ImGui::TreeNodeEx(tag_comp.tag.c_str(), 
+						outliner_base_flags | ((m_selected_entity == loc_entity) ? ImGuiTreeNodeFlags_Selected : 0));
+					if (ImGui::IsItemClicked())
+						m_selected_entity = loc_entity;
+
+					if (is_open) {
+
+						display_entity_children(loc_map, loc_entity);
+						ImGui::TreePop();
+					}
+					continue;
+				}
+
+
+				// has no relationship
+				ImGui::Text("O");		// TODO: replace with hide/show button
+				ImGui::SameLine();
+				ImGui::TreeNodeEx(tag_comp.tag.c_str(), 
+					outliner_base_flags | ImGuiTreeNodeFlags_Leaf | ImGuiTreeNodeFlags_NoTreePushOnOpen | ((m_selected_entity == loc_entity) ? ImGuiTreeNodeFlags_Selected : 0));
+				if (ImGui::IsItemClicked())
+					m_selected_entity = loc_entity;
+				
 			}
 
 		}
+
+		// Reset m_selected_entity when clicking on empty space
+		if (ImGui::IsWindowHovered() && ImGui::IsMouseClicked(ImGuiMouseButton_Left) && !ImGui::IsAnyItemHovered())
+			m_selected_entity = entity();
 
 		ImGui::End();
 	}
@@ -196,88 +271,94 @@ namespace PFF {
 		const bool is_window_begin = ImGui::Begin("Viewport##PFF_Engine", nullptr, window_flags);
 		ImGui::PopStyleVar(2);
 
-		if (is_window_begin) {
+		if (!is_window_begin) {
 
-			// display rendred image
-			const ImVec2 viewport_size = ImGui::GetContentRegionAvail();
+			ImGui::End();
+			return;
+		}
 
-			application::get().get_renderer().set_imugi_viewport_size(glm::u32vec2(viewport_size.x, viewport_size.y));
+		// display rendred image
+		const ImVec2 viewport_size = ImGui::GetContentRegionAvail();
+		application::get().get_renderer().set_imugi_viewport_size(glm::u32vec2(viewport_size.x, viewport_size.y));
 
-			auto* buffer = application::get().get_renderer().get_draw_image_pointer();
+		auto* draw_image = application::get().get_renderer().get_draw_image_pointer();
+		const ImVec2 viewport_uv = {	math::clamp(viewport_size.x / draw_image->get_width(), 0.f, 1.f),
+										math::clamp(viewport_size.y / draw_image->get_height(), 0.f, 1.f) };
+		ImGui::Image(draw_image->get_descriptor_set(), ImVec2{ viewport_size.x, viewport_size.y }, ImVec2{ 0,0 }, viewport_uv);
 
-			const ImVec2 viewport_uv = {	std::max(std::min(viewport_size.x / buffer->get_width(), 1.f), 0.f),
-											std::max(std::min(viewport_size.y / buffer->get_height(), 1.f), 0.f) };
-			ImGui::Image(buffer->get_descriptor_set(), ImVec2{ viewport_size.x, viewport_size.y }, ImVec2{ 0,0 }, viewport_uv);
+		// show debug data
+		application::get().get_imgui_layer()->show_FPS();
+		application::get().get_imgui_layer()->show_renderer_metrik();
+		window_renderer_backgrond_effect();
 
-			// show debug data
-			application::get().get_imgui_layer()->show_FPS();
-			application::get().get_imgui_layer()->show_renderer_metrik();
-			window_renderer_backgrond_effect();
+		if (ImGui::BeginPopupContextWindow()) {
 
-			if (ImGui::BeginPopupContextWindow()) {
+			ImGui::Text("Performance Analysis");
+			ImGui::Separator();
+			ImGui::Checkbox("Show FPS window", application::get().get_imgui_layer()->get_show_FPS_window_pointer());
+			ImGui::Checkbox("Show renderer metrik", application::get().get_imgui_layer()->get_show_renderer_metrik_pointer());
+			ImGui::Checkbox("Show render background settings", &m_show_renderer_backgrond_effect);
 
-				ImGui::Text("Performance Analysis");
-				ImGui::Separator();
-				ImGui::Checkbox("Show FPS window", application::get().get_imgui_layer()->get_show_FPS_window_pointer());
-				ImGui::Checkbox("Show renderer metrik", application::get().get_imgui_layer()->get_show_renderer_metrik_pointer());
-				ImGui::Checkbox("Show render background settings", &m_show_renderer_backgrond_effect);
-
-				ImGui::EndPopup();
-			}
+			ImGui::EndPopup();
+		}
 
 
-			if (ImGui::BeginDragDropTarget()) {
+		if (ImGui::BeginDragDropTarget()) {
 
-				if (const ImGuiPayload* payload = ImGui::AcceptDragDropPayload("PROJECT_CONTENT_FILE")) {
+			if (const ImGuiPayload* payload = ImGui::AcceptDragDropPayload("PROJECT_CONTENT_FILE")) {
 
-					const std::filesystem::path file_path = (const char*)payload->Data;
-					asset_file_header loc_asset_file_header;
-					if (file_path.extension() == ".pffasset") {
+				const std::filesystem::path file_path = (const char*)payload->Data;
+				asset_file_header loc_asset_file_header;
+				if (file_path.extension() == ".pffasset") {
 
-						serializer::binary(file_path, "PFF_asset_file", serializer::option::load_from_file)
-							.entry(loc_asset_file_header);
+					serializer::binary(file_path, "PFF_asset_file", serializer::option::load_from_file)
+						.entry(loc_asset_file_header);
 
-					} else if (file_path.extension() == ".pffworld") {
+				} else if (file_path.extension() == ".pffworld") {
 
-						serializer::yaml(file_path, "PFF_asset_file", serializer::option::load_from_file)
-							.entry(KEY_VALUE(loc_asset_file_header.version))
-							.entry(KEY_VALUE(loc_asset_file_header.type))
-							.entry(KEY_VALUE(loc_asset_file_header.timestamp));
-					}
+					serializer::yaml(file_path, "PFF_asset_file", serializer::option::load_from_file)
+						.entry(KEY_VALUE(loc_asset_file_header.version))
+						.entry(KEY_VALUE(loc_asset_file_header.type))
+						.entry(KEY_VALUE(loc_asset_file_header.timestamp));
+				}
 
-					switch (loc_asset_file_header.type) {
+				switch (loc_asset_file_header.type) {
 					
-					case file_type::mesh: {
+				case file_type::mesh: {
 
-						CORE_LOG(Trace, "Adding static mesh, Name: " << "SM_" + file_path.filename().replace_extension("").string());
+					CORE_LOG(Trace, "Adding static mesh, Name: " << "SM_" + file_path.filename().replace_extension("").string());
 
-						const auto loc_map = application::get().get_world_layer()->get_maps()[0];
-						entity loc_entitiy = loc_map->create_entity("SM_" + file_path.filename().replace_extension("").string());
-						
-						auto& transform_comp = loc_entitiy.get_component<transform_component>();
-						transform_comp.translation = glm::vec3(0);
-						transform_comp.rotation = glm::vec3(0);
+					if (m_selected_entity != entity()) {
+
+						CORE_LOG(Debug, "an entity is selected");
 
 						mesh_component mesh_comp{};
 						mesh_comp.asset_path = file_path;
-						auto& loc_mesh_component = loc_entitiy.add_component<mesh_component>(mesh_comp);
-						CORE_LOG(Debug, "asset_path: " << loc_mesh_component.asset_path);
-
-
-						//mesh_comp.mesh_asset = static_mesh_asset_manager::get_from_path(util::extract_path_from_project_content_folder(file_path));
-						//mesh_comp.material = GET_RENDERER.get_default_material_pointer();		// get correct shader
-
-					} break;
-
-					default:
+						m_selected_entity.add_mesh_component(mesh_comp);
 						break;
 					}
+					
+					const auto loc_map = application::get().get_world_layer()->get_maps()[0];
+					entity loc_entitiy = loc_map->create_entity("SM_" + file_path.filename().replace_extension("").string());
+						
+					mesh_component mesh_comp{};
+					mesh_comp.asset_path = file_path;
+					loc_entitiy.add_mesh_component(mesh_comp);
 
+					//mesh_comp.mesh_asset = static_mesh_asset_manager::get_from_path(util::extract_path_from_project_content_folder(file_path));
+					//mesh_comp.material = GET_RENDERER.get_default_material_pointer();		// get correct shader
+
+				} break;
+
+				default:
+					break;
 				}
-				ImGui::EndDragDropTarget();
+
 			}
+			ImGui::EndDragDropTarget();
 
 		}
+
 		ImGui::End();
 	}
 

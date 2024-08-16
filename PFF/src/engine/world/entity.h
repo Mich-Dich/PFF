@@ -55,7 +55,7 @@ namespace PFF {
 		template<typename T>
 		FORCEINLINE void add_script_component() { add_component<script_component>().bind<T>(); }
 
-		void add_mesh_component(mesh_component mesh_comp);
+		void add_mesh_component(mesh_component& mesh_comp);
 
 		operator bool()							const { return (m_entity_handle != entt::null); }
 		operator entt::entity()					const { return m_entity_handle; }

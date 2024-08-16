@@ -302,6 +302,19 @@ namespace PFF {
 
 							});
 						}
+						
+						if (loc_entity.has_component<relationship_component>()) {
+							auto& relationship_comp = loc_entity.get_component<relationship_component>();
+							entity_section.sub_section("relationship_component", [&](serializer::yaml& component_section) {
+
+								component_section.entry(KEY_VALUE(relationship_comp.parent_ID))
+									.vector(KEY_VALUE(relationship_comp.children_ID), [&](serializer::yaml& children, u64 x) {
+
+										children.entry(util::num_to_str(x), relationship_comp.children_ID[x]);
+									});
+
+							});
+						}
 
 					});
 

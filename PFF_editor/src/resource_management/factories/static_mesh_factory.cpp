@@ -11,8 +11,9 @@
 #include <fastgltf/util.hpp>
 #include <fastgltf/tools.hpp>
 
-#include "engine/resource_management/mesh_headers.h"
 #include "engine/resource_management/headers.h"
+#include "engine/resource_management/mesh_headers.h"
+#include "engine/resource_management/mesh_serializer.h"
 
 #include "static_mesh_factory.h"
 

@@ -5,6 +5,8 @@
 #include "mesh_import_window.h"
 #include "PFF_editor.h"
 #include "engine/resource_management/static_mesh_asset_manager.h"
+#include "engine/resource_management/headers.h"
+#include "engine/resource_management/mesh_headers.h"
 
 #include "content_browser.h"
 
