@@ -16,10 +16,12 @@ namespace PFF {
 
 	world_viewport_window::world_viewport_window() {
 
+		serialize(serializer::option::load_from_file);
 	}
 
 	world_viewport_window::~world_viewport_window() {
 
+		serialize(serializer::option::save_to_file);
 	}
 
 	void world_viewport_window::window() {
@@ -65,7 +67,7 @@ namespace PFF {
 
 	void world_viewport_window::serialize(serializer::option option) {
 
-		serializer::yaml(config::get_filepath_from_configtype(application::get().get_project_path(), config::file::editor), "windows_to_show", option)
+		serializer::yaml(config::get_filepath_from_configtype(application::get().get_project_path(), config::file::editor), "world_viewport_windows_to_show", option)
 			.entry("show_renderer_backgrond_effect", m_show_renderer_backgrond_effect)
 			.entry("show_general_debugger", m_show_general_debugger)
 			.entry("show_outliner", m_show_outliner)
@@ -120,7 +122,7 @@ namespace PFF {
 			return;
 
 		ImGuiWindowFlags window_flags{};
-		if (ImGui::Begin("Outliner", &m_show_outliner, window_flags)) {}
+		ImGui::Begin("Outliner", &m_show_outliner, window_flags);
 
 		const auto& maps = application::get().get_world_layer()->get_maps();
 		for (const auto& loc_map : maps) {
@@ -139,7 +141,7 @@ namespace PFF {
 
 					ImGui::Text("O");		// TODO: replace with hide/show button
 					ImGui::SameLine();
-					const bool is_open = ImGui::TreeNodeEx(tag_comp.tag.c_str(), 
+					const bool is_open = ImGui::TreeNodeEx(tag_comp.tag.c_str(),
 						outliner_base_flags | ((m_selected_entity == loc_entity) ? ImGuiTreeNodeFlags_Selected : 0));
 					if (ImGui::IsItemClicked())
 						m_selected_entity = loc_entity;
@@ -156,11 +158,11 @@ namespace PFF {
 				// has no relationship
 				ImGui::Text("O");		// TODO: replace with hide/show button
 				ImGui::SameLine();
-				ImGui::TreeNodeEx(tag_comp.tag.c_str(), 
+				ImGui::TreeNodeEx(tag_comp.tag.c_str(),
 					outliner_base_flags | ImGuiTreeNodeFlags_Leaf | ImGuiTreeNodeFlags_NoTreePushOnOpen | ((m_selected_entity == loc_entity) ? ImGuiTreeNodeFlags_Selected : 0));
 				if (ImGui::IsItemClicked())
 					m_selected_entity = loc_entity;
-				
+
 			}
 
 		}
@@ -179,7 +181,39 @@ namespace PFF {
 			return;
 
 		ImGuiWindowFlags window_flags{};
-		if (ImGui::Begin("Details", &m_show_details, window_flags)) {}
+		if (!ImGui::Begin("Details", &m_show_details, window_flags))
+			return;
+
+		if (m_selected_entity == entity()) {
+
+			ImGui::End();
+			return;
+		}
+
+		// Component that every entity has
+		if (ImGui::CollapsingHeader("Tag"), ImGuiTreeNodeFlags_DefaultOpen) {
+
+			auto& tag_comp = m_selected_entity.get_component<tag_component>();
+			UI::begin_table("entity_component", false);
+			UI::table_row_text("tag", tag_comp.tag.c_str());
+			UI::end_table();
+		}
+
+		// Component that every entity has
+		if (ImGui::CollapsingHeader("Transform"), ImGuiTreeNodeFlags_DefaultOpen) {
+
+			auto& transform_comp = m_selected_entity.get_component<transform_component>();
+			UI::begin_table("entity_component", false);
+			UI::table_row("translation", transform_comp.translation);
+			UI::table_row("rotation", transform_comp.rotation);
+			UI::table_row("scale", transform_comp.scale);
+			UI::end_table(); 
+		}
+		
+		if (m_selected_entity.has_component<mesh_component>()) {
+
+		}
+
 
 		ImGui::End();
 	}
@@ -328,12 +362,11 @@ namespace PFF {
 
 					CORE_LOG(Trace, "Adding static mesh, Name: " << "SM_" + file_path.filename().replace_extension("").string());
 
+					mesh_component mesh_comp{};
+					mesh_comp.asset_path = util::extract_path_from_project_content_folder(file_path);
+
 					if (m_selected_entity != entity()) {
 
-						CORE_LOG(Debug, "an entity is selected");
-
-						mesh_component mesh_comp{};
-						mesh_comp.asset_path = file_path;
 						m_selected_entity.add_mesh_component(mesh_comp);
 						break;
 					}
@@ -341,8 +374,6 @@ namespace PFF {
 					const auto loc_map = application::get().get_world_layer()->get_maps()[0];
 					entity loc_entitiy = loc_map->create_entity("SM_" + file_path.filename().replace_extension("").string());
 						
-					mesh_component mesh_comp{};
-					mesh_comp.asset_path = file_path;
 					loc_entitiy.add_mesh_component(mesh_comp);
 
 					//mesh_comp.mesh_asset = static_mesh_asset_manager::get_from_path(util::extract_path_from_project_content_folder(file_path));

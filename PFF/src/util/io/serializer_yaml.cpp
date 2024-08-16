@@ -113,7 +113,7 @@ namespace PFF::serializer {
 					line = line.substr(NUM_OF_INDENTING_SPACES);
 
 					//  more indented                                         is sub-section        is array-element
-					if ((util::measure_indentation(line, NUM_OF_INDENTING_SPACES) != SECTION_INDENTATION) || line.back() == ':' || line.front() == '-') {
+					if ((util::measure_indentation(line, NUM_OF_INDENTING_SPACES) > SECTION_INDENTATION) || line.back() == ':' || line.front() == '-') {
 
 						m_file_content << line << '\n';
 						continue;
@@ -139,6 +139,9 @@ namespace PFF::serializer {
 		std::getline(iss, key, ':');
 		std::getline(iss, value);
 
+		if (const u32 indentation = util::measure_indentation(key, 1); indentation > 0)
+			key = key.substr(indentation);
+
 		if (!value.empty() && value.front() == ' ')
 			value.erase(0, 1);
 	}
@@ -149,7 +152,7 @@ namespace PFF::serializer {
 
 		if (m_option == PFF::serializer::option::save_to_file) {
 
-			m_file_content << util::add_spaces(m_level_of_indention - 1, NUM_OF_INDENTING_SPACES) << section_name << ":\n";
+			m_file_content << util::add_spaces(m_level_of_indention + vector_func_index -1, NUM_OF_INDENTING_SPACES) << section_name << ":\n";
 			sub_section_function(*this);
 
 		} else {	// load from file
@@ -182,10 +185,13 @@ namespace PFF::serializer {
 
 					while (std::getline(file_content_buffer, line)) {
 
+						if (util::measure_indentation(line, NUM_OF_INDENTING_SPACES) < m_level_of_indention)	// exit inner loop after section is finished
+							break;		
+
 						line = line.substr(NUM_OF_INDENTING_SPACES);
 
-						//  more indented                                        beginning of new sub-section
-						if (util::measure_indentation(line, NUM_OF_INDENTING_SPACES) != 0 || line.back() == ':') {
+						//  more indented																		beginning of new sub-section
+						if (util::measure_indentation(line, NUM_OF_INDENTING_SPACES) > m_level_of_indention -1 || line.back() == ':' || line.front() == '-') {
 
 							m_file_content << line << "\n";
 							continue;
@@ -199,7 +205,10 @@ namespace PFF::serializer {
 				if (found_section)
 					break;
 			}
-			sub_section_function(*this);
+
+			if (found_section)
+				sub_section_function(*this);
+
 			m_key_value_pares = key_value_pares_buffer;
 			m_file_content << file_content_buffer.str();
 		}

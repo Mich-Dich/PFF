@@ -1,6 +1,7 @@
 
 #include "util/pffpch.h"
 
+#include "application.h"
 #include "engine/resource_management/static_mesh_asset_manager.h"
 #include "engine/resource_management/mesh_serializer.h"
 
@@ -14,7 +15,7 @@ namespace PFF {
 
 		asset_file_header asset_header;
 		general_mesh_file_header general_header;
-		auto serializer = serializer::binary(mesh_comp.asset_path, "PFF_asset_file", serializer::option::load_from_file);
+		auto serializer = serializer::binary(application::get().get_project_path() / CONTENT_DIR / mesh_comp.asset_path, "PFF_asset_file", serializer::option::load_from_file);
 		serialize_mesh_headers(serializer, asset_header, general_header);
 		CORE_ASSERT(asset_header.type == file_type::mesh, "", "Tryed to add mesh_component but provided asset_path is not a mesh");
 
@@ -25,7 +26,7 @@ namespace PFF {
 			static_mesh_file_header static_mesh_header;
 			serialize_static_mesh_header(serializer, static_mesh_header);
 
-			mesh_comp.mesh_asset = static_mesh_asset_manager::get_from_path(util::extract_path_from_project_content_folder(mesh_comp.asset_path));
+			mesh_comp.mesh_asset = static_mesh_asset_manager::get_from_path(mesh_comp.asset_path);
 
 			//TODO: check 
 			//		if (user defined a material_instance) || ([static_mesh_header] has a material_instance)

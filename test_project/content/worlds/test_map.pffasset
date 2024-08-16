@@ -2,96 +2,109 @@ map_data:
   file_header:
     version: 1 0 0
     type: 2
-    timestamp: 2024 8 16 5 13 46 49 278
-  data:
-    entity_5:
-      tag: SM_grass_001_Plane
-      ID: 5614138961331100878
-      transform_component:
-        translation: 0 0 0
-        rotation: 0 0 0
-        scale: 1 1 1
-      mesh_component:
-        asset_path: C:\CustomGameEngine\PFF\test_project\content\meshes\grass_001_Plane.pffasset
-        mobility: 0
-        shoudl_render: true
-        transform: 1 0 0 0 0 1 0 0 0 0 1 0 0 0 0 1
-      relationship_component:
-        parent_ID: 11180139864072432588
-        children_ID:
-    entity_4:
-      tag: SM_grass_002_Plane
-      ID: 6303739116628459500
-      transform_component:
-        translation: 0 0 0
-        rotation: 0 0 0
-        scale: 1 1 1
-      mesh_component:
-        asset_path: C:\CustomGameEngine\PFF\test_project\content\meshes\grass_002_Plane.pffasset
-        mobility: 0
-        shoudl_render: true
-        transform: 1 0 0 0 0 1 0 0 0 0 1 0 0 0 0 1
-      relationship_component:
-        parent_ID: 11180139864072432588
-        children_ID:
-    entity_3:
-      tag: SM_grass_002_Plane
-      ID: 5527133044746345787
-      transform_component:
-        translation: 0 0 0
-        rotation: 0 0 0
-        scale: 1 1 1
-      mesh_component:
-        asset_path: C:\CustomGameEngine\PFF\test_project\content\meshes\grass_002_Plane.pffasset
-        mobility: 0
-        shoudl_render: true
-        transform: 1 0 0 0 0 1 0 0 0 0 1 0 0 0 0 1
-      relationship_component:
-        parent_ID: 14628615687118784663
-        children_ID:
-    entity_2:
-      tag: SM_grass_001_Plane
-      ID: 11180139864072432588
-      transform_component:
-        translation: 0 0 0
-        rotation: 0 0 0
-        scale: 1 1 1
-      mesh_component:
-        asset_path: C:\CustomGameEngine\PFF\test_project\content\meshes\grass_001_Plane.pffasset
-        mobility: 0
-        shoudl_render: true
-        transform: 1 0 0 0 0 1 0 0 0 0 1 0 0 0 0 1
-      relationship_component:
-        parent_ID: 14628615687118784663
-        children_ID:
-        - 0: 6303739116628459500
-        - 1: 5614138961331100878
-    entity_1:
-      tag: SM_grass_001_Plane
-      ID: 12606125713152941768
-      transform_component:
-        translation: 0 0 0
-        rotation: 0 0 0
-        scale: 1 1 1
-      mesh_component:
-        asset_path: C:\CustomGameEngine\PFF\test_project\content\meshes\grass_001_Plane.pffasset
-        mobility: 0
-        shoudl_render: true
-        transform: 1 0 0 0 0 1 0 0 0 0 1 0 0 0 0 1
-    entity_0:
-      tag: SM_grass_002_Plane
-      ID: 14628615687118784663
-      transform_component:
-        translation: 0 0 0
-        rotation: 0 0 0
-        scale: 1 1 1
-      mesh_component:
-        asset_path: C:\CustomGameEngine\PFF\test_project\content\meshes\grass_002_Plane.pffasset
-        mobility: 0
-        shoudl_render: true
-        transform: 1 0 0 0 0 1 0 0 0 0 1 0 0 0 0 1
-      relationship_component:
-        parent_ID: 0
-        children_ID:
-        - 0: 11180139864072432588
-        - 1: 5527133044746345787
+    timestamp: 2024 8 16 5 19 30 29 744
+  entities:
+  - tag: SM_grass_002_Plane
+    ID: 13392266882071143579
+    transform_component:
+      translation: 0 0 0
+      rotation: 0 0 0
+      scale: 1 1 1
+    mesh_component:
+      asset_path: meshes\grass_002_Plane.pffasset
+      mobility: 0
+      shoudl_render: true
+      transform: 1 0 0 0 0 1 0 0 0 0 1 0 0 0 0 1
+    relationship_component:
+      parent_ID: 0
+      children_ID:
+      - ID: 7665366783267236136
+      - ID: 2984191139830112024
+  - tag: SM_grass_002_Plane
+    ID: 7665366783267236136
+    transform_component:
+      translation: 0 0 0
+      rotation: 0 0 0
+      scale: 1 1 1
+    mesh_component:
+      asset_path: meshes\grass_002_Plane.pffasset
+      mobility: 0
+      shoudl_render: true
+      transform: 1 0 0 0 0 1 0 0 0 0 1 0 0 0 0 1
+    relationship_component:
+      parent_ID: 13392266882071143579
+      children_ID:
+      - ID: 16597681695622070698
+      - ID: 18176559363330587691
+  - tag: SM_grass_002_Plane
+    ID: 2984191139830112024
+    transform_component:
+      translation: 0 0 0
+      rotation: 0 0 0
+      scale: 1 1 1
+    mesh_component:
+      asset_path: meshes\grass_002_Plane.pffasset
+      mobility: 0
+      shoudl_render: true
+      transform: 1 0 0 0 0 1 0 0 0 0 1 0 0 0 0 1
+    relationship_component:
+      parent_ID: 13392266882071143579
+      children_ID:
+  - tag: SM_basicmesh_Sphere
+    ID: 16597681695622070698
+    transform_component:
+      translation: 0 0 0
+      rotation: 0 0 0
+      scale: 1 1 1
+    mesh_component:
+      asset_path: meshes\basicmesh_Sphere.pffasset
+      mobility: 0
+      shoudl_render: true
+      transform: 1 0 0 0 0 1 0 0 0 0 1 0 0 0 0 1
+    relationship_component:
+      parent_ID: 7665366783267236136
+      children_ID:
+  - tag: SM_basicmesh_Sphere
+    ID: 18176559363330587691
+    transform_component:
+      translation: 0 0 0
+      rotation: 0 0 0
+      scale: 1 1 1
+    mesh_component:
+      asset_path: meshes\basicmesh_Sphere.pffasset
+      mobility: 0
+      shoudl_render: true
+      transform: 1 0 0 0 0 1 0 0 0 0 1 0 0 0 0 1
+    relationship_component:
+      parent_ID: 7665366783267236136
+      children_ID:
+      - ID: 2542501644761166161
+      - ID: 1986262975729520130
+  - tag: SM_basicmesh_Suzanne
+    ID: 2542501644761166161
+    transform_component:
+      translation: 0 0 0
+      rotation: 0 0 0
+      scale: 1 1 1
+    mesh_component:
+      asset_path: meshes\basicmesh_Suzanne.pffasset
+      mobility: 0
+      shoudl_render: true
+      transform: 1 0 0 0 0 1 0 0 0 0 1 0 0 0 0 1
+    relationship_component:
+      parent_ID: 18176559363330587691
+      children_ID:
+  - tag: SM_basicmesh_Suzanne
+    ID: 1986262975729520130
+    transform_component:
+      translation: 0 0 0
+      rotation: 0 0 0
+      scale: 1 1 1
+    mesh_component:
+      asset_path: meshes\basicmesh_Suzanne.pffasset
+      mobility: 0
+      shoudl_render: true
+      transform: 1 0 0 0 0 1 0 0 0 0 1 0 0 0 0 1
+    relationship_component:
+      parent_ID: 18176559363330587691
+      children_ID:

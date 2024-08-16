@@ -36,6 +36,10 @@ namespace PFF {
 		glm::mat4 transform = glm::mat4(1);
 
 		FORCEINLINE glm::mat4& get_transform() {
+			
+			// ============================== DEV-ONLY ==============================
+			needs_updating = true;
+			// ============================== DEV-ONLY ==============================
 
 			if (needs_updating) {
 				needs_updating = false;

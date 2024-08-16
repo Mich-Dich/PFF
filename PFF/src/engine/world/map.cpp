@@ -54,20 +54,8 @@ namespace PFF {
 		m_path = application::get().get_project_path() / CONTENT_DIR / "worlds" / "test_map.pffasset";
 		CORE_LOG(Debug, "m_path: " << m_path);
 
-		//{
-		//	entity loc_entitiy = create_entity("editor_origin_grid");
-
-		//	auto& transform_comp = loc_entitiy.get_component<transform_component>();
-		//	transform_comp.translation = glm::vec3(0);
-		//	transform_comp.rotation = glm::vec3(0);
-
-		//	auto& mesh_comp = loc_entitiy.add_component<mesh_component>();			
-		//	mesh_comp.mesh_asset = static_mesh_asset_manager::get_from_path("meshes/grass_002_Plane.pffasset");
-		//	//mesh_comp.material = GET_RENDERER.get_default_material_pointer();		// get correct shader
-		//}
-
-
-		
+		serialize(serializer::option::load_from_file);
+				
 		//class test_script : public entity_script {
 		//public:
 		//	void on_create() override { CORE_LOG(Debug, "Creating test_script instance") }
@@ -259,68 +247,121 @@ namespace PFF {
 		file_header.type = file_type::map;
 		file_header.timestamp = util::get_system_time();
 
-		serializer::yaml(m_path, "map_data", option)
-			.sub_section("file_header", [&](serializer::yaml& header_section) {
+		auto serializer = serializer::yaml(m_path, "map_data", option);
+		serializer.sub_section("file_header", [&](serializer::yaml& header_section) {
 
-				header_section.entry(KEY_VALUE(file_header.version))
+			header_section.entry(KEY_VALUE(file_header.version))
 				.entry(KEY_VALUE(file_header.type))
 				.entry(KEY_VALUE(file_header.timestamp));
-			})
-			.sub_section("data", [&](serializer::yaml& data_section) {
+		});
+	
+		if (option == serializer::option::save_to_file) {
 
-				//const auto view = ;
-				for (const auto entity_ID : m_registry.view<entt::entity>(/*entt::exclude<T>*/)) {
+			const auto view = m_registry.view<entt::entity>();
+			std::vector<entt::entity> entities(view.begin(), view.end());			// convert to vector<> because of serializer API
+			std::reverse(entities.begin(), entities.end());							// reverse because EnTT counts from last to first in view<>()
 
-					data_section.sub_section(("entity_" + util::num_to_str((u32)entity_ID)), [&](serializer::yaml& entity_section) {
+			serializer.vector("entities", entities, [&](serializer::yaml& entity_section, u64 x) {
 
-						entity loc_entity = entity(entity_ID, this);
+				entity loc_entity = entity(entities[x], this);
 
-						auto& tag_comp = loc_entity.get_component<tag_component>();
-						entity_section.entry(KEY_VALUE(tag_comp.tag));
+				auto& tag_comp = loc_entity.get_component<tag_component>();
+				entity_section.entry(KEY_VALUE(tag_comp.tag));
 
-						auto& ID_comp = loc_entity.get_component<ID_component>();
-						entity_section.entry(KEY_VALUE(ID_comp.ID));
+				auto& ID_comp = loc_entity.get_component<ID_component>();
+				entity_section.entry(KEY_VALUE(ID_comp.ID));
 
-						if (loc_entity.has_component<transform_component>()) {
-							auto& transform_comp = loc_entity.get_component<transform_component>();
-							entity_section.sub_section("transform_component", [&](serializer::yaml& component_section) {
+				auto& transform_comp = loc_entity.get_component<transform_component>();
+				entity_section.sub_section("transform_component", [&](serializer::yaml& component_section) {
 
-								component_section.entry(KEY_VALUE(transform_comp.translation))
-								.entry(KEY_VALUE(transform_comp.rotation))
-								.entry(KEY_VALUE(transform_comp.scale));
-							});
-						}
+					component_section.entry(KEY_VALUE(transform_comp.translation))
+					.entry(KEY_VALUE(transform_comp.rotation))
+					.entry(KEY_VALUE(transform_comp.scale));
+				});
 
-						if (loc_entity.has_component<mesh_component>()) {
-							auto& mesh_comp = loc_entity.get_component<mesh_component>();
-							entity_section.sub_section("mesh_component", [&](serializer::yaml& component_section) {
+				if (loc_entity.has_component<mesh_component>()) {
+					auto& mesh_comp = loc_entity.get_component<mesh_component>();
+					entity_section.sub_section("mesh_component", [&](serializer::yaml& component_section) {
 
-								component_section.entry(KEY_VALUE(mesh_comp.asset_path))
-								.entry(KEY_VALUE(mesh_comp.mobility))
-								.entry(KEY_VALUE(mesh_comp.shoudl_render))
-								.entry(KEY_VALUE(mesh_comp.transform));
-
-							});
-						}
-						
-						if (loc_entity.has_component<relationship_component>()) {
-							auto& relationship_comp = loc_entity.get_component<relationship_component>();
-							entity_section.sub_section("relationship_component", [&](serializer::yaml& component_section) {
-
-								component_section.entry(KEY_VALUE(relationship_comp.parent_ID))
-									.vector(KEY_VALUE(relationship_comp.children_ID), [&](serializer::yaml& children, u64 x) {
-
-										children.entry(util::num_to_str(x), relationship_comp.children_ID[x]);
-									});
-
-							});
-						}
+						component_section.entry(KEY_VALUE(mesh_comp.asset_path))
+						.entry(KEY_VALUE(mesh_comp.mobility))
+						.entry(KEY_VALUE(mesh_comp.shoudl_render))
+						.entry(KEY_VALUE(mesh_comp.transform));
 
 					});
-
 				}
-			})
-			;
+
+				if (loc_entity.has_component<relationship_component>()) {
+					auto& relationship_comp = loc_entity.get_component<relationship_component>();
+					entity_section.sub_section("relationship_component", [&](serializer::yaml& component_section) {
+
+						component_section.entry(KEY_VALUE(relationship_comp.parent_ID))
+						.vector(KEY_VALUE(relationship_comp.children_ID), [&](serializer::yaml& children, u64 x) {
+
+							children.entry("ID", relationship_comp.children_ID[x]);
+						});
+
+					});
+				}
+
+			});
+
+
+		} else {		// LOAD
+
+			std::vector<entt::entity> entities{};
+
+			serializer.vector("entities", entities, [&](serializer::yaml& entity_section, u64 x) {
+				
+
+				std::string tag{};
+				entity_section.entry(KEY_VALUE(tag));
+
+				UUID ID{};
+				entity_section.entry(KEY_VALUE(ID));
+
+
+				entity loc_entity = create_entity_with_UUID(ID, tag);
+
+				auto& transform_comp = loc_entity.get_component<transform_component>();
+				entity_section.sub_section("transform_component", [&](serializer::yaml& component_section) {
+
+					component_section.entry(KEY_VALUE(transform_comp.translation))
+					.entry(KEY_VALUE(transform_comp.rotation))
+					.entry(KEY_VALUE(transform_comp.scale));
+				});
+
+				entity_section.sub_section("mesh_component", [&](serializer::yaml& component_section) {
+
+					mesh_component mesh_comp{};
+					component_section.entry(KEY_VALUE(mesh_comp.asset_path))
+					.entry(KEY_VALUE(mesh_comp.mobility))
+					.entry(KEY_VALUE(mesh_comp.shoudl_render))
+					.entry(KEY_VALUE(mesh_comp.transform));
+
+					loc_entity.add_mesh_component(mesh_comp);
+				});
+
+				entity_section.sub_section("relationship_component", [&](serializer::yaml& component_section) {
+
+					relationship_component relationship_comp{};
+					component_section.entry(KEY_VALUE(relationship_comp.parent_ID))
+					.vector(KEY_VALUE(relationship_comp.children_ID), [&](serializer::yaml& children, u64 x) {
+
+						children.entry("ID", relationship_comp.children_ID[x]);
+					});
+
+					CORE_LOG(Error, "children_ID: " << util::to_string(relationship_comp.parent_ID) << " childre: " << util::num_to_str(relationship_comp.children_ID.size()));
+
+					loc_entity.add_component<relationship_component>(relationship_comp);
+				});
+
+				CORE_LOG(Trace, "Loaded entity: " << ID << " tag: " << tag);
+
+			});
+
+		}
+
 
 	}
 
