@@ -1112,9 +1112,12 @@ namespace PFF::render::vulkan {
 			// get every entity with [transform] and [mesh]
 			const auto group = loc_map->get_registry().group<transform_component>(entt::get<mesh_component>);
 			for (const auto entity : group) {
-				const auto& [transform, mesh_comp] = group.get<transform_component, mesh_component>(entity);
+				const auto& [transform_comp, mesh_comp] = group.get<transform_component, mesh_component>(entity);
 
-				if (!is_bounds_in_frustum(mesh_comp.mesh_asset->bounds, (glm::mat4&)transform))
+				if (!mesh_comp.mesh_asset || mesh_comp.asset_path.empty() || !mesh_comp.shoudl_render)
+					continue;
+
+				if (!is_bounds_in_frustum(mesh_comp.mesh_asset->bounds, (glm::mat4&)transform_comp))
 					continue;
 				
 				// TODO: add more culling for geometry that doesn't need to be drawns
@@ -1146,10 +1149,10 @@ namespace PFF::render::vulkan {
 
 				GPU_draw_push_constants push_constants;
 				switch (mesh_comp.mobility) {
-					case mobility::locked:		push_constants.world_matrix = mesh_comp.transform; break;
-					case mobility::movable:		push_constants.world_matrix = mesh_comp.transform; break;		// TODO: meeds to check if object moved
+					case mobility::locked:		push_constants.world_matrix = (glm::mat4&)transform_comp; break;
+					case mobility::movable:		push_constants.world_matrix = (glm::mat4&)transform_comp; break;		// TODO: meeds to check if object moved
 					case mobility::dynamic:		
-					default:					push_constants.world_matrix = (glm::mat4&)transform * mesh_comp.transform; break;
+					default:					push_constants.world_matrix = (glm::mat4&)transform_comp; break;		// TODO: check for relationship_comp => add parent transform
 				}
 				push_constants.vertex_buffer = mesh_comp.mesh_asset->mesh_buffers.vertex_buffer_address;
 				vkCmdPushConstants(cmd, mesh_comp.material->pipeline->layout, VK_SHADER_STAGE_VERTEX_BIT, (u32)0, sizeof(GPU_draw_push_constants), &push_constants);

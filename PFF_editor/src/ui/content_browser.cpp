@@ -245,9 +245,24 @@ namespace PFF {
 			ImGui::EndGroup();
 			const auto item_mouse_interation = UI::get_mouse_interation_on_item();
 
+			const char* playload_name = "PROJECT_CONTENT_FILE";
+			
+			// TODO: make it possible to easyly tell the file type
+			//switch (loc_asset_file_header.type) {
+			//case file_type::mesh:
+			//	playload_name = "PROJECT_CONTENT_FILE_MESH";
+			//	break;
+			//case file_type::world:
+			//	playload_name = "PROJECT_CONTENT_FILE_WORLD";
+			//	break;
+			//default:
+			//	break;
+			//}
+
+
 			// Handle drag source for files
 			if (ImGui::BeginDragDropSource(ImGuiDragDropFlags_SourceAllowNullID)) {
-				ImGui::SetDragDropPayload("PROJECT_CONTENT_FILE", entry.path().string().c_str(), entry.path().string().length() + 1);
+				ImGui::SetDragDropPayload(playload_name, entry.path().string().c_str(), entry.path().string().length() + 1);
 
 				ImGui::Image(m_mesh_asset_image->get_descriptor_set(), m_icon_size);
 				ImGui::TextWrapped("%s", item_name.c_str());

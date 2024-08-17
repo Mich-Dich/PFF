@@ -1,12 +1,16 @@
 
 #include "util/pffpch.h"
 
+#include <glm/gtc/matrix_transform.hpp>
 #define GLM_ENABLE_EXPERIMENTAL
 #include <glm/gtx/matrix_decompose.hpp>
+#include <glm/gtx/quaternion.hpp>
 
 #include "math.h"
 
 namespace PFF::math {
+	
+	bool is_valid_vec3(const glm::vec3& vec) { return !std::isnan(vec.x) && !std::isnan(vec.y) && !std::isnan(vec.z); }
 
 	bool decompose_transform(const glm::mat4& transform, glm::vec3& translation, glm::vec3& rotation, glm::vec3& scale) {
 		// From glm::decompose in matrix_decompose.inl
@@ -71,6 +75,30 @@ namespace PFF::math {
 		}
 
 
+		return true;
+	}
+
+	bool compose_transform(glm::mat4& transform, const glm::vec3& translation, const glm::vec3& rotation, const glm::vec3& scale) {
+
+		if (!is_valid_vec3(translation) || !is_valid_vec3(rotation) || !is_valid_vec3(scale) ||
+			scale.x == 0.0f || scale.y == 0.0f || scale.z == 0.0f) {
+			return false;
+		}
+
+		glm::mat4 translation_matrix = glm::mat4(1.0f);
+		glm::mat4 scale_matrix = glm::mat4(1.0f);
+		glm::mat4 rotation_matrix = glm::mat4(1.0f);
+
+		translation_matrix[3] = glm::vec4(translation.x, translation.y, translation.z, 1.0f);
+
+		glm::quat quaternion(rotation);
+		rotation_matrix = glm::toMat4(quaternion);
+
+		scale_matrix[0][0] = scale.x;
+		scale_matrix[1][1] = scale.y;
+		scale_matrix[2][2] = scale.z;
+
+		transform = translation_matrix * rotation_matrix * scale_matrix;
 		return true;
 	}
 

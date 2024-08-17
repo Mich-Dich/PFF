@@ -497,6 +497,20 @@ namespace PFF::UI {
 		ImGui::Text("%s", value.data());
 	}
 
+	bool table_row(std::string_view label, glm::mat4& value) {
+		
+		glm::vec3 translation, rotation, scale;
+		math::decompose_transform(value, translation, rotation, scale);
+
+		bool changed_0 = UI::table_row("translation", translation);
+		bool changed_1 = UI::table_row("rotation", rotation);
+		bool changed_2 = UI::table_row("scale", scale);
+
+		math::compose_transform(value, translation, rotation, scale);
+
+		return changed_0 || changed_1 || changed_2;
+	}
+
 	void table_row_progressbar(std::string_view label, const char* progress_bar_text, const f32 percent, const bool auto_resize, const f32 progressbar_size_x, const f32 progressbar_size_y) {
 
 

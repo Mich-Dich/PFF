@@ -6,30 +6,9 @@ todo_list:
     - title: Change engine Wiki window
       description: The file list is currently display using button, change to tree nodes like in the content browser
       done: false
-    - title: Dummy task
-      description: 
+    - title: relocate mobility in mesh_comp to root entity
+      description: # only root entity should have the mobility field, because mixing mobility values can lead to chaos.$$ ## possible implementation$  All entities have the mobility_component$  When adding a relationship comnponent, it should automaticly check if the given entity is the root $  If NOT it should remove the mobility_component
       done: false
-    - title: Dummy task
-      description: 
-      done: false
-    - title: Dummy task
-      description: 
-      done: false
-    - title: Dummy task
-      description: 
-      done: false
-    - title: Dummy task
-      description: 
-      done: false
-    - title: Dummy task
-      description: 
-      done: false
-    - title: Dummy task
-      description: 
-      done: false
-    - title: Dummy task
-      description: 
-      done: false
-    - title: Dummy task
+    - title: Make it possible to delete entities from the outliner
       description: 
       done: false

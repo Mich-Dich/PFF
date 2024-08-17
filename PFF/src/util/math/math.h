@@ -4,7 +4,11 @@
 
 namespace PFF::math {
 
+    bool is_valid_vec3(const glm::vec3& vec);
+
 	bool decompose_transform(const glm::mat4& transform, glm::vec3& translation, glm::vec3& rotation, glm::vec3& scale);
+
+	bool compose_transform(glm::mat4& transform, const glm::vec3& translation, const glm::vec3& rotation, const glm::vec3& scale);
 
     PFF_API FORCEINLINE f32 calc_array_average(const f32* array, u32 size);
 

@@ -150,6 +150,8 @@ namespace PFF::UI {
 
 	PFF_API FORCEINLINE void table_row(std::string_view label, std::string_view value);
 
+	PFF_API FORCEINLINE bool table_row(std::string_view label, glm::mat4& value);
+
 
 	// @brief Adds a row to an ImGui table with a label and corresponding value input field.
 	// @tparam [T] The type of the value.

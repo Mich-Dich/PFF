@@ -73,6 +73,11 @@ namespace PFF {
 			.entry("show_outliner", m_show_outliner)
 			.entry("show_details", m_show_details)
 			.entry("show_world_settings", m_show_world_settings);
+
+			// TODO: serialize selected entity (need figure out how to serialize the selected map)
+			/*.sub_section("world_vieport_data", [selected_entity = m_selected_entity](serializer::yaml& section) {
+				section.entry("selected entity", selected_entity);
+			});*/
 	}
 
 	// ------------------------------------------------------------------------------------------------------------------------------------------------------------------
@@ -204,14 +209,70 @@ namespace PFF {
 
 			auto& transform_comp = m_selected_entity.get_component<transform_component>();
 			UI::begin_table("entity_component", false);
-			UI::table_row("translation", transform_comp.translation);
-			UI::table_row("rotation", transform_comp.rotation);
-			UI::table_row("scale", transform_comp.scale);
+
+			if (UI::table_row("transform", (glm::mat4&)transform_comp)) {		// TODO: change UI::table_row() to return true is transform was changed
+
+				// TODO: propegate transform change if mobility::locked
+				if (m_selected_entity.has_component<relationship_component>()) {
+
+				}
+			}
+
 			UI::end_table(); 
 		}
 		
 		if (m_selected_entity.has_component<mesh_component>()) {
 
+			// Component that every entity has
+			if (ImGui::CollapsingHeader("Mesh"), ImGuiTreeNodeFlags_DefaultOpen) {
+
+				auto& mesh_comp = m_selected_entity.get_component<mesh_component>();
+				UI::begin_table("entity_component", false);
+				
+				UI::table_row([]() {
+					ImGui::Text("mobility");
+				}, [&]() {
+
+					static const char* items[] = { "locked", "movable", "dynamic" };
+					static int item_current_idx = static_cast<std::underlying_type_t<mobility>>(mesh_comp.mobility);
+					const char* combo_preview_value = items[item_current_idx];
+					static ImGuiComboFlags flags = 0;
+					if (ImGui::BeginCombo("##details_window_mesh_component_mobility", combo_preview_value, flags)) {
+						
+						for (int n = 0; n < IM_ARRAYSIZE(items); n++) {
+							const bool is_selected = (item_current_idx == n);
+							if (ImGui::Selectable(items[n], is_selected))
+								item_current_idx = n;
+
+							if (is_selected)		// Set the initial focus when opening the combo (scrolling + keyboard navigation focus)
+								ImGui::SetItemDefaultFocus();
+						}
+
+						ImGui::EndCombo();
+					}
+				});
+				UI::table_row("shoudl render", mesh_comp.shoudl_render);
+
+				UI::table_row([]() {
+					ImGui::Text("mesh asset");
+				}, [&]() {
+
+					ImGui::Text(mesh_comp.asset_path.string().c_str());
+
+					if (ImGui::BeginDragDropTarget()) {
+						if (const ImGuiPayload* payload = ImGui::AcceptDragDropPayload("PROJECT_CONTENT_FILE")) {
+
+							const std::filesystem::path file_path = (const char*)payload->Data;
+							mesh_comp.asset_path = util::extract_path_from_project_content_folder(file_path);
+							mesh_comp.mesh_asset = static_mesh_asset_manager::get_from_path(mesh_comp.asset_path);
+						}
+						ImGui::EndDragDropTarget();
+					}
+					
+				});
+
+				UI::end_table();
+			}
 		}
 
 

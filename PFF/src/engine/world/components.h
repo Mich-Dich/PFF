@@ -6,9 +6,6 @@
 #include "util/math/math.h"
 #include "engine/geometry/mesh.h"
 
-#include <glm/gtc/matrix_transform.hpp>
-#define GLM_ENABLE_EXPERIMENTAL
-#include <glm/gtx/quaternion.hpp>
 
 //#include <xmmintrin.h>   // SSE
 //#include <smmintrin.h>   // SSE4.1 (for matrix multiplication)
@@ -19,50 +16,13 @@ namespace PFF {
 
 		PFF_DEFAULT_CONSTRUCTORS(transform_component);
 		
-		transform_component(const glm::vec3& translation)
-			: translation(translation) {}
-		transform_component(const glm::mat4& transform) { math::decompose_transform(transform, translation, rotation, scale); }
+		transform_component(const glm::mat4& transform)
+			: transform(transform) {}
 
-		operator glm::mat4& () { return get_transform(); }
-		operator const glm::mat4& () { return get_transform(); }
+		operator glm::mat4& () { return transform; }
+		operator const glm::mat4& () { return transform; }
 
-		glm::vec3 translation = { 0.0f, 0.0f, 0.0f };
-		glm::vec3 rotation = { 0.0f, 0.0f, 0.0f };
-		glm::vec3 scale	= { 1.0f, 1.0f, 1.0f };
-
-	private:
-
-		bool needs_updating = true;
 		glm::mat4 transform = glm::mat4(1);
-
-		FORCEINLINE glm::mat4& get_transform() {
-			
-			// ============================== DEV-ONLY ==============================
-			needs_updating = true;
-			// ============================== DEV-ONLY ==============================
-
-			if (needs_updating) {
-				needs_updating = false;
-
-				glm::mat4 translation_matrix = glm::mat4(1.0f);
-				glm::mat4 scale_matrix = glm::mat4(1.0f);
-				glm::mat4 rotation_matrix = glm::mat4(1.0f);
-
-				translation_matrix[3] = glm::vec4(translation.x, translation.y, translation.z, 1.0f);
-				
-				scale_matrix[0][0] = scale.x;
-				scale_matrix[1][1] = scale.y;
-				scale_matrix[2][2] = scale.z;
-
-				glm::quat quaternion(rotation);
-				rotation_matrix = glm::toMat4(quaternion);
-
-				// Combine matrices using SIMD
-				transform = translation_matrix * rotation_matrix * scale_matrix;
-			}
-
-			return transform;
-		}
 	};
 
 	struct ID_component {
@@ -108,7 +68,7 @@ namespace PFF {
 			: mesh_asset(mesh_asset_ref) {}
 
 		mobility							mobility = mobility::locked;
-		glm::mat4							transform = glm::mat4(1);			// TODO: remove because every entity can only have 1 mesh_comp, use parenting system instead
+		//glm::mat4							transform = glm::mat4(1);			// TODO: remove because every entity can only have 1 mesh_comp, use parenting system instead
 		bool								shoudl_render = true;
 		std::filesystem::path				asset_path;
 
