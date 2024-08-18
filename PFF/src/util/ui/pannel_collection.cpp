@@ -24,47 +24,74 @@ namespace PFF::UI {
 		return ImGui::IsMouseHoveringRect(item_pos, item_max) && ImGui::IsMouseDoubleClicked(0);
 	}
 
-	mouse_interation get_mouse_interation_on_item() {
+	mouse_interation get_mouse_interation_on_item(const f32 target_click_duration) {
+
+		static std::chrono::steady_clock::time_point left_click_time;
+		static std::chrono::steady_clock::time_point right_click_time;
 
 		const ImVec2 item_pos = ImGui::GetItemRectMin();
 		const ImVec2 item_max = item_pos + ImGui::GetItemRectSize();
 
+		// If the mouse is not hovering over the item, return none
 		if (!ImGui::IsMouseHoveringRect(item_pos, item_max))
 			return mouse_interation::none;
 
+		// Right mouse button interaction
 		if (ImGui::IsMouseClicked(ImGuiMouseButton_Right)) {
-			if (ImGui::IsMouseDoubleClicked(ImGuiMouseButton_Right))
-				return mouse_interation::right_double_click;
-			return mouse_interation::right_click;
+			right_click_time = std::chrono::steady_clock::now();
+		}
+		if (ImGui::IsMouseReleased(ImGuiMouseButton_Right)) {
+			auto click_duration = std::chrono::steady_clock::now() - right_click_time;
+			if (std::chrono::duration_cast<std::chrono::milliseconds>(click_duration).count() < (target_click_duration * 1000))
+				return (ImGui::GetIO().MouseClickedLastCount[ImGuiMouseButton_Right] >= 2) ? mouse_interation::right_double_click : mouse_interation::right_click;
 		}
 
+		// Left mouse button interaction
 		if (ImGui::IsMouseClicked(ImGuiMouseButton_Left)) {
-			if (ImGui::IsMouseDoubleClicked(ImGuiMouseButton_Left))
-				return mouse_interation::double_click;
-			return mouse_interation::single_click;
+			left_click_time = std::chrono::steady_clock::now();
+		}
+		if (ImGui::IsMouseReleased(ImGuiMouseButton_Left)) {
+			auto click_duration = std::chrono::steady_clock::now() - left_click_time;
+			
+			if (std::chrono::duration_cast<std::chrono::milliseconds>(click_duration).count() < (target_click_duration * 1000))
+				return (ImGui::GetIO().MouseClickedLastCount[ImGuiMouseButton_Left] >= 2) ? mouse_interation::double_click : mouse_interation::single_click;
 		}
 
 		return mouse_interation::hovered;
 	}
 
-	mouse_interation get_mouse_interation_on_window() {
+	mouse_interation get_mouse_interation_on_window(const f32 target_click_duration) {
+
+		static std::chrono::steady_clock::time_point left_click_time;
+		static std::chrono::steady_clock::time_point right_click_time;
 
 		const ImVec2 item_pos = ImGui::GetWindowPos();
 		const ImVec2 item_max = item_pos + ImGui::GetWindowSize();
 
+		// If the mouse is not hovering over the item, return none
 		if (!ImGui::IsMouseHoveringRect(item_pos, item_max))
 			return mouse_interation::none;
 
-		if (ImGui::IsMouseClicked(ImGuiMouseButton_Right)) {
-			if (ImGui::IsMouseDoubleClicked(ImGuiMouseButton_Right))
-				return mouse_interation::right_double_click;
-			return mouse_interation::right_click;
+		// Right mouse button interaction
+		if (ImGui::IsMouseClicked(ImGuiMouseButton_Right)) 
+			right_click_time = std::chrono::steady_clock::now();
+		
+		if (ImGui::IsMouseReleased(ImGuiMouseButton_Right)) {
+
+			auto click_duration = std::chrono::steady_clock::now() - right_click_time;
+			if (std::chrono::duration_cast<std::chrono::milliseconds>(click_duration).count() < (target_click_duration * 1000))
+				return (ImGui::GetIO().MouseClickedLastCount[ImGuiMouseButton_Right] >= 2) ? mouse_interation::right_double_click : mouse_interation::right_click;
 		}
 
-		if (ImGui::IsMouseClicked(ImGuiMouseButton_Left)) {
-			if (ImGui::IsMouseDoubleClicked(ImGuiMouseButton_Left))
-				return mouse_interation::double_click;
-			return mouse_interation::single_click;
+		// Left mouse button interaction
+		if (ImGui::IsMouseClicked(ImGuiMouseButton_Left))
+			left_click_time = std::chrono::steady_clock::now();
+		
+		if (ImGui::IsMouseReleased(ImGuiMouseButton_Left)) {
+
+			auto click_duration = std::chrono::steady_clock::now() - left_click_time;
+			if (std::chrono::duration_cast<std::chrono::milliseconds>(click_duration).count() < (target_click_duration * 1000))
+				return (ImGui::GetIO().MouseClickedLastCount[ImGuiMouseButton_Left] >= 2) ? mouse_interation::double_click : mouse_interation::single_click;
 		}
 
 		return mouse_interation::hovered;
@@ -459,6 +486,43 @@ namespace PFF::UI {
 		ImGui::TableSetColumnIndex(1);
 		second_colum();
 	}
+
+	void table_row(std::string_view label, std::string& text, bool& enable_input) {
+
+		ImGui::TableNextRow();
+		ImGui::TableSetColumnIndex(0);
+		ImGui::Text("%s", label.data());
+
+		ImGui::TableSetColumnIndex(1);
+
+		if (enable_input) {
+
+			std::string loc_label = "##";
+			loc_label.reserve(label.size() + 2);
+			std::remove_copy_if(label.begin(), label.end(), std::back_inserter(loc_label), [](char c) { return std::isspace(static_cast<unsigned char>(c)); });
+
+			std::string buffer = text;
+			buffer.resize(256);
+
+			ImGui::SetNextItemWidth(ImGui::GetColumnWidth());
+			if (ImGui::InputText(loc_label.c_str(), buffer.data(), 256, ImGuiInputTextFlags_CharsNoBlank | ImGuiInputTextFlags_EnterReturnsTrue)) {
+
+				buffer.resize(strlen(buffer.c_str()));
+				if (!buffer.empty()) {
+
+					text = buffer;
+					enable_input = false;
+				}
+			}
+
+		} else {
+
+			UI::gray_button(text.c_str());
+			if (get_mouse_interation_on_item() == mouse_interation::double_click) 
+				enable_input = true;
+		}
+
+	}
 	
 	void table_row_text(std::string_view label, const char* format, ...) {
 
@@ -502,11 +566,12 @@ namespace PFF::UI {
 		glm::vec3 translation, rotation, scale;
 		math::decompose_transform(value, translation, rotation, scale);
 
-		bool changed_0 = UI::table_row("translation", translation);
-		bool changed_1 = UI::table_row("rotation", rotation);
-		bool changed_2 = UI::table_row("scale", scale);
+		const bool changed_0 = UI::table_row("translation", translation);
+		const bool changed_1 = UI::table_row("rotation", rotation);
+		const bool changed_2 = UI::table_row("scale", scale);
 
-		math::compose_transform(value, translation, rotation, scale);
+		if (changed_0 || changed_1 || changed_2)
+			math::compose_transform(value, translation, rotation, scale);
 
 		return changed_0 || changed_1 || changed_2;
 	}

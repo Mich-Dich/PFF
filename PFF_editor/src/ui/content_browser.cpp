@@ -155,19 +155,7 @@ namespace PFF {
 				ImGui::PopID();
 			}
 			ImGui::EndGroup();
-			const auto item_mouse_interation = UI::get_mouse_interation_on_item();
-
-			// Handle drag source for files
-			if (ImGui::BeginDragDropSource(ImGuiDragDropFlags_SourceAllowNullID)) {
-				ImGui::SetDragDropPayload("PROJECT_CONTENT_FOLDER", entry.path().string().c_str(), entry.path().string().length() + 1);
-
-				ImGui::Image(m_folder_image->get_descriptor_set(), m_icon_size, ImVec2(0, 0), ImVec2(1, 1), UI::action_color_gray_active);
-				ImGui::TextWrapped("%s", item_name.c_str());
-
-				ImGui::EndDragDropSource();
-			}
-
-			switch (item_mouse_interation) {
+			switch (UI::get_mouse_interation_on_item()) {
 			case UI::mouse_interation::double_click:
 				select_new_directory(entry.path());
 				return;
@@ -179,6 +167,18 @@ namespace PFF {
 			default:
 				break;
 			}
+
+
+			// Handle drag source for files
+			if (ImGui::BeginDragDropSource(ImGuiDragDropFlags_SourceAllowNullID)) {
+				ImGui::SetDragDropPayload("PROJECT_CONTENT_FOLDER", entry.path().string().c_str(), entry.path().string().length() + 1);
+
+				ImGui::Image(m_folder_image->get_descriptor_set(), m_icon_size, ImVec2(0, 0), ImVec2(1, 1), UI::action_color_gray_active);
+				ImGui::TextWrapped("%s", item_name.c_str());
+
+				ImGui::EndDragDropSource();
+			}
+
 
 			// Handle dropping files into the current directory
 			drop_target_to_move_file(entry.path());

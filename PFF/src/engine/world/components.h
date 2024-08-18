@@ -12,6 +12,14 @@
 
 namespace PFF {
 
+	enum class transform_operation {
+
+		none,
+		translate = 7,		// 7 is from the ImGuizmo lib
+		rotate = 120,		// 120 is from the ImGuizmo lib
+		scale = 896,		// 896 is from the ImGuizmo lib
+	};
+
 	struct transform_component {
 
 		PFF_DEFAULT_CONSTRUCTORS(transform_component);

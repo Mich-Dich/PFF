@@ -152,7 +152,7 @@ namespace PFF::serializer {
 
 		if (m_option == PFF::serializer::option::save_to_file) {
 
-			m_file_content << util::add_spaces(m_level_of_indention + vector_func_index -1, NUM_OF_INDENTING_SPACES) << section_name << ":\n";
+			m_file_content << util::add_spaces(m_level_of_indention + static_cast<u32>(vector_func_index -1), NUM_OF_INDENTING_SPACES) << section_name << ":\n";
 			sub_section_function(*this);
 
 		} else {	// load from file

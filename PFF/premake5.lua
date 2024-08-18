@@ -27,6 +27,9 @@ project "PFF"
 		"src/**.embeded",
 		"**..pffproj",
 		"**..pff",
+
+		"vendor/ImGuizmo/ImGuizmo.h",
+		"vendor/ImGuizmo/ImGuizmo.cpp",
 	}
 
 	includedirs
@@ -40,6 +43,7 @@ project "PFF"
 		"%{IncludeDir.ImGui}/backends/",
 		"%{IncludeDir.stb_image}",
 		"%{IncludeDir.entt}",
+		"%{IncludeDir.ImGuizmo}",
 		
 		"%{IncludeDir.VulkanSDK}",
 	}
@@ -56,6 +60,9 @@ project "PFF"
 		"vendor/imgui/bin/Debug-windows-x86_64/ImGui",
         "%{IncludeDir.VulkanSDK}/lib",
 	}
+
+	filter "files:vendor/ImGuizmo/**.cpp"
+		flags { "NoPCH" }
 	
 	filter "system:windows"
 		systemversion "latest"

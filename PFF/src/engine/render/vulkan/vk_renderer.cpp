@@ -11,10 +11,11 @@
 #include "vk_image.h"
 #include "vk_pipeline.h"
 
-// ========== ImGui ============
-#include "imgui.h"
-#include "imgui_impl_glfw.h"
-#include "imgui_impl_vulkan.h"
+// ========== ImGui/ImGuizmo ============
+#include <imgui.h>
+#include <imgui_impl_glfw.h>
+#include <imgui_impl_vulkan.h>
+#include <ImGuizmo.h>
 #include "engine/layer/imgui_layer.h"
 
 // ========== misc ============
@@ -471,6 +472,9 @@ namespace PFF::render::vulkan {
 			ImGui_ImplVulkan_NewFrame();
 			ImGui_ImplGlfw_NewFrame();
 			ImGui::NewFrame();
+
+			ImGuizmo::SetImGuiContext(application::get().get_imgui_layer()->get_context());
+			ImGuizmo::BeginFrame();
 
 			for (layer* layer : *m_layer_stack) 
 				layer->on_imgui_render();
@@ -1070,8 +1074,10 @@ namespace PFF::render::vulkan {
 
 		m_scene_data.view = m_active_camera->get_view();
 		m_scene_data.proj = glm::perspective(glm::radians(m_active_camera->get_perspective_fov_y()), (float)m_draw_extent.width / (float)m_draw_extent.height, 100000.f, 0.1f);
+		m_active_camera->force_set_projection_matrix(m_scene_data.proj);
 		m_scene_data.proj[1][1] *= -1;				// invert the Y direction on projection matrix
 		m_scene_data.proj_view = m_scene_data.proj * m_scene_data.view;
+
 
 		// allocate a new uniform buffer for the scene data
 		vk_buffer gpuSceneDataBuffer = create_buffer(sizeof(render::GPU_scene_data), VK_BUFFER_USAGE_UNIFORM_BUFFER_BIT, VMA_MEMORY_USAGE_CPU_TO_GPU);
@@ -1183,7 +1189,7 @@ namespace PFF::render::vulkan {
 	// called once per frame
 	void vk_renderer::calc_frustum_planes(const glm::mat4& pro_view) {
 
-		PFF_ISOLATED_PROFILER_SCOPED(700, "calc frustum planes ", PFF::duration_precision::microseconds);
+		//PFF_ISOLATED_PROFILER_SCOPED(700, "calc frustum planes ", PFF::duration_precision::microseconds);
 
 		glm::mat4 m = glm::transpose(pro_view);
 		m_view_frustum[0] = glm::vec4(m[3][0] + m[0][0], m[3][1] + m[0][1], m[3][2] + m[0][2], m[3][3] + m[0][3]);  // left plane

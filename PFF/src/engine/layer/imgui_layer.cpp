@@ -2,6 +2,7 @@
 #include "util/pffpch.h"
 
 #include <imgui.h>
+#include <ImGuizmo.h>
 
 //#include "engine/render/image.h"
 #include "util/ui/window_images.embed"
@@ -164,6 +165,9 @@ namespace PFF::UI {
 
 		GET_RENDERER.imgui_create_fonts();
 		load_UI_data();
+
+		ImGuizmo::SetOrthographic(false);				// currently only using perspektiv
+		ImGuizmo::AllowAxisFlip(false);
 	}
 
 

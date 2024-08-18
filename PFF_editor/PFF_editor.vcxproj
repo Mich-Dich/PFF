@@ -80,7 +80,7 @@
       <PrecompiledHeaderFile>util/pch_editor.h</PrecompiledHeaderFile>
       <WarningLevel>Level3</WarningLevel>
       <PreprocessorDefinitions>PFF_USING_EDITOR;ENGINE_NAME=PFF;PROJECT_NAME=PFF_editor;PFF_INSIDE_EDITOR;PFF_PLATFORM_WINDOWS;PFF_EDITOR_DEBUG;%(PreprocessorDefinitions)</PreprocessorDefinitions>
-      <AdditionalIncludeDirectories>src;assets;content;..\PFF\src;..\PFF\vendor\entt\include;..\PFF\vendor\glm;..\PFF\vendor\imgui;..\PFF\vendor\imgui\backends;..\PFF\vendor\fastgltf\include;..\PFF\vendor\tinyobjloader;..\PFF\vendor\stb_image;C:\VulkanSDK\1.3.250.1\Include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>src;assets;content;..\PFF\src;..\PFF\vendor\entt\include;..\PFF\vendor\glm;..\PFF\vendor\imgui;..\PFF\vendor\imgui\backends;..\PFF\vendor\fastgltf\include;..\PFF\vendor\tinyobjloader;..\PFF\vendor\stb_image;..\PFF\vendor\ImGuizmo;C:\VulkanSDK\1.3.250.1\Include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <DebugInformationFormat>EditAndContinue</DebugInformationFormat>
       <Optimization>Disabled</Optimization>
       <MinimalRebuild>false</MinimalRebuild>
@@ -110,7 +110,7 @@ IF EXIST $(SolutionDir)\PFF_editor\assets\ (xcopy /Q /E /Y /I $(SolutionDir)\PFF
       <PrecompiledHeaderFile>util/pch_editor.h</PrecompiledHeaderFile>
       <WarningLevel>Level3</WarningLevel>
       <PreprocessorDefinitions>PFF_USING_EDITOR;ENGINE_NAME=PFF;PROJECT_NAME=PFF_editor;PFF_INSIDE_EDITOR;PFF_PLATFORM_WINDOWS;PFF_EDITOR_RELEASE_WITH_DEBUG_INFO;%(PreprocessorDefinitions)</PreprocessorDefinitions>
-      <AdditionalIncludeDirectories>src;assets;content;..\PFF\src;..\PFF\vendor\entt\include;..\PFF\vendor\glm;..\PFF\vendor\imgui;..\PFF\vendor\imgui\backends;..\PFF\vendor\fastgltf\include;..\PFF\vendor\tinyobjloader;..\PFF\vendor\stb_image;C:\VulkanSDK\1.3.250.1\Include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>src;assets;content;..\PFF\src;..\PFF\vendor\entt\include;..\PFF\vendor\glm;..\PFF\vendor\imgui;..\PFF\vendor\imgui\backends;..\PFF\vendor\fastgltf\include;..\PFF\vendor\tinyobjloader;..\PFF\vendor\stb_image;..\PFF\vendor\ImGuizmo;C:\VulkanSDK\1.3.250.1\Include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <DebugInformationFormat>ProgramDatabase</DebugInformationFormat>
       <Optimization>MaxSpeed</Optimization>
       <FunctionLevelLinking>true</FunctionLevelLinking>
@@ -144,7 +144,7 @@ IF EXIST $(SolutionDir)\PFF_editor\assets\ (xcopy /Q /E /Y /I $(SolutionDir)\PFF
       <PrecompiledHeaderFile>util/pch_editor.h</PrecompiledHeaderFile>
       <WarningLevel>Level3</WarningLevel>
       <PreprocessorDefinitions>PFF_USING_EDITOR;ENGINE_NAME=PFF;PROJECT_NAME=PFF_editor;PFF_INSIDE_EDITOR;PFF_PLATFORM_WINDOWS;PFF_EDITOR_RELEASE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
-      <AdditionalIncludeDirectories>src;assets;content;..\PFF\src;..\PFF\vendor\entt\include;..\PFF\vendor\glm;..\PFF\vendor\imgui;..\PFF\vendor\imgui\backends;..\PFF\vendor\fastgltf\include;..\PFF\vendor\tinyobjloader;..\PFF\vendor\stb_image;C:\VulkanSDK\1.3.250.1\Include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>src;assets;content;..\PFF\src;..\PFF\vendor\entt\include;..\PFF\vendor\glm;..\PFF\vendor\imgui;..\PFF\vendor\imgui\backends;..\PFF\vendor\fastgltf\include;..\PFF\vendor\tinyobjloader;..\PFF\vendor\stb_image;..\PFF\vendor\ImGuizmo;C:\VulkanSDK\1.3.250.1\Include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <Optimization>Full</Optimization>
       <FunctionLevelLinking>true</FunctionLevelLinking>
       <IntrinsicFunctions>true</IntrinsicFunctions>

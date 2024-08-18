@@ -80,7 +80,7 @@
       <PrecompiledHeaderFile>util/pffpch.h</PrecompiledHeaderFile>
       <WarningLevel>Level3</WarningLevel>
       <PreprocessorDefinitions>PFF_USING_EDITOR;ENGINE_NAME=PFF;PROJECT_NAME="Sandbox";PFF_INSIDE_ENGINE;GLFW_INCLUDE_NONE;PFF_PLATFORM_WINDOWS;PFF_DEBUG;%(PreprocessorDefinitions)</PreprocessorDefinitions>
-      <AdditionalIncludeDirectories>src;assets;vendor\glm;vendor\glfw\include;vendor\imgui;vendor\imgui\backends;vendor\stb_image;vendor\entt\include;C:\VulkanSDK\1.3.250.1\Include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>src;assets;vendor\glm;vendor\glfw\include;vendor\imgui;vendor\imgui\backends;vendor\stb_image;vendor\entt\include;vendor\ImGuizmo;C:\VulkanSDK\1.3.250.1\Include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <DebugInformationFormat>EditAndContinue</DebugInformationFormat>
       <Optimization>Disabled</Optimization>
       <MinimalRebuild>false</MinimalRebuild>
@@ -119,7 +119,7 @@ IF EXIST ..\bin\Debug-windows-x86_64\PFF\PFF.dll\ (xcopy /Q /E /Y /I ..\bin\Debu
       <PrecompiledHeaderFile>util/pffpch.h</PrecompiledHeaderFile>
       <WarningLevel>Level3</WarningLevel>
       <PreprocessorDefinitions>PFF_USING_EDITOR;ENGINE_NAME=PFF;PROJECT_NAME="Sandbox";PFF_INSIDE_ENGINE;GLFW_INCLUDE_NONE;PFF_PLATFORM_WINDOWS;PFF_RELEASE_WITH_DEBUG_INFO;%(PreprocessorDefinitions)</PreprocessorDefinitions>
-      <AdditionalIncludeDirectories>src;assets;vendor\glm;vendor\glfw\include;vendor\imgui;vendor\imgui\backends;vendor\stb_image;vendor\entt\include;C:\VulkanSDK\1.3.250.1\Include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>src;assets;vendor\glm;vendor\glfw\include;vendor\imgui;vendor\imgui\backends;vendor\stb_image;vendor\entt\include;vendor\ImGuizmo;C:\VulkanSDK\1.3.250.1\Include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <DebugInformationFormat>ProgramDatabase</DebugInformationFormat>
       <Optimization>MaxSpeed</Optimization>
       <FunctionLevelLinking>true</FunctionLevelLinking>
@@ -162,7 +162,7 @@ IF EXIST ..\bin\RelWithDebInfo-windows-x86_64\PFF\PFF.dll\ (xcopy /Q /E /Y /I ..
       <PrecompiledHeaderFile>util/pffpch.h</PrecompiledHeaderFile>
       <WarningLevel>Level3</WarningLevel>
       <PreprocessorDefinitions>PFF_USING_EDITOR;ENGINE_NAME=PFF;PROJECT_NAME="Sandbox";PFF_INSIDE_ENGINE;GLFW_INCLUDE_NONE;PFF_PLATFORM_WINDOWS;PFF_RELEASE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
-      <AdditionalIncludeDirectories>src;assets;vendor\glm;vendor\glfw\include;vendor\imgui;vendor\imgui\backends;vendor\stb_image;vendor\entt\include;C:\VulkanSDK\1.3.250.1\Include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>src;assets;vendor\glm;vendor\glfw\include;vendor\imgui;vendor\imgui\backends;vendor\stb_image;vendor\entt\include;vendor\ImGuizmo;C:\VulkanSDK\1.3.250.1\Include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <Optimization>Full</Optimization>
       <FunctionLevelLinking>true</FunctionLevelLinking>
       <IntrinsicFunctions>true</IntrinsicFunctions>
@@ -199,7 +199,6 @@ IF EXIST ..\bin\Release-windows-x86_64\PFF\PFF.dll\ (xcopy /Q /E /Y /I ..\bin\Re
     </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <ClInclude Include="src\engine\resource_management\mesh_serializer.h" />
     <ClInclude Include="src\PFF.h" />
     <ClInclude Include="src\application.h" />
     <ClInclude Include="src\engine\Events\Event.h" />
@@ -208,7 +207,6 @@ IF EXIST ..\bin\Release-windows-x86_64\PFF\PFF.dll\ (xcopy /Q /E /Y /I ..\bin\Re
     <ClInclude Include="src\engine\Events\mouse_event.h" />
     <ClInclude Include="src\engine\game_objects\camera.h" />
     <ClInclude Include="src\engine\game_objects\game_manager.h" />
-    <ClInclude Include="src\engine\game_objects\game_object.h" />
     <ClInclude Include="src\engine\game_objects\player_controller.h" />
     <ClInclude Include="src\engine\geometry\mesh.h" />
     <ClInclude Include="src\engine\io_handler\input_action.h" />
@@ -235,6 +233,7 @@ IF EXIST ..\bin\Release-windows-x86_64\PFF\PFF.dll\ (xcopy /Q /E /Y /I ..\bin\Re
     <ClInclude Include="src\engine\render\vulkan\vk_types.h" />
     <ClInclude Include="src\engine\resource_management\headers.h" />
     <ClInclude Include="src\engine\resource_management\mesh_headers.h" />
+    <ClInclude Include="src\engine\resource_management\mesh_serializer.h" />
     <ClInclude Include="src\engine\resource_management\static_mesh_asset_manager.h" />
     <ClInclude Include="src\engine\world\components.h" />
     <ClInclude Include="src\engine\world\entity.h" />
@@ -264,12 +263,12 @@ IF EXIST ..\bin\Release-windows-x86_64\PFF\PFF.dll\ (xcopy /Q /E /Y /I ..\bin\Re
     <ClInclude Include="src\util\ui\imgui_markdown.h" />
     <ClInclude Include="src\util\ui\pannel_collection.h" />
     <ClInclude Include="src\util\util.h" />
+    <ClInclude Include="vendor\ImGuizmo\ImGuizmo.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="src\application.cpp" />
     <ClCompile Include="src\engine\game_objects\camera.cpp" />
     <ClCompile Include="src\engine\game_objects\game_manager.cpp" />
-    <ClCompile Include="src\engine\game_objects\game_object.cpp" />
     <ClCompile Include="src\engine\game_objects\player_controller.cpp" />
     <ClCompile Include="src\engine\geometry\mesh.cpp" />
     <ClCompile Include="src\engine\io_handler\input_mapping.cpp" />
@@ -305,6 +304,9 @@ IF EXIST ..\bin\Release-windows-x86_64\PFF\PFF.dll\ (xcopy /Q /E /Y /I ..\bin\Re
     <ClCompile Include="src\util\ui\imgui_markdown.cpp" />
     <ClCompile Include="src\util\ui\pannel_collection.cpp" />
     <ClCompile Include="src\util\util.cpp" />
+    <ClCompile Include="vendor\ImGuizmo\ImGuizmo.cpp">
+      <PrecompiledHeader>NotUsing</PrecompiledHeader>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="vendor\glfw\GLFW.vcxproj">

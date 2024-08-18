@@ -54,7 +54,9 @@ namespace PFF::UI {
 
 	PFF_API FORCEINLINE bool is_item_double_clicked();
 
-	PFF_API FORCEINLINE mouse_interation get_mouse_interation_on_item();
+	PFF_API FORCEINLINE mouse_interation get_mouse_interation_on_item(const f32 target_click_duration = 0.2f);
+
+	PFF_API FORCEINLINE mouse_interation get_mouse_interation_on_window(const f32 target_click_duration = 0.2f);
 
 	PFF_API FORCEINLINE std::string wrap_text_at_underscore(const std::string& text, float wrap_width);
 
@@ -143,6 +145,7 @@ namespace PFF::UI {
 
 	PFF_API FORCEINLINE void table_row(std::function<void()> first_colum, std::function<void()> second_colum);
 
+	PFF_API FORCEINLINE void table_row(std::string_view label, std::string& text, bool& enable_input);
 
 	PFF_API FORCEINLINE void table_row_text(std::string_view label, const char* format, ...);
 

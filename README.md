@@ -37,6 +37,7 @@ PFF relies on the following dependencies:
 - [premake5](https://premake.github.io/)
 - [glfw](https://www.glfw.org/)
 - [ImGui](https://github.com/ocornut/imgui)
+- [ImGuizmo](https://github.com/CedricGuillemet/ImGuizmo)
 - [glm](https://github.com/icaven/glm)
 - [Vulkan](https://www.lunarg.com/vulkan-sdk/) install Vulkan SDK and add it to your PATH or update the variable [VULKAN_SDK] in [dependencies.lua]
 

@@ -52,7 +52,7 @@ namespace PFF {
 	map::map() {
 
 		m_path = application::get().get_project_path() / CONTENT_DIR / "worlds" / "test_map.pffasset";
-		CORE_LOG(Debug, "m_path: " << m_path);
+		CORE_LOG(Trace, "Loading map: " << m_path);
 
 		serialize(serializer::option::load_from_file);
 				
@@ -241,7 +241,7 @@ namespace PFF {
 	}
 
 
-#define SERIALIZE_SIMPLE_COMPONENT(name, function)																									\
+#define SERIALIZE_SIMPLE_COMPONENT(name, function)																							\
 	if (loc_entity.has_component<##name##_component>()) {																					\
 		auto& ##name##_comp = loc_entity.get_component<##name##_component>();																\
 		entity_section.sub_section(std::string(#name) + "_component", [&](serializer::yaml& component_section) {							\
@@ -250,7 +250,7 @@ namespace PFF {
 		});																																	\
 	}
 
-#define DESERIALIZE_SIMPLE_COMPONENT(name, function)																								\
+#define DESERIALIZE_SIMPLE_COMPONENT(name, function)																						\
 	entity_section.sub_section(std::string(#name) + "_component", [&](serializer::yaml& component_section) {								\
 																																			\
 		name##_component name##_comp{};																										\

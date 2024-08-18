@@ -12,6 +12,10 @@ namespace PFF {
 		camera();
 		~camera();
 
+		FORCEINLINE glm::mat4& get_projection_NC() { return m_projection_matrix; }
+		FORCEINLINE glm::mat4& get_view_NC() { return view_matrix; }
+
+
 		FORCEINLINE const glm::mat4& get_projection() const { return m_projection_matrix; }
 		FORCEINLINE const glm::mat4& get_view() const { return view_matrix; }
 		FORCEINLINE const f32& get_perspective_fov_y() const { return m_perspective_fov_y; }

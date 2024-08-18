@@ -58,7 +58,7 @@ namespace PFF::render::vulkan {
 		PFF_DEFAULT_GETTER(VkDevice,				device);
 		PFF_DEFAULT_GETTER(VmaAllocator,			allocator);
 		
-		__forceinline void set_imugi_viewport_size(glm::u32vec2 imugi_viewport_size) {
+		FORCEINLINE void set_imugi_viewport_size(glm::u32vec2 imugi_viewport_size) {
 			m_imugi_viewport_size = imugi_viewport_size;
 		};
 

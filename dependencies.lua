@@ -12,6 +12,8 @@ IncludeDir["fastgltf"]          = "%{wks.location}/PFF/vendor/fastgltf/include"
 IncludeDir["tinyobjloader"]     = "%{wks.location}/PFF/vendor/tinyobjloader"
 IncludeDir["stb_image"]         = "%{wks.location}/PFF/vendor/stb_image"
 IncludeDir["entt"]              = "%{wks.location}/PFF/vendor/entt/include"
+IncludeDir["ImGuizmo"]          = "%{wks.location}/PFF/vendor/ImGuizmo"
+
 IncludeDir["VulkanSDK"]         = "%{VULKAN_SDK}/Include"
 
 ------------ libs dir ------------ 

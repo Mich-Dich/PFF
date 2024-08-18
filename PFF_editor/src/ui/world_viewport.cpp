@@ -1,8 +1,10 @@
 
 #include "util/pch_editor.h"
 
-#include <imgui.h>
 #include <entt.hpp>
+#include <glm/gtc/type_ptr.hpp>
+#include <imgui.h>
+#include <ImGuizmo.h>
 
 #include "util/ui/pannel_collection.h"
 #include "engine/world/map.h"
@@ -13,10 +15,19 @@
 #include "world_viewport.h"
 
 namespace PFF {
+	
+	
+
+
+
 
 	world_viewport_window::world_viewport_window() {
 
 		serialize(serializer::option::load_from_file);
+
+		m_transfrom_translation_image = create_ref<image>(util::get_executable_path() / "assets" / "icons" / "transfrom_translation.png", image_format::RGBA);
+		m_transfrom_rotation_image = create_ref<image>(util::get_executable_path() / "assets" / "icons" / "transfrom_rotation.png", image_format::RGBA);
+		m_transfrom_scale_image = create_ref<image>(util::get_executable_path() / "assets" / "icons" / "transfrom_scale.png", image_format::RGBA);
 	}
 
 	world_viewport_window::~world_viewport_window() {
@@ -74,10 +85,40 @@ namespace PFF {
 			.entry("show_details", m_show_details)
 			.entry("show_world_settings", m_show_world_settings);
 
-			// TODO: serialize selected entity (need figure out how to serialize the selected map)
-			/*.sub_section("world_vieport_data", [selected_entity = m_selected_entity](serializer::yaml& section) {
-				section.entry("selected entity", selected_entity);
-			});*/
+		serializer::yaml(config::get_filepath_from_configtype(application::get().get_project_path(), config::file::editor), "guizmo_data", option)
+			.entry("operation", m_gizmo_operation);
+
+
+
+		if (option == serializer::option::save_to_file && m_selected_entity == entity())
+			return;
+
+		UUID selected_ID{};
+		if (option == serializer::option::save_to_file) {
+
+			selected_ID = m_selected_entity.get_UUID();
+			CORE_LOG(Trace, "Save UUID: " << selected_ID);
+		}
+
+		serializer::yaml(config::get_filepath_from_configtype(application::get().get_project_path(), config::file::editor), "world_vieport_data", option)
+			.entry("selected_entity", selected_ID);
+
+		if (option == serializer::option::load_from_file) {
+
+			// TODO: load selected entity after loading world/map
+			CORE_LOG(Trace, "Load UUID: " << selected_ID);
+			const auto& maps = application::get().get_world_layer()->get_maps();
+			for (const auto& loc_map : maps) {
+
+				if (auto loc_entity = loc_map->get_entity_by_UUID(selected_ID)) {
+
+					m_selected_entity = loc_entity;
+					CORE_LOG(Info, "FOUND UUID: " << selected_ID);
+					break;
+				}
+			}
+		}
+
 	}
 
 	// ------------------------------------------------------------------------------------------------------------------------------------------------------------------
@@ -200,7 +241,10 @@ namespace PFF {
 
 			auto& tag_comp = m_selected_entity.get_component<tag_component>();
 			UI::begin_table("entity_component", false);
-			UI::table_row_text("tag", tag_comp.tag.c_str());
+
+
+			static bool enable_tag_editing = false;
+			UI::table_row("tag", tag_comp.tag, enable_tag_editing);
 			UI::end_table();
 		}
 
@@ -237,6 +281,7 @@ namespace PFF {
 					static int item_current_idx = static_cast<std::underlying_type_t<mobility>>(mesh_comp.mobility);
 					const char* combo_preview_value = items[item_current_idx];
 					static ImGuiComboFlags flags = 0;
+					ImGui::SetNextItemWidth(ImGui::GetColumnWidth());
 					if (ImGui::BeginCombo("##details_window_mesh_component_mobility", combo_preview_value, flags)) {
 						
 						for (int n = 0; n < IM_ARRAYSIZE(items); n++) {
@@ -257,6 +302,7 @@ namespace PFF {
 					ImGui::Text("mesh asset");
 				}, [&]() {
 
+					ImGui::SetNextItemWidth(ImGui::GetColumnWidth());
 					ImGui::Text(mesh_comp.asset_path.string().c_str());
 
 					if (ImGui::BeginDragDropTarget()) {
@@ -287,69 +333,70 @@ namespace PFF {
 		ImGuiWindowFlags window_flags = ImGuiWindowFlags_NoTitleBar;
 		if (ImGui::Begin("Editor Debugger", &m_show_general_debugger, window_flags)) {
 
-			if (ImGui::BeginTabBar("##tabs", ImGuiTabBarFlags_None)) {
+if (ImGui::BeginTabBar("##tabs", ImGuiTabBarFlags_None)) {
 
-				const f32 tab_width = 60.f;		// TODO: move into [default_tab_width] variable in config-file
-				ImGui::SetNextItemWidth(tab_width);
-				if (ImGui::BeginTabItem("Inputs")) {
-
-
-					UI::begin_table("display_input_actions_params", false);
-					for (input_action* action : *application::get().get_world_layer()->get_current_player_controller()->get_input_mapping()) {						// get input_action
-
-						switch (action->value) {
-						case input::action_type::boolean:
-							UI::table_row(action->get_name(), action->data.boolean, ImGuiInputTextFlags_ReadOnly);
-							break;
-
-						case input::action_type::vec_1D:
-							UI::table_row(action->get_name(), action->data.vec_1D, ImGuiInputTextFlags_ReadOnly);
-							break;
-
-						case input::action_type::vec_2D:
-							UI::table_row(action->get_name(), action->data.vec_2D, ImGuiInputTextFlags_ReadOnly);
-							break;
-
-						case input::action_type::vec_3D:
-							UI::table_row(action->get_name(), action->data.vec_3D, ImGuiInputTextFlags_ReadOnly);
-							break;
-
-						default:
-							break;
-						}
-					}
-					UI::end_table();
+	const f32 tab_width = 60.f;		// TODO: move into [default_tab_width] variable in config-file
+	ImGui::SetNextItemWidth(tab_width);
+	if (ImGui::BeginTabItem("Inputs")) {
 
 
-					ImGui::EndTabItem();
-				}
+		UI::begin_table("display_input_actions_params", false);
+		for (input_action* action : *application::get().get_world_layer()->get_current_player_controller()->get_input_mapping()) {						// get input_action
 
-				ImGui::SetNextItemWidth(tab_width);
-				if (ImGui::BeginTabItem("Test")) {
+			switch (action->value) {
+			case input::action_type::boolean:
+				UI::table_row(action->get_name(), action->data.boolean, ImGuiInputTextFlags_ReadOnly);
+				break;
 
-					// camera pos and dir
-					if (ImGui::CollapsingHeader("Camera", ImGuiTreeNodeFlags_DefaultOpen)) {
+			case input::action_type::vec_1D:
+				UI::table_row(action->get_name(), action->data.vec_1D, ImGuiInputTextFlags_ReadOnly);
+				break;
 
-						//static_cast<PFF_editor>(application::get()); .get_editor_layer();
-						//glm::vec3 camera_pos = get_editor_camera_pos();
-						UI::begin_table("##Camera_params", false);
+			case input::action_type::vec_2D:
+				UI::table_row(action->get_name(), action->data.vec_2D, ImGuiInputTextFlags_ReadOnly);
+				break;
 
-						UI::table_row("Position", glm::vec3(), 0);
-						UI::table_row("Direction", glm::vec2(), 0);
+			case input::action_type::vec_3D:
+				UI::table_row(action->get_name(), action->data.vec_3D, ImGuiInputTextFlags_ReadOnly);
+				break;
 
-						UI::end_table();
-
-					}
-
-					ImGui::EndTabItem();
-				}
-
-				ImGui::EndTabBar();
+			default:
+				break;
 			}
+		}
+		UI::end_table();
+
+
+		ImGui::EndTabItem();
+	}
+
+	ImGui::SetNextItemWidth(tab_width);
+	if (ImGui::BeginTabItem("Test")) {
+
+		// camera pos and dir
+		if (ImGui::CollapsingHeader("Camera", ImGuiTreeNodeFlags_DefaultOpen)) {
+
+			//static_cast<PFF_editor>(application::get()); .get_editor_layer();
+			//glm::vec3 camera_pos = get_editor_camera_pos();
+			UI::begin_table("##Camera_params", false);
+
+			UI::table_row("Position", glm::vec3(), 0);
+			UI::table_row("Direction", glm::vec2(), 0);
+
+			UI::end_table();
+
+		}
+
+		ImGui::EndTabItem();
+	}
+
+	ImGui::EndTabBar();
+}
 
 		}
 		ImGui::End();
 	}
+
 
 	void world_viewport_window::window_main_viewport() {
 
@@ -377,26 +424,9 @@ namespace PFF {
 		application::get().get_renderer().set_imugi_viewport_size(glm::u32vec2(viewport_size.x, viewport_size.y));
 
 		auto* draw_image = application::get().get_renderer().get_draw_image_pointer();
-		const ImVec2 viewport_uv = {	math::clamp(viewport_size.x / draw_image->get_width(), 0.f, 1.f),
+		const ImVec2 viewport_uv = { math::clamp(viewport_size.x / draw_image->get_width(), 0.f, 1.f),
 										math::clamp(viewport_size.y / draw_image->get_height(), 0.f, 1.f) };
 		ImGui::Image(draw_image->get_descriptor_set(), ImVec2{ viewport_size.x, viewport_size.y }, ImVec2{ 0,0 }, viewport_uv);
-
-		// show debug data
-		application::get().get_imgui_layer()->show_FPS();
-		application::get().get_imgui_layer()->show_renderer_metrik();
-		window_renderer_backgrond_effect();
-
-		if (ImGui::BeginPopupContextWindow()) {
-
-			ImGui::Text("Performance Analysis");
-			ImGui::Separator();
-			ImGui::Checkbox("Show FPS window", application::get().get_imgui_layer()->get_show_FPS_window_pointer());
-			ImGui::Checkbox("Show renderer metrik", application::get().get_imgui_layer()->get_show_renderer_metrik_pointer());
-			ImGui::Checkbox("Show render background settings", &m_show_renderer_backgrond_effect);
-
-			ImGui::EndPopup();
-		}
-
 
 		if (ImGui::BeginDragDropTarget()) {
 
@@ -418,8 +448,9 @@ namespace PFF {
 				}
 
 				switch (loc_asset_file_header.type) {
-					
-				case file_type::mesh: {
+
+				case file_type::mesh:
+				{
 
 					CORE_LOG(Trace, "Adding static mesh, Name: " << "SM_" + file_path.filename().replace_extension("").string());
 
@@ -431,10 +462,10 @@ namespace PFF {
 						m_selected_entity.add_mesh_component(mesh_comp);
 						break;
 					}
-					
+
 					const auto loc_map = application::get().get_world_layer()->get_maps()[0];
 					entity loc_entitiy = loc_map->create_entity("SM_" + file_path.filename().replace_extension("").string());
-						
+
 					loc_entitiy.add_mesh_component(mesh_comp);
 
 					//mesh_comp.mesh_asset = static_mesh_asset_manager::get_from_path(util::extract_path_from_project_content_folder(file_path));
@@ -451,10 +482,118 @@ namespace PFF {
 
 		}
 
+
+
+
+		auto* draw_list = ImGui::GetWindowDrawList();
+		const auto start_pos = ImVec2(200, 5);
+		const ImVec2 button_size = ImVec2(15); // size of the button
+		const ImVec2 box_padding = ImVec2(5); // padding around the button
+		const f32 button_length = button_size.x + (box_padding.x * 2);
+		auto color = m_gizmo_operation == transform_operation::translate ? ImGui::GetStyle().Colors[ImGuiCol_Button] : UI::default_gray;
+		{
+
+			const ImVec2 box_min = ImGui::GetWindowPos() + start_pos; // top-left corner
+			const ImVec2 box_max = box_min + button_size + (box_padding * 2); // bottom-right corner
+			const f32 corner_size = 7;
+
+			draw_list->AddRectFilled(box_min, ImVec2(box_max.x, box_max.y - corner_size), ImGui::ColorConvertFloat4ToU32(color));
+			draw_list->AddRectFilled(ImVec2(box_min.x + corner_size, box_max.y - corner_size), box_max, ImGui::ColorConvertFloat4ToU32(color));
+			draw_list->AddTriangleFilled(ImVec2(box_min.x, box_max.y - corner_size),
+				ImVec2(box_min.x + corner_size, box_max.y - corner_size),
+				ImVec2(box_min.x + corner_size, box_max.y), ImGui::ColorConvertFloat4ToU32(color));
+
+			ImGui::SetCursorPos(start_pos + box_padding);
+			if (ImGui::ImageButton(m_transfrom_translation_image->get_descriptor_set(), ImVec2{ 15 }, ImVec2(0), ImVec2(1), 0, color)) {
+
+				CORE_LOG(Trace, "TRANSLATE button");
+				m_gizmo_operation = transform_operation::translate;
+			}
+		}
+
+		color = m_gizmo_operation == transform_operation::rotate ? ImGui::GetStyle().Colors[ImGuiCol_Button] : UI::default_gray;
+		{
+
+			const ImVec2 box_min = ImGui::GetWindowPos() + start_pos + ImVec2(button_length, 0);
+			const ImVec2 box_max = box_min + button_size + (box_padding * 2);
+			const f32 corner_size = 7;
+
+			draw_list->AddRectFilled(box_min, box_max, ImGui::ColorConvertFloat4ToU32(color));
+
+			ImGui::SetCursorPos(start_pos + ImVec2(button_length, 0) + box_padding);
+			if (ImGui::ImageButton(m_transfrom_rotation_image->get_descriptor_set(), ImVec2{ 15 }, ImVec2(0), ImVec2(1), 0, color)) {
+
+				CORE_LOG(Trace, "ROTATE button");
+				m_gizmo_operation = transform_operation::rotate;
+			}
+		}
+
+		color = m_gizmo_operation == transform_operation::scale ? ImGui::GetStyle().Colors[ImGuiCol_Button] : UI::default_gray;
+		{
+
+			const ImVec2 box_min = ImGui::GetWindowPos() + start_pos + ImVec2(button_length * 2, 0);
+			const ImVec2 box_max = box_min + button_size + (box_padding * 2);
+			const f32 corner_size = 7;
+
+			draw_list->AddRectFilled(box_min, box_max, ImGui::ColorConvertFloat4ToU32(color));
+
+			ImGui::SetCursorPos(start_pos + ImVec2(button_length * 2, 0) + box_padding);
+			if (ImGui::ImageButton(m_transfrom_scale_image->get_descriptor_set(), ImVec2{ 15 }, ImVec2(0), ImVec2(1), 0, color)) {
+
+				CORE_LOG(Trace, "SCALE button");
+				m_gizmo_operation = transform_operation::scale;
+			}
+		}
+
+
+
+		// show debug data
+		application::get().get_imgui_layer()->show_FPS();
+		application::get().get_imgui_layer()->show_renderer_metrik();
+		window_renderer_backgrond_effect();
+
+		if (UI::get_mouse_interation_on_window() == UI::mouse_interation::right_double_click)
+			ImGui::OpenPopup("viewport additional functionality");
+		if (ImGui::BeginPopup("viewport additional functionality")) {
+
+			ImGui::Text("Performance Analysis");
+			ImGui::Separator();
+			ImGui::Checkbox("Show FPS window", application::get().get_imgui_layer()->get_show_FPS_window_pointer());
+			ImGui::Checkbox("Show renderer metrik", application::get().get_imgui_layer()->get_show_renderer_metrik_pointer());
+			ImGui::Checkbox("Show render background settings", &m_show_renderer_backgrond_effect);
+
+			ImGui::EndPopup();
+		}
+
+		// ---------------------------------------- IGuizmo ----------------------------------------
+		if (m_selected_entity) {
+
+			ImGuizmo::SetDrawlist();
+			ImGuizmo::SetRect(ImGui::GetWindowPos().x, ImGui::GetWindowPos().y, (f32)ImGui::GetWindowWidth(), (f32)ImGui::GetWindowHeight());
+
+			ref<camera> camera = application::get().get_world_layer()->get_editor_camera();
+			glm::mat4& view_matrix = camera->get_view_NC();
+
+			glm::mat4& projection_matrix = camera->get_projection_NC();
+			projection_matrix[2][2] = -projection_matrix[2][2];
+			projection_matrix[3][2] = -projection_matrix[3][2];
+
+			glm::mat4& entity_transform = (glm::mat4&)m_selected_entity.get_component<transform_component>();
+			glm::mat4 buffer_transform = entity_transform;
+
+			if (ImGuizmo::Manipulate(glm::value_ptr(view_matrix), glm::value_ptr(projection_matrix),
+				(ImGuizmo::OPERATION)m_gizmo_operation, ImGuizmo::MODE::WORLD, glm::value_ptr(entity_transform))) {
+
+				buffer_transform = glm::inverse(buffer_transform) * entity_transform;
+				m_selected_entity.propegate_transform_to_children(buffer_transform, m_gizmo_operation);
+			}
+		}
+
+
 		ImGui::End();
 	}
-
-	void world_viewport_window::window_renderer_backgrond_effect() {
+	
+void world_viewport_window::window_renderer_backgrond_effect() {
 
 		if (!m_show_renderer_backgrond_effect)
 			return;
