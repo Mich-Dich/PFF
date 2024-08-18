@@ -56,7 +56,7 @@ namespace PFF {
 		FORCEINLINE void add_script_component() { add_component<script_component>().bind<T>(); }
 
 		void add_mesh_component(mesh_component& mesh_comp);
-		void propegate_transform_to_children(const glm::mat4& transform, const transform_operation transform_operation);
+		void propegate_transform_to_children(const glm::mat4& root_transform_inverse, const glm::mat4& delta_transform);
 		void accumulate_transform_from_parents(glm::mat4& transform);
 
 		operator bool()							const { return (m_entity_handle != entt::null); }

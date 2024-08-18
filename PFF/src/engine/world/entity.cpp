@@ -79,9 +79,7 @@ namespace PFF {
 
 	}
 	
-#if 0
-
-	void entity::propegate_transform_to_children(const glm::mat4& transform, const transform_operation transform_operation) {
+	void entity::propegate_transform_to_children(const glm::mat4& root_transform_inverse, const glm::mat4& delta_transform) {
 
 		if (!has_component<relationship_component>())		// is standalone entity => no relationships
 			return;
@@ -96,81 +94,14 @@ namespace PFF {
 			// Apply the transform to the child
 			auto child = m_map->get_entity_by_UUID(child_ID);
 			glm::mat4& child_transform = (glm::mat4&)child.get_component<transform_component>();
-			child_transform = new_transform * child_transform;
 
-			child.propegate_transform_to_children(new_transform, transform_operation);			// call recursive for children
+			glm::mat4 child_local_space_transform = glm::inverse(root_transform_inverse) * child_transform;
+			child_local_space_transform = delta_transform * child_local_space_transform;		// Apply transform in local space
+			child_transform = root_transform_inverse * child_local_space_transform;
+
+			child.propegate_transform_to_children(root_transform_inverse, delta_transform);			// call recursive for children
 		}
-
 	}
-
-#else
-
-	void entity::propegate_transform_to_children(const glm::mat4& transform, const transform_operation transform_operation) {
-
-		static u32 recursion_count = 0;
-
-		if (!has_component<relationship_component>())		// is standalone entity => no relationships
-			return;
-
-		auto& relation_comp = get_component<relationship_component>();
-		if (relation_comp.children_ID.size() <= 0)			// has no children
-			return;
-
-		recursion_count++;
-		//CORE_LOG(Debug, "PUSH recursion: " << recursion_count);
-
-		glm::vec3 parent_translation, parent_rotation, parent_scale;
-		math::decompose_transform((glm::mat4&)get_component<transform_component>(), parent_translation, parent_rotation, parent_scale);
-
-		glm::vec3 transform_translation, transform_rotation, transform_scale;
-		math::decompose_transform(transform, transform_translation, transform_rotation, transform_scale);
-
-
-		glm::mat4 new_transform;
-
-		switch (transform_operation) {
-
-		case transform_operation::translate:		// recalc transform for every recursion
-			transform_translation *= parent_scale;
-			math::compose_transform(new_transform, transform_translation, transform_rotation, transform_scale);
-			break;
-
-		case transform_operation::rotate:			// use original transform and hand that down every recursion
-
-			if (recursion_count == 1) {				// Is root
-
-				// This works for the first generation of children, but only that generation
-				glm::mat4 translate_to_parent = glm::translate(glm::mat4(1.0f), parent_translation);
-				glm::mat4 rotation_matrix = glm::yawPitchRoll(transform_rotation.y, transform_rotation.x, transform_rotation.z);
-				glm::mat4 translate_back = glm::translate(glm::mat4(1.0f), -parent_translation);
-				new_transform = translate_to_parent * rotation_matrix * translate_back;
-			} else
-				new_transform = transform;
-
-			break;
-
-		case transform_operation::scale:
-			break;
-
-		default:
-			break;
-		}
-
-		for (const auto child_ID : relation_comp.children_ID) {
-
-			// Apply the transform to the child
-			auto child = m_map->get_entity_by_UUID(child_ID);
-			glm::mat4& child_transform = (glm::mat4&)child.get_component<transform_component>();
-			child_transform = new_transform * child_transform;
-
-			child.propegate_transform_to_children(new_transform, transform_operation);			// call recursive for children
-		}
-
-		recursion_count--;
-		//CORE_LOG(Debug, "POP  recursion: " << recursion_count);
-	}
-
-#endif
 
 	void entity::accumulate_transform_from_parents(glm::mat4& transform) {
 

@@ -579,13 +579,14 @@ if (ImGui::BeginTabBar("##tabs", ImGuiTabBarFlags_None)) {
 			projection_matrix[3][2] = -projection_matrix[3][2];
 
 			glm::mat4& entity_transform = (glm::mat4&)m_selected_entity.get_component<transform_component>();
+			const glm::mat4 root_transform = entity_transform;
 			glm::mat4 buffer_transform = entity_transform;
 
 			if (ImGuizmo::Manipulate(glm::value_ptr(view_matrix), glm::value_ptr(projection_matrix),
 				(ImGuizmo::OPERATION)m_gizmo_operation, ImGuizmo::MODE::WORLD, glm::value_ptr(entity_transform))) {
 
-				buffer_transform = glm::inverse(buffer_transform) * entity_transform;
-				m_selected_entity.propegate_transform_to_children(buffer_transform, m_gizmo_operation);
+				buffer_transform = glm::inverse(buffer_transform) * entity_transform;		// trandform delta
+				m_selected_entity.propegate_transform_to_children(root_transform, buffer_transform);
 			}
 		}
 
