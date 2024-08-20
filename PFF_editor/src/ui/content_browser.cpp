@@ -14,22 +14,8 @@ namespace PFF {
 
 	static ImGuiTreeNodeFlags base_flags = ImGuiTreeNodeFlags_OpenOnArrow | ImGuiTreeNodeFlags_OpenOnDoubleClick | ImGuiTreeNodeFlags_SpanAvailWidth;
 	static ImU32 background_color = IM_COL32(50, 50, 50, 255);
-
-	// Function to display the search field and filtered results
 	static std::string search_query;
-	static void search_field_and_button(const std::filesystem::path& path) {
 
-		ImVec2 input_text_size(180, 0); // Set width to 150 pixels, height to default
-		ImGui::SetNextItemWidth(input_text_size.x);
-		ImGui::InputText("##search_in_project_content_dir", search_query.data(), search_query.capacity(), ImGuiInputTextFlags_CharsNoBlank, NULL, NULL);
-		ImGui::SameLine();
-		if (ImGui::Button("search")) {
-
-			CORE_LOG(Warn, "NOT INPLEMENTED YET");
-		}
-		ImGui::SameLine();
-
-	}
 
 	static void drop_target_to_move_file(const std::filesystem::path folder_path) {
 
@@ -39,10 +25,10 @@ namespace PFF {
 
 				const std::filesystem::path file_path = (const char*)payload->Data;
 				try {
-					
-					std::filesystem::path destination = folder_path / file_path.filename();
-					std::filesystem::rename(file_path, destination);
-					CORE_LOG(Info, "File moved successfully!");
+
+std::filesystem::path destination = folder_path / file_path.filename();
+std::filesystem::rename(file_path, destination);
+CORE_LOG(Info, "File moved successfully!");
 
 				} catch (const std::filesystem::filesystem_error& e)
 					CORE_LOG(Error, "Error: " << e.what());
@@ -100,7 +86,7 @@ namespace PFF {
 				bool buffer = ImGui::TreeNodeEx(entry.path().filename().string().c_str(), base_flags);
 				if (ImGui::IsItemClicked())
 					select_new_directory(entry.path());
-				
+
 				drop_target_to_move_file(entry.path());
 
 				if (buffer) {
@@ -129,12 +115,34 @@ namespace PFF {
 		CORE_LOG(Info, "NOT IMPLEMENTED YET");
 	}
 
+	//static std::string search_query;
+	void content_browser::show_search_result_for_current_folder(const std::filesystem::path& path, u32& item_index) {
+
+		const float window_visible_x2 = ImGui::GetWindowPos().x + ImGui::GetWindowContentRegionMax().x;
+		for (const auto& entry : std::filesystem::directory_iterator(path)) {
+
+			if (entry.is_directory())
+				show_search_result_for_current_folder(entry.path(), item_index);			// look into any subfolder
+			else {
+
+				if (entry.path().filename().string().find(search_query) == std::string::npos)
+					continue;
+
+				display_file(entry.path(), item_index++);
+
+				// handle item wrapping
+				const float next_item_x2 = ImGui::GetItemRectMax().x + ImGui::GetStyle().ItemSpacing.x + m_icon_size.x; // Expected position if next item was on the same line
+				if (next_item_x2 < window_visible_x2)
+					ImGui::SameLine();
+			}
+		}
+	}
+
 	void content_browser::show_current_folder_content(const std::filesystem::path& path) {
 
 		const ImGuiStyle& style = ImGui::GetStyle();
 		const float window_visible_x2 = ImGui::GetWindowPos().x + ImGui::GetWindowContentRegionMax().x;
-		const ImVec2 button_sz = m_icon_size; // Use the size of the icon for the button
-		int count = 0;
+		u32 count = 0;
 		for (const auto& entry : std::filesystem::directory_iterator(path)) {
 
 			if (!entry.is_directory())
@@ -184,7 +192,7 @@ namespace PFF {
 			drop_target_to_move_file(entry.path());
 
 			// handle item wrapping
-			const float next_item_x2 = ImGui::GetItemRectMax().x + style.ItemSpacing.x + button_sz.x; // Expected position if next item was on the same line
+			const float next_item_x2 = ImGui::GetItemRectMax().x + style.ItemSpacing.x + m_icon_size.x; // Expected position if next item was on the same line
 			if (next_item_x2 < window_visible_x2)
 				ImGui::SameLine();
 		}
@@ -198,114 +206,10 @@ namespace PFF {
 			if (entry.is_directory())
 				continue;
 
-			asset_file_header loc_asset_file_header;
-			if (entry.path().extension() == ".pffasset") {
-
-				serializer::binary(entry.path(), "PFF_asset_file", serializer::option::load_from_file)
-					.entry(loc_asset_file_header);
-			
-			} else if (entry.path().extension() == ".pffworld") {
-
-				serializer::yaml(entry.path(), "PFF_asset_file", serializer::option::load_from_file)
-					.entry(KEY_VALUE(loc_asset_file_header.version))
-					.entry(KEY_VALUE(loc_asset_file_header.type))
-					.entry(KEY_VALUE(loc_asset_file_header.timestamp));
-			}
-
-			// Begin a new group for each item
-			const std::string item_name = entry.path().filename().replace_extension("").string();
-			ImGui::BeginGroup();
-			{
-				ImGui::PushID(count++);
-				
-				const ImVec2 item_pos = ImGui::GetCursorScreenPos();
-				ImDrawList* draw_list = ImGui::GetWindowDrawList();
-				draw_list->AddRectFilled(item_pos, item_pos + m_icon_size, background_color, style.FrameRounding);
-
-				switch (loc_asset_file_header.type) {
-
-				case file_type::mesh:
-					ImGui::Image(m_mesh_asset_image->get_descriptor_set(), m_icon_size);
-					break;
-					
-				case file_type::world:
-					ImGui::Image(m_world_image->get_descriptor_set(), m_icon_size);
-					break;
-
-				default:
-					break;
-				}
-
-
-				std::string wrapped_text = UI::wrap_text_at_underscore(item_name, m_icon_size.x);
-				ImGui::TextWrapped(wrapped_text.c_str());
-
-				ImGui::PopID();
-			}
-			ImGui::EndGroup();
-			const auto item_mouse_interation = UI::get_mouse_interation_on_item();
-
-			const char* playload_name = "PROJECT_CONTENT_FILE";
-			
-			// TODO: make it possible to easyly tell the file type
-			//switch (loc_asset_file_header.type) {
-			//case file_type::mesh:
-			//	playload_name = "PROJECT_CONTENT_FILE_MESH";
-			//	break;
-			//case file_type::world:
-			//	playload_name = "PROJECT_CONTENT_FILE_WORLD";
-			//	break;
-			//default:
-			//	break;
-			//}
-
-
-			// Handle drag source for files
-			if (ImGui::BeginDragDropSource(ImGuiDragDropFlags_SourceAllowNullID)) {
-				ImGui::SetDragDropPayload(playload_name, entry.path().string().c_str(), entry.path().string().length() + 1);
-
-				ImGui::Image(m_mesh_asset_image->get_descriptor_set(), m_icon_size);
-				ImGui::TextWrapped("%s", item_name.c_str());
-								
-				ImGui::EndDragDropSource();
-			}
-			
-			// Context menu popup
-			std::string popup_name = "item_context_menu_" + item_name;
-			if (ImGui::BeginPopupContextItem(popup_name.c_str())) {
-
-				if (ImGui::MenuItem("Rename")) {
-
-					CORE_LOG(Info, "NOT IMPLEMENTED YET");
-				}
-				if (ImGui::MenuItem("Delete")) {
-			
-					std::error_code error_code{};
-					CORE_VALIDATE(std::filesystem::remove(entry.path(), error_code), break, "deleting file from content folder: [" << entry.path() << "]", "FAILED to delete file from content folder: [" << entry.path() << "] error: " << error_code);
-				}
-
-
-				if (item_mouse_interation == UI::mouse_interation::none && !UI::is_holvering_window())
-					ImGui::CloseCurrentPopup();
-
-				ImGui::EndPopup();
-			}
-
-			switch (item_mouse_interation) {
-				case UI::mouse_interation::double_click:
-					CORE_LOG(Info, "NOT IMPLEMENTED YET => should opening coresponding editor window");
-					break;
-
-				case UI::mouse_interation::right_click:
-					ImGui::OpenPopup(popup_name.c_str());
-					break;
-
-				default:
-					break;
-			}
+			display_file(entry.path(), count++);
 
 			// handle item wrapping
-			const float next_item_x2 = ImGui::GetItemRectMax().x + style.ItemSpacing.x + button_sz.x; // Expected position if next item was on the same line
+			const float next_item_x2 = ImGui::GetItemRectMax().x + style.ItemSpacing.x + m_icon_size.x; // Expected position if next item was on the same line
 			if (next_item_x2 < window_visible_x2)
 				ImGui::SameLine();
 		}
@@ -323,6 +227,116 @@ namespace PFF {
 			}
 			ImGui::EndDragDropTarget();
 		}
+	}
+
+	void content_browser::display_file(std::filesystem::path file_path, u32 ID) {
+
+		asset_file_header loc_asset_file_header;
+		if (file_path.extension() == ".pffasset") {
+
+			serializer::binary(file_path, "PFF_asset_file", serializer::option::load_from_file)
+				.entry(loc_asset_file_header);
+
+		} else if (file_path.extension() == ".pffworld") {
+
+			serializer::yaml(file_path, "PFF_asset_file", serializer::option::load_from_file)
+				.entry(KEY_VALUE(loc_asset_file_header.version))
+				.entry(KEY_VALUE(loc_asset_file_header.type))
+				.entry(KEY_VALUE(loc_asset_file_header.timestamp));
+		}
+
+		// Begin a new group for each item
+		const std::string item_name = file_path.filename().replace_extension("").string();
+		ImGui::BeginGroup();
+		{
+			ImGui::PushID(ID);
+
+			const ImVec2 item_pos = ImGui::GetCursorScreenPos();
+			ImDrawList* draw_list = ImGui::GetWindowDrawList();
+			draw_list->AddRectFilled(item_pos, item_pos + m_icon_size, background_color, ImGui::GetStyle().FrameRounding);
+
+			switch (loc_asset_file_header.type) {
+
+			case file_type::mesh:
+				ImGui::Image(m_mesh_asset_image->get_descriptor_set(), m_icon_size);
+				break;
+
+			case file_type::world:
+				ImGui::Image(m_world_image->get_descriptor_set(), m_icon_size);
+				break;
+
+			default:
+				break;
+			}
+
+
+			std::string wrapped_text = UI::wrap_text_at_underscore(item_name, m_icon_size.x);
+			ImGui::TextWrapped(wrapped_text.c_str());
+
+			ImGui::PopID();
+		}
+		ImGui::EndGroup();
+		const auto item_mouse_interation = UI::get_mouse_interation_on_item();
+
+		const char* playload_name = "PROJECT_CONTENT_FILE";
+
+		// TODO: make it possible to easyly tell the file type
+		//switch (loc_asset_file_header.type) {
+		//case file_type::mesh:
+		//	playload_name = "PROJECT_CONTENT_FILE_MESH";
+		//	break;
+		//case file_type::world:
+		//	playload_name = "PROJECT_CONTENT_FILE_WORLD";
+		//	break;
+		//default:
+		//	break;
+		//}
+
+
+		// Handle drag source for files
+		if (ImGui::BeginDragDropSource(ImGuiDragDropFlags_SourceAllowNullID)) {
+			ImGui::SetDragDropPayload(playload_name, file_path.string().c_str(), file_path.string().length() + 1);
+
+			ImGui::Image(m_mesh_asset_image->get_descriptor_set(), m_icon_size);
+			ImGui::TextWrapped("%s", item_name.c_str());
+
+			ImGui::EndDragDropSource();
+		}
+
+		// Context menu popup
+		std::string popup_name = "item_context_menu_" + item_name;
+		if (ImGui::BeginPopupContextItem(popup_name.c_str())) {
+
+			if (ImGui::MenuItem("Rename")) {
+
+				CORE_LOG(Info, "NOT IMPLEMENTED YET");
+			}
+			if (ImGui::MenuItem("Delete")) {
+
+				std::error_code error_code{};
+				CORE_VALIDATE(std::filesystem::remove(file_path, error_code), return, "deleting file from content folder: [" << file_path << "]", "FAILED to delete file from content folder: [" << file_path << "] error: " << error_code);
+			}
+
+
+			if (item_mouse_interation == UI::mouse_interation::none && !UI::is_holvering_window())
+				ImGui::CloseCurrentPopup();
+
+			ImGui::EndPopup();
+		}
+
+		switch (item_mouse_interation) {
+		case UI::mouse_interation::double_click:
+			CORE_LOG(Info, "NOT IMPLEMENTED YET => should opening coresponding editor window");
+			break;
+
+		case UI::mouse_interation::right_click:
+			ImGui::OpenPopup(popup_name.c_str());
+			break;
+
+		default:
+			break;
+		}
+
 	}
 
 
@@ -362,7 +376,10 @@ namespace PFF {
 			
 			ImGui::SameLine();
 			UI::shift_cursor_pos(30, 0);
-			search_field_and_button(m_selected_directory);
+
+			ImVec2 input_text_size(180, 0); // Set width to 150 pixels, height to default
+			ImGui::SetNextItemWidth(math::clamp<f32>(input_text_size.x, 30, ImGui::GetContentRegionAvail().x));
+			UI::serach_input("##serach_in_world_viewport_details_panel", search_query);
 
 			ImGui::SameLine();
 			UI::shift_cursor_pos(10, 0);
@@ -387,8 +404,20 @@ namespace PFF {
 
 			//ImGui::ShowDemoWindow();
 
+			if (search_query.empty())
+				show_current_folder_content(m_selected_directory);
+			else {
 
-			show_current_folder_content(m_selected_directory);
+				u32 index_buffer = 0;
+				show_search_result_for_current_folder(m_selected_directory, index_buffer);
+
+				if (index_buffer == 0) {
+					UI::shift_cursor_pos(10, 10);
+					ImGui::Text("Not item found containing [%s]", search_query.c_str());
+				}
+
+			}
+
 
 		});
 

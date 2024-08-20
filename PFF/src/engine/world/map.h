@@ -87,8 +87,6 @@ namespace PFF {
 
 			if constexpr (std::is_same_v<T, mesh_component>) {
 
-				CORE_LOG(Trace, "USING THE [on_component_added<mesh_component>()] template");
-
 			}
 		}
 

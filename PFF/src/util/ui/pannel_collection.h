@@ -126,6 +126,7 @@ namespace PFF::UI {
 
 	PFF_API FORCEINLINE void custom_frame_NEW(const f32 width_left_side, const bool can_resize, const ImU32 color_left_side, std::function<void()> left_side, std::function<void()> right_side);
 
+	PFF_API FORCEINLINE bool serach_input(const char* lable, std::string& search_text);
 
 	// @brief Renders an integer slider within a table row in an ImGui interface.
 	// 
@@ -153,6 +154,7 @@ namespace PFF::UI {
 
 	PFF_API FORCEINLINE void table_row(std::string_view label, std::string_view value);
 
+	// returns true when transform was changed
 	PFF_API FORCEINLINE bool table_row(std::string_view label, glm::mat4& value);
 
 

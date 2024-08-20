@@ -38,7 +38,9 @@ namespace PFF::UI {
 
 		serializer::yaml(config::get_filepath_from_configtype(application::get().get_project_path(), config::file::ui), "performance_display", option)
 			.entry(KEY_VALUE(m_show_FPS_window))
-			.entry(KEY_VALUE(m_show_renderer_metrik));
+			.entry(KEY_VALUE(m_show_renderer_metrik))
+			.entry(KEY_VALUE(renderer_metrik_window_location))
+			.entry(KEY_VALUE(FPS_window_location));
 	}
 
 	static void serialize(serializer::option option) {
@@ -69,8 +71,7 @@ namespace PFF::UI {
 			.entry(KEY_VALUE(action_color_gray_default))
 			.entry(KEY_VALUE(action_color_gray_hover))
 			.entry(KEY_VALUE(action_color_gray_active));
-
-		std::string buffer = option == serializer::option::load_from_file ? "load_from_file" : "save_to_file";
+		
 	}
 
 	void save_UI_theme_data() {
@@ -205,7 +206,6 @@ namespace PFF::UI {
 		static const u32 const_array_size = sizeof(f32) * 100;
 		static bool show_graphs = true;
 
-		static UI::window_pos location = UI::window_pos::top_left;
 		ImGuiWindowFlags window_flags = (
 			ImGuiWindowFlags_NoDecoration |
 			ImGuiWindowFlags_NoDocking |
@@ -213,12 +213,12 @@ namespace PFF::UI {
 			ImGuiWindowFlags_NoSavedSettings |
 			ImGuiWindowFlags_NoFocusOnAppearing |
 			ImGuiWindowFlags_NoNav);
-		if (location != UI::window_pos::custom)
+		if (renderer_metrik_window_location != UI::window_pos::custom)
 			window_flags |= ImGuiWindowFlags_NoMove;
 
 		static char formatted_text[32];
 
-		UI::set_next_window_pos_in_window(location);
+		UI::set_next_window_pos_in_window(renderer_metrik_window_location);
 		ImGui::SetNextWindowBgAlpha(0.8f); // Transparent background
 		if (ImGui::Begin("Renderer Metrik##PFF_Engine", &m_show_FPS_window, window_flags)) {
 
@@ -313,7 +313,7 @@ namespace PFF::UI {
 
 				ImGui::Checkbox("show timing graphs", &show_graphs);
 
-				UI::next_window_position_selector(location, m_show_renderer_metrik);
+				UI::next_window_position_selector(renderer_metrik_window_location, m_show_renderer_metrik);
 
 				ImGui::EndPopup();
 			}
@@ -349,7 +349,6 @@ namespace PFF::UI {
 			last_update_time = current_time;
 		}
 
-		static UI::window_pos location = UI::window_pos::top_right;
 		ImGuiWindowFlags window_flags = (
 			ImGuiWindowFlags_NoDecoration |
 			ImGuiWindowFlags_NoDocking |
@@ -357,10 +356,11 @@ namespace PFF::UI {
 			ImGuiWindowFlags_NoSavedSettings |
 			ImGuiWindowFlags_NoFocusOnAppearing |
 			ImGuiWindowFlags_NoNav);
-		if (location != UI::window_pos::custom)
+		if (FPS_window_location != UI::window_pos::custom)
 			window_flags |= ImGuiWindowFlags_NoMove;
 
-		UI::set_next_window_pos_in_window(location);
+		UI::set_next_window_pos_in_window(FPS_window_location);
+
 		ImGui::SetNextWindowBgAlpha(0.8f); // Transparent background
 		if (ImGui::Begin("Performance_display##PFF_Engine", &m_show_FPS_window, window_flags)) {
 
@@ -454,7 +454,7 @@ namespace PFF::UI {
 				ImGui::Checkbox("show progress bars", &show_progress_bars);
 				ImGui::Checkbox("show FPS graph", &show_graph);
 
-				UI::next_window_position_selector(location, m_show_FPS_window);
+				UI::next_window_position_selector(FPS_window_location, m_show_FPS_window);
 
 				ImGui::EndPopup();
 			}

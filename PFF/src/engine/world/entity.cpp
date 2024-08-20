@@ -28,8 +28,7 @@ namespace PFF {
 		CORE_ASSERT(asset_header.type == file_type::mesh, "", "Tryed to add mesh_component but provided asset_path is not a mesh");
 
 		switch (general_header.type) {
-		case mesh_type::static_mesh:
-		{
+		case mesh_type::static_mesh: {
 
 			static_mesh_file_header static_mesh_header;
 			serialize_static_mesh_header(serializer, static_mesh_header);
@@ -79,7 +78,7 @@ namespace PFF {
 
 	}
 	
-	void entity::propegate_transform_to_children(const glm::mat4& root_transform_inverse, const glm::mat4& delta_transform) {
+	void entity::propegate_transform_to_children(const glm::mat4& root_transform, const glm::mat4& delta_transform) {
 
 		if (!has_component<relationship_component>())		// is standalone entity => no relationships
 			return;
@@ -88,18 +87,17 @@ namespace PFF {
 		if (relation_comp.children_ID.size() <= 0)			// has no children
 			return;
 
-
 		for (const auto child_ID : relation_comp.children_ID) {
 
 			// Apply the transform to the child
 			auto child = m_map->get_entity_by_UUID(child_ID);
 			glm::mat4& child_transform = (glm::mat4&)child.get_component<transform_component>();
 
-			glm::mat4 child_local_space_transform = glm::inverse(root_transform_inverse) * child_transform;
+			glm::mat4 child_local_space_transform = glm::inverse(root_transform) * child_transform;
 			child_local_space_transform = delta_transform * child_local_space_transform;		// Apply transform in local space
-			child_transform = root_transform_inverse * child_local_space_transform;
+			child_transform = root_transform * child_local_space_transform;
 
-			child.propegate_transform_to_children(root_transform_inverse, delta_transform);			// call recursive for children
+			child.propegate_transform_to_children(root_transform, delta_transform);			// call recursive for children
 		}
 	}
 

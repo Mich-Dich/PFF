@@ -15,8 +15,8 @@
 #include "world_viewport.h"
 
 namespace PFF {
-	
-	
+
+
 
 
 
@@ -140,7 +140,7 @@ namespace PFF {
 				ImGui::SameLine();
 				const bool is_open = ImGui::TreeNodeEx(name,
 					outliner_base_flags | ((m_selected_entity == child) ? ImGuiTreeNodeFlags_Selected : 0));
-				
+
 				if (ImGui::IsItemClicked())
 					m_selected_entity = child;
 
@@ -230,6 +230,25 @@ namespace PFF {
 		if (!ImGui::Begin("Details", &m_show_details, window_flags))
 			return;
 
+
+
+		const auto button_size = ImGui::CalcTextSize("Add Component").x;
+
+		ImGui::SetNextItemWidth(ImGui::GetContentRegionAvail().x - button_size - (ImGui::GetStyle().ItemSpacing.x * 3));
+		std::string search_text = "";
+		if (UI::serach_input("##serach_in_world_viewport_details_panel", search_text)) {
+
+			CORE_LOG(Debug, "Search not implemented yet");
+		}
+		ImGui::SameLine();
+
+
+		if (ImGui::Button("Add Component"), button_size) {
+
+
+		}
+
+
 		if (m_selected_entity == entity()) {
 
 			ImGui::End();
@@ -251,20 +270,21 @@ namespace PFF {
 		// Component that every entity has
 		if (ImGui::CollapsingHeader("Transform"), ImGuiTreeNodeFlags_DefaultOpen) {
 
-			auto& transform_comp = m_selected_entity.get_component<transform_component>();
 			UI::begin_table("entity_component", false);
 
-			if (UI::table_row("transform", (glm::mat4&)transform_comp)) {		// TODO: change UI::table_row() to return true is transform was changed
+			auto& entity_transform = (glm::mat4&)m_selected_entity.get_component<transform_component>();
+			glm::mat4 buffer_transform = entity_transform;
 
-				// TODO: propegate transform change if mobility::locked
-				if (m_selected_entity.has_component<relationship_component>()) {
+			if (UI::table_row("transform", entity_transform)) {
 
-				}
+				const glm::mat4 root_transform = buffer_transform;
+				buffer_transform = glm::inverse(buffer_transform) * entity_transform;		// trandform delta
+				m_selected_entity.propegate_transform_to_children(root_transform, buffer_transform);
 			}
 
-			UI::end_table(); 
+			UI::end_table();
 		}
-		
+
 		if (m_selected_entity.has_component<mesh_component>()) {
 
 			// Component that every entity has
@@ -272,7 +292,7 @@ namespace PFF {
 
 				auto& mesh_comp = m_selected_entity.get_component<mesh_component>();
 				UI::begin_table("entity_component", false);
-				
+
 				UI::table_row([]() {
 					ImGui::Text("mobility");
 				}, [&]() {
@@ -283,7 +303,7 @@ namespace PFF {
 					static ImGuiComboFlags flags = 0;
 					ImGui::SetNextItemWidth(ImGui::GetColumnWidth());
 					if (ImGui::BeginCombo("##details_window_mesh_component_mobility", combo_preview_value, flags)) {
-						
+
 						for (int n = 0; n < IM_ARRAYSIZE(items); n++) {
 							const bool is_selected = (item_current_idx == n);
 							if (ImGui::Selectable(items[n], is_selected))
@@ -299,7 +319,8 @@ namespace PFF {
 				UI::table_row("shoudl render", mesh_comp.shoudl_render);
 
 				UI::table_row([]() {
-					ImGui::Text("mesh asset");
+				ImGui::Text("mesh asset");
+
 				}, [&]() {
 
 					ImGui::SetNextItemWidth(ImGui::GetColumnWidth());
@@ -314,7 +335,7 @@ namespace PFF {
 						}
 						ImGui::EndDragDropTarget();
 					}
-					
+
 				});
 
 				UI::end_table();
@@ -333,70 +354,68 @@ namespace PFF {
 		ImGuiWindowFlags window_flags = ImGuiWindowFlags_NoTitleBar;
 		if (ImGui::Begin("Editor Debugger", &m_show_general_debugger, window_flags)) {
 
-if (ImGui::BeginTabBar("##tabs", ImGuiTabBarFlags_None)) {
+			if (ImGui::BeginTabBar("##tabs", ImGuiTabBarFlags_None)) {
 
-	const f32 tab_width = 60.f;		// TODO: move into [default_tab_width] variable in config-file
-	ImGui::SetNextItemWidth(tab_width);
-	if (ImGui::BeginTabItem("Inputs")) {
+				const f32 tab_width = 60.f;		// TODO: move into [default_tab_width] variable in config-file
+				ImGui::SetNextItemWidth(tab_width);
+				ImGui::BeginTabItem("Inputs");
 
 
-		UI::begin_table("display_input_actions_params", false);
-		for (input_action* action : *application::get().get_world_layer()->get_current_player_controller()->get_input_mapping()) {						// get input_action
+				UI::begin_table("display_input_actions_params", false);
+				for (input_action* action : *application::get().get_world_layer()->get_current_player_controller()->get_input_mapping()) {						// get input_action
 
-			switch (action->value) {
-			case input::action_type::boolean:
-				UI::table_row(action->get_name(), action->data.boolean, ImGuiInputTextFlags_ReadOnly);
-				break;
+					switch (action->value) {
+					case input::action_type::boolean:
+						UI::table_row(action->get_name(), action->data.boolean, ImGuiInputTextFlags_ReadOnly);
+						break;
 
-			case input::action_type::vec_1D:
-				UI::table_row(action->get_name(), action->data.vec_1D, ImGuiInputTextFlags_ReadOnly);
-				break;
+					case input::action_type::vec_1D:
+						UI::table_row(action->get_name(), action->data.vec_1D, ImGuiInputTextFlags_ReadOnly);
+						break;
 
-			case input::action_type::vec_2D:
-				UI::table_row(action->get_name(), action->data.vec_2D, ImGuiInputTextFlags_ReadOnly);
-				break;
+					case input::action_type::vec_2D:
+						UI::table_row(action->get_name(), action->data.vec_2D, ImGuiInputTextFlags_ReadOnly);
+						break;
 
-			case input::action_type::vec_3D:
-				UI::table_row(action->get_name(), action->data.vec_3D, ImGuiInputTextFlags_ReadOnly);
-				break;
+					case input::action_type::vec_3D:
+						UI::table_row(action->get_name(), action->data.vec_3D, ImGuiInputTextFlags_ReadOnly);
+						break;
 
-			default:
-				break;
+					default:
+						break;
+					}
+				}
+				UI::end_table();
+
+
+				ImGui::EndTabItem();
+
+				ImGui::SetNextItemWidth(tab_width);
+				if (ImGui::BeginTabItem("Test")) {
+
+					// camera pos and dir
+					if (ImGui::CollapsingHeader("Camera", ImGuiTreeNodeFlags_DefaultOpen)) {
+
+						//static_cast<PFF_editor>(application::get()); .get_editor_layer();
+						//glm::vec3 camera_pos = get_editor_camera_pos();
+						UI::begin_table("##Camera_params", false);
+
+						UI::table_row("Position", glm::vec3(), 0);
+						UI::table_row("Direction", glm::vec2(), 0);
+
+						UI::end_table();
+
+					}
+
+					ImGui::EndTabItem();
+				}
+
+				ImGui::EndTabBar();
 			}
-		}
-		UI::end_table();
-
-
-		ImGui::EndTabItem();
-	}
-
-	ImGui::SetNextItemWidth(tab_width);
-	if (ImGui::BeginTabItem("Test")) {
-
-		// camera pos and dir
-		if (ImGui::CollapsingHeader("Camera", ImGuiTreeNodeFlags_DefaultOpen)) {
-
-			//static_cast<PFF_editor>(application::get()); .get_editor_layer();
-			//glm::vec3 camera_pos = get_editor_camera_pos();
-			UI::begin_table("##Camera_params", false);
-
-			UI::table_row("Position", glm::vec3(), 0);
-			UI::table_row("Direction", glm::vec2(), 0);
-
-			UI::end_table();
-
-		}
-
-		ImGui::EndTabItem();
-	}
-
-	ImGui::EndTabBar();
-}
 
 		}
 		ImGui::End();
 	}
-
 
 	void world_viewport_window::window_main_viewport() {
 
@@ -483,16 +502,15 @@ if (ImGui::BeginTabBar("##tabs", ImGuiTabBarFlags_None)) {
 		}
 
 
-
-
 		auto* draw_list = ImGui::GetWindowDrawList();
-		const auto start_pos = ImVec2(200, 5);
+
+		const auto start_pos = ImVec2(ImGui::GetWindowWidth() - 100, 5);
+
 		const ImVec2 button_size = ImVec2(15); // size of the button
 		const ImVec2 box_padding = ImVec2(5); // padding around the button
 		const f32 button_length = button_size.x + (box_padding.x * 2);
 		auto color = m_gizmo_operation == transform_operation::translate ? ImGui::GetStyle().Colors[ImGuiCol_Button] : UI::default_gray;
 		{
-
 			const ImVec2 box_min = ImGui::GetWindowPos() + start_pos; // top-left corner
 			const ImVec2 box_max = box_min + button_size + (box_padding * 2); // bottom-right corner
 			const f32 corner_size = 7;
@@ -513,10 +531,8 @@ if (ImGui::BeginTabBar("##tabs", ImGuiTabBarFlags_None)) {
 
 		color = m_gizmo_operation == transform_operation::rotate ? ImGui::GetStyle().Colors[ImGuiCol_Button] : UI::default_gray;
 		{
-
 			const ImVec2 box_min = ImGui::GetWindowPos() + start_pos + ImVec2(button_length, 0);
 			const ImVec2 box_max = box_min + button_size + (box_padding * 2);
-			const f32 corner_size = 7;
 
 			draw_list->AddRectFilled(box_min, box_max, ImGui::ColorConvertFloat4ToU32(color));
 
@@ -530,10 +546,8 @@ if (ImGui::BeginTabBar("##tabs", ImGuiTabBarFlags_None)) {
 
 		color = m_gizmo_operation == transform_operation::scale ? ImGui::GetStyle().Colors[ImGuiCol_Button] : UI::default_gray;
 		{
-
 			const ImVec2 box_min = ImGui::GetWindowPos() + start_pos + ImVec2(button_length * 2, 0);
 			const ImVec2 box_max = box_min + button_size + (box_padding * 2);
-			const f32 corner_size = 7;
 
 			draw_list->AddRectFilled(box_min, box_max, ImGui::ColorConvertFloat4ToU32(color));
 
@@ -579,12 +593,12 @@ if (ImGui::BeginTabBar("##tabs", ImGuiTabBarFlags_None)) {
 			projection_matrix[3][2] = -projection_matrix[3][2];
 
 			glm::mat4& entity_transform = (glm::mat4&)m_selected_entity.get_component<transform_component>();
-			const glm::mat4 root_transform = entity_transform;
 			glm::mat4 buffer_transform = entity_transform;
 
 			if (ImGuizmo::Manipulate(glm::value_ptr(view_matrix), glm::value_ptr(projection_matrix),
 				(ImGuizmo::OPERATION)m_gizmo_operation, ImGuizmo::MODE::WORLD, glm::value_ptr(entity_transform))) {
 
+				const glm::mat4 root_transform = buffer_transform;
 				buffer_transform = glm::inverse(buffer_transform) * entity_transform;		// trandform delta
 				m_selected_entity.propegate_transform_to_children(root_transform, buffer_transform);
 			}
@@ -593,8 +607,8 @@ if (ImGui::BeginTabBar("##tabs", ImGuiTabBarFlags_None)) {
 
 		ImGui::End();
 	}
-	
-void world_viewport_window::window_renderer_backgrond_effect() {
+
+	void world_viewport_window::window_renderer_backgrond_effect() {
 
 		if (!m_show_renderer_backgrond_effect)
 			return;
@@ -618,33 +632,31 @@ void world_viewport_window::window_renderer_backgrond_effect() {
 			render::compute_effect& selected = application::get().get_renderer().get_current_background_effect();
 			int& background_effect_index = application::get().get_renderer().get_current_background_effect_index();
 
-			if (UI::begin_table("renderer background values", true, ImVec2(300, 0), 0, true, 0.3f)) {
+			UI::begin_table("renderer background values", true, ImVec2(300, 0), 0, true, 0.3f);
 
-				UI::table_row_slider<int>("Effects", background_effect_index, 0, application::get().get_renderer().get_number_of_background_effects() - 1.f);
+			UI::table_row_slider<int>("Effects", background_effect_index, 0, application::get().get_renderer().get_number_of_background_effects() - 1.f);
 
-				if (background_effect_index == 0) {}
+			if (background_effect_index == 0) {}
 
-				else if (background_effect_index == 1) {
+			else if (background_effect_index == 1) {
 
-					UI::table_row_slider("top color", selected.data.data1);
-					UI::table_row_slider("bottom color", selected.data.data2);
+				UI::table_row_slider("top color", selected.data.data1);
+				UI::table_row_slider("bottom color", selected.data.data2);
 
-				} else if (background_effect_index == 2) {
+			} else if (background_effect_index == 2) {
 
-					UI::table_row_slider<glm::vec3>("bottom color", (glm::vec3&)selected.data.data1);
-					UI::table_row_slider<f32>("star amount", selected.data.data1[3]);
+				UI::table_row_slider<glm::vec3>("bottom color", (glm::vec3&)selected.data.data1);
+				UI::table_row_slider<f32>("star amount", selected.data.data1[3]);
 
-				} else {
+			} else {
 
-					UI::table_row_slider("data 1", selected.data.data1);
-					UI::table_row_slider("data 2", selected.data.data2);
-					UI::table_row_slider("data 3", selected.data.data3);
-					UI::table_row_slider("data 4", selected.data.data4);
-				}
-
-				UI::end_table();
+				UI::table_row_slider("data 1", selected.data.data1);
+				UI::table_row_slider("data 2", selected.data.data2);
+				UI::table_row_slider("data 3", selected.data.data3);
+				UI::table_row_slider("data 4", selected.data.data4);
 			}
 
+			UI::end_table();
 			UI::next_window_position_selector_popup(location, m_show_renderer_backgrond_effect);
 		}
 		ImGui::End();

@@ -11,6 +11,7 @@ namespace PFF::UI {
 	#define LERP_GRAY(value)					{value, value, value, 1.f }
 	#define IMCOLOR_GRAY(value)					ImColor{value, value, value, 255 }
 
+	enum class window_pos;
 
 	FORCEINLINE static u32 convert_color_to_int(const ImVec4& color) { return IM_COL32(255 * color.x, 255 * color.y, 255 * color.z, 255 * color.w); }
 
@@ -83,12 +84,14 @@ namespace PFF::UI {
 		std::unordered_map<std::string, ImFont*> m_fonts{};
 
 		// ------------------------- performance display -------------------------
-		bool m_show_FPS_window = true;
-		bool m_show_renderer_metrik = true;
-		f32 m_work_time = 0.f, m_sleep_time = 0.f;
-		u32 m_target_fps = 0, m_current_fps = 0;
-		bool m_limit_fps = false;
-		bool fonts_need_recreation = false;
+		bool				m_show_FPS_window = true;
+		bool				m_show_renderer_metrik = true;
+		f32					m_work_time = 0.f, m_sleep_time = 0.f;
+		u32					m_target_fps = 0, m_current_fps = 0;
+		bool				m_limit_fps = false;
+		bool				fonts_need_recreation = false;
 
+		UI::window_pos		renderer_metrik_window_location = static_cast< window_pos>(2);
+		UI::window_pos		FPS_window_location = static_cast< window_pos>(2);
 	};
 }

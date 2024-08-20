@@ -454,6 +454,34 @@ namespace PFF::UI {
 		ImGui::EndChild();
 	}
 
+	bool serach_input(const char* lable, std::string& search_text) {
+
+		std::string buffer = search_text;
+		buffer.resize(256);
+
+		ImGui::SetNextItemAllowOverlap();
+		if (ImGui::InputTextWithHint(lable, "Search", buffer.data(), 255, ImGuiInputTextFlags_EnterReturnsTrue)) {
+
+			buffer.resize(strlen(buffer.c_str()));
+			search_text = buffer;
+			return true;
+		}
+
+		if (!search_text.empty()) {
+
+			ImGui::SameLine();
+			UI::shift_cursor_pos(-ImGui::CalcTextSize(" X ").x - (ImGui::GetStyle().ItemSpacing.x * 3), 0);
+
+			std::string button_text = " X ##Clear_search_query__" + std::string(lable);
+			if (ImGui::Button(button_text.c_str())) {
+
+				CORE_LOG(Trace, "Trigger clear button")
+				search_text = "";
+			}
+		}
+
+		return false;
+	}
 
 	bool table_row_slider(std::string_view label, int& value, int min_value, int max_value, ImGuiInputTextFlags flags) {
 
@@ -523,6 +551,7 @@ namespace PFF::UI {
 		}
 
 	}
+
 	
 	void table_row_text(std::string_view label, const char* format, ...) {
 
