@@ -11,17 +11,22 @@
 #include "vk_descriptor.h"
 //#include "engine/geometry/mesh.h"
 
+//class image {
+//public:
+//
+//    //PFF_DEFAULT_CONSTRUCTORS(image);
+//
+//    //friend class PFF::render::vulkan::vk_renderer;
+////private:
+//
+//    VkImage             m_image{};
+//    VkImageView         m_image_view{};
+//    VmaAllocation       m_allocation{};
+//    VkExtent3D          m_image_extent{};
+//    VkFormat            m_image_format{};
+//};
 
-struct vk_image {
-
-    VkImage             image;
-    VkImageView         image_view;
-    VmaAllocation       allocation;
-    VkExtent3D          image_extent;
-    VkFormat            image_format;
-};
-
-struct allocated_buffer {
+struct vk_buffer {
 
     VkBuffer            buffer;
     VmaAllocation       allocation;
@@ -36,4 +41,5 @@ struct GPU_draw_push_constants {
 };
 
 
-#define VK_CHECK(expr)		CORE_ASSERT_S(expr == VK_SUCCESS)
+#define VK_CHECK_S(expr)		                        CORE_ASSERT_S(expr == VK_SUCCESS)
+#define VK_CHECK(expr, successMsg, failureMsg)		    CORE_ASSERT(expr == VK_SUCCESS)

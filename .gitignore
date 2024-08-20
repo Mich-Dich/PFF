@@ -9,6 +9,7 @@
 
 config/
 *.ini
+!PFF_editor/config/todo_list.yml
 
 # Compield shaders
 *.spv

@@ -1,83 +1,162 @@
 #pragma once
 
-#include "util/pffpch.h"
-
 #include <imgui.h>
-#include <imgui_impl_glfw.h>
-#include <imgui_impl_vulkan.h>
-#include <imgui_internal.h>
 #include <glm/glm.hpp>
 
 #include "application.h"
 
 
+static FORCEINLINE ImVec2  operator*(const ImVec2& lhs, const float rhs) { return ImVec2(lhs.x * rhs, lhs.y * rhs); }
+static FORCEINLINE ImVec2  operator/(const ImVec2& lhs, const float rhs) { return ImVec2(lhs.x / rhs, lhs.y / rhs); }
+static FORCEINLINE ImVec2  operator+(const ImVec2& lhs, const ImVec2& rhs) { return ImVec2(lhs.x + rhs.x, lhs.y + rhs.y); }
+static FORCEINLINE ImVec2  operator-(const ImVec2& lhs, const ImVec2& rhs) { return ImVec2(lhs.x - rhs.x, lhs.y - rhs.y); }
+static FORCEINLINE ImVec2  operator*(const ImVec2& lhs, const ImVec2& rhs) { return ImVec2(lhs.x * rhs.x, lhs.y * rhs.y); }
+static FORCEINLINE ImVec2  operator/(const ImVec2& lhs, const ImVec2& rhs) { return ImVec2(lhs.x / rhs.x, lhs.y / rhs.y); }
+static FORCEINLINE ImVec2  operator-(const ImVec2& lhs) { return ImVec2(-lhs.x, -lhs.y); }
+static FORCEINLINE ImVec2& operator*=(ImVec2& lhs, const float rhs) { lhs.x *= rhs; lhs.y *= rhs; return lhs; }
+static FORCEINLINE ImVec2& operator/=(ImVec2& lhs, const float rhs) { lhs.x /= rhs; lhs.y /= rhs; return lhs; }
+static FORCEINLINE ImVec2& operator+=(ImVec2& lhs, const ImVec2& rhs) { lhs.x += rhs.x; lhs.y += rhs.y; return lhs; }
+static FORCEINLINE ImVec2& operator-=(ImVec2& lhs, const ImVec2& rhs) { lhs.x -= rhs.x; lhs.y -= rhs.y; return lhs; }
+static FORCEINLINE ImVec2& operator*=(ImVec2& lhs, const ImVec2& rhs) { lhs.x *= rhs.x; lhs.y *= rhs.y; return lhs; }
+static FORCEINLINE ImVec2& operator/=(ImVec2& lhs, const ImVec2& rhs) { lhs.x /= rhs.x; lhs.y /= rhs.y; return lhs; }
+static FORCEINLINE bool    operator==(const ImVec2& lhs, const ImVec2& rhs) { return lhs.x == rhs.x && lhs.y == rhs.y; }
+static FORCEINLINE bool    operator!=(const ImVec2& lhs, const ImVec2& rhs) { return lhs.x != rhs.x || lhs.y != rhs.y; }
+static FORCEINLINE ImVec4  operator+(const ImVec4& lhs, const ImVec4& rhs) { return ImVec4(lhs.x + rhs.x, lhs.y + rhs.y, lhs.z + rhs.z, lhs.w + rhs.w); }
+static FORCEINLINE ImVec4  operator-(const ImVec4& lhs, const ImVec4& rhs) { return ImVec4(lhs.x - rhs.x, lhs.y - rhs.y, lhs.z - rhs.z, lhs.w - rhs.w); }
+static FORCEINLINE ImVec4  operator*(const ImVec4& lhs, const ImVec4& rhs) { return ImVec4(lhs.x * rhs.x, lhs.y * rhs.y, lhs.z * rhs.z, lhs.w * rhs.w); }
+static FORCEINLINE bool    operator==(const ImVec4& lhs, const ImVec4& rhs) { return lhs.x == rhs.x && lhs.y == rhs.y && lhs.z == rhs.z && lhs.w == rhs.w; }
+static FORCEINLINE bool    operator!=(const ImVec4& lhs, const ImVec4& rhs) { return lhs.x != rhs.x || lhs.y != rhs.y || lhs.z != rhs.z || lhs.w != rhs.w; }
+
 namespace PFF::UI {
 
-	void seperation_vertical();
-	void help_marker(const char* desc);
-	void shift_cursor_pos(const f32 shift_x = 0.0f, const f32 shift_y = 0.0f);
+	enum class window_pos {
 
-	// ----------------------------------------- static funcs -----------------------------------------
+		center = 0,
+		custom = 1,
+		top_left = 2,
+		top_right = 3,
+		bottom_left = 4,
+		bottom_right = 5,
+	};
+
+	enum class mouse_interation {
+
+		none,
+		hovered,
+		single_click,
+		double_click,
+		right_click,
+		right_double_click,
+	};
+
+
+	PFF_API FORCEINLINE bool is_holvering_window();
+
+	PFF_API FORCEINLINE bool is_item_double_clicked();
+
+	PFF_API FORCEINLINE mouse_interation get_mouse_interation_on_item(const f32 target_click_duration = 0.2f);
+
+	PFF_API FORCEINLINE mouse_interation get_mouse_interation_on_window(const f32 target_click_duration = 0.2f);
+
+	PFF_API FORCEINLINE std::string wrap_text_at_underscore(const std::string& text, float wrap_width);
+
+	PFF_API FORCEINLINE void set_next_window_pos(window_pos location, f32 padding = 10.f);
+
+	PFF_API FORCEINLINE void set_next_window_pos_in_window(window_pos location, f32 padding = 10.f);
+
+	PFF_API FORCEINLINE void next_window_position_selector(window_pos& position, bool& show_window);
+
+	PFF_API FORCEINLINE void next_window_position_selector_popup(window_pos& position, bool& show_window);
+
 
 	// @brief Draws a vertical separation line.
-	static void seperation_vertical() {
+	PFF_API FORCEINLINE void seperation_vertical();
 
-		ImGui::SameLine();
-		shift_cursor_pos(5, 0);
-		ImGui::SeparatorEx(ImGuiSeparatorFlags_Vertical);
 
-		ImGui::SameLine();
-		shift_cursor_pos(5, 0);
-	}
+	PFF_API FORCEINLINE bool gray_button(const char* label, const ImVec2& size = { 0, 0 });
 
-	static bool add_gray_button(const char* lable, const ImVec2& size = { 0, 0 }) {
-
-		ImGui::PushStyleColor(ImGuiCol_Button, UI::action_color_gray_default);
-		ImGui::PushStyleColor(ImGuiCol_ButtonHovered, UI::action_color_gray_hover);
-		ImGui::PushStyleColor(ImGuiCol_ButtonActive, UI::action_color_gray_active);
-
-		const bool result = ImGui::Button(lable, size);
-
-		ImGui::PopStyleColor(3);
-		return result;
-	}
+	PFF_API FORCEINLINE bool toggle_button(const char* lable, bool& bool_var, const ImVec2& size = { 0, 0 });
 
 	// @brief Draws text using a larger font.
 	// @param [text] The text to be drawn.
-	static void draw_big_text(const char* text, bool wrapped = false) {
+	PFF_API FORCEINLINE void big_text(const char* text, bool wrapped = false);
 
-		//ImGui::PushFont(application::get().get_imgui_layer()->get_font("regular_big"));
 
-		if(wrapped)
-			ImGui::TextWrapped(text);
-		else
-			ImGui::Text(text);
+	PFF_API FORCEINLINE void text_bold(const char* text, bool wrapped = false);
 
-		ImGui::PopFont();
-	}
+	PFF_API FORCEINLINE void text_italic(const char* text, bool wrapped = false);
 
 	// @brief Displays a help marker with tooltip containing the provided description.
 	// @param [desc] The description text to be displayed in the tooltip.
-	static void help_marker(const char* desc) {
+	PFF_API FORCEINLINE void help_marker(const char* desc);
 
-		ImGui::TextDisabled(" ? ");
-		if (ImGui::IsItemHovered(ImGuiHoveredFlags_DelayShort)) {
-			ImGui::BeginTooltip();
-			ImGui::PushTextWrapPos(ImGui::GetFontSize() * 35.0f);
-			ImGui::TextUnformatted(desc);
-			ImGui::PopTextWrapPos();
-			ImGui::EndTooltip();
-		}
-	}
 
 	// @brief Adjusts the current ImGui cursor position by adding the specified horizontal and vertical shift offsets.
 	// @param [shift_x] The horizontal shift offset.
 	// @param [shift_y] The vertical shift offset.
-	static void shift_cursor_pos(const f32 shift_x, const f32 shift_y) {
+	PFF_API FORCEINLINE void shift_cursor_pos(const f32 shift_x, const f32 shift_y);
 
-		auto current_pos = ImGui::GetCursorPos();
-		ImGui::SetCursorPos({ current_pos.x + shift_x, current_pos.y + shift_y });
-	}
+	// @brief Adjusts the current ImGui cursor position by adding the specified horizontal and vertical shift offsets.
+	// @param [shift_x] The horizontal shift offset.
+	// @param [shift_y] The vertical shift offset.
+	PFF_API FORCEINLINE void shift_cursor_pos(const ImVec2 shift);
+
+
+	PFF_API FORCEINLINE void progressbar_with_text(const char* label, const char* progress_bar_text, f32 percent, f32 label_size = 50.f, f32 progressbar_size_x = 50.f, f32 progressbar_size_y = 1.f);
+
+
+	// @brief This function sets up an ImGui table with two columns, where the first column is resizable and the second column fills the remaining availabel area
+	// @brief CAUTION - you need to call UI::end_table() at the end of the table;
+	// @param [label] Is used to identify the table
+	PFF_API FORCEINLINE bool begin_table(std::string_view label, bool display_name = true, ImVec2 size = ImVec2(0,0), f32 inner_width = 0.0f, bool set_columns_width = true, f32 columns_width_percentage = 0.5f);
+
+	
+	// @brief Ends the table started with UI::begin_table().
+	PFF_API FORCEINLINE void end_table();
+
+
+	// @brief This function draws a custom frame with two separate sections: [left_side] and [right_side].
+	//          The width of the first column is specified by [width_left_side]. Both sections are contained within
+	//          the same ImGui table. Each section's content is drawn using the provided function callbacks (lamdas or functions)
+	// @param [width_left_side] The fixed width of the first column.
+	// @param [left_side] The function representing the content of the left side.
+	// @param [right_side] The function representing the content of the right side.
+	PFF_API FORCEINLINE void custom_frame(const f32 width_left_side, std::function<void()> left_side, std::function<void()> right_side);
+
+
+	PFF_API FORCEINLINE void custom_frame_NEW(const f32 width_left_side, const bool can_resize, const ImU32 color_left_side, std::function<void()> left_side, std::function<void()> right_side);
+
+	PFF_API FORCEINLINE bool serach_input(const char* lable, std::string& search_text);
+
+	// @brief Renders an integer slider within a table row in an ImGui interface.
+	// 
+	// This function creates a row in an ImGui table, sets the label in the first column,
+	// and places an integer slider in the second column. The slider modifies the provided
+	// integer value within the specified range.
+	// 
+	// @param label The text label for the slider, displayed in the first column of the table.
+	// @param value A reference to the integer value to be modified by the slider.
+	// @param min_value The minimum value for the slider.
+	// @param max_value The maximum value for the slider.
+	// @param flags Optional ImGui input text flags.
+	// 
+	// @return true if the value was changed by the slider, false otherwise.
+	PFF_API FORCEINLINE bool table_row_slider(std::string_view label, int& value, int min_value = 0, int max_value = 1, ImGuiInputTextFlags flags = ImGuiInputTextFlags_None);
+
+
+	PFF_API FORCEINLINE void table_row(std::function<void()> first_colum, std::function<void()> second_colum);
+
+	PFF_API FORCEINLINE void table_row(std::string_view label, std::string& text, bool& enable_input);
+
+	PFF_API FORCEINLINE void table_row_text(std::string_view label, const char* format, ...);
+
+	PFF_API FORCEINLINE void table_row(std::string_view label, bool& value);
+
+	PFF_API FORCEINLINE void table_row(std::string_view label, std::string_view value);
+
+	// returns true when transform was changed
+	PFF_API FORCEINLINE bool table_row(std::string_view label, glm::mat4& value);
+
 
 	// @brief Adds a row to an ImGui table with a label and corresponding value input field.
 	// @tparam [T] The type of the value.
@@ -85,7 +164,7 @@ namespace PFF::UI {
 	// @param [value] The value to be displayed or edited.
 	// @param [flags] Flags controlling the behavior of the input field.
 	template<typename T>
-	void add_table_row(std::string_view label, T& value, ImGuiInputTextFlags flags = ImGuiInputTextFlags_None, f32 drag_speed = 0.01f, f32 min_value = 0.f, f32 max_value = 0.f) {
+	bool table_row(std::string_view label, T& value, f32 drag_speed = 0.01f, f32 min_value = 0.f, f32 max_value = 0.f, ImGuiInputTextFlags flags = ImGuiInputTextFlags_None) {
 
 		ImGuiStyle& style = ImGui::GetStyle();
 		ImVec2 current_item_spacing = style.ItemSpacing;
@@ -97,106 +176,149 @@ namespace PFF::UI {
 
 		ImGui::TableSetColumnIndex(1);
 
+		const std::string loc_label = "##" + *label.data();
+
 		if constexpr (std::is_same_v<T, bool>) {
 
 			ImGui::Text("%s", util::bool_to_str(value));
+			return false;
 		}
 
 		else if constexpr (std::is_arithmetic_v<T>) {
 
 			ImGui::SetNextItemWidth(ImGui::GetColumnWidth());
-			ImGui::DragFloat(label.data(), &value, drag_speed, min_value, max_value, "%.2f", flags);
+			return ImGui::DragFloat(loc_label.c_str(), &value, drag_speed, min_value, max_value, "%.2f", flags);
 		}
 
 		else if constexpr (std::is_same_v<T, glm::vec2> || std::is_same_v<T, ImVec2>) {
 
 			ImGui::SetNextItemWidth(ImGui::GetColumnWidth());
-			ImGui::DragFloat2(label.data(), &value[0], drag_speed, min_value, max_value, "%.2f", flags);
+			return ImGui::DragFloat2(loc_label.c_str(), &value[0], drag_speed, min_value, max_value, "%.2f", flags);
 		}
 
 		else if constexpr (std::is_same_v<T, glm::vec3>) {
 
 			ImGui::SetNextItemWidth(ImGui::GetColumnWidth());
-			ImGui::DragFloat3(label.data(), &value[0], drag_speed, min_value, max_value, "%.2f", flags);
+			return ImGui::DragFloat3(loc_label.c_str(), &value[0], drag_speed, min_value, max_value, "%.2f", flags);
 		}
 
 		else if constexpr (std::is_same_v<T, glm::vec4> || std::is_same_v<T, ImVec4>) {
 
 			ImGui::SetNextItemWidth(ImGui::GetColumnWidth());
-			ImGui::DragFloat4(label.data(), &value[0], drag_speed, min_value, max_value, "%.2f", flags);
+			return ImGui::DragFloat4(loc_label.c_str(), &value[0], drag_speed, min_value, max_value, "%.2f", flags);
 		}
 
 		else if constexpr (std::is_convertible_v<T, std::string>) {
 
 			ImGui::Text("%s", std::to_string(value).c_str());
+			return false;
 		}
+
+		return false;
 	}
 
-	// @brief This function sets up an ImGui table with two columns, where the first column is resizable and the second column fills the remaining available area and not resizable
-	// @brief CAUTION - you slao need to call UI::end_default_table() at the end of table;
-	// @param [lable] Is used to identify the table
-	static void begin_default_table(std::string_view lable, bool display_name = true) {
 
-		if (display_name)
-			ImGui::Text("%s:", lable.data());
+	PFF_API FORCEINLINE void table_row_progressbar(std::string_view label, const char* progress_bar_text, const f32 percent, const bool auto_resize = true, const f32 progressbar_size_x = 50.f, const f32 progressbar_size_y = 1.f);
 
-		// setup table and columns
-		ImGuiTableFlags flags = ImGuiTableFlags_Resizable;
-		ImGui::BeginTable(lable.data(), 2, flags);
-		ImGui::TableSetupColumn("##one", ImGuiTableColumnFlags_NoHeaderLabel);
-		ImGui::TableSetupColumn("##two", ImGuiTableColumnFlags_NoHeaderLabel | ImGuiTableColumnFlags_NoResize);
+
+	// @brief Renders a slider within a table row in an ImGui interface.
+	// 
+	// This function creates a row in an ImGui table, sets the label in the first column,
+	// and places a slider in the second column. The type of the slider is determined by
+	// the type of the value parameter.
+	// 
+	// @tparam T The type of the value to be modified by the slider. Supported types are:
+	// @tparam      - int
+	// @tparam      - f32 (float)
+	// @tparam      - f64 (double)
+	// @tparam      - glm::vec2
+	// @tparam      - glm::vec3
+	// @tparam      - glm::vec4
+	// @tparam      - ImVec2
+	// @tparam      - ImVec4
+	// 
+	// @param label The text label for the slider, displayed in the first column of the table.
+	// @param value A reference to the value to be modified by the slider.
+	// @param min_value The minimum value for the slider. Defaults to 0.f.
+	// @param max_value The maximum value for the slider. Defaults to 1.f.
+	// @param flags Optional ImGui input text flags. Defaults to ImGuiInputTextFlags_None.
+	// 
+	// @return true if the value was changed by the slider, false otherwise.
+	template<typename T>
+	bool table_row_slider(std::string_view label, T& value, f32 min_value = 0.f, f32 max_value = 1.f, f32 draw_speed = 0.2f, ImGuiInputTextFlags flags = ImGuiInputTextFlags_None) {
+
+		ImGuiStyle& style = ImGui::GetStyle();
+		ImVec2 current_item_spacing = style.ItemSpacing;
+		flags |= ImGuiInputTextFlags_AllowTabInput;
+
+		ImGui::TableNextRow();
+		ImGui::TableSetColumnIndex(0);
+		ImGui::Text("%s", label.data());
+
+		ImGui::TableSetColumnIndex(1);
+
+		// Copy non-space characters from label to loc_label
+		std::string loc_label = "##";
+		loc_label.reserve(label.size() + 2);
+		std::remove_copy_if(label.begin(), label.end(), std::back_inserter(loc_label), [](char c) {
+			return std::isspace(static_cast<unsigned char>(c));
+		});
+
+		ImGui::SetNextItemWidth(ImGui::GetColumnWidth());
+
+		if constexpr (std::is_same_v<T, int>)
+			return ImGui::SliderInt(loc_label.c_str(), &value, static_cast<int>(min_value), static_cast<int>(max_value), "%d", flags);
+
+		if constexpr (std::is_same_v<T, f32> || std::is_same_v<T, f64>)
+			return ImGui::SliderFloat(loc_label.c_str(), &value, min_value, max_value, "%.2f", flags);
+
+		if constexpr (std::is_same_v<T, glm::vec2> || std::is_same_v<T, ImVec2>)
+			return ImGui::SliderFloat2(loc_label.c_str(), &value[0], min_value, max_value, "%.2f", flags);
+
+		if constexpr (std::is_same_v<T, glm::vec3>)
+			return ImGui::SliderFloat3(loc_label.c_str(), &value[0], min_value, max_value, "%.2f", flags);
+
+		if constexpr (std::is_same_v<T, glm::vec4> || std::is_same_v<T, ImVec4>)
+			return ImGui::SliderFloat4(loc_label.c_str(), &value[0], min_value, max_value, "%.2f", flags);
+
+		return false;
+	}
+	
+	
+	template<typename T>
+	bool table_row_drag_scalar(std::string_view label, T& value, const char* format, T min_value = (T)0, T max_value = (T)1, f32 draw_speed = 0.2f, ImGuiInputTextFlags flags = ImGuiInputTextFlags_None) {
+
+		ImGuiStyle& style = ImGui::GetStyle();
+		ImVec2 current_item_spacing = style.ItemSpacing;
+		flags |= ImGuiInputTextFlags_AllowTabInput;
+
+		ImGui::TableNextRow();
+		ImGui::TableSetColumnIndex(0);
+		ImGui::Text("%s", label.data());
+
+		ImGui::TableSetColumnIndex(1);
+
+		// Copy non-space characters from label to loc_label
+		std::string loc_label = "##";
+		loc_label.reserve(label.size() + 2);
+		std::remove_copy_if(label.begin(), label.end(), std::back_inserter(loc_label), [](char c) {
+			return std::isspace(static_cast<unsigned char>(c));
+		});
+
+		ImGui::SetNextItemWidth(ImGui::GetColumnWidth());
+
+		if constexpr (std::is_same_v<T, int>)
+			return ImGui::SliderInt(loc_label.c_str(), &value, static_cast<int>(min_value), static_cast<int>(max_value), "%d", flags);
+
+		if constexpr (std::is_same_v<T, f32> || std::is_same_v<T, f64>)
+			return ImGui::SliderFloat(loc_label.c_str(), &value, min_value, max_value, "%.2f", flags);
+
+		if constexpr (std::is_same_v<T, u32>)
+			return ImGui::DragScalar(loc_label.c_str(), ImGuiDataType_U32, &value, 0.2f, (const void*)&min_value, (const void*)&max_value, format);
+
+		return false;
 	}
 
-	// @brief Ends the table started with UI::begin_default_table("example").
-	static void end_default_table() {
-
-		ImGui::EndTable();
-	}
-
-	// @brief This function draws a custom frame with two separate sections: [left_side] and [right_side].
-	//          The width of the first column is specified by [width_left_side]. Both sections are contained within
-	//          the same ImGui table. Each section's content is drawn using the provided function callbacks (lamdas or functions)
-	// @param [width_left_side] The fixed width of the first column.
-	// @param [left_side] The function representing the content of the left side.
-	// @param [right_side] The function representing the content of the right side.
-	static void custom_frame(const f32 width_left_side, std::function<void()> left_side, std::function<void()> right_side) {
-
-		// SETUP
-		ImGuiTableFlags flags = ImGuiTableFlags_None;
-		ImGui::PushStyleVar(ImGuiStyleVar_CellPadding, ImVec2(0, 0));
-		if (ImGui::BeginTable("test_master_divider", 2, flags)) {
-
-			ImGui::PopStyleVar();
-
-			// setup column
-			ImGui::TableSetupColumn("##one", ImGuiTableColumnFlags_WidthFixed, width_left_side);
-			ImGui::TableSetupColumn("##two", ImGuiTableColumnFlags_WidthFixed | ImGuiTableColumnFlags_NoResize, ImGui::GetWindowWidth() - (width_left_side + 10.f));
-
-			// enter first column
-			ImGui::TableNextRow();
-			ImGui::TableSetColumnIndex(0);
-
-			// draw background
-			const ImVec4 color = UI::highlited_window_bg;
-			const ImVec2 uperleft_corner = ImGui::GetCursorScreenPos();
-			const ImVec2 lowerright_corner = { uperleft_corner.x + width_left_side ,uperleft_corner.y + ImGui::GetWindowHeight() };
-			ImGui::GetWindowDrawList()->AddRectFilled(uperleft_corner, lowerright_corner, PFF::UI::convert_color_to_int(color));
-
-			shift_cursor_pos(0, ImGui::GetTextLineHeight());
-			ImGui::BeginGroup();
-			left_side();
-			ImGui::EndGroup();
-
-			ImGui::TableSetColumnIndex(1);
-			shift_cursor_pos(10, 10);
-
-			ImGui::BeginGroup();
-			right_side();
-			ImGui::EndGroup();
-
-			ImGui::EndTable();
-		}
-	}
 }
 
 

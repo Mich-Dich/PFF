@@ -3,8 +3,11 @@
 // PCH of engine
 #include "util/pffpch.h"
 
+// PFF engine
+#include <PFF.h>
+
 // main files
-#include "application.h"
+#include "ui/editor_window.h"
 
 // UI related files
 //#include "ui/panels/pannel_collection.h"

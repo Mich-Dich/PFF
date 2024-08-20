@@ -36,15 +36,15 @@ namespace PFF::render::vulkan {
     private:
 
         std::vector<VkPipelineShaderStageCreateInfo>    p_shader_stages;
-        
         VkPipelineInputAssemblyStateCreateInfo          p_input_assembly_CI;
         VkPipelineRasterizationStateCreateInfo          p_rasterizer_CI;
-        VkPipelineColorBlendAttachmentState             m_color_blend_attachment_CI;
         VkPipelineMultisampleStateCreateInfo            p_multisampling_CI;
         VkPipelineLayout                                p_pipeline_layout;
         VkPipelineDepthStencilStateCreateInfo           p_depth_stencil_CI;
         VkPipelineRenderingCreateInfo                   p_render_info_CI;
         VkFormat                                        p_color_attachmentformat;
+
+        VkPipelineColorBlendAttachmentState             m_color_blend_attachment_CI;
     };
 
 }

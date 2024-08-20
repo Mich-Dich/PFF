@@ -10,9 +10,13 @@
 #include "engine/layer/imgui_layer.h"
 
 #include "toolkit/todo_list/todo_list.h"
+#include "toolkit/settings/graphics_engine_settings.h"
+#include "toolkit/texture_editor.h"
+#include "ui/engine_wiki.h"
 
 // TEST 
 #include "application.h"
+#include "engine/render/renderer.h"
 //#include "engine/render/renderer.h"
 //#include "engine/render/vk_swapchain.h"
 
@@ -25,33 +29,37 @@ namespace PFF {
 
 	editor_layer::~editor_layer() { LOG_SHUTDOWN(); }
 
-
-
 	void editor_layer::on_attach() {
 
 		LOG(Trace, "attaching editor_layer");
 		// inform GLFW window to hide title_bar
 		application::get().get_window()->show_titlebar(false);
-
-
-		// m_context = ImGui::CreateContext();
-
-		//m_swapchain_supported_presentmodes = application::get().get_renderer()->get_swapchain_suported_present_modes();
-		//for (auto mode : m_swapchain_supported_presentmodes)
-		//	m_swapchain_supported_presentmodes_str.push_back(present_mode_to_str(mode));
-
-		//s_todo_list = new toolkit::todo::todo_list();
+		
+		serialize(serializer::option::load_from_file);
 	}
 
 	void editor_layer::on_detach() {
 
-		//application::get().get_window()->show_titlebar(true);
-		//toolkit::todo::shutdown();					// only need to cal shutdown() to kill todo_list if editor shutsdown
-		//delete s_todo_list;
+		serialize(serializer::option::save_to_file);
+
+		for (auto& editor_window : m_editor_windows)
+			editor_window.reset();
+		m_editor_windows.clear();
+
 		LOG(Trace, "Detaching editor_layer");
 	}
 
-	void editor_layer::on_update(f32 delta_time) { }
+	void editor_layer::on_update(f32 delta_time) {
+	
+		// First pass to mark items for removal
+		auto it = std::remove_if(m_editor_windows.begin(), m_editor_windows.end(),
+			[](const scope_ref<PFF::editor_window>& editor_window) {
+				return editor_window->should_close();
+			});
+
+		// Erase the removed items
+		m_editor_windows.erase(it, m_editor_windows.end());
+	}
 
 	void editor_layer::on_event(event& event) { }
 
@@ -59,25 +67,50 @@ namespace PFF {
 		
 		ImGui::SetCurrentContext(m_context);
 
-		window_main_menu_bar();
+		window_main_title_bar();
 		window_main_content();
-		
-		window_general_debugger();
-		window_outliner();
-		window_details();
-		window_world_settings();
-		window_content_browser_0();
-		window_content_browser_1();
-		
-		window_graphics_engine_settings();
-		window_editor_settings();
-		window_general_settings();
-		
-		PFF::toolkit::todo::window_todo_list();
+
+		//ImGui::DockSpaceOverViewport(ImGui::GetMainViewport());
+
+		m_world_viewport_window.window();
+
+		window_editor_settings();								// TODO: convert into editor window
+		window_general_settings();								// TODO: convert into editor window
+		PFF::toolkit::settings::window_graphics_engine();		// TODO: convert into editor window
+		PFF::toolkit::todo::window_todo_list();					// TODO: convert into editor window
+		PFF::UI::engine_wiki_window();							// TODO: convert into editor window
+
+		// First pass to mark items for removal
+		for (const auto& editor_window : m_editor_windows)
+				editor_window->window();
+
+#ifdef PFF_EDITOR_DEBUG
+		if (style_editor)
+			ImGui::ShowStyleEditor();
+
+		if (demo_window)
+			ImGui::ShowDemoWindow();
+#endif
+	}
+
+	void editor_layer::serialize(serializer::option option) {
+
+		serializer::yaml(config::get_filepath_from_configtype(application::get().get_project_path(), config::file::editor), "windows_to_show", option)
+			.entry("show_main_menu_bar", m_show_main_menu_bar)
+			.entry("show_options", m_show_options)
+			.entry("show_graphics_engine_settings", m_show_graphics_engine_settings)
+			.entry("show_editor_settings", m_show_editor_settings)
+			.entry("show_general_settings", m_show_general_settings)
+			.entry("show_style_editor", style_editor)
+			.entry("show_engine_wiki", PFF::UI::show_engine_wiki)
+
+			.entry("show_todo_lis", PFF::toolkit::todo::s_show_todo_list)
+
+			.entry("show_demo_window", demo_window);
 	}
 
 
-	void editor_layer::window_main_menu_bar() {
+	void editor_layer::window_main_title_bar() {
 
 		const f32 m_titlebar_height = 60.f;
 
@@ -90,13 +123,10 @@ namespace PFF {
 		ImGuiWindowFlags window_flags = ImGuiWindowFlags_NoDocking;
 		window_flags |= ImGuiWindowFlags_NoTitleBar | ImGuiWindowFlags_NoCollapse | ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoMove | ImGuiWindowFlags_NoScrollbar | ImGuiWindowFlags_NoScrollWithMouse;
 		window_flags |= ImGuiWindowFlags_NoBringToFrontOnFocus | ImGuiWindowFlags_NoNavFocus | ImGuiWindowFlags_NoDecoration | ImGuiWindowFlags_NoNav;
-		// window_flags |= ImGuiWindowFlags_MenuBar;
-
 		
 		auto color_buf = style->Colors[ImGuiCol_Button];
 		auto main_color = IM_COL32(color_buf.x * 255, color_buf.y * 255, color_buf.z * 255, color_buf.w * 255);
 		auto BG_color = IM_COL32(20, 20, 20, 255);
-
 
 		// ImGui::PushStyleColor(ImGuiCol_WindowBg, PFF_UI_ACTIVE_THEME->WindowBg);
 		ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, ImVec2(0, 0));
@@ -117,8 +147,8 @@ namespace PFF {
 		const ImVec2 titlebar_max = { ImGui::GetCursorScreenPos().x + ImGui::GetWindowWidth(),
 										ImGui::GetCursorScreenPos().y + m_titlebar_height };
 
-		auto* bg_draw_list = ImGui::GetBackgroundDrawList();
-		auto* fg_draw_list = ImGui::GetForegroundDrawList();
+		/*auto* bg_draw_list = ImGui::GetBackgroundDrawList();
+		auto* fg_draw_list = ImGui::GetForegroundDrawList();*/
 		// bg_draw_list->AddRectFilled(titlebar_min, titlebar_max, IM_COL32(21, 251, 21, 255));
 
 		auto* window_draw_list = ImGui::GetWindowDrawList();
@@ -147,7 +177,7 @@ namespace PFF {
 		ImGui::Button("##titlebar_drag_zone", ImVec2(button_area_width, m_titlebar_height));
 #endif // 1
 
-		application::get().set_titlebar_hovered(ImGui::IsItemHovered());
+		application::get().set_is_titlebar_hovered(ImGui::IsItemHovered());
 		ImGui::SetItemAllowOverlap();
 
 		// LOGO
@@ -161,6 +191,14 @@ namespace PFF {
 		ImGui::PushFont(application::get().get_imgui_layer()->get_font("giant"));
 		ImGui::SetCursorPos(ImVec2(25, ((m_titlebar_height - ImGui::GetFontSize() + titlebar_vertical_offset) / 2)));
 		ImGui::Text("PFF Editor");
+		ImGui::PopFont();
+
+		// display project title
+		ImGui::PushFont(application::get().get_imgui_layer()->get_font("header_1"));
+		const static std::string project_name = application::get().get_project_data().name;
+		const auto project_name_size = ImGui::CalcTextSize(project_name.c_str());
+		ImGui::SetCursorPos(ImVec2(viewport->Size.x - (window_padding.x + (button_spaccing * 2) + (button_width * 3)) - project_name_size.x - 30, window_padding.y + titlebar_vertical_offset));
+		ImGui::Text(project_name.c_str());
 		ImGui::PopFont();
 
 		ImGui::SetCursorPos(ImVec2(viewport->Size.x - (window_padding.x + (button_spaccing * 2) + (button_width * 3)), window_padding.y + titlebar_vertical_offset));
@@ -179,26 +217,27 @@ namespace PFF {
 		if (ImGui::Button("X##Close", ImVec2(button_width, button_width)))
 			application::get().close_application();
 
-		//ImGuiStyle* style = &ImGui::GetStyle();
-		ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, ImVec2(4, 4));
-		ImGui::PushStyleVar(ImGuiStyleVar_WindowRounding, 0.f);
-		ImGui::PushStyleVar(ImGuiStyleVar_WindowBorderSize, 0.f);
-		ImGui::PushStyleColor(ImGuiCol_MenuBarBg, ImVec4{ 0, 0, 0, 0 });
-		ImGui::PushStyleColor(ImGuiCol_WindowBg, ImVec4{ 0, 0, 0, 0 });
-
 		// make new window with menubar because I dont know how to limit the extend of a MenuBar
 		// just ImGui::MenuBar() would bo over the entire width of [appliaction_titlebar]
-		ImGui::SetNextWindowPos(ImVec2(viewport->Pos.x + 160, viewport->Pos.y + window_padding.y + titlebar_vertical_offset));
-		ImGui::SetNextWindowSize({ 0,0 });
-		ImGui::SetNextWindowViewport(viewport->ID);
 		{
+			ImGui::SetNextWindowPos(ImVec2(viewport->Pos.x + 160, viewport->Pos.y + window_padding.y + titlebar_vertical_offset));
+			ImGui::SetNextWindowSize({ 0,0 });
+			ImGui::SetNextWindowViewport(viewport->ID);
 			window_flags = ImGuiWindowFlags_NoTitleBar | ImGuiWindowFlags_NoCollapse | ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoMove | ImGuiWindowFlags_NoScrollbar | ImGuiWindowFlags_NoScrollWithMouse;
 			window_flags |= ImGuiWindowFlags_NoDocking | ImGuiWindowFlags_MenuBar | ImGuiWindowFlags_AlwaysAutoResize;
+			
+			//ImGuiStyle* style = &ImGui::GetStyle();
+			ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, ImVec2(4, 4));
+			ImGui::PushStyleVar(ImGuiStyleVar_WindowRounding, 0.f);
+			ImGui::PushStyleVar(ImGuiStyleVar_WindowBorderSize, 0.f);
+			ImGui::PushStyleColor(ImGuiCol_MenuBarBg, ImVec4{ 0, 0, 0, 0 });
+			ImGui::PushStyleColor(ImGuiCol_WindowBg, ImVec4{ 0, 0, 0, 0 });
+
 			ImGui::Begin("application_title_menubar", nullptr, window_flags);
 
-			ImGui::PopStyleColor(2);
-			ImGui::PopStyleVar(3);
-			main_menu_bar();
+				ImGui::PopStyleColor(2);
+				ImGui::PopStyleVar(3);
+				main_menu_bar();
 
 			ImGui::End();
 		}
@@ -207,77 +246,6 @@ namespace PFF {
 	}
 
 
-	void editor_layer::window_general_debugger() {
-
-		if (!m_show_general_debugger)
-			return;
-
-		ImGuiWindowFlags window_flags = ImGuiWindowFlags_NoTitleBar;
-		if (ImGui::Begin("Editor Debugger", &m_show_general_debugger, window_flags)) {
-
-			if (ImGui::BeginTabBar("##tabs", ImGuiTabBarFlags_None)) {
-
-				f32 tab_width = 60.f;		// TODO: move into [default_tab_width] variable in config-file
-				ImGui::SetNextItemWidth(tab_width);
-				if (ImGui::BeginTabItem("Inputs")) {
-
-									
-					UI::begin_default_table("display_input_actions_params", false);
-					for (input_action* action : *application::get().get_world_layer()->get_current_player_controller()->get_input_mapping()) {						// get input_action
-
-						switch (action->value) {
-						case input::action_type::boolean:
-							UI::add_table_row(action->get_name(), action->data.boolean, ImGuiInputTextFlags_ReadOnly);
-							break;
-
-						case input::action_type::vec_1D:
-							UI::add_table_row(action->get_name(), action->data.vec_1D, ImGuiInputTextFlags_ReadOnly);
-							break;
-
-						case input::action_type::vec_2D:
-							UI::add_table_row(action->get_name(), action->data.vec_2D, ImGuiInputTextFlags_ReadOnly);
-							break;
-
-						case input::action_type::vec_3D:
-							UI::add_table_row(action->get_name(), action->data.vec_3D, ImGuiInputTextFlags_ReadOnly);
-							break;
-
-						default:
-							break;
-						}
-					}
-					UI::end_default_table();
-					
-
-					ImGui::EndTabItem();
-				}
-
-				ImGui::SetNextItemWidth(tab_width);
-				if (ImGui::BeginTabItem("Test")) {
-
-					// camera pos and dir
-					if (ImGui::CollapsingHeader("Camera", ImGuiTreeNodeFlags_DefaultOpen)) {
-
-						//static_cast<PFF_editor>(application::get()); .get_editor_layer();
-						//glm::vec3 camera_pos = get_editor_camera_pos();
-						UI::begin_default_table("##Camera_params", false);
-
-						UI::add_table_row("Position", glm::vec3(), 0);
-						UI::add_table_row("Direction", glm::vec2(), 0);
-
-						UI::end_default_table();
-
-					}
-
-					ImGui::EndTabItem();
-				}
-
-				ImGui::EndTabBar();
-			}
-
-		}
-		ImGui::End();
-	}
 
 
 	void editor_layer::window_main_content() {
@@ -306,199 +274,9 @@ namespace PFF {
 		ImGui::End();
 	}
 
+	void editor_layer::window_editor_settings() { }
 
-	void editor_layer::window_outliner() {
-
-		if (!m_show_outliner)
-			return;
-
-		ImGuiWindowFlags window_flags{};
-		if (ImGui::Begin("Outliner", &m_show_outliner, window_flags)) {}
-
-		ImGui::End();
-	}
-
-
-	void editor_layer::window_details() {
-
-		if (!m_show_details)
-			return;
-
-		ImGuiWindowFlags window_flags{};
-		if (ImGui::Begin("Details", &m_show_details, window_flags)) {}
-
-		ImGui::End();
-	}
-
-	void editor_layer::window_world_settings() {
-
-		if (!m_show_world_settings)
-			return;
-
-		ImGuiWindowFlags window_flags{};
-		if (ImGui::Begin("World Settings", &m_show_world_settings, window_flags)) {}
-
-		ImGui::End();
-	}
-
-	void editor_layer::window_content_browser_0() {
-
-		if (!m_show_content_browser_0)
-			return;
-
-		ImGuiWindowFlags window_flags{};
-		if (ImGui::Begin("Content Browser", &m_show_content_browser_0, window_flags)) {}
-
-		ImGui::End();
-	}
-
-	void editor_layer::window_content_browser_1() {
-
-		if (!m_show_content_browser_1)
-			return;
-
-		ImGuiWindowFlags window_flags{};
-		if (ImGui::Begin("Content Browser 2", &m_show_content_browser_1, window_flags)) {}
-
-		ImGui::End();
-	}
-
-	void editor_layer::window_graphics_engine_settings() {
-
-		if (!m_show_graphics_engine_settings)
-			return;
-
-		ImVec2 topic_button_size = { 150, 30 };
-
-		ImGuiViewport* viewport = ImGui::GetMainViewport();
-		ImGui::SetNextWindowPos(ImGui::GetMainViewport()->GetCenter(), ImGuiCond_Once, ImVec2(0.5f, 0.5f));
-		ImGui::SetNextWindowSize(ImVec2(viewport->Size.x - 500, viewport->Size.y - 300), ImGuiCond_Once);
-		ImGui::SetNextWindowViewport(viewport->ID);
-
-		ImGuiWindowFlags window_flags = ImGuiWindowFlags_None;
-		ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, ImVec2(0, 0));
-		ImGui::Begin("Graphics Engine Settings", &m_show_graphics_engine_settings, window_flags);
-		ImGui::PopStyleVar();
-
-		const f32 default_item_width = 250;
-		const f32 first_width = 250.f;
-		static u32 item_current_idx = 0;
-		UI::custom_frame(first_width, [first_width]() mutable {
-
-			const char* items[] = { "General_settings", "General_settings 02", "General_settings 03" };
-
-			ImGuiStyle* style = &ImGui::GetStyle();
-			ImGui::PushStyleVar(ImGuiStyleVar_ItemSpacing, ImVec2(10, 10));
-			ImGui::PushStyleVar(ImGuiStyleVar_FramePadding, ImVec2(25, style->FramePadding.y));
-			ImGui::PushStyleVar(ImGuiStyleVar_SelectableTextAlign, ImVec2(.5f, .5f));
-			ImGui::PushStyleColor(ImGuiCol_FrameBg, UI::highlited_window_bg);
-			if (ImGui::BeginListBox("##Topic_selector", ImVec2(first_width, (ARRAY_SIZE(items) * ImGui::GetTextLineHeightWithSpacing()) - 1))) {
-
-				for (u32 n = 0; n < ARRAY_SIZE(items); n++) {
-
-					const bool is_selected = (item_current_idx == n);
-					if (ImGui::Selectable(items[n], is_selected))
-						item_current_idx = n;
-				}
-				ImGui::EndListBox();
-
-			}
-			ImGui::PopStyleColor();
-			ImGui::PopStyleVar(3);
-
-			}, [&] {
-
-				if (item_current_idx == 0) {		// [General_settings] in array [items]
-
-					ImGui::BeginGroup();
-					static u32 present_mode_selected = 0;
-					if (ImGui::CollapsingHeader("Swapchain##GraphicsSettings", ImGuiTreeNodeFlags_DefaultOpen)) {
-
-						static int selected = 1;
-
-						if (ImGui::Button(" ? ##Present_mode_popup"))
-							ImGui::OpenPopup("present_mode_explanations");
-
-						ImGui::SameLine();
-						ImGui::SetNextItemWidth(UI::default_item_width);
-						if (ImGui::Combo("##Present_mode_selector", &selected, m_swapchain_supported_presentmodes_str.data(), static_cast<int>(m_swapchain_supported_presentmodes_str.size()))) {
-
-							LOG(Fatal, "NOT IMPLEMENTED YET")
-						}
-						ImGui::SameLine();
-						ImGui::Text("Choose swapchain present mode of the [swapchain] for optimal performance and visual quality");
-
-
-					}
-
-					if (ImGui::BeginPopup("present_mode_explanations")) {
-
-						ImGui::Text("Explenations for possible present modes:");
-						ImGui::Separator();
-
-						ImGui::Text("Immediate");
-						ImGui::Indent(10.f);
-						ImGui::Text("The presentation engine does not wait for a vertical blanking period to update the current image,\n"
-							"meaning this mode may result in visible tearing. No internal queuing of presentation requests is needed,\n"
-							"as the requests are applied immediately.");
-						ImGui::Indent(-10.f);
-
-						ImGui::Text("Mailbox");
-						ImGui::Indent(10.f);
-						ImGui::Text("The presentation engine waits for the next vertical blanking period to update the current image,\n"
-							"preventing tearing. It maintains a single-entry queue for pending presentation requests.\n"
-							"If the queue is full, new requests replace existing ones, ensuring timely processing during each vertical blanking period.");
-						ImGui::Indent(-10.f);
-
-						ImGui::Text("FiFo (First-In, First-Out)");
-						ImGui::Indent(10.f);
-						ImGui::Text("Similar to Mailbox, the presentation engine waits for the next vertical blanking period to update the current image,\n"
-							"avoiding tearing. Pending presentation requests are queued, with new requests added to the end and processed in order\n"
-							"during each non-empty blanking period.");
-						ImGui::Indent(-10.f);
-
-						ImGui::Text("Relaxed FiFo");
-						ImGui::Indent(10.f);
-						ImGui::Text("The presentation engine typically waits for the next vertical blanking period to update the current image.\n"
-							"However, if a blanking period has passed since the last update, it may update immediately, potentially resulting in tearing.\n"
-							"It uses a queue for pending presentation requests, ensuring timely processing.");
-						ImGui::Indent(-10.f);
-
-						ImGui::Text("Shared Demand Refresh");
-						ImGui::Indent(10.f);
-						ImGui::Text("The presentation engine and application share access to a single image.\n"
-							"The engine updates the image only after receiving a presentation request,\n"
-							"while the application must request updates as needed. Tearing may occur since updates can happen at any point.");
-						ImGui::Indent(-10.f);
-
-						ImGui::Text("Shared Continuous Refresh");
-						ImGui::Indent(10.f);
-						ImGui::Text("Both the presentation engine and application have access to a shared image.\n"
-							"The engine periodically updates the image on its regular refresh cycle without needing additional requests from the application.\n"
-							"However, if rendering is not timed correctly, tearing may occur.");
-						ImGui::Indent(-10.f);
-
-						ImGui::EndPopup();
-					}
-
-
-					ImGui::EndGroup();
-				}
-
-				if (item_current_idx == 0) {		// [General_settings] in array [items]
-
-				}
-
-				});
-
-		ImGui::End();
-	}
-
-	void editor_layer::window_editor_settings() {
-	}
-
-	void editor_layer::window_general_settings() {
-	}
+	void editor_layer::window_general_settings() { }
 
 	void editor_layer::main_menu_bar() {
 
@@ -520,7 +298,7 @@ namespace PFF {
 				if (ImGui::MenuItem("Options"), NULL, m_show_options)
 					m_show_options = true;
 				ImGui::Separator();
-				if (ImGui::MenuItem("Quit", "Alt+F4"))
+				if (ImGui::MenuItem("Quit", "Alt + F4"))
 					application::get().close_application();
 				ImGui::EndMenu();
 			}
@@ -539,18 +317,13 @@ namespace PFF {
 				if (ImGui::MenuItem("General Settings"))
 					m_show_general_settings = true;
 
-				if (ImGui::MenuItem("Editor Settings"))
-					m_show_editor_settings = true;
+				ImGui::MenuItem("Editor Settings", "", &m_show_editor_settings);
 
-				if (ImGui::MenuItem("Graphics Engine Settings")) {
+				ImGui::MenuItem("Graphics Engine", "", &PFF::toolkit::settings::s_show_graphics_engine_settings);
 
-					m_show_graphics_engine_settings = true;
-					LOG(Trace, "start GES window")
-				}
+				if (ImGui::BeginMenu("UI")) {
 
-				if (ImGui::BeginMenu("Color Theme")) {
-
-					ImGui::Text("Select Theme");
+					UI::big_text("Select Theme");
 
 					const char* items[] = { "Dark", "Light" };
 					static int item_current_idx = 0;
@@ -561,7 +334,8 @@ namespace PFF {
 							if (ImGui::Selectable(items[n], is_selected)) {
 
 								item_current_idx = n;
-								UI::UI_theme = static_cast<UI::theme_selection>(item_current_idx);
+								UI::set_UI_theme_selection(static_cast<UI::theme_selection>(item_current_idx));
+								CORE_LOG(Debug, "updating UI theme" << (int)UI::UI_theme);
 								UI::update_UI_theme();
 							}
 						}
@@ -576,7 +350,7 @@ namespace PFF {
 					static ImVec4 backup_color;
 					if (!backup_color_init) {
 
-						serializer::yaml(config::get_filepath_from_configtype(config::file::ui), "window_border", serializer::option::load_from_file)
+						serializer::yaml(config::get_filepath_from_configtype(application::get().get_project_path(), config::file::ui), "window_border", serializer::option::load_from_file)
 							.entry(KEY_VALUE(window_border));
 						//config::load(config::file::editor, "UI", "window_border", window_border);
 
@@ -608,55 +382,93 @@ namespace PFF {
 
 					ImGui::SameLine();
 					ImGui::BeginGroup();
-
-					ImGui::BeginGroup();
-					ImGui::Text("Current");
-					ImGui::ColorButton("##current", UI::main_color, ImGuiColorEditFlags_NoPicker | ImGuiColorEditFlags_AlphaPreviewHalf, ImVec2(60, 40));
-					ImGui::EndGroup();
-
-					ImGui::SameLine();
-					ImGui::BeginGroup();
-					ImGui::Text("Previous");
-					if (ImGui::ColorButton("##previous", backup_color, ImGuiColorEditFlags_NoPicker | ImGuiColorEditFlags_AlphaPreviewHalf, ImVec2(60, 40)))
-						UI::update_UI_colors(backup_color);
-
-					ImGui::EndGroup();
-
-					ImGui::Separator();
-					ImGui::Text("Palette");
-					for (int n = 0; n < ARRAY_SIZE(saved_palette); n++) {
-						ImGui::PushID(n);
-						if ((n % 5) != 0)
-							ImGui::SameLine(0.0f, ImGui::GetStyle().ItemSpacing.y);
-
-						ImGuiColorEditFlags palette_button_flags = ImGuiColorEditFlags_NoAlpha | ImGuiColorEditFlags_NoPicker | ImGuiColorEditFlags_NoTooltip;
-						if (ImGui::ColorButton("##palette", saved_palette[n], palette_button_flags, ImVec2(21, 21)))
-							UI::update_UI_colors(ImVec4(saved_palette[n].x, saved_palette[n].y, saved_palette[n].z, UI::main_color.w));
-
-						// Allow user to drop colors into each palette entry. Note that ColorButton() is already a
-						// drag source by default, unless specifying the ImGuiColorEditFlags_NoDragDrop flag.
-						if (ImGui::BeginDragDropTarget()) {
-							if (const ImGuiPayload* payload = ImGui::AcceptDragDropPayload(IMGUI_PAYLOAD_TYPE_COLOR_3F))
-								memcpy((float*)&saved_palette[n], payload->Data, sizeof(float) * 3);
-							if (const ImGuiPayload* payload = ImGui::AcceptDragDropPayload(IMGUI_PAYLOAD_TYPE_COLOR_4F))
-								memcpy((float*)&saved_palette[n], payload->Data, sizeof(float) * 4);
-							ImGui::EndDragDropTarget();
+					{
+						ImGui::BeginGroup();
+						{
+							ImGui::Text("Current");
+							ImGui::ColorButton("##current", UI::main_color, ImGuiColorEditFlags_NoPicker | ImGuiColorEditFlags_AlphaPreviewHalf, ImVec2(60, 40));
 						}
+						ImGui::EndGroup();
 
-						ImGui::PopID();
+						ImGui::SameLine();
+						{
+							ImGui::BeginGroup();
+							ImGui::Text("Previous");
+							if (ImGui::ColorButton("##previous", backup_color, ImGuiColorEditFlags_NoPicker | ImGuiColorEditFlags_AlphaPreviewHalf, ImVec2(60, 40)))
+								UI::update_UI_colors(backup_color);
+						}
+						ImGui::EndGroup();
+
+						ImGui::Separator();
+						ImGui::Text("Palette");
+						for (int n = 0; n < ARRAY_SIZE(saved_palette); n++) {
+							ImGui::PushID(n);
+							if ((n % 5) != 0)
+								ImGui::SameLine(0.0f, ImGui::GetStyle().ItemSpacing.y);
+
+							ImGuiColorEditFlags palette_button_flags = ImGuiColorEditFlags_NoAlpha | ImGuiColorEditFlags_NoPicker | ImGuiColorEditFlags_NoTooltip;
+							if (ImGui::ColorButton("##palette", saved_palette[n], palette_button_flags, ImVec2(21, 21)))
+								UI::update_UI_colors(ImVec4(saved_palette[n].x, saved_palette[n].y, saved_palette[n].z, UI::main_color.w));
+
+							// Allow user to drop colors into each palette entry. Note that ColorButton() is already a
+							// drag source by default, unless specifying the ImGuiColorEditFlags_NoDragDrop flag.
+							if (ImGui::BeginDragDropTarget()) {
+								if (const ImGuiPayload* payload = ImGui::AcceptDragDropPayload(IMGUI_PAYLOAD_TYPE_COLOR_3F))
+									memcpy((float*)&saved_palette[n], payload->Data, sizeof(float) * 3);
+								if (const ImGuiPayload* payload = ImGui::AcceptDragDropPayload(IMGUI_PAYLOAD_TYPE_COLOR_4F))
+									memcpy((float*)&saved_palette[n], payload->Data, sizeof(float) * 4);
+								ImGui::EndDragDropTarget();
+							}
+
+							ImGui::PopID();
+						}
 					}
 					ImGui::EndGroup();
+
+					//static f32 background_brightness = 0;
+					//ImGui::SetNextItemWidth(350);
+					//UI::begin_table("background_settings_values", false, ImVec2(350, (ImGui::GetTextLineHeightWithSpacing() * 2)) );
+					//UI::table_row_slider("brightness", background_brightness);
+					//UI::end_table();
+
 					ImGui::EndMenu();
 				}
+
 				ImGui::EndMenu();
 			}
 
 			if (ImGui::BeginMenu("Windows")) {
 
 				ImGui::MenuItem("ToDo List", "", &PFF::toolkit::todo::s_show_todo_list);
+				ImGui::MenuItem("Style Editor", "", &style_editor);
+				ImGui::MenuItem("Demo Window", "", &demo_window);
+				ImGui::MenuItem("Engine Wiki", "", &PFF::UI::show_engine_wiki);
+
+				// IN DEV
+				ImGui::SeparatorText("Settings");
+				ImGui::MenuItem("graphics_engine_settings", "", &m_show_graphics_engine_settings);
+				ImGui::MenuItem("editor_settings", "", &m_show_editor_settings);
+				ImGui::MenuItem("general_settings", "", &m_show_general_settings);
+
+				ImGui::Separator();		
+
+				m_world_viewport_window.show_possible_sub_window_options();
 
 				ImGui::EndMenu();
 			}
+
+
+			if (ImGui::BeginMenu("Tools")) {
+
+				if (ImGui::MenuItem("Texture Editor", "", nullptr)) {
+
+					LOG(Trace, "Adding Editor Window (texture_editor)");
+					m_editor_windows.emplace_back( std::make_unique<toolkit::texture_editor>() );
+				}
+
+				ImGui::EndMenu();
+			}
+
 			ImGui::EndMenuBar();
 		}
 	}
@@ -689,4 +501,3 @@ namespace PFF {
 //		ImGuiWindowFlags_NoNav 							ImGuiWindowFlags_NoNavInputs | ImGuiWindowFlags_NoNavFocus,
 //		ImGuiWindowFlags_NoDecoration 					ImGuiWindowFlags_NoTitleBar | ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoScrollbar | ImGuiWindowFlags_NoCollapse,
 //		ImGuiWindowFlags_NoInputs 						ImGuiWindowFlags_NoMouseInputs | ImGuiWindowFlags_NoNavInputs | ImGuiWindowFlags_NoNavFocus,
-//	

@@ -14,24 +14,62 @@ typedef int64_t int64;
 
 typedef	float f32;
 typedef double f64;
+typedef long double f128;
 
 typedef unsigned long long handle;
 
-enum class error_code {
-	success = 0,
-	generic_not_found,
-	error_opening_file,
-	line_not_found,
-};
+namespace PFF {
 
-enum class system_state {
-	active,
-	suspended,
-	inactive,
-};
+	struct version {
 
-#define CONFIG_DIR				"./config/"
+		version() {}
+		version(u16 major, u16  minor, u16  patch)
+			:major(major), minor(minor), patch(patch) {}
+
+		u16 major{};
+		u16 minor{};
+		u16 patch{};
+	};
+
+//#pragma pack(1)
+	struct system_time {
+
+		u16 year;
+		u8 month;
+		u8 day;
+		u8 day_of_week;
+		u8 hour;
+		u8 minute;
+		u8 secund;
+		u16 millisecends;
+	};
+//#pragma pack(pop)
+
+	enum class error_code {
+		success = 0,
+		generic_not_found,
+		file_not_found,
+		error_opening_file,
+		system_path_not_free,
+		line_not_found,
+	};
+
+	enum class system_state {
+		active,
+		suspended,
+		inactive,
+	};
+
+}
+
+#define PFF_ASSET_EXTENTION		".pffasset"
+#define PFF_PROJECT_EXTENTION	".pffproj"
+
+#define CONFIG_DIR				"config"
+#define CONTENT_DIR				"content"
+
 #define FILE_EXTENSION_CONFIG	".yml"
+#define FILE_EXTENSION_INI		".ini"
 
 enum class key_state {
 	release = 0,

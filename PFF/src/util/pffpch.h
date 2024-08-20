@@ -13,6 +13,8 @@
 #include <cstdio>
 #include <chrono>
 #include <thread>
+#include <future>
+#include <random>
 
 #include <string>
 #include <sstream>
@@ -29,6 +31,7 @@
 #include <set>
 #include <array>
 #include <type_traits>
+#include <xmmintrin.h>
 
 #include <stdio.h>
 #include <cstdarg>
@@ -52,7 +55,6 @@
 // ============================================================================  platform specific  ============================================================================
 
 #ifdef PFF_PLATFORM_WINDOWS
-	//#include <Windows.h>
 	#include "util/platform/windows_util.h"
 #else
 	#error PFF only suports windows
@@ -60,9 +62,19 @@
 
 // ==================================================================================  utils  ==================================================================================
 
-#include "util/util.h"
+#include "util/math/noise.h"
 #include "util/math/constance.h"
 #include "util/math/random.h"
-#include "util/benchmarking/instrumentor.h"
-#include "util/io/serializer.h"
+
+#include "macros.h"
+#include "util/util.h"
+#include "util/profiling/stopwatch.h"
+#include "util/profiling/instrumentor.h"
+#include "util/io/serializer_yaml.h"
+#include "util/io/serializer_binary.h"
 //#include "util/math/random.h"
+
+// ==================================================================================  for application use  ==================================================================================
+
+#include "UUID.h"
+

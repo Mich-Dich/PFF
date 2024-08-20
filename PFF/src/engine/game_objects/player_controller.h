@@ -17,7 +17,7 @@ namespace PFF {
 		player_controller();
 		~player_controller();
 
-		DELETE_COPY(player_controller);
+		PFF_DELETE_COPY_CONSTRUCTOR(player_controller);
 
 		USE_IN_EDITOR void set_world_layer_ref(world_layer* world_layer);
 		USE_IN_EDITOR FORCEINLINE const ref<input_mapping> get_input_mapping() const { return m_input_mapping; }

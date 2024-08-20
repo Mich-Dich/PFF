@@ -1,121 +1,75 @@
 
 #include "util/pch_editor.h"
 
-#include "util/io/config.h"
-//#include "util/color_theme.h"
+#include "project/project_data_struct.h"
 
 #include "PFF_editor.h"
 
+
 namespace PFF {
 
+	void PFF_editor::serialize(serializer::option option) {
+
+		// list all serialize functions
+
+		serializer::yaml(config::get_filepath_from_configtype(util::get_executable_path(), config::file::editor), "editor_data", option)
+			.entry("last_opened_project", m_editor_data.current_project);
+
+		m_editor_controller->serialize(option);
+	}
 
 	PFF_editor::PFF_editor() {
 
-		LOG(Trace, "register player controller");
+		m_editor_data.editor_executable_path = util::get_executable_path();
 
 		m_editor_layer = new editor_layer(application::get().get_imgui_layer()->get_context());
 		push_overlay(m_editor_layer);
 
+		LOG(Trace, "register editor controller");
 		m_editor_controller = std::make_shared<editor_controller>();
 		register_player_controller(m_editor_controller);
-				
-		// load editor camera loc && rot
-		//glm::vec3 position = { 0, 0, -2 };
-		glm::vec3 position = { -16, -19, -30 };
-		glm::vec3 look_direction = { .5f, -.4f, 0 };
+		
+		serialize(serializer::option::load_from_file);
+		if (!util::is_valid_project_dir(m_editor_data.current_project))
+			m_editor_data.current_project = util::file_dialog().parent_path();
 
-		serializer::yaml(config::get_filepath_from_configtype(config::file::editor), "editor_camera", serializer::option::load_from_file)
-			.entry(KEY_VALUE(position))
-			.entry(KEY_VALUE(look_direction));
-
-		m_editor_controller->set_editor_camera_pos(position);
-		m_editor_controller->set_editor_camera_direction(look_direction);
+		application::get().set_project_path(m_editor_data.current_project);			// save project directory in application
 	}
 
 	PFF_editor::~PFF_editor() {
-		
-		// save camera position
-		glm::vec3 position = m_editor_controller->get_editor_camera_pos();
-		glm::vec3 look_direction = m_editor_controller->get_editor_camera_direction();
-
-		serializer::yaml(config::get_filepath_from_configtype(config::file::editor), "editor_camera", serializer::option::save_to_file)
-			.entry(KEY_VALUE(position))
-			.entry(KEY_VALUE(look_direction));
+	
+		serialize(serializer::option::save_to_file);
 
 		pop_overlay(m_editor_layer);
 		delete m_editor_layer;
+
+		CORE_LOG_SHUTDOWN();
 	}
 
 	bool PFF_editor::init() {
 
-		LOG(Trace, "init editor logic");
+		// TODO: load the map specefied in the project settings as editor_start_world
+		ref<map> loc_map = create_ref<map>();
 
-		/*
-		std::shared_ptr<basic_mesh> floor = basic_mesh::create_mesh_from_file("assets/floor.obj");
-		auto floor_obj = get_current_map()->create_empty_game_object();
-		floor_obj->mesh = floor;
-		floor_obj->transform.translation = { 0.f, 0.f, 0.f };
-		floor_obj->transform.scale = glm::vec3(2.5f);
+		//entity loc_entitiy = loc_map->create_entity("editor_origin_grid");
+		//auto& transform_comp = loc_entitiy.get_component<transform_component>();
+		//transform_comp.translation = glm::vec3(0);
+		//transform_comp.rotation = glm::vec3(0);
 
-#if 1		// populate scene with grid of meshes
+		//auto& mesh_comp = loc_entitiy.add_component<mesh_component>();
 
-		std::shared_ptr<basic_mesh> model = basic_mesh::create_mesh_from_file("assets/smooth_vase.obj");
-		u32 counter = 0;
-		for (int16 x = -10; x < 10; x++) {
-			for (int16 y = -10; y < 10; y++) {
+		//mesh_comp.mesh_asset = static_mesh_asset_manager::get().get_test_mesh();
+		//mesh_comp.material = material_instance_asset_manager::get().get_default_material_pointer();
 
-				auto test_obj = get_current_map()->create_empty_game_object();
-				test_obj->mesh = model;
-				test_obj->transform.translation = { (x * 2) + 1, (y * 2) + 1, 0.5f };
-				test_obj->transform.scale = glm::vec3(2.f);
-				test_obj->rotation_speed = glm::linearRand(glm::vec3(0.0f), glm::vec3(glm::two_pi<f32>()));
-				counter++;
-			}
-		}
-		LOG(Info, "Num of objects: " << counter);
-
-#else
-		// untitled / thruster
-		std::shared_ptr<basic_mesh> model = basic_mesh::create_mesh_from_file("assets/untitled.obj");
-		m_test_game_object = get_current_map()->create_empty_game_object();
-		m_test_game_object->mesh = model;
-		m_test_game_object->set_translation({ .0f, 0.f, 2.f });
-		m_test_game_object->transform.scale = glm::vec3(1.f);
-		m_test_game_object->rotation_speed = glm::vec3(0.f, 3.5f, 0.f);
-
-#endif // 1
-		*/
-		return true;
-	}
-
-	bool PFF_editor::shutdown() {
+		get_world_layer()->add_map( loc_map );
 		
-		return true;
-	}
-
-	bool PFF_editor::render(const f32 delta_time) {
 
 		return true;
 	}
 
-	bool PFF_editor::update(const f32 delta_time) {
+	bool PFF_editor::shutdown() { return true; }
 
-		/*
-		static bool move_positive{};
+	bool PFF_editor::render(const f32 delta_time) { return true; }
 
-		if (m_test_game_object->transform.translation.y >= 10.f)
-			move_positive = false;
-
-		if (m_test_game_object->transform.translation.y <= -10.f)
-			move_positive = true;
-
-
-		if (move_positive)
-			m_test_game_object->transform.translation.y += 10.f * delta_time;
-		else
-			m_test_game_object->transform.translation.y -= 10.f * delta_time;
-		*/
-
-		return true;
-	}
+	bool PFF_editor::update(const f32 delta_time) { return true; }
 }

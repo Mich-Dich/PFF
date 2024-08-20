@@ -18,6 +18,6 @@ namespace PFF::io_handler {
 	// @brief Creates a directory at the specified path if it doesn't already exist.
 	// @param [path] The path to the directory to be created.
 	// @return [bool] Returns true if the directory is successfully created or already exists; false otherwise.
-	bool create_directory(const std::string& path);
+	bool create_directory(const std::filesystem::path& path);
 	
 }

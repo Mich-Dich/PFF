@@ -1,89 +1,105 @@
 <?xml version="1.0" encoding="utf-8"?>
 <Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <ItemGroup>
-    <Filter Include="shaders">
-      <UniqueIdentifier>{0F45D591-7B24-542D-843C-DF03F09ABA8E}</UniqueIdentifier>
+    <Filter Include="controller">
+      <UniqueIdentifier>{09C867BF-F57F-A90C-5E87-82684A5E44FD}</UniqueIdentifier>
     </Filter>
-    <Filter Include="src">
-      <UniqueIdentifier>{2DAB880B-99B4-887C-2230-9F7C8E38947C}</UniqueIdentifier>
+    <Filter Include="resource_management">
+      <UniqueIdentifier>{89094B2A-F56A-2838-7ED8-6EEAEA385FF7}</UniqueIdentifier>
     </Filter>
-    <Filter Include="src\controller">
-      <UniqueIdentifier>{C0646EF6-AC32-62FC-95C6-D22281333E61}</UniqueIdentifier>
+    <Filter Include="resource_management\factories">
+      <UniqueIdentifier>{5874F3EC-C48C-DA16-8D39-6AB0F9106FB0}</UniqueIdentifier>
     </Filter>
-    <Filter Include="src\toolkit">
-      <UniqueIdentifier>{C2705FF9-2E26-D8EE-B71A-D2C523CFCEF2}</UniqueIdentifier>
+    <Filter Include="toolkit">
+      <UniqueIdentifier>{AB7025F0-1750-A48B-2068-2F628CC60AED}</UniqueIdentifier>
     </Filter>
-    <Filter Include="src\toolkit\graphics_engine_settings">
-      <UniqueIdentifier>{47372309-331E-E500-DC6E-4B1EC8345E67}</UniqueIdentifier>
+    <Filter Include="toolkit\settings">
+      <UniqueIdentifier>{4BB27C36-37AB-9B88-60DD-800D4C357B94}</UniqueIdentifier>
     </Filter>
-    <Filter Include="src\toolkit\todo_list">
-      <UniqueIdentifier>{426A2C2E-AED6-E728-77CA-7F86E3F50991}</UniqueIdentifier>
+    <Filter Include="toolkit\todo_list">
+      <UniqueIdentifier>{6B211ED9-D737-1C6F-20AF-A7908C04EDF6}</UniqueIdentifier>
     </Filter>
-    <Filter Include="src\ui">
-      <UniqueIdentifier>{7A4F661C-66F1-90F2-4FAC-A4463BED1743}</UniqueIdentifier>
+    <Filter Include="ui">
+      <UniqueIdentifier>{C3795900-AF05-880B-18B4-880B045F880B}</UniqueIdentifier>
     </Filter>
-    <Filter Include="src\util">
-      <UniqueIdentifier>{BA5238CF-A61F-93DA-CF38-8182BB64C868}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="src\util\ui">
-      <UniqueIdentifier>{E7E79551-539D-0E47-DC91-081E4846054B}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="src\util\ui\panels">
-      <UniqueIdentifier>{7962BFDC-6546-8032-CEA6-7A85BAA96AB4}</UniqueIdentifier>
+    <Filter Include="util">
+      <UniqueIdentifier>{43339F7C-2F6A-A00D-D856-8610C46C1C0F}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="src\PFF_editor.h">
-      <Filter>src</Filter>
-    </ClInclude>
+    <ClInclude Include="src\PFF_editor.h" />
     <ClInclude Include="src\controller\editor_controller.h">
-      <Filter>src\controller</Filter>
+      <Filter>controller</Filter>
     </ClInclude>
     <ClInclude Include="src\controller\editor_inputs.h">
-      <Filter>src\controller</Filter>
+      <Filter>controller</Filter>
     </ClInclude>
-    <ClInclude Include="src\toolkit\graphics_engine_settings\graphics_engine_settings.h">
-      <Filter>src\toolkit\graphics_engine_settings</Filter>
+    <ClInclude Include="src\resource_management\factories\static_mesh_factory.h">
+      <Filter>resource_management\factories</Filter>
+    </ClInclude>
+    <ClInclude Include="src\toolkit\settings\graphics_engine_settings.h">
+      <Filter>toolkit\settings</Filter>
+    </ClInclude>
+    <ClInclude Include="src\toolkit\texture_editor.h">
+      <Filter>toolkit</Filter>
     </ClInclude>
     <ClInclude Include="src\toolkit\todo_list\todo_list.h">
-      <Filter>src\toolkit\todo_list</Filter>
+      <Filter>toolkit\todo_list</Filter>
+    </ClInclude>
+    <ClInclude Include="src\ui\content_browser.h">
+      <Filter>ui</Filter>
     </ClInclude>
     <ClInclude Include="src\ui\editor_layer.h">
-      <Filter>src\ui</Filter>
+      <Filter>ui</Filter>
+    </ClInclude>
+    <ClInclude Include="src\ui\editor_window.h">
+      <Filter>ui</Filter>
+    </ClInclude>
+    <ClInclude Include="src\ui\engine_wiki.h">
+      <Filter>ui</Filter>
+    </ClInclude>
+    <ClInclude Include="src\ui\mesh_import_window.h">
+      <Filter>ui</Filter>
+    </ClInclude>
+    <ClInclude Include="src\ui\world_viewport.h">
+      <Filter>ui</Filter>
     </ClInclude>
     <ClInclude Include="src\util\pch_editor.h">
-      <Filter>src\util</Filter>
+      <Filter>util</Filter>
     </ClInclude>
     <ClInclude Include="src\util\util_editor.h">
-      <Filter>src\util</Filter>
+      <Filter>util</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="src\PFF_editor.cpp">
-      <Filter>src</Filter>
-    </ClCompile>
+    <ClCompile Include="src\PFF_editor.cpp" />
     <ClCompile Include="src\controller\editor_controller.cpp">
-      <Filter>src\controller</Filter>
+      <Filter>controller</Filter>
     </ClCompile>
-    <ClCompile Include="src\entry.cpp">
-      <Filter>src</Filter>
+    <ClCompile Include="src\entry.cpp" />
+    <ClCompile Include="src\resource_management\factories\static_mesh_factory.cpp">
+      <Filter>resource_management\factories</Filter>
     </ClCompile>
-    <ClCompile Include="src\toolkit\graphics_engine_settings\graphics_engine_settings.cpp">
-      <Filter>src\toolkit\graphics_engine_settings</Filter>
+    <ClCompile Include="src\toolkit\texture_editor.cpp">
+      <Filter>toolkit</Filter>
+    </ClCompile>
+    <ClCompile Include="src\ui\content_browser.cpp">
+      <Filter>ui</Filter>
     </ClCompile>
     <ClCompile Include="src\ui\editor_layer.cpp">
-      <Filter>src\ui</Filter>
+      <Filter>ui</Filter>
+    </ClCompile>
+    <ClCompile Include="src\ui\editor_window.cpp">
+      <Filter>ui</Filter>
+    </ClCompile>
+    <ClCompile Include="src\ui\mesh_import_window.cpp">
+      <Filter>ui</Filter>
+    </ClCompile>
+    <ClCompile Include="src\ui\world_viewport.cpp">
+      <Filter>ui</Filter>
     </ClCompile>
     <ClCompile Include="src\util\pch_editor.cpp">
-      <Filter>src\util</Filter>
+      <Filter>util</Filter>
     </ClCompile>
-  </ItemGroup>
-  <ItemGroup>
-    <None Include="shaders\default.frag">
-      <Filter>shaders</Filter>
-    </None>
-    <None Include="shaders\default.vert">
-      <Filter>shaders</Filter>
-    </None>
   </ItemGroup>
 </Project>

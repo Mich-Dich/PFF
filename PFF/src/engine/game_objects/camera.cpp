@@ -51,17 +51,30 @@ namespace PFF {
 
 	void camera::set_view_YXZ(glm::vec3 position, glm::vec3 rotation) {
 
-		PFF_PROFILE_FUNCTION();
 
-		const float c3 = glm::cos(rotation.z);
-		const float s3 = glm::sin(rotation.z);
-		const float c2 = glm::cos(rotation.x);
-		const float s2 = glm::sin(rotation.x);
 		const float c1 = glm::cos(rotation.y);
+		const float c2 = glm::cos(rotation.x);
+		const float c3 = glm::cos(rotation.z);
 		const float s1 = glm::sin(rotation.y);
-		const glm::vec3 u{ (c1 * c3 + s1 * s2 * s3), (c2 * s3), (c1 * s2 * s3 - c3 * s1) };
-		const glm::vec3 v{ (c3 * s1 * s2 - c1 * s3), (c2 * c3), (c1 * c3 * s2 + s1 * s3) };
-		const glm::vec3 w{ (c2 * s1), (-s2), (c1 * c2) };
+		const float s2 = glm::sin(rotation.x);
+		const float s3 = glm::sin(rotation.z);
+
+		const glm::vec3 u{
+			c1 * c3 + s1 * s2 * s3,
+			c2 * s3,
+			c1 * s2 * s3 - c3 * s1
+		};
+		const glm::vec3 v{
+			c3 * s1 * s2 - c1 * s3,
+			c2 * c3,
+			c1 * c3 * s2 + s1 * s3
+		};
+		const glm::vec3 w{
+			c2 * s1,
+			-s2,
+			c1 * c2
+		};
+
 		view_matrix = glm::mat4{ 1.f };
 		view_matrix[0][0] = u.x;
 		view_matrix[1][0] = u.y;
@@ -79,15 +92,12 @@ namespace PFF {
 
 	void camera::set_view_XYZ(glm::vec3 position, glm::vec3 rotation) {
 
-		PFF_PROFILE_FUNCTION();
-
 		const float c1 = glm::cos(rotation.x);
-		const float s1 = glm::sin(rotation.x);
 		const float c2 = glm::cos(rotation.y);
-		const float s2 = glm::sin(rotation.y);
 		const float c3 = glm::cos(rotation.z);
+		const float s1 = glm::sin(rotation.x);
+		const float s2 = glm::sin(rotation.y);
 		const float s3 = glm::sin(rotation.z);
-
 		const glm::vec3 u{ (c2 * c3), (-c2 * s3), (s2) };
 		const glm::vec3 v{ (c1 * s3 + c3 * s1 * s2), (c3 * c1 - s1 * s2 * s3), (-c2 * s1) };
 		const glm::vec3 w{ (s1 * s3 - c1 * c3 * s2), (c1 * s2 * s3 + c3 * s1), (c1 * c2) };

@@ -8,13 +8,22 @@
 
 namespace PFF {
 	
-	world_layer::world_layer() { CORE_LOG_INIT(); }
+	world_layer::world_layer() { 
+
+		CORE_LOG_INIT();
+	}
 
 	world_layer::~world_layer() { CORE_LOG_SHUTDOWN(); }
 
+
+	void world_layer::register_player_controller(ref<player_controller> player_controller) {
+
+		m_player_controller = player_controller;
+		m_player_controller->set_world_layer_ref(this);
+	}
+
 	void world_layer::on_attach() {
 	
-		//m_current_map = std::make_shared<game_map>();			// only a dummy map
 		m_editor_camera = std::make_shared<camera>();
 		m_editor_camera->set_view_direction(glm::vec3{ 0.0f }, glm::vec3{ 0.5f, 0.0f, 1.0f });
 		//m_editor_camera.set_orthographic_projection(-aspect, aspect, -1, 1, 0, 10);
@@ -30,7 +39,6 @@ namespace PFF {
 
 		m_player_controller.reset();
 		m_editor_camera.reset();
-		//m_current_map.reset();
 		
 		CORE_LOG(Trace, "detaching world_layer");
 	}
@@ -40,12 +48,9 @@ namespace PFF {
 		PFF_PROFILE_FUNCTION();
 
 		m_player_controller->update_internal(delta_time);
-		
-		//for (auto& obj : m_current_map->get_all_game_objects()) {
-		//
-		//	obj.second.transform.rotation += glm::mod(obj.second.rotation_speed * delta_time, two_pi<f32>());
-		//	obj.second.transform.translation += obj.second.movement_speed * delta_time;
-		//}
+	
+		for (const auto& map : m_maps)
+			map->on_update(delta_time);
 		
 	}
 

@@ -4,7 +4,9 @@
 // Defines that have influence of system behavior
 // -------------------------------------------------------------------------------------------------------------------------------------------
 
-// collect timing-data from evey magor function?
+#define PFF_RENDER_API_VULKAN
+
+// collect timing-data from every magor function?
 #define PFF_PROFILE								0	// general
 #define PFF_PROFILE_RENDERER					0	// renderer
 

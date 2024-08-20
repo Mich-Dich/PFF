@@ -21,25 +21,38 @@ namespace PFF {
     namespace config {
 
         //
-        void init() {
+        void init(std::filesystem::path project_dir, std::filesystem::path PFF_dir) {
 
             PFF_PROFILE_FUNCTION();
 
-            io_handler::create_directory(CONFIG_DIR);
-
+            io_handler::create_directory(PFF_dir / CONFIG_DIR);
+            CORE_LOG(Trace, "Checking Engine config files at: " << PFF_dir / CONFIG_DIR);
             for (int i = 0; i <= static_cast<int>(file::input); ++i) {
 
-                std::filesystem::path file_path = BUILD_CONFIG_PATH(static_cast<file>(i));
+                std::filesystem::path file_path = PFF_dir / CONFIG_DIR / (config::file_type_to_string(static_cast<file>(i)) + FILE_EXTENSION_CONFIG);
                 std::ofstream config_file(file_path, std::ios::app);
                 if (!config_file.is_open()) {
 
                     CORE_LOG(Error, "Failed to open/create config file: [" << file_path << "]");
                     return;
                 }
-
-                CORE_LOG(Trace, "Confirmed existence of config file: [" << file_path << "]");
                 config_file.close();
             }
+
+            io_handler::create_directory(project_dir / CONFIG_DIR);
+            CORE_LOG(Trace, "Checking project config files at: " << project_dir / CONFIG_DIR);
+            for (int i = 0; i <= static_cast<int>(file::input); ++i) {
+
+                std::filesystem::path file_path = project_dir / CONFIG_DIR / (config::file_type_to_string(static_cast<file>(i)) + FILE_EXTENSION_CONFIG);
+                std::ofstream config_file(file_path, std::ios::app);
+                if (!config_file.is_open()) {
+
+                    CORE_LOG(Error, "Failed to open/create config file: [" << file_path << "]");
+                    return;
+                }
+                config_file.close();
+            }
+
         }
 
         /*
@@ -158,20 +171,24 @@ namespace PFF {
 
         // ----------------------------------------------- file path resolution ----------------------------------------------- 
 
-        PFF_API_EDITOR std::string get_filepath_from_configtype(file type) {
+        //std::filesystem::path get_projerct_filepath_from_configtype(file type) { return util::get_executable_path() / CONFIG_DIR / (config::file_type_to_string(type) + FILE_EXTENSION_CONFIG); }
 
-            return CONFIG_DIR + config::file_type_to_string(type) + FILE_EXTENSION_CONFIG;
-        }
+        //std::filesystem::path get_editor_filepath_from_configtype(file type) { return util::get_executable_path() / CONFIG_DIR / (config::file_type_to_string(type) + FILE_EXTENSION_CONFIG); }
+
+        std::filesystem::path get_filepath_from_configtype(std::filesystem::path root, file type) { return root / CONFIG_DIR / (config::file_type_to_string(type) + FILE_EXTENSION_CONFIG); }
+
+        std::filesystem::path get_filepath_from_configtype_ini(std::filesystem::path root, file type) { return root / CONFIG_DIR / (config::file_type_to_string(type) + FILE_EXTENSION_INI); }
 
         //
         std::string file_type_to_string(file type) {
 
             static const std::unordered_map<file, std::string> typeStrings{
+                {file::ui, "ui" },
                 {file::editor, "editor"},
                 {file::engine, "engine"},
+                {file::imgui, "imgui"},
                 {file::game, "game"},
                 {file::input, "input"},
-                {file::ui, "ui" },
             };
 
             auto it = typeStrings.find(type);

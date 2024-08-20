@@ -34,7 +34,8 @@ namespace PFF {
 			{key_code::key_space, INPUT_ACTION_TRIGGER_KEY_DOWN, INPUT_ACTION_MODEFIER_AXIS_3 | INPUT_ACTION_MODEFIER_NEGATE},
 			{key_code::key_left_shift, INPUT_ACTION_TRIGGER_KEY_DOWN, INPUT_ACTION_MODEFIER_AXIS_3 },
 		};								
-		REGISTER_INPUT_ACTION(move);
+		move.set_name("move");
+		register_action(&move, true, util::get_executable_path());
 
 
 		capture_mouse = PFF::input_action{};
@@ -46,7 +47,8 @@ namespace PFF {
 		capture_mouse.keys_bindings = {
 			{key_code::mouse_bu_right, INPUT_ACTION_TRIGGER_KEY_DOWN},
 		};
-		REGISTER_INPUT_ACTION(capture_mouse);
+		capture_mouse.set_name("capture_mouse");
+		register_action(&capture_mouse, true, util::get_executable_path());
 
 
 		look = PFF::input_action{};
@@ -59,7 +61,8 @@ namespace PFF {
 			{key_code::mouse_moved_x, INPUT_ACTION_TRIGGER_MOUSE_POS_AND_NEG, INPUT_ACTION_MODEFIER_NEGATE},
 			{key_code::mouse_moved_y, INPUT_ACTION_TRIGGER_MOUSE_POS_AND_NEG, INPUT_ACTION_MODEFIER_AXIS_2 | INPUT_ACTION_MODEFIER_NEGATE},
 		};
-		REGISTER_INPUT_ACTION(look);
+		look.set_name("look");
+		register_action(&look, true, util::get_executable_path());
 
 		change_move_speed = PFF::input_action{};
 		change_move_speed.description = "increase/decrease the movement speed of the editor camera";
@@ -70,7 +73,8 @@ namespace PFF {
 		change_move_speed.keys_bindings = {
 			{key_code::mouse_scrolled_y, INPUT_ACTION_TRIGGER_MOUSE_POS_AND_NEG},
 		};
-		REGISTER_INPUT_ACTION(change_move_speed);
+		change_move_speed.set_name("change_move_speed"); 
+		register_action(&change_move_speed, true, util::get_executable_path());
 
 
 
@@ -83,7 +87,8 @@ namespace PFF {
 		toggle_fps.keys_bindings = {
 			{key_code::key_P, INPUT_ACTION_TRIGGER_KEY_MOVE_DOWN},
 		};
-		REGISTER_INPUT_ACTION(toggle_fps);
+		toggle_fps.set_name("toggle_fps");
+		register_action(&toggle_fps, true, util::get_executable_path());
 
 	}
 

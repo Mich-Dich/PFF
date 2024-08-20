@@ -1,7 +1,7 @@
 
 project "PFF"
 	location "%{wks.location}/PFF"
-	kind "SharedLib"		-- TODO: make posibly into [StaticLib]
+	kind "SharedLib"
 	staticruntime "off"
 	language "C++"
 	cppdialect "C++17"
@@ -24,6 +24,12 @@ project "PFF"
 	{
 		"src/**.h",
 		"src/**.cpp",
+		"src/**.embeded",
+		"**..pffproj",
+		"**..pff",
+
+		"vendor/ImGuizmo/ImGuizmo.h",
+		"vendor/ImGuizmo/ImGuizmo.cpp",
 	}
 
 	includedirs
@@ -35,9 +41,10 @@ project "PFF"
 		"%{IncludeDir.glfw}/include",
 		"%{IncludeDir.ImGui}",
 		"%{IncludeDir.ImGui}/backends/",
-		"%{IncludeDir.fastgltf}",
-		"%{IncludeDir.tinyobjloader}",
 		"%{IncludeDir.stb_image}",
+		"%{IncludeDir.entt}",
+		"%{IncludeDir.ImGuizmo}",
+		
 		"%{IncludeDir.VulkanSDK}",
 	}
 	
@@ -45,7 +52,6 @@ project "PFF"
 	{
 		"glfw",
 		"imgui",
-		"fastgltf",
         "%{Library.Vulkan}",
 	}
 
@@ -54,6 +60,9 @@ project "PFF"
 		"vendor/imgui/bin/Debug-windows-x86_64/ImGui",
         "%{IncludeDir.VulkanSDK}/lib",
 	}
+
+	filter "files:vendor/ImGuizmo/**.cpp"
+		flags { "NoPCH" }
 	
 	filter "system:windows"
 		systemversion "latest"
@@ -76,6 +85,11 @@ project "PFF"
 			
 			"{MKDIR} %{wks.location}/bin/" .. outputs .. "/PFF_editor",
 			"{COPY} %{cfg.buildtarget.relpath} %{wks.location}/bin/" .. outputs  .. "/PFF_editor",
+			
+			"{MKDIR} %{wks.location}/bin/" .. outputs .. "/" .. client_project_name,
+			"{COPY} %{cfg.buildtarget.relpath} %{wks.location}/bin/" .. outputs  .. "/" .. client_project_name,
+
+			postbuildcommands { table.unpack(copy_content_of_dir(outputs, {"PFF/shaders", "PFF/defaults", "PFF/assets"})), }
 		}
 
 	filter "configurations:Debug"

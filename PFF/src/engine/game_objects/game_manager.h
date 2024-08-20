@@ -1,14 +1,13 @@
 #pragma once
 
 #include "engine/game_objects/player_controller.h"
-#include "engine/game_objects/game_object.h"
 
-namespace PFF{
+namespace PFF {
 
 	class game_manager {
 	public:
 
-		DELETE_COPY(game_manager);
+		PFF_DELETE_COPY_CONSTRUCTOR(game_manager);
 
 		static game_manager& instance() {
 			static game_manager instance;
@@ -16,7 +15,7 @@ namespace PFF{
 		}
 
 		player_controller* p_player_controller{};
-		//game_object* p_player{};
+		//entity p_player{};
 
 	private:
 

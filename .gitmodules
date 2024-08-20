@@ -13,3 +13,6 @@
 [submodule "PFF/vendor/fastgltf"]
 	path = PFF/vendor/fastgltf
 	url = https://github.com/Mich-Dich/fastgltf
+[submodule "PFF/vendor/ImGuizmo"]
+	path = PFF/vendor/ImGuizmo
+	url = https://github.com/Mich-Dich/ImGuizmo

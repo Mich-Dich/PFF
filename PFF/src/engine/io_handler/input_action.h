@@ -125,13 +125,12 @@ namespace PFF {
 		}
 		*/
 
-		void set_name(std::string_view name) { this->name = name; }
-		std::string_view get_name() const { return name; }
+		PFF_DEFAULT_GETTER_SETTER_C(std::string_view, name)
 
 	private:
-		std::string name{};
-		input_action_data target;
-		std::chrono::time_point < std::chrono::steady_clock> time_stamp{};
+		std::string m_name{};
+		input_action_data m_target;
+		std::chrono::time_point < std::chrono::steady_clock> m_time_stamp{};
 
 	};
 
