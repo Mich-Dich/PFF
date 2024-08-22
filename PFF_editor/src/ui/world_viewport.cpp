@@ -7,9 +7,9 @@
 #include <ImGuizmo.h>
 
 #include "util/ui/pannel_collection.h"
-#include "engine/world/map.h"
+#include "util/ui/component_UI.h"
 
-#include "engine/resource_management/static_mesh_asset_manager.h"
+#include "engine/world/map.h"
 #include "engine/resource_management/mesh_serializer.h"
 
 #include "world_viewport.h"
@@ -64,6 +64,8 @@ namespace PFF {
 		}
 		ImGui::End();
 
+
+		m_deletion_queue.flush();
 	}
 
 	void world_viewport_window::show_possible_sub_window_options() {
@@ -125,12 +127,19 @@ namespace PFF {
 	// Sub windows
 	// ------------------------------------------------------------------------------------------------------------------------------------------------------------------
 
-	void world_viewport_window::display_entity_children(ref<map> loc_map, entity& entity) {
+	void world_viewport_window::display_entity_children(ref<map> loc_map, entity& entity, u64& index) {
 
 		auto& relation_comp = entity.get_component<relationship_component>();
 		for (const auto child_ID : relation_comp.children_ID) {
 
 			PFF::entity child = loc_map->get_entity_by_UUID(child_ID);
+			if (!child) {
+
+				CORE_LOG(Warn, "Bad UUID pointer: " << child_ID);
+				continue;
+			}
+			
+			
 			const char* name = child.get_component<tag_component>().tag.c_str();
 
 			// Does have childer itself
@@ -138,15 +147,21 @@ namespace PFF {
 
 				ImGui::Text("O");		// TODO: replace with hide/show button
 				ImGui::SameLine();
+
+				std::string item_name = "outliner_entity_" + index++;
+				ImGui::PushID(item_name.c_str());
 				const bool is_open = ImGui::TreeNodeEx(name,
 					outliner_base_flags | ((m_selected_entity == child) ? ImGuiTreeNodeFlags_Selected : 0));
+				ImGui::PopID();
 
 				if (ImGui::IsItemClicked())
 					m_selected_entity = child;
 
+				outliner_entity_popup(item_name.c_str(), loc_map, child);
+
 				if (is_open) {
 
-					display_entity_children(loc_map, child);
+					display_entity_children(loc_map, child, index);
 					ImGui::TreePop();
 				}
 				continue;
@@ -155,12 +170,20 @@ namespace PFF {
 			// Does not have more childer
 			ImGui::Text("O");		// TODO: replace with hide/show button
 			ImGui::SameLine();
+
+			std::string item_name = "outliner_entity_" + index++;
+			ImGui::PushID(item_name.c_str());
 			ImGui::TreeNodeEx(name,
 				outliner_base_flags | ImGuiTreeNodeFlags_Leaf | ImGuiTreeNodeFlags_NoTreePushOnOpen | ((m_selected_entity == child) ? ImGuiTreeNodeFlags_Selected : 0));
+			ImGui::PopID();
+
 			if (ImGui::IsItemClicked())
 				m_selected_entity = child;
+
+			outliner_entity_popup(item_name.c_str(), loc_map, child);
 		}
 	}
+
 
 	void world_viewport_window::window_outliner() {
 
@@ -170,6 +193,7 @@ namespace PFF {
 		ImGuiWindowFlags window_flags{};
 		ImGui::Begin("Outliner", &m_show_outliner, window_flags);
 
+		u64 index = 0;
 		const auto& maps = application::get().get_world_layer()->get_maps();
 		for (const auto& loc_map : maps) {
 
@@ -187,28 +211,39 @@ namespace PFF {
 
 					ImGui::Text("O");		// TODO: replace with hide/show button
 					ImGui::SameLine();
+
+					std::string item_name = "outliner_entity_" + index++;
+					ImGui::PushID(item_name.c_str());
 					const bool is_open = ImGui::TreeNodeEx(tag_comp.tag.c_str(),
 						outliner_base_flags | ((m_selected_entity == loc_entity) ? ImGuiTreeNodeFlags_Selected : 0));
+					ImGui::PopID();
+					
 					if (ImGui::IsItemClicked())
 						m_selected_entity = loc_entity;
 
 					if (is_open) {
 
-						display_entity_children(loc_map, loc_entity);
+						display_entity_children(loc_map, loc_entity, index);
 						ImGui::TreePop();
 					}
+
 					continue;
 				}
-
 
 				// has no relationship
 				ImGui::Text("O");		// TODO: replace with hide/show button
 				ImGui::SameLine();
+
+				std::string item_name = "outliner_entity_" + index++;
+				ImGui::PushID(item_name.c_str());
 				ImGui::TreeNodeEx(tag_comp.tag.c_str(),
 					outliner_base_flags | ImGuiTreeNodeFlags_Leaf | ImGuiTreeNodeFlags_NoTreePushOnOpen | ((m_selected_entity == loc_entity) ? ImGuiTreeNodeFlags_Selected : 0));
+				ImGui::PopID();
+
 				if (ImGui::IsItemClicked())
 					m_selected_entity = loc_entity;
 
+				outliner_entity_popup(item_name.c_str(), loc_map, loc_entity);
 			}
 
 		}
@@ -218,6 +253,22 @@ namespace PFF {
 			m_selected_entity = entity();
 
 		ImGui::End();
+	}
+
+	void world_viewport_window::outliner_entity_popup(const char* name, ref<map> map, PFF::entity entity) {
+
+		// Add a popup menu to the tree node
+		if (ImGui::BeginPopupContextItem(name, ImGuiPopupFlags_MouseButtonRight)) {
+			if (ImGui::MenuItem("Delete")) {
+
+				if (entity == m_selected_entity)
+					m_selected_entity = PFF::entity{};
+
+				m_deletion_queue.push_func([=]() {map->destroy_entity(entity); });
+			}
+
+			ImGui::EndPopup();
+		}
 	}
 
 
@@ -240,14 +291,12 @@ namespace PFF {
 
 			CORE_LOG(Debug, "Search not implemented yet");
 		}
+
 		ImGui::SameLine();
-
-
 		if (ImGui::Button("Add Component"), button_size) {
 
 
 		}
-
 
 		if (m_selected_entity == entity()) {
 
@@ -255,93 +304,11 @@ namespace PFF {
 			return;
 		}
 
-		// Component that every entity has
-		if (ImGui::CollapsingHeader("Tag"), ImGuiTreeNodeFlags_DefaultOpen) {
+		UI::display_tag_comp(m_selected_entity);
 
-			auto& tag_comp = m_selected_entity.get_component<tag_component>();
-			UI::begin_table("entity_component", false);
+		UI::display_transform_comp(m_selected_entity);
 
-
-			static bool enable_tag_editing = false;
-			UI::table_row("tag", tag_comp.tag, enable_tag_editing);
-			UI::end_table();
-		}
-
-		// Component that every entity has
-		if (ImGui::CollapsingHeader("Transform"), ImGuiTreeNodeFlags_DefaultOpen) {
-
-			UI::begin_table("entity_component", false);
-
-			auto& entity_transform = (glm::mat4&)m_selected_entity.get_component<transform_component>();
-			glm::mat4 buffer_transform = entity_transform;
-
-			if (UI::table_row("transform", entity_transform)) {
-
-				const glm::mat4 root_transform = buffer_transform;
-				buffer_transform = glm::inverse(buffer_transform) * entity_transform;		// trandform delta
-				m_selected_entity.propegate_transform_to_children(root_transform, buffer_transform);
-			}
-
-			UI::end_table();
-		}
-
-		if (m_selected_entity.has_component<mesh_component>()) {
-
-			// Component that every entity has
-			if (ImGui::CollapsingHeader("Mesh"), ImGuiTreeNodeFlags_DefaultOpen) {
-
-				auto& mesh_comp = m_selected_entity.get_component<mesh_component>();
-				UI::begin_table("entity_component", false);
-
-				UI::table_row([]() {
-					ImGui::Text("mobility");
-				}, [&]() {
-
-					static const char* items[] = { "locked", "movable", "dynamic" };
-					static int item_current_idx = static_cast<std::underlying_type_t<mobility>>(mesh_comp.mobility);
-					const char* combo_preview_value = items[item_current_idx];
-					static ImGuiComboFlags flags = 0;
-					ImGui::SetNextItemWidth(ImGui::GetColumnWidth());
-					if (ImGui::BeginCombo("##details_window_mesh_component_mobility", combo_preview_value, flags)) {
-
-						for (int n = 0; n < IM_ARRAYSIZE(items); n++) {
-							const bool is_selected = (item_current_idx == n);
-							if (ImGui::Selectable(items[n], is_selected))
-								item_current_idx = n;
-
-							if (is_selected)		// Set the initial focus when opening the combo (scrolling + keyboard navigation focus)
-								ImGui::SetItemDefaultFocus();
-						}
-
-						ImGui::EndCombo();
-					}
-				});
-				UI::table_row("shoudl render", mesh_comp.shoudl_render);
-
-				UI::table_row([]() {
-				ImGui::Text("mesh asset");
-
-				}, [&]() {
-
-					ImGui::SetNextItemWidth(ImGui::GetColumnWidth());
-					ImGui::Text(mesh_comp.asset_path.string().c_str());
-
-					if (ImGui::BeginDragDropTarget()) {
-						if (const ImGuiPayload* payload = ImGui::AcceptDragDropPayload("PROJECT_CONTENT_FILE")) {
-
-							const std::filesystem::path file_path = (const char*)payload->Data;
-							mesh_comp.asset_path = util::extract_path_from_project_content_folder(file_path);
-							mesh_comp.mesh_asset = static_mesh_asset_manager::get_from_path(mesh_comp.asset_path);
-						}
-						ImGui::EndDragDropTarget();
-					}
-
-				});
-
-				UI::end_table();
-			}
-		}
-
+		UI::try_display_mesh_comp(m_selected_entity);
 
 		ImGui::End();
 	}

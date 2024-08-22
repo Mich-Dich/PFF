@@ -55,6 +55,15 @@ namespace PFF::util {
         return result;
     }
 
+
+    void simple_deletion_queue::flush() {
+
+        for (auto it = m_functions.rbegin(); it != m_functions.rend(); it++)
+            (*it)();
+        m_functions.clear();
+    }
+
+
     void extract_part_after_delimiter(std::string& dest, const std::string& input, const char* delimiter) {
 
         size_t found = input.find_last_of(delimiter);

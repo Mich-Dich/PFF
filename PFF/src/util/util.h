@@ -88,6 +88,26 @@ namespace PFF {
             std::mt19937                            engine; // Mersenne Twister pseudo-random generator
         };
 
+        // @brief A class that manages a queue of functions for deferred execution. 
+        //        Typically used for managing cleanup operations that should be executed 
+        //        at a later time, such as resource deallocation.
+        class PFF_API simple_deletion_queue {
+        public:
+
+            // @brief Adds a function to the deletion queue.
+           // @param [function] A function object (std::function<void()>) to be added to the queue.
+           //                   The function is stored and executed later when flush() is called.
+            void push_func(std::function<void()>&& function) { m_functions.push_back(function); }
+
+            // @brief Executes all the functions in the queue and clears the queue.
+            //        Each function in the queue is called in the order it was added.
+            //        After all functions are executed, the queue is emptied.
+            void flush();
+
+        private:
+            std::vector<std::function<void()>>		m_functions{};
+        };
+
         // @brief Searches for the last occurrence of the specified delimiter in the input string,
         //          and if found, extracts the substring after the delimiter into the 'dest' string.
         //          If the delimiter is not found, the 'dest' string remains unchanged.

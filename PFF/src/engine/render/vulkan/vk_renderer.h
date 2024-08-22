@@ -222,8 +222,6 @@ namespace PFF::render::vulkan {
 		material_instance							m_default_material;
 		material									m_metal_rough_material;
 
-
 		std::array<glm::vec4, 6>					m_view_frustum{};
-
 	};
 }

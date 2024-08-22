@@ -11,4 +11,4 @@ todo_list:
       done: false
     - title: Make it possible to delete entities from the outliner
       description: 
-      done: false
+      done: true

@@ -149,6 +149,33 @@ namespace PFF {
 
 	void map::destroy_entity(entity entity) {
 
+		// remove refrence to entity from any relationship
+		if (entity.has_component<relationship_component>()) {
+
+			auto& relationship = entity.get_component<relationship_component>();
+
+			//auto it = std::remove(relationship.children_ID.begin(), relationship.children_ID.end(), entity.get_UUID());
+			//if (it != relationship.children_ID.end())
+			//	relationship.children_ID.erase(it);
+
+			auto& parent_relationship = get_entity_by_UUID(relationship.parent_ID).get_component<relationship_component>();
+			auto it = std::remove(parent_relationship.children_ID.begin(), parent_relationship.children_ID.end(), entity.get_UUID());
+			if (it != parent_relationship.children_ID.end())
+				parent_relationship.children_ID.erase(it);
+
+			// remove entity from children
+			if (relationship.children_ID.size()) {
+				for (auto child_ID : relationship.children_ID) {
+
+					auto child_entity = get_entity_by_UUID(child_ID);
+					auto& child_relationship = child_entity.get_component<relationship_component>();
+					child_relationship.parent_ID = relationship.parent_ID;
+					parent_relationship.children_ID.push_back(child_ID);
+				}
+			}
+
+		}
+
 		m_entity_map.erase(entity.get_UUID());
 		m_registry.destroy(entity);
 	}

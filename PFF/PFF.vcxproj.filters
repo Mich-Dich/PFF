@@ -267,6 +267,8 @@
     <ClInclude Include="vendor\ImGuizmo\ImGuizmo.h">
       <Filter>vendor\ImGuizmo</Filter>
     </ClInclude>
+    <ClInclude Include="src\util\ui\component_UI.h" />
+    <ClInclude Include="src\engine\resource_management\image_asset_manager.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="src\application.cpp">
@@ -380,5 +382,7 @@
     <ClCompile Include="vendor\ImGuizmo\ImGuizmo.cpp">
       <Filter>vendor\ImGuizmo</Filter>
     </ClCompile>
+    <ClCompile Include="src\util\ui\component_UI.cpp" />
+    <ClCompile Include="src\engine\resource_management\image_asset_manager.cpp" />
   </ItemGroup>
 </Project>

@@ -34,7 +34,7 @@ namespace PFF::mesh_factory {
         fastgltf::Parser parser{};
         auto load = parser.loadGltfBinary(&data, file_path.parent_path(), gltfOptions);
 
-        CORE_VALIDATE(load, return {}, "", "Failed to load glTF: [" << fastgltf::to_underlying(load.error()) << "]");
+        CORE_VALIDATE(load, return {}, "", "Failed to load glTF: [" << fastgltf::getErrorMessage(load.error()) << "]");
 
         fastgltf::Asset gltf;
         gltf = std::move(load.get());
