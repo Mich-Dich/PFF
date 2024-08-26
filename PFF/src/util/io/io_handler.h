@@ -18,6 +18,20 @@ namespace PFF::io_handler {
 	// @brief Creates a directory at the specified path if it doesn't already exist.
 	// @param [path] The path to the directory to be created.
 	// @return [bool] Returns true if the directory is successfully created or already exists; false otherwise.
-	bool create_directory(const std::filesystem::path& path);
+	PFF_API bool create_directory(const std::filesystem::path& path);
 	
+	PFF_API bool is_directory(const std::filesystem::path& path);
+
+	PFF_API bool is_file(const std::filesystem::path& path);
+
+	PFF_API bool is_hidden(const std::filesystem::path& path);
+
+	PFF_API const std::filesystem::path get_absolute_path(const std::filesystem::path& path);
+
+	PFF_API std::vector<std::filesystem::path> get_files_in_dir(const std::filesystem::path& path);
+
+	PFF_API std::vector<std::filesystem::path> get_folders_in_dir(const std::filesystem::path& path);
+
+	PFF_API bool write_to_file(const char* data, const std::filesystem::path& filename);
+
 }

@@ -4,11 +4,11 @@
 
 #include "stopwatch.h"
 
-
 namespace PFF {
 
-    namespace Profiling {
+#ifdef PFF_DEBUG
 
+    namespace Profiling {
 
         bool simple_profiler::add_value() {
 
@@ -35,10 +35,12 @@ namespace PFF {
         }
     }
 
+#endif
+
+
     f32 stopwatch::stop() {
 
         std::chrono::system_clock::time_point end_point = std::chrono::system_clock::now();
-
         switch (m_presition) {
             case PFF::duration_precision::microseconds: return *m_result_pointer = std::chrono::duration_cast<std::chrono::nanoseconds>(end_point - m_start_point).count() / 1000.f;
             case PFF::duration_precision::seconds:      return *m_result_pointer = std::chrono::duration_cast<std::chrono::milliseconds>(end_point - m_start_point).count() / 1000.f;
@@ -54,6 +56,5 @@ namespace PFF {
 
 
     void stopwatch::_start() { m_start_point = std::chrono::system_clock::now(); }
-
 
 }

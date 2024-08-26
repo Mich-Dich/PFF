@@ -29,20 +29,24 @@ namespace PFF::util {
         return dist(engine);
     }
 
+
     f64 random::get_f64(f64 min, f64 max) {
         std::uniform_real_distribution<f64> dist(min, max);
         return dist(engine);
     }
+
 
     u32 random::get_u32(u32 min, u32 max) {
         std::uniform_int_distribution<u32> dist(min, max);
         return dist(engine);
     }
 
+
     u64 random::get_u64(u64 min, u64 max) {
         std::uniform_int_distribution<u64> dist(min, max);
         return dist(engine);
     }
+
 
     std::string util::random::get_string(const size_t length) {
 
@@ -64,6 +68,55 @@ namespace PFF::util {
     }
 
 
+    bool run_program(const std::filesystem::path& path_to_exe, const std::string& cmd_args) { return run_program(path_to_exe, cmd_args.c_str()); }
+
+
+    bool run_program(const std::filesystem::path& path_to_exe, const char* cmd_args) {
+
+        bool result = false;
+
+#ifdef PFF_PLATFORM_WINDOWS
+
+        STARTUPINFOA startupInfo;
+        PROCESS_INFORMATION processInfo;
+
+        ZeroMemory(&startupInfo, sizeof(startupInfo));
+        startupInfo.cb = sizeof(startupInfo);
+        ZeroMemory(&processInfo, sizeof(processInfo));
+
+        std::string cmdArguments = path_to_exe.string() + " " + cmd_args;
+
+        // Start the program
+        result = CreateProcessA(
+            NULL,							// Application Name
+            (LPSTR)cmdArguments.c_str(),	// Command Line Args
+            NULL,							// Process Attributes
+            NULL,							// Thread Attributes
+            FALSE,							// Inherit Handles
+            CREATE_NEW_CONSOLE,				// Creation Flags
+            NULL,							// Environment
+            NULL,							// Current Directory
+            &startupInfo,					// Startup Info
+            &processInfo					// Process Info
+        );
+
+        if (result) {
+            // Close process and thread handles
+            CloseHandle(processInfo.hProcess);
+            CloseHandle(processInfo.hThread);
+        } else
+            CORE_LOG(Warn, "Unsuccessfully started process: " << path_to_exe.string().c_str());
+
+#elif defined PFF_PLATFORM_LINUX || defined PFF_PLATFORM_MAC
+
+#error Not implemented yet
+
+#endif
+
+        return result;
+    }
+
+
     void extract_part_after_delimiter(std::string& dest, const std::string& input, const char* delimiter) {
 
         size_t found = input.find_last_of(delimiter);
@@ -75,6 +128,7 @@ namespace PFF::util {
 
         return; // If delimiter is not found
     }
+
 
     void extract_part_befor_delimiter(std::string& dest, const std::string& input, const char* delimiter) {
 

@@ -103,6 +103,7 @@ namespace PFF {
 			glfwMaximizeWindow(m_Window);
 
 		// Set icon
+		m_icon_path = PFF::util::get_executable_path() / "./assets/logo.png";
 		GLFWimage icon;
 		int channels;
 		std::string iconPathStr = m_icon_path.string();

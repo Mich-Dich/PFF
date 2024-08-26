@@ -15,7 +15,6 @@ project "PFF"
 	defines
 	{
 		"ENGINE_NAME=PFF",
-		'PROJECT_NAME="' .. client_project_name .. '"',
 		"PFF_INSIDE_ENGINE",
 		"GLFW_INCLUDE_NONE",
 	}
@@ -80,32 +79,34 @@ project "PFF"
 
 		postbuildcommands
 		{
-			"{MKDIR} %{wks.location}/bin/" .. outputs .. "/" .. client_project_name,
-			"{COPY} %{cfg.buildtarget.relpath} %{wks.location}/bin/" .. outputs  .. "/" .. client_project_name,
+			-- "{MKDIR} %{wks.location}/bin/" .. outputs .. "/" .. client_project_name,
+			-- "{COPY} %{cfg.buildtarget.relpath} %{wks.location}/bin/" .. outputs  .. "/" .. client_project_name,
 			
 			"{MKDIR} %{wks.location}/bin/" .. outputs .. "/PFF_editor",
 			"{COPY} %{cfg.buildtarget.relpath} %{wks.location}/bin/" .. outputs  .. "/PFF_editor",
 			
-			"{MKDIR} %{wks.location}/bin/" .. outputs .. "/" .. client_project_name,
-			"{COPY} %{cfg.buildtarget.relpath} %{wks.location}/bin/" .. outputs  .. "/" .. client_project_name,
-
+			-- copy premake exe
+			"{MKDIR} %{wks.location}/bin/" .. outputs .. "/vendor/premake",
+			"{COPY} %{wks.location}/vendor/premake %{wks.location}/bin/" .. outputs .. "/vendor/premake",
+			
 			postbuildcommands { table.unpack(copy_content_of_dir(outputs, {"PFF/shaders", "PFF/defaults", "PFF/assets"})), }
 		}
 
 	filter "configurations:Debug"
-		buildoptions "/MDd"
 		defines "PFF_DEBUG"
+		buildoptions "/MDd"
 		runtime "Debug"
 		symbols "on"
 
 	filter "configurations:RelWithDebInfo"
 		defines "PFF_RELEASE_WITH_DEBUG_INFO"
+		buildoptions "/MD"
 		runtime "Release"
 		symbols "on"
 		optimize "speed"
 
 	filter "configurations:Release"
-		buildoptions "/MD"
 		defines "PFF_RELEASE"
+		buildoptions "/MDd"
 		runtime "Release"
 		optimize "on"

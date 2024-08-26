@@ -19,6 +19,10 @@
 #include "engine/render/render_util.h"
 #include "engine/game_objects/camera.h"
 
+// ================= IN DEV =================
+#include "project/script_system.h"
+// ================= IN DEV =================
+
 #include "application.h"
 
 namespace PFF {
@@ -50,13 +54,25 @@ namespace PFF {
 		serializer::yaml(config::get_filepath_from_configtype(util::get_executable_path(), config::file::editor), "editor_data", serializer::option::load_from_file)
 			.entry("last_opened_project", m_project_path);
 
+
+		// ========================================== DEV-ONLY should be set by launcher or when building the project_solution ==========================================
+		if (m_project_path.empty())
+			m_project_path = util::file_dialog().parent_path();
+
+		serializer::yaml(config::get_filepath_from_configtype(util::get_executable_path(), config::file::editor), "editor_data", serializer::option::save_to_file)
+			.entry("last_opened_project", m_project_path);
+		// ========================================== DEV-ONLY should be set by launcher or when building the project_solution ==========================================
+
+
 		if (!m_project_path.empty()) {
+
 			for (const auto& entry : std::filesystem::directory_iterator(m_project_path)) {
 				
 				if (entry.is_directory() || entry.path().extension() != PFF_PROJECT_EXTENTION)
 					continue;
 				
 				serializer::yaml(entry.path(), "project_data", serializer::option::load_from_file)
+					.entry(KEY_VALUE(m_project_data.display_name))
 					.entry(KEY_VALUE(m_project_data.name))
 					//.entry(KEY_VALUE(m_project_data.ID))
 					.entry(KEY_VALUE(m_project_data.engine_version))
@@ -74,7 +90,7 @@ namespace PFF {
 			}
 		}
 
-					//m_project_data{};
+		//m_project_data{};
 		// ========================================================== TODO ==========================================================
 		//		Editor needs to set the [project_path] in the yaml file bevor starting the engine <= IMPORTANT
 		// ========================================================== TODO ==========================================================
@@ -103,6 +119,8 @@ namespace PFF {
 
 		m_imgui_layer = new UI::imgui_layer();
 		m_layerstack->push_overlay(m_imgui_layer);
+
+		script_system::init();
 
 		PFF_PROFILE_END_SESSION();
 	}

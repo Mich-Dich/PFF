@@ -50,13 +50,16 @@ namespace PFF::geometry {
         mesh_asset(std::vector<u32> indices = {}, std::vector<vertex> vertices = {})
 			: indices(indices), vertices(vertices) {};
 
+        void calc_bounds();
+
         std::string                         name{};
         PFF::render::GPU_mesh_buffers	    mesh_buffers{};     // GPU side buffers
 		std::vector<Geo_surface>			surfaces{};
 		std::vector<u32>					indices{};
 		std::vector<vertex>					vertices{};
         bounds                              bounds{};
-
 	};
+
+
 
 }

@@ -97,7 +97,7 @@ namespace PFF::render {
 	protected:
 
 		std::vector<compute_effect> 				m_background_effects{};
-		int											m_current_background_effect = 2;
+		int											m_current_background_effect = 1;
 
 	private:
 

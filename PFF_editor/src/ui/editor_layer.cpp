@@ -101,12 +101,12 @@ namespace PFF {
 			.entry("show_graphics_engine_settings", m_show_graphics_engine_settings)
 			.entry("show_editor_settings", m_show_editor_settings)
 			.entry("show_general_settings", m_show_general_settings)
-			.entry("show_style_editor", style_editor)
 			.entry("show_engine_wiki", PFF::UI::show_engine_wiki)
-
-			.entry("show_todo_lis", PFF::toolkit::todo::s_show_todo_list)
-
-			.entry("show_demo_window", demo_window);
+#ifdef PFF_EDITOR_DEBUG
+			.entry("show_style_editor", style_editor)
+			.entry("show_demo_window", demo_window)
+#endif
+			.entry("show_todo_lis", PFF::toolkit::todo::s_show_todo_list);
 	}
 
 
@@ -195,7 +195,7 @@ namespace PFF {
 
 		// display project title
 		ImGui::PushFont(application::get().get_imgui_layer()->get_font("header_1"));
-		const static std::string project_name = application::get().get_project_data().name;
+		const static std::string project_name = application::get().get_project_data().display_name;
 		const auto project_name_size = ImGui::CalcTextSize(project_name.c_str());
 		ImGui::SetCursorPos(ImVec2(viewport->Size.x - (window_padding.x + (button_spaccing * 2) + (button_width * 3)) - project_name_size.x - 30, window_padding.y + titlebar_vertical_offset));
 		ImGui::Text(project_name.c_str());
@@ -440,8 +440,10 @@ namespace PFF {
 			if (ImGui::BeginMenu("Windows")) {
 
 				ImGui::MenuItem("ToDo List", "", &PFF::toolkit::todo::s_show_todo_list);
+#ifdef PFF_EDITOR_DEBUG
 				ImGui::MenuItem("Style Editor", "", &style_editor);
 				ImGui::MenuItem("Demo Window", "", &demo_window);
+#endif
 				ImGui::MenuItem("Engine Wiki", "", &PFF::UI::show_engine_wiki);
 
 				// IN DEV

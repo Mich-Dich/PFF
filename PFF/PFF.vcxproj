@@ -79,7 +79,7 @@
       <PrecompiledHeader>Use</PrecompiledHeader>
       <PrecompiledHeaderFile>util/pffpch.h</PrecompiledHeaderFile>
       <WarningLevel>Level3</WarningLevel>
-      <PreprocessorDefinitions>PFF_USING_EDITOR;ENGINE_NAME=PFF;PROJECT_NAME="Sandbox";PFF_INSIDE_ENGINE;GLFW_INCLUDE_NONE;PFF_PLATFORM_WINDOWS;PFF_DEBUG;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions>PFF_USING_EDITOR;ENGINE_NAME=PFF;PFF_INSIDE_ENGINE;GLFW_INCLUDE_NONE;PFF_PLATFORM_WINDOWS;PFF_DEBUG;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <AdditionalIncludeDirectories>src;assets;vendor\glm;vendor\glfw\include;vendor\imgui;vendor\imgui\backends;vendor\stb_image;vendor\entt\include;vendor\ImGuizmo;C:\VulkanSDK\1.3.250.1\Include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <DebugInformationFormat>EditAndContinue</DebugInformationFormat>
       <Optimization>Disabled</Optimization>
@@ -105,12 +105,10 @@ IF NOT EXIST $(SolutionDir)\bin\Debug-windows-x86_64\PFF\defaults (mkdir $(Solut
 IF EXIST $(SolutionDir)\PFF\defaults\ (xcopy /Q /E /Y /I $(SolutionDir)\PFF\defaults $(SolutionDir)\bin\Debug-windows-x86_64\PFF\defaults &gt; nul) ELSE (xcopy /Q /Y /I $(SolutionDir)\PFF\defaults $(SolutionDir)\bin\Debug-windows-x86_64\PFF\defaults &gt; nul)
 IF NOT EXIST $(SolutionDir)\bin\Debug-windows-x86_64\PFF\assets (mkdir $(SolutionDir)\bin\Debug-windows-x86_64\PFF\assets)
 IF EXIST $(SolutionDir)\PFF\assets\ (xcopy /Q /E /Y /I $(SolutionDir)\PFF\assets $(SolutionDir)\bin\Debug-windows-x86_64\PFF\assets &gt; nul) ELSE (xcopy /Q /Y /I $(SolutionDir)\PFF\assets $(SolutionDir)\bin\Debug-windows-x86_64\PFF\assets &gt; nul)
-IF NOT EXIST $(SolutionDir)\bin\Debug-windows-x86_64\Sandbox (mkdir $(SolutionDir)\bin\Debug-windows-x86_64\Sandbox)
-IF EXIST ..\bin\Debug-windows-x86_64\PFF\PFF.dll\ (xcopy /Q /E /Y /I ..\bin\Debug-windows-x86_64\PFF\PFF.dll $(SolutionDir)\bin\Debug-windows-x86_64\Sandbox &gt; nul) ELSE (xcopy /Q /Y /I ..\bin\Debug-windows-x86_64\PFF\PFF.dll $(SolutionDir)\bin\Debug-windows-x86_64\Sandbox &gt; nul)
 IF NOT EXIST $(SolutionDir)\bin\Debug-windows-x86_64\PFF_editor (mkdir $(SolutionDir)\bin\Debug-windows-x86_64\PFF_editor)
 IF EXIST ..\bin\Debug-windows-x86_64\PFF\PFF.dll\ (xcopy /Q /E /Y /I ..\bin\Debug-windows-x86_64\PFF\PFF.dll $(SolutionDir)\bin\Debug-windows-x86_64\PFF_editor &gt; nul) ELSE (xcopy /Q /Y /I ..\bin\Debug-windows-x86_64\PFF\PFF.dll $(SolutionDir)\bin\Debug-windows-x86_64\PFF_editor &gt; nul)
-IF NOT EXIST $(SolutionDir)\bin\Debug-windows-x86_64\Sandbox (mkdir $(SolutionDir)\bin\Debug-windows-x86_64\Sandbox)
-IF EXIST ..\bin\Debug-windows-x86_64\PFF\PFF.dll\ (xcopy /Q /E /Y /I ..\bin\Debug-windows-x86_64\PFF\PFF.dll $(SolutionDir)\bin\Debug-windows-x86_64\Sandbox &gt; nul) ELSE (xcopy /Q /Y /I ..\bin\Debug-windows-x86_64\PFF\PFF.dll $(SolutionDir)\bin\Debug-windows-x86_64\Sandbox &gt; nul)</Command>
+IF NOT EXIST $(SolutionDir)\bin\Debug-windows-x86_64\vendor\premake (mkdir $(SolutionDir)\bin\Debug-windows-x86_64\vendor\premake)
+IF EXIST $(SolutionDir)\vendor\premake\ (xcopy /Q /E /Y /I $(SolutionDir)\vendor\premake $(SolutionDir)\bin\Debug-windows-x86_64\vendor\premake &gt; nul) ELSE (xcopy /Q /Y /I $(SolutionDir)\vendor\premake $(SolutionDir)\bin\Debug-windows-x86_64\vendor\premake &gt; nul)</Command>
     </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='RelWithDebInfo|x64'">
@@ -118,7 +116,7 @@ IF EXIST ..\bin\Debug-windows-x86_64\PFF\PFF.dll\ (xcopy /Q /E /Y /I ..\bin\Debu
       <PrecompiledHeader>Use</PrecompiledHeader>
       <PrecompiledHeaderFile>util/pffpch.h</PrecompiledHeaderFile>
       <WarningLevel>Level3</WarningLevel>
-      <PreprocessorDefinitions>PFF_USING_EDITOR;ENGINE_NAME=PFF;PROJECT_NAME="Sandbox";PFF_INSIDE_ENGINE;GLFW_INCLUDE_NONE;PFF_PLATFORM_WINDOWS;PFF_RELEASE_WITH_DEBUG_INFO;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions>PFF_USING_EDITOR;ENGINE_NAME=PFF;PFF_INSIDE_ENGINE;GLFW_INCLUDE_NONE;PFF_PLATFORM_WINDOWS;PFF_RELEASE_WITH_DEBUG_INFO;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <AdditionalIncludeDirectories>src;assets;vendor\glm;vendor\glfw\include;vendor\imgui;vendor\imgui\backends;vendor\stb_image;vendor\entt\include;vendor\ImGuizmo;C:\VulkanSDK\1.3.250.1\Include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <DebugInformationFormat>ProgramDatabase</DebugInformationFormat>
       <Optimization>MaxSpeed</Optimization>
@@ -128,6 +126,7 @@ IF EXIST ..\bin\Debug-windows-x86_64\PFF\PFF.dll\ (xcopy /Q /E /Y /I ..\bin\Debu
       <StringPooling>true</StringPooling>
       <RuntimeLibrary>MultiThreadedDLL</RuntimeLibrary>
       <MultiProcessorCompilation>true</MultiProcessorCompilation>
+      <AdditionalOptions>/MD %(AdditionalOptions)</AdditionalOptions>
       <LanguageStandard>stdcpp17</LanguageStandard>
       <ExternalWarningLevel>Level3</ExternalWarningLevel>
     </ClCompile>
@@ -148,12 +147,10 @@ IF NOT EXIST $(SolutionDir)\bin\RelWithDebInfo-windows-x86_64\PFF\defaults (mkdi
 IF EXIST $(SolutionDir)\PFF\defaults\ (xcopy /Q /E /Y /I $(SolutionDir)\PFF\defaults $(SolutionDir)\bin\RelWithDebInfo-windows-x86_64\PFF\defaults &gt; nul) ELSE (xcopy /Q /Y /I $(SolutionDir)\PFF\defaults $(SolutionDir)\bin\RelWithDebInfo-windows-x86_64\PFF\defaults &gt; nul)
 IF NOT EXIST $(SolutionDir)\bin\RelWithDebInfo-windows-x86_64\PFF\assets (mkdir $(SolutionDir)\bin\RelWithDebInfo-windows-x86_64\PFF\assets)
 IF EXIST $(SolutionDir)\PFF\assets\ (xcopy /Q /E /Y /I $(SolutionDir)\PFF\assets $(SolutionDir)\bin\RelWithDebInfo-windows-x86_64\PFF\assets &gt; nul) ELSE (xcopy /Q /Y /I $(SolutionDir)\PFF\assets $(SolutionDir)\bin\RelWithDebInfo-windows-x86_64\PFF\assets &gt; nul)
-IF NOT EXIST $(SolutionDir)\bin\RelWithDebInfo-windows-x86_64\Sandbox (mkdir $(SolutionDir)\bin\RelWithDebInfo-windows-x86_64\Sandbox)
-IF EXIST ..\bin\RelWithDebInfo-windows-x86_64\PFF\PFF.dll\ (xcopy /Q /E /Y /I ..\bin\RelWithDebInfo-windows-x86_64\PFF\PFF.dll $(SolutionDir)\bin\RelWithDebInfo-windows-x86_64\Sandbox &gt; nul) ELSE (xcopy /Q /Y /I ..\bin\RelWithDebInfo-windows-x86_64\PFF\PFF.dll $(SolutionDir)\bin\RelWithDebInfo-windows-x86_64\Sandbox &gt; nul)
 IF NOT EXIST $(SolutionDir)\bin\RelWithDebInfo-windows-x86_64\PFF_editor (mkdir $(SolutionDir)\bin\RelWithDebInfo-windows-x86_64\PFF_editor)
 IF EXIST ..\bin\RelWithDebInfo-windows-x86_64\PFF\PFF.dll\ (xcopy /Q /E /Y /I ..\bin\RelWithDebInfo-windows-x86_64\PFF\PFF.dll $(SolutionDir)\bin\RelWithDebInfo-windows-x86_64\PFF_editor &gt; nul) ELSE (xcopy /Q /Y /I ..\bin\RelWithDebInfo-windows-x86_64\PFF\PFF.dll $(SolutionDir)\bin\RelWithDebInfo-windows-x86_64\PFF_editor &gt; nul)
-IF NOT EXIST $(SolutionDir)\bin\RelWithDebInfo-windows-x86_64\Sandbox (mkdir $(SolutionDir)\bin\RelWithDebInfo-windows-x86_64\Sandbox)
-IF EXIST ..\bin\RelWithDebInfo-windows-x86_64\PFF\PFF.dll\ (xcopy /Q /E /Y /I ..\bin\RelWithDebInfo-windows-x86_64\PFF\PFF.dll $(SolutionDir)\bin\RelWithDebInfo-windows-x86_64\Sandbox &gt; nul) ELSE (xcopy /Q /Y /I ..\bin\RelWithDebInfo-windows-x86_64\PFF\PFF.dll $(SolutionDir)\bin\RelWithDebInfo-windows-x86_64\Sandbox &gt; nul)</Command>
+IF NOT EXIST $(SolutionDir)\bin\RelWithDebInfo-windows-x86_64\vendor\premake (mkdir $(SolutionDir)\bin\RelWithDebInfo-windows-x86_64\vendor\premake)
+IF EXIST $(SolutionDir)\vendor\premake\ (xcopy /Q /E /Y /I $(SolutionDir)\vendor\premake $(SolutionDir)\bin\RelWithDebInfo-windows-x86_64\vendor\premake &gt; nul) ELSE (xcopy /Q /Y /I $(SolutionDir)\vendor\premake $(SolutionDir)\bin\RelWithDebInfo-windows-x86_64\vendor\premake &gt; nul)</Command>
     </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
@@ -161,7 +158,7 @@ IF EXIST ..\bin\RelWithDebInfo-windows-x86_64\PFF\PFF.dll\ (xcopy /Q /E /Y /I ..
       <PrecompiledHeader>Use</PrecompiledHeader>
       <PrecompiledHeaderFile>util/pffpch.h</PrecompiledHeaderFile>
       <WarningLevel>Level3</WarningLevel>
-      <PreprocessorDefinitions>PFF_USING_EDITOR;ENGINE_NAME=PFF;PROJECT_NAME="Sandbox";PFF_INSIDE_ENGINE;GLFW_INCLUDE_NONE;PFF_PLATFORM_WINDOWS;PFF_RELEASE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions>PFF_USING_EDITOR;ENGINE_NAME=PFF;PFF_INSIDE_ENGINE;GLFW_INCLUDE_NONE;PFF_PLATFORM_WINDOWS;PFF_RELEASE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <AdditionalIncludeDirectories>src;assets;vendor\glm;vendor\glfw\include;vendor\imgui;vendor\imgui\backends;vendor\stb_image;vendor\entt\include;vendor\ImGuizmo;C:\VulkanSDK\1.3.250.1\Include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <Optimization>Full</Optimization>
       <FunctionLevelLinking>true</FunctionLevelLinking>
@@ -170,7 +167,7 @@ IF EXIST ..\bin\RelWithDebInfo-windows-x86_64\PFF\PFF.dll\ (xcopy /Q /E /Y /I ..
       <StringPooling>true</StringPooling>
       <RuntimeLibrary>MultiThreadedDLL</RuntimeLibrary>
       <MultiProcessorCompilation>true</MultiProcessorCompilation>
-      <AdditionalOptions>/MD %(AdditionalOptions)</AdditionalOptions>
+      <AdditionalOptions>/MDd %(AdditionalOptions)</AdditionalOptions>
       <LanguageStandard>stdcpp17</LanguageStandard>
       <ExternalWarningLevel>Level3</ExternalWarningLevel>
     </ClCompile>
@@ -190,16 +187,13 @@ IF NOT EXIST $(SolutionDir)\bin\Release-windows-x86_64\PFF\defaults (mkdir $(Sol
 IF EXIST $(SolutionDir)\PFF\defaults\ (xcopy /Q /E /Y /I $(SolutionDir)\PFF\defaults $(SolutionDir)\bin\Release-windows-x86_64\PFF\defaults &gt; nul) ELSE (xcopy /Q /Y /I $(SolutionDir)\PFF\defaults $(SolutionDir)\bin\Release-windows-x86_64\PFF\defaults &gt; nul)
 IF NOT EXIST $(SolutionDir)\bin\Release-windows-x86_64\PFF\assets (mkdir $(SolutionDir)\bin\Release-windows-x86_64\PFF\assets)
 IF EXIST $(SolutionDir)\PFF\assets\ (xcopy /Q /E /Y /I $(SolutionDir)\PFF\assets $(SolutionDir)\bin\Release-windows-x86_64\PFF\assets &gt; nul) ELSE (xcopy /Q /Y /I $(SolutionDir)\PFF\assets $(SolutionDir)\bin\Release-windows-x86_64\PFF\assets &gt; nul)
-IF NOT EXIST $(SolutionDir)\bin\Release-windows-x86_64\Sandbox (mkdir $(SolutionDir)\bin\Release-windows-x86_64\Sandbox)
-IF EXIST ..\bin\Release-windows-x86_64\PFF\PFF.dll\ (xcopy /Q /E /Y /I ..\bin\Release-windows-x86_64\PFF\PFF.dll $(SolutionDir)\bin\Release-windows-x86_64\Sandbox &gt; nul) ELSE (xcopy /Q /Y /I ..\bin\Release-windows-x86_64\PFF\PFF.dll $(SolutionDir)\bin\Release-windows-x86_64\Sandbox &gt; nul)
 IF NOT EXIST $(SolutionDir)\bin\Release-windows-x86_64\PFF_editor (mkdir $(SolutionDir)\bin\Release-windows-x86_64\PFF_editor)
 IF EXIST ..\bin\Release-windows-x86_64\PFF\PFF.dll\ (xcopy /Q /E /Y /I ..\bin\Release-windows-x86_64\PFF\PFF.dll $(SolutionDir)\bin\Release-windows-x86_64\PFF_editor &gt; nul) ELSE (xcopy /Q /Y /I ..\bin\Release-windows-x86_64\PFF\PFF.dll $(SolutionDir)\bin\Release-windows-x86_64\PFF_editor &gt; nul)
-IF NOT EXIST $(SolutionDir)\bin\Release-windows-x86_64\Sandbox (mkdir $(SolutionDir)\bin\Release-windows-x86_64\Sandbox)
-IF EXIST ..\bin\Release-windows-x86_64\PFF\PFF.dll\ (xcopy /Q /E /Y /I ..\bin\Release-windows-x86_64\PFF\PFF.dll $(SolutionDir)\bin\Release-windows-x86_64\Sandbox &gt; nul) ELSE (xcopy /Q /Y /I ..\bin\Release-windows-x86_64\PFF\PFF.dll $(SolutionDir)\bin\Release-windows-x86_64\Sandbox &gt; nul)</Command>
+IF NOT EXIST $(SolutionDir)\bin\Release-windows-x86_64\vendor\premake (mkdir $(SolutionDir)\bin\Release-windows-x86_64\vendor\premake)
+IF EXIST $(SolutionDir)\vendor\premake\ (xcopy /Q /E /Y /I $(SolutionDir)\vendor\premake $(SolutionDir)\bin\Release-windows-x86_64\vendor\premake &gt; nul) ELSE (xcopy /Q /Y /I $(SolutionDir)\vendor\premake $(SolutionDir)\bin\Release-windows-x86_64\vendor\premake &gt; nul)</Command>
     </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <ClInclude Include="src\engine\resource_management\image_asset_manager.h" />
     <ClInclude Include="src\PFF.h" />
     <ClInclude Include="src\application.h" />
     <ClInclude Include="src\engine\Events\Event.h" />
@@ -233,6 +227,7 @@ IF EXIST ..\bin\Release-windows-x86_64\PFF\PFF.dll\ (xcopy /Q /E /Y /I ..\bin\Re
     <ClInclude Include="src\engine\render\vulkan\vk_renderer.h" />
     <ClInclude Include="src\engine\render\vulkan\vk_types.h" />
     <ClInclude Include="src\engine\resource_management\headers.h" />
+    <ClInclude Include="src\engine\resource_management\image_asset_manager.h" />
     <ClInclude Include="src\engine\resource_management\mesh_headers.h" />
     <ClInclude Include="src\engine\resource_management\mesh_serializer.h" />
     <ClInclude Include="src\engine\resource_management\static_mesh_asset_manager.h" />
@@ -242,8 +237,10 @@ IF EXIST ..\bin\Release-windows-x86_64\PFF\PFF.dll\ (xcopy /Q /E /Y /I ..\bin\Re
     <ClInclude Include="src\engine\world\map.h" />
     <ClInclude Include="src\entry_point.h" />
     <ClInclude Include="src\procedural\procedural_mesh_script.h" />
+    <ClInclude Include="src\project\file_system_watcher.h" />
     <ClInclude Include="src\project\project_data_struct.h" />
-    <ClInclude Include="src\util\ui\component_UI.h" />
+    <ClInclude Include="src\project\project_macros.h" />
+    <ClInclude Include="src\project\script_system.h" />
     <ClInclude Include="src\util\UUID.h" />
     <ClInclude Include="src\util\core_config.h" />
     <ClInclude Include="src\util\data_types.h" />
@@ -262,6 +259,7 @@ IF EXIST ..\bin\Release-windows-x86_64\PFF\PFF.dll\ (xcopy /Q /E /Y /I ..\bin\Re
     <ClInclude Include="src\util\platform\windows_util.h" />
     <ClInclude Include="src\util\profiling\instrumentor.h" />
     <ClInclude Include="src\util\profiling\stopwatch.h" />
+    <ClInclude Include="src\util\ui\component_UI.h" />
     <ClInclude Include="src\util\ui\imgui_markdown.h" />
     <ClInclude Include="src\util\ui\pannel_collection.h" />
     <ClInclude Include="src\util\util.h" />
@@ -293,7 +291,8 @@ IF EXIST ..\bin\Release-windows-x86_64\PFF\PFF.dll\ (xcopy /Q /E /Y /I ..\bin\Re
     <ClCompile Include="src\engine\resource_management\static_mesh_asset_manager.cpp" />
     <ClCompile Include="src\engine\world\entity.cpp" />
     <ClCompile Include="src\engine\world\map.cpp" />
-    <ClCompile Include="src\util\ui\component_UI.cpp" />
+    <ClCompile Include="src\project\file_system_watcher.cpp" />
+    <ClCompile Include="src\project\script_system.cpp" />
     <ClCompile Include="src\util\UUID.cpp" />
     <ClCompile Include="src\util\io\config.cpp" />
     <ClCompile Include="src\util\io\io_handler.cpp" />
@@ -305,6 +304,7 @@ IF EXIST ..\bin\Release-windows-x86_64\PFF\PFF.dll\ (xcopy /Q /E /Y /I ..\bin\Re
       <PrecompiledHeader>Create</PrecompiledHeader>
     </ClCompile>
     <ClCompile Include="src\util\profiling\stopwatch.cpp" />
+    <ClCompile Include="src\util\ui\component_UI.cpp" />
     <ClCompile Include="src\util\ui\imgui_markdown.cpp" />
     <ClCompile Include="src\util\ui\pannel_collection.cpp" />
     <ClCompile Include="src\util\util.cpp" />

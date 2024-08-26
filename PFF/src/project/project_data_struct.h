@@ -8,7 +8,9 @@ namespace PFF {
 	struct project_data {
 
 		// meta_data
-		std::string					name{};						// this name will be used in the launcher and when building
+		std::string					display_name{};				// this name will be used in the launcher and editor
+		std::string					name{};						// this name is the name of the solution & export-folder
+		
 		UUID						ID;
 		version						engine_version{};			// version of the engine used, used by launcher, engine, editor, ...
 		version						project_version{};			// version of this project, mostly uesfull to the user for version managemant

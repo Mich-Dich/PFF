@@ -12,10 +12,12 @@ namespace PFF {
 	void material::build_pipelines() {
 
 		VkShaderModule meshFragShader;
-		CORE_ASSERT(render::vulkan::util::load_shader_module("../PFF/shaders/mesh.frag.spv", GET_RENDERER.get_device(), &meshFragShader), "Loaded shader: mesh.frag.spv", "Error when building the triangle fragment shader module");
+		CORE_ASSERT(render::vulkan::util::load_shader_module(PFF::util::get_executable_path() / "../PFF/shaders/mesh.frag.spv", GET_RENDERER.get_device(), &meshFragShader),
+			"Loaded shader: mesh.frag.spv", "Error when building the triangle fragment shader module");
 
 		VkShaderModule meshVertexShader;
-		CORE_ASSERT(render::vulkan::util::load_shader_module("../PFF/shaders/mesh.vert.spv", GET_RENDERER.get_device(), &meshVertexShader), "Loaded shader: mesh.vert.spv", "Error when building the triangle vertex shader module");
+		CORE_ASSERT(render::vulkan::util::load_shader_module(PFF::util::get_executable_path() / "../PFF/shaders/mesh.vert.spv", GET_RENDERER.get_device(), &meshVertexShader),
+			"Loaded shader: mesh.vert.spv", "Error when building the triangle vertex shader module");
 
 		VkPushConstantRange matrix_range{};
 		matrix_range.offset = 0;

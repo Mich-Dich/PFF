@@ -53,4 +53,41 @@ namespace PFF::io_handler {
 		return true;
 	}
 
+	bool is_directory(const std::filesystem::path& path)								{ return std::filesystem::is_directory(path); }
+
+	bool is_file(const std::filesystem::path& path)										{ return std::filesystem::is_regular_file(path); }
+
+	bool is_hidden(const std::filesystem::path& path)									{ return path.filename().string()[0] == '.'; }
+
+	const std::filesystem::path get_absolute_path(const std::filesystem::path& path)	{ return std::filesystem::absolute(path); }
+
+	std::vector<std::filesystem::path> get_files_in_dir(const std::filesystem::path& path) {
+
+		std::vector<std::filesystem::path> files;
+		for (const auto& entry : std::filesystem::directory_iterator(path)) {
+			if (is_file(entry.path())) {
+				files.push_back(entry.path());
+			}
+		}
+		return files;
+	}
+
+	std::vector<std::filesystem::path> get_folders_in_dir(const std::filesystem::path& path) {
+		std::vector<std::filesystem::path> folders;
+		for (const auto& entry : std::filesystem::directory_iterator(path)) {
+			if (std::filesystem::is_directory(entry.path()))
+				folders.push_back(entry.path());
+		}
+		return folders;
+	}
+
+	bool write_to_file(const char* data, const std::filesystem::path& filename) {
+
+		std::ofstream outStream(filename.string());
+		CORE_VALIDATE(outStream.is_open(), return false, "", "could not open " << filename);
+		outStream << data;
+		outStream.close();
+		return true;
+	}
+
 }

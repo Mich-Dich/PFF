@@ -76,9 +76,8 @@ namespace PFF {
 			: mesh_asset(mesh_asset_ref) {}
 
 		mobility							mobility = mobility::locked;
-		//glm::mat4							transform = glm::mat4(1);			// TODO: remove because every entity can only have 1 mesh_comp, use parenting system instead
 		bool								shoudl_render = true;
-		std::filesystem::path				asset_path;
+		std::filesystem::path				asset_path;							// MAYBE: doesnt need to be saved here, only needed for serializaation, maybe export to asset manager or UUID
 
 	// MAYBE: make private
 		ref<PFF::geometry::mesh_asset>		mesh_asset = nullptr;

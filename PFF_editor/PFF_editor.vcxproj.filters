@@ -4,6 +4,9 @@
     <Filter Include="controller">
       <UniqueIdentifier>{09C867BF-F57F-A90C-5E87-82684A5E44FD}</UniqueIdentifier>
     </Filter>
+    <Filter Include="native_scripting">
+      <UniqueIdentifier>{5EB758E5-4AB0-7737-73E2-5CBC5F3A5743}</UniqueIdentifier>
+    </Filter>
     <Filter Include="resource_management">
       <UniqueIdentifier>{89094B2A-F56A-2838-7ED8-6EEAEA385FF7}</UniqueIdentifier>
     </Filter>
@@ -33,6 +36,21 @@
     </ClInclude>
     <ClInclude Include="src\controller\editor_inputs.h">
       <Filter>controller</Filter>
+    </ClInclude>
+    <ClInclude Include="src\native_scripting\code_generator.h">
+      <Filter>native_scripting</Filter>
+    </ClInclude>
+    <ClInclude Include="src\native_scripting\cpp_build.h">
+      <Filter>native_scripting</Filter>
+    </ClInclude>
+    <ClInclude Include="src\native_scripting\project_file_watcher.h">
+      <Filter>native_scripting</Filter>
+    </ClInclude>
+    <ClInclude Include="src\native_scripting\script_parser.h">
+      <Filter>native_scripting</Filter>
+    </ClInclude>
+    <ClInclude Include="src\native_scripting\script_scanner.h">
+      <Filter>native_scripting</Filter>
     </ClInclude>
     <ClInclude Include="src\resource_management\factories\static_mesh_factory.h">
       <Filter>resource_management\factories</Filter>
@@ -77,6 +95,21 @@
       <Filter>controller</Filter>
     </ClCompile>
     <ClCompile Include="src\entry.cpp" />
+    <ClCompile Include="src\native_scripting\code_generator.cpp">
+      <Filter>native_scripting</Filter>
+    </ClCompile>
+    <ClCompile Include="src\native_scripting\cpp_build.cpp">
+      <Filter>native_scripting</Filter>
+    </ClCompile>
+    <ClCompile Include="src\native_scripting\project_file_watcher.cpp">
+      <Filter>native_scripting</Filter>
+    </ClCompile>
+    <ClCompile Include="src\native_scripting\script_parser.cpp">
+      <Filter>native_scripting</Filter>
+    </ClCompile>
+    <ClCompile Include="src\native_scripting\script_scanner.cpp">
+      <Filter>native_scripting</Filter>
+    </ClCompile>
     <ClCompile Include="src\resource_management\factories\static_mesh_factory.cpp">
       <Filter>resource_management\factories</Filter>
     </ClCompile>

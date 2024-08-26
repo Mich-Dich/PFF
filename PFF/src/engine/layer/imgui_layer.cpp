@@ -136,7 +136,7 @@ namespace PFF::UI {
 		
 		serialize(serializer::option::load_from_file);
 
-		std::filesystem::path base_path = std::filesystem::path("..") / "PFF" / "assets" / "fonts";
+		std::filesystem::path base_path = PFF::util::get_executable_path() / std::filesystem::path("..") / "PFF" / "assets" / "fonts";
 		std::filesystem::path OpenSans_path = base_path / "Open_Sans" / "static";
 		std::filesystem::path Inconsolata_path = base_path / "Inconsolata" / "static";
 

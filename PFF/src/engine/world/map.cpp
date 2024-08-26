@@ -64,65 +64,108 @@ namespace PFF {
 		//};
 		//loc_entitiy.add_script_component<test_script>();
 
-#define ADD_MESH_PROCESS 3
-#if ADD_MESH_PROCESS == 0
-		
-		entity loc_entitiy = create_entity("Test entity for renderer");
-
-		auto& transform_comp = loc_entitiy.get_component<transform_component>();
-		transform_comp.translation = glm::vec3(0);
-
-		auto& mesh_comp = loc_entitiy.add_component<mesh_component>();
-		mesh_comp.mesh_asset = GET_RENDERER.get_test_mesh();
-		mesh_comp.material = GET_RENDERER.get_default_material_pointer();
-
-#elif ADD_MESH_PROCESS == 1
-
-		for (u32 x = 0; x < 15; x++) {
-			for (u32 y = 0; y < 10; y++) {
-
-				entity loc_entitiy = create_entity("Test entity for renderer: " + util::to_string(x) + " / " + util::to_string(y));
-
-				auto& transform_comp = loc_entitiy.get_component<transform_component>();
-				transform_comp.translation = glm::vec3(35 * x, 0, 75 * y);
-				transform_comp.scale = glm::vec3(0.1f);
-
-				auto& mesh_comp = loc_entitiy.add_component<mesh_component>();
-				mesh_comp.mesh_asset = GET_RENDERER.get_test_mesh();
-				mesh_comp.material = GET_RENDERER.get_default_material_pointer();
-
-				// ============== ONLY FOR STATIC OBJECTS ==============
-				mesh_comp.transform = (glm::mat4&)transform_comp * mesh_comp.transform;
-			}
-		}
-
-#elif ADD_MESH_PROCESS == 2
-
-		const f32 field_size = 20.f;
 
 
-		util::random loc_random{};
-		loc_random.get_f32(0.f, 2 * glm::pi<f32>());
 
 
-		for (u32 x = 0; x < 2000; x++) {
 
-			entity loc_entitiy = create_entity("Test entity for renderer: " + util::to_string(x));
 
-			auto& transform_comp = loc_entitiy.get_component<transform_component>();
-			transform_comp.translation = glm::vec3(loc_random.get_f32(-field_size, field_size), 0, loc_random.get_f32(-field_size, field_size));
-			transform_comp.rotation = glm::vec3(0, loc_random.get_f32(0.f, 2 * glm::pi<f32>()), 0);
 
-			auto& mesh_comp = loc_entitiy.add_component<mesh_component>();
-			mesh_comp.mesh_asset = GET_RENDERER.get_test_mesh();
-			mesh_comp.material = GET_RENDERER.get_default_material_pointer();
 
-			// ============== ONLY FOR STATIC OBJECTS ==============
-			mesh_comp.transform = (glm::mat4&)transform_comp * mesh_comp.transform;
-		}
 
-#endif //  ADD_MESH_PROCESS == 1
-		
+
+
+
+		//// ================================================ SIMPLE TERRAIN GENERATOR ===============================================
+		//// procedural terrain test
+
+		//geometry::mesh_asset loc_mesh{};
+		//loc_mesh.name = "procedural_test";
+
+		//PFF::util::noise noise(PFF::util::noise_type::perlin);
+		//noise.Set_fractal_type(PFF::util::fractal_type::FBm);
+		//noise.set_frequency(0.005f);
+		//noise.set_fractal_octaves(4);
+		//noise.set_fractal_lacunarity(2.3f);
+
+		//const glm::ivec2 grid_size = glm::ivec2(5);			// number of grid tiles
+		//const glm::vec2 grid_tile_size = glm::ivec2(100);	// size of a grid tile
+		//const glm::vec2 grid_resolution = glm::ivec2(100);
+		//const int iterations_x = static_cast<u32>(grid_size.x * grid_resolution.x);
+		//const int iterations_y = static_cast<u32>(grid_size.y * grid_resolution.y);
+
+		//const glm::vec2 offset = glm::vec2(
+		//	(static_cast<f32>(grid_size.x) / 2) * grid_tile_size.x,
+		//	(static_cast<f32>(grid_size.y) / 2) * grid_tile_size.y
+		//);
+		//const glm::vec2 pos_multiplier = glm::vec2(
+		//	(grid_tile_size.x / grid_resolution.x),
+		//	(grid_tile_size.y / grid_resolution.y)
+		//);
+
+		//loc_mesh.vertices.resize((iterations_x + 1) * (iterations_y + 1));
+		//loc_mesh.indices.resize((iterations_x * iterations_y) * 6);
+
+		//int counter = 0;
+		//for (int y = 0; y <= iterations_y; ++y) {
+		//	for (int x = 0; x <= iterations_x; ++x) {
+
+		//		loc_mesh.vertices[counter] = geometry::vertex(
+		//			glm::vec3(
+		//			(x * pos_multiplier.x) - offset.x,
+		//			noise.get_noise((f32)x, (f32)y) * 50.f,
+		//			(y * pos_multiplier.y) - offset.y
+		//		),
+		//			{ 0, 0, 1 },
+		//			glm::vec4{ 1.f },
+		//			static_cast<f32>(x) / grid_resolution.x,
+		//			static_cast<f32>(y) / grid_resolution.y
+		//		);
+		//		counter++;
+		//	}
+		//}
+
+		//counter = 0;
+		//for (int y = 0; y < iterations_y; y++) {
+		//	for (int x = 0; x < iterations_x; x++) {
+
+		//		int top_left = y * ((iterations_x)+1) + x;
+		//		int top_right = top_left + 1;
+		//		int bottom_left = (y + 1) * ((iterations_x)+1) + x;
+		//		int bottom_right = bottom_left + 1;
+
+		//		loc_mesh.indices[counter + 0] = top_left;
+		//		loc_mesh.indices[counter + 1] = bottom_left;
+		//		loc_mesh.indices[counter + 2] = top_right;
+
+		//		loc_mesh.indices[counter + 3] = top_right;
+		//		loc_mesh.indices[counter + 4] = bottom_left;
+		//		loc_mesh.indices[counter + 5] = bottom_right;
+		//		counter += 6;
+		//	}
+		//}
+
+		//geometry::Geo_surface new_surface{};
+		//new_surface.count = static_cast<int>(loc_mesh.indices.size());
+		//loc_mesh.surfaces.push_back(new_surface);
+
+		//loc_mesh.calc_bounds();
+
+
+		//auto T_test_mesh = create_ref<geometry::mesh_asset>(std::move(loc_mesh));
+		//T_test_mesh->mesh_buffers = GET_RENDERER.upload_mesh(T_test_mesh->indices, T_test_mesh->vertices);
+
+
+
+
+
+
+		//entity loc_entitiy = create_entity("Test entity for PG");
+		//auto& transform_comp = loc_entitiy.get_component<transform_component>();
+		//auto& mesh_comp = loc_entitiy.add_component<mesh_component>();
+		//mesh_comp.mesh_asset = T_test_mesh;
+		//mesh_comp.asset_path = std::filesystem::path("suff");
+
 	}
 
 	map::~map() { 
@@ -154,26 +197,19 @@ namespace PFF {
 
 			auto& relationship = entity.get_component<relationship_component>();
 
-			//auto it = std::remove(relationship.children_ID.begin(), relationship.children_ID.end(), entity.get_UUID());
-			//if (it != relationship.children_ID.end())
-			//	relationship.children_ID.erase(it);
-
 			auto& parent_relationship = get_entity_by_UUID(relationship.parent_ID).get_component<relationship_component>();
 			auto it = std::remove(parent_relationship.children_ID.begin(), parent_relationship.children_ID.end(), entity.get_UUID());
 			if (it != parent_relationship.children_ID.end())
 				parent_relationship.children_ID.erase(it);
 
 			// remove entity from children
-			if (relationship.children_ID.size()) {
-				for (auto child_ID : relationship.children_ID) {
+			for (auto child_ID : relationship.children_ID) {
 
-					auto child_entity = get_entity_by_UUID(child_ID);
-					auto& child_relationship = child_entity.get_component<relationship_component>();
-					child_relationship.parent_ID = relationship.parent_ID;
-					parent_relationship.children_ID.push_back(child_ID);
-				}
+				auto child_entity = get_entity_by_UUID(child_ID);
+				auto& child_relationship = child_entity.get_component<relationship_component>();
+				child_relationship.parent_ID = relationship.parent_ID;
+				parent_relationship.children_ID.push_back(child_ID);
 			}
-
 		}
 
 		m_entity_map.erase(entity.get_UUID());
@@ -268,6 +304,7 @@ namespace PFF {
 	}
 
 
+
 #define SERIALIZE_SIMPLE_COMPONENT(name, function)																							\
 	if (loc_entity.has_component<##name##_component>()) {																					\
 		auto& ##name##_comp = loc_entity.get_component<##name##_component>();																\
@@ -285,8 +322,6 @@ namespace PFF {
 																																			\
 		loc_entity.add_component<name##_component>(name##_comp);																			\
 	})
-
-
 
 
 	void map::serialize(serializer::option option) {

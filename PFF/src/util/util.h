@@ -108,6 +108,12 @@ namespace PFF {
             std::vector<std::function<void()>>		m_functions{};
         };
 
+
+        FORCEINLINE PFF_API bool run_program(const std::filesystem::path& path_to_exe, const std::string& cmd_args = "");
+
+        PFF_API bool run_program(const std::filesystem::path& path_to_exe, const char* cmd_args = "");
+
+
         // @brief Searches for the last occurrence of the specified delimiter in the input string,
         //          and if found, extracts the substring after the delimiter into the 'dest' string.
         //          If the delimiter is not found, the 'dest' string remains unchanged.

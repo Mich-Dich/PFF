@@ -1,6 +1,5 @@
 #pragma once
 
-
 namespace PFF {
 
     enum class PFF_API duration_precision {

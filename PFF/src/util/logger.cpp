@@ -111,7 +111,7 @@ namespace PFF::logger {
         io_handler::create_directory(file_dir);
 
         LogCoreFileName = (file_dir + "/engine.log").c_str();
-        LogFileName = (file_dir + "/" + PROJECT_NAME + ".log").c_str();
+        LogFileName = (file_dir + "/project.log").c_str();
 
         set_format(format);
 

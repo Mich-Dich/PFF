@@ -87,7 +87,7 @@ namespace PFF {
 
 		std::mutex m_event_queue_mutex;
 		std::queue<std::function<void()>> m_event_queue;
-		std::filesystem::path m_icon_path = "./assets/logo.png";
+		std::filesystem::path m_icon_path;
 
 		void bind_event_calbacks();
 		void set_vsync(bool enable);

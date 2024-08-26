@@ -4,6 +4,16 @@
 
 #include <glm/glm.hpp>
 
+#include "util/io/io_handler.h"
+#include "util/io/serializer_data.h"
+#include "util/io/serializer_yaml.h"
+#include "util/io/serializer_binary.h"
+
+#include "util/math/constance.h"
+#include "util/math/math.h"
+#include "util/math/noise.h"
+#include "util/math/random.h"
+
 #include "application.h"
 #include "entry_point.h"
 #include "util/pffpch.h"
@@ -16,17 +26,15 @@
 #include "engine/world/map.h"
 #include "engine/world/entity.h"
 #include "engine/world/components.h"
-//#include "engine/world/entity_script.h"
+#include "engine/world/entity_script.h"
 
 
 // ================================ IN DEV ================================
 #include "engine/resource_management/static_mesh_asset_manager.h"
 // ================================ IN DEV ================================
 
-
 #include "util/ui/imgui_markdown.h"
 #include "util/UUID.h"
 
-// #include "engine/geometry/basic_mesh.h"
-// #include "engine/geometry/dynamic_mesh.h"
-// #include "engine/geometry/static_mesh.h"
+
+#include "project/project_macros.h"

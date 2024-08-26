@@ -17,7 +17,6 @@ project "PFF_editor"
 	defines
 	{
 		"ENGINE_NAME=PFF",
-		"PROJECT_NAME=PFF_editor",
 		"PFF_INSIDE_EDITOR",
 	}
 
@@ -74,16 +73,17 @@ project "PFF_editor"
 		defines "PFF_EDITOR_DEBUG"
 		runtime "Debug"
 		symbols "on"
-
+		
 	filter "configurations:RelWithDebInfo"
 		defines "PFF_EDITOR_RELEASE_WITH_DEBUG_INFO"
+		buildoptions "/MD"
 		runtime "Release"
 		symbols "on"
 		optimize "speed"
 
 	filter "configurations:Release"
-		buildoptions "/MD"
 		defines "PFF_EDITOR_RELEASE"
+		buildoptions "/MDd"
 		runtime "Release"
 		optimize "on"
-			
+		

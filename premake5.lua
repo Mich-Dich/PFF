@@ -1,6 +1,5 @@
 
 include "dependencies.lua"
-client_project_name = "Sandbox"						-- This is the name of your project
 
 workspace "PFF"
 	platforms "x64"
@@ -60,4 +59,3 @@ end
 
 include "PFF"
 include "PFF_editor"
-include "Sandbox"

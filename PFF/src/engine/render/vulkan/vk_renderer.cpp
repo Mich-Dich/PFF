@@ -42,13 +42,12 @@ namespace PFF::render::vulkan {
 	#define COLLECT_PERFORMANCE_DATA
 #endif
 
-	vk_renderer vk_renderer::s_instance;
+
+	vk_renderer vk_renderer::s_instance = vk_renderer{};
 
 	static std::vector<std::vector<std::function<void()>>> s_resource_free_queue;
 
 	static std::vector<std::unordered_map<std::function<void()>, u16>> s_resource_free_queue_TEST;		// use u16 as a counter to free resources after all command buffers are free
-
-
 
 
 
@@ -121,7 +120,7 @@ namespace PFF::render::vulkan {
 
 		CORE_LOG_INIT();
 
-		PFF::render::util::compile_shaders_in_dir("../PFF/shaders", true);
+		PFF::render::util::compile_shaders_in_dir( PFF::util::get_executable_path() / "../PFF/shaders", true);
 
 		//make the vulkan instance, with basic debug features
 		vkb::InstanceBuilder builder;
@@ -886,7 +885,7 @@ namespace PFF::render::vulkan {
 		// ====================================================== Add pipeline [grid] ====================================================== 
 
 		VkShaderModule grid_shader;
-		CORE_ASSERT(util::load_shader_module("../PFF/shaders/gradient.comp.spv", m_device, &grid_shader), "", "Error when building the compute shader");
+		CORE_ASSERT(util::load_shader_module(PFF::util::get_executable_path() / "../PFF/shaders/gradient.comp.spv", m_device, &grid_shader), "", "Error when building the compute shader");
 		compute_pipeline_CI.stage.module = grid_shader;		//change the shader module only
 
 		render::compute_effect grid{};
@@ -900,7 +899,7 @@ namespace PFF::render::vulkan {
 		// ====================================================== Add pipeline [gradient] ====================================================== 		
 
 		VkShaderModule gradient_shader;
-		CORE_ASSERT(util::load_shader_module("../PFF/shaders/gradient_color.comp.spv", m_device, &gradient_shader), "", "Error when building the compute shader");
+		CORE_ASSERT(util::load_shader_module(PFF::util::get_executable_path() / "../PFF/shaders/gradient_color.comp.spv", m_device, &gradient_shader), "", "Error when building the compute shader");
 		compute_pipeline_CI.stage.module = gradient_shader;	//change the shader module only
 
 		render::compute_effect gradient{};
@@ -917,7 +916,7 @@ namespace PFF::render::vulkan {
 		// ====================================================== Add pipeline [sky] ====================================================== 
 
 		VkShaderModule sky_shader;
-		CORE_ASSERT(util::load_shader_module("../PFF/shaders/sky.comp.spv", m_device, &sky_shader), "", "Error when building the compute shader");
+		CORE_ASSERT(util::load_shader_module(PFF::util::get_executable_path() / "../PFF/shaders/sky.comp.spv", m_device, &sky_shader), "", "Error when building the compute shader");
 		compute_pipeline_CI.stage.module = sky_shader;		//change the shader module only
 
 		render::compute_effect sky{};
@@ -945,10 +944,10 @@ namespace PFF::render::vulkan {
 	
 #if 1	// Try new initalization with new shader
 		VkShaderModule mesh_frag_shader;
-		CORE_ASSERT(util::load_shader_module("../PFF/shaders/tex_image.frag.spv", m_device, &mesh_frag_shader), "Triangle fragment shader succesfully loaded", "Error when building the fragment shader");
+		CORE_ASSERT(util::load_shader_module(PFF::util::get_executable_path() / "../PFF/shaders/tex_image.frag.spv", m_device, &mesh_frag_shader), "Triangle fragment shader succesfully loaded", "Error when building the fragment shader");
 
 		VkShaderModule mesh_vertex_shader;
-		CORE_ASSERT(util::load_shader_module("../PFF/shaders/colored_triangle_mesh.vert.spv", m_device, &mesh_vertex_shader), "Triangle vertex shader succesfully loaded", "Error when building the vertex shader");
+		CORE_ASSERT(util::load_shader_module(PFF::util::get_executable_path() / "../PFF/shaders/colored_triangle_mesh.vert.spv", m_device, &mesh_vertex_shader), "Triangle vertex shader succesfully loaded", "Error when building the vertex shader");
 
 		VkPushConstantRange bufferRange{};
 		bufferRange.offset = 0;
@@ -963,10 +962,10 @@ namespace PFF::render::vulkan {
 		VK_CHECK_S(vkCreatePipelineLayout(m_device, &pipeline_layout_info, nullptr, &m_mesh_pipeline_layout));
 #else
 		VkShaderModule mesh_frag_shader;
-		CORE_ASSERT(util::load_shader_module("../PFF/shaders/colored_triangle.frag.spv", m_device, &mesh_frag_shader), "", "Error when building the triangle fragment shader module");
+		CORE_ASSERT(util::load_shader_module(PFF::util::get_executable_path() / "../PFF/shaders/colored_triangle.frag.spv", m_device, &mesh_frag_shader), "", "Error when building the triangle fragment shader module");
 
 		VkShaderModule mesh_vertex_shader;
-		CORE_ASSERT(util::load_shader_module("../PFF/shaders/colored_triangle_mesh.vert.spv", m_device, &mesh_vertex_shader), "", "Error when building the triangle vertex shader module");
+		CORE_ASSERT(util::load_shader_module(PFF::util::get_executable_path() / "../PFF/shaders/colored_triangle_mesh.vert.spv", m_device, &mesh_vertex_shader), "", "Error when building the triangle vertex shader module");
 
 		VkPushConstantRange push_constant_range{};
 		push_constant_range.offset = 0;
