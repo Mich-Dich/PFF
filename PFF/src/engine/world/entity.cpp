@@ -16,6 +16,10 @@
 #include "entity.h"
 
 namespace PFF {
+	
+	
+	bool entity::is_valid() { return m_map->m_registry.valid(m_entity_handle); }
+
 
 	void entity::add_mesh_component(mesh_component& mesh_comp) {
 

@@ -15,14 +15,14 @@ namespace PFF {
 
 namespace PFF::geometry {
     
-    struct bounds {     
+    struct PFF_API bounds {
 
         glm::vec3   origin{};
         f32         sphere_radius{};
         glm::vec3   extents{};          // AABB
     };
     
-    struct Geo_surface {
+    struct PFF_API Geo_surface {
 
         u32         startIndex;
         u32         count;
@@ -32,11 +32,13 @@ namespace PFF::geometry {
 
 
     // wierd layout because of alignement limitations on GPU
-    struct vertex {
+    struct PFF_API vertex {
 
         vertex() {}
-        vertex(const glm::vec3& pos, const glm::vec3& norm, const glm::vec4& col, f32 u_x, f32 u_y)
-            : position(pos), normal(norm), color(col), uv_x(u_x), uv_y(u_y) {}
+        vertex(const glm::vec3& pos, const glm::vec3& norm, const glm::vec4& col, const f32 uv_x, const f32 uv_y)
+            : position(pos), normal(norm), color(col), uv_x(uv_x), uv_y(uv_y) {}
+        vertex(const glm::vec3& pos, const glm::vec3& norm, const glm::vec4& col, const glm::vec2 uv)
+            : position(pos), normal(norm), color(col), uv_x(uv.x), uv_y(uv.y) {}
 
         glm::vec3                           position{};
         f32                                 uv_x = 0;
@@ -45,14 +47,14 @@ namespace PFF::geometry {
         glm::vec4                           color{};
     };
 
-    struct mesh_asset {
+    struct PFF_API mesh_asset {
 
         mesh_asset(std::vector<u32> indices = {}, std::vector<vertex> vertices = {})
 			: indices(indices), vertices(vertices) {};
 
         void calc_bounds();
 
-        std::string                         name{};
+        //std::string                         name{};
         PFF::render::GPU_mesh_buffers	    mesh_buffers{};     // GPU side buffers
 		std::vector<Geo_surface>			surfaces{};
 		std::vector<u32>					indices{};

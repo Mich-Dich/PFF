@@ -1,7 +1,7 @@
 
 #include "util/pch_editor.h"
 
-#include <entt.hpp>
+#include <entt/entt.hpp>
 #include <glm/gtc/type_ptr.hpp>
 #include <imgui.h>
 #include <ImGuizmo.h>
@@ -105,21 +105,16 @@ namespace PFF {
 		serializer::yaml(config::get_filepath_from_configtype(application::get().get_project_path(), config::file::editor), "world_vieport_data", option)
 			.entry("selected_entity", selected_ID);
 
-		if (option == serializer::option::load_from_file) {
+		//if (option == serializer::option::load_from_file) {
 
-			// TODO: load selected entity after loading world/map
-			CORE_LOG(Trace, "Load UUID: " << selected_ID);
-			const auto& maps = application::get().get_world_layer()->get_maps();
-			for (const auto& loc_map : maps) {
+		//	// TODO: load selected entity after loading world/map
+		//	CORE_LOG(Trace, "Load UUID: " << selected_ID);
+		//	if (auto loc_entity = application::get().get_world_layer()->get_map()->get_entity_by_UUID(selected_ID)) {
 
-				if (auto loc_entity = loc_map->get_entity_by_UUID(selected_ID)) {
-
-					m_selected_entity = loc_entity;
-					CORE_LOG(Info, "FOUND UUID: " << selected_ID);
-					break;
-				}
-			}
-		}
+		//		m_selected_entity = loc_entity;
+		//		CORE_LOG(Info, "FOUND UUID: " << selected_ID);
+		//	}
+		//}
 
 	}
 
@@ -194,59 +189,56 @@ namespace PFF {
 		ImGui::Begin("Outliner", &m_show_outliner, window_flags);
 
 		u64 index = 0;
-		const auto& maps = application::get().get_world_layer()->get_maps();
-		for (const auto& loc_map : maps) {
+		const auto& loc_map = application::get().get_world_layer()->get_map();
+		for (const auto entity_ID : loc_map->m_registry.view<entt::entity>()) {
 
-			for (const auto entity_ID : loc_map->m_registry.view<entt::entity>()) {
+			PFF::entity loc_entity = entity(entity_ID, loc_map.get());
+			const auto& tag_comp = loc_entity.get_component<tag_component>();
 
-				PFF::entity loc_entity = entity(entity_ID, loc_map.get());
-				const auto& tag_comp = loc_entity.get_component<tag_component>();
+			// has relationship
+			if (loc_entity.has_component<relationship_component>()) {
 
-				// has relationship
-				if (loc_entity.has_component<relationship_component>()) {
-
-					auto& relation_comp = loc_entity.get_component<relationship_component>();
-					if (relation_comp.parent_ID != 0)	// skip all children in main display (will be displayed in [display_entity_children()])
-						continue;
-
-					ImGui::Text("O");		// TODO: replace with hide/show button
-					ImGui::SameLine();
-
-					std::string item_name = "outliner_entity_" + index++;
-					ImGui::PushID(item_name.c_str());
-					const bool is_open = ImGui::TreeNodeEx(tag_comp.tag.c_str(),
-						outliner_base_flags | ((m_selected_entity == loc_entity) ? ImGuiTreeNodeFlags_Selected : 0));
-					ImGui::PopID();
-					
-					if (ImGui::IsItemClicked())
-						m_selected_entity = loc_entity;
-
-					if (is_open) {
-
-						display_entity_children(loc_map, loc_entity, index);
-						ImGui::TreePop();
-					}
-
+				auto& relation_comp = loc_entity.get_component<relationship_component>();
+				if (relation_comp.parent_ID != 0)	// skip all children in main display (will be displayed in [display_entity_children()])
 					continue;
-				}
 
-				// has no relationship
 				ImGui::Text("O");		// TODO: replace with hide/show button
 				ImGui::SameLine();
 
 				std::string item_name = "outliner_entity_" + index++;
 				ImGui::PushID(item_name.c_str());
-				ImGui::TreeNodeEx(tag_comp.tag.c_str(),
-					outliner_base_flags | ImGuiTreeNodeFlags_Leaf | ImGuiTreeNodeFlags_NoTreePushOnOpen | ((m_selected_entity == loc_entity) ? ImGuiTreeNodeFlags_Selected : 0));
+				const bool is_open = ImGui::TreeNodeEx(tag_comp.tag.c_str(),
+					outliner_base_flags | ((m_selected_entity == loc_entity) ? ImGuiTreeNodeFlags_Selected : 0));
 				ImGui::PopID();
-
+					
 				if (ImGui::IsItemClicked())
 					m_selected_entity = loc_entity;
 
-				outliner_entity_popup(item_name.c_str(), loc_map, loc_entity);
+				if (is_open) {
+
+					display_entity_children(loc_map, loc_entity, index);
+					ImGui::TreePop();
+				}
+
+				continue;
 			}
 
+			// has no relationship
+			ImGui::Text("O");		// TODO: replace with hide/show button
+			ImGui::SameLine();
+
+			std::string item_name = "outliner_entity_" + index++;
+			ImGui::PushID(item_name.c_str());
+			ImGui::TreeNodeEx(tag_comp.tag.c_str(),
+				outliner_base_flags | ImGuiTreeNodeFlags_Leaf | ImGuiTreeNodeFlags_NoTreePushOnOpen | ((m_selected_entity == loc_entity) ? ImGuiTreeNodeFlags_Selected : 0));
+			ImGui::PopID();
+
+			if (ImGui::IsItemClicked())
+				m_selected_entity = loc_entity;
+
+			outliner_entity_popup(item_name.c_str(), loc_map, loc_entity);
 		}
+
 
 		// Reset m_selected_entity when clicking on empty space
 		if (ImGui::IsWindowHovered() && ImGui::IsMouseClicked(ImGuiMouseButton_Left) && !ImGui::IsAnyItemHovered())
@@ -449,7 +441,7 @@ namespace PFF {
 						break;
 					}
 
-					const auto loc_map = application::get().get_world_layer()->get_maps()[0];
+					const auto loc_map = application::get().get_world_layer()->get_map();
 					entity loc_entitiy = loc_map->create_entity("SM_" + file_path.filename().replace_extension("").string());
 
 					loc_entitiy.add_mesh_component(mesh_comp);

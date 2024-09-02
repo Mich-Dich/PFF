@@ -153,9 +153,9 @@ namespace PFF {
 
 	#if ENABLED_LOGGING_OF_ASSERTS
 		#define CORE_ASSERT(expr, successMsg, failureMsg)								\
-						if (expr) {														\
-							CORE_LOG(Trace, successMsg);								\
-						} else {														\
+						if (expr) 														\
+							CORE_LOG(Trace, successMsg)									\
+						 else {															\
 							CORE_LOG(Fatal, failureMsg);								\
 							DEBUG_BREAK();												\
 						}
@@ -172,16 +172,16 @@ namespace PFF {
 
 	#if ENABLE_LOGGING_OF_VALIDATION
 		#define CORE_VALIDATE(expr, ReturnCommand, successMsg, failureMsg)				\
-						if (expr) {														\
-							CORE_LOG(Trace, successMsg);								\
-						} else {														\
+						if (expr) 														\
+							CORE_LOG(Trace, successMsg)									\
+						 else {															\
 							CORE_LOG(Warn, failureMsg);									\
 							ReturnCommand;												\
 						}
 
 		#define CORE_VALIDATE_S(expr, ReturnCommand)									\
 						if (!expr) {													\
-							CORE_LOG(Warn, #expr);										\
+							CORE_LOG(Warn, "Validation Failed: " << #expr);				\
 							ReturnCommand;												\
 						}
 	#else

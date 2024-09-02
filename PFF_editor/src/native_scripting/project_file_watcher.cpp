@@ -1,6 +1,7 @@
 
 #include "util/pch_editor.h"
 
+#include "PFF_editor.h"
 #include "util/io/io_handler.h"
 #include "script_parser.h"
 #include "project/file_system_watcher.h"
@@ -69,22 +70,20 @@ namespace PFF {
 
 	static void generate_init_files() {
 
-		std::filesystem::path generatedDir = s_root_directory / "generated";
-		io_handler::create_directory(generatedDir);
+		std::filesystem::path generated_dir = s_root_directory / "generated";
+		io_handler::create_directory(generated_dir);
 
-		std::filesystem::path initH = generatedDir / "init.h";
-		std::filesystem::path initCpp = generatedDir / "init.cpp";
+		std::filesystem::path initH = generated_dir / "init.h";
+		std::filesystem::path initCpp = generated_dir / "init.cpp";
 		code_generator::generate_init_file(s_classes, initH);
-
 		io_handler::write_to_file("#include \"init.h\"\n", initCpp);
 	}
 
 	static bool process_file(std::filesystem::path& file, const std::filesystem::path& generatedDirPath) {
 
-		if (!io_handler::is_file(file) || io_handler::is_hidden(file) || !is_header_file(file))
+		if (!io_handler::is_file(file) || io_handler::is_hidden(file) || !is_header_file(file) || file.filename().replace_extension() == "project")
 			return false;
 
-		io_handler::create_directory(generatedDirPath);
 
 		script_scanner fileScanner = script_scanner(file);
 		std::vector<Token> fileTokens = fileScanner.scan_tokens();
@@ -93,10 +92,13 @@ namespace PFF {
 
 		merge_new_classes(fileParser.get_classes(), file);
 
-		std::string generatedHFilename = file.filename().replace_extension("").string() + "-generated.h";
-		const std::filesystem::path path = generatedDirPath / generatedHFilename;
+		const auto relatice_filepath = util::extract_path_from_directory(file, "src");
+		std::string generatedHFilename = file.filename().replace_extension("").string() + "-generated" + file.extension().string();
+		const std::filesystem::path path = PFF_editor::get().get_project_path() / "generated" / relatice_filepath.parent_path() / generatedHFilename;
+		io_handler::create_directory(path.parent_path());
+
 		io_handler::write_to_file(fileParser.generate_header_file().c_str(), path);
-		generate_init_files();
+		//generate_init_files();
 		return true;
 	}
 
@@ -109,7 +111,9 @@ namespace PFF {
 		std::filesystem::path generatedFilePath = s_root_directory / generatedDirPath;
 		if (process_file(filePath, generatedFilePath))
 			cpp_build::build(s_root_directory);
-		
+	
+		cpp_build::compile(s_root_directory);
+
 	}
 
 	static void generate_initial_class_information(const std::filesystem::path& directory) {
@@ -122,8 +126,6 @@ namespace PFF {
 		const std::filesystem::path generatedDir = directory / ".." / "generated";
 		for (auto file : files) 
 			process_file(file, generatedDir);
-
-		generate_init_files();
 	}
 
 
@@ -151,8 +153,10 @@ namespace PFF {
 
 		CORE_LOG(Trace, "Generating initial class information");
 		generate_initial_class_information(s_root_directory / SOURCE_DIR);
+		generate_init_files();
 
 		cpp_build::build(s_root_directory);
+		cpp_build::compile(s_root_directory);
 
 		CORE_LOG(Trace, "Monitoring directory " << io_handler::get_absolute_path(s_root_directory / SOURCE_DIR));
 		s_file_watcher.path = s_root_directory / SOURCE_DIR;

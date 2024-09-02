@@ -41,14 +41,8 @@ namespace PFF::io_handler {
 	bool create_directory(const std::filesystem::path& path) {
 
 		// Check if the directory exists
-		if (!std::filesystem::is_directory(path)) {
-			
-			if (!std::filesystem::create_directory(path)) {		// Create the directory
-
-				CORE_LOG(Error, "could not create directory");
-				return false;
-			}
-		}
+		if (!std::filesystem::is_directory(path))
+			CORE_VALIDATE(std::filesystem::create_directories(path), return false, "", "could not create directory: " << path);
 		
 		return true;
 	}

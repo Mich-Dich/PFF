@@ -1,6 +1,8 @@
 
 #include "util/pffpch.h"
 
+#include <regex>
+
 #include "file_system_watcher.h"
 
 #ifdef PFF_PLATFORM_WINDOWS
@@ -11,13 +13,42 @@
 
 namespace PFF {
 
+#define BIT_FLAG_IF(enum_value, flag)				if (p_notify_filters && enum_value)									\
+														flags |= flag;
+
+#define TRY_CALL_FUNCTION(func_name)				if (func_name!= nullptr)											\
+														func_name(std::filesystem::path(std::string(filename)));
+
+	static const std::vector<std::string> temp_extensions = { "~", ".TMP", ".tmp", ".temp", ".swp", ".bak" };
+	static const std::vector<std::regex> temp_patterns = {
+		std::regex(".*~RF[0-9a-f]{6}\\.TMP"),		// Visual Studio temp files
+		std::regex(".*\\.[0-9a-zA-Z]{3}~")			// Other common temp file patterns
+	};
+
 	static bool is_started = false;
 	
-	file_system_watcher::file_system_watcher() { }
 
+	file_system_watcher::file_system_watcher() { }
 
 	void file_system_watcher::start() { m_thread = std::thread(&file_system_watcher::start_thread, this); }
 
+	static bool should_ignore_file(const std::string filename) {
+
+		if (filename[0] == '.')			// Ignore files that start with a dot (hidden files)
+			return true;
+
+		for (const auto& ext : temp_extensions) {
+			if (filename.length() >= ext.length() && filename.compare(filename.length() - ext.length(), ext.length(), ext) == 0)
+				return true;
+		}
+
+		for (const auto& pattern : temp_patterns) {
+			if (std::regex_match(filename, pattern))
+				return true;
+		}
+
+		return false;
+	}
 
 	void file_system_watcher::start_thread() {
 
@@ -37,35 +68,20 @@ namespace PFF {
 
 		if (dirHandle == INVALID_HANDLE_VALUE) {
 		
-			CORE_LOG(Error, "Invalid file access. Could not create FileSystemWatcher for " << path.string().c_str());
+			CORE_LOG(Error, "Invalid file access. Could not create file_system_watcher for " << path.string().c_str());
 			return;
 		}
 
 		// Set up notification flags 
 		int flags = 0;
-		if (p_notify_filters && notify_filters::FileName)
-			flags |= FILE_NOTIFY_CHANGE_FILE_NAME;
-
-		if (p_notify_filters && notify_filters::DirectoryName)
-			flags |= FILE_NOTIFY_CHANGE_DIR_NAME;
-		
-		if (p_notify_filters && notify_filters::Attributes)
-			flags |= FILE_NOTIFY_CHANGE_ATTRIBUTES;
-		
-		if (p_notify_filters && notify_filters::Size)
-			flags |= FILE_NOTIFY_CHANGE_SIZE;
-		
-		if (p_notify_filters && notify_filters::LastWrite)
-			flags |= FILE_NOTIFY_CHANGE_LAST_WRITE;
-		
-		if (p_notify_filters && notify_filters::LastAccess)
-			flags |= FILE_NOTIFY_CHANGE_LAST_ACCESS;
-		
-		if (p_notify_filters && notify_filters::CreationTime)
-			flags |= FILE_NOTIFY_CHANGE_CREATION;
-		
-		if (p_notify_filters && notify_filters::Security)
-			flags |= FILE_NOTIFY_CHANGE_SECURITY;
+		BIT_FLAG_IF(notify_filters::FileName, FILE_NOTIFY_CHANGE_FILE_NAME);
+		BIT_FLAG_IF(notify_filters::DirectoryName, FILE_NOTIFY_CHANGE_DIR_NAME);
+		BIT_FLAG_IF(notify_filters::Attributes, FILE_NOTIFY_CHANGE_ATTRIBUTES);
+		BIT_FLAG_IF(notify_filters::Size, FILE_NOTIFY_CHANGE_SIZE);
+		BIT_FLAG_IF(notify_filters::LastWrite, FILE_NOTIFY_CHANGE_LAST_WRITE);
+		BIT_FLAG_IF(notify_filters::LastAccess, FILE_NOTIFY_CHANGE_LAST_ACCESS);
+		BIT_FLAG_IF(notify_filters::CreationTime, FILE_NOTIFY_CHANGE_CREATION);
+		BIT_FLAG_IF(notify_filters::Security, FILE_NOTIFY_CHANGE_SECURITY);
 
 		char filename[MAX_PATH];
 		char buffer[2048];
@@ -113,30 +129,19 @@ namespace PFF {
 				strcpy(filename, "");
 				int filenamelen = WideCharToMultiByte(CP_ACP, 0, pNotify->FileName, pNotify->FileNameLength / 2, filename, sizeof(filename), NULL, NULL);
 				filename[pNotify->FileNameLength / 2] = '\0';
+
+				if (should_ignore_file(std::string(filename))) {
+
+					offset += pNotify->NextEntryOffset;
+					continue;
+				}
+
 				switch (pNotify->Action) {
-				case FILE_ACTION_ADDED:
-					if (on_created != nullptr) 
-						on_created(std::filesystem::path(std::string(filename)));
-					
-					break;
-				case FILE_ACTION_REMOVED:
-					if (on_deleted != nullptr) 
-						on_deleted(std::filesystem::path(std::string(filename)));
-					
-					break;
-				case FILE_ACTION_MODIFIED:
-					if (on_changed != nullptr) 
-						on_changed(std::filesystem::path(std::string(filename)));
-					
-					break;
-				case FILE_ACTION_RENAMED_OLD_NAME:
-					// Logger::Info("The file was renamed and this is the old name: [%s]", filename);
-					break;
-				case FILE_ACTION_RENAMED_NEW_NAME:
-					if (on_renamed != nullptr) 
-						on_renamed(std::filesystem::path(std::string(filename)));
-					
-					break;
+				case FILE_ACTION_ADDED:				TRY_CALL_FUNCTION(on_created) break;
+				case FILE_ACTION_REMOVED:			TRY_CALL_FUNCTION(on_deleted) break;
+				case FILE_ACTION_MODIFIED:			TRY_CALL_FUNCTION(on_changed) break;
+				case FILE_ACTION_RENAMED_NEW_NAME:	TRY_CALL_FUNCTION(on_renamed) break;
+				case FILE_ACTION_RENAMED_OLD_NAME:	LOG(Info, "The file was renamed and this is the old name: [" << filename << "]"); break;
 				default:
 					CORE_LOG(Error, "Default error. Unknown file action [" << pNotify->Action << "] for FileSystemWatcher " << path.string().c_str());
 					break;

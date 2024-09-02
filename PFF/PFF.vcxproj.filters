@@ -407,5 +407,6 @@
     <ClCompile Include="vendor\ImGuizmo\ImGuizmo.cpp">
       <Filter>vendor\ImGuizmo</Filter>
     </ClCompile>
+    <ClCompile Include="src\procedural\procedural_mesh_script.cpp" />
   </ItemGroup>
 </Project>

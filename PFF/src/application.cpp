@@ -120,6 +120,10 @@ namespace PFF {
 		m_imgui_layer = new UI::imgui_layer();
 		m_layerstack->push_overlay(m_imgui_layer);
 
+
+		// TODO: load the map specefied in the project settings as editor_start_world
+		get_world_layer()->set_map(create_ref<map>());
+
 		script_system::init();
 
 		PFF_PROFILE_END_SESSION();
@@ -136,22 +140,15 @@ namespace PFF {
 			util::cancel_timer(m_timers[x]);
 		m_timers.clear();
 
-		//m_current_map.reset();
-		//m_layerstack.pop_layer(m_world_layer);
-		//delete m_world_layer;
-
 		GET_RENDERER.resource_free();
 
 		m_layerstack->pop_overlay(m_imgui_layer);
 		delete m_imgui_layer;
 
 		GET_RENDERER.shutdown();
-
-
+		
 		m_layerstack.reset();
-
 		m_window.reset();
-
 		CORE_LOG_SHUTDOWN();
 		PFF_PROFILE_END_SESSION();
 	}

@@ -42,26 +42,7 @@ namespace PFF {
 		CORE_LOG_SHUTDOWN();
 	}
 
-	bool PFF_editor::init() {
-
-		// TODO: load the map specefied in the project settings as editor_start_world
-		ref<map> loc_map = create_ref<map>();
-
-		//entity loc_entitiy = loc_map->create_entity("editor_origin_grid");
-		//auto& transform_comp = loc_entitiy.get_component<transform_component>();
-		//transform_comp.translation = glm::vec3(0);
-		//transform_comp.rotation = glm::vec3(0);
-
-		//auto& mesh_comp = loc_entitiy.add_component<mesh_component>();
-
-		//mesh_comp.mesh_asset = static_mesh_asset_manager::get().get_test_mesh();
-		//mesh_comp.material = material_instance_asset_manager::get().get_default_material_pointer();
-
-		get_world_layer()->add_map( loc_map );
-		
-
-		return true;
-	}
+	bool PFF_editor::init() { return true; }
 
 	bool PFF_editor::shutdown() { return true; }
 

@@ -291,6 +291,7 @@ IF EXIST $(SolutionDir)\vendor\premake\ (xcopy /Q /E /Y /I $(SolutionDir)\vendor
     <ClCompile Include="src\engine\resource_management\static_mesh_asset_manager.cpp" />
     <ClCompile Include="src\engine\world\entity.cpp" />
     <ClCompile Include="src\engine\world\map.cpp" />
+    <ClCompile Include="src\procedural\procedural_mesh_script.cpp" />
     <ClCompile Include="src\project\file_system_watcher.cpp" />
     <ClCompile Include="src\project\script_system.cpp" />
     <ClCompile Include="src\util\UUID.cpp" />

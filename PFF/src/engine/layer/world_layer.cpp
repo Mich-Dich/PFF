@@ -4,6 +4,8 @@
 #include "application.h"
 #include "engine/render/renderer.h"
 #include "engine/Events/Event.h"
+#include "project/script_system.h"
+
 #include "world_layer.h"
 
 namespace PFF {
@@ -20,6 +22,12 @@ namespace PFF {
 
 		m_player_controller = player_controller;
 		m_player_controller->set_world_layer_ref(this);
+	}
+
+	void world_layer::set_map(const ref<map> map) {
+
+		m_map = map;
+		script_system::reinit_scripts();		// reregister scripts
 	}
 
 	void world_layer::on_attach() {
@@ -49,8 +57,7 @@ namespace PFF {
 
 		m_player_controller->update_internal(delta_time);
 	
-		for (const auto& map : m_maps)
-			map->on_update(delta_time);
+		m_map->on_update(delta_time);
 		
 	}
 

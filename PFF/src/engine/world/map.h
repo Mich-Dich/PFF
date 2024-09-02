@@ -1,6 +1,6 @@
 #pragma once
 
-#include <entt.hpp>
+#include <entt/entt.hpp>
 #include <glm/glm.hpp>
 
 namespace PFF {

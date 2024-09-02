@@ -12,6 +12,10 @@
 
 #include "map.h"
 
+#define DEV_ONLY
+#ifdef DEV_ONLY
+	#include "project/script_system.h"
+#endif
 namespace PFF {
 
 	template<typename... component>
@@ -28,11 +32,6 @@ namespace PFF {
 	}
 
 	template<typename... component>
-	static void copy_component(component_group<component...>, entt::registry& dst, entt::registry& src, const std::unordered_map<UUID, entt::entity>& entt_map) {
-		copy_component<component...>(dst, src, entt_map);
-	}
-
-	template<typename... component>
 	static void copy_component_if_exists(entity dst, entity src) {
 		([&]() {
 			if (src.has_component<component>())
@@ -41,9 +40,10 @@ namespace PFF {
 	}
 
 	template<typename... component>
-	static void copy_component_if_exists(component_group<component...>, entity dst, entity src) {
-		copy_component_if_exists<component...>(dst, src);
-	}
+	static void copy_component(component_group<component...>, entt::registry& dst, entt::registry& src, const std::unordered_map<UUID, entt::entity>& entt_map) { copy_component<component...>(dst, src, entt_map); }
+
+	template<typename... component>
+	static void copy_component_if_exists(component_group<component...>, entity dst, entity src) { copy_component_if_exists<component...>(dst, src); }
 
 	// =======================================================================================================================================
 	// - - - - - - - - MAP - - - - - - - - 
@@ -64,6 +64,12 @@ namespace PFF {
 		//};
 		//loc_entitiy.add_script_component<test_script>();
 
+#ifdef DEV_ONLY
+
+		entity loc_entitiy = create_entity("procedural_script_test");
+		script_system::add_component_from_string("simple_terrain_script", loc_entitiy);
+
+#endif
 
 
 
@@ -160,9 +166,9 @@ namespace PFF {
 
 
 
-		//entity loc_entitiy = create_entity("Test entity for PG");
-		//auto& transform_comp = loc_entitiy.get_component<transform_component>();
-		//auto& mesh_comp = loc_entitiy.add_component<mesh_component>();
+		//entity terrain_entitiy = create_entity("Test entity for PG");
+		//auto& transform_comp = terrain_entitiy.get_component<transform_component>();
+		//auto& mesh_comp = terrain_entitiy.add_component<mesh_component>();
 		//mesh_comp.mesh_asset = T_test_mesh;
 		//mesh_comp.asset_path = std::filesystem::path("suff");
 
@@ -322,7 +328,6 @@ namespace PFF {
 																																			\
 		loc_entity.add_component<name##_component>(name##_comp);																			\
 	})
-
 
 	void map::serialize(serializer::option option) {
 

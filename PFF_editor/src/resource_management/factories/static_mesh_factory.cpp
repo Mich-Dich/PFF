@@ -23,7 +23,7 @@ namespace PFF::mesh_factory {
     ref<PFF::geometry::mesh_asset> load_gltf_mesh(std::filesystem::path filePath);
 
 
-    std::optional<std::vector<ref<PFF::geometry::mesh_asset>>> load_gltf_meshes(std::filesystem::path file_path) {
+    std::optional<std::unordered_map<std::string, ref<PFF::geometry::mesh_asset>>> load_gltf_meshes(std::filesystem::path file_path) {
 
         CORE_VALIDATE(std::filesystem::exists(file_path), return {}, "Loading GLTF: " << file_path, "provided file path does not exist");
 
@@ -39,7 +39,7 @@ namespace PFF::mesh_factory {
         fastgltf::Asset gltf;
         gltf = std::move(load.get());
 
-        std::vector<ref<geometry::mesh_asset>> meshes{};
+        std::unordered_map<std::string, ref<geometry::mesh_asset>> meshes{};
 
         // use the same vectors for all meshes so that the memory doesnt reallocate as often
 
@@ -48,7 +48,7 @@ namespace PFF::mesh_factory {
         for (fastgltf::Mesh& mesh : gltf.meshes) {
 
             geometry::mesh_asset loc_mesh{};
-            loc_mesh.name = mesh.name;
+            //loc_mesh.name = mesh.name;
 
             CORE_LOG(Trace, "name of surface: " << mesh.name)
 
@@ -154,7 +154,7 @@ namespace PFF::mesh_factory {
             loc_mesh.bounds.sphere_radius = glm::length(loc_mesh.bounds.extents);
 
             // new_mesh.meshBuffers = engine->uploadMesh(indices, vertices);
-            meshes.emplace_back(create_ref<geometry::mesh_asset>(std::move(loc_mesh)));
+            meshes.emplace(mesh.name, create_ref<geometry::mesh_asset>(std::move(loc_mesh)));
         }
 
         return meshes;
@@ -169,7 +169,7 @@ namespace PFF::mesh_factory {
         CORE_LOG(Trace, "source_path: " << source_path << " destination_path: " << destination_path);
 
         // load file from source_path and
-        std::optional<std::vector<ref<PFF::geometry::mesh_asset>>> loc_mesh_assets = load_gltf_meshes(source_path);
+        std::optional<std::unordered_map<std::string, ref<PFF::geometry::mesh_asset>>> loc_mesh_assets = load_gltf_meshes(source_path);
         CORE_VALIDATE(loc_mesh_assets.has_value(), return false, "loaded source file", "Failed to load meshes");
 
         if (options.combine_meshes) {
@@ -183,10 +183,11 @@ namespace PFF::mesh_factory {
 
         } else {
 
-            for (size_t x = 0; x < loc_mesh_assets.value().size(); x++) {
+            u32 counter = 0;
+            for (const auto mesh : loc_mesh_assets.value()) {
 
                 static_mesh_file_metadata metadata{};
-                metadata.name = source_path.filename().replace_extension("").string() + "_" + loc_mesh_assets.value()[x]->name;
+                metadata.name = source_path.filename().replace_extension("").string() + "_" + mesh.first;
 
                 asset_file_header asset_header{};
                 asset_header.type = file_type::mesh;
@@ -199,11 +200,12 @@ namespace PFF::mesh_factory {
                 static_mesh_file_header static_mesh_header{};
                 static_mesh_header.version = 1;
                 static_mesh_header.source_file = source_path;
-                static_mesh_header.mesh_index = x;
+                static_mesh_header.mesh_index = counter;
+                counter++;
 
                 std::filesystem::path output_path = destination_path / (metadata.name + PFF_ASSET_EXTENTION);
 
-                serialize_mesh(output_path, loc_mesh_assets.value()[x], asset_header, general_mesh_header, static_mesh_header, serializer::option::save_to_file);
+                serialize_mesh(output_path, mesh.second, asset_header, general_mesh_header, static_mesh_header, serializer::option::save_to_file);
             }
         }
 

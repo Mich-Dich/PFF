@@ -22,14 +22,14 @@ namespace PFF {
 
 	std::vector<Token> script_scanner::scan_tokens() {
 
-		CORE_LOG(Trace, "Scanning file: " << m_filepath);
+		//CORE_LOG(Trace, "scanning file [" << util::extract_path_from_directory(m_filepath, "src").generic_string() << "]");
 		auto tokens = std::vector<Token>();
 
 		m_cursor = 0;
 		while (!at_end()) {
 			m_start = m_cursor;
 			Token token = scan_token();
-			if (token.m_Type != TokenType::ERROR_TYPE)
+			if (token.m_type != TokenType::ERROR_TYPE)
 				tokens.push_back(token);
 		}
 

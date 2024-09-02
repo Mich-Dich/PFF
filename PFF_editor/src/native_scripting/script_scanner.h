@@ -24,10 +24,10 @@ namespace PFF {
 
 	struct Token {
 		
-		int m_Line;
-		int m_Column;
-		TokenType m_Type;
-		std::string m_Lexeme;
+		int m_line;
+		int m_column;
+		TokenType m_type;
+		std::string m_lexeme;
 	};
 
 	class script_scanner {

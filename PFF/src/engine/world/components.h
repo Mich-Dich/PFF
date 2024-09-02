@@ -23,7 +23,6 @@ namespace PFF {
 	struct transform_component {
 
 		PFF_DEFAULT_CONSTRUCTORS(transform_component);
-		
 		transform_component(const glm::mat4& transform)
 			: transform(transform) {}
 
@@ -71,29 +70,24 @@ namespace PFF {
 	public:
 
 		PFF_DEFAULT_CONSTRUCTORS(mesh_component);
-
 		mesh_component(ref<PFF::geometry::mesh_asset> mesh_asset_ref)
 			: mesh_asset(mesh_asset_ref) {}
 
 		mobility							mobility = mobility::locked;
 		bool								shoudl_render = true;
 		std::filesystem::path				asset_path;							// MAYBE: doesnt need to be saved here, only needed for serializaation, maybe export to asset manager or UUID
-
-	// MAYBE: make private
-		ref<PFF::geometry::mesh_asset>		mesh_asset = nullptr;
+		ref<PFF::geometry::mesh_asset>		mesh_asset = nullptr;				// MAYBE: make private
 		material_instance*					material = nullptr;					// TODO: currently uses one material for all surfaces in mesh_asset, change so it can use diffrent materials per furface
 	};
 
-	// ============================================================ IN-DEV ============================================================
+	//struct static_mesh_component {
 
-	struct static_mesh_component {
+	//	PFF_DEFAULT_CONSTRUCTORS(static_mesh_component);
 
-		PFF_DEFAULT_CONSTRUCTORS(static_mesh_component);
-
-		glm::mat4							transform = glm::mat4(1);
-		ref<PFF::geometry::mesh_asset>		mesh_asset;
-		material_instance*					material = nullptr;					// TODO: currently uses one material for all surfaces in mesh_asset, change so it can use diffrent materials
-	};
+	//	glm::mat4							transform = glm::mat4(1);
+	//	ref<PFF::geometry::mesh_asset>		mesh_asset;
+	//	material_instance*					material = nullptr;					// TODO: currently uses one material for all surfaces in mesh_asset, change so it can use diffrent materials
+	//};
 
 	// can be used only when needed OR every entity has it		(leaning towarts sparing use)
 	struct relationship_component {
@@ -107,6 +101,8 @@ namespace PFF {
 		UUID								parent_ID;
 		std::vector<UUID>					children_ID;
 	};
+
+	// ============================================================ IN-DEV ============================================================
 
 	class entity_script;
 
@@ -140,19 +136,37 @@ namespace PFF {
 		// the version with virtual function had a size of around [328 bytes] now its [24 bytes]
 	};
 
+	class procedural_mesh_script;
 	struct procedural_mesh_component {
+		
+		// MAYBE: split into two comps
+		//		contra	increate complexity of serialization				(need to constantly check for multiplay comps)
+		//				increate complexity of interaction with other comps (need to constantly check for multiplay comps)
+		//
+		//		pro		can make multiple meshes from one script (not really needed)
 
+		PFF_DEFAULT_CONSTRUCTORS(procedural_mesh_component);
+		//procedural_mesh_component(ref<PFF::geometry::mesh_asset> mesh_asset_ref) {}		// need to assign to instance
+
+		// --------------------- script-part of component --------------------- 
 		template<typename T>
 		void bind() {
 
-			create_script = []() { return static_cast<entity_script*>(new T()); };
-			destroy_script = [](script_component* script_comp) { delete script_comp->instance; script_comp->instance = nullptr; };
+			create_script = []() { return static_cast<procedural_mesh_script*>(new T()); };
+			destroy_script = [](procedural_mesh_component* script_comp) { delete script_comp->instance; script_comp->instance = nullptr; };
 		}
 
-		entity_script* instance = nullptr;
-		entity_script* (*create_script)();
-		void			(*destroy_script)(script_component*);
-	
+		procedural_mesh_script*						instance = nullptr;
+		procedural_mesh_script*						(*create_script)();
+		void										(*destroy_script)(procedural_mesh_component*);
+		std::string									script_name = "";		// MAYBE: doesnt need to be saved here, only needed for serialization, maybe export to asset manager or UUID
+
+
+		// --------------------- mesh-part of component --------------------- 
+		mobility									mobility = mobility::locked;
+		bool										shoudl_render = true;
+		//ref<PFF::geometry::mesh_asset>			mesh_asset = nullptr;
+		material_instance*							material = nullptr;		// TODO: currently uses one material for all surfaces in mesh_asset, change so it can use diffrent materials per furface
 	};
 
 	// ============================================================ IN-DEV ============================================================
@@ -162,7 +176,7 @@ namespace PFF {
 
 	using all_components =
 		component_group<
-			transform_component, ID_component, tag_component, mesh_component, static_mesh_component, script_component //, procedural_mesh_component
+			transform_component, ID_component, tag_component, mesh_component, script_component, procedural_mesh_component
 		>;
 
 }

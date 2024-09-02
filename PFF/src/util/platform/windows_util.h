@@ -15,6 +15,14 @@
 	#define PFF_API_EDITOR	
 #endif
 
+
+#ifdef PFF_PROJECT
+	#define PROJECT_API extern "C" __declspec(dllexport)
+#else
+	#define PROJECT_API __declspec(dllimport)
+#endif
+
+
 #if defined(PFF_INSIDE_ENGINE) || defined(PFF_INSIDE_EDITOR)
 	#define USE_IN_EDITOR
 #else

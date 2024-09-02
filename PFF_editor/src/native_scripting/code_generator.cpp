@@ -1,6 +1,7 @@
 
 #include "util/pch_editor.h"
 
+#include "PFF_editor.h"
 #include "code_generator.h"
 
 namespace PFF::code_generator {
@@ -22,227 +23,183 @@ namespace PFF::code_generator {
 
 	void generate_init_file(const std::vector<PFF_class>& classes, const std::filesystem::path& filepath) {
 
+		CORE_LOG(Trace, " generating init-files for project ");
+
 		std::ostringstream source;
-
-		source << "#pragma once\n";
+		source << "#pragma once\n\n";
 		source << "#include <PFF.h>\n";										// main engine header
+		source << "#define ENTT_STANDARD_CPP\n";
+		source << "#include <entt/entt.hpp>\n\n";
 
-		const std::filesystem::path base = filepath.parent_path();
+		const auto base = PFF_editor::get().get_project_path() / "generated";
 		for (auto clazz : classes) {
-			const std::filesystem::path otherPath = clazz.full_filepath;
-			source << "#include \"" << std::filesystem::relative(otherPath, base).generic_string().c_str() << "\"\n";
 
-			std::string genFilename = clazz.full_filepath.filename().string() + "-generated" + clazz.full_filepath.extension().string();
-			const std::filesystem::path otherGenCPath = clazz.full_filepath.parent_path() / "generated" / genFilename;
-			const std::filesystem::path otherGenPath = otherGenCPath.parent_path();
-			source << "#include \"" << std::filesystem::relative(otherGenPath, base).generic_string().c_str() << "\"\n\n";
+			source << "#include \"" << util::extract_path_from_directory(clazz.full_filepath, "src").generic_string() << "\"\n";
+			source << "#include \"" << util::extract_path_from_directory(clazz.full_filepath, "src").replace_extension().generic_string() + "-generated" + clazz.full_filepath.extension().string() << "\"\n";
 		}
 
 		source << "\n";
-		source << "#define ENTT_STANDARD_CPP\n";
-		source << "#include <entt.hpp>\n\n";
-
-		source << "extern \"C\" namespace PFF {\n";
-		source << "\textern \"C\" namespace Init {\n\n";
+		source << "extern \"C\" namespace PFF::init {\n\n";
 
 		// Init Component Id's -------------------------------------------------------------------------------------------
-		source << "\t\tstatic void InitComponentIds(SceneData & scene)\n";
-		source << "\t\t{\n";
+		source << "\tstatic void init_component_ids(entt::registry* registry) {\n\n";
 
 		for (auto clazz : classes) {
-			source << "\t\t\tNEntity::RegisterComponentType<" << clazz.class_name.c_str() << ">();\n";
+			source << "\t\tregistry->storage<" << clazz.class_name.c_str() << ">();\n";
 		}
 
-		source << "\t\t}\n";
+		source << "\t}\n\n";
 
 		// AddComponent function
-		source << "\t\textern \"C\" PFF_SCRIPT void AddComponent(entt::registry& registryRef, std::string className, entt::entity entity)\n";
-		source << "\t\t{\n";
-		source << "\t\t\tLog::Assert(registryRef.valid(entity), \"Invalid entity in script\");\n";
+		source << "\tPROJECT_API void add_component(std::string className, PFF::entity entity) {\n\n";
+		source << "\t\tASSERT(entity.is_valid(), \"\", \"Invalid entity in script\");\n";
 
 		num_visited = 0;
 		for (auto clazz : classes) {
 			if (!visited_source_file(clazz)) {
-				std::string namespaceName = "Reflect" + script_parser::get_filename_as_class_name(clazz.full_filepath.filename().string());
-				source << "\t\t\tfor (auto strClass : " << namespaceName.c_str() << "::stringToMap)\n";
-				source << "\t\t\t{\n";
-				source << "\t\t\t\tif (strClass.first == className)\n";
-				source << "\t\t\t\t{\n";
-				source << "\t\t\t\t\t" << namespaceName << "::AddComponent(className, entity, registryRef);\n";
-				source << "\t\t\t\t\treturn;\n";
-				source << "\t\t\t\t}\n";
-				source << "\t\t\t}\n";
+				std::string namespaceName = "reflect_" + script_parser::get_filename_as_class_name(clazz.full_filepath.filename().string());
+				source << "\t\tfor (auto strClass : " << namespaceName.c_str() << "::string_to_map) {\n\n";
+				source << "\t\t\tif (strClass.first != className) \n";
+				source << "\t\t\t\tcontinue;\n\n";
+				source << "\t\t\t" << namespaceName << "::add_component(className, entity);\n";
+				source << "\t\t\treturn;\n";
+				source << "\t\t}\n";
 
 				visited_class_buffer[num_visited] = clazz.full_filepath;
 				num_visited++;
 			}
 		}
 
-		source << "\t\t}\n\n";
+		source << "\t}\n";
 
-		// Generate UpdateScripts function
-		source << "\t\textern \"C\" PFF_SCRIPT void UpdateScripts(entt::registry& registryRef, float dt)\n";
-		source << "\t\t{\n";
-		for (auto clazz : classes) {
-			source << "\t\t\t{\n";
-			source << "\t\t\t\tauto view = registryRef.view<" << clazz.class_name.c_str() << ">();\n";
-			source << "\t\t\t\tfor (auto entity : view)\n";
-			source << "\t\t\t\t{\n";
-			source << "\t\t\t\t\tauto comp = registryRef.get<" << clazz.class_name.c_str() << ">(entity);\n";
-			source << "\t\t\t\t\tcomp.Update(NEntity::CreateEntity(entity), dt);\n";
-			source << "\t\t\t\t}\n";
-			source << "\t\t\t}\n";
-		}
-		source << "\t\t}\n";
+		//// Generate UpdateScripts function
+		//source << "\t\tPROJECT_API void UpdateScripts(entt::registry& registryRef, float dt)\n";
+		//source << "\t\t{\n";
+		//for (auto clazz : classes) {
+		//	source << "\t\t\t{\n";
+		//	source << "\t\t\t\tauto view = registryRef.view<" << clazz.class_name.c_str() << ">();\n";
+		//	source << "\t\t\t\tfor (auto entity : view)\n";
+		//	source << "\t\t\t\t{\n";
+		//	source << "\t\t\t\t\tauto comp = registryRef.get<" << clazz.class_name.c_str() << ">(entity);\n";
+		//	source << "\t\t\t\t\tcomp.Update(NEntity::CreateEntity(entity), dt);\n";
+		//	source << "\t\t\t\t}\n";
+		//	source << "\t\t\t}\n";
+		//}
+		//source << "\t\t}\n";
 
-		// Generate EditorUpdateScripts function
-		source << "\n";
-		source << "\t\textern \"C\" PFF_SCRIPT void EditorUpdateScripts(entt::registry& registryRef, float dt)\n";
-		source << "\t\t{\n";
-		for (auto clazz : classes) {
-			source << "\t\t\t{\n";
-			source << "\t\t\t\tauto view = registryRef.view<" << clazz.class_name.c_str() << ">();\n";
-			source << "\t\t\t\tfor (auto entity : view)\n";
-			source << "\t\t\t\t{\n";
-			source << "\t\t\t\t\tauto comp = registryRef.get<" << clazz.class_name.c_str() << ">(entity);\n";
-			source << "\t\t\t\t\tcomp.EditorUpdate(NEntity::CreateEntity(entity), dt);\n";
-			source << "\t\t\t\t}\n";
-			source << "\t\t\t}\n";
-		}
-		source << "\t\t}\n";
+		//// Generate EditorUpdateScripts function
+		//source << "\n";
+		//source << "\t\tPROJECT_API void EditorUpdateScripts(entt::registry& registryRef, float dt)\n";
+		//source << "\t\t{\n";
+		//for (auto clazz : classes) {
+		//	source << "\t\t\t{\n";
+		//	source << "\t\t\t\tauto view = registryRef.view<" << clazz.class_name.c_str() << ">();\n";
+		//	source << "\t\t\t\tfor (auto entity : view)\n";
+		//	source << "\t\t\t\t{\n";
+		//	source << "\t\t\t\t\tauto comp = registryRef.get<" << clazz.class_name.c_str() << ">(entity);\n";
+		//	source << "\t\t\t\t\tcomp.EditorUpdate(NEntity::CreateEntity(entity), dt);\n";
+		//	source << "\t\t\t\t}\n";
+		//	source << "\t\t\t}\n";
+		//}
+		//source << "\t\t}\n";
 
-		// Generate NotifyBeginContact function
-		source << "\n";
-		source << "\t\textern \"C\" PFF_SCRIPT void NotifyBeginContact(Entity a, Entity b)\n";
-		source << "\t\t{\n";
-		for (auto clazz : classes) {
-			source << "\t\t\t{\n";
-			source << "\t\t\t\tif (NEntity::HasComponent<" << clazz.class_name.c_str() << ">(a))\n";
-			source << "\t\t\t\t{\n";
-			source << "\t\t\t\t\tNEntity::GetComponent<" << clazz.class_name.c_str() << ">(a).BeginContact(b);\n";
-			source << "\t\t\t\t}\n";
-			source << "\t\t\t\tif (NEntity::HasComponent<" << clazz.class_name.c_str() << ">(b))\n";
-			source << "\t\t\t\t{\n";
-			source << "\t\t\t\t\tNEntity::GetComponent<" << clazz.class_name.c_str() << ">(b).BeginContact(a);\n";
-			source << "\t\t\t\t}\n";
-			source << "\t\t\t}\n";
-		}
-		source << "\t\t}\n";
+		//// Generate SaveScript function
+		//source << "\n";
+		//source << "\t\tPROJECT_API void SaveScripts(entt::registry& registryRef, json& j, SceneData* sceneData)\n";
+		//source << "\t\t{\n";
+		//source << "\t\t\tLog::Info(\"Saving scripts\");\n";
+		//num_visited = 0;
+		//for (auto clazz : classes) {
+		//	if (!visited_source_file(clazz)) {
+		//		std::string namespaceName = "reflect_" + script_parser::get_filename_as_class_name(clazz.full_filepath.filename().string());
+		//		source << "\t\t\t" << namespaceName.c_str() << "::SaveScripts(j, registryRef, sceneData);\n";
 
-		// Generate NotifyEndContact function
-		source << "\n";
-		source << "\t\textern \"C\" PFF_SCRIPT void NotifyEndContact(Entity a, Entity b)\n";
-		source << "\t\t{\n";
-		for (auto clazz : classes) {
-			source << "\t\t\t{\n";
-			source << "\t\t\t\tif (NEntity::HasComponent<" << clazz.class_name.c_str() << ">(a))\n";
-			source << "\t\t\t\t{\n";
-			source << "\t\t\t\t\tNEntity::GetComponent<" << clazz.class_name.c_str() << ">(a).EndContact(b);\n";
-			source << "\t\t\t\t}\n";
-			source << "\t\t\t\tif (NEntity::HasComponent<" << clazz.class_name.c_str() << ">(b))\n";
-			source << "\t\t\t\t{\n";
-			source << "\t\t\t\t\tNEntity::GetComponent<" << clazz.class_name.c_str() << ">(b).EndContact(a);\n";
-			source << "\t\t\t\t}\n";
-			source << "\t\t\t}\n";
-		}
-		source << "\t\t}\n";
+		//		visited_class_buffer[num_visited] = clazz.full_filepath;
+		//		num_visited++;
+		//	}
+		//}
+		//source << "\t\t}\n";
 
-		// Generate SaveScript function
-		source << "\n";
-		source << "\t\textern \"C\" PFF_SCRIPT void SaveScripts(entt::registry& registryRef, json& j, SceneData* sceneData)\n";
-		source << "\t\t{\n";
-		source << "\t\t\tLog::Info(\"Saving scripts\");\n";
-		num_visited = 0;
-		for (auto clazz : classes) {
-			if (!visited_source_file(clazz)) {
-				std::string namespaceName = "Reflect" + script_parser::get_filename_as_class_name(clazz.full_filepath.filename().string());
-				source << "\t\t\t" << namespaceName.c_str() << "::SaveScripts(j, registryRef, sceneData);\n";
+		//// Generate Load Scripts function
+		//source << "\n";
+		//source << "\t\tPROJECT_API void LoadScript(entt::registry& registryRef, const json& j, Entity entity)\n";
+		//source << "\t\t{\n";
+		//num_visited = 0;
+		//for (auto clazz : classes) {
+		//	if (!visited_source_file(clazz)) {
+		//		std::string namespaceName = "reflect_" + script_parser::get_filename_as_class_name(clazz.full_filepath.filename().string());
+		//		source << "\t\t\t" << namespaceName.c_str() << "::TryLoad(j, entity, registryRef);\n";
 
-				visited_class_buffer[num_visited] = clazz.full_filepath;
-				num_visited++;
-			}
-		}
-		source << "\t\t}\n";
-
-		// Generate Load Scripts function
-		source << "\n";
-		source << "\t\textern \"C\" PFF_SCRIPT void LoadScript(entt::registry& registryRef, const json& j, Entity entity)\n";
-		source << "\t\t{\n";
-		num_visited = 0;
-		for (auto clazz : classes) {
-			if (!visited_source_file(clazz)) {
-				std::string namespaceName = "Reflect" + script_parser::get_filename_as_class_name(clazz.full_filepath.filename().string());
-				source << "\t\t\t" << namespaceName.c_str() << "::TryLoad(j, entity, registryRef);\n";
-
-				visited_class_buffer[num_visited] = clazz.full_filepath;
-				num_visited++;
-			}
-		}
-		source << "\t\t}\n";
+		//		visited_class_buffer[num_visited] = clazz.full_filepath;
+		//		num_visited++;
+		//	}
+		//}
+		//source << "\t\t}\n";
 
 		// Generate Init Scripts function
 		source << "\n";
-		source << "\t\textern \"C\" PFF_SCRIPT void InitScripts(SceneData* sceneData)\n";
-		source << "\t\t{\n";
-		source << "\t\t\tLog::Info(\"Initializing scripts\");\n";
-		source << "\t\t\tInitComponentIds(*sceneData);\n";
+		source << "\tPROJECT_API void init_scripts(entt::registry* registry) {\n\n";
+		source << "\t\tLOG(Info, \"Initializing scripts\");\n";
+		source << "\t\tinit_component_ids(registry);\n";
 
 		num_visited = 0;
 		for (auto clazz : classes) {
 			if (!visited_source_file(clazz)) {
-				std::string namespaceName = "Reflect" + script_parser::get_filename_as_class_name(clazz.full_filepath.filename().string());
-				source << "\t\t\t" << namespaceName.c_str() << "::Init();\n";
+				std::string namespaceName = "reflect_" + script_parser::get_filename_as_class_name(clazz.full_filepath.filename().string());
+				source << "\t\t" << namespaceName.c_str() << "::init();\n";
 
 				visited_class_buffer[num_visited] = clazz.full_filepath;
 				num_visited++;
 			}
 		}
-		source << "\t\t}\n";
+		source << "\t}\n";
 
 		// Generate Init ImGui function
-		source << "\n";
-		source << "\t\textern \"C\" PFF_SCRIPT void InitImGui(void* ctx)\n";
-		source << "\t\t{\n";
-		source << "\t\t\tLog::Info(\"Initializing ImGui\");\n";
-		source << "\t\t\tImGui::SetCurrentContext((ImGuiContext*)ctx);\n";
-		source << "\t\t}\n";
+		/*{
+			source << "\n";
+			source << "\t\tPROJECT_API void InitImGui(void* ctx) {\n\n";
+			source << "\t\t\tLOG(Info, \"Initializing ImGui\");\n";
+			source << "\t\t\tImGui::SetCurrentContext((ImGuiContext*)ctx);\n";
+			source << "\t\t}\n";
+		}*/
 
 		// Generate ImGui function
-		source << "\n";
-		source << "\t\textern \"C\" PFF_SCRIPT void ImGui(entt::registry& registryRef, Entity entity)\n";
-		source << "\t\t{\n";
+		/*{
+			source << "\n";
+			source << "\t\tPROJECT_API void ImGui(entt::registry& registryRef, Entity entity) {\n\n";
 
-		num_visited = 0;
-		for (auto clazz : classes) {
-			if (!visited_source_file(clazz)) {
-				std::string namespaceName = "Reflect" + script_parser::get_filename_as_class_name(clazz.full_filepath.filename().string());
-				source << "\t\t\t" << namespaceName.c_str() << "::ImGui(entity, registryRef);\n";
+			num_visited = 0;
+			for (auto clazz : classes) {
+				if (!visited_source_file(clazz)) {
+					std::string namespaceName = "reflect_" + script_parser::get_filename_as_class_name(clazz.full_filepath.filename().string());
+					source << "\t\t\t" << namespaceName.c_str() << "::ImGui(entity, registryRef);\n";
 
-				visited_class_buffer[num_visited] = clazz.full_filepath;
-				num_visited++;
+					visited_class_buffer[num_visited] = clazz.full_filepath;
+					num_visited++;
+				}
 			}
-		}
-		source << "\t\t}\n";
+			source << "\t\t}\n";
+		}*/
 
 		// Generate Delete Scripts function
-		source << "\n";
-		source << "\t\textern \"C\" PFF_SCRIPT void DeleteScripts()\n";
-		source << "\t\t{\n";
-		source << "\t\t\tLog::Info(\"Deleting Scripts\");\n";
+		/*{
+			source << "\n";
+			source << "\t\tPROJECT_API void DeleteScripts() {\n\n";
+			source << "\t\t\tLOG(Info, \"Deleting Scripts\");\n";
 
-		num_visited = 0;
-		for (auto clazz : classes) {
-			if (!visited_source_file(clazz)) {
-				std::string namespaceName = "Reflect" + script_parser::get_filename_as_class_name(clazz.full_filepath.filename().string());
-				source << "\t\t\t" << namespaceName.c_str() << "::DeleteScripts();\n";
+			num_visited = 0;
+			for (auto clazz : classes) {
+				if (!visited_source_file(clazz)) {
+					std::string namespaceName = "reflect_" + script_parser::get_filename_as_class_name(clazz.full_filepath.filename().string());
+					source << "\t\t\t" << namespaceName.c_str() << "::delete_scripts();\n";
 
-				visited_class_buffer[num_visited] = clazz.full_filepath;
-				num_visited++;
+					visited_class_buffer[num_visited] = clazz.full_filepath;
+					num_visited++;
+				}
 			}
-		}
-		source << "\t\t}\n";
-
-		source << "\t}\n";
+			source << "\t\t}\n";
+		}*/
+		
 		source << "}\n";
 
 		std::ofstream outStream(filepath.string());
@@ -300,7 +257,8 @@ workspace "PFF_project"
 
 	includedirs
 	{
-		"%{prj.name}/content",
+		"content",
+		"src",
 )";
 		stream << 
 			"		\"" << engineSource.generic_string() << "/PFF/src\",\n"
@@ -331,6 +289,7 @@ workspace "PFF_project"
 	filter "system:windows"
 		defines "PFF_PLATFORM_WINDOWS"
 		systemversion "latest"
+		buildcommands { "del /S *.pdb" }
 
 	filter "configurations:Debug"
 		defines "PROJECT_DEBUG"
@@ -351,7 +310,6 @@ workspace "PFF_project"
 	void generate_build_file(const std::filesystem::path& filepath, const std::filesystem::path& premakeFilepath) {
 
 		std::filesystem::path projectPremakeLua = filepath.parent_path() / "premake5.lua";
-
 		std::ostringstream stream;
 		stream << R"(
 @echo OFF
@@ -363,13 +321,14 @@ SETLOCAL EnableDelayedExpansion
 
 
 echo.
-echo ======== Building PFF Project
-echo.
-
-echo -------- Compile VS 2022 Solution:)";
-
-		stream << "\ncall " << premakeFilepath.generic_string() << " vs2022";
+if "%1" == "compile" (
+	echo -------- Compiling PFF Project
+	msbuild PFF_project.sln /p:Configuration=Debug /p:Platform=x64
+) else (
+	echo -------- Building PFF Project Solution)";
+		stream << "\n\tcall " << premakeFilepath.generic_string() << " vs2022";
 		stream << R"(
+)
 echo.
 
 echo -------- Compile Result:
@@ -382,8 +341,10 @@ if %errorlevel% neq 0 (
 @echo on
 )";
 
-		std::ofstream outStream(filepath.string());
-		outStream << stream.str().c_str();
-		outStream.close();
+		io_handler::write_to_file(stream.str().c_str(), filepath);
+
+		//std::ofstream outStream(filepath.string());
+		//outStream << stream.str().c_str();
+		//outStream.close();
 	}
 }

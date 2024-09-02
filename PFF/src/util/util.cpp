@@ -213,6 +213,23 @@ namespace PFF::util {
         }
         return result;
     }
+    
+    std::filesystem::path extract_path_from_directory(const std::filesystem::path& full_path, const std::string& directory) {
+
+        std::filesystem::path result;
+        bool start_adding = false;
+
+        for (const auto& part : full_path) {
+
+            if (start_adding)
+                result /= part;  // Add the part to the result path
+
+            if (part == directory)
+                start_adding = true;
+        }
+        return result;
+    }
+    
 
     std::filesystem::path file_dialog() {
 

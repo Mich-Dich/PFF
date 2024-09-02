@@ -2,7 +2,7 @@
 
 #include "util/pffpch.h"
 
-#include <entt.hpp>
+#include <entt/entt.hpp>
 
 //#include "entity_script.h"
 #include "util/UUID.h"
@@ -54,7 +54,11 @@ namespace PFF {
 
 		template<typename T>
 		FORCEINLINE void add_script_component() { add_component<script_component>().bind<T>(); }
+		
+		template<typename T>
+		FORCEINLINE void add_procedural_mesh_component() { add_component<procedural_mesh_component>().bind<T>(); }
 
+		FORCEINLINE bool is_valid();
 		void add_mesh_component(mesh_component& mesh_comp);
 		void propegate_transform_to_children(const glm::mat4& root_transform, const glm::mat4& delta_transform);
 		void accumulate_transform_from_parents(glm::mat4& transform);
