@@ -229,12 +229,12 @@ namespace PFF {
 				file << ((x == 0) ? "\t\tif" : "\t\telse if");
 				file << "(class_name == \"" << m_classes[x].class_name.c_str() << "\") {\n\n";
 
-				file << "\t\t\tif constexpr (std::is_base_of_v<entity_script, " << m_classes[x].class_name.c_str() << ">)\n";
-				file << "\t\t\t\tentity.add_script_component<" << m_classes[x].class_name.c_str() << ">();\n\n";
+				file << "\t\t\tif constexpr (std::is_base_of_v<procedural_mesh_script, " << m_classes[x].class_name.c_str() << ">)\n";
+				file << "\t\t\t\tentity.add_procedural_mesh_component<" << m_classes[x].class_name.c_str() << ">(\"" << m_classes[x].class_name.c_str() << "\");\n\n";
 
-				file << "\t\t\telse if constexpr (std::is_base_of_v<procedural_mesh_script, " << m_classes[x].class_name.c_str() << ">)\n";
-				file << "\t\t\t\tentity.add_procedural_mesh_component<" << m_classes[x].class_name.c_str() << ">();\n\n";
-			
+				file << "\t\t\telse if constexpr (std::is_base_of_v<entity_script, " << m_classes[x].class_name.c_str() << ">)\n";
+				file << "\t\t\t\tentity.add_script_component<" << m_classes[x].class_name.c_str() << ">();\n\n";
+							
 				file << "\t\t}\n";
 			}
 			file << "\t}\n\n";

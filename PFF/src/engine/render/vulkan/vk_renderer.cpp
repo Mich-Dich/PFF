@@ -1124,71 +1124,62 @@ namespace PFF::render::vulkan {
 		const auto procedural_view = loc_map->get_registry().view<procedural_mesh_component>();	// .group<transform_component>(entt::get<procedural_mesh_component>);
 		for (const auto entity : procedural_view) {
 
-			const auto& procedural_mesh_comp = procedural_view.get(entity);
+			const auto& [procedural_mesh_comp] = procedural_view.get(entity);
+			if (!procedural_mesh_comp.instance || !procedural_mesh_comp.shoudl_render)
+				continue;
+
 			const auto& transform_comp = loc_map->get_registry().get<transform_component>(entity);
+			auto mesh_asset = procedural_mesh_comp.instance->get_mesh_asset();
+			if (!procedural_mesh_comp.instance->get_mesh_asset() || !is_bounds_in_frustum(mesh_asset->bounds, (glm::mat4&)transform_comp))
+				continue;
 
+
+			// TODO: add more culling for geometry that doesn't need to be drawns
+				// oclution culling
+
+			// only bind material and pipeline when needed
+			material_instance* loc_material = (procedural_mesh_comp.material != nullptr) ? procedural_mesh_comp.material : &m_default_material;
+			if (last_material != loc_material) {
+
+				last_material = loc_material;
+				material_pipeline* loc_pipeline = (loc_material->pipeline != nullptr) ? loc_material->pipeline : m_default_material.pipeline;
+				if (last_pipeline != loc_pipeline) {
+
+					last_pipeline = loc_pipeline;
+					vkCmdBindPipeline(cmd, VK_PIPELINE_BIND_POINT_GRAPHICS, loc_pipeline->pipeline);
+					vkCmdBindDescriptorSets(cmd, VK_PIPELINE_BIND_POINT_GRAPHICS, loc_pipeline->layout, 0, 1, &globalDescriptor, 0, nullptr);
+					m_renderer_metrik.pipline_binding_count++;
+				}
+				vkCmdBindDescriptorSets(cmd, VK_PIPELINE_BIND_POINT_GRAPHICS, loc_material->pipeline->layout, (u32)1, (u32)1, &loc_material->material_set, (u32)0, nullptr);
+				m_renderer_metrik.material_binding_count++;
+			}
+
+			GPU_draw_push_constants push_constants;
+			switch (procedural_mesh_comp.mobility) {
+			case mobility::locked:		push_constants.world_matrix = (glm::mat4&)transform_comp; break;
+			case mobility::movable:		push_constants.world_matrix = (glm::mat4&)transform_comp; break;		// TODO: meeds to check if object moved
+			case mobility::dynamic:
+			default:					push_constants.world_matrix = (glm::mat4&)transform_comp; break;		// TODO: check for relationship_comp => add parent transform
+			}
+			push_constants.vertex_buffer = mesh_asset->mesh_buffers.vertex_buffer_address;
+			vkCmdPushConstants(cmd, loc_material->pipeline->layout, VK_SHADER_STAGE_VERTEX_BIT, (u32)0, sizeof(GPU_draw_push_constants), &push_constants);
+			vkCmdBindIndexBuffer(cmd, mesh_asset->mesh_buffers.index_buffer.buffer, 0, VK_INDEX_TYPE_UINT32);
+
+			// Draw every surface in mesh_asset
+			for (u64 x = 0; x < mesh_asset->surfaces.size(); x++) {
+
+				vkCmdDrawIndexed(cmd, mesh_asset->surfaces[x].count, 1, mesh_asset->surfaces[x].startIndex, 0, 0);		// POSIBLE OPIMIZATION - Collect all transforms of mesh_comp pointing to same mesh_asset and draw indexed
+
+#ifdef COLLECT_PERFORMANCE_DATA
+				m_renderer_metrik.triangles += (u64)mesh_asset->surfaces[x].count / 3;
+				m_renderer_metrik.draw_calls++;
+#endif // COLLECT_PERFORMANCE_DATA
+			}
+
+#ifdef COLLECT_PERFORMANCE_DATA
+			m_renderer_metrik.mesh_draw++;
+#endif // COLLECT_PERFORMANCE_DATA
 		}
-		CORE_LOG(Trace, "procedural_view size: " << procedural_view.size());
-
-		//const auto procedural_group = loc_map->get_registry().group<transform_component>(entt::get<procedural_mesh_component>);
-		//for (const auto entity : procedural_group) {
-//
-//				const auto& [transform_comp, procedural_mesh_comp] = procedural_group.get<transform_component, procedural_mesh_component>(entity);
-//
-//				if (!procedural_mesh_comp.instance->get_mesh_asset() || !procedural_mesh_comp.instance || !procedural_mesh_comp.shoudl_render)
-//					continue;
-// 
-//				auto mesh_asset = procedural_mesh_comp.instance->get_mesh_asset();
-//				if (!is_bounds_in_frustum(mesh_asset->bounds, (glm::mat4&)transform_comp))
-//					continue;
-//
-//
-//				// TODO: add more culling for geometry that doesn't need to be drawns
-//					// oclution culling
-//
-//				// only bind material and pipeline when needed
-//				material_instance* loc_material = (procedural_mesh_comp.material != nullptr) ? procedural_mesh_comp.material : &m_default_material;
-//				if (last_material != loc_material) {
-//
-//					last_material = loc_material;
-//					material_pipeline* loc_pipeline = (loc_material->pipeline != nullptr) ? loc_material->pipeline : m_default_material.pipeline;
-//					if (last_pipeline != loc_pipeline) {
-//
-//						last_pipeline = loc_pipeline;
-//						vkCmdBindPipeline(cmd, VK_PIPELINE_BIND_POINT_GRAPHICS, loc_pipeline->pipeline);
-//						vkCmdBindDescriptorSets(cmd, VK_PIPELINE_BIND_POINT_GRAPHICS, loc_pipeline->layout, 0, 1, &globalDescriptor, 0, nullptr);
-//						m_renderer_metrik.pipline_binding_count++;
-//					}
-//					vkCmdBindDescriptorSets(cmd, VK_PIPELINE_BIND_POINT_GRAPHICS, loc_material->pipeline->layout, (u32)1, (u32)1, &loc_material->material_set, (u32)0, nullptr);
-//					m_renderer_metrik.material_binding_count++;
-//				}
-//
-//				GPU_draw_push_constants push_constants;
-//				switch (procedural_mesh_comp.mobility) {
-//				case mobility::locked:		push_constants.world_matrix = (glm::mat4&)transform_comp; break;
-//				case mobility::movable:		push_constants.world_matrix = (glm::mat4&)transform_comp; break;		// TODO: meeds to check if object moved
-//				case mobility::dynamic:
-//				default:					push_constants.world_matrix = (glm::mat4&)transform_comp; break;		// TODO: check for relationship_comp => add parent transform
-//				}
-//				push_constants.vertex_buffer = mesh_asset->mesh_buffers.vertex_buffer_address;
-//				vkCmdPushConstants(cmd, loc_material->pipeline->layout, VK_SHADER_STAGE_VERTEX_BIT, (u32)0, sizeof(GPU_draw_push_constants), &push_constants);
-//				vkCmdBindIndexBuffer(cmd, mesh_asset->mesh_buffers.index_buffer.buffer, 0, VK_INDEX_TYPE_UINT32);
-//
-//				// Draw every surface in mesh_asset
-//				for (u64 x = 0; x < mesh_asset->surfaces.size(); x++) {
-//
-//					vkCmdDrawIndexed(cmd, mesh_asset->surfaces[x].count, 1, mesh_asset->surfaces[x].startIndex, 0, 0);		// POSIBLE OPIMIZATION - Collect all transforms of mesh_comp pointing to same mesh_asset and draw indexed
-//
-//#ifdef COLLECT_PERFORMANCE_DATA
-//					m_renderer_metrik.triangles += (u64)mesh_asset->surfaces[x].count / 3;
-//					m_renderer_metrik.draw_calls++;
-//#endif // COLLECT_PERFORMANCE_DATA
-//				}
-//
-//#ifdef COLLECT_PERFORMANCE_DATA
-//				m_renderer_metrik.mesh_draw++;
-//#endif // COLLECT_PERFORMANCE_DATA
-//			}
 
 
 

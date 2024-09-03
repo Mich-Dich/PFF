@@ -120,11 +120,12 @@ namespace PFF {
 		m_imgui_layer = new UI::imgui_layer();
 		m_layerstack->push_overlay(m_imgui_layer);
 
+		
+		script_system::init();
 
 		// TODO: load the map specefied in the project settings as editor_start_world
 		get_world_layer()->set_map(create_ref<map>());
 
-		script_system::init();
 
 		PFF_PROFILE_END_SESSION();
 	}

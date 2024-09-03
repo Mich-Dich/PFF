@@ -5,6 +5,7 @@
 #include "components.h"
 #include "entity_script.h"
 #include "entity.h"
+#include "procedural/procedural_mesh_script.h"
 #include "engine/resource_management/static_mesh_asset_manager.h"
 
 // serislization
@@ -66,8 +67,9 @@ namespace PFF {
 
 #ifdef DEV_ONLY
 
-		entity loc_entitiy = create_entity("procedural_script_test");
-		script_system::add_component_from_string("simple_terrain_script", loc_entitiy);
+		//CORE_LOG(Debug, "create entity and add [simple_terrain_script]");
+		//entity loc_entitiy = create_entity("procedural_script_test");
+		//script_system::add_component_from_string("simple_terrain_script", loc_entitiy);
 
 #endif
 
@@ -294,7 +296,21 @@ namespace PFF {
 		});
 #else
 		m_registry.view<script_component>().each([=](auto entity, auto& script_comp) {
-			
+
+			// ==================== DEV-ONLY (move to on_runtime_start()) ====================
+			if (!script_comp.instance) {
+
+				script_comp.instance = script_comp.create_script();
+				script_comp.instance->m_entity = PFF::entity{ entity, this };
+				script_comp.instance->on_create();
+			}
+
+			script_comp.instance->on_update(delta_time);
+
+		});
+
+		m_registry.view<procedural_mesh_component>().each([=](auto entity, auto& script_comp) {
+
 			// ==================== DEV-ONLY (move to on_runtime_start()) ====================
 			if (!script_comp.instance) {
 
@@ -377,6 +393,11 @@ namespace PFF {
 					.entry(KEY_VALUE(mesh_comp.shoudl_render));
 				);
 
+				SERIALIZE_SIMPLE_COMPONENT(procedural_mesh,
+					.entry(KEY_VALUE(procedural_mesh_comp.script_name))
+					.entry(KEY_VALUE(procedural_mesh_comp.mobility))
+					.entry(KEY_VALUE(procedural_mesh_comp.shoudl_render));
+				);
 
 				SERIALIZE_SIMPLE_COMPONENT(relationship,
 					.entry(KEY_VALUE(relationship_comp.parent_ID))
@@ -427,6 +448,16 @@ namespace PFF {
 					.entry(KEY_VALUE(mesh_comp.shoudl_render));
 
 					loc_entity.add_mesh_component(mesh_comp);
+				});
+
+				entity_section.sub_section("procedural_mesh_component", [&](serializer::yaml& component_section) {
+
+					procedural_mesh_component proc_mesh_comp{};
+					component_section.entry(KEY_VALUE(proc_mesh_comp.script_name))
+						.entry(KEY_VALUE(proc_mesh_comp.mobility))
+						.entry(KEY_VALUE(proc_mesh_comp.shoudl_render));
+
+					script_system::add_component_from_string(proc_mesh_comp.script_name, loc_entity);
 				});
 
 				DESERIALIZE_SIMPLE_COMPONENT(relationship,

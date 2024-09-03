@@ -4,6 +4,12 @@
 
 #include <type_traits> // For std::is_vector
 
+#include <typeinfo>
+
+#if defined(__GNUC__) || defined(__clang__)
+    #include <cxxabi.h>
+#endif
+
 #include "util/logger.h"
 #include "util/io/io_handler.h"
 #include "util/io/config.h"
@@ -284,6 +290,40 @@ namespace PFF {
         // STRING MANIPULATION
         // --------------------------------------------------------------------------------------------------------------------
         
+
+        template<typename T>
+        void convert_typename_to_string(std::string& typename_string) {
+#if defined(_MSC_VER)
+            // MSVC specific code
+            typename_string = typeid(T).name();
+            // Remove "class " or "struct " prefix if present
+            const char* class_prefix = "class ";
+            const char* struct_prefix = "struct ";
+            if (typename_string.find(class_prefix) == 0)
+                typename_string = typename_string.substr(strlen(class_prefix));
+            else if (typename_string.find(struct_prefix) == 0)
+                typename_string = typename_string.substr(strlen(struct_prefix));
+#elif defined(__GNUC__) || defined(__clang__)
+            // GCC and Clang specific code
+            const char* typeName = typeid(T).name();
+            int status;
+            char* demangled = abi::__cxa_demangle(typeName, nullptr, nullptr, &status);
+            if (status == 0) {
+                typename_string = demangled;
+                free(demangled);
+            } else {
+                typename_string = typeName;
+            }
+#else
+            // Generic fallback
+            typename_string = typeid(T).name();
+#endif
+
+            // Remove namespace qualifiers if present
+            size_t pos = typename_string.find_last_of("::");
+            if (pos != std::string::npos)
+                typename_string = typename_string.substr(pos + 1);
+        }
         
         // Variadic template function to handle multiple arguments
         template<typename... Args>

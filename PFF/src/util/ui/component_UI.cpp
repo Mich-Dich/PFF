@@ -76,7 +76,7 @@ namespace PFF::UI {
 
 	PFF_API void display_transform_comp(PFF::entity entity) {
 
-		UI::try_display_component<transform_component>("Tag", entity, [&](auto& component) {
+		UI::try_display_component<transform_component>("Transform", entity, [&](auto& component) {
 
 			auto& entity_transform = (glm::mat4&)component;
 			glm::mat4 buffer_transform = entity_transform;

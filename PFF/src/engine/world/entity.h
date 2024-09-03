@@ -56,7 +56,7 @@ namespace PFF {
 		FORCEINLINE void add_script_component() { add_component<script_component>().bind<T>(); }
 		
 		template<typename T>
-		FORCEINLINE void add_procedural_mesh_component() { add_component<procedural_mesh_component>().bind<T>(); }
+		FORCEINLINE void add_procedural_mesh_component(std::string script_name) { add_component<procedural_mesh_component>().bind<T>(script_name); }
 
 		FORCEINLINE bool is_valid();
 		void add_mesh_component(mesh_component& mesh_comp);

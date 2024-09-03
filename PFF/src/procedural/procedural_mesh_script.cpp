@@ -35,10 +35,10 @@ namespace PFF {
 		m_mesh_asset->indices.push_back(index3);
 	}
 
-	void procedural_mesh_script::add_quad(const u32 index1, const u32 index2, const u32 index3, const u32 index4) {
+	void procedural_mesh_script::add_quad(const u32 top_right_index, u32 top_left_index, const u32 bottom_left_index, const u32 bottom_right_index) {
 	
-		add_triangle(index1, index2, index3);
-		add_triangle(index3, index4, index1);
+		add_triangle(top_right_index, top_left_index, bottom_left_index);
+		add_triangle(top_right_index, bottom_left_index, bottom_right_index);
 	}
 	
 	void procedural_mesh_script::add_surface(const u32 start_index, const u32 index_count) {

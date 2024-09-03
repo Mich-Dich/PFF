@@ -1,6 +1,7 @@
 #pragma once
 
 #include "util/pffpch.h"
+
 #include "engine/render/render_public_data.h"
 #include "engine/render/material.h"
 #include "util/math/math.h"
@@ -150,10 +151,11 @@ namespace PFF {
 
 		// --------------------- script-part of component --------------------- 
 		template<typename T>
-		void bind() {
+		void bind(std::string& script_name_string) {
 
 			create_script = []() { return static_cast<procedural_mesh_script*>(new T()); };
 			destroy_script = [](procedural_mesh_component* script_comp) { delete script_comp->instance; script_comp->instance = nullptr; };
+			script_name = script_name_string;
 		}
 
 		procedural_mesh_script*						instance = nullptr;
@@ -165,7 +167,7 @@ namespace PFF {
 		// --------------------- mesh-part of component --------------------- 
 		mobility									mobility = mobility::locked;
 		bool										shoudl_render = true;
-		//ref<PFF::geometry::mesh_asset>			mesh_asset = nullptr;
+		//ref<PFF::geometry::mesh_asset>			mesh_asset = nullptr;	// MAYBE: Move mesh_asset to the component for better performance in rendering
 		material_instance*							material = nullptr;		// TODO: currently uses one material for all surfaces in mesh_asset, change so it can use diffrent materials per furface
 	};
 

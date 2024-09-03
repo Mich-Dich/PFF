@@ -178,30 +178,47 @@ namespace PFF::serializer {
 					continue;
 
 				// if line contains desired section enter inner-loop
-				//   has correct indentaion              has correct section_name                          ends with double-point
-				if ((util::measure_indentation(line, NUM_OF_INDENTING_SPACES) == 0) && (line.find(section_name) != std::string::npos) && (line.back() == ':')) {
+				//   has incorrect indentaion											ends NOT with double-point
+				if ((util::measure_indentation(line, NUM_OF_INDENTING_SPACES) != 0) || (line.back() != ':'))
+					continue;
 
-					found_section = true;
+				// remove leading and trailing whitespace
+				auto trimmed = line;
+				trimmed.erase(trimmed.begin(), std::find_if(trimmed.begin(), trimmed.end(), [](unsigned char ch) {
+					return !std::isspace(ch);
+				}));
+				trimmed.erase(std::find_if(trimmed.rbegin(), trimmed.rend(), [](unsigned char ch) {
+					return !std::isspace(ch);
+				}).base(), trimmed.end());
 
-					while (std::getline(file_content_buffer, line)) {
+				// Remove the trailing colon
+				if (!trimmed.empty() && trimmed.back() == ':')
+					trimmed.pop_back();
 
-						if (util::measure_indentation(line, NUM_OF_INDENTING_SPACES) < m_level_of_indention)	// exit inner loop after section is finished
-							break;		
+				if (trimmed != section_name)		// has incorrect section_name
+					continue;
 
-						line = line.substr(NUM_OF_INDENTING_SPACES);
+				found_section = true;
 
-						//  more indented																		beginning of new sub-section
-						if (util::measure_indentation(line, NUM_OF_INDENTING_SPACES) > m_level_of_indention -1 || line.back() == ':' || line.front() == '-') {
+				while (std::getline(file_content_buffer, line)) {
 
-							m_file_content << line << "\n";
-							continue;
-						}
+					if (util::measure_indentation(line, NUM_OF_INDENTING_SPACES) < m_level_of_indention)	// exit inner loop after section is finished
+						break;		
 
-						std::string key, value;
-						extract_key_value(key, value, line);
-						m_key_value_pares[key] = value;
+					line = line.substr(NUM_OF_INDENTING_SPACES);
+
+					//  more indented																		beginning of new sub-section
+					if (util::measure_indentation(line, NUM_OF_INDENTING_SPACES) > m_level_of_indention -1 || line.back() == ':' || line.front() == '-') {
+
+						m_file_content << line << "\n";
+						continue;
 					}
+
+					std::string key, value;
+					extract_key_value(key, value, line);
+					m_key_value_pares[key] = value;
 				}
+
 				if (found_section)
 					break;
 			}
