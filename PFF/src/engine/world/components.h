@@ -168,7 +168,7 @@ namespace PFF {
 		mobility									mobility = mobility::locked;
 		bool										shoudl_render = true;
 		//ref<PFF::geometry::mesh_asset>			mesh_asset = nullptr;	// MAYBE: Move mesh_asset to the component for better performance in rendering
-		material_instance*							material = nullptr;		// TODO: currently uses one material for all surfaces in mesh_asset, change so it can use diffrent materials per furface
+		//material_instance*						material = nullptr;		// TODO: currently uses one material for all surfaces in mesh_asset, change so it can use diffrent materials per furface
 	};
 
 	// ============================================================ IN-DEV ============================================================

@@ -124,7 +124,7 @@ namespace PFF {
 		script_system::init();
 
 		// TODO: load the map specefied in the project settings as editor_start_world
-		get_world_layer()->set_map(create_ref<map>());
+		m_world_layer->set_map(create_ref<map>());
 
 
 		PFF_PROFILE_END_SESSION();
@@ -145,6 +145,11 @@ namespace PFF {
 
 		m_layerstack->pop_overlay(m_imgui_layer);
 		delete m_imgui_layer;
+		m_imgui_layer = nullptr;
+
+		m_layerstack->pop_overlay(m_world_layer);
+		delete m_world_layer;
+		m_world_layer = nullptr;
 
 		GET_RENDERER.shutdown();
 		

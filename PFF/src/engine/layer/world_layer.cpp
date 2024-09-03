@@ -15,7 +15,11 @@ namespace PFF {
 		CORE_LOG_INIT();
 	}
 
-	world_layer::~world_layer() { CORE_LOG_SHUTDOWN(); }
+	world_layer::~world_layer() { 
+		
+		CORE_LOG_SHUTDOWN();
+		m_map.reset();
+	}
 
 
 	void world_layer::register_player_controller(ref<player_controller> player_controller) {

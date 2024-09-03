@@ -50,7 +50,7 @@ namespace PFF {
 		render::vulkan::pipeline_builder pipeline_builder;
 		pipeline_builder.set_shaders(meshVertexShader, meshFragShader);
 		pipeline_builder.set_input_topology(VK_PRIMITIVE_TOPOLOGY_TRIANGLE_LIST);
-		pipeline_builder.set_polygon_mode(VK_POLYGON_MODE_FILL);
+		pipeline_builder.set_polygon_mode(VK_POLYGON_MODE_LINE);
 		pipeline_builder.set_cull_mode(VK_CULL_MODE_FRONT_BIT, VK_FRONT_FACE_CLOCKWISE);
 		pipeline_builder.set_multisampling_none();
 		pipeline_builder.disable_blending();

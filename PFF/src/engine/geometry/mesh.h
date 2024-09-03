@@ -2,6 +2,7 @@
 
 #include "util/pffpch.h"
 #include "engine/render/render_public_data.h"
+#include "engine/render/material.h"
 
 namespace PFF {
 
@@ -62,6 +63,20 @@ namespace PFF::geometry {
         bounds                              bounds{};
 	};
 
+    struct PFF_API procedural_mesh_asset : public mesh_asset {
 
+        procedural_mesh_asset(std::vector<u32> indices = {}, std::vector<vertex> vertices = {})
+            : mesh_asset(indices, vertices) {}
+        //~procedural_mesh_asset();
+
+        vk_buffer       staging_buffer = {};
+        void*           staging_data = nullptr;
+        size_t          staging_buffer_size = 0;
+        
+        material_instance* material = nullptr;		// TODO: currently uses one material for all surfaces in mesh_asset, change so it can use diffrent materials per furface
+
+        void update(const std::vector<u32>& new_indices, const std::vector<vertex>& new_vertices);
+        void cleanup();
+    };
 
 }

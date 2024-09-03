@@ -15,7 +15,7 @@ namespace PFF {
 
 		procedural_mesh_script();
 		virtual ~procedural_mesh_script();
-		PFF_DEFAULT_GETTER(ref<geometry::mesh_asset>,		mesh_asset);
+		PFF_DEFAULT_GETTER(PFF::geometry::procedural_mesh_asset&,		mesh_asset);
 
 		virtual void on_rebuild() {}
 		virtual void on_collision_overlap() {}
@@ -35,9 +35,9 @@ namespace PFF {
 		FORCEINLINE void set_vertex_color(const u32 index, const glm::vec4& color);
 		FORCEINLINE void recalculate_normals();
 		FORCEINLINE void recalculate_bounds();
-		void apply_mesh();			// Apply the generated mesh data to the actual mesh component
+		void apply_mesh(const bool recalc_bounds = false);			// Apply the generated mesh data to the actual mesh component
 
-		ref<geometry::mesh_asset>		m_mesh_asset = {};
+		PFF::geometry::procedural_mesh_asset		m_mesh_asset = PFF::geometry::procedural_mesh_asset();
 
 	private:
 

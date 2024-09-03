@@ -93,12 +93,18 @@ namespace PFF::render::vulkan {
 		void* get_rendered_image() override { return (void*)m_imugi_image_dset; }
 
 		vk_buffer create_buffer(size_t allocSize, VkBufferUsageFlags usage, VmaMemoryUsage memoryUsage);
-		void destroy_buffer(const vk_buffer& buffer);
+		FORCEINLINE void destroy_buffer(const vk_buffer& buffer);
 
 		// TIP: Note that this pattern is not very efficient, as CPU is waiting for the GPU command to fully execute before continuing with our CPU side logic
 		//		This is should be put on a background thread, whose sole job is to execute uploads like this one, and deleting/reusing the staging buffers.
 		render::GPU_mesh_buffers upload_mesh(std::vector<u32> indices, std::vector<PFF::geometry::vertex> vertices);
-		// TODO: add function release_mesh()
+#if 0
+		void update_mesh(render::GPU_mesh_buffers& mesh, const std::vector<u32>& indices, const std::vector<PFF::geometry::vertex>& vertices);
+#else
+		void update_mesh(PFF::geometry::procedural_mesh_asset& mesh, const std::vector<u32>& indices, const std::vector<PFF::geometry::vertex>& vertices);
+		void cleanup_procedural_mesh(PFF::geometry::procedural_mesh_asset& mesh);
+#endif
+		void release_mesh(render::GPU_mesh_buffers& mesh);
 
 	private:
 

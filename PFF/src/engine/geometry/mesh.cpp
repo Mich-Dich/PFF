@@ -1,6 +1,8 @@
 
 #include "util/pffpch.h"
 
+#include "engine/render/vulkan/vk_renderer.h"
+
 #include "mesh.h"
 
 namespace PFF::geometry {
@@ -8,6 +10,8 @@ namespace PFF::geometry {
 
 
 	void mesh_asset::calc_bounds() {
+		
+		PFF_ISOLATED_PROFILER_SCOPED(1000, "calc frustum planes ", PFF::duration_precision::microseconds);
 
 		CORE_ASSERT(surfaces.size() > 0, "", "Cannot calculate the bounds of an emty mesh_asset. Needs to have atleast one surface");
 
@@ -39,6 +43,18 @@ namespace PFF::geometry {
 		bounds.origin = (maxpos + minpos) / 2.f;
 		bounds.extents = (maxpos - minpos) / 2.f;
 		bounds.sphere_radius = glm::length(bounds.extents);
+	}
+
+	//procedural_mesh_asset::~procedural_mesh_asset() { 
+	//	
+	//	CORE_LOG(Error, "SHUTINGDOWN procedural_mesh_script");
+	//	GET_RENDERER.cleanup_procedural_mesh(this);
+	//}
+
+	void procedural_mesh_asset::update(const std::vector<u32>& new_indices, const std::vector<vertex>& new_vertices) {
+	}
+
+	void procedural_mesh_asset::cleanup() {
 	}
 
 }

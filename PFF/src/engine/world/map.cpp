@@ -56,14 +56,6 @@ namespace PFF {
 		CORE_LOG(Trace, "Loading map: " << m_path);
 
 		serialize(serializer::option::load_from_file);
-				
-		//class test_script : public entity_script {
-		//public:
-		//	void on_create() override { CORE_LOG(Debug, "Creating test_script instance") }
-		//	void on_destroy() override { }
-		//	void on_update(f32 delta_time) override { CORE_LOG(Info, "Time: " << delta_time); }
-		//};
-		//loc_entitiy.add_script_component<test_script>();
 
 #ifdef DEV_ONLY
 
@@ -73,112 +65,18 @@ namespace PFF {
 
 #endif
 
-
-
-
-
-
-
-
-
-
-
-
-		//// ================================================ SIMPLE TERRAIN GENERATOR ===============================================
-		//// procedural terrain test
-
-		//geometry::mesh_asset loc_mesh{};
-		//loc_mesh.name = "procedural_test";
-
-		//PFF::util::noise noise(PFF::util::noise_type::perlin);
-		//noise.Set_fractal_type(PFF::util::fractal_type::FBm);
-		//noise.set_frequency(0.005f);
-		//noise.set_fractal_octaves(4);
-		//noise.set_fractal_lacunarity(2.3f);
-
-		//const glm::ivec2 grid_size = glm::ivec2(5);			// number of grid tiles
-		//const glm::vec2 grid_tile_size = glm::ivec2(100);	// size of a grid tile
-		//const glm::vec2 grid_resolution = glm::ivec2(100);
-		//const int iterations_x = static_cast<u32>(grid_size.x * grid_resolution.x);
-		//const int iterations_y = static_cast<u32>(grid_size.y * grid_resolution.y);
-
-		//const glm::vec2 offset = glm::vec2(
-		//	(static_cast<f32>(grid_size.x) / 2) * grid_tile_size.x,
-		//	(static_cast<f32>(grid_size.y) / 2) * grid_tile_size.y
-		//);
-		//const glm::vec2 pos_multiplier = glm::vec2(
-		//	(grid_tile_size.x / grid_resolution.x),
-		//	(grid_tile_size.y / grid_resolution.y)
-		//);
-
-		//loc_mesh.vertices.resize((iterations_x + 1) * (iterations_y + 1));
-		//loc_mesh.indices.resize((iterations_x * iterations_y) * 6);
-
-		//int counter = 0;
-		//for (int y = 0; y <= iterations_y; ++y) {
-		//	for (int x = 0; x <= iterations_x; ++x) {
-
-		//		loc_mesh.vertices[counter] = geometry::vertex(
-		//			glm::vec3(
-		//			(x * pos_multiplier.x) - offset.x,
-		//			noise.get_noise((f32)x, (f32)y) * 50.f,
-		//			(y * pos_multiplier.y) - offset.y
-		//		),
-		//			{ 0, 0, 1 },
-		//			glm::vec4{ 1.f },
-		//			static_cast<f32>(x) / grid_resolution.x,
-		//			static_cast<f32>(y) / grid_resolution.y
-		//		);
-		//		counter++;
-		//	}
-		//}
-
-		//counter = 0;
-		//for (int y = 0; y < iterations_y; y++) {
-		//	for (int x = 0; x < iterations_x; x++) {
-
-		//		int top_left = y * ((iterations_x)+1) + x;
-		//		int top_right = top_left + 1;
-		//		int bottom_left = (y + 1) * ((iterations_x)+1) + x;
-		//		int bottom_right = bottom_left + 1;
-
-		//		loc_mesh.indices[counter + 0] = top_left;
-		//		loc_mesh.indices[counter + 1] = bottom_left;
-		//		loc_mesh.indices[counter + 2] = top_right;
-
-		//		loc_mesh.indices[counter + 3] = top_right;
-		//		loc_mesh.indices[counter + 4] = bottom_left;
-		//		loc_mesh.indices[counter + 5] = bottom_right;
-		//		counter += 6;
-		//	}
-		//}
-
-		//geometry::Geo_surface new_surface{};
-		//new_surface.count = static_cast<int>(loc_mesh.indices.size());
-		//loc_mesh.surfaces.push_back(new_surface);
-
-		//loc_mesh.calc_bounds();
-
-
-		//auto T_test_mesh = create_ref<geometry::mesh_asset>(std::move(loc_mesh));
-		//T_test_mesh->mesh_buffers = GET_RENDERER.upload_mesh(T_test_mesh->indices, T_test_mesh->vertices);
-
-
-
-
-
-
-		//entity terrain_entitiy = create_entity("Test entity for PG");
-		//auto& transform_comp = terrain_entitiy.get_component<transform_component>();
-		//auto& mesh_comp = terrain_entitiy.add_component<mesh_component>();
-		//mesh_comp.mesh_asset = T_test_mesh;
-		//mesh_comp.asset_path = std::filesystem::path("suff");
-
 	}
 
 	map::~map() { 
 	
 		serialize(serializer::option::save_to_file);
+
+		m_registry.view<procedural_mesh_component>().each([=](auto entity, auto& script_comp) {
+
+			if (script_comp.instance) 
+				script_comp.destroy_script(&script_comp);
+		});
+
 	}
 
 	ref<map> map::copy(ref<map> other) { return ref<map>(); }

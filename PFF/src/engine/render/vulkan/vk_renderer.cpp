@@ -1130,7 +1130,7 @@ namespace PFF::render::vulkan {
 
 			const auto& transform_comp = loc_map->get_registry().get<transform_component>(entity);
 			auto mesh_asset = procedural_mesh_comp.instance->get_mesh_asset();
-			if (!procedural_mesh_comp.instance->get_mesh_asset() || !is_bounds_in_frustum(mesh_asset->bounds, (glm::mat4&)transform_comp))
+			if (/*!mesh_asset || */!is_bounds_in_frustum(mesh_asset.bounds, (glm::mat4&)transform_comp))
 				continue;
 
 
@@ -1138,7 +1138,7 @@ namespace PFF::render::vulkan {
 				// oclution culling
 
 			// only bind material and pipeline when needed
-			material_instance* loc_material = (procedural_mesh_comp.material != nullptr) ? procedural_mesh_comp.material : &m_default_material;
+			material_instance* loc_material = (mesh_asset.material != nullptr) ? mesh_asset.material : &m_default_material;
 			if (last_material != loc_material) {
 
 				last_material = loc_material;
@@ -1161,17 +1161,17 @@ namespace PFF::render::vulkan {
 			case mobility::dynamic:
 			default:					push_constants.world_matrix = (glm::mat4&)transform_comp; break;		// TODO: check for relationship_comp => add parent transform
 			}
-			push_constants.vertex_buffer = mesh_asset->mesh_buffers.vertex_buffer_address;
+			push_constants.vertex_buffer = mesh_asset.mesh_buffers.vertex_buffer_address;
 			vkCmdPushConstants(cmd, loc_material->pipeline->layout, VK_SHADER_STAGE_VERTEX_BIT, (u32)0, sizeof(GPU_draw_push_constants), &push_constants);
-			vkCmdBindIndexBuffer(cmd, mesh_asset->mesh_buffers.index_buffer.buffer, 0, VK_INDEX_TYPE_UINT32);
+			vkCmdBindIndexBuffer(cmd, mesh_asset.mesh_buffers.index_buffer.buffer, 0, VK_INDEX_TYPE_UINT32);
 
 			// Draw every surface in mesh_asset
-			for (u64 x = 0; x < mesh_asset->surfaces.size(); x++) {
+			for (u64 x = 0; x < mesh_asset.surfaces.size(); x++) {
 
-				vkCmdDrawIndexed(cmd, mesh_asset->surfaces[x].count, 1, mesh_asset->surfaces[x].startIndex, 0, 0);		// POSIBLE OPIMIZATION - Collect all transforms of mesh_comp pointing to same mesh_asset and draw indexed
+				vkCmdDrawIndexed(cmd, mesh_asset.surfaces[x].count, 1, mesh_asset.surfaces[x].startIndex, 0, 0);		// POSIBLE OPIMIZATION - Collect all transforms of mesh_comp pointing to same mesh_asset and draw indexed
 
 #ifdef COLLECT_PERFORMANCE_DATA
-				m_renderer_metrik.triangles += (u64)mesh_asset->surfaces[x].count / 3;
+				m_renderer_metrik.triangles += (u64)mesh_asset.surfaces[x].count / 3;
 				m_renderer_metrik.draw_calls++;
 #endif // COLLECT_PERFORMANCE_DATA
 			}
@@ -1397,6 +1397,156 @@ namespace PFF::render::vulkan {
 		});
 		
 		return new_mesh;
+	}
+
+#if 0
+
+	void vk_renderer::update_mesh(render::GPU_mesh_buffers& mesh, const std::vector<u32>& indices, const std::vector<PFF::geometry::vertex>& vertices) {
+		
+		const size_t vertexBufferSize = vertices.size() * sizeof(PFF::geometry::vertex);
+		const size_t indexBufferSize = indices.size() * sizeof(u32);
+		if (!mesh.vertex_buffer.buffer || !mesh.index_buffer.buffer ||
+			mesh.vertex_buffer.info.size < vertexBufferSize || mesh.index_buffer.info.size < indexBufferSize) {
+
+			CORE_LOG(Warn, "Mesh not created yet or size changed, calling [upload_mesh()]");
+			mesh = upload_mesh(indices, vertices);
+			return;
+		}
+
+		vk_buffer staging = create_buffer(vertexBufferSize + indexBufferSize, VK_BUFFER_USAGE_TRANSFER_SRC_BIT, VMA_MEMORY_USAGE_CPU_TO_GPU);	// Create a staging buffer
+		void* data = staging.allocation->GetMappedData();																						// Map the staging buffer
+
+		// copy new data to the staging buffer
+		memcpy(data, vertices.data(), vertexBufferSize);
+		memcpy((char*)data + vertexBufferSize, indices.data(), indexBufferSize);
+
+		// submit a command to copy from staging buffer to the actual buffers
+		immediate_submit([&](VkCommandBuffer cmd) {
+			VkBufferCopy vertexCopy{};
+			vertexCopy.dstOffset = 0;
+			vertexCopy.srcOffset = 0;
+			vertexCopy.size = vertexBufferSize;
+			vkCmdCopyBuffer(cmd, staging.buffer, mesh.vertex_buffer.buffer, 1, &vertexCopy);
+
+			VkBufferCopy indexCopy{};
+			indexCopy.dstOffset = 0;
+			indexCopy.srcOffset = vertexBufferSize;
+			indexCopy.size = indexBufferSize;
+			vkCmdCopyBuffer(cmd, staging.buffer, mesh.index_buffer.buffer, 1, &indexCopy);
+		});
+		destroy_buffer(staging);
+	}
+	
+#else
+
+	void vk_renderer::update_mesh(PFF::geometry::procedural_mesh_asset& mesh, const std::vector<u32>& indices, const std::vector<PFF::geometry::vertex>& vertices) {
+
+		const size_t vertexBufferSize = vertices.size() * sizeof(PFF::geometry::vertex);
+		const size_t indexBufferSize = indices.size() * sizeof(u32);
+		const size_t totalSize = vertexBufferSize + indexBufferSize;
+
+		if (!mesh.mesh_buffers.vertex_buffer.buffer || !mesh.mesh_buffers.index_buffer.buffer
+			|| mesh.mesh_buffers.vertex_buffer.info.size < vertexBufferSize || mesh.mesh_buffers.index_buffer.info.size < indexBufferSize) {
+
+			CORE_LOG(Warn, "Mesh not created yet or size changed, calling [upload_mesh()]");
+			mesh.mesh_buffers = upload_mesh(indices, vertices);
+			mesh.indices = indices;
+			mesh.vertices = vertices;
+			mesh.calc_bounds();
+			return;
+		}
+
+		// Create or resize staging buffer if necessary
+		if (mesh.staging_buffer_size < totalSize) {
+			if (mesh.staging_buffer.buffer) {
+
+				CORE_LOG(Info, "Destroying existing staging buffer");
+				destroy_buffer(mesh.staging_buffer);
+				mesh.staging_buffer = {};
+				mesh.staging_data = nullptr;
+				mesh.staging_buffer_size = 0;
+			}
+			
+			CORE_LOG(Info, "Creating new staging buffer of size: [" << totalSize << "]");
+			mesh.staging_buffer = create_buffer(totalSize, VK_BUFFER_USAGE_TRANSFER_SRC_BIT, VMA_MEMORY_USAGE_CPU_TO_GPU);
+			CORE_VALIDATE(mesh.staging_buffer.buffer, return, "", "Failed to create staging buffer");
+
+			mesh.staging_data = mesh.staging_buffer.allocation->GetMappedData();
+			mesh.staging_buffer_size = totalSize;
+		}
+
+		// Copy new data to the staging buffer
+		memcpy(mesh.staging_data, vertices.data(), vertexBufferSize);
+		memcpy((char*)mesh.staging_data + vertexBufferSize, indices.data(), indexBufferSize);
+
+		// Submit a command to copy from staging buffer to the actual buffers
+		immediate_submit([&](VkCommandBuffer cmd) {
+			VkBufferCopy vertexCopy{};
+			vertexCopy.size = vertexBufferSize;
+			vkCmdCopyBuffer(cmd, mesh.staging_buffer.buffer, mesh.mesh_buffers.vertex_buffer.buffer, 1, &vertexCopy);
+
+			VkBufferCopy indexCopy{};
+			indexCopy.srcOffset = vertexBufferSize;
+			indexCopy.size = indexBufferSize;
+			vkCmdCopyBuffer(cmd, mesh.staging_buffer.buffer, mesh.mesh_buffers.index_buffer.buffer, 1, &indexCopy);
+
+			// Add memory barriers
+			VkBufferMemoryBarrier barriers[2] = {};
+			barriers[0].sType = VK_STRUCTURE_TYPE_BUFFER_MEMORY_BARRIER;
+			barriers[0].srcAccessMask = VK_ACCESS_TRANSFER_WRITE_BIT;
+			barriers[0].dstAccessMask = VK_ACCESS_VERTEX_ATTRIBUTE_READ_BIT;
+			barriers[0].buffer = mesh.mesh_buffers.vertex_buffer.buffer;
+			barriers[0].size = VK_WHOLE_SIZE;
+
+			barriers[1].sType = VK_STRUCTURE_TYPE_BUFFER_MEMORY_BARRIER;
+			barriers[1].srcAccessMask = VK_ACCESS_TRANSFER_WRITE_BIT;
+			barriers[1].dstAccessMask = VK_ACCESS_INDEX_READ_BIT;
+			barriers[1].buffer = mesh.mesh_buffers.index_buffer.buffer;
+			barriers[1].size = VK_WHOLE_SIZE;
+
+			vkCmdPipelineBarrier(cmd,
+				VK_PIPELINE_STAGE_TRANSFER_BIT,
+				VK_PIPELINE_STAGE_VERTEX_INPUT_BIT,
+				0,
+				0, nullptr,
+				2, barriers,
+				0, nullptr);
+			});
+
+		// Update the mesh data
+		mesh.indices = indices;
+		mesh.vertices = vertices;
+		//mesh.calc_bounds();
+	}
+
+	void vk_renderer::cleanup_procedural_mesh(PFF::geometry::procedural_mesh_asset& mesh) {
+
+		if (!mesh.staging_buffer.buffer || mesh.staging_buffer_size == 0 || !mesh.staging_data)
+			return;
+
+		destroy_buffer(mesh.staging_buffer);
+		mesh.staging_buffer = {};
+		mesh.staging_data = nullptr;
+		mesh.staging_buffer_size = 0;
+	}
+
+#endif
+
+	void vk_renderer::release_mesh(render::GPU_mesh_buffers& mesh) {
+
+		if (mesh.vertex_buffer.buffer) {
+		
+			vmaDestroyBuffer(m_allocator, mesh.vertex_buffer.buffer, mesh.vertex_buffer.allocation);
+			mesh.vertex_buffer = {};  // Reset to empty state
+		}
+
+		if (mesh.index_buffer.buffer) {
+			
+			vmaDestroyBuffer(m_allocator, mesh.index_buffer.buffer, mesh.index_buffer.allocation);
+			mesh.index_buffer = {};  // Reset to empty state
+		}
+		mesh.vertex_buffer_address = 0;
+		CORE_LOG(Trace, "Mesh released from GPU memory");
 	}
 
 }

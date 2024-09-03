@@ -18,7 +18,7 @@
 
 namespace PFF {
 
-#ifdef PFF_DEBUG
+#if defined(PFF_DEBUG) || defined(PROJECT_DEBUG)
 	namespace Profiling {
 
 #define PFF_ISOLATED_PROFILER_SCOPED(num_of_tests, message, profile_duration_precision)     static PFF::Profiling::simple_profiler loc_simple_profiler(num_of_tests, message, profile_duration_precision);      \
