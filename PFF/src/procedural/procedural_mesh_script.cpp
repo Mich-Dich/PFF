@@ -25,6 +25,14 @@ namespace PFF {
 		m_mesh_asset.vertices.emplace_back(position, normal, color, uv);
 	}
 
+	void procedural_mesh_script::add_vertex(const u32 index, const glm::vec3& position, const glm::vec3& normal, const glm::vec2& uv, const glm::vec4& color) {
+	
+		if (m_mesh_asset.vertices.size() - 1 > index)
+			m_mesh_asset.vertices.resize(index + 10);
+
+		m_mesh_asset.vertices[index] = geometry::vertex(position, normal, color, uv);
+	}
+
 	void procedural_mesh_script::add_triangle(const u32 index1, const u32 index2, const u32 index3) {
 		
 		m_mesh_asset.indices.push_back(index1);

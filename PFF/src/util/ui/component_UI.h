@@ -9,7 +9,7 @@ namespace PFF::UI {
 	template<typename T, typename ui_function>
 	FORCEINLINE void try_display_component(const char* name, PFF::entity entity, ui_function function) {
 
-		if (!entity.has_component<mesh_component>())
+		if (!entity.has_component<T>())
 			return;
 
 		if (!ImGui::CollapsingHeader(name, ImGuiTreeNodeFlags_DefaultOpen))
@@ -38,6 +38,7 @@ namespace PFF::UI {
 	}
 
 	FORCEINLINE PFF_API void try_display_mesh_comp(PFF::entity entity);
+	FORCEINLINE PFF_API void try_display_procedural_script_comp(PFF::entity entity);
 
 	FORCEINLINE PFF_API void display_tag_comp(PFF::entity entity);
 	FORCEINLINE PFF_API void display_transform_comp(PFF::entity entity);

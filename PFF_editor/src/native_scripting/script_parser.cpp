@@ -5,9 +5,9 @@
 
 namespace PFF {
 	
-	static Token							s_error_token = Token{ -1, -1, TokenType::ERROR_TYPE, "" };
+	static token							s_error_token = token{ -1, -1, token_type::ERROR_TYPE, "" };
 
-	FORCEINLINE Token generate_error_token() { return Token{ -1, -1, TokenType::ERROR_TYPE, "" }; }
+	FORCEINLINE token generate_error_token() { return token{ -1, -1, token_type::ERROR_TYPE, "" }; }
 	FORCEINLINE static bool is_alpha(char c) { return (c >= 'a' && c <= 'z') || (c >= 'A' && c <= 'Z'); }
 	FORCEINLINE static bool is_alpha_numeric(char c) { return is_alpha(c) || (c >= '0' && c <= '9'); }
 	FORCEINLINE static bool is_variable_friendly(char c) { return is_alpha_numeric(c) || c == '_'; }
@@ -147,7 +147,7 @@ namespace PFF {
 			for (auto ustruct : m_structs) {
 				std::string string_class_name = ustruct.struct_name;
 				string_class_name[0] = tolower(string_class_name[0]);
-				file << "\t\tauto " << string_class_name.c_str() << "_factory = entt::meta<" << ustruct.struct_name.c_str() << ">()\n";
+				file << "\t\tauto " << ustruct.struct_name_without_namespace.c_str() << "_factory = entt::meta<" << ustruct.struct_name.c_str() << ">()\n";
 
 				for (auto var : ustruct.variables) {
 					file << "\t\t\t.data<&" << ustruct.struct_name.c_str() << "::" << var.identifier.c_str() << ", entt::as_ref_t>(ids[" << id << "])\n";
@@ -159,7 +159,7 @@ namespace PFF {
 			for (auto uclass : m_classes) {
 				std::string string_class_name = uclass.class_name;
 				string_class_name[0] = tolower(string_class_name[0]);
-				file << "\t\tauto " << string_class_name.c_str() << "_factory = entt::meta<" << uclass.class_name.c_str() << ">()\n";
+				file << "\t\tauto " << uclass.class_name_without_namespace.c_str() << "_factory = entt::meta<" << uclass.class_name.c_str() << ">()\n";
 
 				for (auto var : uclass.variables) {
 					file << "\t\t\t.data<&" << uclass.class_name.c_str() << "::" << var.identifier.c_str() << ", entt::as_ref_t>(ids[" << id << "])\n";
@@ -169,6 +169,29 @@ namespace PFF {
 				file << "\t\t\t.type(entt::type_hash<" << uclass.class_name.c_str() << ">::value()); \n\n";
 			}
 			file << "\t}\n\n";
+		}
+
+		// imgui display function
+		{
+			for (auto ustruct : m_structs) {
+				
+				file << "\tvoid display_properties(" << ustruct.struct_name.c_str() << "* script) {\n\n";
+				for (auto var : ustruct.variables) {
+
+					file << "\t\tUI::table_row(\"" << var.identifier.c_str() << "\", script->" << var.identifier.c_str() << ");\n";
+				}
+				file << "\t}\n\n";
+			}
+
+			for (auto uclass : m_classes) {
+
+				file << "\tvoid display_properties(" << uclass.class_name.c_str() << "* script) {\n\n";
+				for (auto var : uclass.variables) {
+
+					file << "\t\tUI::table_row(\"" << var.identifier.c_str() << "\", script->" << var.identifier.c_str() << ");\n";
+				}
+				file << "\t}\n\n";
+			}
 		}
 
 		// save a scripts function
@@ -227,15 +250,25 @@ namespace PFF {
 			for (size_t x = 0; x < m_classes.size(); x++) {
 
 				file << ((x == 0) ? "\t\tif" : "\t\telse if");
-				file << "(class_name == \"" << m_classes[x].class_name.c_str() << "\") {\n\n";
+				file << "(class_name == \"" << m_classes[x].class_name.c_str() << "\")";
 
-				file << "\t\t\tif constexpr (std::is_base_of_v<procedural_mesh_script, " << m_classes[x].class_name.c_str() << ">)\n";
-				file << "\t\t\t\tentity.add_procedural_mesh_component<" << m_classes[x].class_name.c_str() << ">(\"" << m_classes[x].class_name.c_str() << "\");\n\n";
+				if (m_classes[x].parent_class_name.find("procedural_mesh_script") != std::string::npos) 
+					file << "\n\t\t\tentity.add_procedural_mesh_component<" << m_classes[x].class_name.c_str() << ">(\"" << m_classes[x].class_name.c_str() << "\");\n";
 
-				file << "\t\t\telse if constexpr (std::is_base_of_v<entity_script, " << m_classes[x].class_name.c_str() << ">)\n";
-				file << "\t\t\t\tentity.add_script_component<" << m_classes[x].class_name.c_str() << ">();\n\n";
+				else if (m_classes[x].parent_class_name.find("entity_script") != std::string::npos)
+					file << "\n\t\t\tentity.add_script_component<" << m_classes[x].class_name.c_str() << ">();\n";
+
+				else {
+
+					file << " {\n\n\t\t\t// could not auto detect parent class\n";
+					file << "\t\t\tif constexpr (std::is_base_of_v<procedural_mesh_script, " << m_classes[x].class_name.c_str() << ">)\n";
+					file << "\t\t\t\tentity.add_procedural_mesh_component<" << m_classes[x].class_name.c_str() << ">(\"" << m_classes[x].class_name.c_str() << "\");\n\n";
+
+					file << "\t\t\telse if constexpr (std::is_base_of_v<entity_script, " << m_classes[x].class_name.c_str() << ">)\n";
+					file << "\t\t\t\tentity.add_script_component<" << m_classes[x].class_name.c_str() << ">();\n\n";
+					file << "\t\t}\n";
+				}
 							
-				file << "\t\t}\n";
 			}
 			file << "\t}\n\n";
 		}
@@ -263,65 +296,86 @@ namespace PFF {
 		}
 	}
 
-
-
-
-
 	void script_parser::parse() { 
 	
 		m_current_token = 0;
 		m_Current_iter = m_Tokens.begin();
+		m_current_namespace = "";
+
 		do {
-			if (Match(TokenType::STRUCT_PROP)) {
-				Expect(TokenType::LEFT_PAREN);
-				Expect(TokenType::RIGHT_PAREN);
-				Match(TokenType::SEMICOLON);
-				Expect(TokenType::STRUCT_KW);
-				ParseStruct();
-			} else if (Match(TokenType::CLASS_PROP)) {
-				Expect(TokenType::LEFT_PAREN);
-				Expect(TokenType::RIGHT_PAREN);
-				Match(TokenType::SEMICOLON);
-				Expect(TokenType::CLASS_KW);
-				ParseClass();
+			if (match(token_type::NAMESPACE)) {
+
+				token namespaceToken = expect(token_type::IDENTIFIER);
+				m_current_namespace = namespaceToken.m_lexeme;
+				expect(token_type::LEFT_BRACKET);
+
+			} else if (match(token_type::STRUCT_PROP)) {
+				
+				expect(token_type::LEFT_PAREN);
+				expect(token_type::RIGHT_PAREN);
+				match(token_type::SEMICOLON);
+				expect(token_type::STRUCT_KW);
+				parse_struct();
+
+			} else if (match(token_type::CLASS_PROP)) {
+				
+				expect(token_type::LEFT_PAREN);
+				expect(token_type::RIGHT_PAREN);
+				match(token_type::SEMICOLON);
+				expect(token_type::CLASS_KW);
+				parse_class();
+
+			} else if (match(token_type::RIGHT_BRACKET)) {
+				
+				m_current_namespace = "";
+
 			} else {
+				
 				m_current_token++;
 				m_Current_iter++;
 			}
-		} while (m_current_token < m_Tokens.size() && m_Current_iter->m_type != TokenType::END_OF_FILE);
+		} while (m_current_token < m_Tokens.size() && m_Current_iter->m_type != token_type::END_OF_FILE);
 	}
 
-	void script_parser::ParseClass() {
+	void script_parser::parse_class() {
 
-		Token classType = Expect(TokenType::IDENTIFIER);
+		token class_type = expect(token_type::IDENTIFIER);
+		std::string full_class_name = m_current_namespace.empty() ? class_type.m_lexeme : m_current_namespace + "::" + class_type.m_lexeme;
+		std::string parent_class = "";
 
-		if (Match(TokenType::COLON)) {
-			while (!Match(TokenType::LEFT_BRACKET)) {
+		if (match(token_type::COLON)) {
+			while (!match(token_type::LEFT_BRACKET)) {
+				if (m_Current_iter->m_type == token_type::IDENTIFIER) {
+
+					if (!parent_class.empty())
+						parent_class += "::"; // For nested namespaces
+					
+					parent_class += m_Current_iter->m_lexeme;
+				}
 				m_current_token++;
 				m_Current_iter++;
 			}
-		} else {
-			Expect(TokenType::LEFT_BRACKET);
-		}
+		} else
+			expect(token_type::LEFT_BRACKET);
 
-		PFF_class clazz = PFF_class{ classType.m_lexeme, m_full_filepath, std::list<PFF_variable>() };
+		PFF_class clazz = PFF_class{ full_class_name, parent_class, class_type.m_lexeme, m_full_filepath, std::list<PFF_variable>()};
 
 		int level = 1;
-		while (m_Current_iter->m_type != TokenType::END_OF_FILE) {
-			if (Match(TokenType::LEFT_BRACKET)) {
+		while (m_Current_iter->m_type != token_type::END_OF_FILE) {
+			if (match(token_type::LEFT_BRACKET)) {
 				level++;
-			} else if (Match(TokenType::RIGHT_BRACKET)) {
+			} else if (match(token_type::RIGHT_BRACKET)) {
 				level--;
 				if (level <= 0) {
-					Expect(TokenType::SEMICOLON);
+					expect(token_type::SEMICOLON);
 					break;
 				}
-			} else if (Match(TokenType::PROPERTY)) {
-				Expect(TokenType::LEFT_PAREN);
-				Match(TokenType::IDENTIFIER); // Consume any EditAnywhere type thing, it doesn't do anything for now...
-				Expect(TokenType::RIGHT_PAREN);
-				Match(TokenType::SEMICOLON); // Consume a semicolon if it is there, this is to help with indentation
-				clazz.variables.push_back(ParseVariable());
+			} else if (match(token_type::PROPERTY)) {
+				expect(token_type::LEFT_PAREN);
+				match(token_type::IDENTIFIER); // Consume any EditAnywhere type thing, it doesn't do anything for now...
+				expect(token_type::RIGHT_PAREN);
+				match(token_type::SEMICOLON); // Consume a semicolon if it is there, this is to help with indentation
+				clazz.variables.push_back(parse_variable());
 			} else {
 				m_current_token++;
 				m_Current_iter++;
@@ -331,30 +385,31 @@ namespace PFF {
 		m_classes.push_back(clazz);
 	}
 
-	void script_parser::ParseStruct() {
+	void script_parser::parse_struct() {
 
-		Token structType = Expect(TokenType::IDENTIFIER);
-		Expect(TokenType::LEFT_BRACKET);
-		PFF_struct structure = PFF_struct{ structType.m_lexeme, m_full_filepath, std::list<PFF_variable>() };
+		token structType = expect(token_type::IDENTIFIER);
+		expect(token_type::LEFT_BRACKET);
+		std::string full_struct_name = m_current_namespace.empty() ? structType.m_lexeme : m_current_namespace + "::" + structType.m_lexeme;
+		PFF_struct structure = PFF_struct{ full_struct_name, structType.m_lexeme, m_full_filepath, std::list<PFF_variable>() };
 		int level = 1;
-		while (m_Current_iter->m_type != TokenType::END_OF_FILE) {
+		while (m_Current_iter->m_type != token_type::END_OF_FILE) {
 
-			if (Match(TokenType::LEFT_BRACKET))
+			if (match(token_type::LEFT_BRACKET))
 				level++;
 
-			else if (Match(TokenType::RIGHT_BRACKET)) {
+			else if (match(token_type::RIGHT_BRACKET)) {
 				level--;
 				if (level <= 1) {
-					Expect(TokenType::SEMICOLON);
+					expect(token_type::SEMICOLON);
 					break;
 				}
 			
-			} else if (Match(TokenType::PROPERTY)) {
-				Expect(TokenType::LEFT_PAREN);
-				Match(TokenType::IDENTIFIER); // Consume any EditAnywhere type thing, it doesn't do anything for now...
-				Expect(TokenType::RIGHT_PAREN);
-				Match(TokenType::SEMICOLON); // Consume a semicolon if it is there, this is to help with indentation
-				structure.variables.push_back(ParseVariable());
+			} else if (match(token_type::PROPERTY)) {
+				expect(token_type::LEFT_PAREN);
+				match(token_type::IDENTIFIER); // Consume any EditAnywhere type thing, it doesn't do anything for now...
+				expect(token_type::RIGHT_PAREN);
+				match(token_type::SEMICOLON); // Consume a semicolon if it is there, this is to help with indentation
+				structure.variables.push_back(parse_variable());
 			}
 			// TODO: This might need another else statement like class parser
 		}
@@ -362,27 +417,27 @@ namespace PFF {
 		m_structs.push_back(structure);
 	}
 
-	PFF_variable script_parser::ParseVariable() {
+	PFF_variable script_parser::parse_variable() {
 
-		std::vector<Token> all_tokens_before_semi_colon = std::vector<Token>();
-		std::vector<Token>::iterator current;
+		std::vector<token> all_tokens_before_semi_colon = std::vector<token>();
+		std::vector<token>::iterator current;
 		int after_identifier_index = -1;
 
 		do {
 			current = m_Tokens.begin();
 			std::advance(current, m_current_token);
 			
-			if (m_Current_iter->m_type == TokenType::SEMICOLON && after_identifier_index == -1)
+			if (m_Current_iter->m_type == token_type::SEMICOLON && after_identifier_index == -1)
 				after_identifier_index = static_cast<int>(all_tokens_before_semi_colon.size());
-			else if (m_Current_iter->m_type == TokenType::EQUAL)
+			else if (m_Current_iter->m_type == token_type::EQUAL)
 				after_identifier_index = static_cast<int>(all_tokens_before_semi_colon.size());
 			
 			all_tokens_before_semi_colon.push_back(*current);
 			m_current_token++;
 			m_Current_iter++;
-		} while (current->m_type != TokenType::END_OF_FILE && current->m_type != TokenType::SEMICOLON);
+		} while (current->m_type != token_type::END_OF_FILE && current->m_type != token_type::SEMICOLON);
 
-		Token& variable_identifier = generate_error_token();
+		token& variable_identifier = generate_error_token();
 
 //#define NEW_VERSION
 #ifndef NEW_VERSION
@@ -409,11 +464,11 @@ namespace PFF {
 		variable_identifier = *it;
 #endif
 
-		Token& type_identifier = generate_error_token();
+		token& type_identifier = generate_error_token();
 		auto endIter = all_tokens_before_semi_colon.begin();
 		std::advance(endIter, after_identifier_index - 1);
 		for (auto iter = all_tokens_before_semi_colon.begin(); iter != endIter; iter++) {
-			if (iter->m_type == TokenType::IDENTIFIER) {
+			if (iter->m_type == token_type::IDENTIFIER) {
 				type_identifier = *iter;
 				break;
 			}
@@ -422,7 +477,7 @@ namespace PFF {
 		return PFF_variable{ type_identifier.m_lexeme, variable_identifier.m_lexeme };
 	}
 
-	const Token& script_parser::Expect(TokenType type) {
+	const token& script_parser::expect(token_type type) {
 
 		if (m_Current_iter->m_type != type) {
 
@@ -436,7 +491,7 @@ namespace PFF {
 		return *tokenToReturn;
 	}
 
-	bool script_parser::Match(TokenType type) {
+	bool script_parser::match(token_type type) {
 
 		if (m_Current_iter->m_type == type) {
 			m_current_token++;

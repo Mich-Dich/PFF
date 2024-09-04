@@ -19,23 +19,29 @@ namespace PFF::script_system {
 #define GET_REGISTRY_OF_MAP														GET_WORLD_LAYER->get_map()->get_registry()
 #define TRY_EXECUTE_FUNCTION(name)												if (name) name
 
+	static const char* could_not_load_scripts[]									= {nullptr};
+
 	static editor_update_script_Fn												m_editor_update_scripts = nullptr;
 	static bool																	m_is_loaded = false;
 	static add_component_Fn														m_add_component_from_string = nullptr;
+	static get_scripts_Fn														m_get_scripts = nullptr;
+	static get_scripts_Fn														m_get_procedural_mesh_scripts = nullptr;
+	static display_properties_Fn												m_display_properties = nullptr;
 	static init_scripts_Fn														m_init_scripts = nullptr;
 	//static ImGui_Fn															m_ImGui = nullptr;
 
 	static void add_component_stub(std::string, PFF::entity)					{ CORE_LOG(Warn, "Adding component from STUB"); }
 	static void init_scripts_stub(entt::registry*)								{}
+	static const char** get_scripts_stub(u32*)									{ return could_not_load_scripts; }
 	static void editor_update_script_stub(entt::registry&, float)				{}
+	static void display_properties_stub(std::string, entity_script*)			{}
 	static void delete_scripts_stub()											{}
 
 	void init()																	{ reload(); }
-	
 	void shutdown()																{ free_script_library(true); }
 	void editor_update(float delta_time)										{ TRY_EXECUTE_FUNCTION(m_editor_update_scripts)(GET_REGISTRY_OF_MAP, delta_time); }
 	void add_component_from_string(std::string class_name, PFF::entity entity)	{ TRY_EXECUTE_FUNCTION(m_add_component_from_string)(class_name, entity); }
-	//void imGui(entity entity)													{ TRY_EXECUTE_FUNCTION(m_ImGui)(entity); }
+	void display_properties(std::string class_name, entity_script* script)		{ TRY_EXECUTE_FUNCTION(m_display_properties)(class_name, script); }
 
 #ifdef PFF_PLATFORM_WINDOWS
 	static HMODULE m_module;
@@ -52,12 +58,13 @@ namespace PFF::script_system {
 
 	void reinit_scripts() { 
 
-		if (!m_is_loaded || !m_init_scripts)
-			return;
-
+		CORE_VALIDATE(m_is_loaded && m_init_scripts, return, "reinit_scripts", "COULD NOT reinit_scripts");
 		CORE_VALIDATE(application::get().get_world_layer()->get_map(), return, "reinit_scripts", "COULD NOT reinit_scripts");
 		m_init_scripts( &GET_REGISTRY_OF_MAP );
 	}
+
+	const char** get_all_procedural_mesh_scripts(u32* count) { return (m_get_procedural_mesh_scripts) ? m_get_procedural_mesh_scripts(count) : could_not_load_scripts; }
+	const char** get_all_scripts(u32* count) { return (m_get_scripts) ? m_get_scripts(count) : could_not_load_scripts; }
 
 	void reload(bool delete_script_components) {
 
@@ -81,7 +88,9 @@ namespace PFF::script_system {
 
 		m_add_component_from_string		= (add_component_Fn)try_load_function(m_module, "add_component");
 		m_init_scripts					= (init_scripts_Fn)try_load_function(m_module, "init_scripts");
-		//m_delete_scripts				= (delete_scripts_Fn)try_load_function(m_module, "delete_scripts");
+		m_get_scripts					= (get_scripts_Fn)try_load_function(m_module, "get_all_scripts");
+		m_get_procedural_mesh_scripts	= (get_scripts_Fn)try_load_function(m_module, "get_all_procedural_mesh_scripts");
+		m_display_properties			= (display_properties_Fn)try_load_function(m_module, "display_properties");
 		m_is_loaded						= true;
 
 		reinit_scripts();
@@ -99,14 +108,9 @@ namespace PFF::script_system {
 
 		m_add_component_from_string = add_component_stub;
 		m_init_scripts = init_scripts_stub;
-		//m_editor_update_scripts = editor_update_script_stub;
-		//m_serialize_scripts = serialize_scripts_stub;
-		//m_update_scripts = update_script_stub;
-		//m_init_ImGui = init_ImGui_stub;
-		//m_ImGui = ImGui_stub;
-		//m_delete_scripts = delete_scripts_stub;
-		//m_notify_begin_contact = notify_begin_contact_stub;
-		//m_notify_end_contact = notify_end_contact_stub;
+		m_get_scripts = get_scripts_stub;
+		m_get_procedural_mesh_scripts = get_scripts_stub;
+		m_display_properties = display_properties_stub;
 
 #ifdef PFF_PLATFORM_WINDOWS
 #define FREE_LIBRARY();																		

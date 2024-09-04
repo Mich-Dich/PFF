@@ -41,36 +41,120 @@ namespace PFF::code_generator {
 		source << "\n";
 		source << "extern \"C\" namespace PFF::init {\n\n";
 
-		// Init Component Id's -------------------------------------------------------------------------------------------
-		source << "\tstatic void init_component_ids(entt::registry* registry) {\n\n";
-
+		// ------------------------------------------------------ static variables ------------------------------------------------------
+		source << "\tstatic const char* procedural_mesh_scripts[] = {\n";
 		for (auto clazz : classes) {
-			source << "\t\tregistry->storage<" << clazz.class_name.c_str() << ">();\n";
+			if (clazz.parent_class_name.find("procedural_mesh_script") != std::string::npos)
+				source << "\t\t\"" << clazz.class_name.c_str() << "\",\n";
 		}
+		source << "\t\tnullptr\n\t};\n\n";
 
-		source << "\t}\n\n";
 
-		// AddComponent function
-		source << "\tPROJECT_API void add_component(std::string className, PFF::entity entity) {\n\n";
-		source << "\t\tASSERT(entity.is_valid(), \"\", \"Invalid entity in script\");\n";
-
-		num_visited = 0;
+		source << "\tstatic const char* scripts[] = {\n";
 		for (auto clazz : classes) {
-			if (!visited_source_file(clazz)) {
-				std::string namespaceName = "reflect_" + script_parser::get_filename_as_class_name(clazz.full_filepath.filename().string());
-				source << "\t\tfor (auto strClass : " << namespaceName.c_str() << "::string_to_map) {\n\n";
-				source << "\t\t\tif (strClass.first != className) \n";
-				source << "\t\t\t\tcontinue;\n\n";
-				source << "\t\t\t" << namespaceName << "::add_component(className, entity);\n";
-				source << "\t\t\treturn;\n";
-				source << "\t\t}\n";
+			if (clazz.parent_class_name.find("entity_script") != std::string::npos)
+				source << "\t\t\"" << clazz.class_name.c_str() << "\",\n";
+		}
+		source << "\t\tnullptr\n\t};\n\n";
 
-				visited_class_buffer[num_visited] = clazz.full_filepath;
-				num_visited++;
+		// Generate Init Scripts function
+		{
+			source << "\tPROJECT_API void init_scripts(entt::registry* registry) {\n\n";
+			source << "\t\tLOG(Info, \"Initializing scripts\");\n\n";
+
+			for (auto clazz : classes) {
+				source << "\t\tregistry->storage<" << clazz.class_name.c_str() << ">();\n";
 			}
+			source << "\n";
+
+			source << "\t\tImGui::SetCurrentContext(application::get().get_imgui_layer()->get_context());\n";
+			num_visited = 0;
+			for (auto clazz : classes) {
+				if (!visited_source_file(clazz)) {
+					std::string namespaceName = "reflect_" + script_parser::get_filename_as_class_name(clazz.full_filepath.filename().string());
+					source << "\t\t" << namespaceName.c_str() << "::init();\n";
+
+					visited_class_buffer[num_visited] = clazz.full_filepath;
+					num_visited++;
+				}
+			}
+			source << "\t}\n\n";
 		}
 
-		source << "\t}\n";
+		// add_component function
+		{
+			source << "\tPROJECT_API void add_component(std::string class_name, PFF::entity entity) {\n\n";
+			source << "\t\tASSERT(entity.is_valid(), \"\", \"Invalid entity in script\");\n";
+
+			num_visited = 0;
+			for (auto clazz : classes) {
+				if (!visited_source_file(clazz)) {
+					std::string namespaceName = "reflect_" + script_parser::get_filename_as_class_name(clazz.full_filepath.filename().string());
+					source << "\t\tfor (auto str_class : " << namespaceName.c_str() << "::string_to_map) {\n\n";
+					source << "\t\t\tif (str_class.first != class_name) \n";
+					source << "\t\t\t\tcontinue;\n\n";
+					source << "\t\t\t" << namespaceName << "::add_component(class_name, entity);\n";
+					source << "\t\t\treturn;\n";
+					source << "\t\t}\n";
+
+					visited_class_buffer[num_visited] = clazz.full_filepath;
+					num_visited++;
+				}
+			}
+
+			source << "\t}\n\n";
+		}
+
+		// display_properties function
+		{
+			source << "\tPROJECT_API void display_properties(std::string class_name, entity_script* script) {\n\n";
+
+			source << "\t\tif (!script) {\n";
+			source << "\t\t\tImGui::Text(\"Script pointer is null\");\n";
+			source << "\t\t\treturn;\n\t\t}\n\n";
+
+			num_visited = 0;
+			for (auto clazz : classes) {
+				if (!visited_source_file(clazz)) {
+					std::string namespaceName = "reflect_" + script_parser::get_filename_as_class_name(clazz.full_filepath.filename().string());
+					source << "\t\tfor (auto str_class : " << namespaceName.c_str() << "::string_to_map) {\n\n";
+					source << "\t\t\tif (str_class.first != class_name) \n";
+					source << "\t\t\t\tcontinue;\n\n";
+					source << "\t\t\t" << namespaceName << "::display_properties((" << clazz.class_name.c_str() << "*)script);\n";
+					source << "\t\t\treturn;\n";
+					source << "\t\t}\n";
+
+					visited_class_buffer[num_visited] = clazz.full_filepath;
+					num_visited++;
+				}
+			}
+
+			source << "\t}\n\n";
+		}
+		
+		// generate	simple getters
+		{
+			
+			source << R"(	PROJECT_API const char** get_all_procedural_mesh_scripts(u32 * count) {
+
+		if (count != nullptr)
+			*count = sizeof(procedural_mesh_scripts) / sizeof(procedural_mesh_scripts[0]) - 1;			// Calculate the number of items in the array (excluding the null terminator)
+		
+		return procedural_mesh_scripts;
+	}
+
+)";
+			source << R"(	PROJECT_API const char** get_all_scripts(u32 * count) {
+
+		if (count != nullptr)
+			*count = sizeof(scripts) / sizeof(scripts[0]) - 1;			// Calculate the number of items in the array (excluding the null terminator)
+		
+		return scripts;
+	}
+
+)";
+		}
+
 
 		//// Generate UpdateScripts function
 		//source << "\t\tPROJECT_API void UpdateScripts(entt::registry& registryRef, float dt)\n";
@@ -136,23 +220,7 @@ namespace PFF::code_generator {
 		//}
 		//source << "\t\t}\n";
 
-		// Generate Init Scripts function
-		source << "\n";
-		source << "\tPROJECT_API void init_scripts(entt::registry* registry) {\n\n";
-		source << "\t\tLOG(Info, \"Initializing scripts\");\n";
-		source << "\t\tinit_component_ids(registry);\n";
 
-		num_visited = 0;
-		for (auto clazz : classes) {
-			if (!visited_source_file(clazz)) {
-				std::string namespaceName = "reflect_" + script_parser::get_filename_as_class_name(clazz.full_filepath.filename().string());
-				source << "\t\t" << namespaceName.c_str() << "::init();\n";
-
-				visited_class_buffer[num_visited] = clazz.full_filepath;
-				num_visited++;
-			}
-		}
-		source << "\t}\n";
 
 		// Generate Init ImGui function
 		/*{
@@ -276,12 +344,13 @@ workspace "PFF_project"
 )";
 
 		stream << "\t\t\"" << (engineExeDir / "PFF").generic_string() << "\",\n";
-		stream << "\t\t\"" << (engineExeDir / "imgui").generic_string() << "\",\n";
+		stream << "\t\t\"" << (engineExeDir / "vendor/imgui").generic_string() << "\",\n";
 		stream << R"(	}
 
 	links
 	{
-		"PFF"
+		"PFF",
+		"ImGui"
 	}
 
 	defines "PFF_PROJECT"

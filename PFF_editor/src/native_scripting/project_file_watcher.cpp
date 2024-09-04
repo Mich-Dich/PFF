@@ -86,10 +86,9 @@ namespace PFF {
 
 
 		script_scanner fileScanner = script_scanner(file);
-		std::vector<Token> fileTokens = fileScanner.scan_tokens();
+		std::vector<token> fileTokens = fileScanner.scan_tokens();
 		script_parser fileParser = script_parser(fileTokens, file);
 		fileParser.parse();
-
 		merge_new_classes(fileParser.get_classes(), file);
 
 		const auto relatice_filepath = util::extract_path_from_directory(file, "src");

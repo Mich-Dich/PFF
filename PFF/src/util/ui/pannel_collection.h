@@ -164,7 +164,7 @@ namespace PFF::UI {
 	// @param [value] The value to be displayed or edited.
 	// @param [flags] Flags controlling the behavior of the input field.
 	template<typename T>
-	bool table_row(std::string_view label, T& value, f32 drag_speed = 0.01f, f32 min_value = 0.f, f32 max_value = 0.f, ImGuiInputTextFlags flags = ImGuiInputTextFlags_None) {
+	bool table_row(std::string_view label, T& value, f32 drag_speed = 0.01f, T min_value = T{}, T max_value = T{}, ImGuiInputTextFlags flags = ImGuiInputTextFlags_None) {
 
 		ImGuiStyle& style = ImGui::GetStyle();
 		ImVec2 current_item_spacing = style.ItemSpacing;
@@ -175,8 +175,9 @@ namespace PFF::UI {
 		ImGui::Text("%s", label.data());
 
 		ImGui::TableSetColumnIndex(1);
-
-		const std::string loc_label = "##" + *label.data();
+		std::string loc_label = "##";
+		loc_label += label.data();
+		ImGui::SetNextItemWidth(ImGui::GetColumnWidth());
 
 		if constexpr (std::is_same_v<T, bool>) {
 
@@ -184,29 +185,43 @@ namespace PFF::UI {
 			return false;
 		}
 
-		else if constexpr (std::is_arithmetic_v<T>) {
-
-			ImGui::SetNextItemWidth(ImGui::GetColumnWidth());
-			return ImGui::DragFloat(loc_label.c_str(), &value, drag_speed, min_value, max_value, "%.2f", flags);
+		else if constexpr (std::is_integral_v<T>) {
+			if constexpr (std::is_unsigned_v<T>) {
+				switch (sizeof(T)) {
+				case 1: return ImGui::DragScalar(loc_label.c_str(), ImGuiDataType_U8, &value, drag_speed, &min_value, &max_value, "%u", flags);		// u8
+				case 2: return ImGui::DragScalar(loc_label.c_str(), ImGuiDataType_U16, &value, drag_speed, &min_value, &max_value, "%u", flags);	// u16
+				case 4: return ImGui::DragScalar(loc_label.c_str(), ImGuiDataType_U32, &value, drag_speed, &min_value, &max_value, "%u", flags);	// u32
+				case 8: return ImGui::DragScalar(loc_label.c_str(), ImGuiDataType_U64, &value, drag_speed, &min_value, &max_value, "%llu", flags);	// u64
+				default:
+					ImGui::Text("Could not display variable of type unsigned int [size: %llu]", sizeof(T));
+					return false;
+				}
+			} else {
+				switch (sizeof(T)) {
+				case 1: return ImGui::DragScalar(loc_label.c_str(), ImGuiDataType_S8, &value, drag_speed, &min_value, &max_value, "%d", flags);		// i8
+				case 2: return ImGui::DragScalar(loc_label.c_str(), ImGuiDataType_S16, &value, drag_speed, &min_value, &max_value, "%d", flags);	// i16
+				case 4: return ImGui::DragScalar(loc_label.c_str(), ImGuiDataType_S32, &value, drag_speed, &min_value, &max_value, "%d", flags);	// i32
+				case 8: return ImGui::DragScalar(loc_label.c_str(), ImGuiDataType_S64, &value, drag_speed, &min_value, &max_value, "%lld", flags);	// i64
+				default:
+					ImGui::Text("Could not display var of type signed int [size: %llu]", sizeof(T));
+					return false;
+				}
+			}
+		} else if constexpr (std::is_floating_point_v<T>) {
+			if constexpr (sizeof(T) <= 4)
+				return ImGui::DragScalar(loc_label.c_str(), ImGuiDataType_Float, &value, drag_speed, &min_value, &max_value, "%.3f", flags);
+			else 
+				return ImGui::DragScalar(loc_label.c_str(), ImGuiDataType_Double, &value, drag_speed, &min_value, &max_value, "%.3f", flags);
 		}
 
-		else if constexpr (std::is_same_v<T, glm::vec2> || std::is_same_v<T, ImVec2>) {
+		else if constexpr (std::is_same_v<T, glm::vec2> || std::is_same_v<T, ImVec2>)
+			return ImGui::DragFloat2(loc_label.c_str(), &value[0], drag_speed, min_value[0], max_value[0], "%.2f", flags);
 
-			ImGui::SetNextItemWidth(ImGui::GetColumnWidth());
-			return ImGui::DragFloat2(loc_label.c_str(), &value[0], drag_speed, min_value, max_value, "%.2f", flags);
-		}
+		else if constexpr (std::is_same_v<T, glm::vec3>)
+			return ImGui::DragFloat3(loc_label.c_str(), &value[0], drag_speed, min_value[0], max_value[0], "%.2f", flags);
 
-		else if constexpr (std::is_same_v<T, glm::vec3>) {
-
-			ImGui::SetNextItemWidth(ImGui::GetColumnWidth());
-			return ImGui::DragFloat3(loc_label.c_str(), &value[0], drag_speed, min_value, max_value, "%.2f", flags);
-		}
-
-		else if constexpr (std::is_same_v<T, glm::vec4> || std::is_same_v<T, ImVec4>) {
-
-			ImGui::SetNextItemWidth(ImGui::GetColumnWidth());
-			return ImGui::DragFloat4(loc_label.c_str(), &value[0], drag_speed, min_value, max_value, "%.2f", flags);
-		}
+		else if constexpr (std::is_same_v<T, glm::vec4> || std::is_same_v<T, ImVec4>)
+			return ImGui::DragFloat4(loc_label.c_str(), &value[0], drag_speed, min_value[0], max_value[0], "%.2f", flags);
 
 		else if constexpr (std::is_convertible_v<T, std::string>) {
 
@@ -214,9 +229,19 @@ namespace PFF::UI {
 			return false;
 		}
 
+		else
+			ImGui::Text("Could not display variable");
+
 		return false;
 	}
 
+	/*
+		else if constexpr (std::is_same_v<T, int32> || std::is_same_v<T, u32> || std::is_same_v<T, int64> || std::is_same_v<T, u64>) {
+
+			ImGui::SetNextItemWidth(ImGui::GetColumnWidth());
+			return ImGui::DragInt(loc_label.c_str(), &value, drag_speed, min_value, max_value, "%.2f", flags);
+		}
+*/
 
 	PFF_API FORCEINLINE void table_row_progressbar(std::string_view label, const char* progress_bar_text, const f32 percent, const bool auto_resize = true, const f32 progressbar_size_x = 50.f, const f32 progressbar_size_y = 1.f);
 
@@ -256,14 +281,8 @@ namespace PFF::UI {
 		ImGui::Text("%s", label.data());
 
 		ImGui::TableSetColumnIndex(1);
-
-		// Copy non-space characters from label to loc_label
 		std::string loc_label = "##";
-		loc_label.reserve(label.size() + 2);
-		std::remove_copy_if(label.begin(), label.end(), std::back_inserter(loc_label), [](char c) {
-			return std::isspace(static_cast<unsigned char>(c));
-		});
-
+		loc_label += label.data();
 		ImGui::SetNextItemWidth(ImGui::GetColumnWidth());
 
 		if constexpr (std::is_same_v<T, int>)
@@ -297,14 +316,8 @@ namespace PFF::UI {
 		ImGui::Text("%s", label.data());
 
 		ImGui::TableSetColumnIndex(1);
-
-		// Copy non-space characters from label to loc_label
 		std::string loc_label = "##";
-		loc_label.reserve(label.size() + 2);
-		std::remove_copy_if(label.begin(), label.end(), std::back_inserter(loc_label), [](char c) {
-			return std::isspace(static_cast<unsigned char>(c));
-		});
-
+		loc_label += label.data();
 		ImGui::SetNextItemWidth(ImGui::GetColumnWidth());
 
 		if constexpr (std::is_same_v<T, int>)

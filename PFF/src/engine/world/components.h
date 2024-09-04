@@ -140,14 +140,7 @@ namespace PFF {
 	class procedural_mesh_script;
 	struct procedural_mesh_component {
 		
-		// MAYBE: split into two comps
-		//		contra	increate complexity of serialization				(need to constantly check for multiplay comps)
-		//				increate complexity of interaction with other comps (need to constantly check for multiplay comps)
-		//
-		//		pro		can make multiple meshes from one script (not really needed)
-
 		PFF_DEFAULT_CONSTRUCTORS(procedural_mesh_component);
-		//procedural_mesh_component(ref<PFF::geometry::mesh_asset> mesh_asset_ref) {}		// need to assign to instance
 
 		// --------------------- script-part of component --------------------- 
 		template<typename T>

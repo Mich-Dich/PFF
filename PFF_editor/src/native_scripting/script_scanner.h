@@ -2,7 +2,7 @@
 
 namespace PFF {
 
-	enum TokenType {
+	enum token_type {
 
 		PROPERTY, FUNCTION_PROP, CLASS_PROP, STRUCT_PROP,
 		STRUCT_KW, CLASS_KW, COLON,
@@ -14,6 +14,8 @@ namespace PFF {
 
 		CONST_KW, IDENTIFIER, AUTO_KW,
 
+		NAMESPACE, PUBLIC, PROTECTED, PRIVATE,
+
 		STAR, REF, LEFT_ANGLE_BRACKET, RIGHT_ANGLE_BRACKET,
 
 		STRING_LITERAL, NUMBER, TRUE_KW, FALSE_KW,
@@ -22,11 +24,11 @@ namespace PFF {
 		ERROR_TYPE
 	};
 
-	struct Token {
+	struct token {
 		
 		int m_line;
 		int m_column;
-		TokenType m_type;
+		token_type m_type;
 		std::string m_lexeme;
 	};
 
@@ -35,7 +37,7 @@ namespace PFF {
 		
 		script_scanner(const std::filesystem::path& filepath);
 
-		std::vector<Token> scan_tokens();
+		std::vector<token> scan_tokens();
 
 	private:
 		
@@ -43,13 +45,13 @@ namespace PFF {
 		FORCEINLINE bool is_alpha_numeric(char c) const { return is_alpha(c) || is_digit(c); }
 		FORCEINLINE bool is_alpha(char c) const { return (c >= 'a' && c <= 'z') || (c >= 'A' && c <= 'Z'); }
 		FORCEINLINE bool at_end() const { return m_cursor == m_file_contents.size(); }
-		FORCEINLINE Token generate_token(TokenType m_Type, std::string lexeme) { return Token{ m_line, m_column, m_Type, lexeme }; }
-		FORCEINLINE Token generate_error_token() { return Token{ -1, -1, TokenType::ERROR_TYPE, "" }; }
+		FORCEINLINE token generate_token(token_type m_Type, std::string lexeme) { return token{ m_line, m_column, m_Type, lexeme }; }
+		FORCEINLINE token generate_error_token() { return token{ -1, -1, token_type::ERROR_TYPE, "" }; }
 
-		Token scan_token();
-		Token property_identifier();
-		Token number();
-		Token string();
+		token scan_token();
+		token property_identifier();
+		token number();
+		token string();
 		
 		char advance();
 		char peek();
@@ -58,15 +60,19 @@ namespace PFF {
 		bool match(char expected);
 
 
-		const std::map<std::string, TokenType> keywords = {
-			{ "PFF_PROPERTY",   TokenType::PROPERTY },
-			{ "PFF_CLASS",      TokenType::CLASS_PROP },
-			{ "PFF_STRUCT",     TokenType::STRUCT_PROP },
-			{ "PFF_FUNCTION",   TokenType::FUNCTION_PROP },
-			{ "auto",			TokenType::AUTO_KW },
-			{ "const",			TokenType::CONST_KW },
-			{ "class",			TokenType::CLASS_KW },
-			{ "struct",			TokenType::STRUCT_KW }
+		const std::map<std::string, token_type> keywords = {
+			{ "PFF_PROPERTY",   token_type::PROPERTY },
+			{ "PFF_CLASS",      token_type::CLASS_PROP },
+			{ "PFF_STRUCT",     token_type::STRUCT_PROP },
+			{ "PFF_FUNCTION",   token_type::FUNCTION_PROP },
+			{ "namespace",      token_type::NAMESPACE },
+			{ "public",			token_type::PUBLIC },
+			{ "protected",      token_type::PROTECTED },
+			{ "private",		token_type::PRIVATE },
+			{ "auto",			token_type::AUTO_KW },
+			{ "const",			token_type::CONST_KW },
+			{ "class",			token_type::CLASS_KW },
+			{ "struct",			token_type::STRUCT_KW }
 		};
 
 		std::string				m_file_contents;

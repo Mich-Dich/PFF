@@ -17,6 +17,7 @@
 #include "util/math/noise.h"
 #include "util/math/random.h"
 #include "util/ui/imgui_markdown.h"
+#include "util/ui/pannel_collection.h"
 #include "util/UUID.h"
 #include "util/profiling/instrumentor.h"
 

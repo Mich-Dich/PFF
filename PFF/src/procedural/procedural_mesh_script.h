@@ -29,12 +29,16 @@ namespace PFF {
 		// Helper functions for mesh generation
 		FORCEINLINE void clear();
 		FORCEINLINE void add_vertex(const glm::vec3& position, const glm::vec3& normal = {}, const glm::vec2& uv = {}, const glm::vec4& color = glm::vec4{ 1.f });
+		FORCEINLINE void add_vertex(const u32 index, const glm::vec3& position, const glm::vec3& normal = {}, const glm::vec2& uv = {}, const glm::vec4& color = glm::vec4{ 1.f });
 		FORCEINLINE void add_triangle(const u32 index_1, const u32 index_2, const u32 index_3);
 		FORCEINLINE void add_quad(const u32 top_right_index, u32 top_left_index, const u32 bottom_left_index, const u32 bottom_right_index);
 		FORCEINLINE void add_surface(const u32 start_index, const u32 index_count = 0);
 		FORCEINLINE void set_vertex_color(const u32 index, const glm::vec4& color);
 		FORCEINLINE void recalculate_normals();
 		FORCEINLINE void recalculate_bounds();
+
+		void sweep_profile_along_spline(/* PFF::spline */);
+
 		void apply_mesh(const bool recalc_bounds = false);			// Apply the generated mesh data to the actual mesh component
 
 		PFF::geometry::procedural_mesh_asset		m_mesh_asset = PFF::geometry::procedural_mesh_asset();

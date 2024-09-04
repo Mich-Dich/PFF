@@ -273,8 +273,6 @@ namespace PFF {
 		if (!ImGui::Begin("Details", &m_show_details, window_flags))
 			return;
 
-
-
 		const auto button_size = ImGui::CalcTextSize("Add Component").x;
 
 		ImGui::SetNextItemWidth(ImGui::GetContentRegionAvail().x - button_size - (ImGui::GetStyle().ItemSpacing.x * 3));
@@ -292,6 +290,8 @@ namespace PFF {
 
 		if (m_selected_entity == entity()) {
 
+			ImGui::Text("No entity selected");
+
 			ImGui::End();
 			return;
 		}
@@ -301,6 +301,8 @@ namespace PFF {
 		UI::display_transform_comp(m_selected_entity);
 
 		UI::try_display_mesh_comp(m_selected_entity);
+
+		UI::try_display_procedural_script_comp(m_selected_entity);
 
 		ImGui::End();
 	}

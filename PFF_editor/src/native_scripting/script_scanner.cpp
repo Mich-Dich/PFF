@@ -20,20 +20,20 @@ namespace PFF {
 		file.close();
 	}
 
-	std::vector<Token> script_scanner::scan_tokens() {
+	std::vector<token> script_scanner::scan_tokens() {
 
 		//CORE_LOG(Trace, "scanning file [" << util::extract_path_from_directory(m_filepath, "src").generic_string() << "]");
-		auto tokens = std::vector<Token>();
+		auto tokens = std::vector<token>();
 
 		m_cursor = 0;
 		while (!at_end()) {
 			m_start = m_cursor;
-			Token token = scan_token();
-			if (token.m_type != TokenType::ERROR_TYPE)
+			token token = scan_token();
+			if (token.m_type != token_type::ERROR_TYPE)
 				tokens.push_back(token);
 		}
 
-		tokens.emplace_back(Token{ m_line, m_column, TokenType::END_OF_FILE, "EOF" });
+		tokens.emplace_back(token{ m_line, m_column, token_type::END_OF_FILE, "EOF" });
 		return tokens;
 	}
 
@@ -42,23 +42,23 @@ namespace PFF {
 
 
 
-	Token script_scanner::scan_token() {
+	token script_scanner::scan_token() {
 
 		char c = advance();
 		switch (c) {
 			// Single character tokens
-		case '<': return generate_token(TokenType::LEFT_ANGLE_BRACKET, "<");
-		case '>': return generate_token(TokenType::RIGHT_ANGLE_BRACKET, "<");
-		case '*': return generate_token(TokenType::STAR, "*");
-		case '&': return generate_token(TokenType::REF, "&");
-		case '(': return generate_token(TokenType::LEFT_PAREN, "(");
-		case ')': return generate_token(TokenType::RIGHT_PAREN, ")");
-		case '#': return generate_token(TokenType::HASHTAG, "#");
-		case '{': return generate_token(TokenType::LEFT_BRACKET, "{");
-		case '}': return generate_token(TokenType::RIGHT_BRACKET, "}");
-		case ';': return generate_token(TokenType::SEMICOLON, ";");
-		case '=': return generate_token(TokenType::EQUAL, "=");
-		case ':': return generate_token(TokenType::COLON, ":");
+		case '<': return generate_token(token_type::LEFT_ANGLE_BRACKET, "<");
+		case '>': return generate_token(token_type::RIGHT_ANGLE_BRACKET, "<");
+		case '*': return generate_token(token_type::STAR, "*");
+		case '&': return generate_token(token_type::REF, "&");
+		case '(': return generate_token(token_type::LEFT_PAREN, "(");
+		case ')': return generate_token(token_type::RIGHT_PAREN, ")");
+		case '#': return generate_token(token_type::HASHTAG, "#");
+		case '{': return generate_token(token_type::LEFT_BRACKET, "{");
+		case '}': return generate_token(token_type::RIGHT_BRACKET, "}");
+		case ';': return generate_token(token_type::SEMICOLON, ";");
+		case '=': return generate_token(token_type::EQUAL, "=");
+		case ':': return generate_token(token_type::COLON, ":");
 		case '"': return string();
 			// Whitespace
 		case '/':
@@ -102,22 +102,22 @@ namespace PFF {
 		return generate_error_token();
 	}
 
-	Token script_scanner::property_identifier() {
+	token script_scanner::property_identifier() {
 
 		while (is_alpha_numeric(peek()) || peek() == '_')
 			advance();
 
 		std::string text = m_file_contents.substr(m_start, m_cursor - m_start);
-		TokenType type = TokenType::IDENTIFIER;
+		token_type type = token_type::IDENTIFIER;
 		auto iter = keywords.find(text);
 		if (iter != keywords.end()) {
 			type = iter->second;
 		}
 
-		return Token{ m_line, m_column, type, text };
+		return token{ m_line, m_column, type, text };
 	}
 
-	Token script_scanner::number() {
+	token script_scanner::number() {
 
 		while (is_digit(peek()))
 			advance();
@@ -158,10 +158,10 @@ namespace PFF {
 			CORE_VALIDATE(peek() != '.', return generate_error_token(), "", "Unexpected number literal at [" << m_line << "] col[" << m_column << "]");
 		}
 
-		return Token{ m_line, m_column, TokenType::NUMBER, m_file_contents.substr(m_start, m_cursor - m_start) };
+		return token{ m_line, m_column, token_type::NUMBER, m_file_contents.substr(m_start, m_cursor - m_start) };
 	}
 
-	Token script_scanner::string() {
+	token script_scanner::string() {
 		
 		while (peek() != '"' && !at_end()) {
 			if (peek() == '\n') {
@@ -175,7 +175,7 @@ namespace PFF {
 		advance();
 
 		std::string value = m_file_contents.substr(m_start, m_cursor - m_start);
-		return Token{ m_column, m_line, TokenType::STRING_LITERAL, value };
+		return token{ m_column, m_line, token_type::STRING_LITERAL, value };
 	}
 
 	char script_scanner::advance() {
