@@ -38,6 +38,18 @@ namespace PFF::code_generator {
 			source << "#include \"" << util::extract_path_from_directory(clazz.full_filepath, "src").replace_extension().generic_string() + "-generated" + clazz.full_filepath.extension().string() << "\"\n";
 		}
 
+		source << R"(
+#define PFF_ADD_COMPONENT_GENERATED_MACRO(name)					for (auto str_class : reflect_##name::string_to_map) {			\
+																	if (str_class.first != class_name) continue;				\
+																	reflect_##name::add_component(class_name, entity);			\
+																	return;}
+
+#define PFF_DISPLAY_PROPERTIE_GENERATED_MACRO(name, cast)		for (auto str_class : reflect_##name::string_to_map) {			\
+																	if (str_class.first != class_name) continue;				\
+																	reflect_##name::display_properties((##cast*) script);		\
+																	return;}
+)";
+
 		source << "\n";
 		source << "extern \"C\" namespace PFF::init {\n\n";
 
@@ -85,23 +97,15 @@ namespace PFF::code_generator {
 		{
 			source << "\tPROJECT_API void add_component(std::string class_name, PFF::entity entity) {\n\n";
 			source << "\t\tASSERT(entity.is_valid(), \"\", \"Invalid entity in script\");\n";
-
 			num_visited = 0;
 			for (auto clazz : classes) {
 				if (!visited_source_file(clazz)) {
-					std::string namespaceName = "reflect_" + script_parser::get_filename_as_class_name(clazz.full_filepath.filename().string());
-					source << "\t\tfor (auto str_class : " << namespaceName.c_str() << "::string_to_map) {\n\n";
-					source << "\t\t\tif (str_class.first != class_name) \n";
-					source << "\t\t\t\tcontinue;\n\n";
-					source << "\t\t\t" << namespaceName << "::add_component(class_name, entity);\n";
-					source << "\t\t\treturn;\n";
-					source << "\t\t}\n";
 
+					source << "\t\tPFF_ADD_COMPONENT_GENERATED_MACRO(" << script_parser::get_filename_as_class_name(clazz.full_filepath.filename().string()).c_str() << ");\n";
 					visited_class_buffer[num_visited] = clazz.full_filepath;
 					num_visited++;
 				}
 			}
-
 			source << "\t}\n\n";
 		}
 
@@ -116,14 +120,8 @@ namespace PFF::code_generator {
 			num_visited = 0;
 			for (auto clazz : classes) {
 				if (!visited_source_file(clazz)) {
-					std::string namespaceName = "reflect_" + script_parser::get_filename_as_class_name(clazz.full_filepath.filename().string());
-					source << "\t\tfor (auto str_class : " << namespaceName.c_str() << "::string_to_map) {\n\n";
-					source << "\t\t\tif (str_class.first != class_name) \n";
-					source << "\t\t\t\tcontinue;\n\n";
-					source << "\t\t\t" << namespaceName << "::display_properties((" << clazz.class_name.c_str() << "*)script);\n";
-					source << "\t\t\treturn;\n";
-					source << "\t\t}\n";
-
+					
+					source << "\t\tPFF_DISPLAY_PROPERTIE_GENERATED_MACRO(" << script_parser::get_filename_as_class_name(clazz.full_filepath.filename().string()).c_str() << ", " << clazz.class_name.c_str() << ");\n";
 					visited_class_buffer[num_visited] = clazz.full_filepath;
 					num_visited++;
 				}

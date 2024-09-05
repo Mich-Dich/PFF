@@ -68,7 +68,12 @@ namespace PFF {
             // @param [min] The minimum value of the random number range.
             // @param [max] The maximum value of the random number range.
             // @return A random floating-point number between min and max.
-            FORCEINLINE float get_f32(f32 min = 0.0f, f32 max = 1.0f);
+            FORCEINLINE f32 get_f32(f32 min = 0.0f, f32 max = 1.0f);
+
+            // @brief Generates a random floating-point number in the range [0.f, 1.f] and checks if its less then the percent.
+            // @param [percentage] The value for percent checking (needs to be between 0.f and 1.f).
+            // @return A random floating-point number between min and max.
+            FORCEINLINE bool get_percent(f32 percentage = 0.0f);
 
             // @brief Generates a random double-precision floating-point number in the range [min, max].
             // @param [min] The minimum value of the random number range.
@@ -571,6 +576,14 @@ namespace PFF {
 
             else
                 DEBUG_BREAK();		// Input value is not supported
+        }
+
+        template<typename T>
+        constexpr T from_string(const std::string& src_string) {
+
+            T dest_value;
+            convert_from_string<T>(src_string, dest_value);
+            return dest_value;
         }
 
 

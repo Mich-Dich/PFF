@@ -61,6 +61,48 @@ namespace PFF {
 
 	void procedural_mesh_script::recalculate_bounds() { m_mesh_asset.calc_bounds(); }
 
+	void procedural_mesh_script::add_debug_line(geometry::vertex start, geometry::vertex end, bool vertex_in_global_space) {
+	
+		if (!vertex_in_global_space) {
+
+			GET_RENDERER.add_debug_line(start, end);
+			return;
+		}
+
+		glm::mat4& entity_transform = get_component<transform_component>();
+		glm::vec4 start_transformed = entity_transform * glm::vec4(start.position, 1.0f);
+		glm::vec4 end_transformed = entity_transform * glm::vec4(end.position, 1.0f);
+		start.position = glm::vec3(start_transformed);
+		end.position = glm::vec3(end_transformed);
+
+		// transform the normals
+		glm::mat3 normal_matrix = glm::transpose(glm::inverse(glm::mat3(entity_transform)));
+		start.normal = normal_matrix * start.normal;
+		end.normal = normal_matrix * end.normal;
+
+		GET_RENDERER.add_debug_line(start, end);
+	}
+
+	void procedural_mesh_script::add_debug_line(glm::vec3 start, glm::vec3 end, bool vertex_in_global_space) {
+
+		PFF::geometry::vertex start_vert = {};
+		start_vert.position = start;
+
+		PFF::geometry::vertex end_vert = {};
+		end_vert.position = end;
+
+		add_debug_line(start_vert, end_vert, vertex_in_global_space);
+	}
+
+	void procedural_mesh_script::add_debug_cross(glm::vec3 position, f32 size, bool vertex_in_global_space) {
+
+		add_debug_line(glm::vec3(position.x -size, position.y + 0, position.z + 0), glm::vec3(position.x + size, position.y + 0, position.z + 0), vertex_in_global_space);
+		add_debug_line(glm::vec3(position.x + 0, position.y -size, position.z + 0), glm::vec3(position.x + 0, position.y + size, position.z + 0), vertex_in_global_space);
+		add_debug_line(glm::vec3(position.x + 0, position.y + 0, position.z -size), glm::vec3(position.x + 0, position.y + 0, position.z + size), vertex_in_global_space);
+	}
+
+	void procedural_mesh_script::clear_debug_line() {		GET_RENDERER.clear_debug_line(); }
+
 	void procedural_mesh_script::apply_mesh(const bool recalc_bounds) {
 
 		if (recalc_bounds)

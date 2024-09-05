@@ -5,23 +5,26 @@
 namespace PFF {
 
 	struct PFF_variable {
-		std::string						type;
-		std::string						identifier;
+		std::string						type = {};
+		std::string						identifier = {};
+		std::string						specifiers = {};
 	};
 
 	struct PFF_class {
-		std::string						class_name;
-		std::string						parent_class_name;
-		std::string						class_name_without_namespace;
-		std::filesystem::path			full_filepath;
-		std::list<PFF_variable>			variables;
+		std::string						class_name = {};
+		std::string						class_name_without_namespace = {};
+		std::string						parent_class_name = {};
+		std::string						specifiers = {};
+		std::filesystem::path			full_filepath = {};
+		std::list<PFF_variable>			variables = {};
 	};
 
 	struct PFF_struct {
-		std::string						struct_name;
-		std::string						struct_name_without_namespace;
-		const std::filesystem::path&	full_filepath;
-		std::list<PFF_variable>			variables;
+		std::string						struct_name = {};
+		std::string						struct_name_without_namespace = {};
+		std::string						specifiers = {};
+		std::filesystem::path			full_filepath = {};
+		std::list<PFF_variable>			variables = {};
 	};
 
 	class script_parser {
@@ -41,11 +44,21 @@ namespace PFF {
 
 	private:
 
-		void parse_class();
-		void parse_struct();
+		struct sorting_category {
+			std::string						category_name{};
+			std::vector<PFF_variable>		variables{};
+		};
+
+		std::string generate_display_function(const std::string& name, const std::string& name_without_namespace, const std::string& specifiers, const std::filesystem::path& full_filepath, const std::list<PFF_variable>& variables);
+		std::string parse_specifiers_value(const std::string& specifiers, const std::string& key, std::string default_value = "0");
+		void parse_class(const std::string& specifiers);
+		void parse_struct(const std::string& specifiers);
 		PFF_variable parse_variable();
-		const token& expect(token_type type);
-		bool match(token_type type);
+		void parse_property_specifiers(std::string& specifiers);
+		FORCEINLINE const token& expect(token_type type);
+		FORCEINLINE bool match(token_type type);
+		FORCEINLINE void advance() { m_current_token++; m_Current_iter++; }
+		FORCEINLINE void advance_to_token(const token_type type);
 
 		std::vector<token>::iterator	m_Current_iter;
 		u64								m_current_token;

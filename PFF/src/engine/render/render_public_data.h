@@ -10,6 +10,10 @@
 
 namespace PFF::render {
 
+#if defined(PROJECT_DEBUG) || defined(PFF_DEBUG)
+	#define PFF_RENDERER_DEBUG_CAPABILITY
+#endif // defined(PROJECT_DEBUG) || defined(PFF_DEBUG)
+
 	enum class render_api {
 
 		none = 0,
@@ -27,6 +31,7 @@ namespace PFF::render {
 		VkDeviceAddress		vertex_buffer_address{};
 #endif
 	};
+
 
 
 

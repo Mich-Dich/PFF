@@ -36,6 +36,10 @@ namespace PFF {
 		FORCEINLINE void set_vertex_color(const u32 index, const glm::vec4& color);
 		FORCEINLINE void recalculate_normals();
 		FORCEINLINE void recalculate_bounds();
+		FORCEINLINE void add_debug_line(geometry::vertex start, geometry::vertex end, bool vertex_in_global_space = true);
+		FORCEINLINE void add_debug_line(glm::vec3 start, glm::vec3 end, bool vertex_in_global_space = true);
+		FORCEINLINE void add_debug_cross(glm::vec3 position, f32 size, bool vertex_in_global_space = true);
+		FORCEINLINE void clear_debug_line();
 
 		void sweep_profile_along_spline(/* PFF::spline */);
 

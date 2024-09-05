@@ -164,7 +164,7 @@ namespace PFF::UI {
 	// @param [value] The value to be displayed or edited.
 	// @param [flags] Flags controlling the behavior of the input field.
 	template<typename T>
-	bool table_row(std::string_view label, T& value, f32 drag_speed = 0.01f, T min_value = T{}, T max_value = T{}, ImGuiInputTextFlags flags = ImGuiInputTextFlags_None) {
+	bool table_row(std::string_view label, T& value, f32 drag_speed = 0.01f, T min_value = T{0}, T max_value = T{1}, ImGuiInputTextFlags flags = ImGuiInputTextFlags_None) {
 
 		ImGuiStyle& style = ImGui::GetStyle();
 		ImVec2 current_item_spacing = style.ItemSpacing;
@@ -172,7 +172,10 @@ namespace PFF::UI {
 
 		ImGui::TableNextRow();
 		ImGui::TableSetColumnIndex(0);
-		ImGui::Text("%s", label.data());
+
+		size_t pos = label.find("##");
+		std::string_view displayLabel = (pos != std::string_view::npos) ? label.substr(0, pos) : label;
+		ImGui::Text("%.*s", static_cast<int>(displayLabel.length()), displayLabel.data());
 
 		ImGui::TableSetColumnIndex(1);
 		std::string loc_label = "##";
@@ -245,6 +248,9 @@ namespace PFF::UI {
 
 	PFF_API FORCEINLINE void table_row_progressbar(std::string_view label, const char* progress_bar_text, const f32 percent, const bool auto_resize = true, const f32 progressbar_size_x = 50.f, const f32 progressbar_size_y = 1.f);
 
+
+	PFF_API FORCEINLINE bool begin_collapsing_header_section(const char* lable);
+	PFF_API FORCEINLINE void end_collapsing_header_section();
 
 	// @brief Renders a slider within a table row in an ImGui interface.
 	// 

@@ -189,6 +189,12 @@ namespace PFF::render::vulkan {
 
     // ========================================================================================= feature =========================================================================================
 
+    pipeline_builder& pipeline_builder::disable_culling() {
+
+        p_rasterizer_CI.cullMode = VK_CULL_MODE_NONE;
+        return *this;
+    }
+
     pipeline_builder& pipeline_builder::disable_blending() {
         
         m_color_blend_attachment_CI.colorWriteMask = VK_COLOR_COMPONENT_R_BIT | VK_COLOR_COMPONENT_G_BIT | VK_COLOR_COMPONENT_B_BIT | VK_COLOR_COMPONENT_A_BIT;   //default write mask

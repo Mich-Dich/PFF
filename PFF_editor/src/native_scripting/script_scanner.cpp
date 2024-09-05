@@ -59,6 +59,7 @@ namespace PFF {
 		case ';': return generate_token(token_type::SEMICOLON, ";");
 		case '=': return generate_token(token_type::EQUAL, "=");
 		case ':': return generate_token(token_type::COLON, ":");
+		case ',': return generate_token(token_type::COMA, ",");
 		case '"': return string();
 			// Whitespace
 		case '/':
@@ -83,7 +84,7 @@ namespace PFF {
 			}
 			break;
 		}
-		case ' ':
+		case ' ': // return generate_token(token_type::SPACE, " ");
 		case '\r':
 		case '\t':
 			// Ignore whitespace
@@ -93,9 +94,12 @@ namespace PFF {
 			m_line++;
 			return generate_error_token();
 		default:
-			if (is_alpha(c)) {
+			if (is_alpha(c)) 
 				return property_identifier();
-			}
+
+			if (is_digit(c))
+				return number();
+			
 			break;
 		}
 
@@ -122,39 +126,54 @@ namespace PFF {
 		while (is_digit(peek()))
 			advance();
 
-		bool hasE = false;
-		if (peek() == '.' && (is_digit(peek_next()) || (peek_next() == 'e' && is_digit(peek_next_next()))
-			|| (peek_next() == 'E' && is_digit(peek_next_next())))) {
+		if (peek() == '.' && is_digit(peek_next())
+			|| (peek() == '.' && peek_next() == 'f')) {
+
 			advance();
-
-			while (is_digit(peek())) {
+			while (is_digit(peek()) || peek() == 'f')
 				advance();
-			}
 
-			if ((peek() == 'e' || peek() == 'E') && (is_digit(peek_next()) ||
-				((peek_next() == '-' && is_digit(peek_next_next())) || (peek_next() == '+' && is_digit(peek_next_next()))))) {
+			CORE_VALIDATE(peek() != '.', return generate_error_token(), "", "Unexpected number literal at [" << m_line << "] col[" << m_column << "]");
+		}
+
+		bool hasE = false;
+		if (peek() == '.' && (is_digit(peek_next())
+			|| (peek_next() == 'e' && is_digit(peek_next_next()))
+			|| (peek_next() == 'E' && is_digit(peek_next_next())))) {
+
+			advance();
+			while (is_digit(peek()))
 				advance();
-				while (is_digit(peek())) advance();
+
+			if ((peek() == 'e' || peek() == 'E') && (is_digit(peek_next()) 
+				|| ((peek_next() == '-' && is_digit(peek_next_next())) 
+				|| (peek_next() == '+' && is_digit(peek_next_next()))))) {
+
+				advance();
+				while (is_digit(peek()))
+					advance();
 
 				if ((peek() == '-' || peek() == '+') && is_digit(peek_next())) {
+
 					advance();
 					while (is_digit(peek())) advance();
 				}
-				
 				CORE_VALIDATE(peek() != '.', return generate_error_token(), "", "Unexpected number literal at [" << m_line << "] col[" << m_column << "]");
 			}
 		}
 
-		if ((peek() == 'e' || peek() == 'E') && (is_digit(peek_next()) ||
-			((peek_next() == '-' && is_digit(peek_next_next())) || (peek_next() == '+' && is_digit(peek_next_next()))))) {
+		if ((peek() == 'e' || peek() == 'E') && (is_digit(peek_next()) || ((peek_next() == '-' && is_digit(peek_next_next())) || (peek_next() == '+' && is_digit(peek_next_next()))))) {
+
 			advance();
-			while (is_digit(peek())) advance();
+			while (is_digit(peek()))
+				advance();
 
 			if ((peek() == '-' || peek() == '+') && is_digit(peek_next())) {
-				advance();
-				while (is_digit(peek())) advance();
-			}
 
+				advance();
+				while (is_digit(peek()))
+					advance();
+			}
 			CORE_VALIDATE(peek() != '.', return generate_error_token(), "", "Unexpected number literal at [" << m_line << "] col[" << m_column << "]");
 		}
 
@@ -178,11 +197,11 @@ namespace PFF {
 		return token{ m_column, m_line, token_type::STRING_LITERAL, value };
 	}
 
-	char script_scanner::advance() {
+	char script_scanner::advance(int count) {
 		
 		char c = m_file_contents[m_cursor];
-		m_cursor++;
-		m_column++;
+		m_cursor += count;
+		m_column += count;
 		return c;
 	}
 

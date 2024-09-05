@@ -28,6 +28,7 @@ namespace PFF::render::vulkan {
 
         // feature
         pipeline_builder& disable_blending();
+        pipeline_builder& disable_culling();
         pipeline_builder& enable_blending_additive();
         pipeline_builder& enable_blending_alphablend();
         pipeline_builder& disable_depthtest();

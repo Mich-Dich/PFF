@@ -7,7 +7,7 @@
 namespace PFF::UI {
 
 	template<typename T, typename ui_function>
-	FORCEINLINE void try_display_component(const char* name, PFF::entity entity, ui_function function) {
+	FORCEINLINE void try_display_component(const char* name, PFF::entity entity, ui_function function, bool need_to_close_table = true) {
 
 		if (!entity.has_component<T>())
 			return;
@@ -20,7 +20,8 @@ namespace PFF::UI {
 		auto& component = entity.get_component<T>();
 		function(component);
 
-		UI::end_table();
+		if (need_to_close_table)
+			UI::end_table();
 	}
 	
 	template<typename T, typename ui_function>

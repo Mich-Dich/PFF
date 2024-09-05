@@ -35,7 +35,6 @@ namespace PFF {
 	};
 
 
-
 	struct PFF_API material {
 
 		material_pipeline					opaque_pipeline;
@@ -67,4 +66,11 @@ namespace PFF {
 #endif
 
 	};
+
+#ifdef PFF_RENDERER_DEBUG_CAPABILITY
+	
+	PFF_API void build_debug_lines_pipelines(material& material);
+
+#endif // PFF_RENDERER_DEBUG_CAPABILITY
+
 }

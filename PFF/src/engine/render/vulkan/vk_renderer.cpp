@@ -45,6 +45,10 @@ namespace PFF::render::vulkan {
 	#define COLLECT_PERFORMANCE_DATA
 #endif
 
+#ifdef COLLECT_PERFORMANCE_DATA
+	#define COLLECTING_PERFORMANCE_DATA(data)			data
+#endif // COLLECT_PERFORMANCE_DATA
+
 
 	vk_renderer vk_renderer::s_instance = vk_renderer{};
 
@@ -141,22 +145,24 @@ namespace PFF::render::vulkan {
 
 		m_window->create_vulkan_surface(m_instance, &m_surface);
 
-		//vulkan 1.3 features
-		VkPhysicalDeviceVulkan13Features features{};
-		features.dynamicRendering = true;
-		features.synchronization2 = true;
+		VkPhysicalDeviceFeatures feature{};							//vulkan features
+		feature.fillModeNonSolid = true;
 
-		//vulkan 1.2 features
-		VkPhysicalDeviceVulkan12Features features12{};
-		features12.bufferDeviceAddress = true;
-		features12.descriptorIndexing = true;
+		VkPhysicalDeviceVulkan12Features features_1_2{};			//vulkan 1.2 features
+		features_1_2.bufferDeviceAddress = true;
+		features_1_2.descriptorIndexing = true;
+
+		VkPhysicalDeviceVulkan13Features features_1_3{};			//vulkan 1.3 features
+		features_1_3.dynamicRendering = true;
+		features_1_3.synchronization2 = true;
 
 		// select a gpu that can write to GLFW-surface and supports vulkan 1.3 with the correct features
 		vkb::PhysicalDeviceSelector selector{ vkb_inst };
 		vkb::PhysicalDevice physicalDevice = selector
 			.set_minimum_version(1, 3)
-			.set_required_features_13(features)
-			.set_required_features_12(features12)
+			.set_required_features(feature)
+			.set_required_features_12(features_1_2)
+			.set_required_features_13(features_1_3)
 			.set_surface(m_surface)
 			.select()
 			.value();
@@ -670,6 +676,20 @@ namespace PFF::render::vulkan {
 		material_resources.data_buffer = material_constant.buffer;
 		material_resources.data_buffer_offset = 0;
 		m_default_material = m_metal_rough_material.create_instance(material_pass::main_color, material_resources, m_global_descriptor_allocator);
+
+#ifdef PFF_RENDERER_DEBUG_CAPABILITY
+
+		material::material_resources debug_lines_material_resources;						//debug material for lines
+		debug_lines_material_resources.color_image = m_error_checkerboard_image;
+		debug_lines_material_resources.color_sampler = m_default_sampler_nearest;
+		debug_lines_material_resources.metal_rough_image = m_error_checkerboard_image;
+		debug_lines_material_resources.metal_rough_sampler = m_default_sampler_nearest;
+		debug_lines_material_resources.data_buffer = material_constant.buffer;
+		debug_lines_material_resources.data_buffer_offset = 0;
+		m_debug_lines_material_inst = m_debug_lines_material.create_instance(material_pass::main_color, debug_lines_material_resources, m_global_descriptor_allocator);
+
+#endif // PFF_RENDERER_DEBUG_CAPABILITY
+	 
 	}
 
 	void vk_renderer::serialize(const PFF::serializer::option option) {
@@ -853,6 +873,13 @@ namespace PFF::render::vulkan {
 
 		m_metal_rough_material.build_pipelines();
 		m_deletion_queue.push_func([&] { m_metal_rough_material.release_resources(); });
+
+#ifdef PFF_RENDERER_DEBUG_CAPABILITY
+
+		build_debug_lines_pipelines(m_debug_lines_material);
+		m_deletion_queue.push_func([&] { m_debug_lines_material.release_resources(); });
+
+#endif // PFF_RENDERER_DEBUG_CAPABILITY
 	}
 
 	void vk_renderer::init_pipelines_background() {
@@ -1052,9 +1079,7 @@ namespace PFF::render::vulkan {
 
 	void vk_renderer::draw_geometry(VkCommandBuffer cmd) {
 
-#ifdef COLLECT_PERFORMANCE_DATA
-		PFF::stopwatch loc_stopwatch(&m_renderer_metrik.draw_geometry_time[m_renderer_metrik.current_index]);
-#endif // COLLECT_PERFORMANCE_DATA
+		COLLECTING_PERFORMANCE_DATA(PFF::stopwatch loc_stopwatch(&m_renderer_metrik.draw_geometry_time[m_renderer_metrik.current_index]));
 
 		// ========================================== create GPU global scene data ==========================================
 		//set dynamic viewport and scissor
@@ -1130,7 +1155,7 @@ namespace PFF::render::vulkan {
 
 			const auto& transform_comp = loc_map->get_registry().get<transform_component>(entity);
 			auto mesh_asset = procedural_mesh_comp.instance->get_mesh_asset();
-			if (/*!mesh_asset || */!is_bounds_in_frustum(mesh_asset.bounds, (glm::mat4&)transform_comp))
+			if (mesh_asset.surfaces.size() <= 0 || !is_bounds_in_frustum(mesh_asset.bounds, (glm::mat4&)transform_comp))
 				continue;
 
 
@@ -1148,10 +1173,10 @@ namespace PFF::render::vulkan {
 					last_pipeline = loc_pipeline;
 					vkCmdBindPipeline(cmd, VK_PIPELINE_BIND_POINT_GRAPHICS, loc_pipeline->pipeline);
 					vkCmdBindDescriptorSets(cmd, VK_PIPELINE_BIND_POINT_GRAPHICS, loc_pipeline->layout, 0, 1, &globalDescriptor, 0, nullptr);
-					m_renderer_metrik.pipline_binding_count++;
+					COLLECTING_PERFORMANCE_DATA(m_renderer_metrik.pipline_binding_count++);
 				}
 				vkCmdBindDescriptorSets(cmd, VK_PIPELINE_BIND_POINT_GRAPHICS, loc_material->pipeline->layout, (u32)1, (u32)1, &loc_material->material_set, (u32)0, nullptr);
-				m_renderer_metrik.material_binding_count++;
+				COLLECTING_PERFORMANCE_DATA(m_renderer_metrik.material_binding_count++);
 			}
 
 			GPU_draw_push_constants push_constants;
@@ -1170,15 +1195,11 @@ namespace PFF::render::vulkan {
 
 				vkCmdDrawIndexed(cmd, mesh_asset.surfaces[x].count, 1, mesh_asset.surfaces[x].startIndex, 0, 0);		// POSIBLE OPIMIZATION - Collect all transforms of mesh_comp pointing to same mesh_asset and draw indexed
 
-#ifdef COLLECT_PERFORMANCE_DATA
-				m_renderer_metrik.triangles += (u64)mesh_asset.surfaces[x].count / 3;
-				m_renderer_metrik.draw_calls++;
-#endif // COLLECT_PERFORMANCE_DATA
+				COLLECTING_PERFORMANCE_DATA(m_renderer_metrik.triangles += (u64)mesh_asset.surfaces[x].count / 3);
+				COLLECTING_PERFORMANCE_DATA(m_renderer_metrik.draw_calls++);
 			}
 
-#ifdef COLLECT_PERFORMANCE_DATA
-			m_renderer_metrik.mesh_draw++;
-#endif // COLLECT_PERFORMANCE_DATA
+			COLLECTING_PERFORMANCE_DATA(m_renderer_metrik.mesh_draw++);
 		}
 
 
@@ -1216,10 +1237,10 @@ namespace PFF::render::vulkan {
 					last_pipeline = loc_pipeline;
 					vkCmdBindPipeline(cmd, VK_PIPELINE_BIND_POINT_GRAPHICS, loc_pipeline->pipeline);
 					vkCmdBindDescriptorSets(cmd, VK_PIPELINE_BIND_POINT_GRAPHICS, loc_pipeline->layout, 0, 1, &globalDescriptor, 0, nullptr);
-					m_renderer_metrik.pipline_binding_count++;
+					COLLECTING_PERFORMANCE_DATA(m_renderer_metrik.pipline_binding_count++);
 				}
 				vkCmdBindDescriptorSets(cmd, VK_PIPELINE_BIND_POINT_GRAPHICS, loc_material->pipeline->layout, (u32)1, (u32)1, &loc_material->material_set, (u32)0, nullptr);
-				m_renderer_metrik.material_binding_count++;
+				COLLECTING_PERFORMANCE_DATA(m_renderer_metrik.material_binding_count++);
 			}
 
 			GPU_draw_push_constants push_constants;
@@ -1238,21 +1259,53 @@ namespace PFF::render::vulkan {
 
 				vkCmdDrawIndexed(cmd, mesh_comp.mesh_asset->surfaces[x].count, 1, mesh_comp.mesh_asset->surfaces[x].startIndex, 0, 0);		// POSIBLE OPIMIZATION - Collect all transforms of mesh_comp pointing to same mesh_asset and draw indexed
 
-#ifdef COLLECT_PERFORMANCE_DATA
-				m_renderer_metrik.triangles += (u64)mesh_comp.mesh_asset->surfaces[x].count / 3;
-				m_renderer_metrik.draw_calls++;
-#endif // COLLECT_PERFORMANCE_DATA
+				COLLECTING_PERFORMANCE_DATA(m_renderer_metrik.triangles += (u64)mesh_comp.mesh_asset->surfaces[x].count / 3);
+				COLLECTING_PERFORMANCE_DATA(m_renderer_metrik.draw_calls++);
 			}
 
-#ifdef COLLECT_PERFORMANCE_DATA
-			m_renderer_metrik.mesh_draw++;
-#endif // COLLECT_PERFORMANCE_DATA
+			COLLECTING_PERFORMANCE_DATA(m_renderer_metrik.mesh_draw++);
 		}
 
 
 
+
+
+
+
+
+#ifdef PFF_RENDERER_DEBUG_CAPABILITY
+
+		if (m_debug_lines.vertices.size() > 0) {
+			
+			// binding debug material for lines
+			vkCmdBindPipeline(cmd, VK_PIPELINE_BIND_POINT_GRAPHICS, m_debug_lines_material_inst.pipeline->pipeline);
+			vkCmdBindDescriptorSets(cmd, VK_PIPELINE_BIND_POINT_GRAPHICS, m_debug_lines_material_inst.pipeline->layout, 0, 1, &globalDescriptor, 0, nullptr);
+			vkCmdBindDescriptorSets(cmd, VK_PIPELINE_BIND_POINT_GRAPHICS, m_debug_lines_material_inst.pipeline->layout, (u32)1, (u32)1, &m_debug_lines_material_inst.material_set, (u32)0, nullptr);
+			
+			GPU_draw_push_constants push_constants;
+			push_constants.world_matrix = glm::mat4{1};
+			push_constants.vertex_buffer = m_debug_lines.mesh_buffers.vertex_buffer_address;
+			vkCmdPushConstants(cmd, m_debug_lines_material_inst.pipeline->layout, VK_SHADER_STAGE_VERTEX_BIT, (u32)0, sizeof(GPU_draw_push_constants), &push_constants);
+			vkCmdBindIndexBuffer(cmd, m_debug_lines.mesh_buffers.index_buffer.buffer, 0, VK_INDEX_TYPE_UINT32);
+
+			for (u64 x = 0; x < m_debug_lines.surfaces.size(); x++) {
+
+				vkCmdDrawIndexed(cmd, m_debug_lines.surfaces[x].count, 1, m_debug_lines.surfaces[x].startIndex, 0, 0);		// POSIBLE OPIMIZATION - Collect all transforms of mesh_comp pointing to same mesh_asset and draw indexed
+
+				COLLECTING_PERFORMANCE_DATA(m_renderer_metrik.triangles += (u64)m_debug_lines.surfaces[x].count / 3);
+				COLLECTING_PERFORMANCE_DATA(m_renderer_metrik.draw_calls++);
+			}
+
+			COLLECTING_PERFORMANCE_DATA(m_renderer_metrik.pipline_binding_count++);
+			COLLECTING_PERFORMANCE_DATA(m_renderer_metrik.material_binding_count++);
+			COLLECTING_PERFORMANCE_DATA(m_renderer_metrik.mesh_draw++);
+		}
+
+#endif // PFF_RENDERER_DEBUG_CAPABILITY
+
 		vkCmdEndRendering(cmd);
 	}
+
 
 	// called once per frame
 	void vk_renderer::calc_frustum_planes(const glm::mat4& pro_view) {
@@ -1399,8 +1452,6 @@ namespace PFF::render::vulkan {
 		return new_mesh;
 	}
 
-#if 0
-
 	void vk_renderer::update_mesh(render::GPU_mesh_buffers& mesh, const std::vector<u32>& indices, const std::vector<PFF::geometry::vertex>& vertices) {
 		
 		const size_t vertexBufferSize = vertices.size() * sizeof(PFF::geometry::vertex);
@@ -1408,7 +1459,7 @@ namespace PFF::render::vulkan {
 		if (!mesh.vertex_buffer.buffer || !mesh.index_buffer.buffer ||
 			mesh.vertex_buffer.info.size < vertexBufferSize || mesh.index_buffer.info.size < indexBufferSize) {
 
-			CORE_LOG(Warn, "Mesh not created yet or size changed, calling [upload_mesh()]");
+			//CORE_LOG(Warn, "Mesh not created yet or size changed, calling [upload_mesh()]");
 			mesh = upload_mesh(indices, vertices);
 			return;
 		}
@@ -1437,8 +1488,6 @@ namespace PFF::render::vulkan {
 		destroy_buffer(staging);
 	}
 	
-#else
-
 	void vk_renderer::update_mesh(PFF::geometry::procedural_mesh_asset& mesh, const std::vector<u32>& indices, const std::vector<PFF::geometry::vertex>& vertices) {
 
 		const size_t vertexBufferSize = vertices.size() * sizeof(PFF::geometry::vertex);
@@ -1448,7 +1497,7 @@ namespace PFF::render::vulkan {
 		if (!mesh.mesh_buffers.vertex_buffer.buffer || !mesh.mesh_buffers.index_buffer.buffer
 			|| mesh.mesh_buffers.vertex_buffer.info.size < vertexBufferSize || mesh.mesh_buffers.index_buffer.info.size < indexBufferSize) {
 
-			CORE_LOG(Warn, "Mesh not created yet or size changed, calling [upload_mesh()]");
+			//CORE_LOG(Warn, "Mesh not created yet or size changed, calling [upload_mesh()]");
 			mesh.mesh_buffers = upload_mesh(indices, vertices);
 			mesh.indices = indices;
 			mesh.vertices = vertices;
@@ -1530,8 +1579,6 @@ namespace PFF::render::vulkan {
 		mesh.staging_buffer_size = 0;
 	}
 
-#endif
-
 	void vk_renderer::release_mesh(render::GPU_mesh_buffers& mesh) {
 
 		if (mesh.vertex_buffer.buffer) {
@@ -1548,5 +1595,36 @@ namespace PFF::render::vulkan {
 		mesh.vertex_buffer_address = 0;
 		CORE_LOG(Trace, "Mesh released from GPU memory");
 	}
+
+#ifdef PFF_RENDERER_DEBUG_CAPABILITY
+
+	void vk_renderer::add_debug_line(PFF::geometry::vertex start, PFF::geometry::vertex end) {
+
+		m_debug_lines.vertices.push_back(start);
+		m_debug_lines.vertices.push_back(end);
+
+		size_t index = m_debug_lines.indices.size();
+		m_debug_lines.indices.push_back((u32)index);
+		m_debug_lines.indices.push_back((u32)index + 1);
+
+		if (m_debug_lines.surfaces.size() == 0) {
+
+			PFF::geometry::Geo_surface surface = { 0, (u32)m_debug_lines.indices.size(), PFF::geometry::bounds() };
+			m_debug_lines.surfaces.emplace_back(surface);
+		}
+
+		m_debug_lines.surfaces[0].count = (u32)m_debug_lines.indices.size();
+
+		update_mesh(m_debug_lines.mesh_buffers, m_debug_lines.indices, m_debug_lines.vertices);
+	}
+
+	void vk_renderer::clear_debug_line() {
+
+		m_debug_lines.vertices.clear();
+		m_debug_lines.indices.clear();
+		m_debug_lines.surfaces[0].count = 0;
+	}
+
+#endif // PFF_RENDERER_DEBUG_CAPABILITY
 
 }

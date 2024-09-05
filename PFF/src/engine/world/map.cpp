@@ -291,6 +291,7 @@ namespace PFF {
 					.entry(KEY_VALUE(mesh_comp.shoudl_render));
 				);
 
+				// TODO: call script serializer_func
 				SERIALIZE_SIMPLE_COMPONENT(procedural_mesh,
 					.entry(KEY_VALUE(procedural_mesh_comp.script_name))
 					.entry(KEY_VALUE(procedural_mesh_comp.mobility))

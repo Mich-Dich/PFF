@@ -98,13 +98,18 @@ namespace PFF::render::vulkan {
 		// TIP: Note that this pattern is not very efficient, as CPU is waiting for the GPU command to fully execute before continuing with our CPU side logic
 		//		This is should be put on a background thread, whose sole job is to execute uploads like this one, and deleting/reusing the staging buffers.
 		render::GPU_mesh_buffers upload_mesh(std::vector<u32> indices, std::vector<PFF::geometry::vertex> vertices);
-#if 0
 		void update_mesh(render::GPU_mesh_buffers& mesh, const std::vector<u32>& indices, const std::vector<PFF::geometry::vertex>& vertices);
-#else
 		void update_mesh(PFF::geometry::procedural_mesh_asset& mesh, const std::vector<u32>& indices, const std::vector<PFF::geometry::vertex>& vertices);
 		void cleanup_procedural_mesh(PFF::geometry::procedural_mesh_asset& mesh);
-#endif
 		void release_mesh(render::GPU_mesh_buffers& mesh);
+
+#ifdef PFF_RENDERER_DEBUG_CAPABILITY
+		void add_debug_line(PFF::geometry::vertex start, PFF::geometry::vertex end);
+		void clear_debug_line();
+#else
+		void add_debug_line(PFF::geometry::vertex start, PFF::geometry::vertex end)		{ LOG(Warn, "function [add_debug_line()] only available in debug mode"); }
+		void clear_debug_line()															{ LOG(Warn, "function [clear_debug_line()] only available in debug mode"); }
+#endif // PFF_RENDERER_DEBUG_CAPABILITY
 
 	private:
 
@@ -228,6 +233,13 @@ namespace PFF::render::vulkan {
 		VkDescriptorSetLayout						m_single_image_descriptor_layout;
 		material_instance							m_default_material;
 		material									m_metal_rough_material;
+
+		// ---------------------------- data for debug ---------------------------- 
+#ifdef PFF_RENDERER_DEBUG_CAPABILITY
+		PFF::geometry::mesh_asset					m_debug_lines{};
+		material_instance							m_debug_lines_material_inst;
+		material									m_debug_lines_material;
+#endif // PFF_RENDERER_DEBUG_CAPABILITY
 
 		std::array<glm::vec4, 6>					m_view_frustum{};
 	};

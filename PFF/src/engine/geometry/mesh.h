@@ -25,9 +25,9 @@ namespace PFF::geometry {
     
     struct PFF_API Geo_surface {
 
-        u32         startIndex;
-        u32         count;
-        bounds      bounds;
+        u32         startIndex = 0;
+        u32         count = 0;
+        bounds      bounds{};
         //ref<material_instatnce> material;
     };
 

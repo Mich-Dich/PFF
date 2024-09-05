@@ -127,11 +127,14 @@ namespace PFF::UI {
 				}
 
 			});
+			UI::table_row("shoudl render", component.shoudl_render);
+
+			UI::end_table();
 
 			script_system::display_properties(component.script_name, (PFF::entity_script*)component.instance);
 
-			UI::table_row("shoudl render", component.shoudl_render);
-		});
+
+		}, false);
 
 	}
 

@@ -24,11 +24,12 @@
 
 namespace PFF::util {
 
-    float random::get_f32(f32 min, f32 max) {
+    f32 random::get_f32(f32 min, f32 max) {
         std::uniform_real_distribution<f32> dist(min, max);
         return dist(engine);
     }
 
+    bool random::get_percent(f32 percentage) { return get_f32(0.f, 1.f) > percentage; }
 
     f64 random::get_f64(f64 min, f64 max) {
         std::uniform_real_distribution<f64> dist(min, max);
