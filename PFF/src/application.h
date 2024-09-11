@@ -11,6 +11,8 @@
 
 namespace PFF {
 
+	static project_data serialize_projects_data(const std::filesystem::path& project_path, serializer::option option);
+
 	class pff_window;
 	class renderer;
 	class event;
@@ -20,6 +22,7 @@ namespace PFF {
 	class window_focus_event;
 	class map;
 	class camera;
+	class PFF::render::vulkan::vk_renderer;
 
 	class PFF_API application {
 	public:
@@ -86,8 +89,7 @@ namespace PFF {
 		void client_init();
 		void client_shutdown();
 
-		void serialize(serializer::option option);
-		
+		void serialize(serializer::option option);		
 		void on_event(event& event);
 		bool on_window_close(window_close_event& event);
 		bool on_window_resize(window_resize_event& event);

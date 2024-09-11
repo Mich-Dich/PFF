@@ -55,7 +55,7 @@ namespace PFF {
 		// @param $I		only File Name			main.c foo.c
 		// @param $G		Line				1, 42
 		// @param 
-		// @param $L		LogLevel				[TRACE], [DEBUG] … [FATAL]
+		// @param $L		LogLevel			[TRACE], [DEBUG] … [FATAL]
 		// @param $X		Alienment			add space for "INFO" & "WARN"
 		// @param $B		Color Begin			from here the color starts
 		// @param $E		Color End			from here the color ends

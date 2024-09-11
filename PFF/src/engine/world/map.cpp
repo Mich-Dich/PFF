@@ -193,6 +193,10 @@ namespace PFF {
 			script_comp.instance->on_update(delta_time);
 		});
 #else
+
+		if (!script_system::is_ready())
+			return;
+
 		m_registry.view<script_component>().each([=](auto entity, auto& script_comp) {
 
 			// ==================== DEV-ONLY (move to on_runtime_start()) ====================
@@ -204,10 +208,9 @@ namespace PFF {
 			}
 
 			script_comp.instance->on_update(delta_time);
-
 		});
 
-		m_registry.view<procedural_mesh_component>().each([=](auto entity, auto& script_comp) {
+		m_registry.view<procedural_mesh_component>().each([&](auto entity, auto& script_comp) {
 
 			// ==================== DEV-ONLY (move to on_runtime_start()) ====================
 			if (!script_comp.instance) {
@@ -218,9 +221,44 @@ namespace PFF {
 			}
 
 			script_comp.instance->on_update(delta_time);
-
 		});
+
+		//auto& registry = m_registry;
+		//CORE_LOG(Info, "Registry address in update loop: " << &registry);
+
+		//try {
+		//	registry.storage<procedural_mesh_component>();
+		//	auto view = registry.view<procedural_mesh_component>();
+		//	CORE_LOG(Info, "View created successfully");
+		//	CORE_LOG(Info, "Number of procedural_mesh_components in view: " << view.size());
+		//	CORE_VALIDATE_S(view.size() == 0, return);
+
+
+
+		//} catch (const std::exception& e) {
+		//	CORE_LOG(Error, "Exception when creating view: " << e.what());
+		//} catch (...) {
+		//	CORE_LOG(Error, "Unknown exception when creating view");
+		//}
+
 #endif // RUNTIME_IMPLEMENTED
+	}
+
+	void map::recreate_scripts() {
+
+		m_registry.view<procedural_mesh_component>().each([=](auto entity, auto& script_comp) {
+
+			if (script_comp.instance) {
+
+				CORE_LOG(Trace, "Destroying script");
+				script_comp.destroy_script(&script_comp);
+
+				CORE_LOG(Trace, "Recreating script");
+				script_comp.instance = script_comp.create_script();
+				script_comp.instance->m_entity = PFF::entity{ entity, this };
+				script_comp.instance->on_create();
+			}
+		});
 	}
 
 
@@ -291,12 +329,19 @@ namespace PFF {
 					.entry(KEY_VALUE(mesh_comp.shoudl_render));
 				);
 
-				// TODO: call script serializer_func
-				SERIALIZE_SIMPLE_COMPONENT(procedural_mesh,
-					.entry(KEY_VALUE(procedural_mesh_comp.script_name))
-					.entry(KEY_VALUE(procedural_mesh_comp.mobility))
-					.entry(KEY_VALUE(procedural_mesh_comp.shoudl_render));
-				);
+
+				if (loc_entity.has_component<procedural_mesh_component>()) {
+
+					auto& procedural_mesh_comp = loc_entity.get_component<procedural_mesh_component>();
+					entity_section.sub_section("procedural_mesh_component", [&](serializer::yaml& component_section) {
+
+						component_section.entry(KEY_VALUE(procedural_mesh_comp.script_name))
+							.entry(KEY_VALUE(procedural_mesh_comp.mobility))
+							.entry(KEY_VALUE(procedural_mesh_comp.shoudl_render));
+
+						script_system::serialize_script(procedural_mesh_comp.script_name, (PFF::entity_script*)procedural_mesh_comp.instance, serializer);
+					});
+				};
 
 				SERIALIZE_SIMPLE_COMPONENT(relationship,
 					.entry(KEY_VALUE(relationship_comp.parent_ID))
@@ -356,6 +401,7 @@ namespace PFF {
 						.entry(KEY_VALUE(proc_mesh_comp.mobility))
 						.entry(KEY_VALUE(proc_mesh_comp.shoudl_render));
 
+					script_system::serialize_script(proc_mesh_comp.script_name, (PFF::entity_script*)proc_mesh_comp.instance, serializer);
 					script_system::add_component_from_string(proc_mesh_comp.script_name, loc_entity);
 				});
 

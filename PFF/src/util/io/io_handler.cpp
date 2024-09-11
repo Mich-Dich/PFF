@@ -2,6 +2,19 @@
 #include "util/pffpch.h"
 
 #include <filesystem>
+
+#ifdef PFF_PLATFORM_WINDOWS
+
+	#include <Windows.h>
+	#include <Psapi.h>
+	#include <TlHelp32.h>
+
+#elif defined PFF_PLATFORM_LINUX || defined PFF_PLATFORM_MAC
+	#error Not implemented yet
+#else
+	#error undefined platform
+#endif
+
 #include "io_handler.h"
 
 namespace PFF::io_handler {
@@ -37,14 +50,98 @@ namespace PFF::io_handler {
 		return true;
 	}
 
+	bool io_handler::copy_file(const std::filesystem::path& full_path_to_file, const std::filesystem::path& target_directory) {
+
+		try {
+		
+			CORE_VALIDATE(std::filesystem::exists(full_path_to_file), return false, "", "Source file does not exist: " << full_path_to_file);
+
+			// Check if the target directory exists, if not, create it
+			if (!std::filesystem::exists(target_directory)) {
+				if (io_handler::create_directory(target_directory))
+					return false;
+			}
+
+			std::filesystem::path target_file_path = target_directory / full_path_to_file.filename();
+			std::filesystem::copy_file(full_path_to_file, target_file_path, std::filesystem::copy_options::overwrite_existing);
+			return true;
+
+		} catch (const std::filesystem::filesystem_error& e) {
+
+			CORE_LOG(Error, "Filesystem error: " << e.what());
+			return false;
+		} catch (const std::exception& e) {
+
+			CORE_LOG(Error, "Error copying file: " << e.what());
+			return false;
+		}
+	}
+
 	// 
 	bool create_directory(const std::filesystem::path& path) {
 
 		// Check if the directory exists
 		if (!std::filesystem::is_directory(path))
-			CORE_VALIDATE(std::filesystem::create_directories(path), return false, "", "could not create directory: " << path);
+			CORE_VALIDATE(std::filesystem::create_directories(path), return false, "", "Failed to create directory: " << path);
 		
 		return true;
+	}
+
+	PFF_API std::vector<std::string> get_processes_using_file(const std::wstring& filePath) {
+
+#ifdef PFF_PLATFORM_WINDOWS
+
+		std::vector<std::string> processNames;
+		HANDLE hSnapshot = CreateToolhelp32Snapshot(TH32CS_SNAPPROCESS, 0);
+		if (hSnapshot == INVALID_HANDLE_VALUE)
+			return processNames;
+
+		PROCESSENTRY32 pe32;
+		pe32.dwSize = sizeof(PROCESSENTRY32);
+
+		if (!Process32First(hSnapshot, &pe32)) {
+			CloseHandle(hSnapshot);
+			return processNames;
+		}
+
+		do {
+			HANDLE hProcess = OpenProcess(PROCESS_QUERY_INFORMATION | PROCESS_VM_READ, FALSE, pe32.th32ProcessID);
+			if (hProcess == NULL)
+				continue;
+
+			HMODULE hMods[1024];
+			DWORD cbNeeded;
+
+			if (EnumProcessModules(hProcess, hMods, sizeof(hMods), &cbNeeded)) {
+				for (unsigned int i = 0; i < (cbNeeded / sizeof(HMODULE)); i++) {
+
+					TCHAR szModName[MAX_PATH];
+					if (!GetModuleFileNameEx(hProcess, hMods[i], szModName, sizeof(szModName) / sizeof(TCHAR)))
+						continue;
+
+					if (_wcsicmp(szModName, filePath.c_str()) != 0)
+						continue;
+
+					std::wstring buffer = pe32.szExeFile;
+					int size_needed = WideCharToMultiByte(CP_UTF8, 0, &buffer[0], (int)buffer.size(), NULL, 0, NULL, NULL);
+					std::string str(size_needed, 0);
+					WideCharToMultiByte(CP_UTF8, 0, &buffer[0], (int)buffer.size(), &str[0], size_needed, NULL, NULL);
+					processNames.push_back(str);
+					break;
+				}
+			}
+			CloseHandle(hProcess);
+		} while (Process32Next(hSnapshot, &pe32));
+
+		CloseHandle(hSnapshot);
+		return processNames;
+
+#elif defined PFF_PLATFORM_LINUX || defined PFF_PLATFORM_MAC
+	#error Not implemented yet
+#else
+	#error undefined platform
+#endif
+
 	}
 
 	bool is_directory(const std::filesystem::path& path)								{ return std::filesystem::is_directory(path); }

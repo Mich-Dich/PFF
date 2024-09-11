@@ -237,7 +237,7 @@ IF EXIST $(SolutionDir)\vendor\premake\ (xcopy /Q /E /Y /I $(SolutionDir)\vendor
     <ClInclude Include="src\engine\world\map.h" />
     <ClInclude Include="src\entry_point.h" />
     <ClInclude Include="src\procedural\procedural_mesh_script.h" />
-    <ClInclude Include="src\project\file_system_watcher.h" />
+    <ClInclude Include="src\project\file_watcher_system.h" />
     <ClInclude Include="src\project\project_data_struct.h" />
     <ClInclude Include="src\project\project_macros.h" />
     <ClInclude Include="src\project\script_system.h" />
@@ -292,7 +292,7 @@ IF EXIST $(SolutionDir)\vendor\premake\ (xcopy /Q /E /Y /I $(SolutionDir)\vendor
     <ClCompile Include="src\engine\world\entity.cpp" />
     <ClCompile Include="src\engine\world\map.cpp" />
     <ClCompile Include="src\procedural\procedural_mesh_script.cpp" />
-    <ClCompile Include="src\project\file_system_watcher.cpp" />
+    <ClCompile Include="src\project\file_watcher_system.cpp" />
     <ClCompile Include="src\project\script_system.cpp" />
     <ClCompile Include="src\util\UUID.cpp" />
     <ClCompile Include="src\util\io\config.cpp" />

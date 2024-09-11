@@ -74,7 +74,17 @@ namespace PFF::logger {
 #define SHORT_FILE(text)                (strrchr(text, '\\') ? strrchr(text, '\\') + 1 : text)
 #define SHORTEN_FUNC_NAME(text)         (strrchr(text, '::') ? strrchr(text, '::') + 1 : text)
 
+static const char* get_filename(const char* filepath) {
 
+    const char* filename = std::strrchr(filepath, '\\');
+    if (filename == nullptr) 
+        filename = std::strrchr(filepath, '/');
+
+    if (filename == nullptr) 
+        return filepath;  // No path separator found, return the whole string
+
+    return filename + 1;  // Skip the path separator
+}
 
 namespace PFF::logger {
 
@@ -230,7 +240,7 @@ namespace PFF::logger {
                 case 'K':   Format_Filled << SHORTEN_FILE_PATH(fileName); break;
 
                     // Only File Name
-                case 'I':   Format_Filled << SHORT_FILE(fileName); break;
+                case 'I':   Format_Filled << get_filename(fileName); break;
 
                     // Line
                 case 'G':   Format_Filled << line; break;

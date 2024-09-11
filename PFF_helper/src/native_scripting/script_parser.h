@@ -45,11 +45,15 @@ namespace PFF {
 	private:
 
 		struct sorting_category {
+
 			std::string						category_name{};
 			std::vector<PFF_variable>		variables{};
 		};
 
-		std::string generate_display_function(const std::string& name, const std::string& name_without_namespace, const std::string& specifiers, const std::filesystem::path& full_filepath, const std::list<PFF_variable>& variables);
+		void sort_by_categories(std::vector<sorting_category>& sorted, const std::list<PFF_variable>& variables);
+		std::string generate_display_function(const std::string& name, const std::string& name_without_namespace, const std::string& specifiers, const std::filesystem::path& full_filepath, const std::list<PFF_variable>& variables, bool is_class);
+		std::string generate_serialization_function(const std::string& name, const std::string& name_without_namespace, const std::string& specifiers, const std::filesystem::path& full_filepath, const std::list<PFF_variable>& variables);
+
 		std::string parse_specifiers_value(const std::string& specifiers, const std::string& key, std::string default_value = "0");
 		void parse_class(const std::string& specifiers);
 		void parse_struct(const std::string& specifiers);

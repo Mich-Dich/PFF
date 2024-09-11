@@ -65,15 +65,18 @@ namespace PFF {
 #define PROJECT_PATH			application::get().get_project_path()
 #define PROJECT_NAME			application::get().get_project_data().name
 
-#define PFF_ASSET_EXTENTION		".pffasset"
-#define PFF_PROJECT_EXTENTION	".pffproj"
+#define PFF_ASSET_EXTENTION			".pffasset"
+#define PFF_PROJECT_EXTENTION		".pffproj"
 
-#define CONFIG_DIR				"config"
-#define CONTENT_DIR				"content"
-#define SOURCE_DIR				"src"
+#define PFF_PROJECT_TEMP_DLL_PATH	"_build_DLL"
 
-#define FILE_EXTENSION_CONFIG	".yml"
-#define FILE_EXTENSION_INI		".ini"
+#define METADATA_DIR				"metadata"
+#define CONFIG_DIR					"config"
+#define CONTENT_DIR					"content"
+#define SOURCE_DIR					"src"
+
+#define FILE_EXTENSION_CONFIG		".yml"
+#define FILE_EXTENSION_INI			".ini"
 
 enum class key_state {
 	release = 0,

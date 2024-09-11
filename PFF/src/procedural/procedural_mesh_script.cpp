@@ -83,22 +83,24 @@ namespace PFF {
 		GET_RENDERER.add_debug_line(start, end);
 	}
 
-	void procedural_mesh_script::add_debug_line(glm::vec3 start, glm::vec3 end, bool vertex_in_global_space) {
+	void procedural_mesh_script::add_debug_line(glm::vec3 start, glm::vec3 end, glm::vec4 color, bool vertex_in_global_space) {
 
 		PFF::geometry::vertex start_vert = {};
 		start_vert.position = start;
+		start_vert.color = color;
 
 		PFF::geometry::vertex end_vert = {};
 		end_vert.position = end;
+		end_vert.color = color;
 
 		add_debug_line(start_vert, end_vert, vertex_in_global_space);
 	}
 
-	void procedural_mesh_script::add_debug_cross(glm::vec3 position, f32 size, bool vertex_in_global_space) {
+	void procedural_mesh_script::add_debug_cross(glm::vec3 position, f32 size, glm::vec4 color, bool vertex_in_global_space) {
 
-		add_debug_line(glm::vec3(position.x -size, position.y + 0, position.z + 0), glm::vec3(position.x + size, position.y + 0, position.z + 0), vertex_in_global_space);
-		add_debug_line(glm::vec3(position.x + 0, position.y -size, position.z + 0), glm::vec3(position.x + 0, position.y + size, position.z + 0), vertex_in_global_space);
-		add_debug_line(glm::vec3(position.x + 0, position.y + 0, position.z -size), glm::vec3(position.x + 0, position.y + 0, position.z + size), vertex_in_global_space);
+		add_debug_line(glm::vec3(position.x -size, position.y + 0, position.z + 0), glm::vec3(position.x + size, position.y + 0, position.z + 0), color, vertex_in_global_space);
+		add_debug_line(glm::vec3(position.x + 0, position.y -size, position.z + 0), glm::vec3(position.x + 0, position.y + size, position.z + 0), color, vertex_in_global_space);
+		add_debug_line(glm::vec3(position.x + 0, position.y + 0, position.z -size), glm::vec3(position.x + 0, position.y + 0, position.z + size), color, vertex_in_global_space);
 	}
 
 	void procedural_mesh_script::clear_debug_line() {		GET_RENDERER.clear_debug_line(); }

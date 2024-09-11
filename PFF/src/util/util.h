@@ -64,6 +64,8 @@ namespace PFF {
             random(u32 seed = std::random_device{}()) 
                 : engine(seed) {}
 
+            FORCEINLINE glm::vec3 get_vec3(f32 min = 0.0f, f32 max = 1.0f);
+
             // @brief Generates a random floating-point number in the range [min, max].
             // @param [min] The minimum value of the random number range.
             // @param [max] The maximum value of the random number range.
@@ -120,9 +122,9 @@ namespace PFF {
         };
 
 
-        FORCEINLINE PFF_API bool run_program(const std::filesystem::path& path_to_exe, const std::string& cmd_args = "");
+        FORCEINLINE PFF_API bool run_program(const std::filesystem::path& path_to_exe, const std::string& cmd_args = "", bool open_console = false);
 
-        PFF_API bool run_program(const std::filesystem::path& path_to_exe, const char* cmd_args = "");
+        PFF_API bool run_program(const std::filesystem::path& path_to_exe, const char* cmd_args = "", bool open_console = false);
 
 
         // @brief Searches for the last occurrence of the specified delimiter in the input string,
@@ -298,6 +300,7 @@ namespace PFF {
 
         template<typename T>
         void convert_typename_to_string(std::string& typename_string) {
+
 #if defined(_MSC_VER)
             // MSVC specific code
             typename_string = typeid(T).name();

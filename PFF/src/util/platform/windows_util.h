@@ -6,6 +6,14 @@
 #else
 	#define PFF_API								__declspec(dllimport)
 #endif
+//
+//#ifdef PFF_INSIDE_ENGINE
+//	#define PFF_HELPER_PROGRAM_API				__declspec(dllexport)
+//#elif PFF_HELPER_PROGRAM
+//	#define PFF_HELPER_PROGRAM_API				__declspec(dllimport)
+//#else
+//	#define PFF_HELPER_PROGRAM_API
+//#endif
 
 #ifdef PFF_INSIDE_ENGINE
 	#define PFF_API_EDITOR						__declspec(dllexport)
@@ -15,13 +23,11 @@
 	#define PFF_API_EDITOR	
 #endif
 
-
 #ifdef PFF_PROJECT
-	#define PROJECT_API extern "C" __declspec(dllexport)
+	#define PROJECT_API							extern "C" __declspec(dllexport)
 #else
-	#define PROJECT_API __declspec(dllimport)
+	#define PROJECT_API							__declspec(dllimport)
 #endif
-
 
 #if defined(PFF_INSIDE_ENGINE) || defined(PFF_INSIDE_EDITOR)
 	#define USE_IN_EDITOR
@@ -29,11 +35,12 @@
 	#define USE_IN_EDITOR	
 #endif
 
-#define DEBUG_BREAK() (__debugbreak())
+#define DEBUG_BREAK()							(__debugbreak())
 
 #ifdef CDECL
 	#undef CDECL
 #endif
+
 
 // Function type macros.
 #define VARARGS									__cdecl							// Functions with variable arguments

@@ -37,8 +37,8 @@ namespace PFF {
 		FORCEINLINE void recalculate_normals();
 		FORCEINLINE void recalculate_bounds();
 		FORCEINLINE void add_debug_line(geometry::vertex start, geometry::vertex end, bool vertex_in_global_space = true);
-		FORCEINLINE void add_debug_line(glm::vec3 start, glm::vec3 end, bool vertex_in_global_space = true);
-		FORCEINLINE void add_debug_cross(glm::vec3 position, f32 size, bool vertex_in_global_space = true);
+		FORCEINLINE void add_debug_line(glm::vec3 start, glm::vec3 end, glm::vec4 color = glm::vec4{ 1 }, bool vertex_in_global_space = true);
+		FORCEINLINE void add_debug_cross(glm::vec3 position, f32 size, glm::vec4 color = glm::vec4{ 1 }, bool vertex_in_global_space = true);
 		FORCEINLINE void clear_debug_line();
 
 		void sweep_profile_along_spline(/* PFF::spline */);

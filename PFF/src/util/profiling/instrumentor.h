@@ -31,7 +31,7 @@ namespace PFF {
 #define PFF_DURATION_miliseconds        " milliseconds"
 #define PFF_DURATION_seconds            " seconds"
 
-#define PFF_ISOLATED_PROFILER_LOOP(num_of_iterations, message, profile_duration_precision, func)                                                                                                                        \
+#define PFF_ISOLATED_PROFILER_LOOP(num_of_iterations, message, profile_duration_precision, func)                                                                                                      \
             {                                                                                                                                                                                         \
                 f32 duration = -1.f;                                                                                                                                                                  \
                 {   PFF::stopwatch loc_stpowatch(&duration);                                                                                                                                          \

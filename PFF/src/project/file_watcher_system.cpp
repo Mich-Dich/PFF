@@ -3,7 +3,7 @@
 
 #include <regex>
 
-#include "file_system_watcher.h"
+#include "file_watcher_system.h"
 
 #ifdef PFF_PLATFORM_WINDOWS
 	#include "Windows.h"
@@ -16,8 +16,8 @@ namespace PFF {
 #define BIT_FLAG_IF(enum_value, flag)				if (p_notify_filters && enum_value)									\
 														flags |= flag;
 
-#define TRY_CALL_FUNCTION(func_name)				if (func_name!= nullptr)											\
-														func_name(std::filesystem::path(std::string(filename)));
+#define FUNCTION_FILE_ARGUMANT						(std::filesystem::path(std::string(filename)))
+#define TRY_CALL_FUNCTION(func_name)				if (func_name!= nullptr) func_name
 
 	static const std::vector<std::string> temp_extensions = { "~", ".TMP", ".tmp", ".temp", ".swp", ".bak" };
 	static const std::vector<std::regex> temp_patterns = {
@@ -28,9 +28,9 @@ namespace PFF {
 	static bool is_started = false;
 	
 
-	file_system_watcher::file_system_watcher() { }
+	file_watcher_system::file_watcher_system() { }
 
-	void file_system_watcher::start() { m_thread = std::thread(&file_system_watcher::start_thread, this); }
+	void file_watcher_system::start() { m_thread = std::thread(&file_watcher_system::start_thread, this); }
 
 	static bool should_ignore_file(const std::string filename) {
 
@@ -50,7 +50,7 @@ namespace PFF {
 		return false;
 	}
 
-	void file_system_watcher::start_thread() {
+	void file_watcher_system::start_thread() {
 
 		if (path.empty())
 			return;
@@ -104,8 +104,12 @@ namespace PFF {
 		hEvents[0] = pollingOverlap.hEvent;
 		hEvents[1] = CreateEventA(NULL, TRUE, FALSE, NULL);
 		m_H_stop_event = hEvents[1];
+		
+		CORE_LOG(Debug, "Compiling project");
+		TRY_CALL_FUNCTION(compile)();
 
 		while (result && m_enable_raising_events) {
+
 			result = ReadDirectoryChangesW(
 				dirHandle,                   // handle to the directory to be watched
 				&buffer,                     // pointer to the buffer to receive the read results
@@ -136,25 +140,50 @@ namespace PFF {
 					continue;
 				}
 
-				switch (pNotify->Action) {
-				case FILE_ACTION_ADDED:				TRY_CALL_FUNCTION(on_created) break;
-				case FILE_ACTION_REMOVED:			TRY_CALL_FUNCTION(on_deleted) break;
-				case FILE_ACTION_MODIFIED:			TRY_CALL_FUNCTION(on_changed) break;
-				case FILE_ACTION_RENAMED_NEW_NAME:	TRY_CALL_FUNCTION(on_renamed) break;
-				case FILE_ACTION_RENAMED_OLD_NAME:	LOG(Info, "The file was renamed and this is the old name: [" << filename << "]"); break;
-				default:
-					CORE_LOG(Error, "Default error. Unknown file action [" << pNotify->Action << "] for FileSystemWatcher " << path.string().c_str());
-					break;
-				}
-
+				process_event(FUNCTION_FILE_ARGUMANT, pNotify->Action);
 				offset += pNotify->NextEntryOffset;
+
 			} while (pNotify->NextEntryOffset);
+
+			// process debounced events
+			std::vector<std::pair<std::filesystem::path, int>> events_to_process;
+			{
+				std::lock_guard<std::mutex> lock(m_mutex);
+				auto now = std::chrono::steady_clock::now();
+
+				for (auto it = m_pending_events.begin(); it != m_pending_events.end();) {
+					if (now - it->second.second >= m_debounce_time) {
+						events_to_process.emplace_back(it->first, it->second.first);
+						it = m_pending_events.erase(it);
+					} else
+						++it;
+				}
+			}
+
+			for (const auto& [file, action] : events_to_process) {
+				switch (action) {
+				case FILE_ACTION_ADDED:				TRY_CALL_FUNCTION(on_created)(file); break;
+				case FILE_ACTION_REMOVED:			TRY_CALL_FUNCTION(on_deleted)(file); break;
+				case FILE_ACTION_MODIFIED:			TRY_CALL_FUNCTION(on_changed)(file); break;
+				case FILE_ACTION_RENAMED_NEW_NAME:	TRY_CALL_FUNCTION(on_renamed)(file); break;
+				}
+			}
+
+			if (!events_to_process.empty())
+				TRY_CALL_FUNCTION(compile)();
 		}
 
 		CloseHandle(dirHandle);
 	}
 
-	void file_system_watcher::stop() {
+	void file_watcher_system::process_event(const std::filesystem::path& file, int action) {
+	
+		std::lock_guard<std::mutex> lock(m_mutex);
+		auto now = std::chrono::steady_clock::now();
+		m_pending_events[file] = { action, now };
+	}
+
+	void file_watcher_system::stop() {
 	
 		if (!m_enable_raising_events)
 			return;

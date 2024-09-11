@@ -68,6 +68,9 @@ namespace PFF::UI {
 
 	void try_display_procedural_script_comp(PFF::entity entity) {
 
+		if (!script_system::is_ready())
+			return;
+
 		UI::try_display_component<procedural_mesh_component>("Mesh", entity, [](auto& component) {
 
 			UI::table_row([]() {
@@ -132,7 +135,6 @@ namespace PFF::UI {
 			UI::end_table();
 
 			script_system::display_properties(component.script_name, (PFF::entity_script*)component.instance);
-
 
 		}, false);
 

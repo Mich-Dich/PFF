@@ -24,12 +24,14 @@
 
 namespace PFF::util {
 
+    glm::vec3 util::random::get_vec3(f32 min, f32 max)      { return glm::vec3(get_f32(min, max), get_f32(min, max), get_f32(min, max)); }
+
+    bool random::get_percent(f32 percentage)                { return get_f32(0.f, 1.f) < percentage; }
+
     f32 random::get_f32(f32 min, f32 max) {
         std::uniform_real_distribution<f32> dist(min, max);
         return dist(engine);
     }
-
-    bool random::get_percent(f32 percentage) { return get_f32(0.f, 1.f) > percentage; }
 
     f64 random::get_f64(f64 min, f64 max) {
         std::uniform_real_distribution<f64> dist(min, max);
@@ -69,10 +71,12 @@ namespace PFF::util {
     }
 
 
-    bool run_program(const std::filesystem::path& path_to_exe, const std::string& cmd_args) { return run_program(path_to_exe, cmd_args.c_str()); }
+    bool run_program(const std::filesystem::path& path_to_exe, const std::string& cmd_args, bool open_console) { return run_program(path_to_exe, cmd_args.c_str(), open_console); }
 
 
-    bool run_program(const std::filesystem::path& path_to_exe, const char* cmd_args) {
+    bool run_program(const std::filesystem::path& path_to_exe, const char* cmd_args, bool open_console) {
+
+        CORE_LOG(Error, "path: " << path_to_exe.generic_string());
 
         bool result = false;
 
@@ -85,28 +89,32 @@ namespace PFF::util {
         startupInfo.cb = sizeof(startupInfo);
         ZeroMemory(&processInfo, sizeof(processInfo));
 
-        std::string cmdArguments = path_to_exe.string() + " " + cmd_args;
+        std::string cmdArguments = path_to_exe.generic_string() + " " + cmd_args;
+        auto working_dir = util::get_executable_path().generic_string();
 
         // Start the program
         result = CreateProcessA(
-            NULL,							// Application Name
-            (LPSTR)cmdArguments.c_str(),	// Command Line Args
-            NULL,							// Process Attributes
-            NULL,							// Thread Attributes
-            FALSE,							// Inherit Handles
-            CREATE_NEW_CONSOLE,				// Creation Flags
-            NULL,							// Environment
-            NULL,							// Current Directory
-            &startupInfo,					// Startup Info
-            &processInfo					// Process Info
+            NULL,							            // Application Name
+            (LPSTR)cmdArguments.c_str(),	            // Command Line Args
+            NULL,							            // Process Attributes
+            NULL,							            // Thread Attributes
+            FALSE,							            // Inherit Handles
+            (open_console) ? CREATE_NEW_CONSOLE : 0,	// Creation Flags
+            NULL,							            // Environment
+            working_dir.c_str(),			            // Current Directory
+            &startupInfo,					            // Startup Info
+            &processInfo					            // Process Info
         );
+
+        // Wait for the process to finish
+        WaitForSingleObject(processInfo.hProcess, INFINITE);
 
         if (result) {
             // Close process and thread handles
             CloseHandle(processInfo.hProcess);
             CloseHandle(processInfo.hThread);
         } else
-            CORE_LOG(Warn, "Unsuccessfully started process: " << path_to_exe.string().c_str());
+            CORE_LOG(Warn, "Unsuccessfully started process: " << path_to_exe.generic_string());
 
 #elif defined PFF_PLATFORM_LINUX || defined PFF_PLATFORM_MAC
 

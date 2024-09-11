@@ -1,10 +1,21 @@
 
-#include "util/pch_editor.h"
+#include <util/pffpch.h>
 
 #include "script_parser.h"
 
 namespace PFF {
-	
+
+
+	template<typename T>
+	struct is_vector : std::false_type {};
+
+	template<typename T, typename A>
+	struct is_vector<std::vector<T, A>> : std::true_type {
+		using value_type = T;
+	};
+
+
+
 	static token							s_error_token = token{ -1, -1, token_type::ERROR_TYPE, "" };
 
 	FORCEINLINE token generate_error_token() { return token{ -1, -1, token_type::ERROR_TYPE, "" }; }
@@ -28,96 +39,10 @@ namespace PFF {
 	}
 
 
-	std::string script_parser::generate_display_function(
-		
-		const std::string& name,const std::string& name_without_namespace, const std::string& specifiers, const std::filesystem::path& full_filepath, const std::list<PFF_variable>& variables) {
-		std::stringstream file{};
-
-		bool rebuild_on_change = (specifiers.find("rebuild_on_property_change") != std::string::npos);
-		file << "\tvoid display_properties(" << name.c_str() << "* script) {\n\n";
-
-		file << "\t\t// class specifiers [" << specifiers.c_str() << "]\n";
-
-		if (rebuild_on_change)
-			file << "\t\tbool changed = false;\n";
-
-		// Sort propertyies based on category
-		std::vector<sorting_category>		vars_sorted_by_category{};
-		for (auto var : variables) {
-
-			auto buffer = parse_specifiers_value(var.specifiers, "category", "data");
-			bool founde = false;
-			for (auto& category : vars_sorted_by_category) {
-
-				if (category.category_name != buffer)
-					continue;
-
-				category.variables.push_back(var);
-				founde = true;
-				break;
-			}
-
-			if (!founde) {
-
-				sorting_category sorting_buffer = { buffer, {} };
-				sorting_buffer.variables.push_back(var);
-				vars_sorted_by_category.push_back(sorting_buffer);
-			}
-
-		}
-
-		// display sorted properties
-		for (auto sorted_vars : vars_sorted_by_category) {
-			file << "\t\tif (UI::begin_collapsing_header_section(\"" << sorted_vars.category_name << "\")) {\n";
-			file << "\t\t\tUI::begin_table(\"entity_component\", false);\n";
-
-			for (auto var : sorted_vars.variables) {
-
-				if (rebuild_on_change)
-					file << "\t\t\tchanged |= ";
-				else
-					file << "\t\t\t";
-
-				auto var_lable = parse_specifiers_value(var.specifiers, "display_name", var.identifier);
-				std::replace(var_lable.begin(), var_lable.end(), '_', ' ');
-				var_lable += "##" + name + "::" + var.identifier;
-				//std::replace(var_lable.begin(), var_lable.end(), ':', ' ');
-
-				if (var.specifiers.find("UI_slider_drag_speed") == std::string::npos
-					&& var.specifiers.find("min_value") == std::string::npos
-					&& var.specifiers.find("max_value") == std::string::npos) {
-
-					file << "UI::table_row(\"" << var_lable.c_str() << "\", script->" << var.identifier.c_str() << ");\n";
-					continue;
-				}
-
-				file << "UI::table_row(\"" << var_lable.c_str() << "\", script->" << var.identifier.c_str() << ", ";
-				file << "static_cast<f32>(" << parse_specifiers_value(var.specifiers, "UI_slider_drag_speed", "0.01f") << "), ";
-				file << "static_cast<" << var.type << ">(" << parse_specifiers_value(var.specifiers, "min_value", "0.f") << "), ";
-				file << "static_cast<" << var.type << ">(" << parse_specifiers_value(var.specifiers, "max_value", "1.f") << ")";
-				file << ");\n"; //" << var.metadata << " \n";
-
-			}
-
-			file << "\t\t\tUI::end_table();\n";
-			file << "\t\t}\n";
-			file << "\t\tUI::end_collapsing_header_section();\n\n";
-
-		}
-
-		if (rebuild_on_change)
-			file << "\t\tif (changed)\n\t\t\tscript->on_rebuild();\n";
-
-		file << "\t}\n\n";
-
-		return file.str();
-	}
-
-
 	std::string script_parser::generate_header_file() {
 
-		using namespace entt::literals;
-		CORE_LOG(Trace, "generating header for: [" << util::extract_path_from_directory(m_full_filepath, "src").generic_string() << "]");
+		//using namespace entt::literals;
+		LOG(Trace, "generating header for: [" << util::extract_path_from_directory(m_full_filepath, "src").generic_string() << "]");
 
 		std::ostringstream file;
 		file << R"(
@@ -207,8 +132,8 @@ namespace PFF {
 			file << R"(
 	void init() {
 
-		if (initialized)
-			return;
+		//if (initialized)
+		//	return;
 
 		initialized = true;
 )";
@@ -254,33 +179,22 @@ namespace PFF {
 			}*/
 
 			for (auto structure : m_structs)
-				file << generate_display_function(structure.struct_name, structure.struct_name_without_namespace, structure.specifiers, structure.full_filepath, structure.variables);
+				file << generate_display_function(structure.struct_name, structure.struct_name_without_namespace, structure.specifiers, structure.full_filepath, structure.variables, false);
 
 			for (auto clazz : m_classes)
-				file << generate_display_function(clazz.class_name, clazz.class_name_without_namespace, clazz.specifiers, clazz.full_filepath, clazz.variables);
+				file << generate_display_function(clazz.class_name, clazz.class_name_without_namespace, clazz.specifiers, clazz.full_filepath, clazz.variables, true);
 
 		}
 
 		// save a scripts function
 		{
-			for (size_t x = 0; x < m_classes.size(); x++) {
 
-				file << "\t// " << m_classes[x].class_name.c_str() << "\n";
-				file << "\tvoid serialize_script(" << m_classes[x].class_name.c_str() << "& component, const std::filesystem::path filepath, serializer::option option) { ";
+			for (auto structure : m_structs)
+				file << generate_serialization_function(structure.struct_name, structure.struct_name_without_namespace, structure.specifiers, structure.full_filepath, structure.variables);
 
-				if (m_classes[x].variables.size() == 0) {
+			for (auto clazz : m_classes)
+				file << generate_serialization_function(clazz.class_name, clazz.class_name_without_namespace, clazz.specifiers, clazz.full_filepath, clazz.variables);
 
-					file << "}\n\n";
-					continue;
-				}
-
-				file << "\n\n\t\tserializer::yaml(filepath, \"" << m_classes[x].class_name.c_str() << "\", option)";
-				for (auto uvar : m_classes[x].variables)
-					file << "\n\t\t\t.entry(KEY_VALUE(component." << uvar.identifier.c_str() << "))";
-				file << ";";
-
-				file << "\n\t}\n\n";
-			}
 		}
 
 		// delete scripts function
@@ -328,61 +242,21 @@ namespace PFF {
 	}
 
 
-	std::string script_parser::parse_specifiers_value(const std::string& specifiers, const std::string& key, std::string default_value) {
-
-		size_t key_pos = specifiers.find(key);
-		if (key_pos == std::string::npos) 
-			return default_value;
-
-		size_t value_start = specifiers.find(':', key_pos);
-		if (value_start == std::string::npos) 
-			return default_value;
-
-		value_start++; // Move past the colon
-
-		// Skip whitespace
-		while (value_start < specifiers.length() && std::isspace(specifiers[value_start]))
-			value_start++;
-
-		size_t value_end = value_start;
-		while (value_end < specifiers.length() && specifiers[value_end] != ',' && specifiers[value_end] != ')') {
-
-			value_end++;
-		}
-
-		if (value_end != value_start && specifiers[value_end] == ' ')
-			value_end--;
-
-		// Extract the substring
-		std::string result = specifiers.substr(value_start, value_end - value_start);
-
-		// Remove leading and trailing double quotes
-		if (result.length() >= 2 && result.front() == '"' && result.back() == '"') {
-			result = result.substr(1, result.length() - 2);
-		}
-
-		// Trim any remaining whitespace
-		result.erase(0, result.find_first_not_of(" \t\n\r\f\v"));
-		result.erase(result.find_last_not_of(" \t\n\r\f\v") + 1);
-
-		return result;
-	}
-
 	void script_parser::debug_print() {
 
 		for (auto structIter = m_structs.begin(); structIter != m_structs.end(); structIter++) {
-			CORE_LOG(Info, structIter->struct_name.c_str() << " {");
+			LOG(Info, structIter->struct_name.c_str() << " {");
 			for (auto varIter = structIter->variables.begin(); varIter != structIter->variables.end(); varIter++)
-				CORE_LOG(Info, "    Type<" << varIter->type.c_str() << "> " << varIter->identifier.c_str());
+				LOG(Info, "    Type<" << varIter->type.c_str() << "> " << varIter->identifier.c_str());
 			
 		}
 
 		for (auto classIter = m_classes.begin(); classIter != m_classes.end(); classIter++) {
-			CORE_LOG(Info, classIter->class_name.c_str() << " {");
+			LOG(Info, classIter->class_name.c_str() << " {");
 			for (auto varIter = classIter->variables.begin(); varIter != classIter->variables.end(); varIter++)
-				CORE_LOG(Info, "    Type<" << varIter->type.c_str() << "> " << varIter->identifier.c_str());
+				LOG(Info, "    Type<" << varIter->type.c_str() << "> " << varIter->identifier.c_str());
 
-			CORE_LOG(Info, "}");
+			LOG(Info, "}");
 		}
 	}
 
@@ -431,6 +305,214 @@ namespace PFF {
 				advance();
 
 		} while (m_current_token < m_Tokens.size() && m_Current_iter->m_type != token_type::END_OF_FILE);
+	}
+
+
+
+
+
+
+
+
+
+	void script_parser::sort_by_categories(std::vector<sorting_category>& sorted, const std::list<PFF_variable>& variables) {
+
+		for (auto var : variables) {
+
+			auto buffer = parse_specifiers_value(var.specifiers, "category", "data");
+			bool founde = false;
+			for (auto& category : sorted) {
+
+				if (category.category_name != buffer)
+					continue;
+
+				category.variables.push_back(var);
+				founde = true;
+				break;
+			}
+
+			if (!founde) {
+
+				sorting_category sorting_buffer = { buffer, {} };
+				sorting_buffer.variables.push_back(var);
+				sorted.push_back(sorting_buffer);
+			}
+		}
+	}
+
+	std::string script_parser::generate_display_function(const std::string& name, const std::string& name_without_namespace, const std::string& specifiers, const std::filesystem::path& full_filepath, const std::list<PFF_variable>& variables, bool is_class) {
+
+		std::stringstream file{};
+
+		bool rebuild_on_change = (specifiers.find("rebuild_on_property_change") != std::string::npos);
+		file << "\tbool display_properties(" << name.c_str() << "* script) {\n\n";
+		file << "\t\t// class specifiers [" << specifiers.c_str() << "]\n";
+
+		if (rebuild_on_change)
+			file << "\t\tbool changed = false;\n";
+
+		// Sort propertyies based on category
+		std::vector<sorting_category> vars_sorted_by_category{};
+		sort_by_categories(vars_sorted_by_category, variables);
+
+		// display sorted properties
+		for (auto sorted_vars : vars_sorted_by_category) {
+			file << "\t\tif (UI::begin_collapsing_header_section(\"" << sorted_vars.category_name << "\")) {\n";
+			file << "\t\t\tUI::begin_table(\"entity_component\", false);\n";
+
+			for (auto var : sorted_vars.variables) {
+
+				if (rebuild_on_change)
+					file << "\t\t\tchanged |= ";
+				else
+					file << "\t\t\t";
+
+				auto var_lable = parse_specifiers_value(var.specifiers, "display_name", var.identifier);
+				std::replace(var_lable.begin(), var_lable.end(), '_', ' ');
+				var_lable += "##" + name + "::" + var.identifier;
+				//std::replace(var_lable.begin(), var_lable.end(), ':', ' ');
+
+				if (var.specifiers.find("UI_slider_drag_speed") == std::string::npos
+					&& var.specifiers.find("min_value") == std::string::npos
+					&& var.specifiers.find("max_value") == std::string::npos) {
+
+					file << "UI::table_row(\"" << var_lable.c_str() << "\", script->" << var.identifier.c_str() << ");\n";
+					continue;
+				}
+
+				file << "UI::table_row(\"" << var_lable.c_str() << "\", script->" << var.identifier.c_str() << ", ";
+				file << "static_cast<f32>(" << parse_specifiers_value(var.specifiers, "UI_slider_drag_speed", "0.01f") << "), ";
+				file << "static_cast<" << var.type << ">(" << parse_specifiers_value(var.specifiers, "min_value", "0.f") << "), ";
+				file << "static_cast<" << var.type << ">(" << parse_specifiers_value(var.specifiers, "max_value", "1.f") << ")";
+				file << ");\n"; //" << var.metadata << " \n";
+
+			}
+
+			file << "\t\t\tUI::end_table();\n";
+			file << "\t\t}\n";
+			file << "\t\tUI::end_collapsing_header_section();\n\n";
+
+		}
+
+		if (rebuild_on_change && is_class)
+			file << "\t\tif (changed)\n\t\t\tscript->on_rebuild();\n";
+
+
+		if (rebuild_on_change)
+			file << "\t\treturn changed;\n";
+		else
+			file << "\t\treturn false;\n";
+
+
+		file << "\t}\n\n";
+		return file.str();
+	}
+
+
+	std::string script_parser::generate_serialization_function(const std::string& name, const std::string& name_without_namespace, const std::string& specifiers, const std::filesystem::path& full_filepath, const std::list<PFF_variable>& variables) {
+
+		std::stringstream file{};
+		file << "\tvoid serialize_script(" << name.c_str() << "* script, serializer::yaml& serializer) {\n\n";
+		file << "\t\t// specifiers [" << specifiers.c_str() << "]\n";
+
+		// Sort propertyies based on category
+		std::vector<sorting_category> vars_sorted_by_category{};
+		sort_by_categories(vars_sorted_by_category, variables);
+
+		// display sorted properties
+		for (auto sorted_vars : vars_sorted_by_category) {
+
+			file << "\t\tserializer.sub_section(\"" << sorted_vars.category_name << "\", [&](serializer::yaml& " << sorted_vars.category_name << "_section) {\n";
+			bool needs_to_add_start = true;
+			for (auto var : sorted_vars.variables) {
+
+				if (needs_to_add_start)
+					file << "\n\t\t\t" << sorted_vars.category_name << "_section";
+				else
+					file << "\n\t\t\t\t";
+
+				// Check if the variable is a std::vector
+				if (var.type.substr(0, 12) == "std::vector<") {
+					// Extract the type inside the vector
+					size_t start = var.type.find('<') + 1;
+					size_t end = var.type.find_last_of('>');
+					while (var.type[end - 1] == '*' || var.type[end - 1] == '&')
+						end--;
+					std::string vector_type = var.type.substr(start, end - start);
+
+
+					file << ".vector(\"" << var.identifier.c_str() << "\", script->" << var.identifier.c_str() << ", [&](serializer::yaml& " << var.identifier.c_str() << "_section, u64 x) {" << "\t\t\t// " << var.type << " | " << vector_type << "\n\n";
+
+					bool found = false;
+					for (auto structure : m_structs) {
+
+						if (structure.struct_name_without_namespace == vector_type)
+							found = true;
+						break;
+					}
+					for (auto clazz : m_classes) {
+
+						if (clazz.class_name_without_namespace == vector_type)
+							found = true;
+						break;
+					}
+					if (found)
+						file << "\t\t\t\t\tserialize_script(script->" << var.identifier.c_str() << "[x], serializer);";
+
+
+					file << "\n\t\t\t\t})";
+				} else
+					file << ".entry(KEY_VALUE(script->" << var.identifier.c_str() << "))";
+
+				needs_to_add_start = false;
+			}
+			file << ";";
+			file << "\n\t\t});\n";
+
+		}
+		file << "\t}\n\n";
+
+		return file.str();
+	}
+
+	std::string script_parser::parse_specifiers_value(const std::string& specifiers, const std::string& key, std::string default_value) {
+
+		size_t key_pos = specifiers.find(key);
+		if (key_pos == std::string::npos)
+			return default_value;
+
+		size_t value_start = specifiers.find(':', key_pos);
+		if (value_start == std::string::npos)
+			return default_value;
+
+		value_start++; // Move past the colon
+
+		// Skip whitespace
+		while (value_start < specifiers.length() && std::isspace(specifiers[value_start]))
+			value_start++;
+
+		size_t value_end = value_start;
+		while (value_end < specifiers.length() && specifiers[value_end] != ',' && specifiers[value_end] != ')') {
+
+			value_end++;
+		}
+
+		if (value_end != value_start && specifiers[value_end] == ' ')
+			value_end--;
+
+		// Extract the substring
+		std::string result = specifiers.substr(value_start, value_end - value_start);
+
+		// Remove leading and trailing double quotes
+		if (result.length() >= 2 && result.front() == '"' && result.back() == '"') {
+			result = result.substr(1, result.length() - 2);
+		}
+
+		// Trim any remaining whitespace
+		result.erase(0, result.find_first_not_of(" \t\n\r\f\v"));
+		result.erase(result.find_last_not_of(" \t\n\r\f\v") + 1);
+
+		return result;
 	}
 
 	void script_parser::parse_class(const std::string& specifiers) {
@@ -493,14 +575,6 @@ namespace PFF {
 		m_classes.push_back(clazz);
 	}
 
-
-	void script_parser::advance_to_token(const token_type type) {
-
-		while (m_Current_iter->m_type != token_type::END_OF_FILE && m_Current_iter->m_type != type)
-			advance();
-		advance();
-	}
-
 	void script_parser::parse_struct(const std::string& specifiers) {
 
 		token structType = expect(token_type::IDENTIFIER);
@@ -517,8 +591,6 @@ namespace PFF {
 
 			if (match(token_type::LEFT_BRACKET))
 				level++;
-
-			m_Current_iter->m_lexeme;		// DEV-ONLY
 
 			if (m_Current_iter->m_type == token_type::IDENTIFIER && m_Current_iter->m_lexeme == structType.m_lexeme) {
 
@@ -542,7 +614,7 @@ namespace PFF {
 					expect(token_type::SEMICOLON);
 					break;
 				}
-			
+
 			} else if (match(token_type::PROPERTY)) {
 
 				expect(token_type::LEFT_PAREN);
@@ -569,7 +641,8 @@ namespace PFF {
 		std::vector<token> all_tokens_before_semi_colon;
 		int type_end_index = -1;
 		int identifier_index = -1;
-		
+		m_Current_iter->m_lexeme;		// DEV-ONLY
+
 		// Collect all tokens until semicolon
 		while (m_Current_iter->m_type != token_type::END_OF_FILE &&
 			m_Current_iter->m_type != token_type::SEMICOLON) {
@@ -598,12 +671,12 @@ namespace PFF {
 
 		// Parse type (including namespace)
 		std::string type;
-		for (int i = 0; i <= type_end_index; ++i) 
+		for (int i = 0; i <= type_end_index; ++i)
 			type += all_tokens_before_semi_colon[i].m_lexeme;
 		loc_pff_variable.type = type;
 
 		PFF_variable error_variable{ "ERROR", "ERROR" };
-		CORE_VALIDATE((identifier_index != -1), return error_variable, "", "Cannot find variable identifier. line [" << m_Current_iter->m_line << "], column [" << m_Current_iter->m_column << "]");
+		VALIDATE((identifier_index != -1), return error_variable, "", "Cannot find variable identifier. line [" << m_Current_iter->m_line << "], column [" << m_Current_iter->m_column << "]");
 
 		loc_pff_variable.identifier = all_tokens_before_semi_colon[identifier_index].m_lexeme;
 		return loc_pff_variable;
@@ -631,7 +704,7 @@ namespace PFF {
 			m_Current_iter++;
 
 			if (m_Current_iter == m_Tokens.end()) {
-				CORE_LOG(Error, "Reached end of tokens unexpectedly");
+				LOG(Error, "Reached end of tokens unexpectedly");
 				break;
 			}
 		}
@@ -645,17 +718,6 @@ namespace PFF {
 		}
 	}
 
-	const token& script_parser::expect(token_type type) {
-
-		CORE_VALIDATE(m_Current_iter->m_type == type, return s_error_token, "",
-			"Error: Expected [" << type << "] but instead got [" << m_Current_iter->m_type << "] . line [" << m_Current_iter->m_line << "], column [" << m_Current_iter->m_column << "]");
-
-		auto tokenToReturn = m_Current_iter;
-		m_current_token++;
-		m_Current_iter++;
-		return *tokenToReturn;
-	}
-
 	bool script_parser::match(token_type type) {
 
 		if (m_Current_iter->m_type == type) {
@@ -666,4 +728,23 @@ namespace PFF {
 
 		return false;
 	}
+
+	void script_parser::advance_to_token(const token_type type) {
+
+		while (m_Current_iter->m_type != token_type::END_OF_FILE && m_Current_iter->m_type != type)
+			advance();
+		advance();
+	}
+
+	const token& script_parser::expect(token_type type) {
+
+		VALIDATE(m_Current_iter->m_type == type, return s_error_token, "",
+			"Error: Expected [" << type << "] but instead got [" << m_Current_iter->m_type << "] . line [" << m_Current_iter->m_line << "], column [" << m_Current_iter->m_column << "]");
+
+		auto tokenToReturn = m_Current_iter;
+		m_current_token++;
+		m_Current_iter++;
+		return *tokenToReturn;
+	}
+
 }

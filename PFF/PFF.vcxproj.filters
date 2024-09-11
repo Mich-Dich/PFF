@@ -201,7 +201,7 @@
     <ClInclude Include="src\procedural\procedural_mesh_script.h">
       <Filter>src\procedural</Filter>
     </ClInclude>
-    <ClInclude Include="src\project\file_system_watcher.h">
+    <ClInclude Include="src\project\file_watcher_system.h">
       <Filter>src\project</Filter>
     </ClInclude>
     <ClInclude Include="src\project\project_data_struct.h">
@@ -359,7 +359,10 @@
     <ClCompile Include="src\engine\world\map.cpp">
       <Filter>src\engine\world</Filter>
     </ClCompile>
-    <ClCompile Include="src\project\file_system_watcher.cpp">
+    <ClCompile Include="src\procedural\procedural_mesh_script.cpp">
+      <Filter>src\procedural</Filter>
+    </ClCompile>
+    <ClCompile Include="src\project\file_watcher_system.cpp">
       <Filter>src\project</Filter>
     </ClCompile>
     <ClCompile Include="src\project\script_system.cpp">
@@ -407,6 +410,5 @@
     <ClCompile Include="vendor\ImGuizmo\ImGuizmo.cpp">
       <Filter>vendor\ImGuizmo</Filter>
     </ClCompile>
-    <ClCompile Include="src\procedural\procedural_mesh_script.cpp" />
   </ItemGroup>
 </Project>

@@ -15,9 +15,11 @@
 #include "engine/layer/world_layer.h"
 
 #include "engine/platform/pff_window.h"
+#include "engine/game_objects/camera.h"
+
 #include "engine/render/renderer.h"
 #include "engine/render/render_util.h"
-#include "engine/game_objects/camera.h"
+#include "engine/render/vulkan/vk_renderer.h"
 
 // ================= IN DEV =================
 #include "project/script_system.h"
@@ -26,6 +28,37 @@
 #include "application.h"
 
 namespace PFF {
+
+	project_data serialize_projects_data(const std::filesystem::path& project_path, serializer::option option) {
+
+		project_data data{};
+		for (const auto& entry : std::filesystem::directory_iterator(project_path)) {
+
+			if (entry.is_directory() || entry.path().extension() != PFF_PROJECT_EXTENTION)
+				continue;
+
+			serializer::yaml(entry.path(), "project_data", option)
+				.entry(KEY_VALUE(data.display_name))
+				.entry(KEY_VALUE(data.name))
+				//.entry(KEY_VALUE(data.ID))
+				.entry(KEY_VALUE(data.engine_version))
+				.entry(KEY_VALUE(data.project_version))
+				.entry(KEY_VALUE(data.build_path))
+				.entry(KEY_VALUE(data.start_world))
+				.entry(KEY_VALUE(data.editor_start_world))
+				.entry(KEY_VALUE(data.last_modified))
+				.entry(KEY_VALUE(data.description))
+				.vector("tags", data.tags, [&](serializer::yaml& inner, u64 x) {
+				inner.entry("tag", data.tags[x]);
+				});
+
+			break;
+		}
+
+		return data;
+	}
+
+
 
 	// ==================================================================== setup ====================================================================
 
@@ -64,31 +97,9 @@ namespace PFF {
 		// ========================================== DEV-ONLY should be set by launcher or when building the project_solution ==========================================
 
 
-		if (!m_project_path.empty()) {
+		if (!m_project_path.empty())
+			m_project_data = serialize_projects_data(m_project_path, serializer::option::load_from_file);
 
-			for (const auto& entry : std::filesystem::directory_iterator(m_project_path)) {
-				
-				if (entry.is_directory() || entry.path().extension() != PFF_PROJECT_EXTENTION)
-					continue;
-				
-				serializer::yaml(entry.path(), "project_data", serializer::option::load_from_file)
-					.entry(KEY_VALUE(m_project_data.display_name))
-					.entry(KEY_VALUE(m_project_data.name))
-					//.entry(KEY_VALUE(m_project_data.ID))
-					.entry(KEY_VALUE(m_project_data.engine_version))
-					.entry(KEY_VALUE(m_project_data.project_version))
-					.entry(KEY_VALUE(m_project_data.build_path))
-					.entry(KEY_VALUE(m_project_data.start_world))
-					.entry(KEY_VALUE(m_project_data.editor_start_world))
-					.entry(KEY_VALUE(m_project_data.last_modified))
-					.entry(KEY_VALUE(m_project_data.description))
-					.vector("tags", m_project_data.tags, [&](serializer::yaml& inner, u64 x) {
-						inner.entry("tag", m_project_data.tags[x]);
-					});
-
-				break;
-			}
-		}
 
 		//m_project_data{};
 		// ========================================================== TODO ==========================================================

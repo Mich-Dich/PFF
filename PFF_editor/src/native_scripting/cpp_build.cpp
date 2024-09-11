@@ -18,7 +18,7 @@ namespace PFF::cpp_build {
 
 		building_code = true;
 		const std::filesystem::path path_to_build_script = project_directory / "build.bat";
-		std::string cmdArgs = "vs2022";
+		std::string cmdArgs = "";
 		CORE_LOG(Info, "CMD Args: " << cmdArgs.c_str());
 		util::run_program(path_to_build_script, cmdArgs);
 		building_code = false;
@@ -35,7 +35,7 @@ namespace PFF::cpp_build {
 		compiling = true;
 		std::filesystem::path path_to_build_script = project_directory / "build.bat";
 		std::string cmdArgs = "compile";
-		//CORE_LOG(Info, "CMD Args: " << cmdArgs.c_str());
+		CORE_LOG(Info, "CMD Args: " << cmdArgs.c_str());
 		util::run_program(path_to_build_script, cmdArgs);
 		compiling = false;
 	}

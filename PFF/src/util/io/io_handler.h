@@ -15,11 +15,15 @@ namespace PFF::io_handler {
 	// @return [bool] true if the file is successfully written, false otherwise.
 	PFF_API bool write_file(const std::string& file_path, const std::vector<char>& content);
 
+	PFF_API bool copy_file(const std::filesystem::path& full_path_to_file, const std::filesystem::path& darget_directory);
+	
 	// @brief Creates a directory at the specified path if it doesn't already exist.
 	// @param [path] The path to the directory to be created.
 	// @return [bool] Returns true if the directory is successfully created or already exists; false otherwise.
 	PFF_API bool create_directory(const std::filesystem::path& path);
 	
+	PFF_API std::vector<std::string> get_processes_using_file(const std::wstring& filePath);
+
 	PFF_API bool is_directory(const std::filesystem::path& path);
 
 	PFF_API bool is_file(const std::filesystem::path& path);

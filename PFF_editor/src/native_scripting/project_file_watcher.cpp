@@ -3,18 +3,21 @@
 
 #include "PFF_editor.h"
 #include "util/io/io_handler.h"
-#include "script_parser.h"
-#include "project/file_system_watcher.h"
+//#include "script_parser.h"
+#include "project/file_watcher_system.h"
 #include "code_generator.h"
 #include "cpp_build.h"
+#include "project/script_system.h"
 
 #include "project_file_watcher.h"
 
 namespace PFF {
 
-	static file_system_watcher		s_file_watcher;
+	static file_watcher_system		s_file_watcher;
 	static std::filesystem::path	s_root_directory = "";
 	static std::filesystem::path	s_project_premake_lua = "";
+
+	/*
 	static auto						s_classes = std::vector<PFF_class>();
 	static bool						s_file_modified = false;
 	static bool						s_building_code = false;
@@ -68,22 +71,10 @@ namespace PFF {
 		}
 	}
 
-	static void generate_init_files() {
-
-		std::filesystem::path generated_dir = s_root_directory / "generated";
-		io_handler::create_directory(generated_dir);
-
-		std::filesystem::path initH = generated_dir / "init.h";
-		std::filesystem::path initCpp = generated_dir / "init.cpp";
-		code_generator::generate_init_file(s_classes, initH);
-		io_handler::write_to_file("#include \"init.h\"\n", initCpp);
-	}
-
 	static bool process_file(std::filesystem::path& file, const std::filesystem::path& generatedDirPath) {
 
 		if (!io_handler::is_file(file) || io_handler::is_hidden(file) || !is_header_file(file) || file.filename().replace_extension() == "project")
 			return false;
-
 
 		script_scanner fileScanner = script_scanner(file);
 		std::vector<token> fileTokens = fileScanner.scan_tokens();
@@ -95,9 +86,7 @@ namespace PFF {
 		std::string generatedHFilename = file.filename().replace_extension("").string() + "-generated" + file.extension().string();
 		const std::filesystem::path path = PFF_editor::get().get_project_path() / "generated" / relatice_filepath.parent_path() / generatedHFilename;
 		io_handler::create_directory(path.parent_path());
-
 		io_handler::write_to_file(fileParser.generate_header_file().c_str(), path);
-		//generate_init_files();
 		return true;
 	}
 
@@ -108,11 +97,7 @@ namespace PFF {
 		const std::filesystem::path generatedDirPath = file.parent_path().string() + "generated";
 		std::filesystem::path filePath = generatedDirPath / file;
 		std::filesystem::path generatedFilePath = s_root_directory / generatedDirPath;
-		if (process_file(filePath, generatedFilePath))
-			cpp_build::build(s_root_directory);
-	
-		cpp_build::compile(s_root_directory);
-
+		process_file(filePath, generatedFilePath);
 	}
 
 	static void generate_initial_class_information(const std::filesystem::path& directory) {
@@ -126,20 +111,42 @@ namespace PFF {
 		for (auto file : files) 
 			process_file(file, generatedDir);
 	}
+	*/
 
 
+	static void file_changed(const std::filesystem::path& file) {
 
+		const std::filesystem::path path_to_build_script = util::get_executable_path() / ".." / "PFF_helper" / "PFF_helper.exe";
+		std::string cmdArgs = "1 1 " + s_root_directory.generic_string();
+		CORE_LOG(Info, "CMD Args: " << cmdArgs.c_str());
+		util::run_program(path_to_build_script, cmdArgs);
+	}
+
+	static void compile_project() {
+
+		CORE_LOG(Error, "COMPILING PROJECT");
+#if 1
+		const std::filesystem::path path_to_build_script = util::get_executable_path() / ".." / "PFF_helper" / "PFF_helper.exe";
+		std::string cmdArgs = "1 0 " + s_root_directory.generic_string();
+		CORE_LOG(Info, "CMD Args: " << cmdArgs.c_str());
+		util::run_program(path_to_build_script, cmdArgs);
+#else
+		generate_initial_class_information(s_root_directory / SOURCE_DIR);
+		code_generator::generate_init_file_header(s_classes, generated_dir / "init.h");
+		code_generator::generate_init_file_implemenation(s_classes, generated_dir / "init.cpp");
+
+		cpp_build::build(s_root_directory);
+		cpp_build::compile(s_root_directory);
+		CORE_LOG(Debug, "DLL was recompiled");
+		script_system::reload(false);
+#endif
+
+	}
 
 	project_file_watcher::project_file_watcher() {
 		
 		s_root_directory = application::get().get_project_path();
-
-		if (!io_handler::is_directory(s_root_directory)) {
-			CORE_LOG(Warn, s_root_directory.string().c_str() << " is not a directory. project_file_watcher is not starting.");
-			return;
-		}
-
-
+		CORE_VALIDATE(io_handler::is_directory(s_root_directory), return, "", s_root_directory.string().c_str() << " is not a directory. project_file_watcher is not starting.");
 
 		// ================================== TODO: Move to project creation ================================== 
 		s_project_premake_lua = s_root_directory / "premake5.lua";
@@ -149,14 +156,6 @@ namespace PFF {
 		code_generator::generate_build_file(pathToBuildScript, pathToPremakeExe);
 		// ================================== TODO: Move to project creation ================================== 
 
-
-		CORE_LOG(Trace, "Generating initial class information");
-		generate_initial_class_information(s_root_directory / SOURCE_DIR);
-		generate_init_files();
-
-		cpp_build::build(s_root_directory);
-		cpp_build::compile(s_root_directory);
-
 		CORE_LOG(Trace, "Monitoring directory " << io_handler::get_absolute_path(s_root_directory / SOURCE_DIR));
 		s_file_watcher.path = s_root_directory / SOURCE_DIR;
 		s_file_watcher.p_notify_filters = notify_filters::LastAccess | notify_filters::LastWrite | notify_filters::FileName | notify_filters::DirectoryName;
@@ -165,6 +164,7 @@ namespace PFF {
 		s_file_watcher.on_changed = file_changed;
 		s_file_watcher.on_created = file_changed;
 		s_file_watcher.on_renamed = file_changed;
+		s_file_watcher.compile = compile_project;
 		s_file_watcher.start();
 	}
 

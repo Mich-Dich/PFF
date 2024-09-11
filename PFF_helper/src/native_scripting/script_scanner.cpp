@@ -1,5 +1,5 @@
 
-#include "util/pch_editor.h"
+#include <util/pffpch.h>
 
 #include "script_scanner.h"
 
@@ -13,7 +13,7 @@ namespace PFF {
 		//m_FileContents = buffer.str();
 
 		std::ifstream file(filepath, std::ios::binary);
-		CORE_VALIDATE(file.is_open(), return, "", "Faled to open file; " << filepath)
+		VALIDATE(file.is_open(), return, "", "Faled to open file; " << filepath)
 		std::stringstream buffer;
 		buffer << file.rdbuf();
 		m_file_contents = buffer.str();
@@ -22,7 +22,7 @@ namespace PFF {
 
 	std::vector<token> script_scanner::scan_tokens() {
 
-		//CORE_LOG(Trace, "scanning file [" << util::extract_path_from_directory(m_filepath, "src").generic_string() << "]");
+		//LOG(Trace, "scanning file [" << util::extract_path_from_directory(m_filepath, "src").generic_string() << "]");
 		auto tokens = std::vector<token>();
 
 		m_cursor = 0;
@@ -48,7 +48,7 @@ namespace PFF {
 		switch (c) {
 			// Single character tokens
 		case '<': return generate_token(token_type::LEFT_ANGLE_BRACKET, "<");
-		case '>': return generate_token(token_type::RIGHT_ANGLE_BRACKET, "<");
+		case '>': return generate_token(token_type::RIGHT_ANGLE_BRACKET, ">");
 		case '*': return generate_token(token_type::STAR, "*");
 		case '&': return generate_token(token_type::REF, "&");
 		case '(': return generate_token(token_type::LEFT_PAREN, "(");
@@ -133,7 +133,7 @@ namespace PFF {
 			while (is_digit(peek()) || peek() == 'f')
 				advance();
 
-			CORE_VALIDATE(peek() != '.', return generate_error_token(), "", "Unexpected number literal at [" << m_line << "] col[" << m_column << "]");
+			VALIDATE(peek() != '.', return generate_error_token(), "", "Unexpected number literal at [" << m_line << "] col[" << m_column << "]");
 		}
 
 		bool hasE = false;
@@ -158,7 +158,7 @@ namespace PFF {
 					advance();
 					while (is_digit(peek())) advance();
 				}
-				CORE_VALIDATE(peek() != '.', return generate_error_token(), "", "Unexpected number literal at [" << m_line << "] col[" << m_column << "]");
+				VALIDATE(peek() != '.', return generate_error_token(), "", "Unexpected number literal at [" << m_line << "] col[" << m_column << "]");
 			}
 		}
 
@@ -174,7 +174,7 @@ namespace PFF {
 				while (is_digit(peek()))
 					advance();
 			}
-			CORE_VALIDATE(peek() != '.', return generate_error_token(), "", "Unexpected number literal at [" << m_line << "] col[" << m_column << "]");
+			VALIDATE(peek() != '.', return generate_error_token(), "", "Unexpected number literal at [" << m_line << "] col[" << m_column << "]");
 		}
 
 		return token{ m_line, m_column, token_type::NUMBER, m_file_contents.substr(m_start, m_cursor - m_start) };
@@ -190,7 +190,7 @@ namespace PFF {
 			advance();
 		}
 
-		CORE_VALIDATE(!at_end(), return generate_error_token(), "", "Unexpected string literal at [" << m_line << "] col[" << m_column << "]");
+		VALIDATE(!at_end(), return generate_error_token(), "", "Unexpected string literal at [" << m_line << "] col[" << m_column << "]");
 		advance();
 
 		std::string value = m_file_contents.substr(m_start, m_cursor - m_start);
