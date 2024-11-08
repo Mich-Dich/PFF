@@ -57,6 +57,9 @@ namespace PFF {
 		};
 
 	}
+#else
+	#define PFF_ISOLATED_PROFILER_SCOPED(...)
+	#define PFF_ISOLATED_PROFILER_LOOP(...)
 #endif
 
 	using float_microseconds = std::chrono::duration<double, std::micro>;

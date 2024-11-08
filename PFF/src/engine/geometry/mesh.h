@@ -28,6 +28,9 @@ namespace PFF::geometry {
         u32         startIndex = 0;
         u32         count = 0;
         bounds      bounds{};
+
+        // MAYBE:   bool        should_render = false;
+
         //ref<material_instatnce> material;
     };
 
@@ -57,7 +60,7 @@ namespace PFF::geometry {
 
         //std::string                         name{};
         PFF::render::GPU_mesh_buffers	    mesh_buffers{};     // GPU side buffers
-		std::vector<Geo_surface>			surfaces{};
+		std::vector<Geo_surface>			surfaces{};         // used for LODs
 		std::vector<u32>					indices{};
 		std::vector<vertex>					vertices{};
         bounds                              bounds{};
@@ -69,11 +72,11 @@ namespace PFF::geometry {
             : mesh_asset(indices, vertices) {}
         //~procedural_mesh_asset();
 
-        vk_buffer       staging_buffer = {};
-        void*           staging_data = nullptr;
-        size_t          staging_buffer_size = 0;
+        vk_buffer           staging_buffer = {};
+        void*               staging_data = nullptr;
+        size_t              staging_buffer_size = 0;
         
-        material_instance* material = nullptr;		// TODO: currently uses one material for all surfaces in mesh_asset, change so it can use diffrent materials per furface
+        material_instance*  material = nullptr;		// TODO: currently uses one material for all surfaces in mesh_asset, change so it can use diffrent materials per furface
 
         void update(const std::vector<u32>& new_indices, const std::vector<vertex>& new_vertices);
         void cleanup();

@@ -11,11 +11,11 @@ namespace PFF::code_generator {
 
 	void generate_premake_file(const std::filesystem::path& filepath, const std::string_view project_name) {
 
-		const std::filesystem::path engineSource = std::filesystem::path("C:\\CustomGameEngine\\PFF").make_preferred();
-		const std::filesystem::path engineExeDir = std::filesystem::path("C:\\CustomGameEngine\\PFF\\bin\\Debug-windows-x86_64").make_preferred();
+		const std::filesystem::path engine_source_dir = std::filesystem::path("C:\\CustomGameEngine\\PFF").make_preferred();
+		const std::filesystem::path engine_build_dir = std::filesystem::path("C:\\CustomGameEngine\\PFF\\bin\\Debug-windows-x86_64").make_preferred();
 
 		std::ostringstream stream;
-		stream << "include \"" << (engineSource / "dependencies.lua").generic_string() << "\"\n";
+		stream << "include \"" << (engine_source_dir / "dependencies.lua").generic_string() << "\"\n";
 		stream << R"(
 workspace "PFF_project"
 	architecture "x64"
@@ -26,7 +26,8 @@ workspace "PFF_project"
 		stream << "\tstartproject \"" << project_name << "\"\n\n";
 		stream << "\tproject \"" << project_name << "\"\n";
 
-		stream << R"(		kind "SharedLib"
+		stream << R"(		location "metadata/project_files"					--Set the location for workspace(solution) files
+		kind "SharedLib"
 		language "C++"
 		cppdialect "C++17"
 		staticruntime "off"
@@ -42,9 +43,9 @@ workspace "PFF_project"
 
 	files
 	{
-		"**.h",
-		"**.hpp",
-		"**.cpp",
+		"src/**.h",
+		"src/**.hpp",
+		"src/**.cpp",
 	}
 
 	includedirs
@@ -53,22 +54,27 @@ workspace "PFF_project"
 		"src",
 )";
 		stream << 
-			"		\"" << engineSource.generic_string() << "/PFF/src\",\n"
-			"		\"" << engineSource.generic_string() << "/%{vendor_path.entt}\",\n"
-			"		\"" << engineSource.generic_string() << "/%{vendor_path.glm}\",\n"
-			"		\"" << engineSource.generic_string() << "/%{vendor_path.ImGui}\",\n"
+			"		\"" << engine_source_dir.generic_string() << "/PFF/src\",\n"
+			"		\"" << engine_source_dir.generic_string() << "/%{vendor_path.entt}\",\n"
+			"		\"" << engine_source_dir.generic_string() << "/%{vendor_path.glm}\",\n"
+			"		\"" << engine_source_dir.generic_string() << "/%{vendor_path.ImGui}\",\n"
 			"		\"C:/VulkanSDK/1.3.250.1/Include\",\n"
 			"	}\n";
 
 		stream << R"(
 	symbolspath '$(OutDir)$(TargetName)-$([System.DateTime]::Now.ToString("HH_mm_ss_fff")).pdb'
+)";
 
+		stream << "\tdebugcommand(\"" << (engine_build_dir / "PFF_editor" / "PFF_editor.exe").generic_string() << "\")\n";
+		stream << "\tdebugdir(\"" << (engine_build_dir / "PFF_editor").generic_string() << "\")\n";
+		stream << "\t-- If you need to pass arguments to your game engine, use:								debugargs { \"arg1\", \"arg2\" }\n";
+		stream << R"(
 	libdirs 
 	{
 )";
 
-		stream << "\t\t\"" << (engineExeDir / "PFF").generic_string() << "\",\n";
-		stream << "\t\t\"" << (engineExeDir / "vendor/imgui").generic_string() << "\",\n";
+		stream << "\t\t\"" << (engine_build_dir / "PFF").generic_string() << "\",\n";
+		stream << "\t\t\"" << (engine_build_dir / "vendor/imgui").generic_string() << "\",\n";
 		stream << R"(	}
 
 	links
@@ -81,8 +87,27 @@ workspace "PFF_project"
 
     prebuildcommands {
 )";
-		stream << "\t\t\"cd " << (engineExeDir / "PFF").generic_string() << " && \" ..\n";
-		stream << "\t\t\"" << (engineExeDir / "PFF_helper" / "PFF_helper.exe").generic_string() << " 0 0 " << application::get().get_project_path().generic_string() << "\",";
+		stream << "\t\t\"cd " << (engine_build_dir / "PFF").generic_string() << " && \" ..\n";
+		stream << "\t\t\"" << (engine_build_dir / "PFF_helper" / "PFF_helper.exe").generic_string() << " 0 0 0 " << application::get().get_project_path().generic_string() << "\",";
+
+
+		//	--Add clean commands
+		//	cleancommands{
+		//		"{RMDIR} %{cfg.buildtarget.directory}",
+		//		"{RMDIR} %{cfg.objdir}",
+		//		"echo Cleaning completed for %{prj.name}"
+		//	}
+		//
+		//	--Add rebuild commands
+		//	rebuildcommands{
+		//		"{RMDIR} %{cfg.buildtarget.directory}",
+		//		"{RMDIR} %{cfg.objdir}",
+		//		"premake5 --file=%{wks.location}premake5.lua vs2019",
+		//		"msbuild /t:rebuild /p:configuration=%{cfg.buildcfg} %{wks.location}%{prj.name}.vcxproj",
+		//		"echo Rebuild completed for %{prj.name}"
+		//	}
+
+
 		stream <<R"(
     }
 
@@ -122,6 +147,10 @@ SETLOCAL EnableDelayedExpansion
 
 REM Change to the project directory
 cd /d %~dp0
+
+REM Create metadata and project_files directories
+mkdir metadata 2>nul
+mkdir metadata\project_files 2>nul
 
 echo.
 if "%1" == "compile" (

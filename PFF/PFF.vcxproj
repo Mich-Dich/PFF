@@ -107,6 +107,8 @@ IF NOT EXIST $(SolutionDir)\bin\Debug-windows-x86_64\PFF\assets (mkdir $(Solutio
 IF EXIST $(SolutionDir)\PFF\assets\ (xcopy /Q /E /Y /I $(SolutionDir)\PFF\assets $(SolutionDir)\bin\Debug-windows-x86_64\PFF\assets &gt; nul) ELSE (xcopy /Q /Y /I $(SolutionDir)\PFF\assets $(SolutionDir)\bin\Debug-windows-x86_64\PFF\assets &gt; nul)
 IF NOT EXIST $(SolutionDir)\bin\Debug-windows-x86_64\PFF_editor (mkdir $(SolutionDir)\bin\Debug-windows-x86_64\PFF_editor)
 IF EXIST ..\bin\Debug-windows-x86_64\PFF\PFF.dll\ (xcopy /Q /E /Y /I ..\bin\Debug-windows-x86_64\PFF\PFF.dll $(SolutionDir)\bin\Debug-windows-x86_64\PFF_editor &gt; nul) ELSE (xcopy /Q /Y /I ..\bin\Debug-windows-x86_64\PFF\PFF.dll $(SolutionDir)\bin\Debug-windows-x86_64\PFF_editor &gt; nul)
+IF NOT EXIST $(SolutionDir)\bin\Debug-windows-x86_64\vendor\vulkan-glslc (mkdir $(SolutionDir)\bin\Debug-windows-x86_64\vendor\vulkan-glslc)
+IF EXIST $(SolutionDir)\PFF\vendor\vulkan-glslc\ (xcopy /Q /E /Y /I $(SolutionDir)\PFF\vendor\vulkan-glslc $(SolutionDir)\bin\Debug-windows-x86_64\vendor\vulkan-glslc &gt; nul) ELSE (xcopy /Q /Y /I $(SolutionDir)\PFF\vendor\vulkan-glslc $(SolutionDir)\bin\Debug-windows-x86_64\vendor\vulkan-glslc &gt; nul)
 IF NOT EXIST $(SolutionDir)\bin\Debug-windows-x86_64\vendor\premake (mkdir $(SolutionDir)\bin\Debug-windows-x86_64\vendor\premake)
 IF EXIST $(SolutionDir)\vendor\premake\ (xcopy /Q /E /Y /I $(SolutionDir)\vendor\premake $(SolutionDir)\bin\Debug-windows-x86_64\vendor\premake &gt; nul) ELSE (xcopy /Q /Y /I $(SolutionDir)\vendor\premake $(SolutionDir)\bin\Debug-windows-x86_64\vendor\premake &gt; nul)</Command>
     </PostBuildEvent>
@@ -149,6 +151,8 @@ IF NOT EXIST $(SolutionDir)\bin\RelWithDebInfo-windows-x86_64\PFF\assets (mkdir 
 IF EXIST $(SolutionDir)\PFF\assets\ (xcopy /Q /E /Y /I $(SolutionDir)\PFF\assets $(SolutionDir)\bin\RelWithDebInfo-windows-x86_64\PFF\assets &gt; nul) ELSE (xcopy /Q /Y /I $(SolutionDir)\PFF\assets $(SolutionDir)\bin\RelWithDebInfo-windows-x86_64\PFF\assets &gt; nul)
 IF NOT EXIST $(SolutionDir)\bin\RelWithDebInfo-windows-x86_64\PFF_editor (mkdir $(SolutionDir)\bin\RelWithDebInfo-windows-x86_64\PFF_editor)
 IF EXIST ..\bin\RelWithDebInfo-windows-x86_64\PFF\PFF.dll\ (xcopy /Q /E /Y /I ..\bin\RelWithDebInfo-windows-x86_64\PFF\PFF.dll $(SolutionDir)\bin\RelWithDebInfo-windows-x86_64\PFF_editor &gt; nul) ELSE (xcopy /Q /Y /I ..\bin\RelWithDebInfo-windows-x86_64\PFF\PFF.dll $(SolutionDir)\bin\RelWithDebInfo-windows-x86_64\PFF_editor &gt; nul)
+IF NOT EXIST $(SolutionDir)\bin\RelWithDebInfo-windows-x86_64\vendor\vulkan-glslc (mkdir $(SolutionDir)\bin\RelWithDebInfo-windows-x86_64\vendor\vulkan-glslc)
+IF EXIST $(SolutionDir)\PFF\vendor\vulkan-glslc\ (xcopy /Q /E /Y /I $(SolutionDir)\PFF\vendor\vulkan-glslc $(SolutionDir)\bin\RelWithDebInfo-windows-x86_64\vendor\vulkan-glslc &gt; nul) ELSE (xcopy /Q /Y /I $(SolutionDir)\PFF\vendor\vulkan-glslc $(SolutionDir)\bin\RelWithDebInfo-windows-x86_64\vendor\vulkan-glslc &gt; nul)
 IF NOT EXIST $(SolutionDir)\bin\RelWithDebInfo-windows-x86_64\vendor\premake (mkdir $(SolutionDir)\bin\RelWithDebInfo-windows-x86_64\vendor\premake)
 IF EXIST $(SolutionDir)\vendor\premake\ (xcopy /Q /E /Y /I $(SolutionDir)\vendor\premake $(SolutionDir)\bin\RelWithDebInfo-windows-x86_64\vendor\premake &gt; nul) ELSE (xcopy /Q /Y /I $(SolutionDir)\vendor\premake $(SolutionDir)\bin\RelWithDebInfo-windows-x86_64\vendor\premake &gt; nul)</Command>
     </PostBuildEvent>
@@ -189,11 +193,15 @@ IF NOT EXIST $(SolutionDir)\bin\Release-windows-x86_64\PFF\assets (mkdir $(Solut
 IF EXIST $(SolutionDir)\PFF\assets\ (xcopy /Q /E /Y /I $(SolutionDir)\PFF\assets $(SolutionDir)\bin\Release-windows-x86_64\PFF\assets &gt; nul) ELSE (xcopy /Q /Y /I $(SolutionDir)\PFF\assets $(SolutionDir)\bin\Release-windows-x86_64\PFF\assets &gt; nul)
 IF NOT EXIST $(SolutionDir)\bin\Release-windows-x86_64\PFF_editor (mkdir $(SolutionDir)\bin\Release-windows-x86_64\PFF_editor)
 IF EXIST ..\bin\Release-windows-x86_64\PFF\PFF.dll\ (xcopy /Q /E /Y /I ..\bin\Release-windows-x86_64\PFF\PFF.dll $(SolutionDir)\bin\Release-windows-x86_64\PFF_editor &gt; nul) ELSE (xcopy /Q /Y /I ..\bin\Release-windows-x86_64\PFF\PFF.dll $(SolutionDir)\bin\Release-windows-x86_64\PFF_editor &gt; nul)
+IF NOT EXIST $(SolutionDir)\bin\Release-windows-x86_64\vendor\vulkan-glslc (mkdir $(SolutionDir)\bin\Release-windows-x86_64\vendor\vulkan-glslc)
+IF EXIST $(SolutionDir)\PFF\vendor\vulkan-glslc\ (xcopy /Q /E /Y /I $(SolutionDir)\PFF\vendor\vulkan-glslc $(SolutionDir)\bin\Release-windows-x86_64\vendor\vulkan-glslc &gt; nul) ELSE (xcopy /Q /Y /I $(SolutionDir)\PFF\vendor\vulkan-glslc $(SolutionDir)\bin\Release-windows-x86_64\vendor\vulkan-glslc &gt; nul)
 IF NOT EXIST $(SolutionDir)\bin\Release-windows-x86_64\vendor\premake (mkdir $(SolutionDir)\bin\Release-windows-x86_64\vendor\premake)
 IF EXIST $(SolutionDir)\vendor\premake\ (xcopy /Q /E /Y /I $(SolutionDir)\vendor\premake $(SolutionDir)\bin\Release-windows-x86_64\vendor\premake &gt; nul) ELSE (xcopy /Q /Y /I $(SolutionDir)\vendor\premake $(SolutionDir)\bin\Release-windows-x86_64\vendor\premake &gt; nul)</Command>
     </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClInclude Include="src\engine\geometry\mesh_ops\intersection_triangle_tiangle.h" />
+    <ClInclude Include="src\engine\geometry\mesh_ops\mesh_boolean.h" />
     <ClInclude Include="src\PFF.h" />
     <ClInclude Include="src\application.h" />
     <ClInclude Include="src\engine\Events\Event.h" />
@@ -271,6 +279,7 @@ IF EXIST $(SolutionDir)\vendor\premake\ (xcopy /Q /E /Y /I $(SolutionDir)\vendor
     <ClCompile Include="src\engine\game_objects\game_manager.cpp" />
     <ClCompile Include="src\engine\game_objects\player_controller.cpp" />
     <ClCompile Include="src\engine\geometry\mesh.cpp" />
+    <ClCompile Include="src\engine\geometry\mesh_ops\mesh_boolean.cpp" />
     <ClCompile Include="src\engine\io_handler\input_mapping.cpp" />
     <ClCompile Include="src\engine\layer\imgui_layer.cpp" />
     <ClCompile Include="src\engine\layer\layer.cpp" />

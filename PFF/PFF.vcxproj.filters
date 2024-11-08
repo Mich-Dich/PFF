@@ -282,6 +282,8 @@
     <ClInclude Include="vendor\ImGuizmo\ImGuizmo.h">
       <Filter>vendor\ImGuizmo</Filter>
     </ClInclude>
+    <ClInclude Include="src\engine\geometry\mesh_ops\intersection_triangle_tiangle.h" />
+    <ClInclude Include="src\engine\geometry\mesh_ops\mesh_boolean.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="src\application.cpp">
@@ -410,5 +412,6 @@
     <ClCompile Include="vendor\ImGuizmo\ImGuizmo.cpp">
       <Filter>vendor\ImGuizmo</Filter>
     </ClCompile>
+    <ClCompile Include="src\engine\geometry\mesh_ops\mesh_boolean.cpp" />
   </ItemGroup>
 </Project>

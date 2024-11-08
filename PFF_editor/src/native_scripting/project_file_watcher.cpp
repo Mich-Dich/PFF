@@ -117,7 +117,7 @@ namespace PFF {
 	static void file_changed(const std::filesystem::path& file) {
 
 		const std::filesystem::path path_to_build_script = util::get_executable_path() / ".." / "PFF_helper" / "PFF_helper.exe";
-		std::string cmdArgs = "1 1 " + s_root_directory.generic_string();
+		std::string cmdArgs = "1 0 1 " + s_root_directory.generic_string();
 		CORE_LOG(Info, "CMD Args: " << cmdArgs.c_str());
 		util::run_program(path_to_build_script, cmdArgs);
 	}
@@ -127,7 +127,7 @@ namespace PFF {
 		CORE_LOG(Error, "COMPILING PROJECT");
 #if 1
 		const std::filesystem::path path_to_build_script = util::get_executable_path() / ".." / "PFF_helper" / "PFF_helper.exe";
-		std::string cmdArgs = "1 0 " + s_root_directory.generic_string();
+		std::string cmdArgs = "1 0 0 " + s_root_directory.generic_string();
 		CORE_LOG(Info, "CMD Args: " << cmdArgs.c_str());
 		util::run_program(path_to_build_script, cmdArgs);
 #else

@@ -11,38 +11,41 @@ namespace PFF::geometry {
 
 	void mesh_asset::calc_bounds() {
 		
-		PFF_ISOLATED_PROFILER_SCOPED(1000, "calc frustum planes ", PFF::duration_precision::microseconds);
-
 		CORE_ASSERT(surfaces.size() > 0, "", "Cannot calculate the bounds of an emty mesh_asset. Needs to have atleast one surface");
 
-		// Fist loop over surfaces
-		for (auto loop_surface : surfaces) {
+		PFF_ISOLATED_PROFILER_SCOPED(1000, "calc frustum planes ", PFF::duration_precision::microseconds);
 
-			//loop the vertices of this surface, find min/max bounds
-			glm::vec3 min_pos = vertices[loop_surface.startIndex].position;
-			glm::vec3 max_pos = vertices[loop_surface.startIndex].position;
-			for (u32 x = loop_surface.startIndex; x < (loop_surface.startIndex + loop_surface.count-1); x++) {
+		glm::vec3 mesh_min_pos = vertices[0].position;
+		glm::vec3 mesh_max_pos = vertices[0].position;
 
-				min_pos = glm::min(min_pos, vertices[indices[x]].position);
-				max_pos = glm::max(max_pos, vertices[indices[x]].position);
-			}
-			// calculate origin and extents from the min/max, use extent lenght for radius
-			loop_surface.bounds.origin = (max_pos + min_pos) / 2.f;
-			loop_surface.bounds.extents = (max_pos - min_pos) / 2.f;
-			loop_surface.bounds.sphere_radius = glm::length(loop_surface.bounds.extents);
-		}
+        // Loop over surfaces
+        for (auto& loop_surface : surfaces) {
+            glm::vec3 surface_min_pos = vertices[indices[loop_surface.startIndex]].position;
+            glm::vec3 surface_max_pos = vertices[indices[loop_surface.startIndex]].position;
 
+            // Loop through all vertices of this surface
+            for (u32 i = 0; i < loop_surface.count; ++i) {
+                u32 vertex_index = indices[loop_surface.startIndex + i];
+                const glm::vec3& vertex_pos = vertices[vertex_index].position;
 
-		// calc mesh_asset bounds based on surfaces
-		glm::vec3 minpos = surfaces[0].bounds.origin - surfaces[0].bounds.extents;
-		glm::vec3 maxpos = surfaces[0].bounds.origin + surfaces[0].bounds.extents;
-		for (size_t x = 0; x < surfaces.size(); x++) {
-			minpos = glm::min(minpos, surfaces[x].bounds.origin - surfaces[x].bounds.extents);
-			maxpos = glm::max(maxpos, surfaces[x].bounds.origin + surfaces[x].bounds.extents);
-		}
-		bounds.origin = (maxpos + minpos) / 2.f;
-		bounds.extents = (maxpos - minpos) / 2.f;
-		bounds.sphere_radius = glm::length(bounds.extents);
+                surface_min_pos = glm::min(surface_min_pos, vertex_pos);
+                surface_max_pos = glm::max(surface_max_pos, vertex_pos);
+            }
+
+            // Calculate surface bounds
+            loop_surface.bounds.origin = (surface_max_pos + surface_min_pos) * 0.5f;
+            loop_surface.bounds.extents = (surface_max_pos - surface_min_pos) * 0.5f;
+            loop_surface.bounds.sphere_radius = glm::length(loop_surface.bounds.extents);
+
+            // Update mesh bounds
+            mesh_min_pos = glm::min(mesh_min_pos, surface_min_pos);
+            mesh_max_pos = glm::max(mesh_max_pos, surface_max_pos);
+        }
+
+        // Calculate mesh bounds
+        bounds.origin = (mesh_max_pos + mesh_min_pos) * 0.5f;
+        bounds.extents = (mesh_max_pos - mesh_min_pos) * 0.5f;
+        bounds.sphere_radius = glm::length(bounds.extents);
 	}
 
 	//procedural_mesh_asset::~procedural_mesh_asset() { 

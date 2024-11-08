@@ -60,10 +60,26 @@ namespace PFF {
 		glfwWindowHint(GLFW_VISIBLE, GLFW_FALSE);
 		glfwWindowHint(GLFW_MAXIMIZED, (m_data.window_size_state == window_size_state::fullscreen || m_data.window_size_state == window_size_state::fullscreen_windowed) ? GLFW_TRUE : GLFW_FALSE);
 
+		int max_posible_height = 0;
+		int max_posible_width = 0;
+		int monitor_count;
+		auto monitors = glfwGetMonitors(&monitor_count);
+
+		for (int x = 0; x < monitor_count; x++) {
+
+			int xpos, ypos, width, height;
+			glfwGetMonitorWorkarea(monitors[x], &xpos, &ypos, &width, &height);
+			max_posible_height = math::max(max_posible_height, height);
+			max_posible_width = math::max(max_posible_width, width);
+
+			CORE_LOG(Trace, "Monitor: " << x << " data: " << xpos << " / " << ypos << " / " << width << " / " << height);
+		}
+
+		// ensure window is never bigger than possible OR smaller then logical
+		m_data.height = math::clamp((int)m_data.height, 200, max_posible_height);
+		m_data.width = math::clamp((int)m_data.width, 300, max_posible_width);
 		m_data.height -= 35;
 		m_data.width -= 8;
-		math::max<u32>(m_data.height, 0);
-		math::max<u32>(m_data.width, 0);
 		m_Window = glfwCreateWindow(static_cast<int>(m_data.width), static_cast<int>(m_data.height), m_data.title.c_str(), nullptr, nullptr);
 
 		CORE_ASSERT(glfwVulkanSupported(), "", "GLFW does not support Vulkan");
@@ -80,15 +96,15 @@ namespace PFF {
 		GLFWmonitor* primary = glfwGetPrimaryMonitor();
 		const GLFWvidmode* mode = glfwGetVideoMode(primary);
 		
-		int monitor_count;
-		auto monitors = glfwGetMonitors(&monitor_count);
+		//int monitor_count;
+		//auto monitors = glfwGetMonitors(&monitor_count);
 
-		for (int x = 0; x < monitor_count; x++) {
+		//for (int x = 0; x < monitor_count; x++) {
 
-			int xpos, ypos, width, height;
-			glfwGetMonitorWorkarea(monitors[x], &xpos, &ypos, &width, &height);
-			CORE_LOG(Trace, "Monitor: " << x << " data: "<< xpos << " / " << ypos << " / " << width << " / " << height);
-		}
+		//	int xpos, ypos, width, height;
+		//	glfwGetMonitorWorkarea(monitors[x], &xpos, &ypos, &width, &height);
+		//	CORE_LOG(Trace, "Monitor: " << x << " data: "<< xpos << " / " << ypos << " / " << width << " / " << height);
+		//}
 
 		//   check vertical									  check horicontal
 		//if ((m_data.pos_y + m_data.height > mode->height) || (m_data.pos_x + m_data.width > mode->width)) {

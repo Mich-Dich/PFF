@@ -79,11 +79,11 @@ project "PFF"
 
 		postbuildcommands
 		{
-			-- "{MKDIR} %{wks.location}/bin/" .. outputs .. "/" .. client_project_name,
-			-- "{COPY} %{cfg.buildtarget.relpath} %{wks.location}/bin/" .. outputs  .. "/" .. client_project_name,
-			
 			"{MKDIR} %{wks.location}/bin/" .. outputs .. "/PFF_editor",
 			"{COPY} %{cfg.buildtarget.relpath} %{wks.location}/bin/" .. outputs  .. "/PFF_editor",
+			
+			"{MKDIR} %{wks.location}/bin/" .. outputs .. "/vendor/vulkan-glslc",
+			"{COPY} %{wks.location}/PFF/vendor/vulkan-glslc %{wks.location}/bin/" .. outputs  .. "/vendor/vulkan-glslc",
 			
 			-- copy premake exe
 			"{MKDIR} %{wks.location}/bin/" .. outputs .. "/vendor/premake",

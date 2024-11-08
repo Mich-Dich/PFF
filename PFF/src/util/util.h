@@ -64,36 +64,27 @@ namespace PFF {
             random(u32 seed = std::random_device{}()) 
                 : engine(seed) {}
 
-            FORCEINLINE glm::vec3 get_vec3(f32 min = 0.0f, f32 max = 1.0f);
+            FORCEINLINE glm::vec3 get_vec3(f32 min = -1.0f, f32 max = 1.0f);
 
-            // @brief Generates a random floating-point number in the range [min, max].
-            // @param [min] The minimum value of the random number range.
-            // @param [max] The maximum value of the random number range.
-            // @return A random floating-point number between min and max.
-            FORCEINLINE f32 get_f32(f32 min = 0.0f, f32 max = 1.0f);
+            template<typename T>
+            T get(T min, T max) {
+
+                if constexpr (std::is_floating_point_v<T>) {
+
+                    std::uniform_real_distribution<T> dist(min, max);
+                    return dist(engine);
+                
+                } else if constexpr (std::is_integral_v<T>) {
+
+                    std::uniform_int_distribution<T> dist(min, max);
+                    return dist(engine);
+                }
+            }
 
             // @brief Generates a random floating-point number in the range [0.f, 1.f] and checks if its less then the percent.
             // @param [percentage] The value for percent checking (needs to be between 0.f and 1.f).
             // @return A random floating-point number between min and max.
             FORCEINLINE bool get_percent(f32 percentage = 0.0f);
-
-            // @brief Generates a random double-precision floating-point number in the range [min, max].
-            // @param [min] The minimum value of the random number range.
-            // @param [max] The maximum value of the random number range.
-            // @return A random double-precision floating-point number between min and max.
-            FORCEINLINE f64 get_f64(f64 min = 0.0, f64 max = 1.0);
-
-            // @brief Generates a random unsigned 32-bit integer in the range [min, max].
-            // @param [min] The minimum value of the random number range.
-            // @param [max] The maximum value of the random number range.
-            // @return A random unsigned 32-bit integer between min and max.
-            FORCEINLINE u32 get_u32(u32 min = 0, u32 max = std::numeric_limits<u32>::max());
-
-            // @brief Generates a random unsigned 64-bit integer in the range [min, max].
-            // @param [min] The minimum value of the random number range.
-            // @param [max] The maximum value of the random number range.
-            // @return A random unsigned 64-bit integer between min and max.
-            FORCEINLINE u64 get_u64(u64 min = 0, u64 max = std::numeric_limits<u64>::max());
 
             FORCEINLINE std::string get_string(const size_t length);
 

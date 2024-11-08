@@ -87,7 +87,7 @@ namespace PFF::toolkit::todo {
 	// can define here because header is only included in editor_layer.cpp file
 	void serialize_todo_list(std::vector<topic>& m_topics, serializer::option option) {
 
-		PFF::serializer::yaml(application::get().get_project_path() / METADATA_DIR / "todo_list.yml", "todo_list", option)
+		PFF::serializer::yaml(application::get().get_project_path() / CONFIG_DIR / "todo_list.yml", "todo_list", option)
 			.vector(KEY_VALUE(m_topics), [&](serializer::yaml& yaml, const u64 x) {
 
 				yaml.entry(KEY_VALUE(m_topics[x].name))

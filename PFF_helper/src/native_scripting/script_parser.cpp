@@ -45,7 +45,10 @@ namespace PFF {
 		LOG(Trace, "generating header for: [" << util::extract_path_from_directory(m_full_filepath, "src").generic_string() << "]");
 
 		std::ostringstream file;
-		file << R"(
+
+		// append headers & namespaces
+		{
+			file << R"(
 #pragma once
 
 #include <PFF.h>				// main engine header
@@ -54,16 +57,17 @@ namespace PFF {
 #include <entt/entt.hpp>
 
 )";
-		file << "#include \"" << util::extract_path_from_directory(m_full_filepath, "src").generic_string() << "\"\n\n";
+			file << "#include \"" << util::extract_path_from_directory(m_full_filepath, "src").generic_string() << "\"\n\n";
 
-		// begin namespace
-		file << "namespace PFF::reflect_" << get_filename_as_class_name(m_full_filepath.filename().string()) << " {\n";
+			// begin namespace
+			file << "namespace PFF::reflect_" << get_filename_as_class_name(m_full_filepath.filename().string()) << " {\n";
 
-		file << R"(
+			file << R"(
 	using namespace entt::literals;
 	bool initialized = false;
 
 )";
+		}
 
 		// append ids as entt hash strings
 		{
@@ -340,6 +344,19 @@ namespace PFF {
 		}
 	}
 
+	bool script_parser::is_var_pff_struct_or_class(const std::string& var_type) {
+
+		for (const auto& clazz : m_classes)
+			if (clazz.class_name_without_namespace == var_type)
+				return true;
+		
+		for (const auto& structures : m_structs)
+			if (structures.struct_name_without_namespace == var_type)
+				return true;
+
+		return false;
+	}
+
 	std::string script_parser::generate_display_function(const std::string& name, const std::string& name_without_namespace, const std::string& specifiers, const std::filesystem::path& full_filepath, const std::list<PFF_variable>& variables, bool is_class) {
 
 		std::stringstream file{};
@@ -362,6 +379,15 @@ namespace PFF {
 
 			for (auto var : sorted_vars.variables) {
 
+				if (is_var_pff_struct_or_class(var.type)) {
+
+					file << "\t\t\tUI::end_table();\n";
+					file << "\t\t\tchanged |= display_properties(&script->" << var.identifier.c_str() << ");\n";
+					file << "\t\t\tUI::begin_table(\"entity_component\", false);\n";
+					continue;
+				}
+
+
 				if (rebuild_on_change)
 					file << "\t\t\tchanged |= ";
 				else
@@ -376,7 +402,7 @@ namespace PFF {
 					&& var.specifiers.find("min_value") == std::string::npos
 					&& var.specifiers.find("max_value") == std::string::npos) {
 
-					file << "UI::table_row(\"" << var_lable.c_str() << "\", script->" << var.identifier.c_str() << ");\n";
+					file << "UI::table_row(\"" << var_lable.c_str() << "\", script->" << var.identifier.c_str() << "); // type: " << var.type << " \n";
 					continue;
 				}
 
@@ -384,7 +410,7 @@ namespace PFF {
 				file << "static_cast<f32>(" << parse_specifiers_value(var.specifiers, "UI_slider_drag_speed", "0.01f") << "), ";
 				file << "static_cast<" << var.type << ">(" << parse_specifiers_value(var.specifiers, "min_value", "0.f") << "), ";
 				file << "static_cast<" << var.type << ">(" << parse_specifiers_value(var.specifiers, "max_value", "1.f") << ")";
-				file << ");\n"; //" << var.metadata << " \n";
+				file << ");\n";
 
 			}
 
@@ -425,6 +451,15 @@ namespace PFF {
 			file << "\t\tserializer.sub_section(\"" << sorted_vars.category_name << "\", [&](serializer::yaml& " << sorted_vars.category_name << "_section) {\n";
 			bool needs_to_add_start = true;
 			for (auto var : sorted_vars.variables) {
+
+
+
+				if (is_var_pff_struct_or_class(var.type)) {
+
+					file << "\n\t\t\tserialize_script(&script->" << var.identifier.c_str() << ", serializer);";
+					continue;
+				}
+
 
 				if (needs_to_add_start)
 					file << "\n\t\t\t" << sorted_vars.category_name << "_section";

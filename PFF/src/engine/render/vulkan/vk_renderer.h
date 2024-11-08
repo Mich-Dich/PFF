@@ -237,6 +237,9 @@ namespace PFF::render::vulkan {
 		// ---------------------------- data for debug ---------------------------- 
 #ifdef PFF_RENDERER_DEBUG_CAPABILITY
 		PFF::geometry::mesh_asset					m_debug_lines{};
+
+		//std::vector<PFF::geometry::mesh_asset>		m_debug_line_assets{};			// potentionaly save all debug assets like this
+
 		material_instance							m_debug_lines_material_inst;
 		material									m_debug_lines_material;
 #endif // PFF_RENDERER_DEBUG_CAPABILITY

@@ -59,6 +59,8 @@ namespace PFF {
 		void parse_struct(const std::string& specifiers);
 		PFF_variable parse_variable();
 		void parse_property_specifiers(std::string& specifiers);
+
+		FORCEINLINE bool is_var_pff_struct_or_class(const std::string& var_type);
 		FORCEINLINE const token& expect(token_type type);
 		FORCEINLINE bool match(token_type type);
 		FORCEINLINE void advance() { m_current_token++; m_Current_iter++; }

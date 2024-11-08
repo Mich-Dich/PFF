@@ -24,31 +24,29 @@
 
 namespace PFF::util {
 
-    glm::vec3 util::random::get_vec3(f32 min, f32 max)      { return glm::vec3(get_f32(min, max), get_f32(min, max), get_f32(min, max)); }
+    glm::vec3 util::random::get_vec3(f32 min, f32 max)      { return glm::vec3(get<f32>(min, max), get<f32>(min, max), get<f32>(min, max)); }
 
-    bool random::get_percent(f32 percentage)                { return get_f32(0.f, 1.f) < percentage; }
+    bool random::get_percent(f32 percentage)                { return get<f32>(0.f, 1.f) < percentage; }
 
-    f32 random::get_f32(f32 min, f32 max) {
-        std::uniform_real_distribution<f32> dist(min, max);
-        return dist(engine);
-    }
+    //f32 random::get_f32(f32 min, f32 max) {
+    //    std::uniform_real_distribution<f32> dist(min, max);
+    //    return dist(engine);
+    //}
 
-    f64 random::get_f64(f64 min, f64 max) {
-        std::uniform_real_distribution<f64> dist(min, max);
-        return dist(engine);
-    }
+    //f64 random::get_f64(f64 min, f64 max) {
+    //    std::uniform_real_distribution<f64> dist(min, max);
+    //    return dist(engine);
+    //}
 
+    //u32 random::get_u32(u32 min, u32 max) {
+    //    std::uniform_int_distribution<u32> dist(min, max);
+    //    return dist(engine);
+    //}
 
-    u32 random::get_u32(u32 min, u32 max) {
-        std::uniform_int_distribution<u32> dist(min, max);
-        return dist(engine);
-    }
-
-
-    u64 random::get_u64(u64 min, u64 max) {
-        std::uniform_int_distribution<u64> dist(min, max);
-        return dist(engine);
-    }
+    //u64 random::get_u64(u64 min, u64 max) {
+    //    std::uniform_int_distribution<u64> dist(min, max);
+    //    return dist(engine);
+    //}
 
 
     std::string util::random::get_string(const size_t length) {
@@ -76,7 +74,7 @@ namespace PFF::util {
 
     bool run_program(const std::filesystem::path& path_to_exe, const char* cmd_args, bool open_console) {
 
-        CORE_LOG(Error, "path: " << path_to_exe.generic_string());
+        CORE_LOG(Trace, "executing program at [" << path_to_exe.generic_string() << "]");
 
         bool result = false;
 

@@ -4,6 +4,9 @@
     <Filter Include="native_scripting">
       <UniqueIdentifier>{5EB758E5-4AB0-7737-73E2-5CBC5F3A5743}</UniqueIdentifier>
     </Filter>
+    <Filter Include="shader">
+      <UniqueIdentifier>{1C21B11B-08C3-DBF1-F17D-EF45DDBE6242}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="src\native_scripting\code_generator.h">
@@ -17,6 +20,9 @@
     </ClInclude>
     <ClInclude Include="src\native_scripting\script_scanner.h">
       <Filter>native_scripting</Filter>
+    </ClInclude>
+    <ClInclude Include="src\shader\shader_processor.h">
+      <Filter>shader</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
@@ -32,6 +38,9 @@
     </ClCompile>
     <ClCompile Include="src\native_scripting\script_scanner.cpp">
       <Filter>native_scripting</Filter>
+    </ClCompile>
+    <ClCompile Include="src\shader\shader_processor.cpp">
+      <Filter>shader</Filter>
     </ClCompile>
   </ItemGroup>
 </Project>

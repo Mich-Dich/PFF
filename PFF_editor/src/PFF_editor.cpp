@@ -22,6 +22,8 @@ namespace PFF {
 		m_editor_layer = new editor_layer(application::get().get_imgui_layer()->get_context());
 		push_overlay(m_editor_layer);
 
+		io_handler::create_directory(application::get().get_project_path() / "metadata" / "project_files");			// create location
+
 		LOG(Trace, "register editor controller");
 		m_editor_controller = std::make_shared<editor_controller>();
 		register_player_controller(m_editor_controller);

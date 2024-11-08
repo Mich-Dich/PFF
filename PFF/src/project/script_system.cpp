@@ -89,7 +89,7 @@ namespace PFF::script_system {
 
 	static void serialize_scripts(serializer::option option) {
 
-		std::filesystem::path script_components_serializer_file = PROJECT_PATH / METADATA_DIR / "script_components.yml";
+		std::filesystem::path script_components_serializer_file = PROJECT_PATH / CONFIG_DIR / "script_components.yml";
 		CORE_LOG(Trace, "serializing script components to: [" << script_components_serializer_file.generic_string() << "]");
 
 		asset_file_header file_header{};

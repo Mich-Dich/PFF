@@ -7,7 +7,7 @@ namespace PFF::render::util {
 	// @param [path_to_dir] The path to the directory containing shaders.
 	// @param [compile_subdirectory] If true, shaders in subdirectories will also be compiled; otherwise, only shaders in the specified directory will be compiled.
 	// @return None.
-	void compile_shaders_in_dir(const std::filesystem::path path_to_dir = "../PFF/shaders", bool compile_subdirectory = true);
+	//void compile_shaders_in_dir(const std::filesystem::path path_to_dir = "../PFF/shaders", bool compile_subdirectory = true);
 
 	// @brief Compiles a single shader file into SPIR-V bytecode using the Vulkan GLSL compiler.
 	//        If the shader file does not exist or is not recognized as a shader file based on its extension,
@@ -16,8 +16,7 @@ namespace PFF::render::util {
 	//		  Otherwise, it compiles the shader
 	// @param [path] The path to the shader file to compile.
 	// @return None.
-	void compile_shader(const std::filesystem::path path);
-
+	//void compile_shader(const std::filesystem::path path);
 
 	//GLuint LoadTextureFromEmbeddedData(const uint8_t* data, int data_size, int* out_width, int* out_height);
 

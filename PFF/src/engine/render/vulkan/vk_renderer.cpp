@@ -48,6 +48,8 @@ namespace PFF::render::vulkan {
 
 #ifdef COLLECT_PERFORMANCE_DATA
 	#define COLLECTING_PERFORMANCE_DATA(data)			data
+#else
+	#define COLLECTING_PERFORMANCE_DATA(...)
 #endif // COLLECT_PERFORMANCE_DATA
 
 
@@ -128,7 +130,11 @@ namespace PFF::render::vulkan {
 
 		CORE_LOG_INIT();
 
-		PFF::render::util::compile_shaders_in_dir( PFF::util::get_executable_path() / "../PFF/shaders", true);
+		// compile_shaders_in_dir
+		const std::filesystem::path path_to_build_script = PFF::util::get_executable_path() / ".." / "PFF_helper" / "PFF_helper.exe";
+		std::string cmdArgs = "1 1 0 " + (PFF::util::get_executable_path() / "../PFF/shaders").generic_string() + " 1 ";
+		CORE_LOG(Info, "CMD Args: " << cmdArgs.c_str());
+		PFF::util::run_program(path_to_build_script, cmdArgs);
 
 		//make the vulkan instance, with basic debug features
 		vkb::InstanceBuilder builder;
@@ -1194,6 +1200,13 @@ namespace PFF::render::vulkan {
 				vkCmdPushConstants(cmd, loc_material->pipeline->layout, VK_SHADER_STAGE_VERTEX_BIT, (u32)0, sizeof(GPU_draw_push_constants), &push_constants);
 				vkCmdBindIndexBuffer(cmd, mesh_asset.mesh_buffers.index_buffer.buffer, 0, VK_INDEX_TYPE_UINT32);
 
+#define KRIPLE_RENDERER_TO_DEBUG_MESH_BOOLEAN_OPERATIONS
+#ifdef KRIPLE_RENDERER_TO_DEBUG_MESH_BOOLEAN_OPERATIONS
+				vkCmdDrawIndexed(cmd, mesh_asset.surfaces[2].count, 1, mesh_asset.surfaces[2].startIndex, 0, 0);		// POSIBLE OPIMIZATION - Collect all transforms of mesh_comp pointing to same mesh_asset and draw indexed
+
+				COLLECTING_PERFORMANCE_DATA(m_renderer_metrik.triangles += (u64)mesh_asset.surfaces[2].count / 3);
+				COLLECTING_PERFORMANCE_DATA(m_renderer_metrik.draw_calls++);
+#else
 				// Draw every surface in mesh_asset
 				for (u64 x = 0; x < mesh_asset.surfaces.size(); x++) {
 
@@ -1202,6 +1215,7 @@ namespace PFF::render::vulkan {
 					COLLECTING_PERFORMANCE_DATA(m_renderer_metrik.triangles += (u64)mesh_asset.surfaces[x].count / 3);
 					COLLECTING_PERFORMANCE_DATA(m_renderer_metrik.draw_calls++);
 				}
+#endif
 
 				COLLECTING_PERFORMANCE_DATA(m_renderer_metrik.mesh_draw++);
 			}
@@ -1621,7 +1635,6 @@ namespace PFF::render::vulkan {
 		}
 
 		m_debug_lines.surfaces[0].count = (u32)m_debug_lines.indices.size();
-
 		update_mesh(m_debug_lines.mesh_buffers, m_debug_lines.indices, m_debug_lines.vertices);
 	}
 

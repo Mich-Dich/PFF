@@ -7,24 +7,22 @@
 
 #include "script_processor.h"
 
-namespace PFF::script_processor {
+namespace script_processor {
 	
+	using namespace PFF;
 	
-	static std::filesystem::path								s_root_directory = "";
-	std::filesystem::path get_root_directory()					{ return s_root_directory; }
-	void set_root_directory(std::filesystem::path root_path)	{ s_root_directory = root_path; }
+	static std::filesystem::path												s_root_directory = "";
+	std::filesystem::path get_root_directory()									{ return s_root_directory; }
 
 
+	static std::filesystem::path												s_project_premake_lua = "";
+	static auto																	s_classes = std::vector<PFF_class>();
+	static bool																	s_file_modified = false;
+	static bool																	s_building_code = false;
 
+	static bool is_header_file(const std::filesystem::path& file)				{ return file.extension().string() == ".h" || file.extension().string() == ".hpp"; }
 
-	static std::filesystem::path		s_project_premake_lua = "";
-	static auto							s_classes = std::vector<PFF_class>();
-	static bool							s_file_modified = false;
-	static bool							s_building_code = false;
-
-	static bool is_header_file(const std::filesystem::path& file) { return file.extension().string() == ".h" || file.extension().string() == ".hpp"; }
-
-	static bool Is_reflection_header_file(const std::filesystem::path& file) { return file.filename().string() == "Reflection"; }
+	static bool Is_reflection_header_file(const std::filesystem::path& file)	{ return file.filename().string() == "Reflection"; }
 
 	static void add_class_if_not_exist(PFF_class clazz) {
 
@@ -105,22 +103,15 @@ namespace PFF::script_processor {
 		}
 	}
 
-
-
-
-
-
-    
-
-	bool process_file(std::filesystem::path file) {
+	static bool process_file(std::filesystem::path file) {
 
 		LOG(Info, "Files changed: " << file.generic_string());
 		process_file_internal(file);
 		return true;
 	}
 
-	bool process_project_directory() {
-		
+	static bool process_project_directory() {
+
 		std::filesystem::path generated_dir = s_root_directory / "generated";
 		io_handler::create_directory(generated_dir);
 
@@ -129,6 +120,57 @@ namespace PFF::script_processor {
 		code_generator::generate_init_file_implemenation(s_classes, generated_dir / "init.cpp");
 
 		return false;
+	}
+
+
+
+
+	bool start(int argc, char* argv[]) {
+
+		PFF::logger::use_format_backup();
+		if (std::stoi(argv[1]))
+			PFF::logger::set_format("[$B$T:$J$E] [$B$L$X $I - $P:$G$E] $C$Z");
+		else
+			PFF::logger::set_format("[$T:$J PFF_helper/script_processor] $C$Z");
+
+		int operation_number = std::stoi(argv[3]);
+		native_scripting_operation operation = static_cast<native_scripting_operation>(operation_number);
+
+		std::filesystem::path path_to_project_root = argv[4];
+
+
+		LOG(Trace, "called for [" << operation_to_string(operation) << "] project path [" << path_to_project_root << "]");
+		s_root_directory = path_to_project_root;
+
+		bool result = false;
+		switch (operation) {
+		case native_scripting_operation::parse_directory:        result = process_project_directory(); break;
+		case native_scripting_operation::parse_file:
+
+			ASSERT(argc == 4, "", "Supplyed arguments are invalid for selected option [operation::parse_file] argument count [" << argc << "]");
+			result = process_file(static_cast<std::filesystem::path>(argv[4]));
+			break;
+
+		case native_scripting_operation::create_script: {
+
+			LOG(Trace, "operation [create directory] not implemented yet");
+			result = false;
+			break;
+		}
+		case native_scripting_operation::delete_file: {
+
+			LOG(Trace, "operation [delete file] not implemented yet");
+			result = false;
+			break;
+		}
+		case native_scripting_operation::END_OF_ENUM:
+		default:
+			LOG(Warn, "Invalid operation number [" << operation_number << "]");
+			result = false;
+			break;
+		}
+
+		return result;
 	}
 
 }
