@@ -43,6 +43,9 @@ workspace "PFF_project"
 
 	files
 	{
+		"generated/**.h",
+		"generated/**.hpp",
+		"generated/**.cpp",
 		"src/**.h",
 		"src/**.hpp",
 		"src/**.cpp",
