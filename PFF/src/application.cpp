@@ -89,8 +89,11 @@ namespace PFF {
 
 
 		// ========================================== DEV-ONLY should be set by launcher or when building the project_solution ==========================================
-		if (m_project_path.empty())
-			m_project_path = util::file_dialog().parent_path();
+		if (m_project_path.empty()) {
+
+			const std::vector<std::pair<std::string, std::string>> project_file_filters = { {"PFF Project File", "*.pffproj"} };
+			m_project_path = util::file_dialog("Open PFF-Project", project_file_filters).parent_path();
+		}
 
 		serializer::yaml(config::get_filepath_from_configtype(util::get_executable_path(), config::file::editor), "editor_data", serializer::option::save_to_file)
 			.entry("last_opened_project", m_project_path);

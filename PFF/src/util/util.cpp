@@ -238,37 +238,124 @@ namespace PFF::util {
     }
     
 
-    std::filesystem::path file_dialog() {
+    std::filesystem::path file_dialog(const std::string& title, const std::vector<std::pair<std::string, std::string>>& filters) {
 
 #ifdef PFF_PLATFORM_WINDOWS
 
-        OPENFILENAME ofn;       // common dialog box structure
-        char szFile[260];       // buffer for file name
+        OPENFILENAME ofn;                                                       // common dialog box structure
+        char szFile[260];                                                       // buffer for file name
 
-        // Initialize OPENFILENAME
-        ZeroMemory(&ofn, sizeof(ofn));
+        ZeroMemory(&ofn, sizeof(ofn));                                          // initialize OPENFILENAME
         ofn.lStructSize = sizeof(ofn);
         ofn.hwndOwner = NULL;
         ofn.lpstrFile = (LPWSTR)szFile;
         ofn.lpstrFile[0] = '\0';
         ofn.nMaxFile = sizeof(szFile);
-        ofn.lpstrFilter = _T("All Files\0*.*\0Text Files\0*.TXT\0");
+
+        std::wstring filter;                                                    
+        for (const auto& f : filters) {                                         // create filter string
+            filter += std::wstring(f.first.begin(), f.first.end()) + L'\0' +
+                std::wstring(f.second.begin(), f.second.end()) + L'\0';
+        }
+        filter += L'\0';
+
+        ofn.lpstrFilter = filter.c_str();
         ofn.nFilterIndex = 1;
         ofn.lpstrFileTitle = NULL;
         ofn.nMaxFileTitle = 0;
         ofn.lpstrInitialDir = NULL;
         ofn.Flags = OFN_PATHMUSTEXIST | OFN_FILEMUSTEXIST;
 
-        // Display the Open File dialog box 
+        std::wstring wtitle(title.begin(), title.end());                        // set dialog title
+        ofn.lpstrTitle = wtitle.c_str();
+
         if (GetOpenFileName(&ofn) == TRUE)
-            return std::filesystem::path(ofn.lpstrFile);
+            return std::filesystem::path(szFile);
 
         return std::filesystem::path();
 
-#elif defined PFF_PLATFORM_LINUX || defined PFF_PLATFORM_MAC
+#elif defined PFF_PLATFORM_LINUX
+
+        GtkWidget* dialog;
+        GtkFileChooserAction action = GTK_FILE_CHOOSER_ACTION_OPEN;
+        gint res;
+
+        gtk_init(NULL, NULL);
+        dialog = gtk_file_chooser_dialog_new(
+            title.c_str(),
+            NULL,
+            action,
+            "_Cancel",
+            GTK_RESPONSE_CANCEL,
+            "_Open",
+            GTK_RESPONSE_ACCEPT,
+            NULL
+        );
+
+        for (const auto& filter_pair : filters) {                               // Add filters
+            GtkFileFilter* filter = gtk_file_filter_new();
+            gtk_file_filter_set_name(filter, filter_pair.first.c_str());
+
+            // Split multiple extensions (e.g., "*.cpp;*.h")
+            std::stringstream ss(filter_pair.second);
+            std::string pattern;
+            while (std::getline(ss, pattern, ';')) {
+                gtk_file_filter_add_pattern(filter, pattern.c_str());
+            }
+
+            gtk_file_chooser_add_filter(GTK_FILE_CHOOSER(dialog), filter);
+        }
+
+        std::filesystem::path result;
+        if (gtk_dialog_run(GTK_DIALOG(dialog)) == GTK_RESPONSE_ACCEPT) {
+            char* filename = gtk_file_chooser_get_filename(GTK_FILE_CHOOSER(dialog));
+            result = std::filesystem::path(filename);
+            g_free(filename);
+        }
+
+        gtk_widget_destroy(dialog);
+        while (gtk_events_pending()) gtk_main_iteration();
+
+        return result;
+
+#elif defined PFF_PLATFORM_MAC
+
+        @autoreleasepool{
+            NSOpenPanel * panel = [NSOpenPanel openPanel];
+            [panel setTitle : [NSString stringWithUTF8String : title.c_str()] ] ;
+            [panel setCanChooseFiles : YES] ;
+            [panel setCanChooseDirectories : NO] ;
+            [panel setAllowsMultipleSelection : NO] ;
+
+            // Add filters
+            NSMutableArray* fileTypes = [NSMutableArray array];
+            for (const auto& filter : filters) {
+                std::string extensions = filter.second;
+                // Remove the "*." from each extension
+                size_t pos = 0;
+                while ((pos = extensions.find("*.")) != std::string::npos) {
+                    extensions.erase(pos, 2);
+                }
+
+                // Split by semicolon and add to allowed types
+                std::stringstream ss(extensions);
+                std::string ext;
+                while (std::getline(ss, ext, ';')) {
+                    [fileTypes addObject : [NSString stringWithUTF8String : ext.c_str()] ] ;
+                }
+            }
+            [panel setAllowedFileTypes : fileTypes];
+
+            std::filesystem::path result;
+            if ([panel runModal] == NSModalResponseOK) {
+                NSURL* url = [panel URL];
+                result = std::filesystem::path(std::string([[url path]UTF8String] ));
+            }
+
+            return result;
+        }
 
 #endif
-
     }
 
 
