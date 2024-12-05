@@ -16,10 +16,13 @@ echo.
 
 echo -------- Compile Result:
 if %errorlevel% neq 0 (
-    echo !ESC![31mBUILD FAILED!ESC![0m the premake script encountered [%errorlevel%] errors
+  
+  echo !ESC![31mBUILD FAILED!ESC![0m the premake script encountered [%errorlevel%] errors
+  @echo on
+  PAUSE
+
 ) else (
-    echo !ESC![32mBUILD SUCCESSFULL!ESC![0m
+  echo !ESC![32mBUILD SUCCESSFULL!ESC![0m
 )
 
 @echo on
-PAUSE

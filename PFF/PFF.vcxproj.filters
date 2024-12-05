@@ -16,6 +16,9 @@
     <Filter Include="src\engine\geometry">
       <UniqueIdentifier>{ED764D58-59D8-2A66-E245-71184EA66125}</UniqueIdentifier>
     </Filter>
+    <Filter Include="src\engine\geometry\mesh_ops">
+      <UniqueIdentifier>{7A200609-66DB-F5B4-0F93-6EFFFB2C4045}</UniqueIdentifier>
+    </Filter>
     <Filter Include="src\engine\io_handler">
       <UniqueIdentifier>{F6E7AEE7-6254-6AE2-2B48-024097738C4A}</UniqueIdentifier>
     </Filter>
@@ -101,6 +104,12 @@
     </ClInclude>
     <ClInclude Include="src\engine\geometry\mesh.h">
       <Filter>src\engine\geometry</Filter>
+    </ClInclude>
+    <ClInclude Include="src\engine\geometry\mesh_ops\intersection_triangle_tiangle.h">
+      <Filter>src\engine\geometry\mesh_ops</Filter>
+    </ClInclude>
+    <ClInclude Include="src\engine\geometry\mesh_ops\mesh_boolean.h">
+      <Filter>src\engine\geometry\mesh_ops</Filter>
     </ClInclude>
     <ClInclude Include="src\engine\io_handler\input_action.h">
       <Filter>src\engine\io_handler</Filter>
@@ -282,8 +291,6 @@
     <ClInclude Include="vendor\ImGuizmo\ImGuizmo.h">
       <Filter>vendor\ImGuizmo</Filter>
     </ClInclude>
-    <ClInclude Include="src\engine\geometry\mesh_ops\intersection_triangle_tiangle.h" />
-    <ClInclude Include="src\engine\geometry\mesh_ops\mesh_boolean.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="src\application.cpp">
@@ -300,6 +307,9 @@
     </ClCompile>
     <ClCompile Include="src\engine\geometry\mesh.cpp">
       <Filter>src\engine\geometry</Filter>
+    </ClCompile>
+    <ClCompile Include="src\engine\geometry\mesh_ops\mesh_boolean.cpp">
+      <Filter>src\engine\geometry\mesh_ops</Filter>
     </ClCompile>
     <ClCompile Include="src\engine\io_handler\input_mapping.cpp">
       <Filter>src\engine\io_handler</Filter>
@@ -412,6 +422,5 @@
     <ClCompile Include="vendor\ImGuizmo\ImGuizmo.cpp">
       <Filter>vendor\ImGuizmo</Filter>
     </ClCompile>
-    <ClCompile Include="src\engine\geometry\mesh_ops\mesh_boolean.cpp" />
   </ItemGroup>
 </Project>

@@ -121,7 +121,7 @@ IF EXIST $(SolutionDir)\vendor\premake\ (xcopy /Q /E /Y /I $(SolutionDir)\vendor
       <PreprocessorDefinitions>PFF_USING_EDITOR;ENGINE_NAME=PFF;PFF_INSIDE_ENGINE;GLFW_INCLUDE_NONE;PFF_PLATFORM_WINDOWS;PFF_RELEASE_WITH_DEBUG_INFO;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <AdditionalIncludeDirectories>src;assets;vendor\glm;vendor\glfw\include;vendor\imgui;vendor\imgui\backends;vendor\stb_image;vendor\entt\include;vendor\ImGuizmo;C:\VulkanSDK\1.3.250.1\Include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <DebugInformationFormat>ProgramDatabase</DebugInformationFormat>
-      <Optimization>MaxSpeed</Optimization>
+      <Optimization>Full</Optimization>
       <FunctionLevelLinking>true</FunctionLevelLinking>
       <IntrinsicFunctions>true</IntrinsicFunctions>
       <MinimalRebuild>false</MinimalRebuild>
@@ -164,6 +164,7 @@ IF EXIST $(SolutionDir)\vendor\premake\ (xcopy /Q /E /Y /I $(SolutionDir)\vendor
       <WarningLevel>Level3</WarningLevel>
       <PreprocessorDefinitions>PFF_USING_EDITOR;ENGINE_NAME=PFF;PFF_INSIDE_ENGINE;GLFW_INCLUDE_NONE;PFF_PLATFORM_WINDOWS;PFF_RELEASE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <AdditionalIncludeDirectories>src;assets;vendor\glm;vendor\glfw\include;vendor\imgui;vendor\imgui\backends;vendor\stb_image;vendor\entt\include;vendor\ImGuizmo;C:\VulkanSDK\1.3.250.1\Include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <DebugInformationFormat>None</DebugInformationFormat>
       <Optimization>Full</Optimization>
       <FunctionLevelLinking>true</FunctionLevelLinking>
       <IntrinsicFunctions>true</IntrinsicFunctions>
@@ -171,12 +172,13 @@ IF EXIST $(SolutionDir)\vendor\premake\ (xcopy /Q /E /Y /I $(SolutionDir)\vendor
       <StringPooling>true</StringPooling>
       <RuntimeLibrary>MultiThreadedDLL</RuntimeLibrary>
       <MultiProcessorCompilation>true</MultiProcessorCompilation>
-      <AdditionalOptions>/MDd %(AdditionalOptions)</AdditionalOptions>
+      <AdditionalOptions>/MD %(AdditionalOptions)</AdditionalOptions>
       <LanguageStandard>stdcpp17</LanguageStandard>
       <ExternalWarningLevel>Level3</ExternalWarningLevel>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
+      <GenerateDebugInformation>false</GenerateDebugInformation>
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
       <OptimizeReferences>true</OptimizeReferences>
       <AdditionalDependencies>C:\VulkanSDK\1.3.250.1\Lib\vulkan-1.lib;%(AdditionalDependencies)</AdditionalDependencies>
@@ -200,8 +202,6 @@ IF EXIST $(SolutionDir)\vendor\premake\ (xcopy /Q /E /Y /I $(SolutionDir)\vendor
     </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <ClInclude Include="src\engine\geometry\mesh_ops\intersection_triangle_tiangle.h" />
-    <ClInclude Include="src\engine\geometry\mesh_ops\mesh_boolean.h" />
     <ClInclude Include="src\PFF.h" />
     <ClInclude Include="src\application.h" />
     <ClInclude Include="src\engine\Events\Event.h" />
@@ -212,6 +212,8 @@ IF EXIST $(SolutionDir)\vendor\premake\ (xcopy /Q /E /Y /I $(SolutionDir)\vendor
     <ClInclude Include="src\engine\game_objects\game_manager.h" />
     <ClInclude Include="src\engine\game_objects\player_controller.h" />
     <ClInclude Include="src\engine\geometry\mesh.h" />
+    <ClInclude Include="src\engine\geometry\mesh_ops\intersection_triangle_tiangle.h" />
+    <ClInclude Include="src\engine\geometry\mesh_ops\mesh_boolean.h" />
     <ClInclude Include="src\engine\io_handler\input_action.h" />
     <ClInclude Include="src\engine\io_handler\input_mapping.h" />
     <ClInclude Include="src\engine\layer\imgui_layer.h" />

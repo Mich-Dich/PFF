@@ -112,7 +112,7 @@ IF EXIST $(SolutionDir)\PFF_editor\assets\ (xcopy /Q /E /Y /I $(SolutionDir)\PFF
       <PreprocessorDefinitions>PFF_USING_EDITOR;ENGINE_NAME=PFF;PFF_INSIDE_EDITOR;PFF_PLATFORM_WINDOWS;PFF_EDITOR_RELEASE_WITH_DEBUG_INFO;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <AdditionalIncludeDirectories>src;assets;content;..\PFF\src;..\PFF\vendor\entt\include;..\PFF\vendor\glm;..\PFF\vendor\imgui;..\PFF\vendor\imgui\backends;..\PFF\vendor\fastgltf\include;..\PFF\vendor\tinyobjloader;..\PFF\vendor\stb_image;..\PFF\vendor\ImGuizmo;C:\VulkanSDK\1.3.250.1\Include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <DebugInformationFormat>ProgramDatabase</DebugInformationFormat>
-      <Optimization>MaxSpeed</Optimization>
+      <Optimization>Full</Optimization>
       <FunctionLevelLinking>true</FunctionLevelLinking>
       <IntrinsicFunctions>true</IntrinsicFunctions>
       <MinimalRebuild>false</MinimalRebuild>

@@ -66,6 +66,12 @@ project "PFF"
 	filter "system:windows"
 		systemversion "latest"
 		
+		-- links
+		-- {
+		-- 	"MSVCRT",
+		-- 	"MSVCPRT"
+		-- }
+
 		linkoptions 
 		{
 			 "/NODEFAULTLIB:LIBCMTD",
@@ -101,12 +107,13 @@ project "PFF"
 	filter "configurations:RelWithDebInfo"
 		defines "PFF_RELEASE_WITH_DEBUG_INFO"
 		buildoptions "/MD"
-		runtime "Release"
+        runtime "Release"
 		symbols "on"
-		optimize "speed"
+		optimize "On"
 
 	filter "configurations:Release"
 		defines "PFF_RELEASE"
-		buildoptions "/MDd"
+		buildoptions "/MD"
 		runtime "Release"
-		optimize "on"
+		symbols "off"
+		optimize "Full"

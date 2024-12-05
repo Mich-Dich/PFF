@@ -93,7 +93,7 @@ namespace PFF::render::vulkan {
 		void* get_rendered_image() override { return (void*)m_imugi_image_dset; }
 
 		vk_buffer create_buffer(size_t allocSize, VkBufferUsageFlags usage, VmaMemoryUsage memoryUsage);
-		FORCEINLINE void destroy_buffer(const vk_buffer& buffer);
+		void destroy_buffer(const vk_buffer& buffer);
 
 		// TIP: Note that this pattern is not very efficient, as CPU is waiting for the GPU command to fully execute before continuing with our CPU side logic
 		//		This is should be put on a background thread, whose sole job is to execute uploads like this one, and deleting/reusing the staging buffers.
