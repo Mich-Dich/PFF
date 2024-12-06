@@ -117,3 +117,4 @@ project "PFF"
 		runtime "Release"
 		symbols "off"
 		optimize "Full"
+		

@@ -22,6 +22,8 @@ PFF_editor/benchmarks/
 *.sln
 /bin
 /bin-int
+*.vcxproj.filters
+*.vcxproj
 
 # User-specific files
 *.rsuser

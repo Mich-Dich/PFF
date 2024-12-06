@@ -7,6 +7,11 @@ SETLOCAL EnableDelayedExpansion
 
 
 echo.
+echo ======== Setup windows icon
+echo.
+python scripts/windows_icon_setup.py
+
+echo.
 echo ======== Building PFF (Procedurally Focused Framework)
 echo.
 
@@ -26,3 +31,4 @@ if %errorlevel% neq 0 (
 )
 
 @echo on
+PAUSE

@@ -55,7 +55,7 @@ project "PFF_helper"
 		{
 			"PFF_PLATFORM_WINDOWS",
 		}
-		
+
 	filter "configurations:Debug"
 		buildoptions "/MDd"
 		defines "PFF_EDITOR_DEBUG"

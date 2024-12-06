@@ -77,21 +77,18 @@ namespace PFF {
 		PFF_API void set_buffer_Level(int newLevel);
 
 
-		void log_msg(log_msg_severity level, const char* fileName, const char* funcName, int line, const char* message);
-
-
 		class PFF_API log_message : public std::ostringstream {
-
 		public:
+
 			log_message(log_msg_severity severity, const char* fileName, const char* funcName, int line);
 			~log_message();
 
 		private:
+
 			log_msg_severity m_Severity;
 			const char* m_FileName;
 			const char* m_FuncName;
 			int m_Line;
-
 		};
 	}
 }

@@ -12,6 +12,10 @@
 #include "logger.h"
 
 
+#define SETW(width)             std::setw(width) << std::setfill('0')
+
+
+
 namespace PFF::logger {
     static int enable_ANSI_escape_codes();
 }
@@ -129,12 +133,12 @@ namespace PFF::logger {
         Init_Message.flush();
 
         system_time loc_system_time = util::get_system_time();
-        Init_Message << "[" << std::setw(4) << std::setfill('0') << loc_system_time.year
-            << "/" << std::setw(2) << std::setfill('0') << loc_system_time.month
-            << "/" << std::setw(2) << std::setfill('0') << loc_system_time.day
-            << " - " << std::setw(2) << std::setfill('0') << loc_system_time.hour
-            << ":" << std::setw(2) << std::setfill('0') << loc_system_time.minute
-            << ":" << std::setw(2) << std::setfill('0') << loc_system_time.secund << "]"
+        Init_Message << "[" << SETW(4) << loc_system_time.year
+            << "/" << SETW(2) << loc_system_time.month
+            << "/" << SETW(2) << loc_system_time.day
+            << " - " << SETW(2) << loc_system_time.hour
+            << ":" << SETW(2) << loc_system_time.minute
+            << ":" << SETW(2) << loc_system_time.secund << "]"
             << "  Log initialized" << std::endl
 
             << "   Inital Log Format: '" << format << "'" << std::endl << "   Enabled Log Levels: ";
@@ -180,15 +184,20 @@ namespace PFF::logger {
     // deside with messages should be bufferd and witch are written to file instantly
     void set_buffer_Level(int newLevel) {
 
-        if (newLevel > 0 && newLevel < 5) {
+        if (newLevel > 0 && newLevel < 5)
             LegLevelToBuffer = newLevel;
-        }
 
     }
 
-    void log_msg(log_msg_severity level, const char* fileName, const char* funcName, int line, const char* message) {
 
-        if (strlen(message) == 0)
+    log_message::log_message(log_msg_severity severity, const char* fileName, const char* funcName, int line) :
+        m_Severity(severity), m_FileName(fileName), m_FuncName(funcName), m_Line(line) {}
+
+    log_message::~log_message() {
+
+        std::string loc_string = str();
+        const char* message = loc_string.c_str();
+        if (loc_string.empty())
             return;
 
         system_time loc_system_time = util::get_system_time();
@@ -207,92 +216,48 @@ namespace PFF::logger {
                 Format_Command = LogMessageFormat[x + 1];
                 switch (Format_Command) {
 
-                    // ------------------------------------  Basic Info  -------------------------------------------------------------------------------
-                    // Color Start
-                case 'B':   Format_Filled << ConsoleColorTable[level]; break;
+                // ------------------------------------  Basic Info  -------------------------------------------------------------------------------
+                case 'B':   Format_Filled << ConsoleColorTable[m_Severity]; break;                                                                                                          // Color Start
+                case 'E':   Format_Filled << ConsoleRESET; break;                                                                                                                           // Color End
+                case 'C':   Format_Filled << message; break;                                                                                                                                // input text (message)
+                case 'L':   Format_Filled << SeverityNames[m_Severity]; break;                                                                                                              // Log Level
+                case 'X':   if (m_Severity == log_msg_severity::Info || m_Severity == log_msg_severity::Warn) { Format_Filled << " "; } break;                                              // Alignment
+                case 'Z':   Format_Filled << std::endl; break;                                                                                                                              // Alignment
 
-                    // Color End
-                case 'E':   Format_Filled << ConsoleRESET; break;
+                // ------------------------------------  Source  -------------------------------------------------------------------------------
+                case 'F':   Format_Filled << m_FuncName; break;                                                                                                                             // Function Name
+                case 'P':   Format_Filled << SHORTEN_FUNC_NAME(m_FuncName); break;                                                                                                          // Function Name
+                case 'A':   Format_Filled << m_FileName; break;                                                                                                                             // File Name
+                case 'K':   Format_Filled << SHORTEN_FILE_PATH(m_FileName); break;                                                                                                          // Shortend File Name
+                case 'I':   Format_Filled << get_filename(m_FileName); break;                                                                                                               // Only File Name
+                case 'G':   Format_Filled << m_Line; break;                                                                                                                                 // Line
 
-                    // input text (message)
-                case 'C':   Format_Filled << message; break;
+                // ------------------------------------  Time  -------------------------------------------------------------------------------
+                case 'T':   Format_Filled << SETW(2) << (u16)loc_system_time.hour << ":" << SETW(2) << (u16)loc_system_time.minute << ":" << SETW(2) << (u16)loc_system_time.secund; break; // Clock hh:mm:ss
+                case 'H':   Format_Filled << SETW(2) << (u16)loc_system_time.hour; break;                                                                                                   // Clock secunde
+                case 'M':   Format_Filled << SETW(2) << (u16)loc_system_time.minute; break;                                                                                                 // Clock minute
+                case 'S':   Format_Filled << SETW(2) << (u16)loc_system_time.secund; break;                                                                                                 // Clock second
+                case 'J':   Format_Filled << SETW(3) << (u16)loc_system_time.millisecends; break;                                                                                           // Clock millisec.
 
-                    // Log Level
-                case 'L':   Format_Filled << SeverityNames[level]; break;
+                // ------------------------------------  Date  -------------------------------------------------------------------------------
+                case 'N':   Format_Filled << SETW(4) << (u16)loc_system_time.year << "/" << SETW(2) << (u16)loc_system_time.month << "/" << SETW(2) << (u16)loc_system_time.day; break;     // Data yyyy/mm/dd
+                case 'Y':   Format_Filled << SETW(4) << (u16)loc_system_time.year; break;                                                                                                   // Year
+                case 'O':   Format_Filled << SETW(2) << (u16)loc_system_time.month; break;                                                                                                  // Month
+                case 'D':   Format_Filled << SETW(2) << (u16)loc_system_time.day; break;                                                                                                    // Day
 
-                    // Alignment
-                case 'X':   if (level == log_msg_severity::Info || level == log_msg_severity::Warn) { Format_Filled << " "; } break;
-
-                    // Alignment
-                case 'Z':   Format_Filled << std::endl; break;
-
-                    // ------------------------------------  Source  -------------------------------------------------------------------------------
-                    // Function Name
-                case 'F':   Format_Filled << funcName; break;
-                        
-                    // Function Name
-                case 'P':   Format_Filled << SHORTEN_FUNC_NAME(funcName); break;
-
-                    // File Name
-                case 'A':   Format_Filled << fileName; break;
-
-                    // Shortend File Name
-                case 'K':   Format_Filled << SHORTEN_FILE_PATH(fileName); break;
-
-                    // Only File Name
-                case 'I':   Format_Filled << get_filename(fileName); break;
-
-                    // Line
-                case 'G':   Format_Filled << line; break;
-
-                    // ------------------------------------  Time  -------------------------------------------------------------------------------
-                    // Clock hh:mm:ss
-                case 'T':   Format_Filled << std::setw(2) << std::setfill('0') << (u16)loc_system_time.hour
-                        << ":" << std::setw(2) << std::setfill('0') << (u16)loc_system_time.minute
-                        << ":" << std::setw(2) << std::setfill('0') << (u16)loc_system_time.secund; break;
-
-                    // Clock secunde
-                case 'H':   Format_Filled << std::setw(2) << std::setfill('0') << (u16)loc_system_time.hour; break;
-
-                    // Clock minute
-                case 'M':   Format_Filled << std::setw(2) << std::setfill('0') << (u16)loc_system_time.minute; break;
-
-                    // Clock second
-                case 'S':   Format_Filled << std::setw(2) << std::setfill('0') << (u16)loc_system_time.secund; break;
-
-                    // Clock millisec.
-                case 'J':   Format_Filled << std::setw(3) << std::setfill('0') << (u16)loc_system_time.millisecends; break;
-
-                    // ------------------------------------  Date  -------------------------------------------------------------------------------
-                    // Data yyyy/mm/dd
-                case 'N':   Format_Filled << std::setw(4) << std::setfill('0') << (u16)loc_system_time.year
-                        << "/" << std::setw(2) << std::setfill('0') << (u16)loc_system_time.month
-                        << "/" << std::setw(2) << std::setfill('0') << (u16)loc_system_time.day; break;
-
-                    // Year
-                case 'Y':   Format_Filled << std::setw(4) << std::setfill('0') << (u16)loc_system_time.year; break;
-
-                    // Month
-                case 'O':   Format_Filled << std::setw(2) << std::setfill('0') << (u16)loc_system_time.month; break;
-
-                    // Day
-                case 'D':   Format_Filled << std::setw(2) << std::setfill('0') << (u16)loc_system_time.day; break;
-
-                    // ------------------------------------  Default  -------------------------------------------------------------------------------
+                // ------------------------------------  Default  -------------------------------------------------------------------------------
                 default: break;
                 }
 
                 x++;
             }
 
-            else {
-
+            else
                 Format_Filled << LogMessageFormat[x];
-            }
+
         }
 
         std::cout << Format_Filled.str();
-
 
         // Write the content to a file   !! NO BUFFER YET !!
         std::ofstream outputFile(LogFileName, std::ios::app);
@@ -303,15 +268,5 @@ namespace PFF::logger {
         }
     }
 
-
-    log_message::log_message(log_msg_severity severity, const char* fileName, const char* funcName, int line) :
-        m_Severity(severity), m_FileName(fileName), m_FuncName(funcName), m_Line(line) {}
-
-    log_message::~log_message() {
-
-        log_msg(m_Severity, m_FileName, m_FuncName, m_Line, str().c_str());
-    }
-
     
 }
-

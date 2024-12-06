@@ -175,6 +175,7 @@ namespace PFF::util {
         //CORE_LOG(Debug, "left over time: " << actual_sleep_time << " ms");
     }
 
+
     bool util::is_valid_project_dir(const std::filesystem::path& path) {
 
         if (!std::filesystem::exists(path) || !std::filesystem::is_directory(path))
@@ -187,6 +188,7 @@ namespace PFF::util {
 
         return false;
     }
+
 
     std::filesystem::path extract_path_from_project_folder(const std::filesystem::path& full_path) {
 
@@ -205,6 +207,7 @@ namespace PFF::util {
         }
     }
 
+
     std::filesystem::path extract_path_from_project_content_folder(const std::filesystem::path& full_path) {
 
         std::filesystem::path result;
@@ -220,6 +223,7 @@ namespace PFF::util {
         }
         return result;
     }
+
     
     std::filesystem::path extract_path_from_directory(const std::filesystem::path& full_path, const std::string& directory) {
 
@@ -253,10 +257,8 @@ namespace PFF::util {
         ofn.nMaxFile = sizeof(szFile);
 
         std::wstring filter;                                                    
-        for (const auto& f : filters) {                                         // create filter string
-            filter += std::wstring(f.first.begin(), f.first.end()) + L'\0' +
-                std::wstring(f.second.begin(), f.second.end()) + L'\0';
-        }
+        for (const auto& f : filters)                                           // create filter string
+            filter += std::wstring(f.first.begin(), f.first.end()) + L'\0' + std::wstring(f.second.begin(), f.second.end()) + L'\0';
         filter += L'\0';
 
         ofn.lpstrFilter = filter.c_str();
