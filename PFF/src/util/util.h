@@ -163,9 +163,9 @@ namespace PFF {
 
         PFF_API std::filesystem::path extract_path_from_directory(const std::filesystem::path& full_path, const std::string& directory);
 
-        static const std::vector<std::pair<std::string, std::string>> default_filters = {
+        const std::vector<std::pair<std::string, std::string>> default_filters = {
             {"Text Files", "*.txt"},
-            {"C++ Files", "*.cpp;*.h"},
+            {"C++ Files", "*.cpp;*.h;*.hpp"},
             {"All Files", "*.*"}
         };
 

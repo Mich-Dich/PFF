@@ -247,13 +247,12 @@ namespace PFF::util {
 #ifdef PFF_PLATFORM_WINDOWS
 
         OPENFILENAME ofn;                                                       // common dialog box structure
-        char szFile[260];                                                       // buffer for file name
+        wchar_t szFile[260] = { 0 };                                            // Using wchar_t instead of char for Unicode support
 
         ZeroMemory(&ofn, sizeof(ofn));                                          // initialize OPENFILENAME
         ofn.lStructSize = sizeof(ofn);
         ofn.hwndOwner = NULL;
-        ofn.lpstrFile = (LPWSTR)szFile;
-        ofn.lpstrFile[0] = '\0';
+        ofn.lpstrFile = szFile;
         ofn.nMaxFile = sizeof(szFile);
 
         std::wstring filter;                                                    
@@ -271,7 +270,7 @@ namespace PFF::util {
         std::wstring wtitle(title.begin(), title.end());                        // set dialog title
         ofn.lpstrTitle = wtitle.c_str();
 
-        if (GetOpenFileName(&ofn) == TRUE)
+        if (GetOpenFileNameW(&ofn) == TRUE)
             return std::filesystem::path(szFile);
 
         return std::filesystem::path();

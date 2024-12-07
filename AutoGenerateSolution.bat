@@ -9,6 +9,8 @@ SETLOCAL EnableDelayedExpansion
 echo.
 echo ======== Setup windows icon
 echo.
+
+echo -------- Setup PFF-Project file icon
 python scripts/windows_icon_setup.py
 
 echo.

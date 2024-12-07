@@ -89,6 +89,37 @@ name& operator=(name&&) = default;
 														PFF_DEFAULT_GETTER(type, name)												\
 														PFF_DEFAULT_GETTER_POINTER(type, name)
 
+// ------------------------------------------- function for header -------------------------------------------
+#define PFF_GETTER_FUNC(type, name)						PFF_API FORCEINLINE type get_##name();
+#define PFF_GETTER_REF_FUNC(type, name)					PFF_API FORCEINLINE type& get_##name##_ref();
+#define PFF_GETTER_C_FUNC(type, name)					PFF_API FORCEINLINE type get_##name() const;
+#define PFF_GETTER_POINTER_FUNC(type, name)				PFF_API FORCEINLINE type* get_##name##_pointer();
+
+#define PFF_SETTER_FUNC(type, name)						PFF_API FORCEINLINE void set_##name(type name);
+
+#define PFF_GETTER_SETTER_FUNC(type, name)				PFF_GETTER_FUNC(type, name)													\
+														PFF_SETTER_FUNC(type, name)
+
+// ------------------------------------------- function implementation -------------------------------------------
+#define PFF_GETTER_FUNC_IMPL(type, name)				type name{};																\
+														type get_##name() { return name; }
+
+#define PFF_GETTER_FUNC_IMPL2(type, name, value)		type name = value;															\
+														type get_##name() { return name; }
+
+#define PFF_SETTER_FUNC_IMPL(type, name)				void set_##name(const type new_name) { name = new_name; }
+
+
+#define PFF_GETTER_REF_FUNC_IMPL(type, name)			type name{};																\
+														type& get_##name##_ref();
+
+#define PFF_GETTER_C_FUNC_IMPL(type, name)				type name{};																\
+														type get_##name() const;
+
+#define PFF_GETTER_POINTER_FUNC_IMPL(type, name)		type name{};																\
+														type* get_##name##_pointer();
+
+
 // ---------------------------------------------------------------------------------------------------------------------------------------
 // bit manipulation
 // ---------------------------------------------------------------------------------------------------------------------------------------

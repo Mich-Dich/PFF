@@ -16,9 +16,8 @@ namespace PFF::code_generator {
 
 		std::ostringstream stream;
 		stream << "include \"" << (engine_source_dir / "dependencies.lua").generic_string() << "\"\n";
-		stream << R"(
-workspace "PFF_project"
-	architecture "x64"
+		stream << "\nworkspace \"" << project_name << "\"\n";
+		stream << R"(architecture "x64"
 	configurations { "Debug", "Release" }
 	flags { "MultiProcessorCompile" }
 )";

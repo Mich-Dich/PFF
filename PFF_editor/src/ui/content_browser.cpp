@@ -10,11 +10,21 @@
 
 #include "content_browser.h"
 
+#include <imgui_internal.h>
+
 namespace PFF {
 
-	static ImGuiTreeNodeFlags base_flags = ImGuiTreeNodeFlags_OpenOnArrow | ImGuiTreeNodeFlags_OpenOnDoubleClick | ImGuiTreeNodeFlags_SpanAvailWidth;
-	static ImU32 background_color = IM_COL32(50, 50, 50, 255);
-	static std::string search_query;
+	static ImGuiTreeNodeFlags	base_flags = ImGuiTreeNodeFlags_OpenOnArrow | ImGuiTreeNodeFlags_OpenOnDoubleClick | ImGuiTreeNodeFlags_SpanAvailWidth;
+	static ImU32				background_color = IM_COL32(50, 50, 50, 255);
+	static std::string			search_query;
+	const ImVec2				folder_open_icon_size(18, 14);																		// Calculate the icon size for the tree (make it smaller than regular icons)
+	const ImVec2				folder_closed_icon_size(18, 17);																	// Calculate the icon size for the tree (make it smaller than regular icons)
+
+
+	ImGuiWindow*				folder_display_window{};
+
+
+	int hash_path(const std::filesystem::path& path) { return static_cast<int>(std::hash<std::string>()(path.string())); }
 
 
 	static void drop_target_to_move_file(const std::filesystem::path folder_path) {
@@ -26,9 +36,9 @@ namespace PFF {
 				const std::filesystem::path file_path = (const char*)payload->Data;
 				try {
 
-std::filesystem::path destination = folder_path / file_path.filename();
-std::filesystem::rename(file_path, destination);
-CORE_LOG(Info, "File moved successfully!");
+					std::filesystem::path destination = folder_path / file_path.filename();
+					std::filesystem::rename(file_path, destination);
+					CORE_LOG(Info, "File moved successfully!");
 
 				} catch (const std::filesystem::filesystem_error& e)
 					CORE_LOG(Error, "Error: " << e.what());
@@ -39,20 +49,21 @@ CORE_LOG(Info, "File moved successfully!");
 	}
 
 
-
-
 	content_browser::content_browser() {
 
 		m_project_directory = PFF_editor::get().get_project_path();
 		select_new_directory(m_project_directory / CONTENT_DIR);
 
 		// load folder image
+		m_folder_closed_image = create_ref<image>(PFF_editor::get().get_editor_executable_path() / "assets" / "icons" / "folder_closed.png", image_format::RGBA);
+		m_folder_open_image = create_ref<image>(PFF_editor::get().get_editor_executable_path() / "assets" / "icons" / "folder_open.png", image_format::RGBA);
 		m_folder_image = create_ref<image>(PFF_editor::get().get_editor_executable_path() / "assets" / "icons" / "folder.png", image_format::RGBA);
 		m_world_image = create_ref<image>(PFF_editor::get().get_editor_executable_path() / "assets" / "icons" / "world.png", image_format::RGBA);
 		m_mesh_asset_image = create_ref<image>(PFF_editor::get().get_editor_executable_path() / "assets" / "icons" / "mesh_asset.png", image_format::RGBA);
 
 		m_icon_size = { 60, 60 };
 	}
+
 
 	content_browser::~content_browser() {}
 
@@ -72,7 +83,7 @@ CORE_LOG(Info, "File moved successfully!");
 				continue;
 
 			bool has_sub_folders = false;
-			for (const auto& sub_entry : std::filesystem::directory_iterator(entry.path())) {		// <= HERE I GET AN ERROR
+			for (const auto& sub_entry : std::filesystem::directory_iterator(entry.path())) {
 				if (!sub_entry.is_directory())
 					continue;
 
@@ -80,30 +91,54 @@ CORE_LOG(Info, "File moved successfully!");
 				break;
 			}
 
-
+			// --------------------------------------------- THIS CODE HERE ---------------------------------------------
 			if (has_sub_folders) {
 
-				bool buffer = ImGui::TreeNodeEx(entry.path().filename().string().c_str(), base_flags);
+				ImGui::PushID(hash_path(entry.path()));
+				bool buffer = ImGui::TreeNodeEx(("##" + entry.path().filename().string()).c_str(), base_flags);				// Create tree node without the label
+				ImGui::PopID();
+
+				ImGui::SameLine(0, 2);																						// Place everything on same line
+				ImGui::BeginGroup();																						// Start group to align items horizontally
+
+				if (buffer)
+					ImGui::Image(m_folder_open_image->get_descriptor_set(), folder_open_icon_size, ImVec2(0, 0), ImVec2(1, 1), UI::get_main_color());
+				else
+					ImGui::Image(m_folder_closed_image->get_descriptor_set(), folder_closed_icon_size, ImVec2(0, 0), ImVec2(1, 1), UI::get_main_color());
+
+				ImGui::SameLine(0, 2);
+				ImGui::Text("%s", entry.path().filename().string().c_str());												// Draw folder name text
+				ImGui::EndGroup();
+				
 				if (ImGui::IsItemClicked())
 					select_new_directory(entry.path());
 
 				drop_target_to_move_file(entry.path());
 
 				if (buffer) {
-
 					show_directory_tree(entry.path());
 					ImGui::TreePop();
 				}
-
 			} else {
 
-				ImGui::TreeNodeEx(entry.path().filename().string().c_str(), base_flags | ImGuiTreeNodeFlags_Leaf | ImGuiTreeNodeFlags_NoTreePushOnOpen);
+				ImGui::PushID(hash_path(entry.path()));
+				ImGui::TreeNodeEx("##", base_flags | ImGuiTreeNodeFlags_Leaf | ImGuiTreeNodeFlags_NoTreePushOnOpen);
+				ImGui::PopID();
+
+				ImGui::SameLine(0, 2);
+				ImGui::BeginGroup();																						// Similar modification for leaf nodes
+				ImGui::Image(m_folder_closed_image->get_descriptor_set(), folder_closed_icon_size, ImVec2(0, 0), ImVec2(1, 1), UI::get_main_color());
+				ImGui::SameLine(0, 2);
+				ImGui::Text("%s", entry.path().filename().string().c_str());
+				ImGui::EndGroup();
+				
 				if (ImGui::IsItemClicked() && !ImGui::IsItemToggledOpen())
 					select_new_directory(entry.path());
 
 				drop_target_to_move_file(entry.path());
 			}
 
+			// --------------------------------------------- THIS CODE HERE ---------------------------------------------
 		}
 
 	}
@@ -145,26 +180,34 @@ CORE_LOG(Info, "File moved successfully!");
 		u32 count = 0;
 		for (const auto& entry : std::filesystem::directory_iterator(path)) {
 
-			if (!entry.is_directory())
-				continue;
+			if (!entry.is_directory()) {																		// current entry is a FOLDER
 
+				display_file(entry.path(), count++);
+				const float next_item_x2 = ImGui::GetItemRectMax().x + style.ItemSpacing.x + m_icon_size.x;		// Expected position if next item was on the same line
+				if (next_item_x2 < window_visible_x2)															// handle item wrapping
+					ImGui::SameLine();
+			
+				continue;
+			}
+			
 			// Begin a new group for each item
 			const std::string item_name = entry.path().filename().string();
 			ImGui::BeginGroup();
 			{
-				ImGui::PushID(count++);
-
-				ImGui::Image(m_folder_image->get_descriptor_set(), m_icon_size, ImVec2(0, 0), ImVec2(1, 1), UI::action_color_gray_active);
-
+				ImGui::PushID(hash_path(entry.path()));
+				ImGui::Image(m_folder_image->get_descriptor_set(), m_icon_size, ImVec2(0, 0), ImVec2(1, 1), UI::get_action_color_gray_active());
 				ImVec2 text_size = ImGui::CalcTextSize(item_name.c_str());
 				ImGui::SetCursorPos(ImGui::GetCursorPos() + ImVec2((m_icon_size.x - text_size.x) * 0.5f, 0));
 				ImGui::TextWrapped(item_name.c_str());
-				
 				ImGui::PopID();
 			}
 			ImGui::EndGroup();
+
 			switch (UI::get_mouse_interation_on_item()) {
 			case UI::mouse_interation::double_click:
+
+				CORE_LOG(Trace, "Set TreeNode to open ID[" << hash_path(entry.path()) << "]");
+				ImGui::TreeNodeSetOpen(folder_display_window->GetID(hash_path(entry.path())), true);
 				select_new_directory(entry.path());
 				return;
 
@@ -176,44 +219,35 @@ CORE_LOG(Info, "File moved successfully!");
 				break;
 			}
 
-
 			// Handle drag source for files
 			if (ImGui::BeginDragDropSource(ImGuiDragDropFlags_SourceAllowNullID)) {
 				ImGui::SetDragDropPayload("PROJECT_CONTENT_FOLDER", entry.path().string().c_str(), entry.path().string().length() + 1);
 
-				ImGui::Image(m_folder_image->get_descriptor_set(), m_icon_size, ImVec2(0, 0), ImVec2(1, 1), UI::action_color_gray_active);
+				ImGui::Image(m_folder_image->get_descriptor_set(), m_icon_size, ImVec2(0, 0), ImVec2(1, 1), UI::get_action_color_gray_active());
 				ImGui::TextWrapped("%s", item_name.c_str());
 
 				ImGui::EndDragDropSource();
 			}
 
-
 			// Handle dropping files into the current directory
 			drop_target_to_move_file(entry.path());
 
-			// handle item wrapping
-			const float next_item_x2 = ImGui::GetItemRectMax().x + style.ItemSpacing.x + m_icon_size.x; // Expected position if next item was on the same line
-			if (next_item_x2 < window_visible_x2)
+			const float next_item_x2 = ImGui::GetItemRectMax().x + style.ItemSpacing.x + m_icon_size.x;		// Expected position if next item was on the same line
+			if (next_item_x2 < window_visible_x2)															// handle item wrapping
 				ImGui::SameLine();
 		}
 
+		//for (const auto& entry : std::filesystem::directory_iterator(path)) {
 
+		//	if (entry.is_directory())
+		//		continue;
 
+		//	display_file(entry.path(), count++);
 
-
-		for (const auto& entry : std::filesystem::directory_iterator(path)) {
-
-			if (entry.is_directory())
-				continue;
-
-			display_file(entry.path(), count++);
-
-			// handle item wrapping
-			const float next_item_x2 = ImGui::GetItemRectMax().x + style.ItemSpacing.x + m_icon_size.x; // Expected position if next item was on the same line
-			if (next_item_x2 < window_visible_x2)
-				ImGui::SameLine();
-		}
-
+		//	const float next_item_x2 = ImGui::GetItemRectMax().x + style.ItemSpacing.x + m_icon_size.x;		// Expected position if next item was on the same line
+		//	if (next_item_x2 < window_visible_x2)															// handle item wrapping
+		//		ImGui::SameLine();
+		//}
 
 		// Handle dropping files into the current directory
 		if (ImGui::BeginDragDropTarget()) {
@@ -348,8 +382,9 @@ CORE_LOG(Info, "File moved successfully!");
 		ImGuiWindowFlags window_flags = ImGuiWindowFlags_None;
 		ImGui::Begin("Content Browser", nullptr, window_flags);
 
-		UI::custom_frame_NEW(350, true, UI::default_gray_1, [&]() {
+		UI::custom_frame_NEW(350, true, UI::get_default_gray_1(), [&]() {
 
+			folder_display_window = ImGui::GetCurrentWindow();
 			bool buffer = ImGui::TreeNodeEx((m_project_directory / CONTENT_DIR).filename().string().c_str(), base_flags | ImGuiTreeNodeFlags_DefaultOpen);
 			if (ImGui::IsItemClicked())
 				select_new_directory(m_project_directory / CONTENT_DIR);

@@ -25,25 +25,25 @@ namespace PFF::UI {
 
 	static f32  m_font_size = 15.f, m_font_size_header_0 = 19.f, m_font_size_header_1 = 23.f, m_font_size_header_2 = 27.f, m_big_font_size = 18.f;
 	static theme_selection UI_theme = theme_selection::dark;
-	static bool enable_window_forder;
+	static bool window_border{};
 	static ImVec4 highlited_window_bg = LERP_GRAY(0.57f);
-	static f32 default_item_width;
+	static f32 default_item_width{};
 
-	static ImVec4 main_color;
-	static ImVec4 main_titlebar_color;
+	PFF_GETTER_FUNC(ImVec4, main_color);
+	PFF_GETTER_FUNC(ImVec4, main_titlebar_color);
 
-	static ImVec4 action_color_00_faded;
-	static ImVec4 action_color_00_weak;
-	static ImVec4 action_color_00_default;
-	static ImVec4 action_color_00_hover;
-	static ImVec4 action_color_00_active;
+	PFF_GETTER_FUNC(ImVec4, action_color_00_faded);
+	PFF_GETTER_FUNC(ImVec4, action_color_00_weak);
+	PFF_GETTER_FUNC(ImVec4, action_color_00_default);
+	PFF_GETTER_FUNC(ImVec4, action_color_00_hover);
+	PFF_GETTER_FUNC(ImVec4, action_color_00_active);
 
-	static ImColor default_gray = IMCOLOR_GRAY(30);
-	static ImColor default_gray_1 = IMCOLOR_GRAY(35);
+	PFF_GETTER_FUNC(ImColor, default_gray);
+	PFF_GETTER_FUNC(ImColor, default_gray_1);
 
-	static ImVec4 action_color_gray_default = LERP_GRAY(0.2f);
-	static ImVec4 action_color_gray_hover = LERP_GRAY(0.27f);
-	static ImVec4 action_color_gray_active = LERP_GRAY(0.35f);
+	PFF_GETTER_FUNC(ImVec4, action_color_gray_default);
+	PFF_GETTER_FUNC(ImVec4, action_color_gray_hover);
+	PFF_GETTER_FUNC(ImVec4, action_color_gray_active);
 
 	void PFF_API set_UI_theme_selection(theme_selection theme_selection);
 	void PFF_API enable_window_border(bool enable);
@@ -67,6 +67,7 @@ namespace PFF::UI {
 		void on_update(const f32 delta_time) override;
 		void on_event(event& event) override;
 		void on_imgui_render() override;
+		void serialize(serializer::option option);
 		
 		void PFF_API show_renderer_metrik();
 		void PFF_API show_FPS();
@@ -77,7 +78,6 @@ namespace PFF::UI {
 
 	private:
 
-		void serialize(serializer::option option);
 
 		// ------------------------- general -------------------------
 		ImGuiContext* m_context{};

@@ -28,77 +28,47 @@
 
 namespace PFF::UI {
 
+
+	PFF_GETTER_FUNC_IMPL(ImVec4, main_color);
+	PFF_GETTER_FUNC_IMPL(ImVec4, main_titlebar_color);
+
+	PFF_GETTER_FUNC_IMPL(ImVec4, action_color_00_faded);
+	PFF_GETTER_FUNC_IMPL(ImVec4, action_color_00_weak);
+	PFF_GETTER_FUNC_IMPL(ImVec4, action_color_00_default);
+	PFF_GETTER_FUNC_IMPL(ImVec4, action_color_00_hover);
+	PFF_GETTER_FUNC_IMPL(ImVec4, action_color_00_active);
+
+	PFF_GETTER_FUNC_IMPL2(ImColor, default_gray, IMCOLOR_GRAY(30));
+	PFF_GETTER_FUNC_IMPL2(ImColor, default_gray_1, IMCOLOR_GRAY(35));
+
+	PFF_GETTER_FUNC_IMPL2(ImVec4, action_color_gray_default, LERP_GRAY(0.2f));
+	PFF_GETTER_FUNC_IMPL2(ImVec4, action_color_gray_hover, LERP_GRAY(0.27f));
+	PFF_GETTER_FUNC_IMPL2(ImVec4, action_color_gray_active, LERP_GRAY(0.35f));
+
 	static ImVec4 vector_multi(const ImVec4& vec_0, const ImVec4& vec_1) {
 		return ImVec4{ vec_0.x * vec_1.x, vec_0.y * vec_1.y, vec_0.z * vec_1.z, vec_0.w * vec_1.w };
 	}
 
 	void set_UI_theme_selection(theme_selection theme_selection) { UI_theme = theme_selection; }
 
-	void imgui_layer::serialize(serializer::option option) {
+	//void save_UI_theme_data() {
 
-		serializer::yaml(config::get_filepath_from_configtype(application::get().get_project_path(), config::file::ui), "performance_display", option)
-			.entry(KEY_VALUE(m_show_FPS_window))
-			.entry(KEY_VALUE(m_show_renderer_metrik))
-			.entry(KEY_VALUE(renderer_metrik_window_location))
-			.entry(KEY_VALUE(FPS_window_location));
-	}
+	//	serialize(serializer::option::save_to_file);
+	//	update_UI_theme();
+	//}
 
-	static void serialize(serializer::option option) {
+	//void load_UI_data() {
 
-		serializer::yaml(config::get_filepath_from_configtype(application::get().get_project_path(), config::file::ui), "theme", option)
-			.entry(KEY_VALUE(m_font_size))
-			.entry(KEY_VALUE(m_font_size_header_0))
-			.entry(KEY_VALUE(m_font_size_header_1))
-			.entry(KEY_VALUE(m_font_size_header_2))
-			.entry(KEY_VALUE(m_big_font_size))
-			.entry(KEY_VALUE(UI_theme))
-			.entry(KEY_VALUE(enable_window_forder))
-			.entry(KEY_VALUE(highlited_window_bg))
-			.entry(KEY_VALUE(default_item_width))
-
-			// color
-			.entry(KEY_VALUE(main_color))
-			.entry(KEY_VALUE(main_titlebar_color))
-
-			// color heightlight
-			.entry(KEY_VALUE(action_color_00_faded))
-			.entry(KEY_VALUE(action_color_00_weak))
-			.entry(KEY_VALUE(action_color_00_default))
-			.entry(KEY_VALUE(action_color_00_hover))
-			.entry(KEY_VALUE(action_color_00_active))
-
-			// gray
-			.entry(KEY_VALUE(action_color_gray_default))
-			.entry(KEY_VALUE(action_color_gray_hover))
-			.entry(KEY_VALUE(action_color_gray_active));
-		
-	}
-
-	void save_UI_theme_data() {
-
-		serialize(serializer::option::save_to_file);
-		update_UI_theme();
-	}
-
-	void load_UI_data() {
-
-		serialize(serializer::option::load_from_file);
-		update_UI_theme();
-	}
-
-	void update_UI_colors(ImVec4 new_color) {
-
-		main_color = new_color;
-		serialize(serializer::option::save_to_file);
-		update_UI_theme();
-	}
+	//	serialize(serializer::option::load_from_file);
+	//	update_UI_theme();
+	//}
 
 	imgui_layer::imgui_layer() : layer("imgui_layer") { 
 		
 		CORE_LOG_INIT(); 
 		
 		main_color = { .0f,	.4088f,	1.0f,	1.f };
-		enable_window_forder = false;
+		window_border = false;
 		highlited_window_bg = LERP_GRAY(0.57f);
 		main_titlebar_color = LERP_MAIN_COLOR_DARK(.5f);
 		default_item_width = 200.f;
@@ -136,36 +106,38 @@ namespace PFF::UI {
 		
 		serialize(serializer::option::load_from_file);
 
-		std::filesystem::path base_path = PFF::util::get_executable_path() / std::filesystem::path("..") / "PFF" / "assets" / "fonts";
-		std::filesystem::path OpenSans_path = base_path / "Open_Sans" / "static";
-		std::filesystem::path Inconsolata_path = base_path / "Inconsolata" / "static";
+		{	// Load fonts
+			std::filesystem::path base_path = PFF::util::get_executable_path() / std::filesystem::path("..") / "PFF" / "assets" / "fonts";
+			std::filesystem::path OpenSans_path = base_path / "Open_Sans" / "static";
+			std::filesystem::path Inconsolata_path = base_path / "Inconsolata" / "static";
 
-		// Load fonts
-		auto io = ImGui::GetIO();
-		io.FontAllowUserScaling = true;
-		m_fonts["regular"] =		io.Fonts->AddFontFromFileTTF((OpenSans_path/ "OpenSans-Regular.ttf").string().c_str(), m_font_size);
-		m_fonts["bold"] =			io.Fonts->AddFontFromFileTTF((OpenSans_path/ "OpenSans-Bold.ttf").string().c_str(), m_font_size);
-		m_fonts["italic"] =			io.Fonts->AddFontFromFileTTF((OpenSans_path/ "OpenSans-Italic.ttf").string().c_str(), m_font_size);
+			auto io = ImGui::GetIO();
+			io.FontAllowUserScaling = true;
+			m_fonts["regular"] =		io.Fonts->AddFontFromFileTTF((OpenSans_path/ "OpenSans-Regular.ttf").string().c_str(), m_font_size);
+			m_fonts["bold"] =			io.Fonts->AddFontFromFileTTF((OpenSans_path/ "OpenSans-Bold.ttf").string().c_str(), m_font_size);
+			m_fonts["italic"] =			io.Fonts->AddFontFromFileTTF((OpenSans_path/ "OpenSans-Italic.ttf").string().c_str(), m_font_size);
 
-		m_fonts["regular_big"] =	io.Fonts->AddFontFromFileTTF((OpenSans_path / "OpenSans-Regular.ttf").string().c_str(), m_big_font_size);
-		m_fonts["bold_big"] =		io.Fonts->AddFontFromFileTTF((OpenSans_path / "OpenSans-Bold.ttf").string().c_str(), m_big_font_size);
-		m_fonts["italic_big"] =		io.Fonts->AddFontFromFileTTF((OpenSans_path / "OpenSans-Italic.ttf").string().c_str(), m_big_font_size);
+			m_fonts["regular_big"] =	io.Fonts->AddFontFromFileTTF((OpenSans_path / "OpenSans-Regular.ttf").string().c_str(), m_big_font_size);
+			m_fonts["bold_big"] =		io.Fonts->AddFontFromFileTTF((OpenSans_path / "OpenSans-Bold.ttf").string().c_str(), m_big_font_size);
+			m_fonts["italic_big"] =		io.Fonts->AddFontFromFileTTF((OpenSans_path / "OpenSans-Italic.ttf").string().c_str(), m_big_font_size);
 
-		m_fonts["header_0"] =		io.Fonts->AddFontFromFileTTF((OpenSans_path / "OpenSans-Regular.ttf").string().c_str(), m_font_size_header_2);
-		m_fonts["header_1"] =		io.Fonts->AddFontFromFileTTF((OpenSans_path / "OpenSans-Regular.ttf").string().c_str(), m_font_size_header_1);
-		m_fonts["header_2"] =		io.Fonts->AddFontFromFileTTF((OpenSans_path / "OpenSans-Regular.ttf").string().c_str(), m_font_size_header_0);
+			m_fonts["header_0"] =		io.Fonts->AddFontFromFileTTF((OpenSans_path / "OpenSans-Regular.ttf").string().c_str(), m_font_size_header_2);
+			m_fonts["header_1"] =		io.Fonts->AddFontFromFileTTF((OpenSans_path / "OpenSans-Regular.ttf").string().c_str(), m_font_size_header_1);
+			m_fonts["header_2"] =		io.Fonts->AddFontFromFileTTF((OpenSans_path / "OpenSans-Regular.ttf").string().c_str(), m_font_size_header_0);
 
-		m_fonts["giant"] =			io.Fonts->AddFontFromFileTTF((OpenSans_path / "OpenSans-Bold.ttf").string().c_str(), 30.f);
+			m_fonts["giant"] =			io.Fonts->AddFontFromFileTTF((OpenSans_path / "OpenSans-Bold.ttf").string().c_str(), 30.f);
 
-		// C:\CustomGameEngine\PFF\PFF\assets\fonts\Inconsolata\static
-		//Inconsolata-Regular
-		m_fonts["monospace_regular"] = io.Fonts->AddFontFromFileTTF((Inconsolata_path / "Inconsolata-Regular.ttf").string().c_str(), m_font_size * 0.92f);
-		m_fonts["monospace_regular_big"] = io.Fonts->AddFontFromFileTTF((Inconsolata_path / "Inconsolata-Regular.ttf").string().c_str(), m_big_font_size * 1.92f);
+			// C:\CustomGameEngine\PFF\PFF\assets\fonts\Inconsolata\static
+			//Inconsolata-Regular
+			m_fonts["monospace_regular"] = io.Fonts->AddFontFromFileTTF((Inconsolata_path / "Inconsolata-Regular.ttf").string().c_str(), m_font_size * 0.92f);
+			m_fonts["monospace_regular_big"] = io.Fonts->AddFontFromFileTTF((Inconsolata_path / "Inconsolata-Regular.ttf").string().c_str(), m_big_font_size * 1.92f);
 
-		io.FontDefault = m_fonts["regular"];
+			io.FontDefault = m_fonts["regular"];
 
-		GET_RENDERER.imgui_create_fonts();
-		load_UI_data();
+			GET_RENDERER.imgui_create_fonts();
+		}
+
+		update_UI_theme();
 
 		ImGuizmo::SetOrthographic(false);				// currently only using perspektiv
 		ImGuizmo::AllowAxisFlip(false);
@@ -462,6 +434,7 @@ namespace PFF::UI {
 		ImGui::End();
 	}
 
+
 	ImFont* imgui_layer::get_font(const std::string& name) {
 
 		for (auto loc_font : m_fonts)
@@ -471,9 +444,55 @@ namespace PFF::UI {
 		return nullptr;
 	}
 
+
+	void imgui_layer::serialize(serializer::option option) {
+
+		serializer::yaml(config::get_filepath_from_configtype(application::get().get_project_path(), config::file::ui), "performance_display", option)
+			.entry(KEY_VALUE(m_show_FPS_window))
+			.entry(KEY_VALUE(m_show_renderer_metrik))
+			.entry(KEY_VALUE(renderer_metrik_window_location))
+			.entry(KEY_VALUE(FPS_window_location));
+
+		serializer::yaml(config::get_filepath_from_configtype(application::get().get_project_path(), config::file::ui), "theme", option)
+			.entry(KEY_VALUE(m_font_size))
+			.entry(KEY_VALUE(m_font_size_header_0))
+			.entry(KEY_VALUE(m_font_size_header_1))
+			.entry(KEY_VALUE(m_font_size_header_2))
+			.entry(KEY_VALUE(m_big_font_size))
+			.entry(KEY_VALUE(UI_theme))
+			.entry(KEY_VALUE(window_border))
+			.entry(KEY_VALUE(highlited_window_bg))
+			.entry(KEY_VALUE(default_item_width))
+
+			// color
+			.entry(KEY_VALUE(main_color))
+			.entry(KEY_VALUE(main_titlebar_color))
+
+			// color heightlight
+			.entry(KEY_VALUE(action_color_00_faded))
+			.entry(KEY_VALUE(action_color_00_weak))
+			.entry(KEY_VALUE(action_color_00_default))
+			.entry(KEY_VALUE(action_color_00_hover))
+			.entry(KEY_VALUE(action_color_00_active))
+
+			// gray
+			.entry(KEY_VALUE(action_color_gray_default))
+			.entry(KEY_VALUE(action_color_gray_hover))
+			.entry(KEY_VALUE(action_color_gray_active));
+	}
+
+	// --------------------------------------------------------------------------------------------------------------------------------------------
+
+	void update_UI_colors(ImVec4 new_color) {
+
+		main_color = new_color;
+		application::get().get_imgui_layer()->serialize(serializer::option::save_to_file);
+		update_UI_theme();
+	}
+
 	void enable_window_border(bool enable) {
 
-		enable_window_forder = enable;
+		window_border = enable;
 		//serialize(serializer::option::save_to_file);
 
 		ImGuiStyle* style = &ImGui::GetStyle();

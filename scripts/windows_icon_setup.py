@@ -3,15 +3,17 @@ import os
 import sys
 import ctypes
 
+
 def is_admin():
     try:
         return ctypes.windll.shell32.IsUserAnAdmin()
     except:
         return False
 
+
 def elevate_privileges():
     if not is_admin():
-        response = input("Registering a file type requires admin privileges. Run as admin? (Y/N): ").lower()
+        response = input("Would you like to give admin privileges? (Y/N): ").lower()
         if response == 'y':
             script_path = os.path.abspath(sys.argv[0])
             ctypes.windll.shell32.ShellExecuteW(
@@ -27,6 +29,7 @@ def elevate_privileges():
             print(f"Error getting admin privileges")
             sys.exit(1)
 
+
 def check_extension_exists(extension):
     try:
         key_path = f".{extension}"
@@ -35,15 +38,9 @@ def check_extension_exists(extension):
     except WindowsError:
         return False
     
-def set_file_association(extension, icon_path):
-    script_dir = os.path.dirname(os.path.abspath(__file__))                             # Get the current script's directory
-    icon_path = os.path.join(script_dir, icon_path)
-    print(f"Icon file [{icon_path}]")
-    
-    if not os.path.exists(icon_path):                                                   # Ensure icon file exists
-        print("Error: logo.ico not found in script directory")
-        return
 
+def set_file_association(extension, icon_path):
+    print(f"Using icon file: [{icon_path}]")
     try:
         with winreg.CreateKey(winreg.HKEY_CLASSES_ROOT, f".{extension}") as key:        # Create .pffproj file extension association
             winreg.SetValue(key, "", winreg.REG_SZ, "PFF-Project")
@@ -54,24 +51,32 @@ def set_file_association(extension, icon_path):
             with winreg.CreateKey(key, "DefaultIcon") as icon_key:                      # Set icon
                 winreg.SetValue(icon_key, "", winreg.REG_SZ, icon_path)
         
-        print("File association successfully set!")        
+        print("File association and custom icon successfully registered.")    
         return True
     except Exception as e:
         return str(e)
 
+
 if __name__ == "__main__":    
     extension = "pffproj".replace(".", "")
     icon_path = "assets\\logo.ico"
-
+   
     if check_extension_exists(extension):                                               # Check if extension exists before requesting admin
-        print(f"File extension .{extension} is already registered")
+        print(f"The file extension .{extension} is already registered")
         sys.exit(0)
 
-    print(f"Registering File extension [.{extension}]")
+    script_dir = os.path.dirname(os.path.abspath(__file__))                             # Get the current script's directory
+    icon_path = os.path.join(script_dir, icon_path)
+    if not os.path.exists(icon_path):                                                   # Ensure icon file exists
+        print("Error: The specified icon file [logo.ico] was not found in the [script/assets] directory.")
+        sys.exit(1)
+    
+    print("The PFF Game Engine uses the [.pffproj] file extension and requests to register a custom icon for it.")
+    print("This action requires administrator privileges but is not strictly necessary for the engine's functionality.")
     elevate_privileges()
     result = set_file_association(extension, icon_path)
     if result is True:
-        print(f"Successfully registered .{extension} with custom icon")
+        print(f"Successfully registered the '.{extension}' file extension with the PFF-icon.")
     else:
         print(f"Error: {result}")
 

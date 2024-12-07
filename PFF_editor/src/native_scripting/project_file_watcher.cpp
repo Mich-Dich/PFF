@@ -146,15 +146,15 @@ namespace PFF {
 	project_file_watcher::project_file_watcher() {
 		
 		s_root_directory = application::get().get_project_path();
-		CORE_VALIDATE(io_handler::is_directory(s_root_directory), return, "", s_root_directory.string().c_str() << " is not a directory. project_file_watcher is not starting.");
+		CORE_VALIDATE(io_handler::is_directory(s_root_directory), return, "", "[" << s_root_directory.string().c_str() << "] is not a directory. project_file_watcher is not starting.");
 
-		// ================================== TODO: Move to project creation ================================== 
+		// ================================== TODO: Move to project creation ==================================
 		s_project_premake_lua = s_root_directory / "premake5.lua";
 		code_generator::generate_premake_file(s_project_premake_lua, "test_project");
 		const std::filesystem::path pathToBuildScript = s_root_directory / "build.bat";
 		const std::filesystem::path pathToPremakeExe = util::get_executable_path() / ".." / "vendor" / "premake" / "premake5.exe";
 		code_generator::generate_build_file(pathToBuildScript, pathToPremakeExe);
-		// ================================== TODO: Move to project creation ================================== 
+		// ================================== TODO: Move to project creation ==================================
 
 		CORE_LOG(Trace, "Monitoring directory " << io_handler::get_absolute_path(s_root_directory / SOURCE_DIR));
 		s_file_watcher.path = s_root_directory / SOURCE_DIR;

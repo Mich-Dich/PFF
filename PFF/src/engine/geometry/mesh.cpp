@@ -8,7 +8,6 @@
 namespace PFF::geometry {
 
 
-
 	void mesh_asset::calc_bounds() {
 		
 		CORE_ASSERT(surfaces.size() > 0, "", "Cannot calculate the bounds of an emty mesh_asset. Needs to have atleast one surface");
