@@ -470,7 +470,7 @@ namespace PFF {
 		const ImVec2 button_size = ImVec2(15); // size of the button
 		const ImVec2 box_padding = ImVec2(5); // padding around the button
 		const f32 button_length = button_size.x + (box_padding.x * 2);
-		auto color = m_gizmo_operation == transform_operation::translate ? ImGui::GetStyle().Colors[ImGuiCol_Button] : UI::get_default_gray();
+		auto color = m_gizmo_operation == transform_operation::translate ? ImGui::GetStyle().Colors[ImGuiCol_Button] : UI::get_default_gray_ref();
 		{
 			const ImVec2 box_min = ImGui::GetWindowPos() + start_pos; // top-left corner
 			const ImVec2 box_max = box_min + button_size + (box_padding * 2); // bottom-right corner
@@ -490,7 +490,7 @@ namespace PFF {
 			}
 		}
 
-		color = m_gizmo_operation == transform_operation::rotate ? ImGui::GetStyle().Colors[ImGuiCol_Button] : UI::get_default_gray();
+		color = m_gizmo_operation == transform_operation::rotate ? ImGui::GetStyle().Colors[ImGuiCol_Button] : UI::get_default_gray_ref();
 		{
 			const ImVec2 box_min = ImGui::GetWindowPos() + start_pos + ImVec2(button_length, 0);
 			const ImVec2 box_max = box_min + button_size + (box_padding * 2);
@@ -505,7 +505,7 @@ namespace PFF {
 			}
 		}
 
-		color = m_gizmo_operation == transform_operation::scale ? ImGui::GetStyle().Colors[ImGuiCol_Button] : UI::get_default_gray();
+		color = m_gizmo_operation == transform_operation::scale ? ImGui::GetStyle().Colors[ImGuiCol_Button] : UI::get_default_gray_ref();
 		{
 			const ImVec2 box_min = ImGui::GetWindowPos() + start_pos + ImVec2(button_length * 2, 0);
 			const ImVec2 box_max = box_min + button_size + (box_padding * 2);

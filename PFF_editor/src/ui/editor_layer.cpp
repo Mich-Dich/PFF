@@ -354,7 +354,7 @@ namespace PFF {
 							.entry(KEY_VALUE(window_border));
 						//config::load(config::file::editor, "UI", "window_border", window_border);
 
-						backup_color = UI::get_main_color();
+						backup_color = UI::get_main_color_ref();
 						ImGui::SetColorEditOptions(ImGuiColorEditFlags_Float | ImGuiColorEditFlags_HDR | ImGuiColorEditFlags_PickerHueWheel);
 						backup_color_init = true;
 					}
@@ -377,8 +377,8 @@ namespace PFF {
 						saved_palette_init = false;
 					}
 
-					if (ImGui::ColorPicker4("##picker", (float*)&UI::get_main_color(), ImGuiColorEditFlags_NoSidePreview | ImGuiColorEditFlags_NoSmallPreview))
-						UI::update_UI_colors(UI::get_main_color());
+					if (ImGui::ColorPicker4("##picker", (float*)&UI::get_main_color_ref(), ImGuiColorEditFlags_NoSidePreview | ImGuiColorEditFlags_NoSmallPreview))
+						UI::update_UI_colors(UI::get_main_color_ref());
 
 					ImGui::SameLine();
 					ImGui::BeginGroup();
@@ -386,7 +386,7 @@ namespace PFF {
 						ImGui::BeginGroup();
 						{
 							ImGui::Text("Current");
-							ImGui::ColorButton("##current", UI::get_main_color(), ImGuiColorEditFlags_NoPicker | ImGuiColorEditFlags_AlphaPreviewHalf, ImVec2(60, 40));
+							ImGui::ColorButton("##current", UI::get_main_color_ref(), ImGuiColorEditFlags_NoPicker | ImGuiColorEditFlags_AlphaPreviewHalf, ImVec2(60, 40));
 						}
 						ImGui::EndGroup();
 
@@ -408,7 +408,7 @@ namespace PFF {
 
 							ImGuiColorEditFlags palette_button_flags = ImGuiColorEditFlags_NoAlpha | ImGuiColorEditFlags_NoPicker | ImGuiColorEditFlags_NoTooltip;
 							if (ImGui::ColorButton("##palette", saved_palette[n], palette_button_flags, ImVec2(21, 21)))
-								UI::update_UI_colors(ImVec4(saved_palette[n].x, saved_palette[n].y, saved_palette[n].z, UI::get_main_color().w));
+								UI::update_UI_colors(ImVec4(saved_palette[n].x, saved_palette[n].y, saved_palette[n].z, UI::get_main_color_ref().w));
 
 							// Allow user to drop colors into each palette entry. Note that ColorButton() is already a
 							// drag source by default, unless specifying the ImGuiColorEditFlags_NoDragDrop flag.

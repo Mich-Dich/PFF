@@ -69,7 +69,7 @@ namespace PFF::code_generator {
 
 		stream << "\tdebugcommand(\"" << (engine_build_dir / "PFF_editor" / "PFF_editor.exe").generic_string() << "\")\n";
 		stream << "\tdebugdir(\"" << (engine_build_dir / "PFF_editor").generic_string() << "\")\n";
-		stream << "\t-- If you need to pass arguments to your game engine, use:								debugargs { \"arg1\", \"arg2\" }\n";
+		stream << "\t-- for passing arguments to game engine, use:								debugargs { \"arg1\", \"arg2\" }\n";
 		stream << R"(
 	libdirs 
 	{
@@ -92,26 +92,23 @@ namespace PFF::code_generator {
 		stream << "\t\t\"cd " << (engine_build_dir / "PFF").generic_string() << " && \" ..\n";
 		stream << "\t\t\"" << (engine_build_dir / "PFF_helper" / "PFF_helper.exe").generic_string() << " 0 0 0 " << application::get().get_project_path().generic_string() << "\",";
 
-
-		//	--Add clean commands
-		//	cleancommands{
-		//		"{RMDIR} %{cfg.buildtarget.directory}",
-		//		"{RMDIR} %{cfg.objdir}",
-		//		"echo Cleaning completed for %{prj.name}"
-		//	}
-		//
-		//	--Add rebuild commands
-		//	rebuildcommands{
-		//		"{RMDIR} %{cfg.buildtarget.directory}",
-		//		"{RMDIR} %{cfg.objdir}",
-		//		"premake5 --file=%{wks.location}premake5.lua vs2019",
-		//		"msbuild /t:rebuild /p:configuration=%{cfg.buildcfg} %{wks.location}%{prj.name}.vcxproj",
-		//		"echo Rebuild completed for %{prj.name}"
-		//	}
-
-
 		stream <<R"(
     }
+
+	cleancommands{
+		"{RMDIR} %{cfg.buildtarget.directory}",
+		"{RMDIR} %{cfg.objdir}",
+		"{RMDIR} generated",
+		"echo Cleaning completed for %{prj.name}"
+	}
+
+	rebuildcommands{
+		"{RMDIR} %{cfg.buildtarget.directory}",
+		"{RMDIR} %{cfg.objdir}",
+		"premake5 --file=%{wks.location}premake5.lua vs2019",
+		"msbuild /t:rebuild /p:configuration=%{cfg.buildcfg} %{wks.location}%{prj.name}.vcxproj",
+		"echo Rebuild completed for %{prj.name}"
+	}
 
 	filter "system:windows"
 		defines "PFF_PLATFORM_WINDOWS"

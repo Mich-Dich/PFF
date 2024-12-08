@@ -49,7 +49,7 @@ namespace PFF {
 				.entry(KEY_VALUE(data.last_modified))
 				.entry(KEY_VALUE(data.description))
 				.vector("tags", data.tags, [&](serializer::yaml& inner, u64 x) {
-				inner.entry("tag", data.tags[x]);
+					inner.entry("tag", data.tags[x]);
 				});
 
 			break;
@@ -103,29 +103,21 @@ namespace PFF {
 		if (!m_project_path.empty())
 			m_project_data = serialize_projects_data(m_project_path, serializer::option::load_from_file);
 
-
-		//m_project_data{};
-		// ========================================================== TODO ==========================================================
-		//		Editor needs to set the [project_path] in the yaml file bevor starting the engine <= IMPORTANT
-		// ========================================================== TODO ==========================================================
-
+		// ---------------------------------------- general subsystems ----------------------------------------
 		config::init(m_project_path, util::get_executable_path());
 
-		// LOAD PROJECT_DATA
-
-		serialize(serializer::option::load_from_file);
+		serialize(serializer::option::load_from_file);							// LOAD PROJECT_DATA
 		set_fps_settings(m_target_fps);
 
 		m_layerstack = create_ref<layer_stack>();
 
 		m_window = std::make_shared<pff_window>();
 		m_window->set_event_callback(BIND_FUNKTION(application::on_event));
-		
+
 		// ---------------------------------------- renderer ----------------------------------------
 
-#if defined PFF_RENDER_API_VULKAN
 		GET_RENDERER.setup(m_window, m_layerstack);
-#endif
+		
 		// ---------------------------------------- layers ----------------------------------------
 		m_world_layer = new world_layer();
 		m_layerstack->push_layer(m_world_layer);
@@ -134,7 +126,6 @@ namespace PFF {
 		m_imgui_layer = new UI::imgui_layer();
 		m_layerstack->push_overlay(m_imgui_layer);
 
-		
 		script_system::init();
 
 		// TODO: load the map specefied in the project settings as editor_start_world

@@ -29,21 +29,21 @@ namespace PFF::UI {
 	static ImVec4 highlited_window_bg = LERP_GRAY(0.57f);
 	static f32 default_item_width{};
 
-	PFF_GETTER_FUNC(ImVec4, main_color);
-	PFF_GETTER_FUNC(ImVec4, main_titlebar_color);
+	PFF_GETTER_REF_FUNC(ImVec4, main_color);
+	PFF_GETTER_REF_FUNC(ImVec4, main_titlebar_color);
 
-	PFF_GETTER_FUNC(ImVec4, action_color_00_faded);
-	PFF_GETTER_FUNC(ImVec4, action_color_00_weak);
-	PFF_GETTER_FUNC(ImVec4, action_color_00_default);
-	PFF_GETTER_FUNC(ImVec4, action_color_00_hover);
-	PFF_GETTER_FUNC(ImVec4, action_color_00_active);
+	PFF_GETTER_REF_FUNC(ImVec4, action_color_00_faded);
+	PFF_GETTER_REF_FUNC(ImVec4, action_color_00_weak);
+	PFF_GETTER_REF_FUNC(ImVec4, action_color_00_default);
+	PFF_GETTER_REF_FUNC(ImVec4, action_color_00_hover);
+	PFF_GETTER_REF_FUNC(ImVec4, action_color_00_active);
 
-	PFF_GETTER_FUNC(ImColor, default_gray);
-	PFF_GETTER_FUNC(ImColor, default_gray_1);
+	PFF_GETTER_REF_FUNC(ImColor, default_gray);
+	PFF_GETTER_REF_FUNC(ImColor, default_gray_1);
 
-	PFF_GETTER_FUNC(ImVec4, action_color_gray_default);
-	PFF_GETTER_FUNC(ImVec4, action_color_gray_hover);
-	PFF_GETTER_FUNC(ImVec4, action_color_gray_active);
+	PFF_GETTER_REF_FUNC(ImVec4, action_color_gray_default);
+	PFF_GETTER_REF_FUNC(ImVec4, action_color_gray_hover);
+	PFF_GETTER_REF_FUNC(ImVec4, action_color_gray_active);
 
 	void PFF_API set_UI_theme_selection(theme_selection theme_selection);
 	void PFF_API enable_window_border(bool enable);

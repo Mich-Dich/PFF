@@ -25,25 +25,23 @@
 												(1.f - value) * 1.f + value * main_color.z, \
 												1.f }																		// Set [w] to be [1.f] to disable accidental transparency
 
-
 namespace PFF::UI {
 
+	PFF_GETTER_REF_FUNC_IMPL(ImVec4, main_color);
+	PFF_GETTER_REF_FUNC_IMPL(ImVec4, main_titlebar_color);
 
-	PFF_GETTER_FUNC_IMPL(ImVec4, main_color);
-	PFF_GETTER_FUNC_IMPL(ImVec4, main_titlebar_color);
-
-	PFF_GETTER_FUNC_IMPL(ImVec4, action_color_00_faded);
-	PFF_GETTER_FUNC_IMPL(ImVec4, action_color_00_weak);
-	PFF_GETTER_FUNC_IMPL(ImVec4, action_color_00_default);
-	PFF_GETTER_FUNC_IMPL(ImVec4, action_color_00_hover);
-	PFF_GETTER_FUNC_IMPL(ImVec4, action_color_00_active);
-
-	PFF_GETTER_FUNC_IMPL2(ImColor, default_gray, IMCOLOR_GRAY(30));
-	PFF_GETTER_FUNC_IMPL2(ImColor, default_gray_1, IMCOLOR_GRAY(35));
-
-	PFF_GETTER_FUNC_IMPL2(ImVec4, action_color_gray_default, LERP_GRAY(0.2f));
-	PFF_GETTER_FUNC_IMPL2(ImVec4, action_color_gray_hover, LERP_GRAY(0.27f));
-	PFF_GETTER_FUNC_IMPL2(ImVec4, action_color_gray_active, LERP_GRAY(0.35f));
+	PFF_GETTER_REF_FUNC_IMPL(ImVec4, action_color_00_faded);
+	PFF_GETTER_REF_FUNC_IMPL(ImVec4, action_color_00_weak);
+	PFF_GETTER_REF_FUNC_IMPL(ImVec4, action_color_00_default);
+	PFF_GETTER_REF_FUNC_IMPL(ImVec4, action_color_00_hover);
+	PFF_GETTER_REF_FUNC_IMPL(ImVec4, action_color_00_active);
+			  
+	PFF_GETTER_REF_FUNC_IMPL2(ImColor, default_gray, IMCOLOR_GRAY(30));
+	PFF_GETTER_REF_FUNC_IMPL2(ImColor, default_gray_1, IMCOLOR_GRAY(35));
+			  
+	PFF_GETTER_REF_FUNC_IMPL2(ImVec4, action_color_gray_default, LERP_GRAY(0.2f));
+	PFF_GETTER_REF_FUNC_IMPL2(ImVec4, action_color_gray_hover, LERP_GRAY(0.27f));
+	PFF_GETTER_REF_FUNC_IMPL2(ImVec4, action_color_gray_active, LERP_GRAY(0.35f));
 
 	static ImVec4 vector_multi(const ImVec4& vec_0, const ImVec4& vec_1) {
 		return ImVec4{ vec_0.x * vec_1.x, vec_0.y * vec_1.y, vec_0.z * vec_1.z, vec_0.w * vec_1.w };
@@ -447,13 +445,7 @@ namespace PFF::UI {
 
 	void imgui_layer::serialize(serializer::option option) {
 
-		serializer::yaml(config::get_filepath_from_configtype(application::get().get_project_path(), config::file::ui), "performance_display", option)
-			.entry(KEY_VALUE(m_show_FPS_window))
-			.entry(KEY_VALUE(m_show_renderer_metrik))
-			.entry(KEY_VALUE(renderer_metrik_window_location))
-			.entry(KEY_VALUE(FPS_window_location));
-
-		serializer::yaml(config::get_filepath_from_configtype(application::get().get_project_path(), config::file::ui), "theme", option)
+		serializer::yaml(config::get_filepath_from_configtype(util::get_executable_path(), config::file::ui), "theme", option)			// load general aperance settings
 			.entry(KEY_VALUE(m_font_size))
 			.entry(KEY_VALUE(m_font_size_header_0))
 			.entry(KEY_VALUE(m_font_size_header_1))
@@ -479,6 +471,12 @@ namespace PFF::UI {
 			.entry(KEY_VALUE(action_color_gray_default))
 			.entry(KEY_VALUE(action_color_gray_hover))
 			.entry(KEY_VALUE(action_color_gray_active));
+				
+		serializer::yaml(config::get_filepath_from_configtype(application::get().get_project_path(), config::file::ui), "performance_display", option)
+			.entry(KEY_VALUE(m_show_FPS_window))
+			.entry(KEY_VALUE(m_show_renderer_metrik))
+			.entry(KEY_VALUE(renderer_metrik_window_location))
+			.entry(KEY_VALUE(FPS_window_location));
 	}
 
 	// --------------------------------------------------------------------------------------------------------------------------------------------

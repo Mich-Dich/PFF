@@ -102,9 +102,9 @@ namespace PFF {
 				ImGui::BeginGroup();																						// Start group to align items horizontally
 
 				if (buffer)
-					ImGui::Image(m_folder_open_image->get_descriptor_set(), folder_open_icon_size, ImVec2(0, 0), ImVec2(1, 1), UI::get_main_color());
+					ImGui::Image(m_folder_open_image->get_descriptor_set(), folder_open_icon_size, ImVec2(0, 0), ImVec2(1, 1), UI::get_main_color_ref());
 				else
-					ImGui::Image(m_folder_closed_image->get_descriptor_set(), folder_closed_icon_size, ImVec2(0, 0), ImVec2(1, 1), UI::get_main_color());
+					ImGui::Image(m_folder_closed_image->get_descriptor_set(), folder_closed_icon_size, ImVec2(0, 0), ImVec2(1, 1), UI::get_main_color_ref());
 
 				ImGui::SameLine(0, 2);
 				ImGui::Text("%s", entry.path().filename().string().c_str());												// Draw folder name text
@@ -127,7 +127,7 @@ namespace PFF {
 
 				ImGui::SameLine(0, 2);
 				ImGui::BeginGroup();																						// Similar modification for leaf nodes
-				ImGui::Image(m_folder_closed_image->get_descriptor_set(), folder_closed_icon_size, ImVec2(0, 0), ImVec2(1, 1), UI::get_main_color());
+				ImGui::Image(m_folder_closed_image->get_descriptor_set(), folder_closed_icon_size, ImVec2(0, 0), ImVec2(1, 1), UI::get_main_color_ref());
 				ImGui::SameLine(0, 2);
 				ImGui::Text("%s", entry.path().filename().string().c_str());
 				ImGui::EndGroup();
@@ -173,6 +173,7 @@ namespace PFF {
 		}
 	}
 
+
 	void content_browser::show_current_folder_content(const std::filesystem::path& path) {
 
 		const ImGuiStyle& style = ImGui::GetStyle();
@@ -195,7 +196,7 @@ namespace PFF {
 			ImGui::BeginGroup();
 			{
 				ImGui::PushID(hash_path(entry.path()));
-				ImGui::Image(m_folder_image->get_descriptor_set(), m_icon_size, ImVec2(0, 0), ImVec2(1, 1), UI::get_action_color_gray_active());
+				ImGui::Image(m_folder_image->get_descriptor_set(), m_icon_size, ImVec2(0, 0), ImVec2(1, 1), UI::get_action_color_gray_active_ref());
 				ImVec2 text_size = ImGui::CalcTextSize(item_name.c_str());
 				ImGui::SetCursorPos(ImGui::GetCursorPos() + ImVec2((m_icon_size.x - text_size.x) * 0.5f, 0));
 				ImGui::TextWrapped(item_name.c_str());
@@ -223,7 +224,7 @@ namespace PFF {
 			if (ImGui::BeginDragDropSource(ImGuiDragDropFlags_SourceAllowNullID)) {
 				ImGui::SetDragDropPayload("PROJECT_CONTENT_FOLDER", entry.path().string().c_str(), entry.path().string().length() + 1);
 
-				ImGui::Image(m_folder_image->get_descriptor_set(), m_icon_size, ImVec2(0, 0), ImVec2(1, 1), UI::get_action_color_gray_active());
+				ImGui::Image(m_folder_image->get_descriptor_set(), m_icon_size, ImVec2(0, 0), ImVec2(1, 1), UI::get_action_color_gray_active_ref());
 				ImGui::TextWrapped("%s", item_name.c_str());
 
 				ImGui::EndDragDropSource();
@@ -382,7 +383,7 @@ namespace PFF {
 		ImGuiWindowFlags window_flags = ImGuiWindowFlags_None;
 		ImGui::Begin("Content Browser", nullptr, window_flags);
 
-		UI::custom_frame_NEW(350, true, UI::get_default_gray_1(), [&]() {
+		UI::custom_frame_NEW(350, true, UI::get_default_gray_1_ref(), [&]() {
 
 			folder_display_window = ImGui::GetCurrentWindow();
 			bool buffer = ImGui::TreeNodeEx((m_project_directory / CONTENT_DIR).filename().string().c_str(), base_flags | ImGuiTreeNodeFlags_DefaultOpen);

@@ -261,9 +261,9 @@ namespace PFF::UI {
 
 	bool gray_button(const char* lable, const ImVec2& size) {
 
-		ImGui::PushStyleColor(ImGuiCol_Button, (ImU32)UI::get_default_gray());
-		ImGui::PushStyleColor(ImGuiCol_ButtonHovered, UI::get_action_color_gray_hover());
-		ImGui::PushStyleColor(ImGuiCol_ButtonActive, UI::get_action_color_gray_active());
+		ImGui::PushStyleColor(ImGuiCol_Button, (ImU32)UI::get_default_gray_ref());
+		ImGui::PushStyleColor(ImGuiCol_ButtonHovered, UI::get_action_color_gray_hover_ref());
+		ImGui::PushStyleColor(ImGuiCol_ButtonActive, UI::get_action_color_gray_active_ref());
 
 		const bool result = ImGui::Button(lable, size);
 
@@ -276,9 +276,9 @@ namespace PFF::UI {
 		// show weaker color if toggle_bool is false
 		if (!bool_var) {
 
-			ImGui::PushStyleColor(ImGuiCol_Button, UI::get_action_color_00_faded());
-			ImGui::PushStyleColor(ImGuiCol_ButtonHovered, UI::get_action_color_00_weak());
-			ImGui::PushStyleColor(ImGuiCol_ButtonActive, UI::get_action_color_00_default());
+			ImGui::PushStyleColor(ImGuiCol_Button, UI::get_action_color_00_faded_ref());
+			ImGui::PushStyleColor(ImGuiCol_ButtonHovered, UI::get_action_color_00_weak_ref());
+			ImGui::PushStyleColor(ImGuiCol_ButtonActive, UI::get_action_color_00_default_ref());
 		}
 
 		const bool result = ImGui::Button("show Markdown", ImVec2(100, 21));
