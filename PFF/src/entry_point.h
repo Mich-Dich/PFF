@@ -8,14 +8,8 @@ extern PFF::application* PFF::create_application();
 #ifdef PFF_PLATFORM_WINDOWS
 
 #include <windows.h>
-#include <iostream>
 
 int wmain(int argc, wchar_t* argv[]) {
-
-    std::wcout << L"Number of arguments: " << argc << std::endl;
-    for (int i = 0; i < argc; i++) {
-        std::wcout << L"Argument " << i << L": " << argv[i] << std::endl;
-    }
 
     std::vector<std::string> args;                  // Convert wide arguments to standard strings
     for (int i = 0; i < argc; i++) {
@@ -27,6 +21,8 @@ int wmain(int argc, wchar_t* argv[]) {
     }
 
     auto app = PFF::create_application();
+    app->set_arguments(args);
+    app->init_engine();
     app->run();
     delete app;
 
@@ -38,11 +34,12 @@ int wmain(int argc, wchar_t* argv[]) {
 int main(int argc, char* argv[]) {
 
     std::vector<std::string> args;                  // Convert char* arguments to strings
-    for (int i = 0; i < argc; i++) {
+    for (int i = 0; i < argc; i++)
         args.emplace_back(argv[i]);
-    }
 
     auto app = PFF::create_application();
+    app->set_arguments(args);
+    app->init_engine();
     app->run();
     delete app;
 

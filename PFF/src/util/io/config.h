@@ -26,7 +26,9 @@ namespace PFF::config {
 	// @brief Initializes the configuration files by creating necessary directories and default files.
 	// @param [config_dir] The directory where configuration files will be stored.
 	// @return [void] This function does not have a return value.
-    PFF_API_EDITOR void init(std::filesystem::path project_dir, std::filesystem::path PFF_dir);
+    PFF_API_EDITOR void init(std::filesystem::path PFF_dir);
+
+	PFF_API_EDITOR void create_config_files_for_project(std::filesystem::path project_dir);
 
 	PFF_API_EDITOR FORCEINLINE std::string file_type_to_string(file type);
 

@@ -201,8 +201,6 @@ namespace PFF::render::vulkan {
 		for (int i = 0; i < FRAME_COUNT; i++)
 			m_frames[i].deletion_queue.setup(m_device, m_allocator);
 
-
-
 		init_commands();
 		init_swapchain();
 		init_sync_structures();
@@ -618,7 +616,7 @@ namespace PFF::render::vulkan {
 
 	void vk_renderer::init_default_data() {
 
-		serialize(PFF::serializer::option::load_from_file);
+		//serialize(PFF::serializer::option::load_from_file);
 
 		//3 default textures, white, grey, black. 1 pixel each
 		u32 white = glm::packUnorm4x8(glm::vec4(1, 1, 1, 1));

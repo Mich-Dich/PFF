@@ -21,7 +21,7 @@ namespace PFF {
     namespace config {
 
         //
-        void init(std::filesystem::path project_dir, std::filesystem::path PFF_dir) {
+        void init(std::filesystem::path PFF_dir) {
 
             PFF_PROFILE_FUNCTION();
 
@@ -38,6 +38,10 @@ namespace PFF {
                 }
                 config_file.close();
             }
+        }
+
+        //
+        void create_config_files_for_project(std::filesystem::path project_dir) {
 
             io_handler::create_directory(project_dir / CONFIG_DIR);
             CORE_LOG(Trace, "Checking project config files at: " << project_dir / CONFIG_DIR);
@@ -52,7 +56,6 @@ namespace PFF {
                 }
                 config_file.close();
             }
-
         }
 
         /*

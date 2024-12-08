@@ -10,8 +10,8 @@ namespace PFF {
 		FORCEINLINE bool is_project_path_valid() { return (!project_path.empty() && std::filesystem::exists(project_path) && project_path.extension() == PFF_PROJECT_EXTENTION); }
 
 		std::filesystem::path		project_path;			// system path to the first world when developing the project
-
 		// meta_data
+
 		std::string					display_name{};				// this name will be used in the launcher and editor
 		std::string					name{};						// this name is the name of the solution & export-folder
 		

@@ -9,8 +9,8 @@ namespace PFF {
 	class PFF_editor : public application {
 	public:
 
-		PFF_editor();
-		~PFF_editor();
+		PFF_editor() {}
+		~PFF_editor() {}
 
 		FORCEINLINE editor_layer* get_editor_layer() { return m_editor_layer; }
 		FORCEINLINE std::filesystem::path get_editor_executable_path() { return util::get_executable_path(); }

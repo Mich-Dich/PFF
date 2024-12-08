@@ -84,6 +84,10 @@ namespace PFF {
 		void end_fps_measurement(f32& work_time);
 		void limit_fps();
 
+		void set_arguments(const std::vector<std::string>& args);
+		const std::vector<std::string>& get_arguments() const { return m_arguments; }
+		void init_engine();
+
 	private:
 
 		void client_init();
@@ -96,34 +100,36 @@ namespace PFF {
 		bool on_window_refresh(window_refresh_event& event);
 		bool on_window_focus(window_focus_event& event);
 
-		static application* s_instance;
+		static application*			s_instance;
 
-		static ref<pff_window> m_window;
-		static bool m_is_titlebar_hovered;
-		static bool m_running;
-		UI::imgui_layer* m_imgui_layer;
-		world_layer* m_world_layer;
+		static ref<pff_window>		m_window;
+		static bool					m_is_titlebar_hovered;
+		static bool					m_running;
+		UI::imgui_layer*			m_imgui_layer;
+		world_layer*				m_world_layer;
 
-		ref<layer_stack> m_layerstack{};
-		std::vector<event> m_event_queue;		// TODO: change to queue
-		ref<map> m_current_map = nullptr;
+		ref<layer_stack>			m_layerstack{};
+		std::vector<event>			m_event_queue;		// TODO: change to queue
+		ref<map>					m_current_map = nullptr;
 
-		bool m_focus = true;
-		bool m_limit_fps = true;
-		u32 m_target_fps = 60;
-		u32 m_nonefocus_fps = 30;
-		u32 m_fps{};
-		f32 m_delta_time = 0.f;
-		f32 m_work_time{}, m_sleep_time{};
-		f32 target_duration{};
-		f32 m_last_frame_time = 0.f;
+		bool						m_focus = true;
+		bool						m_limit_fps = true;
+		u32							m_target_fps = 60;
+		u32							m_nonefocus_fps = 30;
+		u32							m_fps{};
+		f32							m_delta_time = 0.f;
+		f32							m_work_time{}, m_sleep_time{};
+		f32							target_duration{};
+		f32							m_last_frame_time = 0.f;
 
 		// vector to store futures (from timer_async and other std::async tasks)
-		std::vector<util::timer> m_timers{};
-		std::mutex m_global_futures_mutex{}; // Mutex to protect global_futures
+		std::vector<util::timer>	m_timers{};
+		std::mutex					m_global_futures_mutex{}; // Mutex to protect global_futures
 
-		std::filesystem::path	m_project_path{};
-		project_data			m_project_data{};
+		std::filesystem::path		m_project_path{};
+		project_data				m_project_data{};
+
+		std::vector<std::string>	m_arguments;
 	};
 
 	// to be defined in Client
