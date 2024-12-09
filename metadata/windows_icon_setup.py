@@ -16,14 +16,7 @@ def elevate_privileges():
         response = input("Would you like to give admin privileges? (Y/N): ").lower()
         if response == 'y':
             script_path = os.path.abspath(sys.argv[0])
-            ctypes.windll.shell32.ShellExecuteW(
-                None, 
-                "runas", 
-                sys.executable, 
-                f'"{script_path}"', 
-                os.path.dirname(script_path), 
-                1
-            )
+            ctypes.windll.shell32.ShellExecuteW(None, "runas", sys.executable, f'"{script_path}"', os.path.dirname(script_path), 1)
             sys.exit(0)
         else:
             print(f"Error getting admin privileges")
@@ -51,7 +44,7 @@ def set_file_association(extension, icon_path):
             with winreg.CreateKey(key, "DefaultIcon") as icon_key:                      # Set icon
                 winreg.SetValue(icon_key, "", winreg.REG_SZ, icon_path)
         
-        print("File association and custom icon successfully registered.")    
+        print("File association and custom icon successfully registered.")
         return True
     except Exception as e:
         return str(e)
@@ -59,14 +52,14 @@ def set_file_association(extension, icon_path):
 
 if __name__ == "__main__":    
     extension = "pffproj".replace(".", "")
-    icon_path = "assets\\logo.ico"
-   
+    icon_path = os.path.join("assets", "logo.ico")
+    script_dir = os.path.dirname(os.path.abspath(__file__))                             # Get the current script's directory
+    icon_path = os.path.join(script_dir, icon_path)
+
     if check_extension_exists(extension):                                               # Check if extension exists before requesting admin
         print(f"The file extension .{extension} is already registered")
         sys.exit(0)
 
-    script_dir = os.path.dirname(os.path.abspath(__file__))                             # Get the current script's directory
-    icon_path = os.path.join(script_dir, icon_path)
     if not os.path.exists(icon_path):                                                   # Ensure icon file exists
         print("Error: The specified icon file [logo.ico] was not found in the [script/assets] directory.")
         sys.exit(1)

@@ -66,6 +66,11 @@ project "PFF_editor"
 			"PFF_PLATFORM_WINDOWS",
 		}
 		
+		files					-- Include the icon resource only for Windows
+		{
+			"../metadata/app_icon.rc",
+		}
+
         postbuildcommands { table.unpack(copy_content_of_dir(outputs, {"PFF_editor/shaders", "PFF_editor/defaults", "PFF_editor/assets"})), }
 		
 	filter "configurations:Debug"

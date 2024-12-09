@@ -69,7 +69,6 @@ namespace PFF {
 	bool application::m_is_titlebar_hovered;
 	bool application::m_running;
 
-
 	application::application() {
 
 		PFF_PROFILE_BEGIN_SESSION("startup", "benchmarks", "PFF_benchmark_startup.json");
@@ -118,7 +117,6 @@ namespace PFF {
 		return m_timers.back().future;
 	}
 
-
 	void application::remove_timer(std::future<void>& future) {
 
 		std::lock_guard<std::mutex> lock(m_global_futures_mutex);
@@ -129,8 +127,6 @@ namespace PFF {
 			m_timers.end());*/
 		LOG(Trace, "timer vector length: " << m_timers.size());
 	}
-
-
 
 	void application::run() {
 

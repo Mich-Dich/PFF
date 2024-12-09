@@ -104,11 +104,10 @@ namespace PFF::util {
             &processInfo					            // Process Info
         );
 
-        // Wait for the process to finish
-        WaitForSingleObject(processInfo.hProcess, INFINITE);
+        WaitForSingleObject(processInfo.hProcess, INFINITE);                                        // Wait for the process to finish
 
-        if (result) {
-            // Close process and thread handles
+        if (result) {                                                                               // Close process and thread handles
+
             CloseHandle(processInfo.hProcess);
             CloseHandle(processInfo.hThread);
         } else

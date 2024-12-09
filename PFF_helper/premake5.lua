@@ -56,6 +56,11 @@ project "PFF_helper"
 			"PFF_PLATFORM_WINDOWS",
 		}
 
+		files					-- Include the icon resource only for Windows
+		{
+			"../metadata/app_icon.rc",
+		}
+
 	filter "configurations:Debug"
 		buildoptions "/MDd"
 		defines "PFF_EDITOR_DEBUG"

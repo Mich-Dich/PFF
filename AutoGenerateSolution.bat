@@ -11,7 +11,7 @@ echo ======== Setup windows icon
 echo.
 
 echo -------- Setup PFF-Project file icon
-python scripts/windows_icon_setup.py
+python metadata/windows_icon_setup.py
 
 echo.
 echo ======== Building PFF (Procedurally Focused Framework)
