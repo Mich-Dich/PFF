@@ -15,6 +15,8 @@
 #include <thread>
 #include <future>
 #include <random>
+#include <filesystem>
+//#include <concepts>			// need to switch to C++20
 
 #include <string>
 #include <sstream>
@@ -45,36 +47,43 @@
 #define GLM_FORCE_DEPTH_ZERO_TO_ONE
 #include <glm/glm.hpp>
 #include <glm/gtc/random.hpp>
-#include <glm/vec3.hpp>						// glm::vec3
-#include <glm/vec4.hpp>						// glm::vec4
-#include <glm/mat4x4.hpp>					// glm::mat4
-#include <glm/ext/matrix_transform.hpp>		// glm::translate, glm::rotate, glm::scale
-#include <glm/ext/matrix_clip_space.hpp>	// glm::perspective
-#include <glm/ext/scalar_constants.hpp>		// glm::pi
+#include <glm/vec3.hpp>							// glm::vec3
+#include <glm/vec4.hpp>							// glm::vec4
+#include <glm/mat4x4.hpp>						// glm::mat4
+#include <glm/ext/matrix_transform.hpp>			// glm::translate, glm::rotate, glm::scale
+#include <glm/ext/matrix_clip_space.hpp>		// glm::perspective
+#include <glm/ext/scalar_constants.hpp>			// glm::pi
 
 // ============================================================================  platform specific  ============================================================================
 
 #ifdef PFF_PLATFORM_WINDOWS
 	#include "util/platform/windows_util.h"
-#else
+#elif defined(PFF_PLATFORM_LINUX)
 	#error PFF only suports windows
+	#include "util/platform/linux_util.h"
+#else
+	#error Unsupported OS detected
 #endif
 
 // ==================================================================================  utils  ==================================================================================
 
 #include "util/math/noise.h"
 #include "util/math/constance.h"
-#include "util/math/random.h"			// <= currently empty MAYBE: move random from util here
+#include "util/math/random.h"					// <= currently empty MAYBE: move random from util here
 
 #include "macros.h"
 #include "util/util.h"
-#include "util/profiling/stopwatch.h"
-#include "util/profiling/instrumentor.h"
+
+//#include "util/io/config.h"					// IO stuuff
+//#include "util/io/io_handler.h"
+#include "util/io/serializer_data.h"			//			serializer stuff
 #include "util/io/serializer_yaml.h"
 #include "util/io/serializer_binary.h"
+
+#include "util/profiling/stopwatch.h"
+#include "util/profiling/instrumentor.h"
 //#include "util/math/random.h"
 
 // ==================================================================================  for application use  ==================================================================================
 
 #include "UUID.h"
-

@@ -241,6 +241,16 @@ namespace PFF::util {
     }
     
 
+    void util::cancel_timer(timer& timer) {
+
+        timer.shared_state->first = true;
+        timer.shared_state->second.notify_one();
+        if (timer.future.valid()) {
+            timer.future.wait();
+        }
+    }
+
+
     std::filesystem::path file_dialog(const std::string& title, const std::vector<std::pair<std::string, std::string>>& filters) {
 
 #ifdef PFF_PLATFORM_WINDOWS
@@ -355,6 +365,12 @@ namespace PFF::util {
             return result;
         }
 
+        PFF_API std::filesystem::path get_executable_path() {
+            return PFF_API std::filesystem::path();
+        }
+
+        }
+
 #endif
     }
 
@@ -428,15 +444,6 @@ namespace PFF::util {
 
 #endif
         return loc_system_time;
-    }
-
-    void util::cancel_timer(timer& timer) {
-
-        timer.shared_state->first = true;
-        timer.shared_state->second.notify_one();
-        if (timer.future.valid()) {
-            timer.future.wait();
-        }
     }
 
     std::string add_spaces(const u32 multiple_of_indenting_spaces, u32 num_of_indenting_spaces) {

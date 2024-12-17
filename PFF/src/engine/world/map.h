@@ -3,6 +3,8 @@
 #include <entt/entt.hpp>
 #include <glm/glm.hpp>
 
+#include "components.h"
+
 namespace PFF {
 
 	class entity;
@@ -79,7 +81,7 @@ namespace PFF {
 		void on_update(const f32 delta_time);
 		void recreate_scripts();
 
-		void serialize(serializer::option option);
+		void serialize(PFF::serializer::option option);
 
 
 	private:

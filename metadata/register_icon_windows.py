@@ -60,14 +60,14 @@ def notify_shell():
 
 
 if __name__ == "__main__":    
-    extension = "pffproj".replace(".", "")
+    extension = "pffproj"
     icon_path = "assets\\logo.ico"
     script_dir = os.path.dirname(os.path.abspath(__file__))                             # Get the current script's directory
     icon_path = os.path.join(script_dir, icon_path)
 
-    # if check_extension_exists(extension):                                               # Check if extension exists before requesting admin
-    #     print(f"The file extension .{extension} is already registered")
-    #     sys.exit(0)
+    if check_extension_exists(extension):                                               # Check if extension exists before requesting admin
+        print(f"The file extension .{extension} is already registered")
+        sys.exit(0)
 
     if not os.path.exists(icon_path):                                                   # Ensure icon file exists
         print("Error: The specified icon file [logo.ico] was not found in the [script/assets] directory.")

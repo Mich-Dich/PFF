@@ -49,6 +49,7 @@ project "PFF"
 	
 	links
 	{
+        -- "stdc++",
 		"glfw",
 		"imgui",
         "%{Library.Vulkan}",

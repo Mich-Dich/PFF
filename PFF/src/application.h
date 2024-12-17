@@ -7,6 +7,8 @@
 #include "engine/layer/world_layer.h"
 #include "project/project_data_struct.h"
 
+//#include "util/timer.h"
+
 #include "engine/render/vulkan/vk_renderer.h"
 
 namespace PFF {
@@ -93,7 +95,7 @@ namespace PFF {
 		void client_init();
 		void client_shutdown();
 
-		void serialize(serializer::option option);		
+		void serialize(serializer::option option);
 		void on_event(event& event);
 		bool on_window_close(window_close_event& event);
 		bool on_window_resize(window_resize_event& event);

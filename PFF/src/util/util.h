@@ -15,6 +15,10 @@
 #include "util/io/config.h"
 #include "util/data_types.h"
 
+#include "util/UUID.h"
+
+
+
 // =================================================================================  macros  ==================================================================================
 
 
@@ -231,16 +235,17 @@ namespace PFF {
             (hash_combine(seed, rest), ...);
         }
 
+
         // --------------------------------------------------------------------------------------------------------------------
         // TIMER
         // --------------------------------------------------------------------------------------------------------------------
-
+        
         struct timer {
-
+        
             std::future<void> future;
             std::shared_ptr<std::pair<std::atomic<bool>, std::condition_variable>> shared_state;
         };
-
+        
         // @brief Asynchronously starts a timer with the specified duration and callback function.
         // 
         // @brief Usage example:
@@ -253,32 +258,29 @@ namespace PFF {
         // @return Reference to the std::future<void> associated with the timer.
         template<class _rep, class _period>
         std::future<void>& timer_async(std::chrono::duration<_rep, _period> duration, std::function<void()> callback, std::function<void()> cancle_callback = NULL) {
-
+        
             auto shared_state = std::make_shared<std::pair<std::atomic<bool>, std::condition_variable>>();
             shared_state->first = false;
             auto future = std::async(std::launch::async, [duration, callback, cancle_callback, shared_state]() {
-
+        
                 std::mutex mtx;
                 std::unique_lock<std::mutex> lock(mtx);
-
+        
                 if (shared_state->second.wait_for(lock, duration, [shared_state]() { return shared_state->first.load(); })) {
-                    // Woken up by main thread
-                    if(cancle_callback != NULL)
+                    if(cancle_callback != NULL)             // Woken up by main thread
                         cancle_callback();
-                } else {
-                    // Time expired
-                    callback();
-                }
-
+                } else
+                    callback();                             // Time expired
+        
                 //application::get().remove_timer(future);
             });
-
-            return application::get().add_future(future, shared_state);
+        
+            return PFF::application::get().add_future(future, shared_state);
         }
-
-
+        
+        
         void cancel_timer(timer& timer);
-
+        
         // @brief Checks if the specified timer has finished.
         //
         // @brief  Usage example:
@@ -289,12 +291,12 @@ namespace PFF {
         // @return True if the timer has finished, false otherwise.
         template<class _rep, class _period>
         bool is_timer_ready(std::future<void>& timer, std::chrono::duration<_rep, _period> duration = 1ms) { return timer.wait_for(duration) == std::future_status::ready; }
+        
 
         // --------------------------------------------------------------------------------------------------------------------
         // STRING MANIPULATION
         // --------------------------------------------------------------------------------------------------------------------
         
-
         template<typename T>
         void convert_typename_to_string(std::string& typename_string) {
 

@@ -74,7 +74,7 @@ namespace PFF {
 
 		int channels;
 		int width = 0, height = 0;
-		void* data = stbi_load(image_path.string().c_str(), &(int)width, &(int)height, &channels, 4);
+		void* data = stbi_load(image_path.string().c_str(), &width, &height, &channels, 4);
 		allocate_memory(data, VkExtent3D{ (u32)width, (u32)height, 1 }, format, mipmapped);
 		stbi_image_free(data);
 	}

@@ -1,15 +1,15 @@
 #pragma once
 
 #include <type_traits>
-
 #include <glm/glm.hpp>
+
 
 struct ImVec2;
 struct ImVec4;
 
 namespace PFF::config {
 
-    enum class PFF_API_EDITOR file {
+    enum class PFF_API_EDITOR file : u8 {
 		ui,
 		editor,
 		engine,
@@ -18,7 +18,7 @@ namespace PFF::config {
 		input,
 	};
 
-    enum class PFF_API_EDITOR operation {
+    enum class PFF_API_EDITOR operation : u8 {
 		save,
 		load,
 	};

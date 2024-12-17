@@ -52,7 +52,11 @@
 // https://github.com/Auburn/FastNoiseLite
 
 #include <cmath>
+
 #include "util/data_types.h"
+//#include "util/platform/platform.h"
+
+
 
 namespace PFF::util {
 
@@ -176,12 +180,12 @@ namespace PFF::util {
 
         // @brief Sets the warp algorithm when using DomainWarp(...)
         void Set_domain_warp_type(domain_warp_type domainWarpType) {
-            mDomainWarpType = domainWarpType;
+            m_domain_warp_type = domainWarpType;
             update_warp_transform_type_3D();
         }
 
         // @brief Sets the maximum warp distance from original position when using DomainWarp(...)
-        void set_domain_warp_amp(float domainWarpAmp) { mDomainWarpAmp = domainWarpAmp; }
+        void set_domain_warp_amp(float domainWarpAmp) { m_domain_warp_amp = domainWarpAmp; }
 
 
         // @brief 2D noise at given position using current settings
@@ -299,16 +303,16 @@ namespace PFF::util {
         cellular_distance_function  m_cellular_distance_function = cellular_distance_function::euclideanSq;
         cellular_return_type        m_cellular_return_type = cellular_return_type::distance;
         float                       m_cellular_jitter_modifier = 1.0f;
-        domain_warp_type            mDomainWarpType = domain_warp_type::OpenSimplex2;
-        transform_type_3D           mWarpTransformType3D = transform_type_3D::DefaultOpenSimplex2;
-        float                       mDomainWarpAmp = 1.0f;
+        domain_warp_type            m_domain_warp_type = domain_warp_type::OpenSimplex2;
+        transform_type_3D           m_warp_transform_type_3D = transform_type_3D::DefaultOpenSimplex2;
+        float                       m_domain_warp_amp = 1.0f;
 
         template <typename T>
         struct Lookup {
-            static const T Gradients2D[];
-            static const T Gradients3D[];
-            static const T RandVecs2D[];
-            static const T RandVecs3D[];
+            static const T gradients_2D[];
+            static const T gradients_3D[];
+            static const T rand_vecs_2D[];
+            static const T rand_vecs_3D[];
         };
 
         static float FastMin(float a, float b) { return a < b ? a : b; }
@@ -389,8 +393,8 @@ namespace PFF::util {
             hash ^= hash >> 15;
             hash &= 127 << 1;
 
-            float xg = Lookup<float>::Gradients2D[hash];
-            float yg = Lookup<float>::Gradients2D[hash | 1];
+            float xg = Lookup<float>::gradients_2D[hash];
+            float yg = Lookup<float>::gradients_2D[hash | 1];
 
             return xd * xg + yd * yg;
         }
@@ -401,9 +405,9 @@ namespace PFF::util {
             hash ^= hash >> 15;
             hash &= 63 << 2;
 
-            float xg = Lookup<float>::Gradients3D[hash];
-            float yg = Lookup<float>::Gradients3D[hash | 1];
-            float zg = Lookup<float>::Gradients3D[hash | 2];
+            float xg = Lookup<float>::gradients_3D[hash];
+            float yg = Lookup<float>::gradients_3D[hash | 1];
+            float zg = Lookup<float>::gradients_3D[hash | 2];
 
             return xd * xg + yd * yg + zd * zg;
         }
@@ -412,17 +416,17 @@ namespace PFF::util {
         void GradCoordOut(int seed, int xPrimed, int yPrimed, float& xo, float& yo) const {
             int hash = Hash(seed, xPrimed, yPrimed) & (255 << 1);
 
-            xo = Lookup<float>::RandVecs2D[hash];
-            yo = Lookup<float>::RandVecs2D[hash | 1];
+            xo = Lookup<float>::rand_vecs_2D[hash];
+            yo = Lookup<float>::rand_vecs_2D[hash | 1];
         }
 
 
         void GradCoordOut(int seed, int xPrimed, int yPrimed, int zPrimed, float& xo, float& yo, float& zo) const {
             int hash = Hash(seed, xPrimed, yPrimed, zPrimed) & (255 << 2);
 
-            xo = Lookup<float>::RandVecs3D[hash];
-            yo = Lookup<float>::RandVecs3D[hash | 1];
-            zo = Lookup<float>::RandVecs3D[hash | 2];
+            xo = Lookup<float>::rand_vecs_3D[hash];
+            yo = Lookup<float>::rand_vecs_3D[hash | 1];
+            zo = Lookup<float>::rand_vecs_3D[hash | 2];
         }
 
 
@@ -431,12 +435,12 @@ namespace PFF::util {
             int index1 = hash & (127 << 1);
             int index2 = (hash >> 7) & (255 << 1);
 
-            float xg = Lookup<float>::Gradients2D[index1];
-            float yg = Lookup<float>::Gradients2D[index1 | 1];
+            float xg = Lookup<float>::gradients_2D[index1];
+            float yg = Lookup<float>::gradients_2D[index1 | 1];
             float value = xd * xg + yd * yg;
 
-            float xgo = Lookup<float>::RandVecs2D[index2];
-            float ygo = Lookup<float>::RandVecs2D[index2 | 1];
+            float xgo = Lookup<float>::rand_vecs_2D[index2];
+            float ygo = Lookup<float>::rand_vecs_2D[index2 | 1];
 
             xo = value * xgo;
             yo = value * ygo;
@@ -448,14 +452,14 @@ namespace PFF::util {
             int index1 = hash & (63 << 2);
             int index2 = (hash >> 6) & (255 << 2);
 
-            float xg = Lookup<float>::Gradients3D[index1];
-            float yg = Lookup<float>::Gradients3D[index1 | 1];
-            float zg = Lookup<float>::Gradients3D[index1 | 2];
+            float xg = Lookup<float>::gradients_3D[index1];
+            float yg = Lookup<float>::gradients_3D[index1 | 1];
+            float zg = Lookup<float>::gradients_3D[index1 | 2];
             float value = xd * xg + yd * yg + zd * zg;
 
-            float xgo = Lookup<float>::RandVecs3D[index2];
-            float ygo = Lookup<float>::RandVecs3D[index2 | 1];
-            float zgo = Lookup<float>::RandVecs3D[index2 | 2];
+            float xgo = Lookup<float>::rand_vecs_3D[index2];
+            float ygo = Lookup<float>::rand_vecs_3D[index2 | 1];
+            float zgo = Lookup<float>::rand_vecs_3D[index2 | 2];
 
             xo = value * xgo;
             yo = value * ygo;
@@ -546,7 +550,7 @@ namespace PFF::util {
             z *= m_frequency;
 
             switch (m_transform_type_3D) {
-            case TransformType3D::improve_XY_planes:
+            case rotation_type_3D::improve_XY_planes:
             {
                 FNfloat xy = x + y;
                 FNfloat s2 = xy * -(FNfloat)0.211324865405187;
@@ -556,7 +560,7 @@ namespace PFF::util {
                 z += xy * (FNfloat)0.577350269189626;
             }
             break;
-            case TransformType3D::improveXZ_planes:
+            case rotation_type_3D::improveXZ_planes:
             {
                 FNfloat xz = x + z;
                 FNfloat s2 = xz * -(FNfloat)0.211324865405187;
@@ -566,7 +570,7 @@ namespace PFF::util {
                 y += xz * (FNfloat)0.577350269189626;
             }
             break;
-            case TransformType3D::default_open_simplex2:
+            case rotation_type_3D::default_open_simplex2:
             {
                 const FNfloat R3 = (FNfloat)(2.0 / 3.0);
                 FNfloat r = (x + y + z) * R3; // Rotation, not skew
@@ -607,9 +611,9 @@ namespace PFF::util {
 
         template <typename FNfloat>
         void TransformDomainWarpCoordinate(FNfloat& x, FNfloat& y) const {
-            switch (mDomainWarpType) {
-            case DomainWarpType_OpenSimplex2:
-            case DomainWarpType_OpenSimplex2Reduced:
+            switch (m_domain_warp_type) {
+            case domain_warp_type::OpenSimplex2:
+            case domain_warp_type::OpenSimplex2Reduced:
             {
                 const FNfloat SQRT3 = (FNfloat)1.7320508075688772935274463415059;
                 const FNfloat F2 = 0.5f * (SQRT3 - 1);
@@ -625,7 +629,7 @@ namespace PFF::util {
 
         template <typename FNfloat>
         void TransformDomainWarpCoordinate(FNfloat& x, FNfloat& y, FNfloat& z) const {
-            switch (mWarpTransformType3D) {
+            switch (m_warp_transform_type_3D) {
             case transform_type_3D::ImproveXYPlanes:
             {
                 FNfloat xy = x + y;
@@ -663,19 +667,19 @@ namespace PFF::util {
         void update_warp_transform_type_3D() {
             switch (m_rotation_type_3D) {
             case rotation_type_3D::improve_XY_planes:
-                mWarpTransformType3D = transform_type_3D::ImproveXYPlanes;
+                m_warp_transform_type_3D = transform_type_3D::ImproveXYPlanes;
                 break;
             case rotation_type_3D::improve_XZ_planes:
-                mWarpTransformType3D = transform_type_3D::ImproveXZPlanes;
+                m_warp_transform_type_3D = transform_type_3D::ImproveXZPlanes;
                 break;
             default:
-                switch (mDomainWarpType) {
+                switch (m_domain_warp_type) {
                 case domain_warp_type::OpenSimplex2:
                 case domain_warp_type::OpenSimplex2Reduced:
-                    mWarpTransformType3D = transform_type_3D::DefaultOpenSimplex2;
+                    m_warp_transform_type_3D = transform_type_3D::DefaultOpenSimplex2;
                     break;
                 default:
-                    mWarpTransformType3D = transform_type_3D::None;
+                    m_warp_transform_type_3D = transform_type_3D::None;
                     break;
                 }
                 break;
@@ -1273,8 +1277,8 @@ namespace PFF::util {
                         int hash = Hash(seed, xPrimed, yPrimed);
                         int idx = hash & (255 << 1);
 
-                        float vecX = (float)(xi - x) + Lookup<float>::RandVecs2D[idx] * cellularJitter;
-                        float vecY = (float)(yi - y) + Lookup<float>::RandVecs2D[idx | 1] * cellularJitter;
+                        float vecX = (float)(xi - x) + Lookup<float>::rand_vecs_2D[idx] * cellularJitter;
+                        float vecY = (float)(yi - y) + Lookup<float>::rand_vecs_2D[idx | 1] * cellularJitter;
 
                         float newDistance = vecX * vecX + vecY * vecY;
 
@@ -1296,8 +1300,8 @@ namespace PFF::util {
                         int hash = Hash(seed, xPrimed, yPrimed);
                         int idx = hash & (255 << 1);
 
-                        float vecX = (float)(xi - x) + Lookup<float>::RandVecs2D[idx] * cellularJitter;
-                        float vecY = (float)(yi - y) + Lookup<float>::RandVecs2D[idx | 1] * cellularJitter;
+                        float vecX = (float)(xi - x) + Lookup<float>::rand_vecs_2D[idx] * cellularJitter;
+                        float vecY = (float)(yi - y) + Lookup<float>::rand_vecs_2D[idx | 1] * cellularJitter;
 
                         float newDistance = FastAbs(vecX) + FastAbs(vecY);
 
@@ -1319,8 +1323,8 @@ namespace PFF::util {
                         int hash = Hash(seed, xPrimed, yPrimed);
                         int idx = hash & (255 << 1);
 
-                        float vecX = (float)(xi - x) + Lookup<float>::RandVecs2D[idx] * cellularJitter;
-                        float vecY = (float)(yi - y) + Lookup<float>::RandVecs2D[idx | 1] * cellularJitter;
+                        float vecX = (float)(xi - x) + Lookup<float>::rand_vecs_2D[idx] * cellularJitter;
+                        float vecY = (float)(yi - y) + Lookup<float>::rand_vecs_2D[idx | 1] * cellularJitter;
 
                         float newDistance = (FastAbs(vecX) + FastAbs(vecY)) + (vecX * vecX + vecY * vecY);
 
@@ -1398,9 +1402,9 @@ namespace PFF::util {
                             int hash = Hash(seed, xPrimed, yPrimed, zPrimed);
                             int idx = hash & (255 << 2);
 
-                            float vecX = (float)(xi - x) + Lookup<float>::RandVecs3D[idx] * cellularJitter;
-                            float vecY = (float)(yi - y) + Lookup<float>::RandVecs3D[idx | 1] * cellularJitter;
-                            float vecZ = (float)(zi - z) + Lookup<float>::RandVecs3D[idx | 2] * cellularJitter;
+                            float vecX = (float)(xi - x) + Lookup<float>::rand_vecs_3D[idx] * cellularJitter;
+                            float vecY = (float)(yi - y) + Lookup<float>::rand_vecs_3D[idx | 1] * cellularJitter;
+                            float vecZ = (float)(zi - z) + Lookup<float>::rand_vecs_3D[idx | 2] * cellularJitter;
 
                             float newDistance = vecX * vecX + vecY * vecY + vecZ * vecZ;
 
@@ -1416,7 +1420,7 @@ namespace PFF::util {
                     xPrimed += PrimeX;
                 }
                 break;
-            case cellular_distance_function::Manhattan:
+            case cellular_distance_function::manhattan:
                 for (int xi = xr - 1; xi <= xr + 1; xi++) {
                     int yPrimed = yPrimedBase;
 
@@ -1427,9 +1431,9 @@ namespace PFF::util {
                             int hash = Hash(seed, xPrimed, yPrimed, zPrimed);
                             int idx = hash & (255 << 2);
 
-                            float vecX = (float)(xi - x) + Lookup<float>::RandVecs3D[idx] * cellularJitter;
-                            float vecY = (float)(yi - y) + Lookup<float>::RandVecs3D[idx | 1] * cellularJitter;
-                            float vecZ = (float)(zi - z) + Lookup<float>::RandVecs3D[idx | 2] * cellularJitter;
+                            float vecX = (float)(xi - x) + Lookup<float>::rand_vecs_3D[idx] * cellularJitter;
+                            float vecY = (float)(yi - y) + Lookup<float>::rand_vecs_3D[idx | 1] * cellularJitter;
+                            float vecZ = (float)(zi - z) + Lookup<float>::rand_vecs_3D[idx | 2] * cellularJitter;
 
                             float newDistance = FastAbs(vecX) + FastAbs(vecY) + FastAbs(vecZ);
 
@@ -1445,7 +1449,7 @@ namespace PFF::util {
                     xPrimed += PrimeX;
                 }
                 break;
-            case cellular_distance_function::Hybrid:
+            case cellular_distance_function::hybrid:
                 for (int xi = xr - 1; xi <= xr + 1; xi++) {
                     int yPrimed = yPrimedBase;
 
@@ -1456,9 +1460,9 @@ namespace PFF::util {
                             int hash = Hash(seed, xPrimed, yPrimed, zPrimed);
                             int idx = hash & (255 << 2);
 
-                            float vecX = (float)(xi - x) + Lookup<float>::RandVecs3D[idx] * cellularJitter;
-                            float vecY = (float)(yi - y) + Lookup<float>::RandVecs3D[idx | 1] * cellularJitter;
-                            float vecZ = (float)(zi - z) + Lookup<float>::RandVecs3D[idx | 2] * cellularJitter;
+                            float vecX = (float)(xi - x) + Lookup<float>::rand_vecs_3D[idx] * cellularJitter;
+                            float vecY = (float)(yi - y) + Lookup<float>::rand_vecs_3D[idx | 1] * cellularJitter;
+                            float vecZ = (float)(zi - z) + Lookup<float>::rand_vecs_3D[idx | 2] * cellularJitter;
 
                             float newDistance = (FastAbs(vecX) + FastAbs(vecY) + FastAbs(vecZ)) + (vecX * vecX + vecY * vecY + vecZ * vecZ);
 
@@ -1478,10 +1482,10 @@ namespace PFF::util {
                 break;
             }
 
-            if (m_cellular_distance_function == cellular_distance_function::Euclidean && m_cellular_return_type >= cellular_return_type::Distance) {
+            if (m_cellular_distance_function == cellular_distance_function::euclidean && m_cellular_return_type >= cellular_return_type::distance) {
                 distance0 = FastSqrt(distance0);
 
-                if (m_cellular_return_type >= cellular_return_type::Distance2) {
+                if (m_cellular_return_type >= cellular_return_type::distance_2) {
                     distance1 = FastSqrt(distance1);
                 }
             }
@@ -1490,22 +1494,22 @@ namespace PFF::util {
             case cellular_return_type::CellValue:
                 return closestHash * (1 / 2147483648.0f);
 
-            case cellular_return_type::Distance:
+            case cellular_return_type::distance:
                 return distance0 - 1;
 
-            case cellular_return_type::Distance2:
+            case cellular_return_type::distance_2:
                 return distance1 - 1;
 
-            case cellular_return_type::Distance2Add:
+            case cellular_return_type::distance_2Add:
                 return (distance1 + distance0) * 0.5f - 1;
 
-            case cellular_return_type::Distance2Sub:
+            case cellular_return_type::distance_2Sub:
                 return distance1 - distance0 - 1;
 
-            case cellular_return_type::Distance2Mul:
+            case cellular_return_type::distance_2Mul:
                 return distance1 * distance0 * 0.5f - 1;
 
-            case cellular_return_type::Distance2Div:
+            case cellular_return_type::distance_2Div:
                 return distance0 / distance1 - 1;
             default:
                 return 0;
@@ -1714,14 +1718,14 @@ namespace PFF::util {
 
         template <typename FNfloat>
         void DoSingleDomainWarp(int seed, float amp, float freq, FNfloat x, FNfloat y, FNfloat& xr, FNfloat& yr) const {
-            switch (mDomainWarpType) {
-            case DomainWarpType_OpenSimplex2:
+            switch (m_domain_warp_type) {
+            case domain_warp_type::OpenSimplex2:
                 SingleDomainWarpSimplexGradient(seed, amp * 38.283687591552734375f, freq, x, y, xr, yr, false);
                 break;
-            case DomainWarpType_OpenSimplex2Reduced:
+            case domain_warp_type::OpenSimplex2Reduced:
                 SingleDomainWarpSimplexGradient(seed, amp * 16.0f, freq, x, y, xr, yr, true);
                 break;
-            case DomainWarpType_BasicGrid:
+            case domain_warp_type::BasicGrid:
                 SingleDomainWarpBasicGrid(seed, amp, freq, x, y, xr, yr);
                 break;
             }
@@ -1729,14 +1733,14 @@ namespace PFF::util {
 
         template <typename FNfloat>
         void DoSingleDomainWarp(int seed, float amp, float freq, FNfloat x, FNfloat y, FNfloat z, FNfloat& xr, FNfloat& yr, FNfloat& zr) const {
-            switch (mDomainWarpType) {
-            case DomainWarpType_OpenSimplex2:
+            switch (m_domain_warp_type) {
+            case domain_warp_type::OpenSimplex2:
                 SingleDomainWarpOpenSimplex2Gradient(seed, amp * 32.69428253173828125f, freq, x, y, z, xr, yr, zr, false);
                 break;
-            case DomainWarpType_OpenSimplex2Reduced:
+            case domain_warp_type::OpenSimplex2Reduced:
                 SingleDomainWarpOpenSimplex2Gradient(seed, amp * 7.71604938271605f, freq, x, y, z, xr, yr, zr, true);
                 break;
-            case DomainWarpType_BasicGrid:
+            case domain_warp_type::BasicGrid:
                 SingleDomainWarpBasicGrid(seed, amp, freq, x, y, z, xr, yr, zr);
                 break;
             }
@@ -1748,7 +1752,7 @@ namespace PFF::util {
         template <typename FNfloat>
         void DomainWarpSingle(FNfloat& x, FNfloat& y) const {
             int seed = m_seed;
-            float amp = mDomainWarpAmp * m_fractal_bounding;
+            float amp = m_domain_warp_amp * m_fractal_bounding;
             float freq = m_frequency;
 
             FNfloat xs = x;
@@ -1761,7 +1765,7 @@ namespace PFF::util {
         template <typename FNfloat>
         void DomainWarpSingle(FNfloat& x, FNfloat& y, FNfloat& z) const {
             int seed = m_seed;
-            float amp = mDomainWarpAmp * m_fractal_bounding;
+            float amp = m_domain_warp_amp * m_fractal_bounding;
             float freq = m_frequency;
 
             FNfloat xs = x;
@@ -1778,7 +1782,7 @@ namespace PFF::util {
         template <typename FNfloat>
         void DomainWarpFractalProgressive(FNfloat& x, FNfloat& y) const {
             int seed = m_seed;
-            float amp = mDomainWarpAmp * m_fractal_bounding;
+            float amp = m_domain_warp_amp * m_fractal_bounding;
             float freq = m_frequency;
 
             for (int i = 0; i < m_octaves; i++) {
@@ -1797,7 +1801,7 @@ namespace PFF::util {
         template <typename FNfloat>
         void DomainWarpFractalProgressive(FNfloat& x, FNfloat& y, FNfloat& z) const {
             int seed = m_seed;
-            float amp = mDomainWarpAmp * m_fractal_bounding;
+            float amp = m_domain_warp_amp * m_fractal_bounding;
             float freq = m_frequency;
 
             for (int i = 0; i < m_octaves; i++) {
@@ -1824,7 +1828,7 @@ namespace PFF::util {
             TransformDomainWarpCoordinate(xs, ys);
 
             int seed = m_seed;
-            float amp = mDomainWarpAmp * m_fractal_bounding;
+            float amp = m_domain_warp_amp * m_fractal_bounding;
             float freq = m_frequency;
 
             for (int i = 0; i < m_octaves; i++) {
@@ -1844,7 +1848,7 @@ namespace PFF::util {
             TransformDomainWarpCoordinate(xs, ys, zs);
 
             int seed = m_seed;
-            float amp = mDomainWarpAmp * m_fractal_bounding;
+            float amp = m_domain_warp_amp * m_fractal_bounding;
             float freq = m_frequency;
 
             for (int i = 0; i < m_octaves; i++) {
@@ -1878,14 +1882,14 @@ namespace PFF::util {
             int hash0 = Hash(seed, x0, y0) & (255 << 1);
             int hash1 = Hash(seed, x1, y0) & (255 << 1);
 
-            float lx0x = Lerp(Lookup<float>::RandVecs2D[hash0], Lookup<float>::RandVecs2D[hash1], xs);
-            float ly0x = Lerp(Lookup<float>::RandVecs2D[hash0 | 1], Lookup<float>::RandVecs2D[hash1 | 1], xs);
+            float lx0x = Lerp(Lookup<float>::rand_vecs_2D[hash0], Lookup<float>::rand_vecs_2D[hash1], xs);
+            float ly0x = Lerp(Lookup<float>::rand_vecs_2D[hash0 | 1], Lookup<float>::rand_vecs_2D[hash1 | 1], xs);
 
             hash0 = Hash(seed, x0, y1) & (255 << 1);
             hash1 = Hash(seed, x1, y1) & (255 << 1);
 
-            float lx1x = Lerp(Lookup<float>::RandVecs2D[hash0], Lookup<float>::RandVecs2D[hash1], xs);
-            float ly1x = Lerp(Lookup<float>::RandVecs2D[hash0 | 1], Lookup<float>::RandVecs2D[hash1 | 1], xs);
+            float lx1x = Lerp(Lookup<float>::rand_vecs_2D[hash0], Lookup<float>::rand_vecs_2D[hash1], xs);
+            float ly1x = Lerp(Lookup<float>::rand_vecs_2D[hash0 | 1], Lookup<float>::rand_vecs_2D[hash1 | 1], xs);
 
             xr += Lerp(lx0x, lx1x, ys) * warpAmp;
             yr += Lerp(ly0x, ly1x, ys) * warpAmp;
@@ -1915,16 +1919,16 @@ namespace PFF::util {
             int hash0 = Hash(seed, x0, y0, z0) & (255 << 2);
             int hash1 = Hash(seed, x1, y0, z0) & (255 << 2);
 
-            float lx0x = Lerp(Lookup<float>::RandVecs3D[hash0], Lookup<float>::RandVecs3D[hash1], xs);
-            float ly0x = Lerp(Lookup<float>::RandVecs3D[hash0 | 1], Lookup<float>::RandVecs3D[hash1 | 1], xs);
-            float lz0x = Lerp(Lookup<float>::RandVecs3D[hash0 | 2], Lookup<float>::RandVecs3D[hash1 | 2], xs);
+            float lx0x = Lerp(Lookup<float>::rand_vecs_3D[hash0], Lookup<float>::rand_vecs_3D[hash1], xs);
+            float ly0x = Lerp(Lookup<float>::rand_vecs_3D[hash0 | 1], Lookup<float>::rand_vecs_3D[hash1 | 1], xs);
+            float lz0x = Lerp(Lookup<float>::rand_vecs_3D[hash0 | 2], Lookup<float>::rand_vecs_3D[hash1 | 2], xs);
 
             hash0 = Hash(seed, x0, y1, z0) & (255 << 2);
             hash1 = Hash(seed, x1, y1, z0) & (255 << 2);
 
-            float lx1x = Lerp(Lookup<float>::RandVecs3D[hash0], Lookup<float>::RandVecs3D[hash1], xs);
-            float ly1x = Lerp(Lookup<float>::RandVecs3D[hash0 | 1], Lookup<float>::RandVecs3D[hash1 | 1], xs);
-            float lz1x = Lerp(Lookup<float>::RandVecs3D[hash0 | 2], Lookup<float>::RandVecs3D[hash1 | 2], xs);
+            float lx1x = Lerp(Lookup<float>::rand_vecs_3D[hash0], Lookup<float>::rand_vecs_3D[hash1], xs);
+            float ly1x = Lerp(Lookup<float>::rand_vecs_3D[hash0 | 1], Lookup<float>::rand_vecs_3D[hash1 | 1], xs);
+            float lz1x = Lerp(Lookup<float>::rand_vecs_3D[hash0 | 2], Lookup<float>::rand_vecs_3D[hash1 | 2], xs);
 
             float lx0y = Lerp(lx0x, lx1x, ys);
             float ly0y = Lerp(ly0x, ly1x, ys);
@@ -1933,16 +1937,16 @@ namespace PFF::util {
             hash0 = Hash(seed, x0, y0, z1) & (255 << 2);
             hash1 = Hash(seed, x1, y0, z1) & (255 << 2);
 
-            lx0x = Lerp(Lookup<float>::RandVecs3D[hash0], Lookup<float>::RandVecs3D[hash1], xs);
-            ly0x = Lerp(Lookup<float>::RandVecs3D[hash0 | 1], Lookup<float>::RandVecs3D[hash1 | 1], xs);
-            lz0x = Lerp(Lookup<float>::RandVecs3D[hash0 | 2], Lookup<float>::RandVecs3D[hash1 | 2], xs);
+            lx0x = Lerp(Lookup<float>::rand_vecs_3D[hash0], Lookup<float>::rand_vecs_3D[hash1], xs);
+            ly0x = Lerp(Lookup<float>::rand_vecs_3D[hash0 | 1], Lookup<float>::rand_vecs_3D[hash1 | 1], xs);
+            lz0x = Lerp(Lookup<float>::rand_vecs_3D[hash0 | 2], Lookup<float>::rand_vecs_3D[hash1 | 2], xs);
 
             hash0 = Hash(seed, x0, y1, z1) & (255 << 2);
             hash1 = Hash(seed, x1, y1, z1) & (255 << 2);
 
-            lx1x = Lerp(Lookup<float>::RandVecs3D[hash0], Lookup<float>::RandVecs3D[hash1], xs);
-            ly1x = Lerp(Lookup<float>::RandVecs3D[hash0 | 1], Lookup<float>::RandVecs3D[hash1 | 1], xs);
-            lz1x = Lerp(Lookup<float>::RandVecs3D[hash0 | 2], Lookup<float>::RandVecs3D[hash1 | 2], xs);
+            lx1x = Lerp(Lookup<float>::rand_vecs_3D[hash0], Lookup<float>::rand_vecs_3D[hash1], xs);
+            ly1x = Lerp(Lookup<float>::rand_vecs_3D[hash0 | 1], Lookup<float>::rand_vecs_3D[hash1 | 1], xs);
+            lz1x = Lerp(Lookup<float>::rand_vecs_3D[hash0 | 2], Lookup<float>::rand_vecs_3D[hash1 | 2], xs);
 
             xr += Lerp(lx0y, Lerp(lx0x, lx1x, ys), zs) * warpAmp;
             yr += Lerp(ly0y, Lerp(ly0x, ly1x, ys), zs) * warpAmp;
@@ -2163,7 +2167,7 @@ namespace PFF::util {
     struct noise::Arguments_must_be_floating_point_values<f128> {};
 
     template <typename T>
-    const T noise::Lookup<T>::Gradients2D[] =
+    const T noise::Lookup<T>::gradients_2D[] =
     {
         0.130526192220052f, 0.99144486137381f, 0.38268343236509f, 0.923879532511287f, 0.608761429008721f, 0.793353340291235f, 0.793353340291235f, 0.608761429008721f,
         0.923879532511287f, 0.38268343236509f, 0.99144486137381f, 0.130526192220051f, 0.99144486137381f, -0.130526192220051f, 0.923879532511287f, -0.38268343236509f,
@@ -2200,7 +2204,7 @@ namespace PFF::util {
     };
 
     template <typename T>
-    const T noise::Lookup<T>::RandVecs2D[] =
+    const T noise::Lookup<T>::rand_vecs_2D[] =
     {
         -0.2700222198f, -0.9628540911f, 0.3863092627f, -0.9223693152f, 0.04444859006f, -0.999011673f, -0.5992523158f, -0.8005602176f, -0.7819280288f, 0.6233687174f, 0.9464672271f, 0.3227999196f, -0.6514146797f, -0.7587218957f, 0.9378472289f, 0.347048376f,
         -0.8497875957f, -0.5271252623f, -0.879042592f, 0.4767432447f, -0.892300288f, -0.4514423508f, -0.379844434f, -0.9250503802f, -0.9951650832f, 0.0982163789f, 0.7724397808f, -0.6350880136f, 0.7573283322f, -0.6530343002f, -0.9928004525f, -0.119780055f,
@@ -2237,7 +2241,7 @@ namespace PFF::util {
     };
 
     template <typename T>
-    const T noise::Lookup<T>::Gradients3D[] =
+    const T noise::Lookup<T>::gradients_3D[] =
     {
         0, 1, 1, 0,  0,-1, 1, 0,  0, 1,-1, 0,  0,-1,-1, 0,
         1, 0, 1, 0, -1, 0, 1, 0,  1, 0,-1, 0, -1, 0,-1, 0,
@@ -2258,7 +2262,7 @@ namespace PFF::util {
     };
 
     template <typename T>
-    const T noise::Lookup<T>::RandVecs3D[] =
+    const T noise::Lookup<T>::rand_vecs_3D[] =
     {
         -0.7292736885f, -0.6618439697f, 0.1735581948f, 0, 0.790292081f, -0.5480887466f, -0.2739291014f, 0, 0.7217578935f, 0.6226212466f, -0.3023380997f, 0, 0.565683137f, -0.8208298145f, -0.0790000257f, 0, 0.760049034f, -0.5555979497f, -0.3370999617f, 0, 0.3713945616f, 0.5011264475f, 0.7816254623f, 0, -0.1277062463f, -0.4254438999f, -0.8959289049f, 0, -0.2881560924f, -0.5815838982f, 0.7607405838f, 0,
         0.5849561111f, -0.662820239f, -0.4674352136f, 0, 0.3307171178f, 0.0391653737f, 0.94291689f, 0, 0.8712121778f, -0.4113374369f, -0.2679381538f, 0, 0.580981015f, 0.7021915846f, 0.4115677815f, 0, 0.503756873f, 0.6330056931f, -0.5878203852f, 0, 0.4493712205f, 0.601390195f, 0.6606022552f, 0, -0.6878403724f, 0.09018890807f, -0.7202371714f, 0, -0.5958956522f, -0.6469350577f, 0.475797649f, 0,

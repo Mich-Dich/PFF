@@ -91,11 +91,13 @@ namespace PFF {
 				break;
 			}
 
+			const std::string path_string = entry.path().filename().string();
+
 			// --------------------------------------------- THIS CODE HERE ---------------------------------------------
 			if (has_sub_folders) {
 
 				ImGui::PushID(hash_path(entry.path()));
-				bool buffer = ImGui::TreeNodeEx(("##" + entry.path().filename().string()).c_str(), base_flags);				// Create tree node without the label
+				bool buffer = ImGui::TreeNodeEx(("##" + path_string).c_str(), base_flags);				// Create tree node without the label
 				ImGui::PopID();
 
 				ImGui::SameLine(0, 2);																						// Place everything on same line
@@ -107,7 +109,7 @@ namespace PFF {
 					ImGui::Image(m_folder_closed_image->get_descriptor_set(), folder_closed_icon_size, ImVec2(0, 0), ImVec2(1, 1), UI::get_main_color_ref());
 
 				ImGui::SameLine(0, 2);
-				ImGui::Text("%s", entry.path().filename().string().c_str());												// Draw folder name text
+				ImGui::Text("%s", path_string.c_str());												// Draw folder name text
 				ImGui::EndGroup();
 				
 				if (ImGui::IsItemClicked())
@@ -129,7 +131,7 @@ namespace PFF {
 				ImGui::BeginGroup();																						// Similar modification for leaf nodes
 				ImGui::Image(m_folder_closed_image->get_descriptor_set(), folder_closed_icon_size, ImVec2(0, 0), ImVec2(1, 1), UI::get_main_color_ref());
 				ImGui::SameLine(0, 2);
-				ImGui::Text("%s", entry.path().filename().string().c_str());
+				ImGui::Text("%s", path_string.c_str());
 				ImGui::EndGroup();
 				
 				if (ImGui::IsItemClicked() && !ImGui::IsItemToggledOpen())
@@ -222,7 +224,9 @@ namespace PFF {
 
 			// Handle drag source for files
 			if (ImGui::BeginDragDropSource(ImGuiDragDropFlags_SourceAllowNullID)) {
-				ImGui::SetDragDropPayload("PROJECT_CONTENT_FOLDER", entry.path().string().c_str(), entry.path().string().length() + 1);
+
+				const std::string path_string = entry.path().string();
+				ImGui::SetDragDropPayload("PROJECT_CONTENT_FOLDER", path_string.c_str(), path_string.length() + 1);
 
 				ImGui::Image(m_folder_image->get_descriptor_set(), m_icon_size, ImVec2(0, 0), ImVec2(1, 1), UI::get_action_color_gray_active_ref());
 				ImGui::TextWrapped("%s", item_name.c_str());
@@ -330,7 +334,9 @@ namespace PFF {
 
 		// Handle drag source for files
 		if (ImGui::BeginDragDropSource(ImGuiDragDropFlags_SourceAllowNullID)) {
-			ImGui::SetDragDropPayload(playload_name, file_path.string().c_str(), file_path.string().length() + 1);
+
+			const std::string path_string = file_path.string();
+			ImGui::SetDragDropPayload(playload_name, path_string.c_str(), path_string.length() + 1);
 
 			ImGui::Image(m_mesh_asset_image->get_descriptor_set(), m_icon_size);
 			ImGui::TextWrapped("%s", item_name.c_str());
@@ -386,7 +392,7 @@ namespace PFF {
 		UI::custom_frame_NEW(350, true, UI::get_default_gray_1_ref(), [&]() {
 
 			folder_display_window = ImGui::GetCurrentWindow();
-			bool buffer = ImGui::TreeNodeEx((m_project_directory / CONTENT_DIR).filename().string().c_str(), base_flags | ImGuiTreeNodeFlags_DefaultOpen);
+			bool buffer = ImGui::TreeNodeEx(CONTENT_DIR, base_flags | ImGuiTreeNodeFlags_DefaultOpen);
 			if (ImGui::IsItemClicked())
 				select_new_directory(m_project_directory / CONTENT_DIR);
 
@@ -423,7 +429,8 @@ namespace PFF {
 			for (const auto& part : m_partial_selected_directory) {
 
 				current_path /= part;
-				if (UI::gray_button(part.string().c_str())) {
+				const std::string part_string = part.string();
+				if (UI::gray_button(part_string.c_str())) {
 
 					select_new_directory(m_project_directory / current_path);
 					break;
