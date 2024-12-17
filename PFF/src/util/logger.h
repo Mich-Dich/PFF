@@ -31,7 +31,7 @@ namespace PFF {
 		// Initializes the logging system.
 		// @param [Format] The initial log format.
 		// @return [bool] Returns true if the initialization is successful, false otherwise.
-		PFF_API bool init(const std::string& format);
+		bool init(const std::string& format);
 
 		// Formating the LogMessages can be customised with the following tags
 		// to format all following Log Messages use: set_Formating(char* format);
@@ -61,12 +61,12 @@ namespace PFF {
 		// @param $E		Color End			from here the color ends
 		// @param $C		Text				Formated Message with variables
 		// @param $Z		New Line			Adds a new Line to the log
-		PFF_API void set_format(const std::string& format);
+		void set_format(const std::string& format);
 
 		//Restores the previous log message format
 		//	@brief This function swaps the current log message format with the previously stored backup.
 		//	It is useful for reverting to a previous format after temporary changes.
-		PFF_API void use_format_backup();
+		void use_format_backup();
 
 		// Define witch log levels should be written to log file directly and witch should be buffered
 		// @param 0    =>   write all logs directly to log file
@@ -74,10 +74,10 @@ namespace PFF {
 		// @param 2    =>   buffer: TRACE + DEBUG
 		// @param 3    =>   buffer: TRACE + DEBUG + INFO
 		// @param 4    =>   buffer: TRACE + DEBUG + INFO + WARN
-		PFF_API void set_buffer_Level(int newLevel);
+		void set_buffer_Level(int newLevel);
 
 
-		class PFF_API log_message : public std::ostringstream {
+		class log_message : public std::ostringstream {
 		public:
 
 			log_message(log_msg_severity severity, const char* fileName, const char* funcName, int line);

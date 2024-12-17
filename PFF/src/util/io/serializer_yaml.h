@@ -4,7 +4,7 @@
 
 namespace PFF::serializer {
 
-	class PFF_API yaml {
+	class yaml {
 	public:
 
 		yaml(const std::filesystem::path filename, const std::string& section_name, option option);

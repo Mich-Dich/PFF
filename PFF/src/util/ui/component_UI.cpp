@@ -140,7 +140,7 @@ namespace PFF::UI {
 
 	}
 
-	PFF_API void display_tag_comp(PFF::entity entity) {
+	void display_tag_comp(PFF::entity entity) {
 
 		UI::try_display_component<tag_component>("Tag", entity, [](auto& component) {
 
@@ -149,7 +149,7 @@ namespace PFF::UI {
 		});
 	}
 
-	PFF_API void display_transform_comp(PFF::entity entity) {
+	void display_transform_comp(PFF::entity entity) {
 
 		UI::try_display_component<transform_component>("Transform", entity, [&](auto& component) {
 

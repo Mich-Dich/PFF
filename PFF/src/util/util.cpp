@@ -24,49 +24,41 @@
 
 namespace PFF::util {
 
-    glm::vec3 util::random::get_vec3(f32 min, f32 max)      { return glm::vec3(get<f32>(min, max), get<f32>(min, max), get<f32>(min, max)); }
-
-    bool random::get_percent(f32 percentage)                { return get<f32>(0.f, 1.f) < percentage; }
-
-    //f32 random::get_f32(f32 min, f32 max) {
-    //    std::uniform_real_distribution<f32> dist(min, max);
-    //    return dist(engine);
+    //glm::vec3 util::random::get_vec3(f32 min, f32 max)      { return glm::vec3(get<f32>(min, max), get<f32>(min, max), get<f32>(min, max)); }
+    //
+    //bool random::get_percent(f32 percentage)                { return get<f32>(0.f, 1.f) < percentage; }
+    //
+    ////f32 random::get_f32(f32 min, f32 max) {
+    ////    std::uniform_real_distribution<f32> dist(min, max);
+    ////    return dist(engine);
+    ////}
+    //
+    ////f64 random::get_f64(f64 min, f64 max) {
+    ////    std::uniform_real_distribution<f64> dist(min, max);
+    ////    return dist(engine);
+    ////}
+    //
+    ////u32 random::get_u32(u32 min, u32 max) {
+    ////    std::uniform_int_distribution<u32> dist(min, max);
+    ////    return dist(engine);
+    ////}
+    //
+    ////u64 random::get_u64(u64 min, u64 max) {
+    ////    std::uniform_int_distribution<u64> dist(min, max);
+    ////    return dist(engine);
+    ////}
+    //
+    //
+    //std::string util::random::get_string(const size_t length) {
+    //
+    //    const std::string charset = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789";
+    //    std::uniform_int_distribution<size_t> dist(0, charset.size() - 1);
+    //
+    //    std::string result;
+    //    result.resize(length);
+    //    std::generate(result.begin(), result.end(), [&]() { return charset[dist(engine)]; });
+    //    return result;
     //}
-
-    //f64 random::get_f64(f64 min, f64 max) {
-    //    std::uniform_real_distribution<f64> dist(min, max);
-    //    return dist(engine);
-    //}
-
-    //u32 random::get_u32(u32 min, u32 max) {
-    //    std::uniform_int_distribution<u32> dist(min, max);
-    //    return dist(engine);
-    //}
-
-    //u64 random::get_u64(u64 min, u64 max) {
-    //    std::uniform_int_distribution<u64> dist(min, max);
-    //    return dist(engine);
-    //}
-
-
-    std::string util::random::get_string(const size_t length) {
-
-        const std::string charset = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789";
-        std::uniform_int_distribution<size_t> dist(0, charset.size() - 1);
-
-        std::string result;
-        result.resize(length);
-        std::generate(result.begin(), result.end(), [&]() { return charset[dist(engine)]; });
-        return result;
-    }
-
-
-    void simple_deletion_queue::flush() {
-
-        for (auto it = m_functions.rbegin(); it != m_functions.rend(); it++)
-            (*it)();
-        m_functions.clear();
-    }
 
 
     bool run_program(const std::filesystem::path& path_to_exe, const std::string& cmd_args, bool open_console) { return run_program(path_to_exe, cmd_args.c_str(), open_console); }
@@ -123,40 +115,6 @@ namespace PFF::util {
     }
 
 
-    void extract_part_after_delimiter(std::string& dest, const std::string& input, const char* delimiter) {
-
-        size_t found = input.find_last_of(delimiter);
-        if (found != std::string::npos) {
-
-            dest = input.substr(found + 1);
-            return;
-        }
-
-        return; // If delimiter is not found
-    }
-
-
-    void extract_part_befor_delimiter(std::string& dest, const std::string& input, const char* delimiter) {
-
-        size_t found = input.find_last_of(delimiter);
-        if (found != std::string::npos) {
-
-            dest = input.substr(0, found);
-            return;
-        }
-
-        return; // If delimiter is not found
-    }
-
-    std::string extract_vaiable_name(const std::string& input) {
-
-        std::string result = input;
-        extract_part_after_delimiter(result, input, "->");
-        extract_part_after_delimiter(result, result, ".");
-
-        return result;
-    }
-    
 
     void high_precision_sleep(f32 duration_in_milliseconds) {
 
@@ -175,80 +133,80 @@ namespace PFF::util {
     }
 
 
-    bool util::is_valid_project_dir(const std::filesystem::path& path) {
+    //bool util::is_valid_project_dir(const std::filesystem::path& path) {
 
-        if (!std::filesystem::exists(path) || !std::filesystem::is_directory(path))
-            return false;
+    //    if (!std::filesystem::exists(path) || !std::filesystem::is_directory(path))
+    //        return false;
 
-        for (const auto& entry : std::filesystem::directory_iterator(path)) {
-            if (entry.is_regular_file() && entry.path().extension() == PFF_PROJECT_EXTENTION)
-                return true; // found a project file
-        }
+    //    for (const auto& entry : std::filesystem::directory_iterator(path)) {
+            //if (entry.is_regular_file() && entry.path().extension() == PFF_PROJECT_EXTENTION)
+    //            return true; // found a project file
+    //    }
 
-        return false;
-    }
-
-
-    std::filesystem::path extract_path_from_project_folder(const std::filesystem::path& full_path) {
-
-        std::string full_path_str = full_path.string();
-        std::string folder_marker = std::string(CONTENT_DIR);
-        size_t pos = full_path_str.find(folder_marker);
-        if (pos != std::string::npos) {
-
-            std::string result_str = full_path_str.substr(pos);
-            return std::filesystem::path(result_str);
-
-        } else {
-
-            CORE_LOG(Trace, "NOT FOUND");
-            return {};
-        }
-    }
+    //    return false;
+    //}
 
 
-    std::filesystem::path extract_path_from_project_content_folder(const std::filesystem::path& full_path) {
+    //std::filesystem::path extract_path_from_project_folder(const std::filesystem::path& full_path) {
 
-        std::filesystem::path result;
-        bool start_adding = false;
+    //    std::string full_path_str = full_path.string();
+    //    std::string folder_marker = std::string(CONTENT_DIR);
+    //    size_t pos = full_path_str.find(folder_marker);
+    //    if (pos != std::string::npos) {
 
-        for (const auto& part : full_path) {
+    //        std::string result_str = full_path_str.substr(pos);
+    //        return std::filesystem::path(result_str);
 
-            if (start_adding)
-                result /= part;  // Add the part to the result path
+    //    } else {
 
-            if (part == std::string(CONTENT_DIR))
-                start_adding = true;
-        }
-        return result;
-    }
+    //        CORE_LOG(Trace, "NOT FOUND");
+    //        return {};
+    //    }
+    //}
 
-    
-    std::filesystem::path extract_path_from_directory(const std::filesystem::path& full_path, const std::string& directory) {
 
-        std::filesystem::path result;
-        bool start_adding = false;
+    //std::filesystem::path extract_path_from_project_content_folder(const std::filesystem::path& full_path) {
 
-        for (const auto& part : full_path) {
+    //    std::filesystem::path result;
+    //    bool start_adding = false;
 
-            if (start_adding)
-                result /= part;  // Add the part to the result path
+    //    for (const auto& part : full_path) {
 
-            if (part == directory)
-                start_adding = true;
-        }
-        return result;
-    }
-    
+    //        if (start_adding)
+    //            result /= part;  // Add the part to the result path
 
-    void util::cancel_timer(timer& timer) {
+    //        if (part == std::string(CONTENT_DIR))
+    //            start_adding = true;
+    //    }
+    //    return result;
+    //}
 
-        timer.shared_state->first = true;
-        timer.shared_state->second.notify_one();
-        if (timer.future.valid()) {
-            timer.future.wait();
-        }
-    }
+    //
+    //std::filesystem::path extract_path_from_directory(const std::filesystem::path& full_path, const std::string& directory) {
+
+    //    std::filesystem::path result;
+    //    bool start_adding = false;
+
+    //    for (const auto& part : full_path) {
+
+    //        if (start_adding)
+    //            result /= part;  // Add the part to the result path
+
+    //        if (part == directory)
+    //            start_adding = true;
+    //    }
+    //    return result;
+    //}
+    //
+
+    //void util::cancel_timer(timer& timer) {
+
+    //    timer.shared_state->first = true;
+    //    timer.shared_state->second.notify_one();
+    //    if (timer.future.valid()) {
+    //        timer.future.wait();
+    //    }
+    //}
 
 
     std::filesystem::path file_dialog(const std::string& title, const std::vector<std::pair<std::string, std::string>>& filters) {
@@ -365,8 +323,8 @@ namespace PFF::util {
             return result;
         }
 
-        PFF_API std::filesystem::path get_executable_path() {
-            return PFF_API std::filesystem::path();
+        std::filesystem::path get_executable_path() {
+            return std::filesystem::path();
         }
 
         }
@@ -446,47 +404,47 @@ namespace PFF::util {
         return loc_system_time;
     }
 
-    std::string add_spaces(const u32 multiple_of_indenting_spaces, u32 num_of_indenting_spaces) {
+    //std::string add_spaces(const u32 multiple_of_indenting_spaces, u32 num_of_indenting_spaces) {
 
-        if (multiple_of_indenting_spaces == 0)
-            return "";
+    //    if (multiple_of_indenting_spaces == 0)
+    //        return "";
 
-        return std::string(multiple_of_indenting_spaces * num_of_indenting_spaces, ' ');
-    }
+    //    return std::string(multiple_of_indenting_spaces * num_of_indenting_spaces, ' ');
+    //}
 
 
-    u32 measure_indentation(const std::string& str, u32 num_of_indenting_spaces) {
+    //u32 measure_indentation(const std::string& str, u32 num_of_indenting_spaces) {
 
-        u32 count = 0;
-        for (char ch : str) {
-            if (ch == ' ')
-                count++;
-            else
-                break; // Stop counting on non-space characters
-        }
+    //    u32 count = 0;
+    //    for (char ch : str) {
+    //        if (ch == ' ')
+    //            count++;
+    //        else
+    //            break; // Stop counting on non-space characters
+    //    }
 
-        return count / num_of_indenting_spaces;
-    }
+    //    return count / num_of_indenting_spaces;
+    //}
 
-    int count_lines(const char* text) {
+    //int count_lines(const char* text) {
 
-        if (text[0] == '\0')
-            return 1;
+    //    if (text[0] == '\0')
+    //        return 1;
 
-        int line_count = 0;
-        for (int i = 0; i < 256; ++i) {
-            if (text[i] == '\0')
-                break;
+    //    int line_count = 0;
+    //    for (int i = 0; i < 256; ++i) {
+    //        if (text[i] == '\0')
+    //            break;
 
-            if (text[i] == '\n')
-                ++line_count;
-        }
+    //        if (text[i] == '\n')
+    //            ++line_count;
+    //    }
 
-        // If the last character is not a newline and the string is not empty, count the last line
-        if (text[0] != '\0' && text[255] != '\n')
-            ++line_count;
+    //    // If the last character is not a newline and the string is not empty, count the last line
+    //    if (text[0] != '\0' && text[255] != '\n')
+    //        ++line_count;
 
-        return line_count;
-    }
+    //    return line_count;
+    //}
 
 }

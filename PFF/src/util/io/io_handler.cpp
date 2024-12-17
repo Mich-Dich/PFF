@@ -87,7 +87,7 @@ namespace PFF::io_handler {
 		return true;
 	}
 
-	PFF_API std::vector<std::string> get_processes_using_file(const std::wstring& filePath) {
+	std::vector<std::string> get_processes_using_file(const std::wstring& filePath) {
 
 #ifdef PFF_PLATFORM_WINDOWS
 

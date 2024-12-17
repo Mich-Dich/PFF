@@ -39,7 +39,7 @@ namespace PFF {
                 } CORE_LOG(Info, message << " => sample count: " << num_of_iterations << " average duration: " << (duration / (f64)num_of_iterations) << PFF_DURATION_##profile_duration_precision);  \
             }
 
-		class PFF_API simple_profiler {
+		class simple_profiler {
 		public:
 
 			simple_profiler(u64 num_of_tests, std::string message, PFF::duration_precision presition = PFF::duration_precision::milliseconds)

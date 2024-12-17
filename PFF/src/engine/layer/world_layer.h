@@ -8,7 +8,7 @@
 
 namespace PFF {
 	
-	class PFF_API_EDITOR world_layer : public layer {
+	class world_layer : public layer {
 	public:
 
 		world_layer();

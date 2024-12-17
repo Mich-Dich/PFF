@@ -2,7 +2,7 @@
 
 namespace PFF {
 
-	class PFF_API UUID {
+	class UUID {
 	public:
 
 		PFF_DEFAULT_COPY_CONSTRUCTOR(UUID);

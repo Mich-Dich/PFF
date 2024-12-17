@@ -4,7 +4,7 @@ project "PFF"
 	kind "SharedLib"
 	staticruntime "off"
 	language "C++"
-	cppdialect "C++17"
+	cppdialect "C++20"
 
 	targetdir ("%{wks.location}/bin/" .. outputs  .. "/%{prj.name}")
 	objdir ("%{wks.location}/bin-int/" .. outputs  .. "/%{prj.name}")
@@ -49,7 +49,6 @@ project "PFF"
 	
 	links
 	{
-        -- "stdc++",
 		"glfw",
 		"imgui",
         "%{Library.Vulkan}",

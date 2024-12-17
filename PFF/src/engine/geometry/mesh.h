@@ -16,14 +16,14 @@ namespace PFF {
 
 namespace PFF::geometry {
     
-    struct PFF_API bounds {
+    struct bounds {
 
         glm::vec3   origin{};
         f32         sphere_radius{};
         glm::vec3   extents{};          // AABB
     };
     
-    struct PFF_API Geo_surface {
+    struct Geo_surface {
 
         u32         startIndex = 0;
         u32         count = 0;
@@ -36,7 +36,7 @@ namespace PFF::geometry {
 
 
     // wierd layout because of alignement limitations on GPU
-    struct PFF_API vertex {
+    struct vertex {
 
         vertex() {}
         vertex(const glm::vec3& pos, const glm::vec3& norm, const glm::vec4& col, const f32 uv_x, const f32 uv_y)
@@ -51,7 +51,7 @@ namespace PFF::geometry {
         glm::vec4                           color{};
     };
 
-    struct PFF_API mesh_asset {
+    struct mesh_asset {
 
         mesh_asset(std::vector<u32> indices = {}, std::vector<vertex> vertices = {})
 			: indices(indices), vertices(vertices) {};
@@ -66,7 +66,7 @@ namespace PFF::geometry {
         bounds                              bounds{};
 	};
 
-    struct PFF_API procedural_mesh_asset : public mesh_asset {
+    struct procedural_mesh_asset : public mesh_asset {
 
         procedural_mesh_asset(std::vector<u32> indices = {}, std::vector<vertex> vertices = {})
             : mesh_asset(indices, vertices) {}

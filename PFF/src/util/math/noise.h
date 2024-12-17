@@ -107,7 +107,7 @@ namespace PFF::util {
         BasicGrid
     };
 
-    class PFF_API noise {
+    class noise {
     public:
 
         // @brief Create new FastNoise object with optional seed

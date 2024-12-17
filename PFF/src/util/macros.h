@@ -90,12 +90,12 @@ name& operator=(name&&) = default;
 																PFF_DEFAULT_GETTER_POINTER(type, name)
 
 // ------------------------------------------- function for header -------------------------------------------
-#define PFF_GETTER_FUNC(type, name)								PFF_API FORCEINLINE type get_##name();
-#define PFF_GETTER_REF_FUNC(type, name)							PFF_API FORCEINLINE type& get_##name##_ref();
-#define PFF_GETTER_C_FUNC(type, name)							PFF_API FORCEINLINE type get_##name() const;
-#define PFF_GETTER_POINTER_FUNC(type, name)						PFF_API FORCEINLINE type* get_##name##_pointer();
+#define PFF_GETTER_FUNC(type, name)								FORCEINLINE type get_##name();
+#define PFF_GETTER_REF_FUNC(type, name)							FORCEINLINE type& get_##name##_ref();
+#define PFF_GETTER_C_FUNC(type, name)							FORCEINLINE type get_##name() const;
+#define PFF_GETTER_POINTER_FUNC(type, name)						FORCEINLINE type* get_##name##_pointer();
 
-#define PFF_SETTER_FUNC(type, name)								PFF_API FORCEINLINE void set_##name(type name);
+#define PFF_SETTER_FUNC(type, name)								FORCEINLINE void set_##name(type name);
 
 #define PFF_GETTER_SETTER_FUNC(type, name)						PFF_GETTER_FUNC(type, name)													\
 																PFF_SETTER_FUNC(type, name)

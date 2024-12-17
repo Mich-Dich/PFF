@@ -11,7 +11,7 @@
 
 namespace PFF {
 
-	class PFF_API entity {
+	class entity {
 	public:
 
 		template<typename T>

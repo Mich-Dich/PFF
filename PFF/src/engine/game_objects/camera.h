@@ -6,7 +6,7 @@
 
 namespace PFF {
 
-	class PFF_API camera {
+	class camera {
 	public:
 
 		camera();

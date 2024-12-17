@@ -14,7 +14,7 @@ namespace PFF {
 	};
 
 
-	class PFF_API file_watcher_system {
+	class file_watcher_system {
 	public:
 
 		file_watcher_system();

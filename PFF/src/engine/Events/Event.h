@@ -34,7 +34,7 @@ namespace PFF {
 													return ss.str();}
 
 
-	class PFF_API event {
+	class event {
 
 	public:
 		event() {}
@@ -51,7 +51,7 @@ namespace PFF {
 	};
 	FORCEINLINE std::ostream& operator<<(std::ostream & os, const event & e) { return os << e.to_string(); }
 
-	class PFF_API event_dispatcher {
+	class event_dispatcher {
 
 		template<typename T>
 		using EventFn = std::function<bool(T&)>;

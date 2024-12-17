@@ -4,7 +4,7 @@
 
 namespace PFF::serializer {
 
-	class PFF_API binary {
+	class binary {
 	public:
 
 		PFF_DELETE_COPY_MOVE_CONSTRUCTOR(binary);

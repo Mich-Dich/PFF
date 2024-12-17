@@ -4,7 +4,7 @@
 
 namespace PFF {
 
-	class PFF_API static_mesh_asset_manager {
+	class static_mesh_asset_manager {
 	public:
 
 		//static static_mesh_asset_manager& get() { return s_instance; }

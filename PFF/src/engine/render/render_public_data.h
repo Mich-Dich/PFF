@@ -23,7 +23,7 @@ namespace PFF::render {
 		Metal = 4,
 	};
 
-	struct PFF_API GPU_mesh_buffers {
+	struct GPU_mesh_buffers {
 
 #if defined PFF_RENDER_API_VULKAN
 		vk_buffer			index_buffer{};

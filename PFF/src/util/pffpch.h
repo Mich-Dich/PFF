@@ -65,25 +65,7 @@
 	#error Unsupported OS detected
 #endif
 
-// ==================================================================================  utils  ==================================================================================
 
-#include "util/math/noise.h"
-#include "util/math/constance.h"
-#include "util/math/random.h"					// <= currently empty MAYBE: move random from util here
-
-#include "macros.h"
-#include "util/util.h"
-
-//#include "util/io/config.h"					// IO stuuff
-//#include "util/io/io_handler.h"
-#include "util/io/serializer_data.h"			//			serializer stuff
-#include "util/io/serializer_yaml.h"
-#include "util/io/serializer_binary.h"
-
-#include "util/profiling/stopwatch.h"
-#include "util/profiling/instrumentor.h"
-//#include "util/math/random.h"
-
-// ==================================================================================  for application use  ==================================================================================
-
-#include "UUID.h"
+// ------------------------------- independent files (single includes) -------------------------------
+#include "util/data_types.h"
+#include "util/logger.h"

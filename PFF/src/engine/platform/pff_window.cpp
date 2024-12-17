@@ -300,7 +300,7 @@ namespace PFF {
 		//application::set_render_state(system_state::active);
 	}
 
-	PFF_API void pff_window::show_titlebar(bool show) {
+	void pff_window::show_titlebar(bool show) {
 		
 		glfwWindowHint(GLFW_TITLEBAR, show ? GLFW_TRUE : GLFW_FALSE);
 	}

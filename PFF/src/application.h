@@ -26,7 +26,7 @@ namespace PFF {
 	class camera;
 	class PFF::render::vulkan::vk_renderer;
 
-	class PFF_API application {
+	class application {
 	public:
 
 		application();

@@ -11,7 +11,7 @@ namespace PFF {
 	class mouse_event;
 	class world_layer;
 
-	class PFF_API player_controller {	
+	class player_controller {	
 	public:
 
 		player_controller();

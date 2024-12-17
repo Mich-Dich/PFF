@@ -12,7 +12,7 @@ namespace PFF {
 	// @brief The map class represents a segment of the in-game world, functioning as a chunk in the world layer.
 	// @brief A large in-game world can be split into different chunks, each represented by a map. The map can be as large as needed.
 	// @brief Active maps are those that the engine should display, and they are managed within the world_layer, which contains multiple maps
-	class PFF_API map {
+	class map {
 	public:
 
 		map();

@@ -8,13 +8,13 @@
 
 namespace PFF {
     
-    enum class PFF_API image_format {
+    enum class image_format {
         None = 0,
         RGBA,
         RGBA32F
     };
 
-    class PFF_API image {
+    class image {
     public:
 
 #if defined PFF_RENDER_API_VULKAN

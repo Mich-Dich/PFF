@@ -622,7 +622,7 @@ namespace PFF::UI {
 		UI::progressbar_with_text("", progress_bar_text, percent, 0.0f, column_width, progressbar_size_y);
 	}
 
-	PFF_API bool begin_collapsing_header_section(const char* lable) {
+	bool begin_collapsing_header_section(const char* lable) {
 
 		ImGui::Indent();
 		bool buffer = ImGui::CollapsingHeader(lable, ImGuiTreeNodeFlags_DefaultOpen);
@@ -633,7 +633,7 @@ namespace PFF::UI {
 		return buffer;
 	}
 
-	PFF_API void end_collapsing_header_section() {
+	void end_collapsing_header_section() {
 		ImGui::Unindent();
 	}
 

@@ -6,7 +6,7 @@
 
 namespace PFF {
 
-	class PFF_API entity_script {
+	class entity_script {
 	public:
 
 		virtual ~entity_script() {}

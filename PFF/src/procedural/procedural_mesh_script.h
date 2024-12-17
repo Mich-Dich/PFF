@@ -9,7 +9,7 @@ namespace PFF {
 	
 	struct procedural_mesh_component;
 
-	class PFF_API procedural_mesh_script : public entity_script {
+	class procedural_mesh_script : public entity_script {
 	public:
 
 		procedural_mesh_script();

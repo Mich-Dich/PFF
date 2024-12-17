@@ -45,10 +45,10 @@ namespace PFF::UI {
 	PFF_GETTER_REF_FUNC(ImVec4, action_color_gray_hover);
 	PFF_GETTER_REF_FUNC(ImVec4, action_color_gray_active);
 
-	void PFF_API set_UI_theme_selection(theme_selection theme_selection);
-	void PFF_API enable_window_border(bool enable);
-	void PFF_API update_UI_theme();
-	void PFF_API update_UI_colors(ImVec4 new_color);
+	void set_UI_theme_selection(theme_selection theme_selection);
+	void enable_window_border(bool enable);
+	void update_UI_theme();
+	void update_UI_colors(ImVec4 new_color);
 
 
 	class imgui_layer : public layer {
@@ -69,10 +69,10 @@ namespace PFF::UI {
 		void on_imgui_render() override;
 		void serialize(PFF::serializer::option option);
 		
-		void PFF_API show_renderer_metrik();
-		void PFF_API show_FPS();
+		void show_renderer_metrik();
+		void show_FPS();
 		
-		PFF_API_EDITOR ImFont* get_font(const std::string& name = "default");
+		ImFont* get_font(const std::string& name = "default");
 
 		ImGuiID m_viewport_ID{};
 

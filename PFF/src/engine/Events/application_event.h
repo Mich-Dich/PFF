@@ -5,7 +5,7 @@
 
 namespace PFF {
 
-	class PFF_API window_resize_event : public event {
+	class window_resize_event : public event {
 	public:
 
 		window_resize_event(u32 width, u32 height) : m_width(width), m_height(height) {}
@@ -21,7 +21,7 @@ namespace PFF {
 		u32 m_width, m_height;
 	};
 
-	class PFF_API window_focus_event : public event {
+	class window_focus_event : public event {
 	public:
 
 		window_focus_event(bool focus) : m_focus(focus) {}
@@ -36,7 +36,7 @@ namespace PFF {
 		bool m_focus;
 	};
 
-	class PFF_API window_close_event : public event {
+	class window_close_event : public event {
 	public:
 
 		window_close_event() {}
@@ -45,7 +45,7 @@ namespace PFF {
 		EVENT_CLASS_CATEGORY(EC_Application);
 	};
 
-	class PFF_API window_refresh_event : public event {
+	class window_refresh_event : public event {
 	public:
 
 		window_refresh_event() {}
@@ -54,7 +54,7 @@ namespace PFF {
 		EVENT_CLASS_CATEGORY(EC_Application);
 	};
 
-	class PFF_API app_Tick_event : public event {
+	class app_Tick_event : public event {
 	public:
 
 		app_Tick_event() {}
@@ -63,7 +63,7 @@ namespace PFF {
 		EVENT_CLASS_CATEGORY(EC_Application);
 	};
 
-	class PFF_API app_update_event : public event {
+	class app_update_event : public event {
 	public:
 
 		app_update_event() {}
@@ -72,7 +72,7 @@ namespace PFF {
 		EVENT_CLASS_CATEGORY(EC_Application)
 	};
 
-	class PFF_API app_render_event : public event {
+	class app_render_event : public event {
 	public:
 
 		app_render_event() {}

@@ -2,7 +2,7 @@
 
 namespace PFF {
 
-    enum class PFF_API duration_precision {
+    enum class duration_precision {
         microseconds,
         milliseconds,
         seconds,
@@ -12,7 +12,7 @@ namespace PFF {
     //        It can either store the elapsed time in a provided float pointer when the stopwatch is stopped/destroyed, 
     //        or it can allow retrieval of the elapsed time by manually calling [stop()] method.
     //        The time is measured in milliseconds.
-    class PFF_API stopwatch {
+    class stopwatch {
     public:
 
         stopwatch(f32* result_pointer, duration_precision presition = duration_precision::milliseconds)

@@ -5,7 +5,7 @@
 
 namespace PFF {
 
-	class PFF_API mouse_event : public event {
+	class mouse_event : public event {
 	public:
 
 		EVENT_CLASS_TYPE(MouseMoved);

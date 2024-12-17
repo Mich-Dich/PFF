@@ -18,7 +18,7 @@
 
 namespace PFF {
 
-	class PFF_API input_mapping {
+	class input_mapping {
 	public:
 
 		input_mapping();
