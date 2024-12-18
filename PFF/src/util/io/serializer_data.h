@@ -1,5 +1,7 @@
 #pragma once
 
+#include "util/data_structures/string_manipulation.h"
+
 #define TEST_NAME_CONVERTION(variable)		extract_vaiable_name(#variable)
 #define SERIALIZE_KEY_VALUE(variable)		serialize_key_value(extract_vaiable_name(#variable), variable);
 

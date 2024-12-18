@@ -2,7 +2,9 @@
 
 #include <imgui.h>
 
+#include "util/system.h"
 #include "util/io/serializer_data.h"
+#include "util/io/config.h"
 
 #include "engine/layer/layer.h"
 
@@ -15,11 +17,10 @@ namespace PFF::UI {
 
 	FORCEINLINE static u32 convert_color_to_int(const ImVec4& color) { return IM_COL32(255 * color.x, 255 * color.y, 255 * color.z, 255 * color.w); }
 
-	enum class theme_selection {
+	enum class theme_selection : u8 {
 		dark,
 		light
 	};
-
 
 	static std::filesystem::path ini_file_location = PFF::config::get_filepath_from_configtype_ini(util::get_executable_path(), config::file::imgui).c_str();
 

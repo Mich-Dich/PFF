@@ -4,10 +4,13 @@
 #include <entt/entt.hpp>
 
 #include "application.h"
-#include "engine/layer/world_layer.h"
-#include "engine/world/map.h"
+#include "util/io/serializer_yaml.h"
+#include "util/io/io.h"
+#include "util/system.h"
 
+#include "engine/layer/world_layer.h"
 #include "engine/resource_management/headers.h"
+#include "engine/world/map.h"
 #include "engine/world/entity.h"
 
 #ifdef PFF_PLATFORM_WINDOWS
@@ -197,8 +200,8 @@ namespace PFF::script_system {
 		const std::filesystem::path project_temp_dll = PROJECT_PATH / "bin" / (PROJECT_NAME + PFF_PROJECT_TEMP_DLL_PATH) / (PROJECT_NAME + ".dll");
 		const std::filesystem::path project_dll_path = PROJECT_PATH / "bin" / PROJECT_NAME;
 		const std::filesystem::path project_dll = project_dll_path / (PROJECT_NAME + ".dll");
-		CORE_VALIDATE(io_handler::copy_file(project_temp_dll, project_dll_path), return, "COPY SUCCESS", "Failed to copy new DLL after multiple attempts");			// copy the new DLL
-		CORE_VALIDATE(io_handler::is_file(project_dll), return, "", "provided path is not a file [" << project_dll << "]");
+		CORE_VALIDATE(io::copy_file(project_temp_dll, project_dll_path), return, "COPY SUCCESS", "Failed to copy new DLL after multiple attempts");			// copy the new DLL
+		CORE_VALIDATE(io::is_file(project_dll), return, "", "provided path is not a file [" << project_dll << "]");
 		CORE_VALIDATE(load_library(project_dll), return, "loaded project DLL", "could not load project [" << project_dll << "]");
 
 		m_add_component_from_string			= (add_component_Fn)try_load_function("add_component");

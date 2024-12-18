@@ -2,7 +2,7 @@
 #include "util/pch_editor.h"
 
 #include "PFF_editor.h"
-#include "util/io/io_handler.h"
+#include "util/io/io.h"
 //#include "script_parser.h"
 #include "project/file_watcher_system.h"
 #include "code_generator.h"
@@ -73,7 +73,7 @@ namespace PFF {
 
 	static bool process_file(std::filesystem::path& file, const std::filesystem::path& generatedDirPath) {
 
-		if (!io_handler::is_file(file) || io_handler::is_hidden(file) || !is_header_file(file) || file.filename().replace_extension() == "project")
+		if (!io::is_file(file) || io::is_hidden(file) || !is_header_file(file) || file.filename().replace_extension() == "project")
 			return false;
 
 		script_scanner fileScanner = script_scanner(file);
@@ -85,8 +85,8 @@ namespace PFF {
 		const auto relatice_filepath = util::extract_path_from_directory(file, "src");
 		std::string generatedHFilename = file.filename().replace_extension("").string() + "-generated" + file.extension().string();
 		const std::filesystem::path path = PFF_editor::get().get_project_path() / "generated" / relatice_filepath.parent_path() / generatedHFilename;
-		io_handler::create_directory(path.parent_path());
-		io_handler::write_to_file(fileParser.generate_header_file().c_str(), path);
+		io::create_directory(path.parent_path());
+		io::write_to_file(fileParser.generate_header_file().c_str(), path);
 		return true;
 	}
 
@@ -102,17 +102,16 @@ namespace PFF {
 
 	static void generate_initial_class_information(const std::filesystem::path& directory) {
 
-		auto subDirs = io_handler::get_folders_in_dir(directory);
+		auto subDirs = io::get_folders_in_dir(directory);
 		for (auto dir : subDirs) 
 			generate_initial_class_information(dir);
 
-		auto files = io_handler::get_files_in_dir(directory);
+		auto files = io::get_files_in_dir(directory);
 		const std::filesystem::path generatedDir = directory / ".." / "generated";
 		for (auto file : files) 
 			process_file(file, generatedDir);
 	}
 	*/
-
 
 	static void file_changed(const std::filesystem::path& file) {
 
@@ -146,7 +145,7 @@ namespace PFF {
 	project_file_watcher::project_file_watcher() {
 		
 		s_root_directory = application::get().get_project_path();
-		CORE_VALIDATE(io_handler::is_directory(s_root_directory), return, "", "[" << s_root_directory.string().c_str() << "] is not a directory. project_file_watcher is not starting.");
+		CORE_VALIDATE(io::is_directory(s_root_directory), return, "", "[" << s_root_directory.string().c_str() << "] is not a directory. project_file_watcher is not starting.");
 
 		// ================================== TODO: Move to project creation ==================================
 		s_project_premake_lua = s_root_directory / "premake5.lua";
@@ -156,7 +155,7 @@ namespace PFF {
 		code_generator::generate_build_file(pathToBuildScript, pathToPremakeExe);
 		// ================================== TODO: Move to project creation ==================================
 
-		CORE_LOG(Trace, "Monitoring directory " << io_handler::get_absolute_path(s_root_directory / SOURCE_DIR));
+		CORE_LOG(Trace, "Monitoring directory " << io::get_absolute_path(s_root_directory / SOURCE_DIR));
 		s_file_watcher.path = s_root_directory / SOURCE_DIR;
 		s_file_watcher.p_notify_filters = notify_filters::LastAccess | notify_filters::LastWrite | notify_filters::FileName | notify_filters::DirectoryName;
 		s_file_watcher.filter = "*.h";

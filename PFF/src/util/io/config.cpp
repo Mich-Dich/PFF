@@ -7,7 +7,7 @@
 #include <fstream>
 #include <string>
 
-#include "io_handler.h"
+#include "io.h"
 #include "util/io/config.h"
 
 #define REMOVE_WHITE_SPACE(line)                line.erase(std::remove_if(line.begin(), line.end(),                                         \
@@ -24,7 +24,7 @@ namespace PFF::config {
 
         PFF_PROFILE_FUNCTION();
 
-        io_handler::create_directory(PFF_dir / CONFIG_DIR);
+        io::create_directory(PFF_dir / CONFIG_DIR);
         CORE_LOG(Trace, "Checking Engine config files at: " << PFF_dir / CONFIG_DIR);
         for (int i = 0; i <= static_cast<int>(file::input); ++i) {
 
@@ -42,7 +42,7 @@ namespace PFF::config {
     //
     void create_config_files_for_project(std::filesystem::path project_dir) {
 
-        io_handler::create_directory(project_dir / CONFIG_DIR);
+        io::create_directory(project_dir / CONFIG_DIR);
         CORE_LOG(Trace, "Checking project config files at: " << project_dir / CONFIG_DIR);
         for (int i = 0; i <= static_cast<int>(file::input); ++i) {
 

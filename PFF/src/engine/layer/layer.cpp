@@ -12,11 +12,9 @@ namespace PFF {
 
 	layer::~layer() {}
 
-	void layer::on_attach() {
-	}
+	void layer::on_attach() { }
 
-	void layer::on_detach() {
-	}
+	void layer::on_detach() { }
 
 	void layer::on_update(const f32 delta_time) {
 

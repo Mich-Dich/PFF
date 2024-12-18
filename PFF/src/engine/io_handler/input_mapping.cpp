@@ -2,6 +2,8 @@
 #include "util/pffpch.h"
 
 #include "application.h"
+#include "util/io/config.h"
+#include "util/io/serializer_yaml.h"
 
 #include "input_action.h"
 #include "input_mapping.h"

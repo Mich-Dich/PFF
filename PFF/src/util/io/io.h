@@ -1,7 +1,7 @@
 #pragma once
 
 
-namespace PFF::io_handler {
+namespace PFF::io {
 
 	// Reads the content of a file into a vector of characters.
 	// @param [file_path] The path to the file to be read.

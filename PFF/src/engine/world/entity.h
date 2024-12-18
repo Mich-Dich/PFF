@@ -4,10 +4,10 @@
 
 #include <entt/entt.hpp>
 
-//#include "entity_script.h"
-#include "util/UUID.h"
+#include "util/data_structures/UUID.h"
 #include "map.h"
 #include "components.h"
+
 
 namespace PFF {
 

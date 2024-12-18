@@ -1,6 +1,9 @@
 #pragma once
 
 #include <imgui.h>
+
+#include "util/ui/pannel_collection.h"
+
 #include "engine/world/components.h"
 #include "engine/world/entity.h"
 
@@ -15,13 +18,13 @@ namespace PFF::UI {
 		if (!ImGui::CollapsingHeader(name, ImGuiTreeNodeFlags_DefaultOpen))
 			return;
 
-		UI::begin_table("entity_component", false);
+		PFF::UI::begin_table("entity_component", false);
 
 		auto& component = entity.get_component<T>();
 		function(component);
 
 		if (need_to_close_table)
-			UI::end_table();
+			PFF::UI::end_table();
 	}
 	
 	template<typename T, typename ui_function>
@@ -30,12 +33,12 @@ namespace PFF::UI {
 		if (!ImGui::CollapsingHeader(name, ImGuiTreeNodeFlags_DefaultOpen))
 			return;
 
-		UI::begin_table("entity_component", false);
+		PFF::UI::begin_table("entity_component", false);
 
 		auto& component = entity.get_component<T>();
 		function(component);
 
-		UI::end_table();
+		PFF::UI::end_table();
 	}
 
 	FORCEINLINE void try_display_mesh_comp(PFF::entity entity);

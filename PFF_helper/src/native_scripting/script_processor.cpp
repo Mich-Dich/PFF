@@ -1,6 +1,8 @@
 
 #include "util/pffpch.h"
 
+#include "util/io/io.h"
+#include "util/data_structures/path_manipulation.h"
 #include "script_scanner.h"
 #include "script_parser.h"
 #include "code_generator.h"
@@ -71,7 +73,7 @@ namespace script_processor {
 
 	static bool process_file_internal(const std::filesystem::path file) {
 
-		if (!io_handler::is_file(file) || io_handler::is_hidden(file) || !is_header_file(file) || file.filename().replace_extension() == "project")		// check if file.filename() == "project" OR file.filename() == "project.h"
+		if (!io::is_file(file) || io::is_hidden(file) || !is_header_file(file) || file.filename().replace_extension() == "project")		// check if file.filename() == "project" OR file.filename() == "project.h"
 			return false;
 		
 		script_scanner fileScanner = script_scanner(file);
@@ -83,8 +85,8 @@ namespace script_processor {
 		const auto relatice_filepath = util::extract_path_from_directory(file, "src");
 		std::string generatedHFilename = file.filename().replace_extension("").string() + "-generated" + file.extension().string();
 		const std::filesystem::path path = s_root_directory / "generated" / relatice_filepath.parent_path() / generatedHFilename;
-		io_handler::create_directory(path.parent_path());
-		io_handler::write_to_file(fileParser.generate_header_file().c_str(), path);
+		io::create_directory(path.parent_path());
+		io::write_to_file(fileParser.generate_header_file().c_str(), path);
 		return true;
 	}
 
@@ -113,7 +115,7 @@ namespace script_processor {
 	static bool process_project_directory() {
 
 		std::filesystem::path generated_dir = s_root_directory / "generated";
-		io_handler::create_directory(generated_dir);
+		io::create_directory(generated_dir);
 
 		generate_initial_class_information(s_root_directory / SOURCE_DIR);
 		code_generator::generate_init_file_header(s_classes, generated_dir / "init.h");

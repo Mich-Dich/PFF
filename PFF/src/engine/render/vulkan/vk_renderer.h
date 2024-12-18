@@ -1,10 +1,11 @@
 #pragma once
 
+#include "util/io/serializer_yaml.h"
+
 #include "engine/render/renderer.h"
 #include "engine/render/vulkan/vk_types.h"
 #include "engine/platform/pff_window.h"
 #include "engine/geometry/mesh.h"
-
 #include "engine/render/material.h"
 
 #include <typeindex>

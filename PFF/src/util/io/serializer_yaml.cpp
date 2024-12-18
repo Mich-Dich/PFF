@@ -1,6 +1,8 @@
 
 #include "util/pffpch.h"
 
+#include "util/io/io.h"
+
 #include "serializer_yaml.h"
 
 namespace PFF::serializer {
@@ -11,7 +13,7 @@ namespace PFF::serializer {
 		: m_filename(filename), m_name(section_name), m_option(option) {
 
 		std::filesystem::path path = filename.parent_path();
-		CORE_ASSERT(io_handler::create_directory(path), "", "Could not create file-path");
+		CORE_ASSERT(io::create_directory(path), "", "Could not create file-path");
 
 		// make shure the file exists
 		if (!std::filesystem::exists(m_filename)) {

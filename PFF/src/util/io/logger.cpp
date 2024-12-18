@@ -1,6 +1,9 @@
 
 #include "util/pffpch.h"
 
+#include "util/system.h"
+#include "util/io/io.h"
+
 #include <list>
 #include <map>
 #include <type_traits>
@@ -16,14 +19,19 @@
 
 
 
+#if defined PFF_PLATFORM_WINDOWS
+    #include <Windows.h>
+#elif defined PFF_PLATFORM_LINUX || defined PFF_PLATFORM_MAC
+    #include <iostream>
+    #include <unistd.h>
+    #include <termios.h>
+#endif
+
 namespace PFF::logger {
-    static int enable_ANSI_escape_codes();
-}
+
+    static int enable_ANSI_escape_codes() {
 
 #if defined PFF_PLATFORM_WINDOWS
-
-    #include <Windows.h>
-    static int PFF::logger::enable_ANSI_escape_codes() {
 
         // Enable ANSI escape codes
         HANDLE hOut = GetStdHandle(STD_OUTPUT_HANDLE);
@@ -45,15 +53,9 @@ namespace PFF::logger {
         }
 
         return 0;
-    }
 
 #elif defined PFF_PLATFORM_LINUX || defined PFF_PLATFORM_MAC
 
-    #include <iostream>
-    #include <unistd.h>
-    #include <termios.h>
-
-    static int enable_ANSI_escape_codes() {
         struct termios term;
         if (tcgetattr(STDOUT_FILENO, &term) == -1) {
             std::cerr << "Failed to get terminal attributes." << std::endl;
@@ -68,9 +70,11 @@ namespace PFF::logger {
         }
 
         return 0;
-    }
-
 #endif
+
+    }
+}
+
 
 #define PROJECT_FOLDER                  "PFF"
 
@@ -122,7 +126,7 @@ namespace PFF::logger {
         enable_ANSI_escape_codes();
 
         std::string file_dir = "./logs";
-        io_handler::create_directory(file_dir);
+        io::create_directory(file_dir);
 
         LogCoreFileName = (file_dir + "/engine.log").c_str();
         LogFileName = (file_dir + "/project.log").c_str();

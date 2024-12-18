@@ -51,7 +51,7 @@ namespace PFF {
 	
 	namespace input {
 
-		enum class action_type {
+		enum class action_type : u8 {
 			boolean,
 			vec_1D,
 			vec_2D,

@@ -3,7 +3,9 @@
 #include "util/core_config.h"
 
 #include "util/data_types.h"
-#include "util/logger.h"
+#include "util/io/logger.h"
+#include "util/macros.h"
+#include "util/timing/stopwatch.h"
 
 #include <algorithm>
 #include <chrono>
@@ -49,11 +51,11 @@ namespace PFF {
 			f32  single_duration = -1.f;
 
 		private:
-			duration_precision  m_presition{};
-			std::string         m_message{};
-			u64                 m_num_of_tests{};
-			f64                 m_durations{};
-			u32                 m_number_of_values{};
+			PFF::duration_precision		m_presition{};
+			std::string					m_message{};
+			u64							m_num_of_tests{};
+			f64							m_durations{};
+			u32							m_number_of_values{};
 		};
 
 	}

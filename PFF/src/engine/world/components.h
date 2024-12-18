@@ -2,9 +2,10 @@
 
 #include "util/pffpch.h"
 
+#include "util/math/math.h"
+#include "util/data_structures/UUID.h"
 #include "engine/render/render_public_data.h"
 #include "engine/render/material.h"
-#include "util/math/math.h"
 #include "engine/geometry/mesh.h"
 
 
@@ -36,8 +37,10 @@ namespace PFF {
 	struct ID_component {
 
 		PFF_DEFAULT_CONSTRUCTORS(ID_component);
+		ID_component(const UUID& uuid)
+			: ID(uuid) {}
 
-		UUID								ID;
+		UUID								ID{};
 	};
 
 	/* MAYBE
@@ -59,7 +62,7 @@ namespace PFF {
 		tag_component(const std::string& tag)
 			: tag(tag) {}
 
-		std::string							tag;
+		std::string							tag{};
 	};
 
 	// ------------------------------------------------------------------------------------------------------------------------

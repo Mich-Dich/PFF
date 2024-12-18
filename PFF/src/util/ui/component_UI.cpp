@@ -2,6 +2,7 @@
 #include "util/pffpch.h"
 
 #include "util/ui/pannel_collection.h"
+#include "util/data_structures/path_manipulation.h"
 #include "engine/resource_management/static_mesh_asset_manager.h"
 #include "project/script_system.h"
 

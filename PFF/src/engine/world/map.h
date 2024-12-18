@@ -3,6 +3,8 @@
 #include <entt/entt.hpp>
 #include <glm/glm.hpp>
 
+#include "util/data_structures/UUID.h"
+
 #include "components.h"
 
 namespace PFF {

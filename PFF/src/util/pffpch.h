@@ -33,6 +33,7 @@
 #include <set>
 #include <array>
 #include <type_traits>
+#include <typeinfo>
 #include <xmmintrin.h>
 
 #include <stdio.h>
@@ -67,5 +68,9 @@
 
 
 // ------------------------------- independent files (single includes) -------------------------------
+#include "util/timing/instrumentor.h"
+#include "util/core_config.h"
 #include "util/data_types.h"
-#include "util/logger.h"
+#include "util/macros.h"
+
+#include "util/io/logger.h"

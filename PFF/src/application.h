@@ -2,6 +2,7 @@
 
 #include "util/pffpch.h"
 
+#include "util/timing/timer.h"
 #include "engine/layer/layer_stack.h"			// need to include this for some reason
 #include "engine/layer/imgui_layer.h"
 #include "engine/layer/world_layer.h"

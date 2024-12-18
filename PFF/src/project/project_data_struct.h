@@ -1,7 +1,7 @@
 #pragma once
 
 #include "util/pffpch.h"
-#include "util/UUID.h"
+#include "util/data_structures/UUID.h"
 
 namespace PFF {
 

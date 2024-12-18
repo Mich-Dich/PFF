@@ -6,23 +6,13 @@
 // -------------------------- external --------------------------
 #include <glm/glm.hpp>
 
-// -------------------------- util --------------------------
-#include "util/pffpch.h"
-#include "util/io/io_handler.h"
-#include "util/io/serializer_data.h"
-#include "util/io/serializer_yaml.h"
-#include "util/io/serializer_binary.h"
-#include "util/math/constance.h"
-#include "util/math/math.h"
-#include "util/math/noise.h"
-#include "util/math/random.h"
-#include "util/ui/imgui_markdown.h"
-#include "util/ui/pannel_collection.h"
-#include "util/UUID.h"
-#include "util/profiling/instrumentor.h"
-
 #include "application.h"
 
+// -------------------------- util --------------------------
+#include "util/pffpch.h"
+#include "util/util.h"													// this includes all util sub files
+
+// -------------------------- engine --------------------------
 #include "engine/Events/Event.h"
 #include "engine/game_objects/player_controller.h"
 #include "engine/layer/layer_stack.h"

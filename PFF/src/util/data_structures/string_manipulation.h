@@ -1,5 +1,9 @@
 #pragma once
 
+#include <imgui.h>
+
+#include "util/data_structures/UUID.h"
+
 namespace PFF::util {
 
 
@@ -28,7 +32,6 @@ namespace PFF::util {
     // @return A string containing the name of the variable extracted from the input string.
     FORCEINLINE std::string extract_vaiable_name(const std::string& input);
 
-
     //@brief Converts a string to a boolean value.
     //@param [string] The string to convert.
     //@return true if the string is "true", false otherwise.
@@ -38,7 +41,6 @@ namespace PFF::util {
     //@param [boolean] The boolean value to convert.
     //@return [conat char*] "true" if the boolean value is true, "false" otherwise.
     FORCEINLINE constexpr const char* bool_to_str(bool boolean) { return boolean ? "true" : "false"; }
-
 
     FORCEINLINE std::string add_spaces(const u32 multiple_of_indenting_spaces, u32 num_of_indenting_spaces = 2);
 
@@ -85,9 +87,6 @@ namespace PFF::util {
         }
         return result;
     }
-
-    template <size_t N>
-    struct char_array { char data[N]; };
 
     template <typename T>
     T str_to_num(const std::string& str) {

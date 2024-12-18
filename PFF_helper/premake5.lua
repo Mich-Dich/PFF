@@ -34,7 +34,6 @@ project "PFF_helper"
 	links
 	{
 		"PFF",
-		-- "ImGui",
 	}
 
 	libdirs 
@@ -44,12 +43,6 @@ project "PFF_helper"
 
 	filter "system:windows"
 		systemversion "latest"
-
-		linkoptions 
-		{
-			 "/NODEFAULTLIB:LIBCMTD",
-			 "/NODEFAULTLIB:MSVCRT",
-		}
 
 		defines
 		{
@@ -62,21 +55,18 @@ project "PFF_helper"
 		}
 
 	filter "configurations:Debug"
-		buildoptions "/MDd"
 		defines "PFF_EDITOR_DEBUG"
 		runtime "Debug"
 		symbols "on"
 		
 	filter "configurations:RelWithDebInfo"
 		defines "PFF_EDITOR_RELEASE_WITH_DEBUG_INFO"
-		buildoptions "/MD"
 		runtime "Release"
 		symbols "on"
 		optimize "On"
 
 	filter "configurations:Release"
 		defines "PFF_EDITOR_RELEASE"
-		buildoptions "/MD"
 		runtime "Release"
 		symbols "off"
-		optimize "Full"
+		optimize "on"

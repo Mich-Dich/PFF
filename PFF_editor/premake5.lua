@@ -24,6 +24,7 @@ project "PFF_editor"
 	{
 		"src/**.h",
 		"src/**.cpp",
+		"src/**.embed",
 	}
 
 	includedirs
@@ -32,6 +33,7 @@ project "PFF_editor"
 		"assets",
 		"content",
 		"%{wks.location}/PFF/src",
+		"%{wks.location}/PFF/vendor",
 
 		"%{IncludeDir.entt}",
 		"%{IncludeDir.glm}",
@@ -55,12 +57,6 @@ project "PFF_editor"
 	filter "system:windows"
 		systemversion "latest"
 
-		linkoptions 
-		{
-			 "/NODEFAULTLIB:LIBCMTD",
-			 "/NODEFAULTLIB:MSVCRT",
-		}
-
 		defines
 		{
 			"PFF_PLATFORM_WINDOWS",
@@ -74,21 +70,17 @@ project "PFF_editor"
         postbuildcommands { table.unpack(copy_content_of_dir(outputs, {"PFF_editor/shaders", "PFF_editor/defaults", "PFF_editor/assets"})), }
 		
 	filter "configurations:Debug"
-		buildoptions "/MDd"
 		defines "PFF_EDITOR_DEBUG"
 		runtime "Debug"
 		symbols "on"
 		
 	filter "configurations:RelWithDebInfo"
 		defines "PFF_EDITOR_RELEASE_WITH_DEBUG_INFO"
-		buildoptions "/MD"
 		runtime "Release"
 		symbols "on"
-		optimize "On"
+		optimize "on"
 
 	filter "configurations:Release"
 		defines "PFF_EDITOR_RELEASE"
-		buildoptions "/MDd"
 		runtime "Release"
 		optimize "on"
-		

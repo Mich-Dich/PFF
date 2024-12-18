@@ -15,9 +15,9 @@
 	#error undefined platform
 #endif
 
-#include "io_handler.h"
+#include "io.h"
 
-namespace PFF::io_handler {
+namespace PFF::io {
 
 	//
 	bool read_file(const std::string& file_path, std::vector<char>& content_buffer) {
@@ -50,7 +50,7 @@ namespace PFF::io_handler {
 		return true;
 	}
 
-	bool io_handler::copy_file(const std::filesystem::path& full_path_to_file, const std::filesystem::path& target_directory) {
+	bool copy_file(const std::filesystem::path& full_path_to_file, const std::filesystem::path& target_directory) {
 
 		try {
 		
@@ -58,7 +58,7 @@ namespace PFF::io_handler {
 
 			// Check if the target directory exists, if not, create it
 			if (!std::filesystem::exists(target_directory)) {
-				if (io_handler::create_directory(target_directory))
+				if (io::create_directory(target_directory))
 					return false;
 			}
 

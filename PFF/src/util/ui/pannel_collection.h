@@ -4,6 +4,7 @@
 #include <glm/glm.hpp>
 
 #include "application.h"
+#include "util/data_structures/UUID.h"
 
 
 static FORCEINLINE ImVec2  operator*(const ImVec2& lhs, const float rhs) { return ImVec2(lhs.x * rhs, lhs.y * rhs); }

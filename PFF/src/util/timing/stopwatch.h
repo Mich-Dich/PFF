@@ -2,12 +2,6 @@
 
 namespace PFF {
 
-    enum class duration_precision {
-        microseconds,
-        milliseconds,
-        seconds,
-    };
-
     // @brief This is a lightweit stopwatch that is automaticlly started when creating an instance.
     //        It can either store the elapsed time in a provided float pointer when the stopwatch is stopped/destroyed, 
     //        or it can allow retrieval of the elapsed time by manually calling [stop()] method.

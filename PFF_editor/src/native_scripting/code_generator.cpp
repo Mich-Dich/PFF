@@ -178,7 +178,7 @@ if %errorlevel% neq 0 (
 @echo on
 )";
 
-		io_handler::write_to_file(stream.str().c_str(), filepath);
+		io::write_to_file(stream.str().c_str(), filepath);
 
 		//std::ofstream outStream(filepath.string());
 		//outStream << stream.str().c_str();

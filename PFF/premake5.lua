@@ -1,7 +1,7 @@
 
 project "PFF"
 	location "%{wks.location}/PFF"
-	kind "SharedLib"
+	kind "StaticLib"
 	staticruntime "off"
 	language "C++"
 	cppdialect "C++20"
@@ -16,6 +16,7 @@ project "PFF"
 	{
 		"ENGINE_NAME=PFF",
 		"PFF_INSIDE_ENGINE",
+		"_CRT_SECURE_NO_WARNINGS",
 		"GLFW_INCLUDE_NONE",
 	}
 
@@ -23,7 +24,7 @@ project "PFF"
 	{
 		"src/**.h",
 		"src/**.cpp",
-		"src/**.embeded",
+		"src/**.embed",
 		"**..pffproj",
 		"**..pff",
 
@@ -42,8 +43,7 @@ project "PFF"
 		"%{IncludeDir.ImGui}/backends/",
 		"%{IncludeDir.stb_image}",
 		"%{IncludeDir.entt}",
-		"%{IncludeDir.ImGuizmo}",
-		
+		"%{IncludeDir.ImGuizmo}",		
 		"%{IncludeDir.VulkanSDK}",
 	}
 	
@@ -66,18 +66,6 @@ project "PFF"
 	filter "system:windows"
 		systemversion "latest"
 		
-		-- links
-		-- {
-		-- 	"MSVCRT",
-		-- 	"MSVCPRT"
-		-- }
-
-		linkoptions 
-		{
-			 "/NODEFAULTLIB:LIBCMTD",
-			 "/NODEFAULTLIB:MSVCRT",
-		}
-
 		defines
 		{
 			"PFF_PLATFORM_WINDOWS",
@@ -91,30 +79,27 @@ project "PFF"
 			"{MKDIR} %{wks.location}/bin/" .. outputs .. "/vendor/vulkan-glslc",
 			"{COPY} %{wks.location}/PFF/vendor/vulkan-glslc %{wks.location}/bin/" .. outputs  .. "/vendor/vulkan-glslc",
 			
-			-- copy premake exe
+			-- copy premake exe (needed for engine projects)
 			"{MKDIR} %{wks.location}/bin/" .. outputs .. "/vendor/premake",
 			"{COPY} %{wks.location}/vendor/premake %{wks.location}/bin/" .. outputs .. "/vendor/premake",
 			
-			postbuildcommands { table.unpack(copy_content_of_dir(outputs, {"PFF/shaders", "PFF/defaults", "PFF/assets"})), }
+			-- postbuildcommands { table.unpack(copy_content_of_dir(outputs, {"PFF/shaders", "PFF/defaults", "PFF/assets"})), }
+			table.unpack(copy_content_of_dir(outputs, {"PFF/shaders", "PFF/defaults", "PFF/assets"})),
 		}
 
 	filter "configurations:Debug"
 		defines "PFF_DEBUG"
-		buildoptions "/MDd"
 		runtime "Debug"
 		symbols "on"
 
 	filter "configurations:RelWithDebInfo"
 		defines "PFF_RELEASE_WITH_DEBUG_INFO"
-		buildoptions "/MD"
         runtime "Release"
 		symbols "on"
-		optimize "On"
+		optimize "on"
 
 	filter "configurations:Release"
 		defines "PFF_RELEASE"
-		buildoptions "/MD"
 		runtime "Release"
 		symbols "off"
-		optimize "Full"
-		
+		optimize "on"
