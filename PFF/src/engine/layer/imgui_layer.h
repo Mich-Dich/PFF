@@ -39,8 +39,8 @@ namespace PFF::UI {
 	PFF_GETTER_REF_FUNC(ImVec4, action_color_00_hover);
 	PFF_GETTER_REF_FUNC(ImVec4, action_color_00_active);
 
-	PFF_GETTER_REF_FUNC(ImColor, default_gray);
-	PFF_GETTER_REF_FUNC(ImColor, default_gray_1);
+	PFF_GETTER_REF_FUNC(ImVec4, default_gray);
+	PFF_GETTER_REF_FUNC(ImVec4, default_gray_1);
 
 	PFF_GETTER_REF_FUNC(ImVec4, action_color_gray_default);
 	PFF_GETTER_REF_FUNC(ImVec4, action_color_gray_hover);

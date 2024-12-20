@@ -389,7 +389,7 @@ namespace PFF {
 		ImGuiWindowFlags window_flags = ImGuiWindowFlags_None;
 		ImGui::Begin("Content Browser", nullptr, window_flags);
 
-		UI::custom_frame_NEW(350, true, UI::get_default_gray_1_ref(), [&]() {
+		UI::custom_frame_NEW(350, true, ImGui::ColorConvertFloat4ToU32(UI::get_default_gray_1_ref()), [&]() {
 
 			folder_display_window = ImGui::GetCurrentWindow();
 			bool buffer = ImGui::TreeNodeEx(CONTENT_DIR, base_flags | ImGuiTreeNodeFlags_DefaultOpen);

@@ -4,7 +4,7 @@ project "PFF_helper"
 	kind "ConsoleApp"
 	staticruntime "off"
 	language "C++"
-	cppdialect "C++17"
+	cppdialect "C++20"
 
 	targetdir ("%{wks.location}/bin/" .. outputs  .. "/%{prj.name}")
 	objdir ("%{wks.location}/bin-int/" .. outputs  .. "/%{prj.name}")
@@ -33,26 +33,14 @@ project "PFF_helper"
 
 	links
 	{
-		"PFF",
-	}
-
-	libdirs 
-	{
-		"%{wks.location}/bin/" .. outputs  .. "/PFF"
+		"PFF"
 	}
 
 	filter "system:windows"
 		systemversion "latest"
-
-		defines
-		{
-			"PFF_PLATFORM_WINDOWS",
-		}
-
-		files					-- Include the icon resource only for Windows
-		{
-			"../metadata/app_icon.rc",
-		}
+		
+		defines { "PFF_PLATFORM_WINDOWS" }
+		files { "../metadata/app_icon.rc" }
 
 	filter "configurations:Debug"
 		defines "PFF_EDITOR_DEBUG"

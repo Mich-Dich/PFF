@@ -38,8 +38,8 @@ namespace PFF::UI {
 	PFF_GETTER_REF_FUNC_IMPL(ImVec4, action_color_00_hover);
 	PFF_GETTER_REF_FUNC_IMPL(ImVec4, action_color_00_active);
 			  
-	PFF_GETTER_REF_FUNC_IMPL2(ImColor, default_gray, IMCOLOR_GRAY(30));
-	PFF_GETTER_REF_FUNC_IMPL2(ImColor, default_gray_1, IMCOLOR_GRAY(35));
+	PFF_GETTER_REF_FUNC_IMPL2(ImVec4, default_gray, IMCOLOR_GRAY(30));
+	PFF_GETTER_REF_FUNC_IMPL2(ImVec4, default_gray_1, IMCOLOR_GRAY(35));
 			  
 	PFF_GETTER_REF_FUNC_IMPL2(ImVec4, action_color_gray_default, LERP_GRAY(0.2f));
 	PFF_GETTER_REF_FUNC_IMPL2(ImVec4, action_color_gray_hover, LERP_GRAY(0.27f));

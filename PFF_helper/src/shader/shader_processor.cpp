@@ -1,6 +1,9 @@
 
 #include <util/pffpch.h>
 
+#include <util/system.h>
+#include <util/data_structures/string_manipulation.h>
+
 #include "shader_processor.h"
 
 namespace shader_processor {

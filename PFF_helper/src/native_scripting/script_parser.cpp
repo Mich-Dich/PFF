@@ -1,19 +1,11 @@
 
 #include <util/pffpch.h>
 
+#include <util/data_structures/path_manipulation.h>
+
 #include "script_parser.h"
 
 namespace PFF {
-
-
-	template<typename T>
-	struct is_vector : std::false_type {};
-
-	template<typename T, typename A>
-	struct is_vector<std::vector<T, A>> : std::true_type {
-		using value_type = T;
-	};
-
 
 
 	static token							s_error_token = token{ -1, -1, token_type::ERROR_TYPE, "" };

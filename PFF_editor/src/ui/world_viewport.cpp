@@ -361,8 +361,8 @@ namespace PFF {
 						//glm::vec3 camera_pos = get_editor_camera_pos();
 						UI::begin_table("##Camera_params", false);
 
-						UI::table_row("Position", glm::vec3(), 0);
-						UI::table_row("Direction", glm::vec2(), 0);
+						//UI::table_row(static_cast<std::string_view>("Position"), glm::vec3(), .0f);
+						//UI::table_row("Direction", glm::vec2(), .0f);
 
 						UI::end_table();
 
@@ -470,17 +470,18 @@ namespace PFF {
 		const ImVec2 button_size = ImVec2(15); // size of the button
 		const ImVec2 box_padding = ImVec2(5); // padding around the button
 		const f32 button_length = button_size.x + (box_padding.x * 2);
-		auto color = m_gizmo_operation == transform_operation::translate ? ImGui::GetStyle().Colors[ImGuiCol_Button] : UI::get_default_gray_ref();
+		ImVec4 color = (m_gizmo_operation == transform_operation::translate) ? ImGui::GetStyle().Colors[ImGuiCol_Button] : UI::get_default_gray_ref();
+		const ImU32 color_u32 = ImGui::ColorConvertFloat4ToU32(color);
 		{
 			const ImVec2 box_min = ImGui::GetWindowPos() + start_pos; // top-left corner
 			const ImVec2 box_max = box_min + button_size + (box_padding * 2); // bottom-right corner
 			const f32 corner_size = 7;
 
-			draw_list->AddRectFilled(box_min, ImVec2(box_max.x, box_max.y - corner_size), ImGui::ColorConvertFloat4ToU32(color));
-			draw_list->AddRectFilled(ImVec2(box_min.x + corner_size, box_max.y - corner_size), box_max, ImGui::ColorConvertFloat4ToU32(color));
+			draw_list->AddRectFilled(box_min, ImVec2(box_max.x, box_max.y - corner_size), color_u32);
+			draw_list->AddRectFilled(ImVec2(box_min.x + corner_size, box_max.y - corner_size), box_max, color_u32);
 			draw_list->AddTriangleFilled(ImVec2(box_min.x, box_max.y - corner_size),
 				ImVec2(box_min.x + corner_size, box_max.y - corner_size),
-				ImVec2(box_min.x + corner_size, box_max.y), ImGui::ColorConvertFloat4ToU32(color));
+				ImVec2(box_min.x + corner_size, box_max.y), color_u32);
 
 			ImGui::SetCursorPos(start_pos + box_padding);
 			if (ImGui::ImageButton(m_transfrom_translation_image->get_descriptor_set(), ImVec2{ 15 }, ImVec2(0), ImVec2(1), 0, color)) {

@@ -1,6 +1,8 @@
 
 #include <util/pffpch.h>
 
+#include <util/data_structures/path_manipulation.h>
+
 #include "script_processor.h"
 #include "script_parser.h"
 

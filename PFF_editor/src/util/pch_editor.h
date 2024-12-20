@@ -1,13 +1,10 @@
 #pragma once
 
-// PCH of engine
-#include "util/pffpch.h"
+#include "util/pffpch.h"					// PCH of engine
 
-// PFF engine
-#include <PFF.h>
+#include <PFF.h>							// PFF engine
 
-// main files
-#include "ui/editor_window.h"
+#include "ui/editor_window.h"				// main files
 
 // UI related files
 //#include "ui/panels/pannel_collection.h"
