@@ -3,9 +3,9 @@
 
 namespace PFF::util {
 
-    FORCEINLINE bool run_program(const std::filesystem::path& path_to_exe, const std::string& cmd_args = "", bool open_console = false);
+    bool run_program(const std::filesystem::path& path_to_exe, const std::string& cmd_args = "", bool open_console = false);
 
-    FORCEINLINE bool run_program(const std::filesystem::path& path_to_exe, const char* cmd_args = "", bool open_console = false);
+    bool run_program(const std::filesystem::path& path_to_exe, const char* cmd_args = "", bool open_console = false);
 
     // @brief Pauses the execution of the current thread for a specified duration with high precision.
     //          This function first uses `std::this_thread::sleep_for` to sleep for nearly the entire duration,
@@ -15,9 +15,9 @@ namespace PFF::util {
     // @param [duration_in_milliseconds] The duration for which the thread should be paused. The function converts this
     //          value to milliseconds and adjusts for an estimated deviation before performing a busy wait until
     //          the desired wake-up time.
-    FORCEINLINE void high_precision_sleep(f32 duration_in_milliseconds);
+    void high_precision_sleep(f32 duration_in_milliseconds);
     
-    FORCEINLINE system_time get_system_time();
+    system_time get_system_time();
 
     const std::vector<std::pair<std::string, std::string>> default_filters = {
         {"Text Files", "*.txt"},

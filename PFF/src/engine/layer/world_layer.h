@@ -19,8 +19,8 @@ namespace PFF {
 		PFF_DEFAULT_GETTER_C(const ref<map>&, map)
 		PFF_GETTER_C(ref<player_controller>, current_player_controller, m_player_controller)
 
-		FORCEINLINE void register_player_controller(ref<player_controller> player_controller);
-		FORCEINLINE void set_map(const ref<map> map);
+		void register_player_controller(ref<player_controller> player_controller);
+		void set_map(const ref<map> map);
 		
 		virtual void on_attach();
 		virtual void on_detach();
@@ -40,7 +40,7 @@ namespace PFF {
 
 		// @brief Pauses or unpauses the system.
 		// @param [should_pause] Whether the system should be paused.
-		FORCEINLINE void pause(bool should_pause);
+		void pause(bool should_pause);
 
 
 	private:

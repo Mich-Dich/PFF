@@ -12,7 +12,7 @@ namespace PFF {
 		~world_viewport_window();
 
 		void window() override;
-		FORCEINLINE virtual void show_possible_sub_window_options() override;
+		virtual void show_possible_sub_window_options() override;
 
 	private:
 

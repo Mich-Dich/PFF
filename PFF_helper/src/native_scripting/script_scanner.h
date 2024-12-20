@@ -35,12 +35,12 @@ namespace PFF {
 
 	private:
 
-		FORCEINLINE bool is_digit(char c) const { return c >= '0' && c <= '9'; }
-		FORCEINLINE bool is_alpha_numeric(char c) const { return is_alpha(c) || is_digit(c); }
-		FORCEINLINE bool is_alpha(char c) const { return (c >= 'a' && c <= 'z') || (c >= 'A' && c <= 'Z'); }
-		FORCEINLINE bool at_end() const { return m_cursor == m_file_contents.size(); }
-		FORCEINLINE token generate_token(token_type m_Type, std::string lexeme) { return token{ m_line, m_column, m_Type, lexeme }; }
-		FORCEINLINE token generate_error_token() { return token{ -1, -1, token_type::ERROR_TYPE, "" }; }
+		FORCEINLINE bool is_digit(char c) const										{ return c >= '0' && c <= '9'; }
+		FORCEINLINE bool is_alpha_numeric(char c) const								{ return is_alpha(c) || is_digit(c); }
+		FORCEINLINE bool is_alpha(char c) const										{ return (c >= 'a' && c <= 'z') || (c >= 'A' && c <= 'Z'); }
+		FORCEINLINE bool at_end() const												{ return m_cursor == m_file_contents.size(); }
+		FORCEINLINE token generate_token(token_type m_Type, std::string lexeme)		{ return token{ m_line, m_column, m_Type, lexeme }; }
+		FORCEINLINE token generate_error_token()									{ return token{ -1, -1, token_type::ERROR_TYPE, "" }; }
 
 		token scan_token();
 		token property_identifier();

@@ -10,10 +10,10 @@ namespace PFF {
 
 	static token							s_error_token = token{ -1, -1, token_type::ERROR_TYPE, "" };
 
-	FORCEINLINE token generate_error_token() { return token{ -1, -1, token_type::ERROR_TYPE, "" }; }
-	FORCEINLINE static bool is_alpha(char c) { return (c >= 'a' && c <= 'z') || (c >= 'A' && c <= 'Z'); }
-	FORCEINLINE static bool is_alpha_numeric(char c) { return is_alpha(c) || (c >= '0' && c <= '9'); }
-	FORCEINLINE static bool is_variable_friendly(char c) { return is_alpha_numeric(c) || c == '_'; }
+	FORCEINLINE token generate_error_token()					{ return token{ -1, -1, token_type::ERROR_TYPE, "" }; }
+	FORCEINLINE static bool is_alpha(char c)					{ return (c >= 'a' && c <= 'z') || (c >= 'A' && c <= 'Z'); }
+	FORCEINLINE static bool is_alpha_numeric(char c)			{ return is_alpha(c) || (c >= '0' && c <= '9'); }
+	FORCEINLINE static bool is_variable_friendly(char c)		{ return is_alpha_numeric(c) || c == '_'; }
 
 #define ADD_KOMA(condition)					if (condition)				\
 												file << ",";

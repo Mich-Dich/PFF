@@ -20,9 +20,9 @@ namespace PFF {
 
         void serialize_script(std::string class_name, entity_script* script, serializer::yaml& serializer);
 
-        FORCEINLINE bool is_ready();
-        FORCEINLINE const char** get_all_procedural_mesh_scripts(u32* count);
-        FORCEINLINE const char** get_all_scripts(u32* count);
+        bool is_ready();
+        const char** get_all_procedural_mesh_scripts(u32* count);
+        const char** get_all_scripts(u32* count);
     };
 
 }

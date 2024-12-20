@@ -14,7 +14,7 @@ namespace PFF::util {
     // @param [input] The input string from which the part is to be extracted.
     // @param [delimiter] The character delimiter used to identify the part to extract.
     // @return None
-    FORCEINLINE void extract_part_after_delimiter(std::string& dest, const std::string& input, const char* delimiter);
+    void extract_part_after_delimiter(std::string& dest, const std::string& input, const char* delimiter);
 
     // @brief Searches for the last occurrence of the specified delimiter in the input string,
     //          and if found, extracts the substring before the delimiter into the 'dest' string.
@@ -23,14 +23,14 @@ namespace PFF::util {
     // @param [input] The input string from which the part is to be extracted.
     // @param [delimiter] The character delimiter used to identify the part to extract.
     // @return None
-    FORCEINLINE void extract_part_befor_delimiter(std::string& dest, const std::string& input, const char* delimiter);
+    void extract_part_befor_delimiter(std::string& dest, const std::string& input, const char* delimiter);
 
     // @brief Given a string representing a variable access chain (e.g., "object1->object2.variable"),
     //          this function extracts and returns the name of the variable ("variable" in this example).
     //          The extraction process considers both "->" and "." as delimiters for nested access.
     // @param [input] The input string representing the variable access chain.
     // @return A string containing the name of the variable extracted from the input string.
-    FORCEINLINE std::string extract_vaiable_name(const std::string& input);
+    std::string extract_vaiable_name(const std::string& input);
 
     //@brief Converts a string to a boolean value.
     //@param [string] The string to convert.
@@ -42,11 +42,11 @@ namespace PFF::util {
     //@return [conat char*] "true" if the boolean value is true, "false" otherwise.
     FORCEINLINE constexpr const char* bool_to_str(bool boolean) { return boolean ? "true" : "false"; }
 
-    FORCEINLINE std::string add_spaces(const u32 multiple_of_indenting_spaces, u32 num_of_indenting_spaces = 2);
+    std::string add_spaces(const u32 multiple_of_indenting_spaces, u32 num_of_indenting_spaces = 2);
 
-    FORCEINLINE u32 measure_indentation(const std::string& str, u32 num_of_indenting_spaces = 2);
+    u32 measure_indentation(const std::string& str, u32 num_of_indenting_spaces = 2);
 
-    FORCEINLINE int count_lines(const char* text);
+    int count_lines(const char* text);
 
 #define EXTRACT_AFTER_PFF(path) ([](const std::string& str) -> std::string {    \
             const std::string delimiter = "PFF";                                        \

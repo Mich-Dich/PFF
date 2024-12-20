@@ -10,9 +10,9 @@ namespace PFF::math {
 
 	bool compose_transform(glm::mat4& transform, const glm::vec3& translation, const glm::vec3& rotation, const glm::vec3& scale);
 
-    FORCEINLINE f32 calc_array_average(const f32* array, u32 size);
+    f32 calc_array_average(const f32* array, u32 size);
 
-    FORCEINLINE f32 calc_array_max(const f32* array, u32 size);
+    f32 calc_array_max(const f32* array, u32 size);
     
 #if 0
     

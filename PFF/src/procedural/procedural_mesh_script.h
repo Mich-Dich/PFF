@@ -26,24 +26,24 @@ namespace PFF {
 		//virtual void on_update(f32 delta_time) {}
 
 		// Helper functions for mesh generation
-		FORCEINLINE void clear();
-		FORCEINLINE void add_vertex(const glm::vec3& position, const glm::vec3& normal = {}, const glm::vec2& uv = {}, const glm::vec4& color = glm::vec4{ 1.f });
-		FORCEINLINE void add_vertex(const u32 index, const glm::vec3& position, const glm::vec3& normal = {}, const glm::vec2& uv = {}, const glm::vec4& color = glm::vec4{ 1.f });
-		FORCEINLINE void add_triangle(const u32 index_1, const u32 index_2, const u32 index_3);
-		FORCEINLINE void add_quad(const u32 top_right_index, u32 top_left_index, const u32 bottom_left_index, const u32 bottom_right_index);
+		void clear();
+		void add_vertex(const glm::vec3& position, const glm::vec3& normal = {}, const glm::vec2& uv = {}, const glm::vec4& color = glm::vec4{ 1.f });
+		void add_vertex(const u32 index, const glm::vec3& position, const glm::vec3& normal = {}, const glm::vec2& uv = {}, const glm::vec4& color = glm::vec4{ 1.f });
+		void add_triangle(const u32 index_1, const u32 index_2, const u32 index_3);
+		void add_quad(const u32 top_right_index, u32 top_left_index, const u32 bottom_left_index, const u32 bottom_right_index);
 
-		FORCEINLINE u64 add_cube(const glm::vec3& position, const glm::vec3& size, const glm::vec3& rotation = glm::vec3(0), const glm::vec4& color = glm::vec4(1.0f));
-		FORCEINLINE u64 add_sphere(const glm::vec3& position = glm::vec3(0), const glm::vec3& scale = glm::vec3(1.f), const glm::vec3& rotation = glm::vec3(0), u32 resolution = 32, const glm::vec4& color = glm::vec4(1.f));
-		FORCEINLINE u64 add_surface(const u32 start_index, const u32 index_count = 0);
+		u64 add_cube(const glm::vec3& position, const glm::vec3& size, const glm::vec3& rotation = glm::vec3(0), const glm::vec4& color = glm::vec4(1.0f));
+		u64 add_sphere(const glm::vec3& position = glm::vec3(0), const glm::vec3& scale = glm::vec3(1.f), const glm::vec3& rotation = glm::vec3(0), u32 resolution = 32, const glm::vec4& color = glm::vec4(1.f));
+		u64 add_surface(const u32 start_index, const u32 index_count = 0);
 
-		FORCEINLINE void set_vertex_color(const u32 index, const glm::vec4& color);
-		FORCEINLINE void recalculate_normals();
-		FORCEINLINE void recalculate_bounds();
-		FORCEINLINE void add_debug_line(geometry::vertex start, geometry::vertex end, bool vertex_in_global_space = true);
-		FORCEINLINE void add_debug_line(glm::vec3 start, glm::vec3 end, glm::vec4 color = glm::vec4{ 1 }, bool vertex_in_global_space = true);
-		FORCEINLINE void add_debug_cross(glm::vec3 position, f32 size, glm::vec4 color = glm::vec4{ 1 }, bool vertex_in_global_space = true);
-		FORCEINLINE void show_debug_bounds(PFF::geometry::bounds bounds);
-		FORCEINLINE void clear_debug_line();
+		void set_vertex_color(const u32 index, const glm::vec4& color);
+		void recalculate_normals();
+		void recalculate_bounds();
+		void add_debug_line(geometry::vertex start, geometry::vertex end, bool vertex_in_global_space = true);
+		void add_debug_line(glm::vec3 start, glm::vec3 end, glm::vec4 color = glm::vec4{ 1 }, bool vertex_in_global_space = true);
+		void add_debug_cross(glm::vec3 position, f32 size, glm::vec4 color = glm::vec4{ 1 }, bool vertex_in_global_space = true);
+		void show_debug_bounds(PFF::geometry::bounds bounds);
+		void clear_debug_line();
 
 		void sweep_profile_along_spline(/* PFF::spline */);
 

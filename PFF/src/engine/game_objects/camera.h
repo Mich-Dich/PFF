@@ -12,16 +12,16 @@ namespace PFF {
 		camera();
 		~camera();
 
-		FORCEINLINE glm::mat4& get_projection_NC() { return m_projection_matrix; }
-		FORCEINLINE glm::mat4& get_view_NC() { return view_matrix; }
+		FORCEINLINE glm::mat4& get_projection_NC()									{ return m_projection_matrix; }
+		FORCEINLINE glm::mat4& get_view_NC()										{ return view_matrix; }
 
 
-		FORCEINLINE const glm::mat4& get_projection() const { return m_projection_matrix; }
-		FORCEINLINE const glm::mat4& get_view() const { return view_matrix; }
-		FORCEINLINE const f32& get_perspective_fov_y() const { return m_perspective_fov_y; }
+		FORCEINLINE const glm::mat4& get_projection() const							{ return m_projection_matrix; }
+		FORCEINLINE const glm::mat4& get_view() const								{ return view_matrix; }
+		FORCEINLINE const f32& get_perspective_fov_y() const						{ return m_perspective_fov_y; }
 
-		FORCEINLINE void force_set_projection_matrix(const glm::mat4& projection) { m_projection_matrix = projection; }
-		FORCEINLINE void force_set_view_matrix(const glm::mat4& view) { view_matrix = view; }
+		FORCEINLINE void force_set_projection_matrix(const glm::mat4& projection)	{ m_projection_matrix = projection; }
+		FORCEINLINE void force_set_view_matrix(const glm::mat4& view)				{ view_matrix = view; }
 
 		void set_clipping_dis(const f32 near_dis, const f32 far_dis);
 		void set_view_direction(glm::vec3 position, glm::vec3 direction, glm::vec3 up = glm::vec3{ 0.0f, -1.0f, 0.0f });
@@ -39,8 +39,8 @@ namespace PFF {
 
 	private:
 
-		FORCEINLINE void update_orthographic_projection() { set_orthographic_projection(m_orthographic_left, m_orthographic_right, m_orthographic_up, m_orthographic_down, m_clipping_near, m_clipping_far); }
-		FORCEINLINE void update_perspective_projection() { set_perspective_projection(m_perspective_fov_y, m_perspective_aspect_ratio, m_clipping_near, m_clipping_far); }
+		FORCEINLINE void update_orthographic_projection()	{ set_orthographic_projection(m_orthographic_left, m_orthographic_right, m_orthographic_up, m_orthographic_down, m_clipping_near, m_clipping_far); }
+		FORCEINLINE void update_perspective_projection()	{ set_perspective_projection(m_perspective_fov_y, m_perspective_aspect_ratio, m_clipping_near, m_clipping_far); }
 		
 		f32 m_perspective_fov_y = 70.f;
 		f32 m_perspective_aspect_ratio{};

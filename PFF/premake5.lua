@@ -2,9 +2,9 @@
 project "PFF"
 	location "%{wks.location}/PFF"
 	kind "StaticLib"
-	staticruntime "off"
 	language "C++"
 	cppdialect "C++20"
+	staticruntime "on"
 
 	targetdir ("%{wks.location}/bin/" .. outputs  .. "/%{prj.name}")
 	objdir ("%{wks.location}/bin-int/" .. outputs  .. "/%{prj.name}")
@@ -14,8 +14,7 @@ project "PFF"
 
 	defines
 	{
-		"ENGINE_NAME=PFF",
-		"PFF_INSIDE_ENGINE",
+		"PFF_ENGINE",
 		"_CRT_SECURE_NO_WARNINGS",
 		"GLFW_INCLUDE_NONE",
 	}

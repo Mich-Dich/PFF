@@ -14,10 +14,10 @@ namespace PFF {
 
 	private:
 
-		FORCEINLINE void select_new_directory(const std::filesystem::path& path);
-		FORCEINLINE void show_directory_tree(const std::filesystem::path& path);
-		FORCEINLINE void show_search_result_for_current_folder(const std::filesystem::path& path, u32& item_index);
-		FORCEINLINE void show_current_folder_content(const std::filesystem::path& path);
+		void select_new_directory(const std::filesystem::path& path);
+		void show_directory_tree(const std::filesystem::path& path);
+		void show_search_result_for_current_folder(const std::filesystem::path& path, u32& item_index);
+		void show_current_folder_content(const std::filesystem::path& path);
 
 		void display_file(std::filesystem::path file_path, u32 ID);
 

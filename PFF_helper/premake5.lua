@@ -2,16 +2,16 @@
 project "PFF_helper"
 	location "%{wks.location}/PFF_helper"
 	kind "ConsoleApp"
-	staticruntime "off"
 	language "C++"
 	cppdialect "C++20"
+	staticruntime "on"
 
 	targetdir ("%{wks.location}/bin/" .. outputs  .. "/%{prj.name}")
 	objdir ("%{wks.location}/bin-int/" .. outputs  .. "/%{prj.name}")
 
 	defines
 	{
-		"PFF_HELPER_PROGRAM",
+		"PFF_HELPER",
 	}
 
 	files
@@ -43,18 +43,18 @@ project "PFF_helper"
 		files { "../metadata/app_icon.rc" }
 
 	filter "configurations:Debug"
-		defines "PFF_EDITOR_DEBUG"
+		defines "PFF_HELPER_DEBUG"
 		runtime "Debug"
 		symbols "on"
 		
 	filter "configurations:RelWithDebInfo"
-		defines "PFF_EDITOR_RELEASE_WITH_DEBUG_INFO"
+		defines "PFF_HELPER_RELEASE_WITH_DEBUG_INFO"
 		runtime "Release"
 		symbols "on"
 		optimize "On"
 
 	filter "configurations:Release"
-		defines "PFF_EDITOR_RELEASE"
+		defines "PFF_HELPER_RELEASE"
 		runtime "Release"
 		symbols "off"
 		optimize "on"

@@ -41,10 +41,12 @@ namespace PFF::UI {
 		PFF::UI::end_table();
 	}
 
-	FORCEINLINE void try_display_mesh_comp(PFF::entity entity);
-	FORCEINLINE void try_display_procedural_script_comp(PFF::entity entity);
+	void try_display_mesh_comp(PFF::entity entity);
+	
+	void try_display_procedural_script_comp(PFF::entity entity);
 
-	FORCEINLINE void display_tag_comp(PFF::entity entity);
-	FORCEINLINE void display_transform_comp(PFF::entity entity);
+	void display_tag_comp(PFF::entity entity);
+	
+	void display_transform_comp(PFF::entity entity);
 
 }

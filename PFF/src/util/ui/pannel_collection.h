@@ -51,69 +51,64 @@ namespace PFF::UI {
 	};
 
 
-	FORCEINLINE bool is_holvering_window();
+	bool is_holvering_window();
 
-	FORCEINLINE bool is_item_double_clicked();
+	bool is_item_double_clicked();
 
-	FORCEINLINE mouse_interation get_mouse_interation_on_item(const f32 target_click_duration = 0.2f);
+	mouse_interation get_mouse_interation_on_item(const f32 target_click_duration = 0.2f);
 
-	FORCEINLINE mouse_interation get_mouse_interation_on_window(const f32 target_click_duration = 0.2f);
+	mouse_interation get_mouse_interation_on_window(const f32 target_click_duration = 0.2f);
 
-	FORCEINLINE std::string wrap_text_at_underscore(const std::string& text, float wrap_width);
+	std::string wrap_text_at_underscore(const std::string& text, float wrap_width);
 
-	FORCEINLINE void set_next_window_pos(window_pos location, f32 padding = 10.f);
+	void set_next_window_pos(window_pos location, f32 padding = 10.f);
 
-	FORCEINLINE void set_next_window_pos_in_window(window_pos location, f32 padding = 10.f);
+	void set_next_window_pos_in_window(window_pos location, f32 padding = 10.f);
 
-	FORCEINLINE void next_window_position_selector(window_pos& position, bool& show_window);
+	void next_window_position_selector(window_pos& position, bool& show_window);
 
-	FORCEINLINE void next_window_position_selector_popup(window_pos& position, bool& show_window);
+	void next_window_position_selector_popup(window_pos& position, bool& show_window);
 
 
 	// @brief Draws a vertical separation line.
-	FORCEINLINE void seperation_vertical();
+	void seperation_vertical();
 
 
-	FORCEINLINE bool gray_button(const char* label, const ImVec2& size = { 0, 0 });
+	bool gray_button(const char* label, const ImVec2& size = { 0, 0 });
 
-	FORCEINLINE bool toggle_button(const char* lable, bool& bool_var, const ImVec2& size = { 0, 0 });
+	bool toggle_button(const char* lable, bool& bool_var, const ImVec2& size = { 0, 0 });
 
 	// @brief Draws text using a larger font.
 	// @param [text] The text to be drawn.
-	FORCEINLINE void big_text(const char* text, bool wrapped = false);
+	void big_text(const char* text, bool wrapped = false);
 
+	void text_bold(const char* text, bool wrapped = false);
 
-	FORCEINLINE void text_bold(const char* text, bool wrapped = false);
-
-	FORCEINLINE void text_italic(const char* text, bool wrapped = false);
+	void text_italic(const char* text, bool wrapped = false);
 
 	// @brief Displays a help marker with tooltip containing the provided description.
 	// @param [desc] The description text to be displayed in the tooltip.
-	FORCEINLINE void help_marker(const char* desc);
-
-
-	// @brief Adjusts the current ImGui cursor position by adding the specified horizontal and vertical shift offsets.
-	// @param [shift_x] The horizontal shift offset.
-	// @param [shift_y] The vertical shift offset.
-	FORCEINLINE void shift_cursor_pos(const f32 shift_x, const f32 shift_y);
+	void help_marker(const char* desc);
 
 	// @brief Adjusts the current ImGui cursor position by adding the specified horizontal and vertical shift offsets.
 	// @param [shift_x] The horizontal shift offset.
 	// @param [shift_y] The vertical shift offset.
-	FORCEINLINE void shift_cursor_pos(const ImVec2 shift);
+	void shift_cursor_pos(const f32 shift_x, const f32 shift_y);
 
+	// @brief Adjusts the current ImGui cursor position by adding the specified horizontal and vertical shift offsets.
+	// @param [shift_x] The horizontal shift offset.
+	// @param [shift_y] The vertical shift offset.
+	void shift_cursor_pos(const ImVec2 shift);
 
-	FORCEINLINE void progressbar_with_text(const char* label, const char* progress_bar_text, f32 percent, f32 label_size = 50.f, f32 progressbar_size_x = 50.f, f32 progressbar_size_y = 1.f);
-
+	void progressbar_with_text(const char* label, const char* progress_bar_text, f32 percent, f32 label_size = 50.f, f32 progressbar_size_x = 50.f, f32 progressbar_size_y = 1.f);
 
 	// @brief This function sets up an ImGui table with two columns, where the first column is resizable and the second column fills the remaining availabel area
 	// @brief CAUTION - you need to call UI::end_table() at the end of the table;
 	// @param [label] Is used to identify the table
-	FORCEINLINE bool begin_table(std::string_view label, bool display_name = true, ImVec2 size = ImVec2(0,0), f32 inner_width = 0.0f, bool set_columns_width = true, f32 columns_width_percentage = 0.5f);
-
+	bool begin_table(std::string_view label, bool display_name = true, ImVec2 size = ImVec2(0,0), f32 inner_width = 0.0f, bool set_columns_width = true, f32 columns_width_percentage = 0.5f);
 	
 	// @brief Ends the table started with UI::begin_table().
-	FORCEINLINE void end_table();
+	void end_table();
 
 
 	// @brief This function draws a custom frame with two separate sections: [left_side] and [right_side].
@@ -122,12 +117,11 @@ namespace PFF::UI {
 	// @param [width_left_side] The fixed width of the first column.
 	// @param [left_side] The function representing the content of the left side.
 	// @param [right_side] The function representing the content of the right side.
-	FORCEINLINE void custom_frame(const f32 width_left_side, std::function<void()> left_side, std::function<void()> right_side);
+	void custom_frame(const f32 width_left_side, std::function<void()> left_side, std::function<void()> right_side);
 
+	void custom_frame_NEW(const f32 width_left_side, const bool can_resize, const ImU32 color_left_side, std::function<void()> left_side, std::function<void()> right_side);
 
-	FORCEINLINE void custom_frame_NEW(const f32 width_left_side, const bool can_resize, const ImU32 color_left_side, std::function<void()> left_side, std::function<void()> right_side);
-
-	FORCEINLINE bool serach_input(const char* lable, std::string& search_text);
+	bool serach_input(const char* lable, std::string& search_text);
 
 	// @brief Renders an integer slider within a table row in an ImGui interface.
 	// 
@@ -142,22 +136,20 @@ namespace PFF::UI {
 	// @param flags Optional ImGui input text flags.
 	// 
 	// @return true if the value was changed by the slider, false otherwise.
-	FORCEINLINE bool table_row_slider(std::string_view label, int& value, int min_value = 0, int max_value = 1, ImGuiInputTextFlags flags = ImGuiInputTextFlags_None);
+	bool table_row_slider(std::string_view label, int& value, int min_value = 0, int max_value = 1, ImGuiInputTextFlags flags = ImGuiInputTextFlags_None);
 
+	void table_row(std::function<void()> first_colum, std::function<void()> second_colum);
 
-	FORCEINLINE void table_row(std::function<void()> first_colum, std::function<void()> second_colum);
+	void table_row(std::string_view label, std::string& text, bool& enable_input);
 
-	FORCEINLINE void table_row(std::string_view label, std::string& text, bool& enable_input);
+	void table_row_text(std::string_view label, const char* format, ...);
 
-	FORCEINLINE void table_row_text(std::string_view label, const char* format, ...);
+	void table_row(std::string_view label, bool& value);
 
-	FORCEINLINE void table_row(std::string_view label, bool& value);
-
-	FORCEINLINE void table_row(std::string_view label, std::string_view value);
+	void table_row(std::string_view label, std::string_view value);
 
 	// returns true when transform was changed
-	FORCEINLINE bool table_row(std::string_view label, glm::mat4& value);
-
+	bool table_row(std::string_view label, glm::mat4& value);
 
 	// @brief Adds a row to an ImGui table with a label and corresponding value input field.
 	// @tparam [T] The type of the value.
@@ -247,11 +239,11 @@ namespace PFF::UI {
 		}
 */
 
-	FORCEINLINE void table_row_progressbar(std::string_view label, const char* progress_bar_text, const f32 percent, const bool auto_resize = true, const f32 progressbar_size_x = 50.f, const f32 progressbar_size_y = 1.f);
+	void table_row_progressbar(std::string_view label, const char* progress_bar_text, const f32 percent, const bool auto_resize = true, const f32 progressbar_size_x = 50.f, const f32 progressbar_size_y = 1.f);
 
+	bool begin_collapsing_header_section(const char* lable);
 
-	FORCEINLINE bool begin_collapsing_header_section(const char* lable);
-	FORCEINLINE void end_collapsing_header_section();
+	void end_collapsing_header_section();
 
 	// @brief Renders a slider within a table row in an ImGui interface.
 	// 

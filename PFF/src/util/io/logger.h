@@ -103,7 +103,7 @@ namespace PFF {
 #define CORE_LOG_LEVEL_ENABLED 4
 
 //  ===================================================================================  Core Logger  ===================================================================================
-#if defined(PFF_INSIDE_ENGINE) || defined(PFF_INSIDE_EDITOR)
+#if defined(PFF_ENGINE) || defined(PFF_EDITOR)
 
 	#define CORE_LOG_Fatal(message)				{ PFF::logger::log_message(PFF::logger::log_msg_severity::Fatal,__FILE__,__FUNCTION__,__LINE__).flush() << message; }
 	#define CORE_LOG_Error(message)				{ PFF::logger::log_message(PFF::logger::log_msg_severity::Error,__FILE__,__FUNCTION__,__LINE__).flush() << message; }
@@ -189,7 +189,7 @@ namespace PFF {
 
 	#define STOP(msg) 							CORE_LOG(Fatal, msg);	DEBUG_BREAK();
 
-#endif //PFF_INSIDE_ENGINE
+#endif //PFF_ENGINE
 
 //  ===================================================================================  Client Logger  ===================================================================================
 

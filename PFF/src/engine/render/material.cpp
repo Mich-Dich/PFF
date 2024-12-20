@@ -104,7 +104,7 @@ namespace PFF {
 
 #ifdef PFF_RENDERER_DEBUG_CAPABILITY
 
-	static void build_debug_lines_pipelines(material& material) {
+	void build_debug_lines_pipelines(material& material) {
 
 		VkShaderModule meshFragShader;
 		CORE_ASSERT(render::vulkan::util::load_shader_module(PFF::util::get_executable_path() / "../PFF/shaders/debug_lines.frag.spv", GET_RENDERER.get_device(), &meshFragShader),

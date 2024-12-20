@@ -34,14 +34,14 @@ namespace PFF::util {
             }
         }
 
-        FORCEINLINE glm::vec3 get_vec3(f32 min = -1.0f, f32 max = 1.0f);
+        glm::vec3 get_vec3(f32 min = -1.0f, f32 max = 1.0f);
 
         // @brief Generates a random floating-point number in the range [0.f, 1.f] and checks if its less then the percent.
         // @param [percentage] The value for percent checking (needs to be between 0.f and 1.f).
         // @return A random floating-point number between min and max.
-        FORCEINLINE bool get_percent(f32 percentage = 0.0f);
+        bool get_percent(f32 percentage = 0.0f);
 
-        FORCEINLINE std::string get_string(const size_t length);
+        std::string get_string(const size_t length);
 
     private:
         std::mt19937                            engine; // Mersenne Twister pseudo-random generator

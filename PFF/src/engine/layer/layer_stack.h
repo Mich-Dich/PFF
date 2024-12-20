@@ -15,8 +15,8 @@ namespace PFF {
 		void pop_overlay(layer* overlay);
 		void delete_all_layers();
 
-		std::vector<layer*>::iterator begin() { return m_layers.begin(); }
-		std::vector<layer*>::iterator end() { return m_layers.end(); }
+		FORCEINLINE std::vector<layer*>::iterator begin() { return m_layers.begin(); }
+		FORCEINLINE std::vector<layer*>::iterator end() { return m_layers.end(); }
 
 		std::vector<layer*> m_layers;
 	private:

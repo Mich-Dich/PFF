@@ -35,9 +35,6 @@ namespace PFF {
 
 		PFF_DELETE_COPY_CONSTRUCTOR(application);
 
-		FORCEINLINE std::filesystem::path get_project_path()				{ return m_project_path; }
-		FORCEINLINE void set_project_path(std::filesystem::path path)		{ m_project_path = path; }
-
 		PFF_DEFAULT_GETTER(project_data,									project_data)
 		PFF_DEFAULT_GETTER_C(f64,											delta_time)
 		PFF_DEFAULT_GETTER_C(u32,											target_fps)
@@ -54,9 +51,10 @@ namespace PFF {
 		FORCEINLINE static void close_application()							{ m_running = false; }
 		FORCEINLINE static RENDERER& get_renderer()							{ return GET_RENDERER; }
 		FORCEINLINE static void set_render_state(system_state state)		{ GET_RENDERER.set_state(state); }
-
 		FORCEINLINE USE_IN_EDITOR void push_overlay(layer* overlay)			{ m_layerstack->push_overlay(overlay); }
 		FORCEINLINE USE_IN_EDITOR void pop_overlay(layer* overlay)			{ m_layerstack->pop_overlay(overlay); }
+		FORCEINLINE std::filesystem::path get_project_path()				{ return m_project_path; }
+		FORCEINLINE void set_project_path(std::filesystem::path path)		{ m_project_path = path; }
 
 		std::future<void>& add_future(std::future<void>& future, std::shared_ptr<std::pair<std::atomic<bool>, std::condition_variable>>& shared_state);
 		void remove_timer(std::future<void>& future);
@@ -66,11 +64,11 @@ namespace PFF {
 		void set_fps_settings(const bool set_for_engine_focused, const u32 new_limit);
 
 		void limit_fps(const bool new_value, const u32 new_limit);
-		FORCEINLINE void capture_cursor();
-		FORCEINLINE void release_cursor();
-		FORCEINLINE void minimize_window();
-		FORCEINLINE void restore_window();
-		FORCEINLINE void maximize_window();
+		void capture_cursor();
+		void release_cursor();
+		void minimize_window();
+		void restore_window();
+		void maximize_window();
 
 		void register_player_controller(ref<player_controller> player_controller) { m_world_layer->register_player_controller(player_controller); }
 		void get_fps_values(bool& limit_fps, u32& target_fps, u32& current_fps, f32& work_time, f32& sleep_time);

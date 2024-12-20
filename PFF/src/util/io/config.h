@@ -30,7 +30,7 @@ namespace PFF::config {
 
 	void create_config_files_for_project(std::filesystem::path project_dir);
 
-	FORCEINLINE std::string file_type_to_string(file type);
+	std::string file_type_to_string(file type);
 
 	//std::filesystem::path get_filepath_from_configtype(file type);
 

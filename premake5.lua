@@ -46,6 +46,12 @@ function copy_content_of_dir(outputs, dir_names)
 	return commands
 end
 
-include "PFF"
-include "PFF_editor"
-include "PFF_helper"
+
+group "Core"
+	include "PFF"
+group ""
+
+group "Tools"
+	include "PFF_editor"
+	include "PFF_helper"
+group ""

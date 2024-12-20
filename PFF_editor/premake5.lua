@@ -2,9 +2,9 @@
 project "PFF_editor"
 	location "%{wks.location}/PFF_editor"
 	kind "ConsoleApp"
-	staticruntime "off"
 	language "C++"
 	cppdialect "C++20"
+	staticruntime "on"
 
 	targetdir ("%{wks.location}/bin/" .. outputs  .. "/%{prj.name}")
 	objdir ("%{wks.location}/bin-int/" .. outputs  .. "/%{prj.name}")
@@ -16,8 +16,7 @@ project "PFF_editor"
 
 	defines
 	{
-		"ENGINE_NAME=PFF",
-		"PFF_INSIDE_EDITOR",
+		"PFF_EDITOR",
 	}
 
 	files
@@ -47,30 +46,23 @@ project "PFF_editor"
 		"C:/VulkanSDK/1.3.250.1/Include",
 	}
 
-	libdirs 
-	{
-		"%{wks.location}/bin/" .. outputs  .. "/PFF"
-	}
+	-- libdirs 
+	-- {
+	-- 	"%{wks.location}/bin/" .. outputs  .. "/PFF"
+	-- }
 
 	links
 	{
+		"PFF",
 		"ImGui",
 		"fastgltf",
-		"PFF",
 	}
 	
 	filter "system:windows"
 		systemversion "latest"
 
-		defines
-		{
-			"PFF_PLATFORM_WINDOWS",
-		}
-		
-		files					-- Include the icon resource only for Windows
-		{
-			"../metadata/app_icon.rc",
-		}
+		defines { "PFF_PLATFORM_WINDOWS" }
+		files { "../metadata/app_icon.rc" }
 
         postbuildcommands { table.unpack(copy_content_of_dir(outputs, {"PFF_editor/shaders", "PFF_editor/defaults", "PFF_editor/assets"})), }
 		

@@ -1,23 +1,23 @@
 #pragma once
 
 
-#ifdef PFF_INSIDE_ENGINE
+#ifdef PFF_ENGINE
 	#define PFF_API								__declspec(dllexport)
 #else
 	#define PFF_API								__declspec(dllimport)
 #endif
-//
-//#ifdef PFF_INSIDE_ENGINE
-//	#define PFF_HELPER_PROGRAM_API				__declspec(dllexport)
-//#elif PFF_HELPER_PROGRAM
-//	#define PFF_HELPER_PROGRAM_API				__declspec(dllimport)
+
+//#ifdef PFF_ENGINE
+//	#define PFF_HELPER_API						__declspec(dllexport)
+//#elif defined(PFF_HELPER)
+//	#define PFF_HELPER_API						__declspec(dllimport)
 //#else
-//	#define PFF_HELPER_PROGRAM_API
+//	#define PFF_HELPER_API
 //#endif
 
-#ifdef PFF_INSIDE_ENGINE
+#ifdef PFF_ENGINE
 	#define PFF_API_EDITOR						__declspec(dllexport)
-#elif PFF_INSIDE_EDITOR
+#elif defined(PFF_EDITOR)
 	#define PFF_API_EDITOR						__declspec(dllimport)
 #else
 	#define PFF_API_EDITOR	
@@ -29,7 +29,7 @@
 	#define PROJECT_API							__declspec(dllimport)
 #endif
 
-#if defined(PFF_INSIDE_ENGINE) || defined(PFF_INSIDE_EDITOR)
+#if defined(PFF_ENGINE) || defined(PFF_EDITOR)
 	#define USE_IN_EDITOR
 #else
 	#define USE_IN_EDITOR	

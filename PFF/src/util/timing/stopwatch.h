@@ -19,14 +19,14 @@ namespace PFF {
         // @brief Stops the stopwatch and calculates the elapsed time.
         //        If a result pointer was provided, it will be updated with the elapsed time.
         // @return The elapsed time in milliseconds since the stopwatch was started.
-        FORCEINLINE f32 stop();
+        f32 stop();
 
         // @breif Restarts the stopped stopwatch
-        FORCEINLINE void restart();
+        void restart();
 
     private:
 
-        FORCEINLINE void _start();
+        void _start();
 
         duration_precision                          m_presition;
         std::chrono::system_clock::time_point       m_start_point{};

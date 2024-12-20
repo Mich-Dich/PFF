@@ -10,9 +10,10 @@
 
 namespace PFF::render {
 
-#if defined(PROJECT_DEBUG) || defined(PFF_DEBUG)
+#if defined(PFF_EDITOR_DEBUG) || defined(PFF_DEBUG)
 	#define PFF_RENDERER_DEBUG_CAPABILITY
-#endif // defined(PROJECT_DEBUG) || defined(PFF_DEBUG)
+#endif
+
 
 	enum class render_api {
 
