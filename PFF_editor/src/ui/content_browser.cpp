@@ -1,16 +1,17 @@
 
 #include "util/pch_editor.h"
 
-#include "util/ui/pannel_collection.h"
+#include <imgui_internal.h>
+#include <util/ui/pannel_collection.h>
+#include <engine/resource_management/headers.h>
+#include <engine/resource_management/mesh_headers.h>
+#include <engine/resource_management/static_mesh_asset_manager.h>
+
 #include "mesh_import_window.h"
 #include "PFF_editor.h"
-#include "engine/resource_management/static_mesh_asset_manager.h"
-#include "engine/resource_management/headers.h"
-#include "engine/resource_management/mesh_headers.h"
+#include "editor_layer.h"
 
 #include "content_browser.h"
-
-#include <imgui_internal.h>
 
 namespace PFF {
 
@@ -19,8 +20,6 @@ namespace PFF {
 	static std::string			search_query;
 	const ImVec2				folder_open_icon_size(18, 14);																		// Calculate the icon size for the tree (make it smaller than regular icons)
 	const ImVec2				folder_closed_icon_size(18, 17);																	// Calculate the icon size for the tree (make it smaller than regular icons)
-
-
 	ImGuiWindow*				folder_display_window{};
 
 
@@ -55,17 +54,25 @@ namespace PFF {
 		select_new_directory(m_project_directory / CONTENT_DIR);
 
 		// load folder image
-		m_folder_closed_image = create_ref<image>(PFF_editor::get().get_editor_executable_path() / "assets" / "icons" / "folder_closed.png", image_format::RGBA);
-		m_folder_open_image = create_ref<image>(PFF_editor::get().get_editor_executable_path() / "assets" / "icons" / "folder_open.png", image_format::RGBA);
-		m_folder_image = create_ref<image>(PFF_editor::get().get_editor_executable_path() / "assets" / "icons" / "folder.png", image_format::RGBA);
-		m_world_image = create_ref<image>(PFF_editor::get().get_editor_executable_path() / "assets" / "icons" / "world.png", image_format::RGBA);
-		m_mesh_asset_image = create_ref<image>(PFF_editor::get().get_editor_executable_path() / "assets" / "icons" / "mesh_asset.png", image_format::RGBA);
+		auto* editor_layer = PFF_editor::get().get_editor_layer();
+		m_folder_closed_icon =	editor_layer->get_folder_closed_icon();
+		m_folder_open_icon =	editor_layer->get_folder_open_icon();
+		m_folder_icon =			editor_layer->get_folder_icon();
+		m_world_icon =			editor_layer->get_world_icon();
+		m_mesh_asset_icon =		editor_layer->get_mesh_asset_icon();
 
 		m_icon_size = { 60, 60 };
 	}
 
 
-	content_browser::~content_browser() {}
+	content_browser::~content_browser() {
+	
+		m_folder_closed_icon.reset();
+		m_folder_open_icon.reset();
+		m_folder_icon.reset();
+		m_world_icon.reset();
+		m_mesh_asset_icon.reset();
+	}
 
 
 	void content_browser::select_new_directory(const std::filesystem::path& path) {
@@ -104,9 +111,9 @@ namespace PFF {
 				ImGui::BeginGroup();																						// Start group to align items horizontally
 
 				if (buffer)
-					ImGui::Image(m_folder_open_image->get_descriptor_set(), folder_open_icon_size, ImVec2(0, 0), ImVec2(1, 1), UI::get_main_color_ref());
+					ImGui::Image(m_folder_open_icon->get_descriptor_set(), folder_open_icon_size, ImVec2(0, 0), ImVec2(1, 1), UI::get_main_color_ref());
 				else
-					ImGui::Image(m_folder_closed_image->get_descriptor_set(), folder_closed_icon_size, ImVec2(0, 0), ImVec2(1, 1), UI::get_main_color_ref());
+					ImGui::Image(m_folder_closed_icon->get_descriptor_set(), folder_closed_icon_size, ImVec2(0, 0), ImVec2(1, 1), UI::get_main_color_ref());
 
 				ImGui::SameLine(0, 2);
 				ImGui::Text("%s", path_string.c_str());												// Draw folder name text
@@ -129,7 +136,7 @@ namespace PFF {
 
 				ImGui::SameLine(0, 2);
 				ImGui::BeginGroup();																						// Similar modification for leaf nodes
-				ImGui::Image(m_folder_closed_image->get_descriptor_set(), folder_closed_icon_size, ImVec2(0, 0), ImVec2(1, 1), UI::get_main_color_ref());
+				ImGui::Image(m_folder_closed_icon->get_descriptor_set(), folder_closed_icon_size, ImVec2(0, 0), ImVec2(1, 1), UI::get_main_color_ref());
 				ImGui::SameLine(0, 2);
 				ImGui::Text("%s", path_string.c_str());
 				ImGui::EndGroup();
@@ -198,7 +205,7 @@ namespace PFF {
 			ImGui::BeginGroup();
 			{
 				ImGui::PushID(hash_path(entry.path()));
-				ImGui::Image(m_folder_image->get_descriptor_set(), m_icon_size, ImVec2(0, 0), ImVec2(1, 1), UI::get_action_color_gray_active_ref());
+				ImGui::Image(m_folder_icon->get_descriptor_set(), m_icon_size, ImVec2(0, 0), ImVec2(1, 1), UI::get_action_color_gray_active_ref());
 				ImVec2 text_size = ImGui::CalcTextSize(item_name.c_str());
 				ImGui::SetCursorPos(ImGui::GetCursorPos() + ImVec2((m_icon_size.x - text_size.x) * 0.5f, 0));
 				ImGui::TextWrapped(item_name.c_str());
@@ -228,7 +235,7 @@ namespace PFF {
 				const std::string path_string = entry.path().string();
 				ImGui::SetDragDropPayload("PROJECT_CONTENT_FOLDER", path_string.c_str(), path_string.length() + 1);
 
-				ImGui::Image(m_folder_image->get_descriptor_set(), m_icon_size, ImVec2(0, 0), ImVec2(1, 1), UI::get_action_color_gray_active_ref());
+				ImGui::Image(m_folder_icon->get_descriptor_set(), m_icon_size, ImVec2(0, 0), ImVec2(1, 1), UI::get_action_color_gray_active_ref());
 				ImGui::TextWrapped("%s", item_name.c_str());
 
 				ImGui::EndDragDropSource();
@@ -297,11 +304,11 @@ namespace PFF {
 			switch (loc_asset_file_header.type) {
 
 			case file_type::mesh:
-				ImGui::Image(m_mesh_asset_image->get_descriptor_set(), m_icon_size);
+				ImGui::Image(m_mesh_asset_icon->get_descriptor_set(), m_icon_size);
 				break;
 
 			case file_type::world:
-				ImGui::Image(m_world_image->get_descriptor_set(), m_icon_size);
+				ImGui::Image(m_world_icon->get_descriptor_set(), m_icon_size);
 				break;
 
 			default:
@@ -338,7 +345,7 @@ namespace PFF {
 			const std::string path_string = file_path.string();
 			ImGui::SetDragDropPayload(playload_name, path_string.c_str(), path_string.length() + 1);
 
-			ImGui::Image(m_mesh_asset_image->get_descriptor_set(), m_icon_size);
+			ImGui::Image(m_mesh_asset_icon->get_descriptor_set(), m_icon_size);
 			ImGui::TextWrapped("%s", item_name.c_str());
 
 			ImGui::EndDragDropSource();

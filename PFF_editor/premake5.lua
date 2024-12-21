@@ -46,17 +46,10 @@ project "PFF_editor"
 		"C:/VulkanSDK/1.3.250.1/Include",
 	}
 
-    -- prebuildcommands
-	-- {	-- Check if the helper executable exists
-    --     "if not exist \"%{wks.location}/bin/" .. outputs  .. "/PFF_helper/PFF_helper.exe\" (",
-    --     "    echo Building PFF_helper...",
-	-- 	"    cd \"%{wks.location}\" && msbuild PFF.sln /p:Configuration=%{cfg.buildcfg} -target:PFF_helper/PFF_helper:Rebuild && cd -",
-    --     ")"
-    -- }
-
 	links
 	{
 		"PFF",
+		"PFF_helper",
 		"ImGui",
 		"fastgltf",
 	}
@@ -69,6 +62,9 @@ project "PFF_editor"
 
         postbuildcommands 
 		{
+			"{MKDIR} %{wks.location}/bin/" .. outputs .. "/PFF_editor/wiki",
+			"{COPY} %{wks.location}/.github/wiki %{wks.location}/bin/" .. outputs .. "/PFF_editor/wiki",
+			
 			table.unpack(copy_content_of_dir(outputs, {"PFF_editor/shaders", "PFF_editor/defaults", "PFF_editor/assets"})),
 		}
 		

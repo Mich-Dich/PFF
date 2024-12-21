@@ -8,9 +8,10 @@
 
 #include "util/ui/pannel_collection.h"
 #include "util/ui/component_UI.h"
-
 #include "engine/world/map.h"
 #include "engine/resource_management/mesh_serializer.h"
+
+#include "PFF_editor.h"
 
 #include "world_viewport.h"
 
@@ -25,9 +26,12 @@ namespace PFF {
 
 		serialize(serializer::option::load_from_file);
 
-		m_transfrom_translation_image = create_ref<image>(util::get_executable_path() / "assets" / "icons" / "transfrom_translation.png", image_format::RGBA);
-		m_transfrom_rotation_image = create_ref<image>(util::get_executable_path() / "assets" / "icons" / "transfrom_rotation.png", image_format::RGBA);
-		m_transfrom_scale_image = create_ref<image>(util::get_executable_path() / "assets" / "icons" / "transfrom_scale.png", image_format::RGBA);
+		auto* editor_layer = PFF_editor::get().get_editor_layer();
+		m_transfrom_translation_image	= editor_layer->get_transfrom_translation_image();
+		m_transfrom_rotation_image		= editor_layer->get_transfrom_rotation_image();
+		m_transfrom_scale_image			= editor_layer->get_transfrom_scale_image();
+
+
 	}
 
 	world_viewport_window::~world_viewport_window() {
@@ -187,6 +191,9 @@ namespace PFF {
 
 		ImGuiWindowFlags window_flags{};
 		ImGui::Begin("Outliner", &m_show_outliner, window_flags);
+
+		static std::string search_query;
+		UI::serach_input("##serach_in_world_viewport_details_panel", search_query);
 
 		u64 index = 0;
 		const auto& loc_map = application::get().get_world_layer()->get_map();

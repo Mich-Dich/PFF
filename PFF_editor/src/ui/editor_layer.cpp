@@ -16,6 +16,7 @@
 
 // TEST 
 #include "application.h"
+#include "PFF_editor.h"
 #include "engine/render/renderer.h"
 //#include "engine/render/renderer.h"
 //#include "engine/render/vk_swapchain.h"
@@ -25,13 +26,30 @@
 
 namespace PFF {
 
-	editor_layer::editor_layer(ImGuiContext* context) : layer("editor_layer"), m_context(context) { LOG_INIT(); }
+
+	editor_layer::editor_layer(ImGuiContext* context) : layer("editor_layer"), m_context(context) {
+		
+		LOG_INIT();
+	}
 
 	editor_layer::~editor_layer() { LOG_SHUTDOWN(); }
 
 	void editor_layer::on_attach() {
 
 		LOG(Trace, "attaching editor_layer");
+
+		const std::filesystem::path icon_path = util::get_executable_path() / "assets" / "icons";
+		m_folder_closed_icon			= create_ref<image>(icon_path / "folder_closed.png", image_format::RGBA);
+		m_folder_open_icon				= create_ref<image>(icon_path / "folder_open.png", image_format::RGBA);
+		m_folder_icon					= create_ref<image>(icon_path / "folder.png", image_format::RGBA);
+		m_world_icon					= create_ref<image>(icon_path / "world.png", image_format::RGBA);
+		m_mesh_asset_icon				= create_ref<image>(icon_path / "mesh_asset.png", image_format::RGBA);
+		m_transfrom_translation_image	= create_ref<image>(icon_path / "transfrom_translation.png", image_format::RGBA);
+		m_transfrom_rotation_image		= create_ref<image>(icon_path / "transfrom_rotation.png", image_format::RGBA);
+		m_transfrom_scale_image			= create_ref<image>(icon_path / "transfrom_scale.png", image_format::RGBA);
+
+		m_world_viewport_window = new world_viewport_window();
+
 		// inform GLFW window to hide title_bar
 		application::get().get_window()->show_titlebar(false);
 		
@@ -39,6 +57,13 @@ namespace PFF {
 	}
 
 	void editor_layer::on_detach() {
+
+		delete m_world_viewport_window;
+		m_folder_closed_icon.reset();
+		m_folder_open_icon.reset();
+		m_folder_icon.reset();
+		m_world_icon.reset();
+		m_mesh_asset_icon.reset();
 
 		serialize(serializer::option::save_to_file);
 
@@ -72,7 +97,7 @@ namespace PFF {
 
 		//ImGui::DockSpaceOverViewport(ImGui::GetMainViewport());
 
-		m_world_viewport_window.window();
+		m_world_viewport_window->window();
 
 		window_editor_settings();								// TODO: convert into editor window
 		window_general_settings();								// TODO: convert into editor window
@@ -168,8 +193,7 @@ namespace PFF {
 		const f32 button_spaccing = 8.f;
 		const f32 button_area_width = viewport->Size.x - ((button_spaccing * 3) + (button_width * 3));
 
-		// tilebar drag area
-		ImGui::SetCursorPos(ImVec2(0.f, titlebar_vertical_offset));
+		ImGui::SetCursorPos(ImVec2(0.f, titlebar_vertical_offset));														// tilebar drag area
 
 #if 1	// FOR DEBUG VISAUL
 		ImGui::InvisibleButton("##titlebar_drag_zone", ImVec2(button_area_width, m_titlebar_height));
@@ -454,7 +478,7 @@ namespace PFF {
 
 				ImGui::Separator();		
 
-				m_world_viewport_window.show_possible_sub_window_options();
+				m_world_viewport_window->show_possible_sub_window_options();
 
 				ImGui::EndMenu();
 			}

@@ -30,6 +30,15 @@ namespace PFF {
 		void on_event(event& event) override;
 		void on_imgui_render() override;
 
+		PFF_DEFAULT_GETTER(ref<image>,		transfrom_translation_image)
+		PFF_DEFAULT_GETTER(ref<image>,		transfrom_rotation_image)
+		PFF_DEFAULT_GETTER(ref<image>,		transfrom_scale_image)
+		PFF_DEFAULT_GETTER(ref<image>,		folder_closed_icon)
+		PFF_DEFAULT_GETTER(ref<image>,		folder_open_icon)
+		PFF_DEFAULT_GETTER(ref<image>,		folder_icon)
+		PFF_DEFAULT_GETTER(ref<image>,		world_icon)
+		PFF_DEFAULT_GETTER(ref<image>,		mesh_asset_icon)
+
 	private:
 
 		void serialize(serializer::option option);
@@ -55,13 +64,23 @@ namespace PFF {
 		bool demo_window = true;
 #endif
 
-		world_viewport_window				m_world_viewport_window{};
-
 		std::vector<VkPresentModeKHR>		m_swapchain_supported_presentmodes;
 		std::vector<const char*>			m_swapchain_supported_presentmodes_str;
 
 		ImGuiContext*						m_context;
 		f32									m_font_size = 16.0f;
 		f32									m_titlebar_height = 60.f;
+
+
+		world_viewport_window*				m_world_viewport_window;
+
+		ref<image>							m_transfrom_translation_image;
+		ref<image>							m_transfrom_rotation_image;
+		ref<image>							m_transfrom_scale_image;
+		ref<image>							m_folder_closed_icon;
+		ref<image>							m_folder_open_icon;
+		ref<image>							m_folder_icon;
+		ref<image>							m_world_icon;
+		ref<image>							m_mesh_asset_icon;
 	};
 }

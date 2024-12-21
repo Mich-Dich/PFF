@@ -9,7 +9,7 @@ namespace PFF::UI {
 
 	static bool show_engine_wiki = false;
 	static std::string wiki_text{};
-	static const std::filesystem::path path_to_wiki = std::filesystem::path() / ".." / ".github" / "wiki";
+	static const std::filesystem::path path_to_wiki = util::get_executable_path() / "wiki";
 
 	std::string read_file_to_string(const std::filesystem::path filepath) {
 
