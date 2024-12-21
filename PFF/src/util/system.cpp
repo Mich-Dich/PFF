@@ -64,7 +64,7 @@ namespace PFF::util {
             CloseHandle(processInfo.hProcess);
             CloseHandle(processInfo.hThread);
         } else
-            CORE_LOG(Warn, "Unsuccessfully started process: " << path_to_exe.generic_string());
+            CORE_LOG(Error, "Unsuccessfully started process: " << path_to_exe.generic_string());
 
 #elif defined PFF_PLATFORM_LINUX || defined PFF_PLATFORM_MAC
     #error Not implemented yet

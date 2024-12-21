@@ -134,9 +134,9 @@ namespace PFF::render::vulkan {
 
 		// compile_shaders_in_dir
 		const std::filesystem::path path_to_build_script = PFF::util::get_executable_path() / ".." / "PFF_helper" / "PFF_helper.exe";
-		std::string cmdArgs = "1 1 0 " + (PFF::util::get_executable_path() / "../PFF/shaders").generic_string() + " 1 ";
-		CORE_LOG(Info, "CMD Args: " << cmdArgs.c_str());
-		PFF::util::run_program(path_to_build_script, cmdArgs);
+		std::string cmdArgs = "1 1 0 " + (PFF::util::get_executable_path().parent_path() / "PFF/shaders").generic_string() + " 1 ";
+		//CORE_LOG(Info, "CMD Args: " << cmdArgs.c_str());
+		CORE_ASSERT(PFF::util::run_program(path_to_build_script, cmdArgs), "Successfully compiled shaders", "Failed to compile shaders using PFF_helper");			// make sure PFF_helper is build
 
 		//make the vulkan instance, with basic debug features
 		vkb::InstanceBuilder builder;

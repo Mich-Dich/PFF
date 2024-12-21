@@ -46,10 +46,13 @@ project "PFF_editor"
 		"C:/VulkanSDK/1.3.250.1/Include",
 	}
 
-	-- libdirs 
-	-- {
-	-- 	"%{wks.location}/bin/" .. outputs  .. "/PFF"
-	-- }
+    -- prebuildcommands
+	-- {	-- Check if the helper executable exists
+    --     "if not exist \"%{wks.location}/bin/" .. outputs  .. "/PFF_helper/PFF_helper.exe\" (",
+    --     "    echo Building PFF_helper...",
+	-- 	"    cd \"%{wks.location}\" && msbuild PFF.sln /p:Configuration=%{cfg.buildcfg} -target:PFF_helper/PFF_helper:Rebuild && cd -",
+    --     ")"
+    -- }
 
 	links
 	{
@@ -64,7 +67,10 @@ project "PFF_editor"
 		defines { "PFF_PLATFORM_WINDOWS" }
 		files { "../metadata/app_icon.rc" }
 
-        postbuildcommands { table.unpack(copy_content_of_dir(outputs, {"PFF_editor/shaders", "PFF_editor/defaults", "PFF_editor/assets"})), }
+        postbuildcommands 
+		{
+			table.unpack(copy_content_of_dir(outputs, {"PFF_editor/shaders", "PFF_editor/defaults", "PFF_editor/assets"})),
+		}
 		
 	filter "configurations:Debug"
 		defines "PFF_EDITOR_DEBUG"

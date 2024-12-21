@@ -47,7 +47,7 @@ function copy_content_of_dir(outputs, dir_names)
 end
 
 
-group "Core"
+group "Engine"
 	include "PFF"
 group ""
 
