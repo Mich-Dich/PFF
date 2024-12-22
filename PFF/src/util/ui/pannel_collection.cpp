@@ -261,7 +261,7 @@ namespace PFF::UI {
 
 	bool gray_button(const char* lable, const ImVec2& size) {
 
-		ImGui::PushStyleColor(ImGuiCol_Button, ImGui::ColorConvertFloat4ToU32(UI::get_default_gray_ref()));
+		ImGui::PushStyleColor(ImGuiCol_Button, UI::get_default_gray_ref());
 		ImGui::PushStyleColor(ImGuiCol_ButtonHovered, UI::get_action_color_gray_hover_ref());
 		ImGui::PushStyleColor(ImGuiCol_ButtonActive, UI::get_action_color_gray_active_ref());
 

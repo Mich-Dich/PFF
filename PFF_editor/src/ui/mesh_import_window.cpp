@@ -30,8 +30,6 @@ namespace PFF {
 			//ImGui::Text("Source: %s", (source_path.string().c_str()));
 
 
-
-
 			UI::begin_table("Mesh Import Settings");
 
 			UI::table_row_text("Source", (source_path.string().c_str()));
@@ -39,9 +37,6 @@ namespace PFF {
 			UI::table_row("auto generate LODs", loc_load_options.auto_generate_LODs);
 			
 			UI::end_table();
-
-
-
 
 
 			const f32 width = ImGui::GetContentRegionAvail().x / 2 - (ImGui::GetStyle().ItemSpacing.x * 2);

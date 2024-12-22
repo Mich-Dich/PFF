@@ -76,17 +76,29 @@ namespace script_processor {
 		if (!io::is_file(file) || io::is_hidden(file) || !is_header_file(file) || file.filename().replace_extension() == "project")		// check if file.filename() == "project" OR file.filename() == "project.h"
 			return false;
 		
+		const auto relatice_filepath = util::extract_path_from_directory(file, SOURCE_DIR);
+		std::string generatedHFilename = file.filename().replace_extension("").string() + "-generated" + file.extension().string();
+		const std::filesystem::path generated_file_path = s_root_directory / "generated" / relatice_filepath.parent_path() / generatedHFilename;
+
+		// compate dates
+		if (std::filesystem::exists(generated_file_path)) {
+
+			const auto file_update_time = std::filesystem::last_write_time(file);
+			const auto generated_file_update_time = std::filesystem::last_write_time(generated_file_path);
+			VALIDATE(file_update_time > generated_file_update_time, return true,
+				"File [" << util::extract_path_from_directory(file, "src").generic_string() << "] was updated, updating -generated-file",
+				"File [" << util::extract_path_from_directory(file, "src").generic_string() << "] already has upto date -generated-file")
+		} else
+			LOG(Trace, "File [" << util::extract_path_from_directory(file, "src").generic_string() << "] has no generated version, creating -generated-file");
+
 		script_scanner fileScanner = script_scanner(file);
 		std::vector<token> fileTokens = fileScanner.scan_tokens();
 		script_parser fileParser = script_parser(fileTokens, file);
 		fileParser.parse();
 		merge_new_classes(fileParser.get_classes(), file);
 
-		const auto relatice_filepath = util::extract_path_from_directory(file, "src");
-		std::string generatedHFilename = file.filename().replace_extension("").string() + "-generated" + file.extension().string();
-		const std::filesystem::path path = s_root_directory / "generated" / relatice_filepath.parent_path() / generatedHFilename;
-		io::create_directory(path.parent_path());
-		io::write_to_file(fileParser.generate_header_file().c_str(), path);
+		io::create_directory(generated_file_path.parent_path());
+		io::write_to_file(fileParser.generate_header_file().c_str(), generated_file_path);
 		return true;
 	}
 
@@ -141,7 +153,7 @@ namespace script_processor {
 		std::filesystem::path path_to_project_root = argv[4];
 
 
-		LOG(Trace, "called for [" << operation_to_string(operation) << "] project path [" << path_to_project_root << "]");
+		LOG(Trace, "called [" << operation_to_string(operation) << "] for project path [" << path_to_project_root << "]");
 		s_root_directory = path_to_project_root;
 
 		bool result = false;

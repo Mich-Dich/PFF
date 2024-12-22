@@ -34,7 +34,7 @@ namespace PFF {
 	std::string script_parser::generate_header_file() {
 
 		//using namespace entt::literals;
-		LOG(Trace, "generating header for: [" << util::extract_path_from_directory(m_full_filepath, "src").generic_string() << "]");
+		//LOG(Trace, "generating header for: [" << util::extract_path_from_directory(m_full_filepath, "src").generic_string() << "]");
 
 		std::ostringstream file;
 

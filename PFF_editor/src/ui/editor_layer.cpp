@@ -39,11 +39,21 @@ namespace PFF {
 		LOG(Trace, "attaching editor_layer");
 
 		const std::filesystem::path icon_path = util::get_executable_path() / "assets" / "icons";
-		m_folder_closed_icon			= create_ref<image>(icon_path / "folder_closed.png", image_format::RGBA);
-		m_folder_open_icon				= create_ref<image>(icon_path / "folder_open.png", image_format::RGBA);
-		m_folder_icon					= create_ref<image>(icon_path / "folder.png", image_format::RGBA);
-		m_world_icon					= create_ref<image>(icon_path / "world.png", image_format::RGBA);
-		m_mesh_asset_icon				= create_ref<image>(icon_path / "mesh_asset.png", image_format::RGBA);
+#define LOAD_ICON(name)			m_##name##_icon = create_ref<image>(icon_path / #name ".png", image_format::RGBA)
+		LOAD_ICON(folder);
+		LOAD_ICON(folder_open);
+		LOAD_ICON(folder_add);
+		LOAD_ICON(folder_big);
+		LOAD_ICON(world);
+		LOAD_ICON(mesh_asset);
+		LOAD_ICON(relation);
+		LOAD_ICON(file);
+		LOAD_ICON(file_proc);
+		LOAD_ICON(mesh_mini);
+		LOAD_ICON(show);
+		LOAD_ICON(hide);
+#undef	LOAD_ICON
+
 		m_transfrom_translation_image	= create_ref<image>(icon_path / "transfrom_translation.png", image_format::RGBA);
 		m_transfrom_rotation_image		= create_ref<image>(icon_path / "transfrom_rotation.png", image_format::RGBA);
 		m_transfrom_scale_image			= create_ref<image>(icon_path / "transfrom_scale.png", image_format::RGBA);
@@ -59,11 +69,21 @@ namespace PFF {
 	void editor_layer::on_detach() {
 
 		delete m_world_viewport_window;
-		m_folder_closed_icon.reset();
-		m_folder_open_icon.reset();
+
 		m_folder_icon.reset();
+		m_folder_big_icon.reset();
+		m_folder_add_icon.reset();
+		m_folder_big_icon.reset();
 		m_world_icon.reset();
 		m_mesh_asset_icon.reset();
+		m_file_icon.reset();
+		m_file_proc_icon.reset();
+		m_mesh_mini_icon.reset();
+		m_show_icon.reset();
+		m_hide_icon.reset();
+		m_transfrom_translation_image.reset();
+		m_transfrom_rotation_image.reset();
+		m_transfrom_scale_image.reset();
 
 		serialize(serializer::option::save_to_file);
 
@@ -172,19 +192,11 @@ namespace PFF {
 		const ImVec2 titlebar_max = { ImGui::GetCursorScreenPos().x + ImGui::GetWindowWidth(),
 									  ImGui::GetCursorScreenPos().y + m_titlebar_height };
 
-		/*auto* bg_draw_list = ImGui::GetBackgroundDrawList();
-		auto* fg_draw_list = ImGui::GetForegroundDrawList();*/
-		// bg_draw_list->AddRectFilled(titlebar_min, titlebar_max, IM_COL32(21, 251, 21, 255));
-
 		auto* window_draw_list = ImGui::GetWindowDrawList();
-		//window_draw_list->AddRectFilled(uperleft_corner, lowerright_corner, IM_COL32(51, 255, 51, 255));
 
 		window_draw_list->AddRectFilled(titlebar_min, { titlebar_min.x + 200.f, titlebar_max.y }, main_color);
 		titlebar_min.x += 200.f;
 		window_draw_list->AddRectFilledMultiColor(titlebar_min, { titlebar_min.x + 550.f, titlebar_max.y }, main_color, BG_color, BG_color, main_color);
-
-		// Debug titlebar bounds
-		//fg_draw_list->AddRect(titlebar_min, titlebar_max, IM_COL32(222, 43, 43, 255));
 
 		static f32 move_offset_y;
 		static f32 move_offset_x;
@@ -209,7 +221,7 @@ namespace PFF {
 
 		}
 
-		const ImVec2 window_padding = { style->WindowPadding.x / 2,style->WindowPadding.y + 3.f };
+		const ImVec2 window_padding = { style->WindowPadding.x / 2, style->WindowPadding.y + 3.f };
 
 		ImGui::SetItemAllowOverlap();
 		ImGui::PushFont(application::get().get_imgui_layer()->get_font("giant"));

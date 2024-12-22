@@ -33,11 +33,18 @@ namespace PFF {
 		PFF_DEFAULT_GETTER(ref<image>,		transfrom_translation_image)
 		PFF_DEFAULT_GETTER(ref<image>,		transfrom_rotation_image)
 		PFF_DEFAULT_GETTER(ref<image>,		transfrom_scale_image)
-		PFF_DEFAULT_GETTER(ref<image>,		folder_closed_icon)
-		PFF_DEFAULT_GETTER(ref<image>,		folder_open_icon)
 		PFF_DEFAULT_GETTER(ref<image>,		folder_icon)
+		PFF_DEFAULT_GETTER(ref<image>,		folder_add_icon)
+		PFF_DEFAULT_GETTER(ref<image>,		folder_open_icon)
+		PFF_DEFAULT_GETTER(ref<image>,		folder_big_icon)
 		PFF_DEFAULT_GETTER(ref<image>,		world_icon)
 		PFF_DEFAULT_GETTER(ref<image>,		mesh_asset_icon)
+		PFF_DEFAULT_GETTER(ref<image>,		relation_icon)
+		PFF_DEFAULT_GETTER(ref<image>,		file_icon)
+		PFF_DEFAULT_GETTER(ref<image>,		file_proc_icon)
+		PFF_DEFAULT_GETTER(ref<image>,		mesh_mini_icon)
+		PFF_DEFAULT_GETTER(ref<image>,		show_icon)
+		PFF_DEFAULT_GETTER(ref<image>,		hide_icon)
 
 	private:
 
@@ -77,10 +84,17 @@ namespace PFF {
 		ref<image>							m_transfrom_translation_image;
 		ref<image>							m_transfrom_rotation_image;
 		ref<image>							m_transfrom_scale_image;
-		ref<image>							m_folder_closed_icon;
-		ref<image>							m_folder_open_icon;
 		ref<image>							m_folder_icon;
+		ref<image>							m_folder_add_icon;
+		ref<image>							m_folder_open_icon;
+		ref<image>							m_folder_big_icon;
 		ref<image>							m_world_icon;
 		ref<image>							m_mesh_asset_icon;
+		ref<image>							m_relation_icon;
+		ref<image>							m_file_icon;
+		ref<image>							m_file_proc_icon;
+		ref<image>							m_mesh_mini_icon;
+		ref<image>							m_show_icon;
+		ref<image>							m_hide_icon;
 	};
 }

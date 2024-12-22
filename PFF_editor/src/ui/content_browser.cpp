@@ -22,6 +22,9 @@ namespace PFF {
 	const ImVec2				folder_closed_icon_size(18, 17);																	// Calculate the icon size for the tree (make it smaller than regular icons)
 	ImGuiWindow*				folder_display_window{};
 
+	const std::vector<std::pair<std::string, std::string>> import_files = {
+		{"glTF 2.0 file", "*.gltf;*.glb"},
+	};
 
 	int hash_path(const std::filesystem::path& path) { return static_cast<int>(std::hash<std::string>()(path.string())); }
 
@@ -55,9 +58,9 @@ namespace PFF {
 
 		// load folder image
 		auto* editor_layer = PFF_editor::get().get_editor_layer();
-		m_folder_closed_icon =	editor_layer->get_folder_closed_icon();
-		m_folder_open_icon =	editor_layer->get_folder_open_icon();
 		m_folder_icon =			editor_layer->get_folder_icon();
+		m_folder_big_icon =		editor_layer->get_folder_big_icon();
+		m_folder_open_icon =	editor_layer->get_folder_icon();
 		m_world_icon =			editor_layer->get_world_icon();
 		m_mesh_asset_icon =		editor_layer->get_mesh_asset_icon();
 
@@ -67,9 +70,9 @@ namespace PFF {
 
 	content_browser::~content_browser() {
 	
-		m_folder_closed_icon.reset();
-		m_folder_open_icon.reset();
 		m_folder_icon.reset();
+		m_folder_big_icon.reset();
+		m_folder_open_icon.reset();
 		m_world_icon.reset();
 		m_mesh_asset_icon.reset();
 	}
@@ -113,7 +116,7 @@ namespace PFF {
 				if (buffer)
 					ImGui::Image(m_folder_open_icon->get_descriptor_set(), folder_open_icon_size, ImVec2(0, 0), ImVec2(1, 1), UI::get_main_color_ref());
 				else
-					ImGui::Image(m_folder_closed_icon->get_descriptor_set(), folder_closed_icon_size, ImVec2(0, 0), ImVec2(1, 1), UI::get_main_color_ref());
+					ImGui::Image(m_folder_icon->get_descriptor_set(), folder_closed_icon_size, ImVec2(0, 0), ImVec2(1, 1), UI::get_main_color_ref());
 
 				ImGui::SameLine(0, 2);
 				ImGui::Text("%s", path_string.c_str());												// Draw folder name text
@@ -136,7 +139,7 @@ namespace PFF {
 
 				ImGui::SameLine(0, 2);
 				ImGui::BeginGroup();																						// Similar modification for leaf nodes
-				ImGui::Image(m_folder_closed_icon->get_descriptor_set(), folder_closed_icon_size, ImVec2(0, 0), ImVec2(1, 1), UI::get_main_color_ref());
+				ImGui::Image(m_folder_icon->get_descriptor_set(), folder_closed_icon_size, ImVec2(0, 0), ImVec2(1, 1), UI::get_main_color_ref());
 				ImGui::SameLine(0, 2);
 				ImGui::Text("%s", path_string.c_str());
 				ImGui::EndGroup();
@@ -188,24 +191,20 @@ namespace PFF {
 		const ImGuiStyle& style = ImGui::GetStyle();
 		const float window_visible_x2 = ImGui::GetWindowPos().x + ImGui::GetWindowContentRegionMax().x;
 		u32 count = 0;
+
 		for (const auto& entry : std::filesystem::directory_iterator(path)) {
 
-			if (!entry.is_directory()) {																		// current entry is a FOLDER
-
-				display_file(entry.path(), count++);
-				const float next_item_x2 = ImGui::GetItemRectMax().x + style.ItemSpacing.x + m_icon_size.x;		// Expected position if next item was on the same line
-				if (next_item_x2 < window_visible_x2)															// handle item wrapping
-					ImGui::SameLine();
-			
+			if (!entry.is_directory())
 				continue;
-			}
-			
+
 			// Begin a new group for each item
+			const int current_ID = hash_path(entry.path());
 			const std::string item_name = entry.path().filename().string();
+			const ImVec4& color = (m_selected_items.find(entry.path()) != m_selected_items.end()) ? UI::get_action_color_00_active_ref() : UI::get_action_color_gray_active_ref();
 			ImGui::BeginGroup();
 			{
-				ImGui::PushID(hash_path(entry.path()));
-				ImGui::Image(m_folder_icon->get_descriptor_set(), m_icon_size, ImVec2(0, 0), ImVec2(1, 1), UI::get_action_color_gray_active_ref());
+				ImGui::PushID(current_ID);
+				ImGui::Image(m_folder_big_icon->get_descriptor_set(), m_icon_size, ImVec2(0, 0), ImVec2(1, 1), color);
 				ImVec2 text_size = ImGui::CalcTextSize(item_name.c_str());
 				ImGui::SetCursorPos(ImGui::GetCursorPos() + ImVec2((m_icon_size.x - text_size.x) * 0.5f, 0));
 				ImGui::TextWrapped(item_name.c_str());
@@ -214,30 +213,45 @@ namespace PFF {
 			ImGui::EndGroup();
 
 			switch (UI::get_mouse_interation_on_item()) {
-			case UI::mouse_interation::double_click:
+				case UI::mouse_interation::double_click:
+					CORE_LOG(Trace, "Set TreeNode to open ID[" << current_ID << "]");
+					ImGui::TreeNodeSetOpen(folder_display_window->GetID(current_ID), true);
+					select_new_directory(entry.path());
+					return;
 
-				CORE_LOG(Trace, "Set TreeNode to open ID[" << hash_path(entry.path()) << "]");
-				ImGui::TreeNodeSetOpen(folder_display_window->GetID(hash_path(entry.path())), true);
-				select_new_directory(entry.path());
-				return;
+				case UI::mouse_interation::right_click:
+					// TODO: open popup					ImGui::OpenPopup(popup_name.c_str());
+					break;
 
-			case UI::mouse_interation::right_click:
-				//ImGui::OpenPopup(popup_name.c_str());
-				break;
+				case UI::mouse_interation::single_click:
+					if (ImGui::GetIO().KeyShift) {
 
-			default:
-				break;
+						if (m_selected_items.find(entry.path()) == m_selected_items.end())				// If Shift is held, select the item
+							m_selected_items.insert(entry.path());
+						else
+							m_selected_items.erase(entry.path());
+
+					} else {
+						// Clear selection and select the clicked item
+						m_selected_items.clear();
+						m_selected_items.insert(entry.path());
+					}
+					break;
+
+				case UI::mouse_interation::hovered:
+					// TODO: draw rectangle behind item
+					break;
+
+				default: break;
 			}
 
-			// Handle drag source for files
 			if (ImGui::BeginDragDropSource(ImGuiDragDropFlags_SourceAllowNullID)) {
 
 				const std::string path_string = entry.path().string();
 				ImGui::SetDragDropPayload("PROJECT_CONTENT_FOLDER", path_string.c_str(), path_string.length() + 1);
-
-				ImGui::Image(m_folder_icon->get_descriptor_set(), m_icon_size, ImVec2(0, 0), ImVec2(1, 1), UI::get_action_color_gray_active_ref());
+				CORE_LOG(Trace, "DRAG-DROP  FOLDER");
+				ImGui::Image(m_folder_big_icon->get_descriptor_set(), m_icon_size, ImVec2(0, 0), ImVec2(1, 1), UI::get_action_color_gray_active_ref());
 				ImGui::TextWrapped("%s", item_name.c_str());
-
 				ImGui::EndDragDropSource();
 			}
 
@@ -249,33 +263,35 @@ namespace PFF {
 				ImGui::SameLine();
 		}
 
-		//for (const auto& entry : std::filesystem::directory_iterator(path)) {
+		for (const auto& entry : std::filesystem::directory_iterator(path)) {
 
-		//	if (entry.is_directory())
-		//		continue;
+			if (entry.is_directory())
+				continue;
 
-		//	display_file(entry.path(), count++);
+			const int current_ID = hash_path(entry.path());
+			display_file(entry.path(), current_ID);
+			const float next_item_x2 = ImGui::GetItemRectMax().x + style.ItemSpacing.x + m_icon_size.x;		// Expected position if next item was on the same line
+			if (next_item_x2 < window_visible_x2)															// handle item wrapping
+				ImGui::SameLine();
 
-		//	const float next_item_x2 = ImGui::GetItemRectMax().x + style.ItemSpacing.x + m_icon_size.x;		// Expected position if next item was on the same line
-		//	if (next_item_x2 < window_visible_x2)															// handle item wrapping
-		//		ImGui::SameLine();
-		//}
+		}
 
 		// Handle dropping files into the current directory
 		if (ImGui::BeginDragDropTarget()) {
 			if (const ImGuiPayload* payload = ImGui::AcceptDragDropPayload("PROJECT_CONTENT_FOLDER")) {
 
-
+				// Handle folder drop
 			}
 			if (const ImGuiPayload* payload = ImGui::AcceptDragDropPayload("PROJECT_CONTENT_FILE")) {
 				std::string file_path(static_cast<const char*>(payload->Data));
+				CORE_LOG(Error, "file_path: " << file_path);
 				handle_drop(path / std::filesystem::path(file_path).filename());
 			}
 			ImGui::EndDragDropTarget();
 		}
 	}
 
-	void content_browser::display_file(std::filesystem::path file_path, u32 ID) {
+	void content_browser::display_file(const std::filesystem::path file_path, int ID) {
 
 		asset_file_header loc_asset_file_header;
 		if (file_path.extension() == ".pffasset") {
@@ -292,6 +308,7 @@ namespace PFF {
 		}
 
 		// Begin a new group for each item
+		const ImVec4& color = (file_path == m_main_selected_item) ? UI::get_action_color_00_active_ref() : (m_selected_items.find(file_path) != m_selected_items.end()) ? UI::get_action_color_00_faded_ref() : ImVec4(1);
 		const std::string item_name = file_path.filename().replace_extension("").string();
 		ImGui::BeginGroup();
 		{
@@ -302,19 +319,16 @@ namespace PFF {
 			draw_list->AddRectFilled(item_pos, item_pos + m_icon_size, background_color, ImGui::GetStyle().FrameRounding);
 
 			switch (loc_asset_file_header.type) {
+				case file_type::mesh:
+					ImGui::Image(m_mesh_asset_icon->get_descriptor_set(), m_icon_size, ImVec2(0, 0), ImVec2(1, 1), color);
+					break;
 
-			case file_type::mesh:
-				ImGui::Image(m_mesh_asset_icon->get_descriptor_set(), m_icon_size);
-				break;
+				case file_type::world:
+					ImGui::Image(m_world_icon->get_descriptor_set(), m_icon_size, ImVec2(0, 0), ImVec2(1, 1), color);
+					break;
 
-			case file_type::world:
-				ImGui::Image(m_world_icon->get_descriptor_set(), m_icon_size);
-				break;
-
-			default:
-				break;
+				default: break;
 			}
-
 
 			std::string wrapped_text = UI::wrap_text_at_underscore(item_name, m_icon_size.x);
 			ImGui::TextWrapped(wrapped_text.c_str());
@@ -324,9 +338,8 @@ namespace PFF {
 		ImGui::EndGroup();
 		const auto item_mouse_interation = UI::get_mouse_interation_on_item();
 
-		const char* playload_name = "PROJECT_CONTENT_FILE";
-
 		// TODO: make it possible to easyly tell the file type
+		const char* playload_name = "PROJECT_CONTENT_FILE";
 		//switch (loc_asset_file_header.type) {
 		//case file_type::mesh:
 		//	playload_name = "PROJECT_CONTENT_FILE_MESH";
@@ -338,27 +351,36 @@ namespace PFF {
 		//	break;
 		//}
 
-
 		// Handle drag source for files
 		if (ImGui::BeginDragDropSource(ImGuiDragDropFlags_SourceAllowNullID)) {
 
-			const std::string path_string = file_path.string();
-			ImGui::SetDragDropPayload(playload_name, path_string.c_str(), path_string.length() + 1);
+			if (m_selected_items.empty()) {
 
-			ImGui::Image(m_mesh_asset_icon->get_descriptor_set(), m_icon_size);
-			ImGui::TextWrapped("%s", item_name.c_str());
+				const std::string path_string = file_path.string();
+				ImGui::SetDragDropPayload(playload_name, path_string.c_str(), path_string.length() + 1);
+				ImGui::Image(m_mesh_asset_icon->get_descriptor_set(), m_icon_size, ImVec2(0, 0), ImVec2(1, 1), UI::get_action_color_gray_active_ref());
+				ImGui::TextWrapped("%s", item_name.c_str());
+				ImGui::EndDragDropSource();
 
-			ImGui::EndDragDropSource();
+			} else {
+
+				const std::string path_string = file_path.string();
+				ImGui::SetDragDropPayload("PROJECT_CONTENT_FILE_MULTI", &m_selected_items, sizeof(&m_selected_items));
+				ImGui::Image(m_mesh_asset_icon->get_descriptor_set(), m_icon_size, ImVec2(0, 0), ImVec2(1, 1), UI::get_action_color_gray_active_ref());
+				ImGui::TextWrapped("[%d] files", m_selected_items.size());
+				ImGui::EndDragDropSource();
+
+			}
+
 		}
 
 		// Context menu popup
 		std::string popup_name = "item_context_menu_" + item_name;
 		if (ImGui::BeginPopupContextItem(popup_name.c_str())) {
 
-			if (ImGui::MenuItem("Rename")) {
-
+			if (ImGui::MenuItem("Rename"))
 				CORE_LOG(Info, "NOT IMPLEMENTED YET");
-			}
+
 			if (ImGui::MenuItem("Delete")) {
 
 				std::error_code error_code{};
@@ -373,16 +395,38 @@ namespace PFF {
 		}
 
 		switch (item_mouse_interation) {
-		case UI::mouse_interation::double_click:
-			CORE_LOG(Info, "NOT IMPLEMENTED YET => should opening coresponding editor window");
-			break;
+			case UI::mouse_interation::double_click:
+				CORE_LOG(Info, "NOT IMPLEMENTED YET => should opening coresponding editor window");
+				break;
 
-		case UI::mouse_interation::right_click:
-			ImGui::OpenPopup(popup_name.c_str());
-			break;
+			case UI::mouse_interation::right_click:
+				ImGui::OpenPopup(popup_name.c_str());
+				break;
 
-		default:
-			break;
+			case UI::mouse_interation::single_click:
+
+				if (ImGui::GetIO().KeyShift) {
+
+					if (!m_main_selected_item.empty())
+						m_selected_items.insert(m_main_selected_item);
+					m_main_selected_item = file_path;
+					m_selected_items.insert(file_path);
+
+				} else if (ImGui::GetIO().KeyCtrl) {
+
+					if (m_selected_items.find(file_path) == m_selected_items.end())				// If Shift is held, select the item
+						m_selected_items.insert(file_path);
+					else
+						m_selected_items.erase(file_path);
+
+				} else {
+
+					m_selected_items.clear();
+					m_main_selected_item = file_path;
+				}
+				break;
+
+			default: break;
 		}
 
 	}
@@ -414,7 +458,7 @@ namespace PFF {
 
 			if (ImGui::Button(" import ##content_browser_import")) {
 
-				std::filesystem::path source_path = util::file_dialog();
+				std::filesystem::path source_path = util::file_dialog("Import asset", import_files);
 
 				if (source_path.extension() == ".gltf" || source_path.extension() == ".glb")
 					PFF_editor::get().get_editor_layer()->add_window<mesh_import_window>(source_path, m_selected_directory);

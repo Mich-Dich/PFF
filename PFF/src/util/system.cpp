@@ -131,13 +131,15 @@ namespace PFF::util {
     std::filesystem::path file_dialog(const std::string& title, const std::vector<std::pair<std::string, std::string>>& filters) {
 
 #ifdef PFF_PLATFORM_WINDOWS
+        // Assuming you have a way to get the handle of your main window
+        HWND hwndOwner = GetActiveWindow(); // or your main window handle
 
         OPENFILENAME ofn;                                                       // common dialog box structure
         wchar_t szFile[260] = { 0 };                                            // Using wchar_t instead of char for Unicode support
 
         ZeroMemory(&ofn, sizeof(ofn));                                          // initialize OPENFILENAME
         ofn.lStructSize = sizeof(ofn);
-        ofn.hwndOwner = NULL;
+        ofn.hwndOwner = hwndOwner;
         ofn.lpstrFile = szFile;
         ofn.nMaxFile = sizeof(szFile);
 

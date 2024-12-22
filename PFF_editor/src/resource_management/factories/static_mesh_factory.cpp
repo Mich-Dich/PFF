@@ -174,12 +174,53 @@ namespace PFF::mesh_factory {
 
         if (options.combine_meshes) {
 
-            static_mesh_file_metadata metadata{};
-            metadata.mesh_index = 0;
+            //static_mesh_file_metadata metadata{};
+            //metadata.mesh_index = 0;
 
-            // TODO: serialize mesh_asset into new file
-            CORE_LOG(Warn, "Not implemented yet");
-            return false;
+            //CORE_LOG(Warn, "Not implemented yet");                  // <= HERE
+            //return false;
+
+
+
+            ref<PFF::geometry::mesh_asset> combined_mesh = std::make_shared<PFF::geometry::mesh_asset>();                           // Create a new mesh to hold the combined data
+
+            // Variables to keep track of the current vertex and index count
+            size_t current_vertex_count = 0;
+            size_t current_index_count = 0;
+
+            for (const auto& mesh_pair : loc_mesh_assets.value()) {                                                                 // Iterate through each mesh and combine them
+                const auto& mesh = mesh_pair.second;
+
+                combined_mesh->vertices.insert(combined_mesh->vertices.end(), mesh->vertices.begin(), mesh->vertices.end());        // Append vertices to the combined mesh
+
+                for (const auto& index : mesh->indices)                                                                            // Adjust indices and append to the combined mesh
+                    combined_mesh->indices.push_back(index + current_vertex_count);
+
+                current_vertex_count += mesh->vertices.size();                                                                      // Update the current vertex count
+            }
+
+            // Create metadata for the combined mesh
+            static_mesh_file_metadata metadata{};
+            metadata.name = source_path.filename().replace_extension("").string() + "_combined";
+
+            asset_file_header asset_header{};
+            asset_header.type = file_type::mesh;
+            asset_header.version = current_asset_file_header_version;
+            asset_header.timestamp = util::get_system_time();
+
+            general_mesh_file_header general_mesh_header{};
+            general_mesh_header.type = mesh_type::static_mesh;
+
+            static_mesh_file_header static_mesh_header{};
+            static_mesh_header.version = 1;
+            static_mesh_header.source_file = source_path;
+            static_mesh_header.mesh_index = 0;
+
+            // Serialize the combined mesh to the destination path
+            std::filesystem::path output_path = destination_path / (metadata.name + PFF_ASSET_EXTENTION);
+            serialize_mesh(output_path, combined_mesh, asset_header, general_mesh_header, static_mesh_header, serializer::option::save_to_file);
+
+            return true;
 
         } else {
 
@@ -204,7 +245,6 @@ namespace PFF::mesh_factory {
                 counter++;
 
                 std::filesystem::path output_path = destination_path / (metadata.name + PFF_ASSET_EXTENTION);
-
                 serialize_mesh(output_path, mesh.second, asset_header, general_mesh_header, static_mesh_header, serializer::option::save_to_file);
             }
         }

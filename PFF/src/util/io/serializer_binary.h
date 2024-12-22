@@ -80,7 +80,7 @@ namespace PFF::serializer {
 		template<typename T>
 		binary& vector(std::vector<T>& vector, std::function<void(PFF::serializer::binary&, const u64 iteration)> vector_function) {
 
-			CORE_LOG(Error, "NOT IMPLEMENTED YET");
+			LOG(Error, "NOT IMPLEMENTED YET");
 			return *this;
 		}
 
