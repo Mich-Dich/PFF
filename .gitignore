@@ -20,8 +20,8 @@ PFF_editor/benchmarks/
 
 # premake generated
 *.sln
-/bin
-/bin-int
+**/bin
+**/bin-int
 *.vcxproj.filters
 *.vcxproj
 

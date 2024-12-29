@@ -25,10 +25,15 @@ To get started with PFF, follow these simple steps:
 
 Windows:
 
-2. Execute the following file to create a VS 2022 solution:
+2. Execute the following file.
    ```
-   AutoGenerateSolution.bat
+   setup.bat
    ```
+   This will:
+      - Update repo & submoduls.
+      - Check for Vulkan Instalation.
+      - create a VS 2022 solution.
+
 Linux/Apple: (currently not supported)
 
 ## Dependencies
