@@ -12,6 +12,7 @@ project "PFF_helper"
 	defines
 	{
 		"PFF_HELPER",
+		"GLSLC_EXE=\"%{VULKAN_SDK}/Bin/glslc.exe\"",
 	}
 
 	files

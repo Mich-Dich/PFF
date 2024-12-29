@@ -4,7 +4,12 @@
 // ========== vulkan utils ============
 #include "vk_types.h"
 #define VMA_IMPLEMENTATION
-#include "vendor/vk_mem_alloc.h"
+#include <vma/vk_mem_alloc.h>
+
+#include <vma/vk_mem_alloc.h>
+#include <vulkan/vulkan.h>
+#include <vulkan/vk_enum_string_helper.h>
+
 #include "vendor/VkBootstrap.h"
 #include "vk_initializers.h"
 #include "vk_instance.h"
@@ -316,6 +321,7 @@ namespace PFF::render::vulkan {
 			std::ifstream default_config_file(PFF::util::get_executable_path() / "defaults" / "imgui_config.ini");
 			CORE_ASSERT(default_config_file.is_open(), "", "Failed to open [default_config_file]");
 
+			CORE_LOG(Trace, "[imgui_config.ini] is empty. Copying data from default file");
 			file << default_config_file.rdbuf();
 
 			default_config_file.close();
@@ -717,7 +723,7 @@ namespace PFF::render::vulkan {
 		create_swapchain(m_window->get_width(), m_window->get_height());
 
 		//draw image size will match the window
-		VkExtent3D drawImageExtent = { 
+		extent_3D drawImageExtent = {
 			m_window->get_width(),
 			m_window->get_height(),
 			1 

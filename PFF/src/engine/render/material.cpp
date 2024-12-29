@@ -22,7 +22,7 @@ namespace PFF {
 
 		VkPushConstantRange matrix_range{};
 		matrix_range.offset = 0;
-		matrix_range.size = sizeof(GPU_draw_push_constants);
+		matrix_range.size = sizeof(render::vulkan::GPU_draw_push_constants);
 		matrix_range.stageFlags = VK_SHADER_STAGE_VERTEX_BIT;
 
 		render::vulkan::descriptor_layout_builder layout_builder;
@@ -116,7 +116,7 @@ namespace PFF {
 
 		VkPushConstantRange matrix_range{};
 		matrix_range.offset = 0;
-		matrix_range.size = sizeof(GPU_draw_push_constants);
+		matrix_range.size = sizeof(render::vulkan::GPU_draw_push_constants);
 		matrix_range.stageFlags = VK_SHADER_STAGE_VERTEX_BIT;
 
 		render::vulkan::descriptor_layout_builder layout_builder;

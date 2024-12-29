@@ -27,7 +27,7 @@ namespace PFF::util {
 
     bool run_program(const std::filesystem::path& path_to_exe, const char* cmd_args, bool open_console) {
 
-        CORE_LOG(Trace, "executing program at [" << path_to_exe.generic_string() << "]");
+        //CORE_LOG(Trace, "executing program at [" << path_to_exe.generic_string() << "]");
 
         bool result = false;
 

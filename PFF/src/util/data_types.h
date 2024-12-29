@@ -70,6 +70,12 @@ namespace PFF {
 	
 	// ------------------------ smart pointers ------------------------
 
+	typedef struct extent_3D {
+		u32 width;
+		u32 height;
+		u32 depth;
+	} extent_3D;
+
 	struct version {
 
 		version() {}

@@ -20,9 +20,7 @@ namespace shader_processor {
 		std::string system_command;
 		std::string compield_file{};
 		compield_file = absolute_path.string() + ".spv";
-		std::filesystem::path path_to_glsl_exe = PFF::util::get_executable_path() / ".." / "vendor" / "vulkan-glslc" / "glslc.exe";
 		system_command = absolute_path.string() + " -o " + compield_file;
-
 		if (std::filesystem::exists(compield_file)) {
 			if (std::filesystem::last_write_time(absolute_path).time_since_epoch().count() < std::filesystem::last_write_time(compield_file).time_since_epoch().count()) {
 				LOG(Trace, "shader is already compield: [" << EXTRACT_AFTER_PFF(absolute_path.string()) << "]");
@@ -32,7 +30,7 @@ namespace shader_processor {
 
 		LOG(Trace, "compiling shader: [" << EXTRACT_AFTER_PFF(absolute_path.string()) << "]");
 
-		bool result = PFF::util::run_program(path_to_glsl_exe, system_command);
+		bool result = PFF::util::run_program(GLSLC_EXE, system_command);
 		VALIDATE(result, , "", "shader could not be compiled: [" << absolute_path.string() << "]");
 		return result;
 	}

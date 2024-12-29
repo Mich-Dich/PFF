@@ -5,7 +5,6 @@
 	#include <vulkan/vulkan.h>
 	#include "vulkan/vk_image.h"
 	#include "vulkan/vk_initializers.h"
-
 	#include "imgui_impl_vulkan.h"
 	#include "engine/render/vulkan/vk_types.h"
 #endif
@@ -60,14 +59,14 @@ namespace PFF {
 
 	}
 
-	image::image(void* data, VkExtent3D size, image_format format, bool mipmapped) {
+	image::image(void* data, extent_3D size, image_format format, bool mipmapped) {
 
 		allocate_memory(data, size, format, mipmapped);
 	}
 
 	image::image(void* data, u32 width, u32 height, image_format format, bool mipmapped) {
 
-		allocate_memory(data, VkExtent3D{width, height, 1}, format, mipmapped);
+		allocate_memory(data, extent_3D{width, height, 1}, format, mipmapped);
 	}
 
 	image::image(std::filesystem::path image_path, image_format format, bool mipmapped) {
@@ -75,7 +74,7 @@ namespace PFF {
 		int channels;
 		int width = 0, height = 0;
 		void* data = stbi_load(image_path.string().c_str(), &width, &height, &channels, 4);
-		allocate_memory(data, VkExtent3D{ (u32)width, (u32)height, 1 }, format, mipmapped);
+		allocate_memory(data, extent_3D{ (u32)width, (u32)height, 1 }, format, mipmapped);
 		stbi_image_free(data);
 	}
 
@@ -85,10 +84,10 @@ namespace PFF {
 		CORE_LOG_SHUTDOWN();
 	}
 
-	void image::allocate_memory(void* data, VkExtent3D size, image_format format, bool mipmapped, VkImageUsageFlags usage) {
+	void image::allocate_memory(void* data, extent_3D size, image_format format, bool mipmapped, VkImageUsageFlags usage) {
 
 		size_t data_size = size.depth * size.width * size.height * util::bytes_per_pixel(format);
-		vk_buffer uploadbuffer = GET_RENDERER.create_buffer(data_size, VK_BUFFER_USAGE_TRANSFER_SRC_BIT, VMA_MEMORY_USAGE_CPU_TO_GPU);
+		render::vulkan::vk_buffer uploadbuffer = GET_RENDERER.create_buffer(data_size, VK_BUFFER_USAGE_TRANSFER_SRC_BIT, VMA_MEMORY_USAGE_CPU_TO_GPU);
 		memcpy(uploadbuffer.info.pMappedData, data, data_size);
 		allocate_image(size, util::image_format_to_vulkan_vormat(format), usage | VK_IMAGE_USAGE_TRANSFER_DST_BIT | VK_IMAGE_USAGE_TRANSFER_SRC_BIT, mipmapped);
 
@@ -104,7 +103,9 @@ namespace PFF {
 			copyRegion.imageSubresource.mipLevel = 0;
 			copyRegion.imageSubresource.baseArrayLayer = 0;
 			copyRegion.imageSubresource.layerCount = 1;
-			copyRegion.imageExtent = size;
+			copyRegion.imageExtent.width = size.width;
+			copyRegion.imageExtent.height = size.height;
+			copyRegion.imageExtent.depth = size.depth;
 
 			vkCmdCopyBufferToImage(cmd, uploadbuffer.buffer, m_image, VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL, 1, &copyRegion);
 			render::vulkan::util::transition_image(cmd, m_image, VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL, VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL);
@@ -114,7 +115,7 @@ namespace PFF {
 		m_is_initalized = true;
 	}
 
-	void image::allocate_image(VkExtent3D size, VkFormat format, VkImageUsageFlags usage, bool mipmapped) {
+	void image::allocate_image(extent_3D size, VkFormat format, VkImageUsageFlags usage, bool mipmapped) {
 
 		set_image_format(format);
 		set_image_extent(size);

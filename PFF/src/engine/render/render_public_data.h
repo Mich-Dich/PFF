@@ -14,7 +14,6 @@ namespace PFF::render {
 	#define PFF_RENDERER_DEBUG_CAPABILITY
 #endif
 
-
 	enum class render_api {
 
 		none = 0,
@@ -27,8 +26,8 @@ namespace PFF::render {
 	struct GPU_mesh_buffers {
 
 #if defined PFF_RENDER_API_VULKAN
-		vk_buffer			index_buffer{};
-		vk_buffer			vertex_buffer{};
+		vulkan::vk_buffer	index_buffer{};
+		vulkan::vk_buffer	vertex_buffer{};
 		VkDeviceAddress		vertex_buffer_address{};
 #endif
 	};

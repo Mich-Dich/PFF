@@ -24,7 +24,7 @@ def elevate_privileges():
             ctypes.windll.shell32.ShellExecuteW(None, "runas", sys.executable, f'"{script_path}"', os.path.dirname(script_path), 1)
             sys.exit(0)
         else:
-            print(f"Error getting admin privileges")
+            print(f"Admin privileges not granted.")
             sys.exit(1)
 
 

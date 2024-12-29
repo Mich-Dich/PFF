@@ -72,7 +72,7 @@ namespace PFF::geometry {
             : mesh_asset(indices, vertices) {}
         //~procedural_mesh_asset();
 
-        vk_buffer           staging_buffer = {};
+        render::vulkan::vk_buffer           staging_buffer = {};
         void*               staging_data = nullptr;
         size_t              staging_buffer_size = 0;
         

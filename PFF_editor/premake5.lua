@@ -42,8 +42,7 @@ project "PFF_editor"
 		"%{IncludeDir.tinyobjloader}",
 		"%{IncludeDir.stb_image}",
 		"%{IncludeDir.ImGuizmo}",
-
-		"C:/VulkanSDK/1.3.250.1/Include",
+		"%{IncludeDir.VulkanSDK}",
 	}
 
 	links

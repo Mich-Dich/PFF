@@ -9,8 +9,6 @@
 #include "engine/render/material.h"
 
 #include <typeindex>
-//#include "vk_types.h"
-//#include <vulkan/vulkan.h>
 
 class PFF::layer_stack;
 
@@ -18,7 +16,7 @@ namespace PFF::render::vulkan {
 
 	class deletion_queue;
 	constexpr u32 FRAME_COUNT = 2;
-
+	//struct vk_buffer;
 
 	class deletion_queue {
 	public:

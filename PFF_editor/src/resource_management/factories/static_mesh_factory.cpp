@@ -194,7 +194,7 @@ namespace PFF::mesh_factory {
                 combined_mesh->vertices.insert(combined_mesh->vertices.end(), mesh->vertices.begin(), mesh->vertices.end());        // Append vertices to the combined mesh
 
                 for (const auto& index : mesh->indices)                                                                            // Adjust indices and append to the combined mesh
-                    combined_mesh->indices.push_back(index + current_vertex_count);
+                    combined_mesh->indices.push_back(index + static_cast<u32>(current_vertex_count));
 
                 current_vertex_count += mesh->vertices.size();                                                                      // Update the current vertex count
             }

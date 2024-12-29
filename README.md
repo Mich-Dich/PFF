@@ -20,7 +20,7 @@ To get started with PFF, follow these simple steps:
 
 1. Clone the repository using:
    ```
-   git clone --recursive https://github.com/Mich-Dich/PFF
+   git clone --branch dev --recursive git@github.com:Mich-Dich/PFF.git
    ```
 
 Windows:

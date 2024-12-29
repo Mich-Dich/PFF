@@ -72,9 +72,6 @@ project "PFF"
 
 		postbuildcommands
 		{
-			"{MKDIR} %{wks.location}/bin/" .. outputs .. "/vendor/vulkan-glslc",
-			"{COPY} %{wks.location}/PFF/vendor/vulkan-glslc %{wks.location}/bin/" .. outputs  .. "/vendor/vulkan-glslc",
-			
 			-- copy premake exe (needed for engine projects)
 			"{MKDIR} %{wks.location}/bin/" .. outputs .. "/vendor/premake",
 			"{COPY} %{wks.location}/vendor/premake %{wks.location}/bin/" .. outputs .. "/vendor/premake",
