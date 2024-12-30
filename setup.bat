@@ -9,24 +9,6 @@ echo.
 echo ======== Check for any updates
 echo.
 
-echo -------- validating PFF veriosn
-git fetch
-echo.
-
-echo -------- validating ImGui veriosn
-cd PFF\vendor\imgui
-git fetch
-git checkout docking
-echo.
-
-echo -------- validating GLFW veriosn
-cd ..\glfw
-git fetch
-git checkout master
-echo.
-
-cd ..\..\..
-
 echo.
 echo ======== Check Vulkan setup
 
