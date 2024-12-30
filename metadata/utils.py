@@ -2,10 +2,10 @@
 
 import sys
 import os
-import winreg
 import subprocess
 import time
 from zipfile import ZipFile
+import urllib
 
 def install(package):
     subprocess.check_call([sys.executable, '-m', 'pip', 'install', package])
@@ -26,19 +26,21 @@ from zipfile import ZipFile
 
 
 
-def GetSystemEnvironmentVariable(name):
-    key = winreg.CreateKey(winreg.HKEY_LOCAL_MACHINE, r"System\CurrentControlSet\Control\Session Manager\Environment")
-    try:
-        return winreg.QueryValueEx(key, name)[0]
-    except:
-        return None
+def print_c(text, color):
+    colors = {
+        "red": "\033[31m",
+        "green": "\033[32m",
+        "orange": "\033[33m",  # Orange is typically represented as yellow
+        "blue": "\033[34m",
+        "purple": "\033[35m",
+        "cyan": "\033[36m",
+        "white": "\033[37m",
+        "reset": "\033[0m"  # Reset to default color
+    }
+    print(f"{colors.get(color, colors['reset'])}{text}{colors['reset']}")
 
-def GetUserEnvironmentVariable(name):
-    key = winreg.CreateKey(winreg.HKEY_CURRENT_USER, r"Environment")
-    try:
-        return winreg.QueryValueEx(key, name)[0]
-    except:
-        return None
+def print_u(text):
+    print(f"\033[4m{text}\033[0m")
 
 def DownloadFile(url, filepath):
     path = filepath

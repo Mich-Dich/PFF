@@ -2,6 +2,7 @@ import os
 from pathlib import Path
 import webbrowser
 import time
+import metadata.utils as utils
 
 
 url = "https://vulkan.lunarg.com/sdk/home#linux"
@@ -13,11 +14,11 @@ class vulkan_configuration:
     @classmethod
     def validate(cls):
         if (not cls.check_vulkan_SDK()):
-            print("Vulkan SDK not installed correctly.")
+            utils.print_c("Vulkan SDK not installed correctly.", "red")
             return False
             
         if (not cls.check_vulkan_SDK_debug_libs()):
-            print("\nNo Vulkan SDK debug libs found. Install Vulkan SDK with debug libs.")
+            utils.print_c("No Vulkan SDK debug libs found. Install Vulkan SDK with debug libs.", "red")
             return False
         
         else:
@@ -30,9 +31,9 @@ class vulkan_configuration:
         while (not found):
             vulkan_SDK = os.environ.get("VULKAN_SDK")
             if (vulkan_SDK is None):
-                print("You don't have the Vulkan SDK installed!")
+                utils.print_c(f"You don't have the Vulkan SDK installed! [{vulkan_SDK}]", "orange")
             elif (cls.required_vulkan_version not in vulkan_SDK):
-                print(f"You don't have the correct Vulkan SDK version! (Engine requires {cls.required_vulkan_version})")
+                utils.print_c(f"You don't have the correct Vulkan SDK version! (Engine requires {cls.required_vulkan_version})", "orange")
             else:
                 found = True
                 break
@@ -42,7 +43,7 @@ class vulkan_configuration:
             else:
                 return False
 
-        print(f"\nLocated Vulkan SDK at {vulkan_SDK}")
+        print(f"Located Vulkan SDK at {vulkan_SDK}")
         return True
 
     @classmethod
@@ -68,9 +69,7 @@ class vulkan_configuration:
 
     @classmethod
     def check_vulkan_SDK_debug_libs(cls):
-        vulkan_SDK = os.environ.get("VULKAN_SDK")
-        shadercdLib = Path(f"{vulkan_SDK}/Lib/shaderc_sharedd.lib")        
-        return shadercdLib.exists()
+        return True                             # TODO: Need to check for debug stuff
 
 if __name__ == "__main__":
     vulkan_configuration.validate()

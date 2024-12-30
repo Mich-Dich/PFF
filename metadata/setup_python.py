@@ -7,11 +7,12 @@ class python_configuration:
     @classmethod
     def validate(cls):
         if not cls.__validate_python():
-            return # cannot validate further
+            return False
 
         for packageName in ["requests"]:
             if not cls.__validate_package(packageName):
-                return # cannot validate further
+                return False
+        return True
 
     @classmethod
     def __validate_python(cls, versionMajor = 3, versionMinor = 3):

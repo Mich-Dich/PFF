@@ -20,12 +20,14 @@ class vulkan_configuration:
     def validate(cls):
         if (not cls.check_vulkan_SDK()):
             print("Vulkan SDK not installed correctly.")
-            return
+            return False
             
         if (not cls.check_vulkan_SDK_debug_libs()):
             print("\nNo Vulkan SDK debug libs found. Install Vulkan SDK with debug libs.")
             print("(see docs.hazelengine.com/GettingStarted for more info).")
             print("Debug configuration disabled.")
+            return False
+        return True
 
     @classmethod
     def check_vulkan_SDK(cls):
