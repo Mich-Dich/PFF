@@ -35,20 +35,26 @@ try:
     utils.print_u("\nCHECK PREMAKE-5 SETUP")
     premake_installed = premake_requirements.validate()
 
-    utils.print_u("\nSETUP WORKSPACE")
-
     if (True == python_installed == vulkan_installed == premake_installed):
         if platform.system() == "Windows":
 
-            # INVOKE REGISTER SCRIPT HERE
+            utils.print_u("\nCHECK WORKSPACE SETUP")
             register_icon.register_icon()
 
-            print("Should create VS Solution")      # should detect the most reason VS installed
+            utils.print_u("\nBUILDING PFF (Procedurally Focused Framework) VS 2022 Solution:")
+            premake_result = subprocess.run(['vendor/premake/premake5.exe', 'vs2022'], check=True)
+
+            utils.print_u("\nBUILD RESULT:")
+            if premake_result.returncode != 0:
+                utils.print_c(f"BUILD FAILED! the premake script encountered [{premake_result.returncode}] errors", "red")
+            else:
+                utils.print_c("BUILD SUCCESSFUL!", "green")
+
         else:               # because of [Load platform dependent script] only remaining option is Linux
 
-            # Run the command './premake5 gmake'
+            utils.print_u("\nCHECK WORKSPACE SETUP")
             result = subprocess.run(['./premake5', 'gmake'], text=True)
-            print("Should setup workspace")
+        
     else:
         # Print error message if any requirements failed
         failed_requirements = []
