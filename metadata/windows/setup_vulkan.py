@@ -7,7 +7,7 @@ from pathlib import Path
 import tkinter as tk
 from tkinter import filedialog
 
-import utils
+from .. import utils
 
 from io import BytesIO
 from urllib.request import urlopen
@@ -23,7 +23,7 @@ class vulkan_configuration:
             return False
             
         if (not cls.check_vulkan_SDK_debug_libs()):
-            print("\nNo Vulkan SDK debug libs found. Install Vulkan SDK with debug libs.")
+            print("No Vulkan SDK debug libs found. Install Vulkan SDK with debug libs.")
             print("(see docs.hazelengine.com/GettingStarted for more info).")
             print("Debug configuration disabled.")
             return False
@@ -46,7 +46,7 @@ class vulkan_configuration:
             else:
                 found = True
 
-        print(f"\nLocated Vulkan SDK at {vulkan_SDK}")
+        print(f"Located Vulkan SDK at {vulkan_SDK}")
         return True
 
     @classmethod

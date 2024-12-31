@@ -1,51 +1,62 @@
-import sys
 import os
 from pathlib import Path
-
-import utils
+import metadata.windows.win_utils as win_utils
+from .. import utils
 
 class premake_configuration:
-    premakeVersion = "5.0.0-beta1"
-    premakeZipUrls = f"https://github.com/premake/premake-core/releases/download/v{premakeVersion}/premake-{premakeVersion}-windows.zip"
-    premakeLicenseUrl = "https://raw.githubusercontent.com/premake/premake-core/master/LICENSE.txt"
-    premakeDirectory = "./vendor/premake/bin"
+    premake_version = "5.0.0-beta4"
+    premake_zip_urls = f"https://github.com/premake/premake-core/releases/download/v{premake_version}/premake-{premake_version}-windows.zip"
+    premake_license_url = "https://raw.githubusercontent.com/premake/premake-core/master/LICENSE.txt"
+    premake_directory = "./vendor/premake"
 
     @classmethod
     def validate(cls):
-        if (not cls.check_if_premake_installed()):
-            print("Premake is not installed.")
+        if (not cls.check_premake()):
+            utils.print_c("premake not installed correctly.", "red")
             return False
+        else:
+            return True
 
-        print(f"Correct Premake located at {os.path.abspath(cls.premakeDirectory)}")
+    @classmethod
+    def check_premake(cls):
+        while True:
+            premake_path = Path(f"{cls.premake_directory}/premake5.exe")
+            if premake_path.exists():
+                break                                                               # found preamke5
+
+            utils.print_c("You don't have premake5 installed!", "orange")
+            if (cls.__install_premake() == True):
+                input("Press enter to continue after instalation ...")
+            else:
+                return False
+
+        print(f"Located premake")
         return True
 
     @classmethod
-    def check_if_premake_installed(cls):
-        premakeExe = Path(f"{cls.premakeDirectory}/premake5.exe");
-        if (not premakeExe.exists()):
-            return cls.install_premake()
-
-        return True
-
-    @classmethod
-    def install_premake(cls):
-        permissionGranted = False
-        while not permissionGranted:
-            reply = str(input("Premake not found. Would you like to download Premake {0:s}? [Y/N]: ".format(cls.premakeVersion))).lower().strip()[:1]
+    def __install_premake(cls):
+        permission_granted = False
+        while not permission_granted:
+            reply = str(input("Would you like to install premake {0:s}? [Y/N]: ".format(cls.premake_version))).lower().strip()[:1]
             if reply == 'n':
                 return False
-            permissionGranted = (reply == 'y')
+            permission_granted = (reply == 'y')
 
-        premakePath = f"{cls.premakeDirectory}/premake-{cls.premakeVersion}-windows.zip"
-        print("Downloading {0:s} to {1:s}".format(cls.premakeZipUrls, premakePath))
-        utils.DownloadFile(cls.premakeZipUrls, premakePath)
+        license_directory = os.path.dirname(cls.premake_directory)
+        os.makedirs(license_directory, exist_ok=True)
+
+        premakePath = f"{cls.premake_directory}/premake-{cls.premake_version}-windows.zip"
+        print("Downloading {0:s} to {1:s}".format(cls.premake_zip_urls, premakePath))
+        utils.DownloadFile(cls.premake_zip_urls, premakePath)
         print("Extracting", premakePath)
-        utils.UnzipFile(premakePath, deleteZipFile=True)
-        print(f"Premake {cls.premakeVersion} has been downloaded to '{cls.premakeDirectory}'")
+        win_utils.UnzipFile(premakePath, deleteZipFile=True)
+        print(f"Premake {cls.premake_version} has been downloaded to '{cls.premake_directory}'")
 
-        premakeLicensePath = f"{cls.premakeDirectory}/LICENSE.txt"
-        print("Downloading {0:s} to {1:s}".format(cls.premakeLicenseUrl, premakeLicensePath))
-        utils.DownloadFile(cls.premakeLicenseUrl, premakeLicensePath)
-        print(f"Premake License file has been downloaded to '{cls.premakeDirectory}'")
+        premakeLicensePath = f"{cls.premake_directory}/LICENSE.txt"
+        print("Downloading Premake License file{0:s} to {1:s}".format(cls.premake_license_url, premakeLicensePath))
+        utils.DownloadFile(cls.premake_license_url, premakeLicensePath)
 
         return True
+
+if __name__ == "__main__":
+    premake_configuration.validate()

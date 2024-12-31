@@ -62,7 +62,3 @@ class premake_configuration:
 
 if __name__ == "__main__":
     premake_configuration.validate()
-
-# chmod +x premake5
-
-# result = subprocess.run(['./premake5', 'gmake'], text=True)

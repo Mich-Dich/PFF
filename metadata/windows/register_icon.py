@@ -22,10 +22,12 @@ def elevate_privileges():
         if response == 'y':
             script_path = os.path.abspath(sys.argv[0])
             ctypes.windll.shell32.ShellExecuteW(None, "runas", sys.executable, f'"{script_path}"', os.path.dirname(script_path), 1)
-            sys.exit(0)
+            return True
         else:
-            print(f"Admin privileges not granted.")
-            sys.exit(1)
+            print(f"Admin privileges not granted.\n")
+            return False
+    else:
+        return True
 
 
 def check_extension_exists(extension):
@@ -59,28 +61,30 @@ def notify_shell():
     ctypes.windll.shell32.SHChangeNotify(SHCNE_ASSOCCHANGED, SHCNF_IDLIST, None, None)
 
 
-if __name__ == "__main__":    
+def register_icon():    
     extension = "pffproj"
-    icon_path = "assets\\logo.ico"
+    icon_path = "..\\assets\\logo.ico"
     script_dir = os.path.dirname(os.path.abspath(__file__))                             # Get the current script's directory
     icon_path = os.path.join(script_dir, icon_path)
 
     if check_extension_exists(extension):                                               # Check if extension exists before requesting admin
         print(f"The file extension .{extension} is already registered")
-        sys.exit(0)
+        return
 
     if not os.path.exists(icon_path):                                                   # Ensure icon file exists
         print("Error: The specified icon file [logo.ico] was not found in the [script/assets] directory.")
-        sys.exit(1)
+        return
     
     print("The PFF Game Engine uses the [.pffproj] file extension and requests to register a custom icon for it.")
     print("This action requires administrator privileges but is not strictly necessary for the engine's functionality.")
-    elevate_privileges()
+    if elevate_privileges() == False:
+        return
+    
     result = set_file_association(extension, icon_path)
     if result is True:
-        print(f"Successfully registered the '.{extension}' file extension with the PFF-icon.")
+        print(f"Successfully registered the '.{extension}' file extension with the PFF-icon.\n")
         notify_shell()  # Notify the shell of the change
     else:
-        print(f"Error: {result}")
+        print(f"Error: {result}\n")
 
     input("Press any key to continue...")

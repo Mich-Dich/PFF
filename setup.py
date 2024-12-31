@@ -1,4 +1,6 @@
 
+import os
+import sys
 import subprocess
 import platform
 import metadata.utils as utils
@@ -6,6 +8,8 @@ import metadata.utils as utils
 # Load platform dependent script
 from metadata.setup_python import python_configuration as python_requirements
 if platform.system() == "Windows":
+    import metadata.windows.win_utils as win_util
+    win_util.enable_ansi_support()
     from metadata.windows.setup_vulkan import vulkan_configuration as vulkan_requirements
     from metadata.windows.setup_premake import premake_configuration as premake_requirements
     import metadata.windows.register_icon as register_icon
@@ -33,19 +37,17 @@ try:
 
     utils.print_u("\nSETUP WORKSPACE")
 
-    if (True == python_installed == vulkan_installed):
+    if (True == python_installed == vulkan_installed == premake_installed):
         if platform.system() == "Windows":
 
             # INVOKE REGISTER SCRIPT HERE
-            # register_script_path = os.path.join(os.path.dirname(register_icon.__file__), 'register_icon.py')
-            # result = subprocess.run([sys.executable, register_script_path], check=True)
+            register_icon.register_icon()
 
             print("Should create VS Solution")      # should detect the most reason VS installed
         else:               # because of [Load platform dependent script] only remaining option is Linux
 
             # Run the command './premake5 gmake'
             result = subprocess.run(['./premake5', 'gmake'], text=True)
-
             print("Should setup workspace")
     else:
         # Print error message if any requirements failed
@@ -54,6 +56,8 @@ try:
             failed_requirements.append("Python")
         if not vulkan_installed:
             failed_requirements.append("Vulkan")
+        if not premake_installed:
+            failed_requirements.append("Premake5")
 
         failed_list = ", ".join(failed_requirements)
         utils.print_c(f"Missing requirements [{failed_list}] => ABORTING", "red")

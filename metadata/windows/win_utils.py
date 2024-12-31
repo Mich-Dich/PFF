@@ -6,6 +6,14 @@ import time
 import sys
 
 
+def enable_ansi_support():
+    if os.name == 'nt':
+        # Enable ANSI escape sequences in Windows
+        import ctypes
+        kernel32 = ctypes.windll.kernel32
+        kernel32.SetConsoleMode(kernel32.GetStdHandle(-11), 7)
+
+
 def GetSystemEnvironmentVariable(name):
     key = winreg.CreateKey(winreg.HKEY_LOCAL_MACHINE, r"System\CurrentControlSet\Control\Session Manager\Environment")
     try:
@@ -13,12 +21,14 @@ def GetSystemEnvironmentVariable(name):
     except:
         return None
 
+
 def GetUserEnvironmentVariable(name):
     key = winreg.CreateKey(winreg.HKEY_CURRENT_USER, r"Environment")
     try:
         return winreg.QueryValueEx(key, name)[0]
     except:
         return None
+
 
 def UnzipFile(filepath, deleteZipFile=True):
     zipFilePath = os.path.abspath(filepath) # get full path of files
