@@ -18,6 +18,8 @@ PFF/*.ini
 /PFF_editor/benchmarks/
 PFF_editor/benchmarks/
 
+.github/wiki/
+
 # local install of premake
 premake5
 
