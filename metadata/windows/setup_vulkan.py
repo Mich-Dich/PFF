@@ -46,7 +46,7 @@ class vulkan_configuration:
             else:
                 found = True
 
-        print(f"Located Vulkan SDK at {vulkan_SDK}")
+        utils.print_c(f"Located Vulkan SDK at {vulkan_SDK}", "green")
         return True
 
     @classmethod

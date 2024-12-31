@@ -4,6 +4,7 @@ import sys
 import subprocess
 import platform
 import metadata.utils as utils
+import metadata.organize_engine_wiki as organize_engine_wiki
 
 # Load platform dependent script
 from metadata.setup_python import python_configuration as python_requirements
@@ -32,6 +33,11 @@ try:
     utils.print_u("\nCHECK VULKAN SETUP")
     vulkan_installed = vulkan_requirements.validate()
 
+    utils.print_u("\nUPDATE WIKI")
+    organize_engine_wiki.start(os.path.join(".github", "wiki"))
+
+    # CLONE WIKI: git clone https://github.com/Mich-Dich/PFF.wiki.git .github/wiki
+
     utils.print_u("\nCHECK PREMAKE-5 SETUP")
     premake_installed = premake_requirements.validate()
 
@@ -44,7 +50,6 @@ try:
             utils.print_u("\nBUILDING PFF (Procedurally Focused Framework) VS 2022 Solution:")
             premake_result = subprocess.run(['vendor/premake/premake5.exe', 'vs2022'], check=True)
 
-            utils.print_u("\nBUILD RESULT:")
             if premake_result.returncode != 0:
                 utils.print_c(f"BUILD FAILED! the premake script encountered [{premake_result.returncode}] errors", "red")
             else:

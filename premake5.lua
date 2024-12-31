@@ -36,8 +36,7 @@ function copy_content_of_dir(outputs, dir_names)
     for _, dir_name in ipairs(dir_names) do
         local target_dir = "%{wks.location}/bin/" .. outputs .. "/" .. dir_name
         local source_dir = "%{wks.location}/" .. dir_name
-
-        print("Copying directory: " .. source_dir .. " to " .. target_dir)
+        -- print("Copying directory: " .. source_dir .. " to " .. target_dir)
 
         -- Create the target directory
         table.insert(commands, "{MKDIR} " .. target_dir)

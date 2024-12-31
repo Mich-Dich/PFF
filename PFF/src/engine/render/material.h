@@ -20,25 +20,25 @@ namespace PFF {
 	struct material_pipeline {
 
 #if defined PFF_RENDER_API_VULKAN
-		VkPipeline							pipeline;
-		VkPipelineLayout					layout;
+		VkPipeline							pipeline{};
+		VkPipelineLayout					layout{};
 #endif
 	};
 
 	struct material_instance {
 
-		material_pass						pass_type;
-		material_pipeline*					pipeline;
+		material_pass						pass_type{};
+		material_pipeline*					pipeline{};
 #if defined PFF_RENDER_API_VULKAN
-		VkDescriptorSet						material_set;
+		VkDescriptorSet						material_set{};
 #endif
 	};
 
 
 	struct material {
 
-		material_pipeline					opaque_pipeline;
-		material_pipeline					transparent_pipeline;
+		material_pipeline					opaque_pipeline{};
+		material_pipeline					transparent_pipeline{};
 
 		struct material_constants {
 			glm::vec4						color_factors;
@@ -57,7 +57,7 @@ namespace PFF {
 
 #if defined PFF_RENDER_API_VULKAN
 		render::vulkan::descriptor_writer	writer;
-		VkDescriptorSetLayout				material_layout;
+		VkDescriptorSetLayout				material_layout{};
 		
 		void build_pipelines();
 		void release_resources();

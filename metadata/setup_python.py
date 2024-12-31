@@ -1,4 +1,5 @@
 
+import metadata.utils as utils
 import sys
 import subprocess
 import importlib.util as importlib_util
@@ -17,8 +18,7 @@ class python_configuration:
     @classmethod
     def __validate_python(cls, versionMajor = 3, versionMinor = 3):
         if sys.version is not None:
-            print("Python version {0:d}.{1:d}.{2:d} detected.".format( \
-                sys.version_info.major, sys.version_info.minor, sys.version_info.micro))
+            utils.print_c("Python version {0:d}.{1:d}.{2:d} detected.".format(sys.version_info.major, sys.version_info.minor, sys.version_info.micro), "green")
             if sys.version_info.major < versionMajor or (sys.version_info.major == versionMajor and sys.version_info.minor < versionMinor):
                 print("Python version too low, expected version {0:d}.{1:d} or higher.".format( \
                     versionMajor, versionMinor))

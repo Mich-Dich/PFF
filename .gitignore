@@ -8,7 +8,7 @@
 *.log
 
 config/
-*.ini
+PFF/*.ini
 !PFF_editor/config/todo_list.yml
 
 # Compield shaders
