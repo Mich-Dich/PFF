@@ -1,11 +1,11 @@
 # PFF - Procedurally Focused Framework
 
-<table style="border-collapse: collapse; width: 100%; border: none;">
+<table style="border: none; width: 100%;">
   <tr>
-    <td style="border: none;">
+    <td>
       <img src="/.github/resources/Logo2.png?raw=true" alt="Main Logo" title="mich" style="max-width: 100%; height: auto; border: none;">
     </td>
-    <td style="vertical-align: middle; padding-right: 20px; border: none;">
+    <td style="vertical-align: middle; padding-right: 20px;">
       <strong>PFF (Procedurally Focused Framework)</strong> is a 3D game engine crafted in C/C++, designed with a primary focus on harnessing the potential of procedural generation. Primarily developed for Windows, PFF is poised to extend its capabilities to Linux in the future, aspiring to offer a versatile and dynamic platform for game development.
     </td>
   </tr>
@@ -16,25 +16,33 @@
 ![first_image](/.github/resources/PFF_editor_fKegSGzSd4.png?raw=true "image of the editor as it is now")
 
 ## Getting Started
-To get started with PFF, follow these simple steps:
+To get started with PFF, follow these simple steps (You need to have the following software preinstalled: ```Git, Python```):
 
 1. Clone the repository using:
    ```
    git clone --branch dev --recursive git@github.com:Mich-Dich/PFF.git
    ```
 
-Windows:
-
-2. Execute the following file.
+2. On Windows/Linux execute the setup script (Apple currently not supported)
    ```
-   setup.bat
+   python setup.py
    ```
    This will:
       - Update repo & submoduls.
-      - Check for Vulkan Instalation.
-      - create a VS 2022 solution.
+      - Check Envirement setup.
+      - Setup workspace
+        - Windows: create a VS 2022 solution.
+        - Linux: (still in dev)
 
-Linux/Apple: (currently not supported)
+For more detailed instructions please visit our [Instalation wiki](https://github.com/Mich-Dich/PFF/wiki/Instalation)
+
+## Usage
+
+The engine always need a project to work with. As the ``` launcher ``` is still under development, it is recomended to start with our [PFF test project](https://github.com/Mich-Dich/PFF_test_project).
+
+You can direcktly start the Project, this will open the editor and then load the project.
+
+Or you can start the engine, but this will ask you everytime witch project to open. Please select the [.pffproj] file of the project you want to use
 
 ## Dependencies
 PFF relies on the following dependencies:
@@ -44,12 +52,7 @@ PFF relies on the following dependencies:
 - [ImGui](https://github.com/ocornut/imgui)
 - [ImGuizmo](https://github.com/CedricGuillemet/ImGuizmo)
 - [glm](https://github.com/icaven/glm)
-- [Vulkan](https://www.lunarg.com/vulkan-sdk/) install Vulkan SDK and add it to your PATH or update the variable [VULKAN_SDK] in [dependencies.lua]
-
-## Usage
-
-You can start using PFF by either utilizing the provided project, [Sandbox], or creating your own project and linking it by adjusting the `premake5.lua` file. 
-Your game (main class) has to inherit from the `application` class.
+- [Vulkan](https://www.lunarg.com/vulkan-sdk/) install Vulkan SDK and add it to your PATH
 
 ## Documentation
 
