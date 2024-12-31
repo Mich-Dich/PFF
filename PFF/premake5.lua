@@ -80,19 +80,51 @@ project "PFF"
 			table.unpack(copy_content_of_dir(outputs, {"PFF/shaders", "PFF/defaults", "PFF/assets"})),
 		}
 
-	filter "configurations:Debug"
-		defines "PFF_DEBUG"
-		runtime "Debug"
-		symbols "on"
+		filter "configurations:Debug"
+			defines "PFF_DEBUG"
+			runtime "Debug"
+			symbols "on"
 
-	filter "configurations:RelWithDebInfo"
-		defines "PFF_RELEASE_WITH_DEBUG_INFO"
-        runtime "Release"
-		symbols "on"
-		optimize "on"
+		filter "configurations:RelWithDebInfo"
+			defines "PFF_RELEASE_WITH_DEBUG_INFO"
+			runtime "Release"
+			symbols "on"
+			optimize "on"
 
-	filter "configurations:Release"
-		defines "PFF_RELEASE"
-		runtime "Release"
-		symbols "off"
-		optimize "on"
+		filter "configurations:Release"
+			defines "PFF_RELEASE"
+			runtime "Release"
+			symbols "off"
+			optimize "on"
+
+	filter "system:linux"
+		systemversion "latest"
+
+		defines "PFF_PLATFORM_LINUX"
+
+		postbuildcommands
+		{
+			-- Create the directory if it doesn't exist
+			"mkdir -p %{wks.location}/bin/" .. outputs .. "/vendor/premake",
+			"cp -r %{wks.location}/vendor/premake %{wks.location}/bin/" .. outputs .. "/vendor/premake",
+			
+			-- Copy content of directories
+			table.unpack(copy_content_of_dir(outputs, {"PFF/shaders", "PFF/defaults", "PFF/assets"})),
+		}
+		
+		filter "configurations:Debug"
+			defines "PFF_DEBUG"
+			runtime "Debug"
+			symbols "on"
+
+		filter "configurations:RelWithDebInfo"
+			defines "PFF_RELEASE_WITH_DEBUG_INFO"
+			runtime "Release"
+			symbols "on"
+			optimize "on"
+
+		filter "configurations:Release"
+			defines "PFF_RELEASE"
+			runtime "Release"
+			symbols "off"
+			optimize "on"

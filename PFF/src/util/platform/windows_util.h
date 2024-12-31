@@ -41,14 +41,19 @@
 	#undef CDECL
 #endif
 
-
 // Function type macros.
-#define VARARGS									__cdecl							// Functions with variable arguments
-#define CDECL									__cdecl							// Standard C function
-#define STDCALL									__stdcall						// Standard calling convention
-#define FORCEINLINE								__forceinline					// Force code to be inline
-#define FORCENOINLINE							__declspec(noinline)			// Force code to NOT be inline
-#define FUNCTION_NON_NULL_RETURN_START			_Ret_notnull_					// Indicate that the function never returns nullptr.
+// Functions with variable arguments
+#define VARARGS									__cdecl							
+// Standard C function
+#define CDECL									__cdecl							
+// Standard calling convention
+#define STDCALL									__stdcall						
+// Force code to be inline
+#define FORCEINLINE								__forceinline					
+// Force code to NOT be inline
+#define FORCENOINLINE							__declspec(noinline)			
+// Indicate that the function never returns nullptr.
+#define FUNCTION_NON_NULL_RETURN_START			_Ret_notnull_					
 
 // Optimization macros (uses __pragma to enable inside a #define).
 #if !defined(__clang__)
