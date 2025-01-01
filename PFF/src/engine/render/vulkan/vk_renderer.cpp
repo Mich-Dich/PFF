@@ -318,7 +318,7 @@ namespace PFF::render::vulkan {
 			std::ofstream file(UI::ini_file_location);
 			CORE_ASSERT(file.is_open(), "", "Failed to open [" << UI::ini_file_location << "] default: [" << io.IniFilename << "]");
 
-			std::ifstream default_config_file(PFF::util::get_executable_path() / "defaults" / "imgui_config.ini");
+			std::ifstream default_config_file(PFF::util::get_executable_path() / "defaults" / "imgui.ini");
 			CORE_ASSERT(default_config_file.is_open(), "", "Failed to open [default_config_file]");
 
 			CORE_LOG(Trace, "[imgui_config.ini] is empty. Copying data from default file");
@@ -433,7 +433,7 @@ namespace PFF::render::vulkan {
 			}
 			s_resource_free_queue[(m_frame_number) % FRAME_COUNT].clear();
 
-			get_current_frame().deletion_queue.flush();
+			get_current_frame().del_queue.flush();
 			get_current_frame().frame_descriptors.clear_pools(m_device);
 		}
 
@@ -1121,7 +1121,7 @@ namespace PFF::render::vulkan {
 
 		// allocate a new uniform buffer for the scene data
 		vk_buffer gpuSceneDataBuffer = create_buffer(sizeof(render::GPU_scene_data), VK_BUFFER_USAGE_UNIFORM_BUFFER_BIT, VMA_MEMORY_USAGE_CPU_TO_GPU);
-		get_current_frame().deletion_queue.push_func([=]() { destroy_buffer(gpuSceneDataBuffer); });
+		get_current_frame().del_queue.push_func([=]() { destroy_buffer(gpuSceneDataBuffer); });
 
 		//write the buffer
 		render::GPU_scene_data* scene_uniform_data = (render::GPU_scene_data*)gpuSceneDataBuffer.allocation->GetMappedData();
@@ -1171,7 +1171,7 @@ namespace PFF::render::vulkan {
 
 				const auto& transform_comp = loc_map->get_registry().get<transform_component>(entity);
 				auto mesh_asset = procedural_mesh_comp.instance->get_mesh_asset();
-				if (mesh_asset.surfaces.size() <= 0 || !is_bounds_in_frustum(mesh_asset.bounds, (glm::mat4&)transform_comp))
+				if (mesh_asset.surfaces.size() <= 0 || !is_bounds_in_frustum(mesh_asset.bounds_data, (glm::mat4&)transform_comp))
 					continue;
 
 
@@ -1196,7 +1196,7 @@ namespace PFF::render::vulkan {
 				}
 
 				GPU_draw_push_constants push_constants;
-				switch (procedural_mesh_comp.mobility) {
+				switch (procedural_mesh_comp.mobility_data) {
 				case mobility::locked:		push_constants.world_matrix = (glm::mat4&)transform_comp; break;
 				case mobility::movable:		push_constants.world_matrix = (glm::mat4&)transform_comp; break;		// TODO: meeds to check if object moved
 				case mobility::dynamic:
@@ -1247,7 +1247,7 @@ namespace PFF::render::vulkan {
 			if (!mesh_comp.mesh_asset || mesh_comp.asset_path.empty() || !mesh_comp.shoudl_render)
 				continue;
 
-			if (!is_bounds_in_frustum(mesh_comp.mesh_asset->bounds, (glm::mat4&)transform_comp))
+			if (!is_bounds_in_frustum(mesh_comp.mesh_asset->bounds_data, (glm::mat4&)transform_comp))
 				continue;
 
 			// TODO: add more culling for geometry that doesn't need to be drawns
@@ -1271,7 +1271,7 @@ namespace PFF::render::vulkan {
 			}
 
 			GPU_draw_push_constants push_constants;
-			switch (mesh_comp.mobility) {
+			switch (mesh_comp.mobility_data) {
 			case mobility::locked:		push_constants.world_matrix = (glm::mat4&)transform_comp; break;
 			case mobility::movable:		push_constants.world_matrix = (glm::mat4&)transform_comp; break;		// TODO: meeds to check if object moved
 			case mobility::dynamic:

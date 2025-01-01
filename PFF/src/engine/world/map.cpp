@@ -328,7 +328,7 @@ namespace PFF {
 
 				SERIALIZE_SIMPLE_COMPONENT(mesh,
 					.entry(KEY_VALUE(mesh_comp.asset_path))
-					.entry(KEY_VALUE(mesh_comp.mobility))
+					.entry(KEY_VALUE(mesh_comp.mobility_data))
 					.entry(KEY_VALUE(mesh_comp.shoudl_render));
 				);
 
@@ -401,7 +401,7 @@ namespace PFF {
 
 					procedural_mesh_component proc_mesh_comp{};
 					component_section.entry(KEY_VALUE(proc_mesh_comp.script_name))
-						.entry(KEY_VALUE(proc_mesh_comp.mobility))
+						.entry(KEY_VALUE(proc_mesh_comp.mobility_data))
 						.entry(KEY_VALUE(proc_mesh_comp.shoudl_render));
 
 					script_system::serialize_script(proc_mesh_comp.script_name, (PFF::entity_script*)proc_mesh_comp.instance, serializer);

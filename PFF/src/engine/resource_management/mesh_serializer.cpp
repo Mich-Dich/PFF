@@ -14,7 +14,7 @@ namespace PFF {
 			serializer.entry(mesh_asset->surfaces)
 			.entry(mesh_asset->vertices)
 			.entry(mesh_asset->indices)
-			.entry(mesh_asset->bounds);
+			.entry(mesh_asset->bounds_data);
 
 	}
 

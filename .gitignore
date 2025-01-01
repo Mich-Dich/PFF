@@ -20,6 +20,7 @@ PFF_editor/benchmarks/
 .github/wiki/
 
 # local install of premake
+vendor/
 premake5
 
 # premake generated
