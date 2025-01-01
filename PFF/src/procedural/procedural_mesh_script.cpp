@@ -18,7 +18,7 @@ namespace PFF {
 		m_mesh_asset.surfaces.clear();
 		m_mesh_asset.vertices.clear();
 		m_mesh_asset.indices.clear();
-		m_mesh_asset.bounds = PFF::geometry::bounds();
+		m_mesh_asset.bounds_data = PFF::geometry::bounds();
 	}
 
 	void procedural_mesh_script::add_vertex(const glm::vec3& position, const glm::vec3& normal, const glm::vec2& uv, const glm::vec4& color) {

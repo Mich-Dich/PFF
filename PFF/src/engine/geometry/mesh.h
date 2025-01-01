@@ -27,10 +27,9 @@ namespace PFF::geometry {
 
         u32         startIndex = 0;
         u32         count = 0;
-        bounds      bounds{};
+        bounds      bounds_data{};
 
         // MAYBE:   bool        should_render = false;
-
         //ref<material_instatnce> material;
     };
 
@@ -63,7 +62,7 @@ namespace PFF::geometry {
 		std::vector<Geo_surface>			surfaces{};         // used for LODs
 		std::vector<u32>					indices{};
 		std::vector<vertex>					vertices{};
-        bounds                              bounds{};
+        bounds                              bounds_data{};
 	};
 
     struct procedural_mesh_asset : public mesh_asset {

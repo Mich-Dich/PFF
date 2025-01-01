@@ -31,7 +31,7 @@ class premake_configuration:
             else:
                 return False
 
-        print(f"Located premake")
+        utils.print_c(f"Located premake", "green")
         return True
 
     @classmethod

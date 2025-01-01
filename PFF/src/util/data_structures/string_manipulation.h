@@ -109,8 +109,8 @@ namespace PFF::util {
     template<typename T>
     void convert_typename_to_string(std::string& typename_string) {
 
-#if defined(_MSC_VER)
-        // MSVC specific code
+#if defined(_MSC_VER)                               // MSVC specific code
+
         typename_string = typeid(T).name();
         // Remove "class " or "struct " prefix if present
         const char* class_prefix = "class ";
@@ -119,17 +119,18 @@ namespace PFF::util {
             typename_string = typename_string.substr(strlen(class_prefix));
         else if (typename_string.find(struct_prefix) == 0)
             typename_string = typename_string.substr(strlen(struct_prefix));
-#elif defined(__GNUC__) || defined(__clang__)
-        // GCC and Clang specific code
+
+#elif defined(__GNUC__) || defined(__clang__)       // GCC and Clang specific code
+
         const char* typeName = typeid(T).name();
         int status;
         char* demangled = abi::__cxa_demangle(typeName, nullptr, nullptr, &status);
         if (status == 0) {
             typename_string = demangled;
             free(demangled);
-        } else {
+        } else
             typename_string = typeName;
-        }
+        
 #else
         // Generic fallback
         typename_string = typeid(T).name();

@@ -89,14 +89,14 @@ namespace PFF {
 	private:
 
 		template<typename T>
-		FORCEINLINE void on_component_added(entity entity, T& component) {
+		FORCEINLINE void on_component_added(PFF::entity entity, T& component) {
 
 			if constexpr (std::is_same_v<T, mesh_component>) {
 
 			}
 		}
 
-		friend class entity;
+		friend class PFF::entity;
 		friend class world_viewport_window;
 
 		glm::mat4								m_transform;					// transform of map (map could be a small chunk of the ingame world)

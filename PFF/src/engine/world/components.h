@@ -77,7 +77,7 @@ namespace PFF {
 		mesh_component(ref<PFF::geometry::mesh_asset> mesh_asset_ref)
 			: mesh_asset(mesh_asset_ref) {}
 
-		mobility							mobility = mobility::locked;
+		mobility							mobility_data = mobility::locked;
 		bool								shoudl_render = true;
 		std::filesystem::path				asset_path;							// MAYBE: doesnt need to be saved here, only needed for serializaation, maybe export to asset manager or UUID
 		ref<PFF::geometry::mesh_asset>		mesh_asset = nullptr;				// MAYBE: make private
@@ -161,7 +161,7 @@ namespace PFF {
 
 
 		// --------------------- mesh-part of component --------------------- 
-		mobility									mobility = mobility::locked;
+		mobility									mobility_data = mobility::locked;
 		bool										shoudl_render = true;
 		//ref<PFF::geometry::mesh_asset>			mesh_asset = nullptr;	// MAYBE: Move mesh_asset to the component for better performance in rendering
 		//material_instance*						material = nullptr;		// TODO: currently uses one material for all surfaces in mesh_asset, change so it can use diffrent materials per furface

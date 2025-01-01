@@ -339,7 +339,7 @@ namespace PFF {
 					entity_section.sub_section("procedural_mesh_component", [&](serializer::yaml& component_section) {
 
 						component_section.entry(KEY_VALUE(procedural_mesh_comp.script_name))
-							.entry(KEY_VALUE(procedural_mesh_comp.mobility))
+							.entry(KEY_VALUE(procedural_mesh_comp.mobility_data))
 							.entry(KEY_VALUE(procedural_mesh_comp.shoudl_render));
 
 						script_system::serialize_script(procedural_mesh_comp.script_name, (PFF::entity_script*)procedural_mesh_comp.instance, serializer);
@@ -391,7 +391,7 @@ namespace PFF {
 					
 					mesh_component mesh_comp{};
 					component_section.entry(KEY_VALUE(mesh_comp.asset_path))
-					.entry(KEY_VALUE(mesh_comp.mobility))
+					.entry(KEY_VALUE(mesh_comp.mobility_data))
 					.entry(KEY_VALUE(mesh_comp.shoudl_render));
 
 					loc_entity.add_mesh_component(mesh_comp);

@@ -32,9 +32,9 @@ namespace PFF::geometry {
             }
 
             // Calculate surface bounds
-            loop_surface.bounds.origin = (surface_max_pos + surface_min_pos) * 0.5f;
-            loop_surface.bounds.extents = (surface_max_pos - surface_min_pos) * 0.5f;
-            loop_surface.bounds.sphere_radius = glm::length(loop_surface.bounds.extents);
+            loop_surface.bounds_data.origin = (surface_max_pos + surface_min_pos) * 0.5f;
+            loop_surface.bounds_data.extents = (surface_max_pos - surface_min_pos) * 0.5f;
+            loop_surface.bounds_data.sphere_radius = glm::length(loop_surface.bounds_data.extents);
 
             // Update mesh bounds
             mesh_min_pos = glm::min(mesh_min_pos, surface_min_pos);
@@ -42,9 +42,9 @@ namespace PFF::geometry {
         }
 
         // Calculate mesh bounds
-        bounds.origin = (mesh_max_pos + mesh_min_pos) * 0.5f;
-        bounds.extents = (mesh_max_pos - mesh_min_pos) * 0.5f;
-        bounds.sphere_radius = glm::length(bounds.extents);
+        bounds_data.origin = (mesh_max_pos + mesh_min_pos) * 0.5f;
+        bounds_data.extents = (mesh_max_pos - mesh_min_pos) * 0.5f;
+        bounds_data.sphere_radius = glm::length(bounds_data.extents);
 	}
 
 	//procedural_mesh_asset::~procedural_mesh_asset() { 

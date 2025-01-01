@@ -21,6 +21,7 @@ else:
     raise Exception("Unsupported operating system")
 
 
+
 try:
     utils.print_u("\nCHECK FOR ANY UPDATES")
     # subprocess.call(["git", "pull"])
@@ -58,7 +59,18 @@ try:
         else:               # because of [Load platform dependent script] only remaining option is Linux
 
             utils.print_u("\nCHECK WORKSPACE SETUP")
-            result = subprocess.run(['./premake5', 'gmake'], text=True)
+            premake_result = subprocess.run(['./premake5', 'gmake'], text=True)
+
+            if premake_result.returncode != 0:
+                utils.print_c(f"BUILD FAILED! the premake script encountered [{premake_result.returncode}] errors", "red")
+            else:
+                utils.print_c("BUILD SUCCESSFUL!", "green")
+
+            utils.print_c("\nhelpful hints", "blue")
+            print("  Cleanup all generated files:      rm -r bin bin-int && find . -name \"Makefile\" -exec rm -f {} +")
+            print("  apply changed premake scripts:    ./premake5 gmake")
+            print("  compile engine:                   make")
+            print("  for more help:                    ./premake5 --help OR visit[https://premake.github.io/docs/Using-Premake/]")
         
     else:
         # Print error message if any requirements failed

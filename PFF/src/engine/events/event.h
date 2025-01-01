@@ -22,16 +22,38 @@ namespace PFF {
 		EC_Button			= BIT(4)
 	};
 
-#define EVENT_CLASS_TYPE(type)					static event_type get_static_type() { return event_type::##type; }						\
+
+
+#if defined(__GNUC__) && !defined(__clang__)
+    #define EVENT_CLASS_TYPE(type) 				static event_type get_static_type() { return event_type::type; } \
+												virtual event_type get_event_type() const override { return get_static_type(); } \
+												virtual const char* get_name() const override { return #type; }
+
+	#define EVENT_CLASS_CATEGORY(category) 		virtual int32 get_category_flag() const override { return category; }
+
+	#define EVENT_CLASS_STRING(custom_string) 	inline std::string to_string() const override { \
+												std::stringstream ss; \
+												ss << "event - " << custom_string; \
+												return ss.str(); }
+
+#elif defined(__clang__)
+    #error "Clang not jet supported"
+	
+#elif defined(_MSC_VER)
+    #define EVENT_CLASS_TYPE(type)				static event_type get_static_type() { return event_type::##type; }						\
 												virtual event_type get_event_type() const override { return get_static_type(); }		\
 												virtual const char* get_name() const override { return #type; }
 
-#define	EVENT_CLASS_CATEGORY(category)			virtual int32 get_category_flag() const override { return category; }
+	#define	EVENT_CLASS_CATEGORY(category)		virtual int32 get_category_flag() const override { return category; }
 
-#define EVENT_CLASS_STRING(custom_string)		FORCEINLINE std::string to_string() const override {									\
-													std::stringstream ss;																\
-													ss << "event - " << custom_string;													\
-													return ss.str();}
+	#define EVENT_CLASS_STRING(custom_string)	FORCEINLINE std::string to_string() const override {									\
+												std::stringstream ss;																\
+												ss << "event - " << custom_string;													\
+												return ss.str();}
+
+#else
+    #error "Unsupported compiler!"
+#endif
 
 
 	class event {

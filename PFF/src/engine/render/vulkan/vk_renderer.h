@@ -123,7 +123,7 @@ namespace PFF::render::vulkan {
 			VkCommandPool							command_pool{};
 			VkCommandBuffer							main_command_buffer{};
 
-			deletion_queue							deletion_queue{};
+			deletion_queue							del_queue{};
 			descriptor_allocator_growable			frame_descriptors;
 
 		};

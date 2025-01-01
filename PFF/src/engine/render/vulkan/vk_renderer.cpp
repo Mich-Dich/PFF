@@ -206,7 +206,7 @@ namespace PFF::render::vulkan {
 		// Setup deletion queues
 		m_deletion_queue.setup(m_device, m_allocator);
 		for (int i = 0; i < FRAME_COUNT; i++)
-			m_frames[i].deletion_queue.setup(m_device, m_allocator);
+			m_frames[i].del_queue.setup(m_device, m_allocator);
 
 		init_commands();
 		init_swapchain();
@@ -236,7 +236,7 @@ namespace PFF::render::vulkan {
 			vkDestroySemaphore(m_device, frame.swapchain_semaphore, nullptr);
 
 			frame.frame_descriptors.clear_pools(m_device);
-			frame.deletion_queue.flush();
+			frame.del_queue.flush();
 		}
 
 		m_deletion_queue.flush();

@@ -2,6 +2,7 @@
 import subprocess
 import os
 import shutil
+import platform
 import metadata.utils as utils
 
 def parse_sidebar(sidebar_file):
@@ -68,7 +69,12 @@ def start(target_dir):
             else:
                 print(f"File not found: {source_file}")
 
-    run_silent_subprocess(fr'rmdir /s /q {os.path.join(target_dir, ".git")}')
+    if platform.system() == "Windows":
+        run_silent_subprocess(fr'rmdir /s /q {os.path.join(target_dir, ".git")}')
+    elif platform.system() == "Linux":
+        run_silent_subprocess(fr'rm -fr {os.path.join(target_dir, ".git")}')
+    else:
+        raise Exception("Unsupported operating system")
 
     try:
         os.remove(sidebar_file)

@@ -26,7 +26,7 @@ IncludeDir["stb_image"]         = "%{wks.location}/%{vendor_path.stb_image}"
 IncludeDir["entt"]              = "%{wks.location}/%{vendor_path.entt}"
 IncludeDir["ImGuizmo"]          = "%{wks.location}/%{vendor_path.ImGuizmo}"
 
-IncludeDir["VulkanSDK"]         = "%{VULKAN_SDK}/Include"
+IncludeDir["VulkanSDK"]         = "%{VULKAN_SDK}/include"
 
 ------------ libs dir ------------ 
 LibraryDir = {}

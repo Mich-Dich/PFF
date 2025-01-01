@@ -63,8 +63,8 @@
 		#define NOMINMAX				// See github.com/skypjack/entt/wiki/Frequently-Asked-Questions#warning-c4003-the-min-the-max-and-the-macro
 	#endif
 #elif defined(PFF_PLATFORM_LINUX)
-	#error PFF only suports windows
 	#include "util/platform/linux_util.h"
+	#include <cxxabi.h>
 #else
 	#error Unsupported OS detected
 #endif

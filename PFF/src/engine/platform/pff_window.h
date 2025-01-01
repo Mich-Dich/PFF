@@ -30,7 +30,7 @@ namespace PFF {
 		u32 height{};
 		bool vsync{};
 		application* app_ref{};
-		window_size_state window_size_state = window_size_state::windowed;
+		window_size_state size_state = window_size_state::windowed;
 
 		EventCallbackFn event_callback;
 
@@ -58,7 +58,7 @@ namespace PFF {
 		FORCEINLINE void set_event_callback(const EventCallbackFn& callback)	{ m_data.event_callback = callback; }
 		FORCEINLINE f64 get_cursor_pos_x() const								{ return m_data.cursor_pos_x; }
 		FORCEINLINE f64 get_cursor_pos_y() const								{ return m_data.cursor_pos_y; }
-		FORCEINLINE window_size_state get_window_size_state() const				{ return m_data.window_size_state; }
+		FORCEINLINE window_size_state get_window_size_state() const				{ return m_data.size_state; }
 		void get_framebuffer_size(int* width, int* height);
 
 		void show_window(bool show);

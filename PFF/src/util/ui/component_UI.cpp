@@ -42,7 +42,7 @@ namespace PFF::UI {
 			}, [&]() {
 
 				static const char* items[] = { "locked", "movable", "dynamic" };
-				static int item_current_idx = static_cast<std::underlying_type_t<mobility>>(component.mobility);
+				static int item_current_idx = static_cast<std::underlying_type_t<mobility>>(component.mobility_data);
 				const char* combo_preview_value = items[item_current_idx];
 				static ImGuiComboFlags flags = 0;
 				ImGui::SetNextItemWidth(ImGui::GetColumnWidth());
