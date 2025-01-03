@@ -318,7 +318,7 @@ namespace PFF::render::vulkan {
 			std::ofstream file(UI::ini_file_location);
 			CORE_ASSERT(file.is_open(), "", "Failed to open [" << UI::ini_file_location << "] default: [" << io.IniFilename << "]");
 
-			std::ifstream default_config_file(PFF::util::get_executable_path() / "defaults" / "imgui_config.ini");
+			std::ifstream default_config_file(PFF::util::get_executable_path() / "defaults" / "imgui.ini");
 			CORE_ASSERT(default_config_file.is_open(), "", "Failed to open [default_config_file]");
 
 			CORE_LOG(Trace, "[imgui_config.ini] is empty. Copying data from default file");
