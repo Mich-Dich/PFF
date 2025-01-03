@@ -166,7 +166,7 @@ namespace PFF {
 	
 #ifdef RUNTIME_IMPLEMENTED
 		// inatnciate every script		TODO: optimize load time by only loading what is needed
-		m_registry.view<script_component>().each([=](auto entity, auto& script_comp) {
+		m_registry.view<script_component>().each([this](auto entity, auto& script_comp) {
 
 			script_comp.instance = script_comp.create_script();
 			script_comp.instance->m_entity = PFF::entity{ entity, this };
@@ -179,7 +179,7 @@ namespace PFF {
 
 #ifdef RUNTIME_IMPLEMENTED
 		// Destroy every script that is still running
-		m_registry.view<script_component>().each([=](auto entity, auto& script_comp) {
+		m_registry.view<script_component>().each([this](auto entity, auto& script_comp) {
 			script_comp.destroy_script(script_comp);
 		});
 #endif // RUNTIME_IMPLEMENTED
@@ -192,7 +192,7 @@ namespace PFF {
 	void map::on_update(const f32 delta_time) {
 
 #ifdef RUNTIME_IMPLEMENTED
-		m_registry.view<script_component>().each([=](auto entity, auto& script_comp) {
+		m_registry.view<script_component>().each([this](auto entity, auto& script_comp) {
 			script_comp.instance->on_update(delta_time);
 		});
 #else
@@ -200,7 +200,7 @@ namespace PFF {
 		if (!script_system::is_ready())
 			return;
 
-		m_registry.view<script_component>().each([=](auto entity, auto& script_comp) {
+		m_registry.view<script_component>().each([this, delta_time](auto entity, auto& script_comp) {
 
 			// ==================== DEV-ONLY (move to on_runtime_start()) ====================
 			if (!script_comp.instance) {
@@ -249,7 +249,7 @@ namespace PFF {
 
 	void map::recreate_scripts() {
 
-		m_registry.view<procedural_mesh_component>().each([=](auto entity, auto& script_comp) {
+		m_registry.view<procedural_mesh_component>().each([this](auto entity, auto& script_comp) {
 
 			if (script_comp.instance) {
 
@@ -265,36 +265,64 @@ namespace PFF {
 	}
 
 
+#if defined(__GNUC__) && !defined(__clang__)
 
-#define SERIALIZE_SIMPLE_COMPONENT(name, function)																							\
-	if (loc_entity.has_component<##name##_component>()) {																					\
-		auto& ##name##_comp = loc_entity.get_component<##name##_component>();																\
-		entity_section.sub_section(std::string(#name) + "_component", [&](serializer::yaml& component_section) {							\
-																																			\
-			component_section##function																										\
-		});																																	\
-	}
+    #define SERIALIZE_SIMPLE_COMPONENT(name, function)                                                                                  		\
+        if (loc_entity.has_component<name##_component>()) {                                                                             		\
+            auto& name##_comp = loc_entity.get_component<name##_component>();                                                           		\
+            entity_section.sub_section(std::string(#name) + "_component", [&](serializer::yaml& component_section) {                    		\
+                                                                                                                                        		\
+                component_section function                                                                                              		\
+            });                                                                                                                         		\
+        }
 
-#define DESERIALIZE_SIMPLE_COMPONENT(name, function)																						\
-	entity_section.sub_section(std::string(#name) + "_component", [&](serializer::yaml& component_section) {								\
-																																			\
-		name##_component name##_comp{};																										\
-		component_section##function																											\
-																																			\
-		loc_entity.add_component<name##_component>(name##_comp);																			\
-	})
+    #define DESERIALIZE_SIMPLE_COMPONENT(name, function)                                                                                		\
+        entity_section.sub_section(std::string(#name) + "_component", [&](serializer::yaml& component_section) {                        		\
+                                                                                                                                        		\
+            name##_component name##_comp{};                                                                                             		\
+            component_section function                                                                                                  		\
+                                                                                                                                        		\
+            loc_entity.add_component<name##_component>(name##_comp);                                                                    		\
+        })
+
+#elif defined(__clang__)
+    #error "Clang not jet supported"
+
+#elif defined(_MSC_VER)
+
+	#define SERIALIZE_SIMPLE_COMPONENT(name, function)																							\
+		if (loc_entity.has_component<##name##_component>()) {																					\
+			auto& ##name##_comp = loc_entity.get_component<##name##_component>();																\
+			entity_section.sub_section(std::string(#name) + "_component", [&](serializer::yaml& component_section) {							\
+																																				\
+				component_section##function																										\
+			});																																	\
+		}
+
+	#define DESERIALIZE_SIMPLE_COMPONENT(name, function)																						\
+		entity_section.sub_section(std::string(#name) + "_component", [&](serializer::yaml& component_section) {								\
+																																				\
+			name##_component name##_comp{};																										\
+			component_section##function																											\
+																																				\
+			loc_entity.add_component<name##_component>(name##_comp);																			\
+		})
+
+#else
+    #error "Unsupported compiler!"
+#endif
 
 	void map::serialize(serializer::option option) {
 
 		asset_file_header file_header{};
-		file_header.version = version(1, 0, 0);
+		file_header.file_version = version(1, 0, 0);
 		file_header.type = file_type::map;
 		file_header.timestamp = util::get_system_time();
 
 		auto serializer = serializer::yaml(m_path, "map_data", option);
 		serializer.sub_section("file_header", [&](serializer::yaml& header_section) {
 
-			header_section.entry(KEY_VALUE(file_header.version))
+			header_section.entry(KEY_VALUE(file_header.file_version))
 				.entry(KEY_VALUE(file_header.type))
 				.entry(KEY_VALUE(file_header.timestamp));
 		});
@@ -319,7 +347,7 @@ namespace PFF {
 				entity_section.sub_section("transform_component", [&](serializer::yaml& component_section) {
 
 					glm::vec3 translation, rotation, scale;
-					math::decompose_transform((const glm::mat4&)transform_comp, translation, rotation, scale);
+					math::decompose_transform((glm::mat4&)transform_comp, translation, rotation, scale);
 
 					component_section.entry(KEY_VALUE(translation))
 					.entry(KEY_VALUE(rotation))
@@ -328,7 +356,7 @@ namespace PFF {
 
 				SERIALIZE_SIMPLE_COMPONENT(mesh,
 					.entry(KEY_VALUE(mesh_comp.asset_path))
-					.entry(KEY_VALUE(mesh_comp.mobility))
+					.entry(KEY_VALUE(mesh_comp.mobility_data))
 					.entry(KEY_VALUE(mesh_comp.shoudl_render));
 				);
 
@@ -401,7 +429,7 @@ namespace PFF {
 
 					procedural_mesh_component proc_mesh_comp{};
 					component_section.entry(KEY_VALUE(proc_mesh_comp.script_name))
-						.entry(KEY_VALUE(proc_mesh_comp.mobility))
+						.entry(KEY_VALUE(proc_mesh_comp.mobility_data))
 						.entry(KEY_VALUE(proc_mesh_comp.shoudl_render));
 
 					script_system::serialize_script(proc_mesh_comp.script_name, (PFF::entity_script*)proc_mesh_comp.instance, serializer);

@@ -1,10 +1,6 @@
 
 #include "util/pffpch.h"
 
-#include "application.h"
-#include "engine/resource_management/static_mesh_asset_manager.h"
-#include "engine/resource_management/mesh_serializer.h"
-
 #define GLM_ENABLE_EXPERIMENTAL
 #include <glm/gtx/quaternion.hpp>
 #include <glm/gtc/matrix_transform.hpp>
@@ -12,6 +8,11 @@
 #include <glm/gtc/matrix_transform.hpp>
 #include <glm/gtx/transform.hpp> // For glm::translate, glm::rotate
 #include <glm/gtx/euler_angles.hpp> // For glm::eulerAngleYXZ
+
+#include "application.h"
+#include "engine/resource_management/static_mesh_asset_manager.h"
+#include "engine/resource_management/mesh_serializer.h"
+// #include "map.h"
 
 #include "entity.h"
 
@@ -77,7 +78,7 @@ namespace PFF {
 
 		std::vector<UUID> cildren{};
 		cildren.push_back(child.get_component<ID_component>().ID);
-		add_component<relationship_component>(NULL, cildren);		// register child
+		add_component<relationship_component>(get_UUID(), cildren);		// register child
 		return;
 
 	}

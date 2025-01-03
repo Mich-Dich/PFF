@@ -79,8 +79,8 @@ namespace PFF::logger {
 #define PROJECT_FOLDER                  "PFF"
 
 #define SHORTEN_FILE_PATH(text)         (strstr(text, PROJECT_FOLDER) ? strstr(text, PROJECT_FOLDER) + strlen(PROJECT_FOLDER) + 1 : text)
-#define SHORT_FILE(text)                (strrchr(text, '\\') ? strrchr(text, '\\') + 1 : text)
-#define SHORTEN_FUNC_NAME(text)         (strrchr(text, '::') ? strrchr(text, '::') + 1 : text)
+#define SHORT_FILE(text)                (strrchr(text, "\\") ? strrchr(text, "\\") + 1 : text)
+#define SHORTEN_FUNC_NAME(text)         (strstr(text, "::") ? strstr(text, "::") + 2 : text)
 
 static const char* get_filename(const char* filepath) {
 

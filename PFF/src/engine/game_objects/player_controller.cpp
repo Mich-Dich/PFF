@@ -2,9 +2,9 @@
 #include "util/pffpch.h"
 
 #include "application.h"
-#include "engine/Events/Event.h"
-#include "engine/Events/mouse_event.h"
-#include "engine/Events/key_event.h"
+#include "engine/events/event.h"
+#include "engine/events/mouse_event.h"
+#include "engine/events/key_event.h"
 #include "engine/layer/world_layer.h"
 
 #include "player_controller.h"

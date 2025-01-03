@@ -50,12 +50,20 @@ namespace PFF {
 		return false;
 	}
 
+	void file_watcher_system::process_event(const std::filesystem::path& file, int action) {
+	
+		std::lock_guard<std::mutex> lock(m_mutex);
+		auto now = std::chrono::steady_clock::now();
+		m_pending_events[file] = { action, now };
+	}
+
+#ifdef PFF_PLATFORM_WINDOWS
+
 	void file_watcher_system::start_thread() {
 
 		if (path.empty())
 			return;
 
-#ifdef PFF_PLATFORM_WINDOWS
 
 		HANDLE dirHandle = CreateFileA(
 			path.string().c_str(), 
@@ -174,13 +182,7 @@ namespace PFF {
 		}
 
 		CloseHandle(dirHandle);
-	}
 
-	void file_watcher_system::process_event(const std::filesystem::path& file, int action) {
-	
-		std::lock_guard<std::mutex> lock(m_mutex);
-		auto now = std::chrono::steady_clock::now();
-		m_pending_events[file] = { action, now };
 	}
 
 	void file_watcher_system::stop() {
@@ -195,6 +197,12 @@ namespace PFF {
 			m_thread.join();
 		
 	}
+
+#elif defined(PFF_PLATFORM_LINUX)
+
+	void file_watcher_system::start_thread() { }
+
+	void file_watcher_system::stop() { }
 
 #endif
 

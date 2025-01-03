@@ -4,7 +4,7 @@
 #include <glm/glm.hpp>
 
 #include "util/data_structures/UUID.h"
-
+// #include "engine/world/entity.h"
 #include "components.h"
 
 namespace PFF {
@@ -88,16 +88,16 @@ namespace PFF {
 
 	private:
 
-		template<typename T>
-		FORCEINLINE void on_component_added(PFF::entity entity, T& component) {
-
-			if constexpr (std::is_same_v<T, mesh_component>) {
-
-			}
-		}
-
-		friend class PFF::entity;
+		friend class entity;
 		friend class world_viewport_window;
+
+		// template<typename T>
+		// FORCEINLINE void on_component_added(entity map_entity, T& component) {
+
+		// 	if constexpr (std::is_same_v<T, mesh_component>) {
+
+		// 	}
+		// }
 
 		glm::mat4								m_transform;					// transform of map (map could be a small chunk of the ingame world)
 		f64										m_width, m_length, m_height;	// size of map

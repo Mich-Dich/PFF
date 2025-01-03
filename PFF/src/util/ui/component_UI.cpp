@@ -22,7 +22,8 @@ namespace PFF::UI {
 			}, [&]() {
 
 				ImGui::SetNextItemWidth(ImGui::GetColumnWidth());
-				ImGui::Text(component.asset_path.string().c_str());
+				const std::string comp_asset_path = component.asset_path.string();
+				ImGui::Text(comp_asset_path.c_str());
 
 				if (ImGui::BeginDragDropTarget()) {
 					if (const ImGuiPayload* payload = ImGui::AcceptDragDropPayload("PROJECT_CONTENT_FILE")) {
@@ -82,7 +83,7 @@ namespace PFF::UI {
 
 				u32 count = 0;
 				static const char** items = script_system::get_all_procedural_mesh_scripts(&count);
-				static int item_current_idx = static_cast<std::underlying_type_t<mobility>>(component.mobility);
+				static int item_current_idx = static_cast<std::underlying_type_t<mobility>>(component.mobility_data);
 				const char* combo_preview_value = items[item_current_idx];
 				static ImGuiComboFlags flags = 0;
 				ImGui::SetNextItemWidth(ImGui::GetColumnWidth());
@@ -112,7 +113,7 @@ namespace PFF::UI {
 			}, [&]() {
 
 				static const char* items[] = { "locked", "movable", "dynamic" };
-				static int item_current_idx = static_cast<std::underlying_type_t<mobility>>(component.mobility);
+				static int item_current_idx = static_cast<std::underlying_type_t<mobility>>(component.mobility_data);
 				const char* combo_preview_value = items[item_current_idx];
 				static ImGuiComboFlags flags = 0;
 				ImGui::SetNextItemWidth(ImGui::GetColumnWidth());

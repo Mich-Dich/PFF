@@ -72,7 +72,8 @@ namespace PFF::util {
     enum class rotation_type_3D {
         none,
         improve_XY_planes,
-        improve_XZ_planes
+        improve_XZ_planes,
+        default_open_simplex2
     };
 
     enum class fractal_type {
@@ -245,10 +246,10 @@ namespace PFF::util {
             default:
                 DomainWarpSingle(x, y);
                 break;
-            case fractal_type::DomainWarpProgressive:
+            case fractal_type::domain_warp_progressive:
                 DomainWarpFractalProgressive(x, y);
                 break;
-            case fractal_type::DomainWarpIndependent:
+            case fractal_type::domain_warp_independent:
                 DomainWarpFractalIndependent(x, y);
                 break;
             }
@@ -267,11 +268,11 @@ namespace PFF::util {
                 DomainWarpSingle(x, y, z);
                 break;
 
-            case fractal_type::DomainWarpProgressive:
+            case fractal_type::domain_warp_progressive:
                 DomainWarpFractalProgressive(x, y, z);
                 break;
 
-            case fractal_type::DomainWarpIndependent:
+            case fractal_type::domain_warp_independent:
                 DomainWarpFractalIndependent(x, y, z);
                 break;
             }
@@ -560,7 +561,7 @@ namespace PFF::util {
                 z += xy * (FNfloat)0.577350269189626;
             }
             break;
-            case rotation_type_3D::improveXZ_planes:
+            case rotation_type_3D::improve_XZ_planes:
             {
                 FNfloat xz = x + z;
                 FNfloat s2 = xz * -(FNfloat)0.211324865405187;
@@ -1491,7 +1492,7 @@ namespace PFF::util {
             }
 
             switch (m_cellular_return_type) {
-            case cellular_return_type::CellValue:
+            case cellular_return_type::cell_value:
                 return closestHash * (1 / 2147483648.0f);
 
             case cellular_return_type::distance:

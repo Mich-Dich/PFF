@@ -27,23 +27,27 @@
 #include "GLFW/glfw3.h"
 #include "application.h"
 #include "util/system.h"
-#include "util/UI/pannel_collection.h"
+#include "util/ui/pannel_collection.h"
 #include "util/io/serializer_yaml.h"
+#include "util/ui/pannel_collection.h"
 #include "engine/platform/pff_window.h"
 #include "engine/layer/layer_stack.h"
 #include "engine/layer/layer.h"
 #include "engine/world/map.h"
+#include "engine/world/components.h"
 #include "project/script_system.h"
+#include "procedural/procedural_mesh_script.h"
 
 #include <glm/gtc/matrix_transform.hpp>
 #define GLM_ENABLE_EXPERIMENTAL
 #include <glm/gtx/quaternion.hpp>
 #include <cstdlib> // for system calls (conpieling shaders)
 
-#include "engine/world/components.h"
-#include "procedural/procedural_mesh_script.h"
-
-#include "util/ui/pannel_collection.h"
+#if defined(PFF_PLATFORM_LINUX)
+	#include <xmmintrin.h> // For SSE
+	#include <emmintrin.h> // For SSE2
+	#include <smmintrin.h> // For SSE4.1
+#endif
 
 #include "vk_renderer.h"
 
@@ -61,12 +65,8 @@ namespace PFF::render::vulkan {
 
 
 	vk_renderer vk_renderer::s_instance = vk_renderer{};
-
 	static std::vector<std::vector<std::function<void()>>> s_resource_free_queue;
-
-	static std::vector<std::unordered_map<std::function<void()>, u16>> s_resource_free_queue_TEST;		// use u16 as a counter to free resources after all command buffers are free
-
-
+	// static std::vector<std::unordered_map<std::function<void()>, u16>> s_resource_free_queue_TEST;		// use u16 as a counter to free resources after all command buffers are free
 
 
 	void deletion_queue:: setup(VkDevice device, VmaAllocator allocator) {
@@ -433,7 +433,7 @@ namespace PFF::render::vulkan {
 			}
 			s_resource_free_queue[(m_frame_number) % FRAME_COUNT].clear();
 
-			get_current_frame().deletion_queue.flush();
+			get_current_frame().del_queue.flush();
 			get_current_frame().frame_descriptors.clear_pools(m_device);
 		}
 
@@ -679,7 +679,7 @@ namespace PFF::render::vulkan {
 		scene_uniform_data->color_factors = glm::vec4{ 1, 1, 1, 1 };
 		scene_uniform_data->metal_rough_factors = glm::vec4{ 1, 0.5, 0, 0 };
 
-		m_deletion_queue.push_func([=]() { destroy_buffer(material_constant); });
+		m_deletion_queue.push_func([this, material_constant]() { destroy_buffer(material_constant); });
 
 		material::material_resources material_resources;						//default the material textures
 		material_resources.color_image = m_error_checkerboard_image;
@@ -709,7 +709,7 @@ namespace PFF::render::vulkan {
 
 		PFF::serializer::yaml(config::get_filepath_from_configtype(application::get().get_project_path(), config::file::engine), "renderer_background_effect", option)
 			.entry("current_background_effect", m_current_background_effect)
-			.vector(KEY_VALUE(m_background_effects), [=](serializer::yaml& yaml, const u64 x) {
+			.vector(KEY_VALUE(m_background_effects), [this](serializer::yaml& yaml, const u64 x) {
 				yaml.entry(KEY_VALUE(m_background_effects[x].name))
 				.entry("data_0", m_background_effects[x].data.data1)
 				.entry("data_1", m_background_effects[x].data.data2)
@@ -861,7 +861,7 @@ namespace PFF::render::vulkan {
 			m_frames[i].frame_descriptors = descriptor_allocator_growable{};
 			m_frames[i].frame_descriptors.init(m_device, 1000, frame_sizes);
 
-			m_deletion_queue.push_func([=]() { m_frames[i].frame_descriptors.destroy_pools(m_device); });
+			m_deletion_queue.push_func([this, i]() { m_frames[i].frame_descriptors.destroy_pools(m_device); });
 		}
 
 		{
@@ -1121,7 +1121,7 @@ namespace PFF::render::vulkan {
 
 		// allocate a new uniform buffer for the scene data
 		vk_buffer gpuSceneDataBuffer = create_buffer(sizeof(render::GPU_scene_data), VK_BUFFER_USAGE_UNIFORM_BUFFER_BIT, VMA_MEMORY_USAGE_CPU_TO_GPU);
-		get_current_frame().deletion_queue.push_func([=]() { destroy_buffer(gpuSceneDataBuffer); });
+		get_current_frame().del_queue.push_func([this, gpuSceneDataBuffer]() { destroy_buffer(gpuSceneDataBuffer); });
 
 		//write the buffer
 		render::GPU_scene_data* scene_uniform_data = (render::GPU_scene_data*)gpuSceneDataBuffer.allocation->GetMappedData();
@@ -1171,7 +1171,7 @@ namespace PFF::render::vulkan {
 
 				const auto& transform_comp = loc_map->get_registry().get<transform_component>(entity);
 				auto mesh_asset = procedural_mesh_comp.instance->get_mesh_asset();
-				if (mesh_asset.surfaces.size() <= 0 || !is_bounds_in_frustum(mesh_asset.bounds, (glm::mat4&)transform_comp))
+				if (mesh_asset.surfaces.size() <= 0 || !is_bounds_in_frustum(mesh_asset.bounds_data, (glm::mat4&)transform_comp))
 					continue;
 
 
@@ -1196,7 +1196,7 @@ namespace PFF::render::vulkan {
 				}
 
 				GPU_draw_push_constants push_constants;
-				switch (procedural_mesh_comp.mobility) {
+				switch (procedural_mesh_comp.mobility_data) {
 				case mobility::locked:		push_constants.world_matrix = (glm::mat4&)transform_comp; break;
 				case mobility::movable:		push_constants.world_matrix = (glm::mat4&)transform_comp; break;		// TODO: meeds to check if object moved
 				case mobility::dynamic:
@@ -1228,16 +1228,6 @@ namespace PFF::render::vulkan {
 
 		}
 
-
-
-
-
-
-
-
-
-
-
 		// get every entity with [transform] and [mesh]
 		const auto group = loc_map->get_registry().group<transform_component>(entt::get<mesh_component>);
 		for (const auto entity : group) {
@@ -1247,7 +1237,7 @@ namespace PFF::render::vulkan {
 			if (!mesh_comp.mesh_asset || mesh_comp.asset_path.empty() || !mesh_comp.shoudl_render)
 				continue;
 
-			if (!is_bounds_in_frustum(mesh_comp.mesh_asset->bounds, (glm::mat4&)transform_comp))
+			if (!is_bounds_in_frustum(mesh_comp.mesh_asset->bounds_data, (glm::mat4&)transform_comp))
 				continue;
 
 			// TODO: add more culling for geometry that doesn't need to be drawns
@@ -1271,7 +1261,7 @@ namespace PFF::render::vulkan {
 			}
 
 			GPU_draw_push_constants push_constants;
-			switch (mesh_comp.mobility) {
+			switch (mesh_comp.mobility_data) {
 			case mobility::locked:		push_constants.world_matrix = (glm::mat4&)transform_comp; break;
 			case mobility::movable:		push_constants.world_matrix = (glm::mat4&)transform_comp; break;		// TODO: meeds to check if object moved
 			case mobility::dynamic:
@@ -1292,13 +1282,6 @@ namespace PFF::render::vulkan {
 
 			COLLECTING_PERFORMANCE_DATA(m_renderer_metrik.mesh_draw++);
 		}
-
-
-
-
-
-
-
 
 #ifdef PFF_RENDERER_DEBUG_CAPABILITY
 
@@ -1470,7 +1453,7 @@ namespace PFF::render::vulkan {
 		});
 
 		destroy_buffer(staging);
-		m_deletion_queue.push_func([=]() {
+		m_deletion_queue.push_func([this, new_mesh]() {
 
 			destroy_buffer(new_mesh.vertex_buffer);
 			destroy_buffer(new_mesh.index_buffer);

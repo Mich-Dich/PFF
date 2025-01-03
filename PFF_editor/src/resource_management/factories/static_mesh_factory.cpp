@@ -128,9 +128,9 @@ namespace PFF::mesh_factory {
                     maxpos = glm::max(maxpos, loc_mesh.vertices[x].position);
                 }
                 // calculate origin and extents from the min/max, use extent lenght for radius
-                new_surface.bounds.origin = (maxpos + minpos) / 2.f;
-                new_surface.bounds.extents = (maxpos - minpos) / 2.f;
-                new_surface.bounds.sphere_radius = glm::length(new_surface.bounds.extents);
+                new_surface.bounds_data.origin = (maxpos + minpos) / 2.f;
+                new_surface.bounds_data.extents = (maxpos - minpos) / 2.f;
+                new_surface.bounds_data.sphere_radius = glm::length(new_surface.bounds_data.extents);
 
                 loc_mesh.surfaces.push_back(new_surface);
             }
@@ -143,15 +143,15 @@ namespace PFF::mesh_factory {
             }
 
             // calc mesh_asset bounds based on surfaces
-            glm::vec3 minpos = loc_mesh.surfaces[0].bounds.origin - loc_mesh.surfaces[0].bounds.extents;
-            glm::vec3 maxpos = loc_mesh.surfaces[0].bounds.origin + loc_mesh.surfaces[0].bounds.extents;
+            glm::vec3 minpos = loc_mesh.surfaces[0].bounds_data.origin - loc_mesh.surfaces[0].bounds_data.extents;
+            glm::vec3 maxpos = loc_mesh.surfaces[0].bounds_data.origin + loc_mesh.surfaces[0].bounds_data.extents;
             for (size_t x = 0; x < loc_mesh.surfaces.size(); x++) {
-                minpos = glm::min(minpos, loc_mesh.surfaces[x].bounds.origin - loc_mesh.surfaces[x].bounds.extents);
-                maxpos = glm::max(maxpos, loc_mesh.surfaces[x].bounds.origin + loc_mesh.surfaces[x].bounds.extents);
+                minpos = glm::min(minpos, loc_mesh.surfaces[x].bounds_data.origin - loc_mesh.surfaces[x].bounds_data.extents);
+                maxpos = glm::max(maxpos, loc_mesh.surfaces[x].bounds_data.origin + loc_mesh.surfaces[x].bounds_data.extents);
             }
-            loc_mesh.bounds.origin = (maxpos + minpos) / 2.f;
-            loc_mesh.bounds.extents = (maxpos - minpos) / 2.f;
-            loc_mesh.bounds.sphere_radius = glm::length(loc_mesh.bounds.extents);
+            loc_mesh.bounds_data.origin = (maxpos + minpos) / 2.f;
+            loc_mesh.bounds_data.extents = (maxpos - minpos) / 2.f;
+            loc_mesh.bounds_data.sphere_radius = glm::length(loc_mesh.bounds_data.extents);
 
             // new_mesh.meshBuffers = engine->uploadMesh(indices, vertices);
             meshes.emplace(mesh.name, create_ref<geometry::mesh_asset>(std::move(loc_mesh)));
@@ -205,7 +205,7 @@ namespace PFF::mesh_factory {
 
             asset_file_header asset_header{};
             asset_header.type = file_type::mesh;
-            asset_header.version = current_asset_file_header_version;
+            asset_header.file_version = current_asset_file_header_version;
             asset_header.timestamp = util::get_system_time();
 
             general_mesh_file_header general_mesh_header{};
@@ -232,7 +232,7 @@ namespace PFF::mesh_factory {
 
                 asset_file_header asset_header{};
                 asset_header.type = file_type::mesh;
-                asset_header.version = current_asset_file_header_version;
+                asset_header.file_version = current_asset_file_header_version;
                 asset_header.timestamp = util::get_system_time();
 
                 general_mesh_file_header general_mesh_header{};

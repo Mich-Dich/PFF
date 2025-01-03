@@ -53,7 +53,7 @@ namespace shader_processor {
 
 
 
-	bool shader_processor::start(int argc, char* argv[]) {
+	bool start(int argc, char* argv[]) {
 
 		PFF::logger::use_format_backup();
 		if (std::stoi(argv[1]))
@@ -63,10 +63,7 @@ namespace shader_processor {
 
 		int operation_number = std::stoi(argv[3]);
 		shader_operation operation = static_cast<shader_operation>(operation_number);
-
 		std::filesystem::path path_to_dir = argv[4];
-
-
 		LOG(Trace, "called for [" << operation_to_string(operation) << "] project path [" << path_to_dir << "]");
 
 		bool result = false;

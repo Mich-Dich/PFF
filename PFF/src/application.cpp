@@ -9,6 +9,8 @@
 #include "engine/events/mouse_event.h"
 #include "engine/events/key_event.h"
 
+// #include "util/io/serializer_data.h"
+// #include "engine/world/entity.h"
 #include "engine/layer/layer.h"
 #include "engine/layer/layer_stack.h"
 #include "engine/layer/imgui_layer.h"
@@ -86,9 +88,9 @@ namespace PFF {
 		GET_RENDERER.set_state(system_state::inactive);
 		serialize(serializer::option::save_to_file);
 
-		for (size_t x = 0; x < m_timers.size(); x++)
-			util::cancel_timer(m_timers[x]);
-		m_timers.clear();
+		// for (size_t x = 0; x < m_timers.size(); x++)
+		// 	util::cancel_timer(m_timers[x]);
+		// m_timers.clear();
 
 		GET_RENDERER.resource_free();
 
@@ -109,24 +111,6 @@ namespace PFF {
 	}
 
 	// ==================================================================== main loop ====================================================================
-
-	std::future<void>& application::add_future(std::future<void>& future, std::shared_ptr<std::pair<std::atomic<bool>, std::condition_variable>>& shared_state) {
-
-		std::lock_guard<std::mutex> lock(m_global_futures_mutex);
-		m_timers.push_back({ std::move(future), shared_state });
-		return m_timers.back().future;
-	}
-
-	void application::remove_timer(std::future<void>& future) {
-
-		std::lock_guard<std::mutex> lock(m_global_futures_mutex);
-
-		LOG(Trace, "timer vector length: " << m_timers.size());
-		/*m_timers.erase(std::remove_if(m_timers.begin(), m_timers.end(),
-			[&future](const util::timer& t) { return t.future._Ptr() == future._Ptr(); }),
-			m_timers.end());*/
-		LOG(Trace, "timer vector length: " << m_timers.size());
-	}
 
 	void application::run() {
 
@@ -159,6 +143,24 @@ namespace PFF {
 	}
 
 	// ==================================================================== PUBLIC ====================================================================
+
+	// std::future<void>& application::add_future(std::future<void>& future, std::shared_ptr<std::pair<std::atomic<bool>, std::condition_variable>>& shared_state) {
+
+	// 	std::lock_guard<std::mutex> lock(m_global_futures_mutex);
+	// 	m_timers.push_back({ std::move(future), shared_state });
+	// 	return m_timers.back().future;
+	// }
+
+	// void application::remove_timer(std::future<void>& future) {
+
+	// 	std::lock_guard<std::mutex> lock(m_global_futures_mutex);
+
+	// 	LOG(Trace, "timer vector length: " << m_timers.size());
+	// 	/*m_timers.erase(std::remove_if(m_timers.begin(), m_timers.end(),
+	// 		[&future](const util::timer& t) { return t.future._Ptr() == future._Ptr(); }),
+	// 		m_timers.end());*/
+	// 	LOG(Trace, "timer vector length: " << m_timers.size());
+	// }
 
 	void application::set_fps_settings(const bool set_for_engine_focused, const u32 new_limit) {
 

@@ -10,8 +10,7 @@
 
 namespace PFF {
 
-	void serialize_mesh(const std::filesystem::path filename, ref<geometry::mesh_asset> mesh_asset,
-		asset_file_header& asset_header, general_mesh_file_header& general_header, static_mesh_file_header& static_mesh_header, const serializer::option option);
+	void serialize_mesh(const std::filesystem::path filename, ref<geometry::mesh_asset> mesh_asset, asset_file_header& asset_header, general_mesh_file_header& general_header, static_mesh_file_header& static_mesh_header, const serializer::option option);
 
 	void serialize_mesh_headers(serializer::binary& serializer, asset_file_header& asset_header, general_mesh_file_header& general_mesh_header);
 	

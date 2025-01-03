@@ -13,7 +13,7 @@
 #include "util/util.h"													// this includes all util sub files
 
 // -------------------------- engine --------------------------
-#include "engine/Events/Event.h"
+#include "engine/events/event.h"
 #include "engine/game_objects/player_controller.h"
 #include "engine/layer/layer_stack.h"
 #include "engine/world/map.h"

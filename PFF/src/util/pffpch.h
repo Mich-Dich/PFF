@@ -16,9 +16,10 @@
 #include <future>
 #include <random>
 #include <filesystem>
-//#include <concepts>			// need to switch to C++20
+#include <concepts>
 
 #include <string>
+#include <cstring>
 #include <sstream>
 #include <vector>
 #include <unordered_map>
@@ -26,7 +27,7 @@
 
 #include <optional>
 #include <queue>
-//#include <span>
+#include <span>
 #include <list>
 #include <map>
 #include <deque>
@@ -65,6 +66,13 @@
 #elif defined(PFF_PLATFORM_LINUX)
 	#include "util/platform/linux_util.h"
 	#include <cxxabi.h>
+	// #include <dirent.h>
+	// #include <unistd.h>
+	// #include <sys/types.h>
+	// #include <sys/stat.h>
+	#ifndef NOMINMAX
+		#define NOMINMAX				// See github.com/skypjack/entt/wiki/Frequently-Asked-Questions#warning-c4003-the-min-the-max-and-the-macro
+	#endif
 #else
 	#error Unsupported OS detected
 #endif

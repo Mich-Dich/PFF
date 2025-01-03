@@ -27,8 +27,8 @@ namespace PFF {
 
 	static void serialize_window_atributes(window_attrib* window_attributes, const PFF::serializer::option option) {
 
-		if (option == serializer::option::save_to_file && window_attributes->window_size_state == window_size_state::minimised)
-			window_attributes->window_size_state = window_size_state::windowed;
+		if (option == serializer::option::save_to_file && window_attributes->size_state == window_size_state::minimised)
+			window_attributes->size_state = window_size_state::windowed;
 
 		serializer::yaml(config::get_filepath_from_configtype(util::get_executable_path(), config::file::editor), "window_attributes", option)
 			.entry(KEY_VALUE(window_attributes->title))
@@ -37,7 +37,7 @@ namespace PFF {
 			.entry(KEY_VALUE(window_attributes->width))
 			.entry(KEY_VALUE(window_attributes->height))
 			.entry(KEY_VALUE(window_attributes->vsync))
-			.entry(KEY_VALUE(window_attributes->window_size_state));
+			.entry(KEY_VALUE(window_attributes->size_state));
 	}
 
 	// ================================================================================== setup ==================================================================================
@@ -60,7 +60,7 @@ namespace PFF {
 		glfwWindowHint(GLFW_CLIENT_API, GLFW_NO_API);
 		glfwWindowHint(GLFW_RESIZABLE, GLFW_TRUE);
 		glfwWindowHint(GLFW_VISIBLE, GLFW_FALSE);
-		glfwWindowHint(GLFW_MAXIMIZED, (m_data.window_size_state == window_size_state::fullscreen || m_data.window_size_state == window_size_state::fullscreen_windowed) ? GLFW_TRUE : GLFW_FALSE);
+		glfwWindowHint(GLFW_MAXIMIZED, (m_data.size_state == window_size_state::fullscreen || m_data.size_state == window_size_state::fullscreen_windowed) ? GLFW_TRUE : GLFW_FALSE);
 
 		int max_posible_height = 0;
 		int max_posible_width = 0;
@@ -116,8 +116,8 @@ namespace PFF {
 		//}
 		glfwSetWindowMonitor(m_Window, NULL, m_data.pos_x, m_data.pos_y, m_data.width, m_data.height, mode->refreshRate);
 
-		if (m_data.window_size_state == window_size_state::fullscreen
-			|| m_data.window_size_state == window_size_state::fullscreen_windowed)
+		if (m_data.size_state == window_size_state::fullscreen
+			|| m_data.size_state == window_size_state::fullscreen_windowed)
 			glfwMaximizeWindow(m_Window);
 
 		// Set icon
@@ -169,7 +169,7 @@ namespace PFF {
 
 			window_attrib& Data = *(window_attrib*)glfwGetWindowUserPointer(window);
 
-			if (Data.window_size_state == window_size_state::windowed) {
+			if (Data.size_state == window_size_state::windowed) {
 
 				Data.width = static_cast<u32>(width);
 				Data.height = static_cast<u32>(height);
@@ -206,7 +206,7 @@ namespace PFF {
 		glfwSetWindowMaximizeCallback(m_Window, [](GLFWwindow* window, int maximized) {
 
 			window_attrib& Data = *(window_attrib*)glfwGetWindowUserPointer(window);
-			Data.window_size_state = maximized? window_size_state::fullscreen : window_size_state::windowed;
+			Data.size_state = maximized? window_size_state::fullscreen : window_size_state::windowed;
 			 CORE_LOG(Trace, "Maximize window: " << maximized);
 		});
 
@@ -283,7 +283,7 @@ namespace PFF {
 		
 		LOG(Trace, "minimizing window");
 		glfwIconifyWindow(m_Window);
-		m_data.window_size_state = window_size_state::minimised;
+		m_data.size_state = window_size_state::minimised;
 		//application::set_render_state(system_state::inactive);
 	}
 
@@ -298,7 +298,7 @@ namespace PFF {
 		
 		LOG(Trace, "maximising window");
 		glfwMaximizeWindow(m_Window);
-		m_data.window_size_state = window_size_state::fullscreen_windowed;
+		m_data.size_state = window_size_state::fullscreen_windowed;
 		//application::set_render_state(system_state::active);
 	}
 

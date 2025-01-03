@@ -1,19 +1,21 @@
 
 #include "util/pffpch.h"
 
-#ifdef PFF_PLATFORM_WINDOWS
+#if defined(PFF_PLATFORM_WINDOWS)
     #include <Windows.h>
     #include <commdlg.h>
     #include <iostream>
-    #include <tchar.h> // For _T() macros
-#elif defined PFF_PLATFORM_LINUX
+    #include <tchar.h>              // For _T() macros
+#elif defined(PFF_PLATFORM_LINUX)
+    #include <sys/types.h>          // For pid_t
+    #include <sys/wait.h>           // For waitpid
+    #include <unistd.h>             // For fork, execv, etc.
+    #include <gtk/gtk.h>            // file dialog
     #include <sys/time.h>
     #include <ctime>
-    #include <unistd.h>             // for [get_executable_path]
-    #error TODO: import libs needed for [file_dialog]
-#elif defined PFF_PLATFORM_MAC
-    #include <mach-o/dyld.h>        // for [get_executable_path]
-    #error TODO: import libs needed for [file_dialog]
+    #include <limits.h>
+#else
+    #error "OS not supported"
 #endif
 
 #include "system.h"
@@ -21,17 +23,17 @@
 
 namespace PFF::util {
 
-
+    //
     bool run_program(const std::filesystem::path& path_to_exe, const std::string& cmd_args, bool open_console) { return run_program(path_to_exe, cmd_args.c_str(), open_console); }
 
-
+    //
     bool run_program(const std::filesystem::path& path_to_exe, const char* cmd_args, bool open_console) {
 
         //CORE_LOG(Trace, "executing program at [" << path_to_exe.generic_string() << "]");
 
         bool result = false;
 
-#ifdef PFF_PLATFORM_WINDOWS
+#if defined(PFF_PLATFORM_WINDOWS)
 
         STARTUPINFOA startupInfo;
         PROCESS_INFORMATION processInfo;
@@ -66,8 +68,49 @@ namespace PFF::util {
         } else
             CORE_LOG(Error, "Unsuccessfully started process: " << path_to_exe.generic_string());
 
-#elif defined PFF_PLATFORM_LINUX || defined PFF_PLATFORM_MAC
-    #error Not implemented yet
+#elif defined(PFF_PLATFORM_LINUX)
+
+    std::string cmdArguments = path_to_exe.generic_string() + " " + cmd_args;                       // Prepare the command line arguments
+    
+    // Split the command line arguments into a vector
+    std::vector<std::string> args;
+    std::istringstream iss(cmdArguments);
+    std::string arg;
+    while (iss >> arg) {
+        args.push_back(arg);
+    }
+
+    // Prepare the argument list for exec
+    std::vector<char*> execArgs;
+    for (auto& a : args) {
+        execArgs.push_back(&a[0]);
+    }
+    execArgs.push_back(nullptr);                                                                    // execv expects a null-terminated array
+
+    pid_t pid = fork();
+    if (pid == -1) {
+        // Fork failed
+        std::cerr << "Failed to fork process." << std::endl;
+        return false;
+    } else if (pid == 0) {
+        // Child process
+        if (open_console) {
+            // If you want to open a new console, you can use a terminal emulator like xterm
+            execlp("xterm", "xterm", "-e", execArgs[0], (char*)nullptr);
+        } else {
+            // Execute the program
+            execv(path_to_exe.c_str(), execArgs.data());
+        }
+        // If execv fails
+        std::cerr << "Failed to execute program: " << path_to_exe.generic_string() << std::endl;
+        exit(EXIT_FAILURE);
+    } else {
+        // Parent process
+        int status;
+        waitpid(pid, &status, 0); // Wait for the child process to finish
+        result = WIFEXITED(status) && (WEXITSTATUS(status) == 0);
+    }
+
 #endif
 
         return result;
@@ -96,7 +139,7 @@ namespace PFF::util {
 
         system_time loc_system_time{};
 
-#ifdef PFF_PLATFORM_WINDOWS
+#if defined(PFF_PLATFORM_WINDOWS)
 
         SYSTEMTIME win_time;
         GetLocalTime(&win_time);
@@ -109,7 +152,7 @@ namespace PFF::util {
         loc_system_time.secund = static_cast<u8>(win_time.wSecond);
         loc_system_time.millisecends = static_cast<u16>(win_time.wMilliseconds);
 
-#elif defined PFF_PLATFORM_LINUX || defined PFF_PLATFORM_MAC
+#elif defined(PFF_PLATFORM_LINUX)
 
         struct timeval tv;
         gettimeofday(&tv, NULL);
@@ -130,7 +173,7 @@ namespace PFF::util {
 
     std::filesystem::path file_dialog(const std::string& title, const std::vector<std::pair<std::string, std::string>>& filters) {
 
-#ifdef PFF_PLATFORM_WINDOWS
+    #if defined(PFF_PLATFORM_WINDOWS)
         // Assuming you have a way to get the handle of your main window
         HWND hwndOwner = GetActiveWindow(); // or your main window handle
 
@@ -163,131 +206,63 @@ namespace PFF::util {
 
         return std::filesystem::path();
 
-#elif defined PFF_PLATFORM_LINUX
+    #elif defined(PFF_PLATFORM_LINUX)
 
-        GtkWidget* dialog;
-        GtkFileChooserAction action = GTK_FILE_CHOOSER_ACTION_OPEN;
-        gint res;
+        GtkWidget *dialog;
+        std::filesystem::path selected_path;
 
-        gtk_init(NULL, NULL);
-        dialog = gtk_file_chooser_dialog_new(
-            title.c_str(),
-            NULL,
-            action,
-            "_Cancel",
-            GTK_RESPONSE_CANCEL,
-            "_Open",
-            GTK_RESPONSE_ACCEPT,
-            NULL
-        );
+        gtk_init(nullptr, nullptr);                     // Initialize GTK
 
-        for (const auto& filter_pair : filters) {                               // Add filters
-            GtkFileFilter* filter = gtk_file_filter_new();
-            gtk_file_filter_set_name(filter, filter_pair.first.c_str());
-
-            // Split multiple extensions (e.g., "*.cpp;*.h")
-            std::stringstream ss(filter_pair.second);
-            std::string pattern;
-            while (std::getline(ss, pattern, ';')) {
-                gtk_file_filter_add_pattern(filter, pattern.c_str());
-            }
-
-            gtk_file_chooser_add_filter(GTK_FILE_CHOOSER(dialog), filter);
+        // Create a file chooser dialog
+        dialog = gtk_file_chooser_dialog_new(title.c_str(), nullptr, GTK_FILE_CHOOSER_ACTION_OPEN, "_Cancel", GTK_RESPONSE_CANCEL, "_Open", GTK_RESPONSE_ACCEPT, nullptr);
+        
+        // Add filters to the dialog
+        for (const auto& filter : filters) {
+            GtkFileFilter *file_filter = gtk_file_filter_new();
+            gtk_file_filter_set_name(file_filter, filter.first.c_str());
+            gtk_file_filter_add_pattern(file_filter, filter.second.c_str());
+            gtk_file_chooser_add_filter(GTK_FILE_CHOOSER(dialog), file_filter);
         }
 
-        std::filesystem::path result;
+        // Show the dialog and wait for user response
         if (gtk_dialog_run(GTK_DIALOG(dialog)) == GTK_RESPONSE_ACCEPT) {
-            char* filename = gtk_file_chooser_get_filename(GTK_FILE_CHOOSER(dialog));
-            result = std::filesystem::path(filename);
-            g_free(filename);
+            gchar *filename = gtk_file_chooser_get_filename(GTK_FILE_CHOOSER(dialog));
+            selected_path = std::filesystem::path(filename);
+            g_free(filename);                           // Free the filename string
         }
 
-        gtk_widget_destroy(dialog);
-        while (gtk_events_pending()) gtk_main_iteration();
+        gtk_widget_destroy(dialog);                     // Destroy the dialog
+        return selected_path;
+    
+    #endif
+    }
 
-        return result;
 
-#elif defined PFF_PLATFORM_MAC
+    std::filesystem::path get_executable_path() {
 
-        @autoreleasepool{
-            NSOpenPanel * panel = [NSOpenPanel openPanel];
-            [panel setTitle : [NSString stringWithUTF8String : title.c_str()] ] ;
-            [panel setCanChooseFiles : YES] ;
-            [panel setCanChooseDirectories : NO] ;
-            [panel setAllowsMultipleSelection : NO] ;
+    #if defined(PFF_PLATFORM_WINDOWS)
 
-            // Add filters
-            NSMutableArray* fileTypes = [NSMutableArray array];
-            for (const auto& filter : filters) {
-                std::string extensions = filter.second;
-                // Remove the "*." from each extension
-                size_t pos = 0;
-                while ((pos = extensions.find("*.")) != std::string::npos) {
-                    extensions.erase(pos, 2);
-                }
-
-                // Split by semicolon and add to allowed types
-                std::stringstream ss(extensions);
-                std::string ext;
-                while (std::getline(ss, ext, ';')) {
-                    [fileTypes addObject : [NSString stringWithUTF8String : ext.c_str()] ] ;
-                }
-            }
-            [panel setAllowedFileTypes : fileTypes];
-
-            std::filesystem::path result;
-            if ([panel runModal] == NSModalResponseOK) {
-                NSURL* url = [panel URL];
-                result = std::filesystem::path(std::string([[url path]UTF8String] ));
-            }
-
-            return result;
+        wchar_t path[MAX_PATH];
+        if (GetModuleFileNameW(NULL, path, MAX_PATH)) {
+            std::filesystem::path execPath(path);
+            return execPath.parent_path();
         }
 
-            std::filesystem::path get_executable_path() {
-            return std::filesystem::path();
+    #elif defined(PFF_PLATFORM_LINUX)
+        
+        char path[PATH_MAX];
+        ssize_t count = readlink("/proc/self/exe", path, PATH_MAX);
+        if (count != -1) {
+            path[count] = '\0'; // Null-terminate the string
+            std::filesystem::path execPath(path);
+            return execPath.parent_path();
         }
 
+    #endif
+
+        std::cerr << "Error retrieving the executable path." << std::endl;
+        return std::filesystem::path();
     }
-
-#endif
-}
-
-
-std::filesystem::path get_executable_path() {
-
-#ifdef PFF_PLATFORM_WINDOWS
-
-    wchar_t path[MAX_PATH];
-    if (GetModuleFileNameW(NULL, path, MAX_PATH)) {
-        std::filesystem::path execPath(path);
-        return execPath.parent_path();
-    }
-
-#elif defined PFF_PLATFORM_LINUX 
-
-    char path[1024];
-    ssize_t len = readlink("/proc/self/exe", path, sizeof(path) - 1);
-    if (len != -1) {
-        path[len] = '\0'; // Null-terminate the string
-        std::filesystem::path execPath(path);
-        return execPath.parent_path();
-    }
-
-#elif defined PFF_PLATFORM_MAC
-
-    char path[1024];
-    uint32_t size = sizeof(path);
-    if (_NSGetExecutablePath(path, &size) == 0) {
-        std::filesystem::path execPath(path);
-        return execPath.parent_path();
-    }
-
-#endif
-
-    std::cerr << "Error retrieving the executable path." << std::endl;
-    return std::filesystem::path();
-}
 
 
 }

@@ -4,6 +4,7 @@
 #include "engine/game_objects/camera.h"
 #include "engine/game_objects/player_controller.h"
 
+// #include "engine/world/entity.h"		// importa map
 #include "engine/world/map.h"
 
 namespace PFF {

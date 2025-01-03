@@ -152,11 +152,11 @@ namespace PFF {
 
 		key_unknown = -1,
 		key_space = 32,
-		key_apostrophe = 39,  // '
-		key_comma = 44,  // ,
-		key_minus = 45,  // -
-		key_period = 46,  // .
-		key_slash = 47,  // /
+		key_apostrophe = 39,  			// '
+		key_comma = 44,  				// ,
+		key_minus = 45,  				// -
+		key_period = 46, 				// .
+		key_slash = 47,  				// /
 		key_0 = 48,
 		key_1 = 49,
 		key_2 = 50,
@@ -167,8 +167,8 @@ namespace PFF {
 		key_7 = 55,
 		key_8 = 56,
 		key_9 = 57,
-		key_semicolon = 59,  // ;
-		key_equal = 61,  // =
+		key_semicolon = 59,  			// ;
+		key_equal = 61,  				// =
 		key_A = 65,
 		key_B = 66,
 		key_C = 67,
@@ -195,12 +195,12 @@ namespace PFF {
 		key_X = 88,
 		key_Y = 89,
 		key_Z = 90,
-		key_left_bracket = 91,  // [
-		key_backslach = 92,  // \ 
-		key_right_bracket = 93,  // ]
-		key_grave_accent = 96,  // `
-		key_world_1 = 161, // non-US #1
-		key_world_2 = 162, // non-US #2
+		key_backslach = 91,				/* \ */ 
+		key_left_bracket = 92,			// [
+		key_right_bracket = 93,			// ]
+		key_grave_accent = 96,			// `
+		key_world_1 = 161,				// non-US #1
+		key_world_2 = 162,				// non-US #2
 
 		// Function keys
 		key_escape = 256,
@@ -267,11 +267,11 @@ namespace PFF {
 		key_left_shift = 340,
 		key_left_control = 341,
 		key_left_alt = 342,
-		key_left_super = 343,	// windows key
+		key_left_super = 343,			// windows key
 		key_right_shift = 344,
 		key_right_control = 345,
 		key_right_alt = 346,
-		key_right_super = 347,	// windows key
+		key_right_super = 347,			// windows key
 		key_menu = 348,
 
 	};

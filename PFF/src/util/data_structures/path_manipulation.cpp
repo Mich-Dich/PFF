@@ -7,7 +7,7 @@
 namespace PFF::util {
 
 
-    bool util::is_valid_project_dir(const std::filesystem::path& path) {
+    bool is_valid_project_dir(const std::filesystem::path& path) {
 
         if (!std::filesystem::exists(path) || !std::filesystem::is_directory(path))
             return false;

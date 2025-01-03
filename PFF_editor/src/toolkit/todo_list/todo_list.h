@@ -218,7 +218,7 @@ namespace PFF::toolkit::todo {
 				}
 
 				char buf[32];
-				sprintf_s(buf, 32, "X##kill_%llu", n);
+				snprintf(buf, 32, "X##kill_%llu", n);
 
 				ImGui::SameLine();
 				if (s_topics[n].hovered) {
@@ -352,7 +352,7 @@ namespace PFF::toolkit::todo {
 
 						if (!s_topics[x].tasks[y].done) {
 
-							sprintf_s(buf, 32, "##topic_%llutask_%llu", x, y);
+							snprintf(buf, 32, "##topic_%llutask_%llu", x, y);
 							ImGui::Checkbox(buf, &s_topics[x].tasks[y].done);
 							ImGui::SameLine();
 							UI::big_text(s_topics[x].tasks[y].title.c_str(), true);
@@ -378,7 +378,7 @@ namespace PFF::toolkit::todo {
 
 							if (s_topics[x].tasks[y].done) {
 
-								sprintf_s(buf, 32, "##topic_%llutask_%llu", x, y);
+								snprintf(buf, 32, "##topic_%llutask_%llu", x, y);
 								ImGui::Checkbox(buf, &s_topics[x].tasks[y].done);
 								ImGui::SameLine();
 								UI::big_text(s_topics[x].tasks[y].title.c_str());

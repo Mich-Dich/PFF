@@ -1,11 +1,10 @@
 
-#include "project/project_data_struct.h"
 #include "application.h"
 
 extern PFF::application* PFF::create_application();
 
 
-#ifdef PFF_PLATFORM_WINDOWS
+#if defined(PFF_PLATFORM_WINDOWS)
 
 #include <windows.h>
 

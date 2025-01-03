@@ -69,7 +69,7 @@ try:
             utils.print_c("\nhelpful hints", "blue")
             print("  Cleanup all generated files:      rm -r bin bin-int && find . -name \"Makefile\" -exec rm -f {} +")
             print("  apply changed premake scripts:    ./premake5 gmake")
-            print("  compile engine:                   make")
+            print("  compile engine:                   make -j             (-j for multiprocessor compilation)")
             print("  for more help:                    ./premake5 --help OR visit[https://premake.github.io/docs/Using-Premake/]")
         
     else:

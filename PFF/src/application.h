@@ -2,13 +2,11 @@
 
 #include "util/pffpch.h"
 
-#include "util/timing/timer.h"
+// #include "util/timing/timer.h"
 #include "engine/layer/layer_stack.h"			// need to include this for some reason
 #include "engine/layer/imgui_layer.h"
 #include "engine/layer/world_layer.h"
 #include "project/project_data_struct.h"
-
-//#include "util/timer.h"
 
 #include "engine/render/vulkan/vk_renderer.h"
 
@@ -25,7 +23,8 @@ namespace PFF {
 	class window_focus_event;
 	class map;
 	class camera;
-	class PFF::render::vulkan::vk_renderer;
+	// class PFF::render::vulkan::vk_renderer;
+	// class util::timer;
 
 	class application {
 	public:
@@ -56,10 +55,12 @@ namespace PFF {
 		FORCEINLINE std::filesystem::path get_project_path()				{ return m_project_path; }
 		FORCEINLINE void set_project_path(std::filesystem::path path)		{ m_project_path = path; }
 
-		std::future<void>& add_future(std::future<void>& future, std::shared_ptr<std::pair<std::atomic<bool>, std::condition_variable>>& shared_state);
-		void remove_timer(std::future<void>& future);
 		void run();
 
+
+		// std::future<void>& add_future(std::future<void>& future, std::shared_ptr<std::pair<std::atomic<bool>, std::condition_variable>>& shared_state);
+		// void remove_timer(std::future<void>& future);
+		
 		// [set_target_fps] if true: set the fps-limit for if the window is focused, if false: set the fps-limit for if the window is not focused
 		void set_fps_settings(const bool set_for_engine_focused, const u32 new_limit);
 
@@ -124,7 +125,7 @@ namespace PFF {
 		f32							m_last_frame_time = 0.f;
 
 		// vector to store futures (from timer_async and other std::async tasks)
-		std::vector<util::timer>	m_timers{};
+		// std::vector<util::timer>	m_timers{};
 		std::mutex					m_global_futures_mutex{}; // Mutex to protect global_futures
 
 		std::filesystem::path		m_project_path{};

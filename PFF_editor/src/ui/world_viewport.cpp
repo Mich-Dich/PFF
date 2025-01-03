@@ -518,7 +518,7 @@ namespace PFF {
 				} else if (file_path.extension() == ".pffworld") {
 
 					serializer::yaml(file_path, "PFF_asset_file", serializer::option::load_from_file)
-						.entry(KEY_VALUE(loc_asset_file_header.version))
+						.entry(KEY_VALUE(loc_asset_file_header.file_version))
 						.entry(KEY_VALUE(loc_asset_file_header.type))
 						.entry(KEY_VALUE(loc_asset_file_header.timestamp));
 				}
@@ -569,7 +569,7 @@ namespace PFF {
 					} else if (file_path.extension() == ".pffworld") {
 
 						serializer::yaml(file_path, "PFF_asset_file", serializer::option::load_from_file)
-							.entry(KEY_VALUE(loc_asset_file_header.version))
+							.entry(KEY_VALUE(loc_asset_file_header.file_version))
 							.entry(KEY_VALUE(loc_asset_file_header.type))
 							.entry(KEY_VALUE(loc_asset_file_header.timestamp));
 					}

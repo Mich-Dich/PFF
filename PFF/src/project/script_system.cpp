@@ -13,10 +13,12 @@
 #include "engine/world/map.h"
 #include "engine/world/entity.h"
 
-#ifdef PFF_PLATFORM_WINDOWS
+#if defined(PFF_PLATFORM_WINDOWS)
 	#include <Windows.h>
-#elif defined PFF_PLATFORM_LINUX || defined PFF_PLATFORM_MAC
-	#error Not implemented yet
+#elif defined(PFF_PLATFORM_LINUX)
+	#include <dlfcn.h> // For dynamic library loading on Linux
+#else
+	#error Platform not supported
 #endif
 
 #include "script_system.h"
@@ -25,12 +27,22 @@
 namespace PFF::script_system {
 
 #define GET_MAP																	application::get().get_world_layer()->get_map()
-#define GET_REGISTRY_OF_MAP														GET_MAP->get_registry()
-#define TRY_EXECUTE_FUNCTION(name)												if (name) name
+#define GET_REGISTRY_OF_MAP 													GET_MAP->get_registry()
+#define TRY_EXECUTE_FUNCTION(name) 												if (name) name
 
-#ifdef PFF_PLATFORM_WINDOWS
+#if defined(__GNUC__) && !defined(__clang__)
+#elif defined(__clang__)
+    #error "Clang not jet supported"
+#elif defined(_MSC_VER)
+#else
+    #error "Unsupported compiler!"
+#endif
+
+
+#if defined(PFF_PLATFORM_WINDOWS)
 
 	static HMODULE			m_module;
+
 	static FARPROC __stdcall try_load_function(const char* functionName) {
 
 		auto func = GetProcAddress(m_module, functionName);
@@ -56,8 +68,30 @@ namespace PFF::script_system {
 		return true;
 	}
 
-#elif defined PFF_PLATFORM_LINUX || defined PFF_PLATFORM_MAC
-#error Not implemented yet
+#elif defined(PFF_PLATFORM_LINUX)
+
+	static void* m_module; // Use void* for the module handle
+
+	static void* try_load_function(const char* functionName) {
+		void* func = dlsym(m_module, functionName);
+		CORE_VALIDATE(func, , "successfully loaded function [" << functionName << "]", "Could not load shared library function [" << functionName << "]");
+		return func;
+	}
+
+	static bool load_library(std::filesystem::path path) {
+		m_module = dlopen(path.string().c_str(), RTLD_LAZY);
+		return m_module != nullptr;
+	}
+
+	static bool free_library() {
+		if (dlclose(m_module) != 0) {
+			CORE_LOG(Warn, "Could not free script shared library. Error: " << dlerror());
+			return false;
+		}
+		m_module = nullptr;
+		return true;
+	}
+
 #endif
 
 	
@@ -96,14 +130,14 @@ namespace PFF::script_system {
 		CORE_LOG(Trace, "serializing script components to: [" << script_components_serializer_file.generic_string() << "]");
 
 		asset_file_header file_header{};
-		file_header.version = version(1, 0, 0);
+		file_header.file_version = version(1, 0, 0);
 		file_header.type = file_type::map;
 		file_header.timestamp = util::get_system_time();
 
 		auto serializer = serializer::yaml(script_components_serializer_file, "script_components", option);
 		serializer.sub_section("file_header", [&](serializer::yaml& header_section) {
 
-			header_section.entry(KEY_VALUE(file_header.version))
+			header_section.entry(KEY_VALUE(file_header.file_version))
 				.entry(KEY_VALUE(file_header.type))
 				.entry(KEY_VALUE(file_header.timestamp));
 		});
@@ -131,7 +165,7 @@ namespace PFF::script_system {
 					entity_section.sub_section("procedural_mesh_component", [&](serializer::yaml& component_section) {
 
 						component_section.entry(KEY_VALUE(procedural_mesh_comp.script_name))
-						.entry(KEY_VALUE(procedural_mesh_comp.mobility))
+						.entry(KEY_VALUE(procedural_mesh_comp.mobility_data))
 						.entry(KEY_VALUE(procedural_mesh_comp.shoudl_render));
 						
 						serialize_script(procedural_mesh_comp.script_name, (PFF::entity_script*)procedural_mesh_comp.instance, serializer);
@@ -158,7 +192,7 @@ namespace PFF::script_system {
 
 					procedural_mesh_component proc_mesh_comp{};
 					entity_section.entry(KEY_VALUE(proc_mesh_comp.script_name))
-						.entry(KEY_VALUE(proc_mesh_comp.mobility))
+						.entry(KEY_VALUE(proc_mesh_comp.mobility_data))
 						.entry(KEY_VALUE(proc_mesh_comp.shoudl_render));
 
 					serialize_script(proc_mesh_comp.script_name, (PFF::entity_script*)proc_mesh_comp.instance, serializer);

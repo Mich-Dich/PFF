@@ -1,16 +1,19 @@
 
 #include "util/pffpch.h"
 
-#include <filesystem>
-
 #ifdef PFF_PLATFORM_WINDOWS
 
 	#include <Windows.h>
 	#include <Psapi.h>
 	#include <TlHelp32.h>
 
-#elif defined PFF_PLATFORM_LINUX || defined PFF_PLATFORM_MAC
-	#error Not implemented yet
+#elif defined(PFF_PLATFORM_LINUX)
+
+	#include <dirent.h>
+	#include <unistd.h>
+	#include <sys/types.h>
+	#include <sys/stat.h>
+
 #else
 	#error undefined platform
 #endif
@@ -50,6 +53,7 @@ namespace PFF::io {
 		return true;
 	}
 
+	//
 	bool copy_file(const std::filesystem::path& full_path_to_file, const std::filesystem::path& target_directory) {
 
 		try {
@@ -136,9 +140,58 @@ namespace PFF::io {
 		CloseHandle(hSnapshot);
 		return processNames;
 
-#elif defined PFF_PLATFORM_LINUX || defined PFF_PLATFORM_MAC
-	#error Not implemented yet
-#else
+#elif defined(PFF_PLATFORM_LINUX)
+
+	std::vector<std::string> processNames;
+    std::string filePathStr(filePath.begin(), filePath.end()); // Convert wstring to string
+
+    // Iterate through the /proc directory
+    DIR* procDir = opendir("/proc");
+    if (procDir == nullptr) {
+        perror("opendir");
+        return processNames;
+    }
+
+    struct dirent* entry;
+    while ((entry = readdir(procDir)) != nullptr) {
+        // Check if the entry is a number (i.e., a PID)
+        if (entry->d_type == DT_DIR && isdigit(entry->d_name[0])) {
+            std::string pidDir = "/proc/" + std::string(entry->d_name) + "/fd/";
+            DIR* fdDir = opendir(pidDir.c_str());
+            if (fdDir) {
+                struct dirent* fdEntry;
+                while ((fdEntry = readdir(fdDir)) != nullptr) {
+                    if (fdEntry->d_type == DT_LNK) {
+                        // Construct the full path to the file descriptor
+                        std::string linkPath = pidDir + fdEntry->d_name;
+                        char targetPath[PATH_MAX];
+                        ssize_t len = readlink(linkPath.c_str(), targetPath, sizeof(targetPath) - 1);
+                        if (len != -1) {
+                            targetPath[len] = '\0'; // Null-terminate the string
+                            // Compare the target path with the file path
+                            if (filePathStr == targetPath) {
+                                // If it matches, get the process name
+                                std::string processName = entry->d_name; // PID
+                                std::string cmdlinePath = "/proc/" + processName + "/comm";
+                                std::ifstream cmdlineFile(cmdlinePath);
+                                if (cmdlineFile.is_open()) {
+                                    std::string name;
+                                    std::getline(cmdlineFile, name);
+                                    processNames.push_back(name);
+                                }
+                                break; // No need to check other fds for this process
+                            }
+                        }
+                    }
+                }
+                closedir(fdDir);
+            }
+        }
+    }
+    closedir(procDir);
+    return processNames;
+
+#elif  defined(PFF_PLATFORM_MAC)
 	#error undefined platform
 #endif
 
@@ -155,20 +208,19 @@ namespace PFF::io {
 	std::vector<std::filesystem::path> get_files_in_dir(const std::filesystem::path& path) {
 
 		std::vector<std::filesystem::path> files;
-		for (const auto& entry : std::filesystem::directory_iterator(path)) {
-			if (is_file(entry.path())) {
+		for (const auto& entry : std::filesystem::directory_iterator(path))
+			if (is_file(entry.path()))
 				files.push_back(entry.path());
-			}
-		}
+
 		return files;
 	}
 
 	std::vector<std::filesystem::path> get_folders_in_dir(const std::filesystem::path& path) {
 		std::vector<std::filesystem::path> folders;
-		for (const auto& entry : std::filesystem::directory_iterator(path)) {
+		for (const auto& entry : std::filesystem::directory_iterator(path))
 			if (std::filesystem::is_directory(entry.path()))
 				folders.push_back(entry.path());
-		}
+		
 		return folders;
 	}
 

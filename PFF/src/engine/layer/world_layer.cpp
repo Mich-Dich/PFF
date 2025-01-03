@@ -3,7 +3,7 @@
 
 #include "application.h"
 #include "engine/render/renderer.h"
-#include "engine/Events/Event.h"
+#include "engine/events/event.h"
 #include "project/script_system.h"
 
 #include "world_layer.h"
