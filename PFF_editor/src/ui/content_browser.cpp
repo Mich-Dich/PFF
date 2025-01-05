@@ -367,7 +367,7 @@ namespace PFF {
 				const std::string path_string = file_path.string();
 				ImGui::SetDragDropPayload("PROJECT_CONTENT_FILE_MULTI", &m_selected_items, sizeof(&m_selected_items));
 				ImGui::Image(m_mesh_asset_icon->get_descriptor_set(), m_icon_size, ImVec2(0, 0), ImVec2(1, 1), UI::get_action_color_gray_active_ref());
-				ImGui::TextWrapped("[%d] files", m_selected_items.size());
+				ImGui::TextWrapped("[%ld] files", m_selected_items.size());
 				ImGui::EndDragDropSource();
 
 			}

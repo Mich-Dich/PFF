@@ -49,7 +49,7 @@ project "PFF"
 	links
 	{
 		"glfw",
-		"imgui",
+		"ImGui",
         "%{Library.Vulkan}",
 	}
 

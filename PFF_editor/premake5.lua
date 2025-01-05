@@ -52,25 +52,25 @@ project "PFF_editor"
 		"ImGui",
 		"fastgltf",
 	}
-	
+
 	filter "system:windows"
 		systemversion "latest"
 		defines { "PFF_PLATFORM_WINDOWS" }
 		files { "../metadata/app_icon.rc" }
 
-        postbuildcommands 
+        postbuildcommands
 		{
 			"{MKDIR} %{wks.location}/bin/" .. outputs .. "/PFF_editor/wiki",
 			"{COPY} %{wks.location}/.github/wiki %{wks.location}/bin/" .. outputs .. "/PFF_editor/wiki",
-			
+
 			table.unpack(copy_content_of_dir(outputs, {"PFF_editor/shaders", "PFF_editor/defaults", "PFF_editor/assets"})),
 		}
-		
+
 	filter "configurations:Debug"
 		defines "PFF_EDITOR_DEBUG"
 		runtime "Debug"
 		symbols "on"
-		
+
 	filter "configurations:RelWithDebInfo"
 		defines "PFF_EDITOR_RELEASE_WITH_DEBUG_INFO"
 		runtime "Release"
@@ -84,6 +84,7 @@ project "PFF_editor"
 
 
 	filter "system:linux"
+		pic "On"
 		systemversion "latest"
 		defines { "PFF_PLATFORM_LINUX" }
 
@@ -92,11 +93,30 @@ project "PFF_editor"
 			-- Create the directory if it doesn't exist
 			"mkdir -p %{wks.location}/bin/" .. outputs .. "/PFF_editor/wiki",
 			"cp -r %{wks.location}/.github/wiki %{wks.location}/bin/" .. outputs .. "/PFF_editor/wiki",
-			
+
 			-- Copy content of directories
 			table.unpack(copy_content_of_dir(outputs, {"PFF_editor/shaders", "PFF_editor/defaults", "PFF_editor/assets"})),
 		}
-		
+
+		links
+		{
+			"glfw",
+			"imgui",
+			"%{Library.Vulkan}",
+		}
+
+		libdirs
+		{
+			"/usr/lib/x86_64-linux-gnu",  -- Default library path for system libraries
+			"%{IncludeDir.VulkanSDK}/lib",
+		}
+
+		includedirs
+		{
+			"%{IncludeDir.glfw}/include",
+			"%{IncludeDir.VulkanSDK}",
+		}
+
 	filter "configurations:Debug"
 		defines "PFF_DEBUG"
 		runtime "Debug"

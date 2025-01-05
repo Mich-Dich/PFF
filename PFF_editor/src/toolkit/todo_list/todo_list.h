@@ -218,7 +218,7 @@ namespace PFF::toolkit::todo {
 				}
 
 				char buf[32];
-				snprintf(buf, 32, "X##kill_%llu", n);
+				snprintf(buf, 32, "X##kill_%lu", n);
 
 				ImGui::SameLine();
 				if (s_topics[n].hovered) {
@@ -276,7 +276,7 @@ namespace PFF::toolkit::todo {
 							auto pos_buffer = ImGui::GetCursorPos();
 							ImGui::SetCursorPos(start_pos);
 							UI::shift_cursor_pos(ImGui::GetColumnWidth() - 60, 4);
-							ImGui::Text("%d/%d", strlen(task_buf.name), CHAR_BUFFER_DEFAULT_SIZE);
+							ImGui::Text("%ld/%d", strlen(task_buf.name), CHAR_BUFFER_DEFAULT_SIZE);
 							ImGui::SetCursorPos(pos_buffer);
 						}
 
@@ -320,7 +320,7 @@ namespace PFF::toolkit::todo {
 						auto pos_buffer = ImGui::GetCursorPos();
 						ImGui::SetCursorPos(start_pos);
 						UI::shift_cursor_pos(collum_width - 60, 4);
-						ImGui::Text("%d/%d", strlen(task_buf.description), CHAR_BUFFER_DEFAULT_SIZE * CHAR_BUFFER_DEFAULT_MULTIPLIER);
+						ImGui::Text("%ld/%d", strlen(task_buf.description), CHAR_BUFFER_DEFAULT_SIZE * CHAR_BUFFER_DEFAULT_MULTIPLIER);
 						ImGui::SetCursorPos(pos_buffer);
 					}
 
@@ -352,7 +352,7 @@ namespace PFF::toolkit::todo {
 
 						if (!s_topics[x].tasks[y].done) {
 
-							snprintf(buf, 32, "##topic_%llutask_%llu", x, y);
+							snprintf(buf, 64, "##topic_%lu_task_%lu", x, y);
 							ImGui::Checkbox(buf, &s_topics[x].tasks[y].done);
 							ImGui::SameLine();
 							UI::big_text(s_topics[x].tasks[y].title.c_str(), true);
@@ -378,7 +378,7 @@ namespace PFF::toolkit::todo {
 
 							if (s_topics[x].tasks[y].done) {
 
-								snprintf(buf, 32, "##topic_%llutask_%llu", x, y);
+								snprintf(buf, 64, "##topic_%lutask_%lu", x, y);
 								ImGui::Checkbox(buf, &s_topics[x].tasks[y].done);
 								ImGui::SameLine();
 								UI::big_text(s_topics[x].tasks[y].title.c_str());

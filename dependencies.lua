@@ -1,7 +1,6 @@
 
 VULKAN_SDK = os.getenv("VULKAN_SDK")
 
-glslc = "../PFF/vendor/vulkan-glslc/glslc.exe"
 
 ------------------
 vendor_path = {}
@@ -30,9 +29,17 @@ IncludeDir["VulkanSDK"]         = "%{VULKAN_SDK}/include"
 
 ------------ libs dir ------------ 
 LibraryDir = {}
-LibraryDir["VulkanSDK"]         = "%{VULKAN_SDK}/Lib"
+LibraryDir["VulkanSDK"]         = "%{VULKAN_SDK}/lib"
 
 ------------ libs ------------ 
 Library = {}
-Library["Vulkan"]               = "%{LibraryDir.VulkanSDK}/vulkan-1.lib"
-Library["VulkanUtils"]          = "%{LibraryDir.VulkanSDK}/VkLayer_utils.lib"
+
+if os.is("windows") then
+    glslc = "../PFF/vendor/vulkan-glslc/glslc.exe"
+    Library["Vulkan"]           = "%{LibraryDir.VulkanSDK}/vulkan-1.lib"
+    Library["VulkanUtils"]      = "%{LibraryDir.VulkanSDK}/VkLayer_utils.lib"
+elseif os.is("linux") then
+    glslc = "../PFF/vendor/vulkan-glslc/glslc"
+    Library["Vulkan"]           = "%{LibraryDir.VulkanSDK}/libvulkan.so"
+    Library["VulkanUtils"]      = "%{LibraryDir.VulkanSDK}/libVkLayer_utils.so"
+end
