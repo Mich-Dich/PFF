@@ -4,9 +4,8 @@
 // ========== vulkan utils ============
 #include "vk_types.h"
 #define VMA_IMPLEMENTATION
-#include <vma/vk_mem_alloc.h>
+#include "vendor/vk_mem_alloc.h"
 
-#include <vma/vk_mem_alloc.h>
 #include <vulkan/vulkan.h>
 #include <vulkan/vk_enum_string_helper.h>
 
@@ -137,10 +136,14 @@ namespace PFF::render::vulkan {
 
 		CORE_LOG_INIT();
 
-		// compile_shaders_in_dir
-		const std::filesystem::path path_to_build_script = PFF::util::get_executable_path() / ".." / "PFF_helper" / "PFF_helper.exe";
+#if defined(PFF_PLATFORM_WINDOWS)					// compile_shaders_in_dir
+		const std::filesystem::path path_to_build_script = PFF::util::get_executable_path().parent_path() / "PFF_helper" / "PFF_helper.exe";
 		std::string cmdArgs = "1 1 0 " + (PFF::util::get_executable_path().parent_path() / "PFF/shaders").generic_string() + " 1 ";
-		//CORE_LOG(Info, "CMD Args: " << cmdArgs.c_str());
+#elif defined(PFF_PLATFORM_LINUX)
+		const std::filesystem::path path_to_build_script = PFF::util::get_executable_path().parent_path() / "PFF_helper" / "PFF_helper";
+		std::string cmdArgs = "1 1 0 " + (PFF::util::get_executable_path().parent_path() / "PFF/shaders").generic_string() + " 1 ";
+#endif
+
 		CORE_ASSERT(PFF::util::run_program(path_to_build_script, cmdArgs), "Successfully compiled shaders", "Failed to compile shaders using PFF_helper");			// make sure PFF_helper is build
 
 		//make the vulkan instance, with basic debug features

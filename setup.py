@@ -11,12 +11,13 @@ from metadata.setup_python import python_configuration as python_requirements
 if platform.system() == "Windows":
     import metadata.windows.win_utils as win_util
     win_util.enable_ansi_support()
-    from metadata.windows.setup_vulkan import vulkan_configuration as vulkan_requirements
-    from metadata.windows.setup_premake import premake_configuration as premake_requirements
+    from metadata.windows.setup_vulkan import vulkan_configuration
+    from metadata.windows.setup_premake import premake_configuration
     import metadata.windows.register_icon as register_icon
 elif platform.system() == "Linux":
-    from metadata.linux.setup_vulkan import vulkan_configuration as vulkan_requirements
-    from metadata.linux.setup_premake import premake_configuration as premake_requirements
+    from metadata.linux.setup_vulkan import vulkan_configuration
+    from metadata.linux.setup_premake import premake_configuration
+    from metadata.linux.setup_glslc import glslc_configuration
 else:
     raise Exception("Unsupported operating system")
 
@@ -32,7 +33,7 @@ try:
     python_installed = python_requirements.validate()
 
     utils.print_u("\nCHECK VULKAN SETUP")
-    vulkan_installed = vulkan_requirements.validate()
+    vulkan_installed = vulkan_configuration.validate()
 
     utils.print_u("\nUPDATE WIKI")
     organize_engine_wiki.start(os.path.join(".github", "wiki"))
@@ -40,7 +41,7 @@ try:
     # CLONE WIKI: git clone https://github.com/Mich-Dich/PFF.wiki.git .github/wiki
 
     utils.print_u("\nCHECK PREMAKE-5 SETUP")
-    premake_installed = premake_requirements.validate()
+    premake_installed = premake_configuration.validate()
 
     if (True == python_installed == vulkan_installed == premake_installed):
         if platform.system() == "Windows":
@@ -58,6 +59,9 @@ try:
 
         else:               # because of [Load platform dependent script] only remaining option is Linux
 
+            utils.print_u("\nCHECK GLSLC SETUP")
+            glslc_installed = glslc_configuration.validate()
+            
             utils.print_u("\nCHECK WORKSPACE SETUP")
             premake_result = subprocess.run(['./premake5', 'gmake'], text=True)
 

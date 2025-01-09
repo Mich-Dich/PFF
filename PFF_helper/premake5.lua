@@ -9,11 +9,7 @@ project "PFF_helper"
 	targetdir ("%{wks.location}/bin/" .. outputs  .. "/%{prj.name}")
 	objdir ("%{wks.location}/bin-int/" .. outputs  .. "/%{prj.name}")
 
-	defines
-	{
-		"PFF_HELPER",
-		"GLSLC_EXE=\"%{VULKAN_SDK}/Bin/glslc.exe\"",
-	}
+	defines { "PFF_HELPER", }
 
 	files
 	{
@@ -39,30 +35,18 @@ project "PFF_helper"
 
 	filter "system:windows"
 		systemversion "latest"
-		defines { "PFF_PLATFORM_WINDOWS" }
+		defines {
+			"PFF_PLATFORM_WINDOWS",
+			"GLSLC_PATH=\"%{VULKAN_SDK}/Bin/glslc.exe\"",
+		}
 		files { "../metadata/app_icon.rc" }
-
-	filter "configurations:Debug"
-		defines "PFF_HELPER_DEBUG"
-		runtime "Debug"
-		symbols "on"
-		
-	filter "configurations:RelWithDebInfo"
-		defines "PFF_HELPER_RELEASE_WITH_DEBUG_INFO"
-		runtime "Release"
-		symbols "on"
-		optimize "On"
-
-	filter "configurations:Release"
-		defines "PFF_HELPER_RELEASE"
-		runtime "Release"
-		symbols "off"
-		optimize "on"
-
 
 	filter "system:linux"
 		systemversion "latest"
-		defines { "PFF_PLATFORM_LINUX" }
+		defines {
+			"PFF_PLATFORM_LINUX",
+			"GLSLC_PATH=\"/usr/bin/glslc\"",
+		}
 	
 		includedirs {
 			"/usr/include/gtk-3.0",
@@ -90,19 +74,19 @@ project "PFF_helper"
 			"pango-1.0", 					-- Link against Pango
 		}
 		
-		filter "configurations:Debug"
-			defines "PFF_DEBUG"
-			runtime "Debug"
-			symbols "on"
+	filter "configurations:Debug"
+		defines "PFF_DEBUG"
+		runtime "Debug"
+		symbols "on"
 
-		filter "configurations:RelWithDebInfo"
-			defines "PFF_RELEASE_WITH_DEBUG_INFO"
-			runtime "Release"
-			symbols "on"
-			optimize "on"
+	filter "configurations:RelWithDebInfo"
+		defines "PFF_RELEASE_WITH_DEBUG_INFO"
+		runtime "Release"
+		symbols "on"
+		optimize "on"
 
-		filter "configurations:Release"
-			defines "PFF_RELEASE"
-			runtime "Release"
-			symbols "off"
-			optimize "on"
+	filter "configurations:Release"
+		defines "PFF_RELEASE"
+		runtime "Release"
+		symbols "off"
+		optimize "on"

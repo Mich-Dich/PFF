@@ -34,11 +34,11 @@ LibraryDir["VulkanSDK"]         = "%{VULKAN_SDK}/lib"
 ------------ libs ------------ 
 Library = {}
 
-if os.is("windows") then
+if os.istarget("windows") then
     glslc = "../PFF/vendor/vulkan-glslc/glslc.exe"
     Library["Vulkan"]           = "%{LibraryDir.VulkanSDK}/vulkan-1.lib"
     Library["VulkanUtils"]      = "%{LibraryDir.VulkanSDK}/VkLayer_utils.lib"
-elseif os.is("linux") then
+elseif os.istarget("linux") then
     glslc = "../PFF/vendor/vulkan-glslc/glslc"
     Library["Vulkan"]           = "%{LibraryDir.VulkanSDK}/libvulkan.so"
     Library["VulkanUtils"]      = "%{LibraryDir.VulkanSDK}/libVkLayer_utils.so"

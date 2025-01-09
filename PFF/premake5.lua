@@ -6,6 +6,10 @@ project "PFF"
 	cppdialect "C++20"
 	staticruntime "on"
 
+	prebuildmessage ("======================================== BUILDING PFF ========================================")
+	postbuildmessage ("======================================== BUILDING PFF ========================================")
+
+
 	targetdir ("%{wks.location}/bin/" .. outputs  .. "/%{prj.name}")
 	objdir ("%{wks.location}/bin-int/" .. outputs  .. "/%{prj.name}")
 	
@@ -48,9 +52,14 @@ project "PFF"
 	
 	links
 	{
-		"glfw",
 		"ImGui",
-        "%{Library.Vulkan}",
+        -- "%{Library.Vulkan}",
+	}
+
+	prebuildcommands {
+
+		-- os.execute("cmake -S . -B vendor/glfw/build"),		-- manuel compilation
+		-- os.execute("cmake --build vendor/glfw//build"),		-- manuel compilation
 	}
 
 	libdirs 
@@ -70,32 +79,18 @@ project "PFF"
 			"PFF_PLATFORM_WINDOWS",
 		}
 
+		links { "glfw", }
+	
 		postbuildcommands
 		{
 			-- copy premake exe (needed for engine projects)
 			"{MKDIR} %{wks.location}/bin/" .. outputs .. "/vendor/premake",
 			"{COPY} %{wks.location}/vendor/premake %{wks.location}/bin/" .. outputs .. "/vendor/premake",
 			
-			-- postbuildcommands { table.unpack(copy_content_of_dir(outputs, {"PFF/shaders", "PFF/defaults", "PFF/assets"})), }
-			table.unpack(copy_content_of_dir(outputs, {"PFF/shaders", "PFF/assets"})),
+			-- postbuildcommands { copy_content_of_dir(outputs, {"PFF/shaders", "PFF/defaults", "PFF/assets"}), }
+			copy_content_of_dir("PFF/shaders"),
+			copy_content_of_dir("PFF/assets"),
 		}
-
-		filter "configurations:Debug"
-			defines "PFF_DEBUG"
-			runtime "Debug"
-			symbols "on"
-
-		filter "configurations:RelWithDebInfo"
-			defines "PFF_RELEASE_WITH_DEBUG_INFO"
-			runtime "Release"
-			symbols "on"
-			optimize "on"
-
-		filter "configurations:Release"
-			defines "PFF_RELEASE"
-			runtime "Release"
-			symbols "off"
-			optimize "on"
 
 	-- filter { "system:linux", "action:gmake" }
   	-- 	buildoptions { "`wx-config --cxxflags`", "-ansi" }
@@ -105,7 +100,11 @@ project "PFF"
 		defines "PFF_PLATFORM_LINUX"
 		-- toolset "clang"
 		
+		links { "vulkan" }
+
 		includedirs {
+			"/usr/include/vulkan",
+
 			"/usr/include/gtk-3.0",
 			"/usr/include/atk-1.0",			-- needed for GTK
 			"/usr/include/gdk-pixbuf-2.0",	-- needed for GTK
@@ -117,10 +116,13 @@ project "PFF"
 		}
 	
 		libdirs {
+			"%{wks.location}/PFF/vendor/glfw/build/src",
 			"/usr/lib/x86_64-linux-gnu", -- Library directory for linking
 		}
 	
 		links {
+			"glfw",
+
 			"gtk-3",  						-- Link against GTK
 			"gdk-3",  						-- Link against GDK
 			"glib-2.0", 					-- Link against GLib
@@ -131,7 +133,7 @@ project "PFF"
 			"pango-1.0", 					-- Link against Pango
 		}
 
-		buildoptions { "-msse4.1" }  -- Add this line to include the SSE4.1 flag for Linux builds
+		buildoptions { "-msse4.1" }  -- include the SSE4.1 flag for Linux builds
 
 		postbuildcommands
 		{
@@ -140,22 +142,25 @@ project "PFF"
 			"cp %{wks.location}/premake5 %{wks.location}/bin/" .. outputs .. "/vendor/premake",
 			
 			-- Copy content of directories
-			table.unpack(copy_content_of_dir(outputs, {"PFF/shaders", "PFF/assets"})),
+
+			copy_content_of_dir("PFF/shaders"),
+			copy_content_of_dir("PFF/assets"),
+			-- copy_content_of_dir({"PFF/shaders", "PFF/assets"}),
 		}
 		
-		filter "configurations:Debug"
-			defines "PFF_DEBUG"
-			runtime "Debug"
-			symbols "on"
+	filter "configurations:Debug"
+		defines "PFF_DEBUG"
+		runtime "Debug"
+		symbols "on"
 
-		filter "configurations:RelWithDebInfo"
-			defines "PFF_RELEASE_WITH_DEBUG_INFO"
-			runtime "Release"
-			symbols "on"
-			optimize "on"
+	filter "configurations:RelWithDebInfo"
+		defines "PFF_RELEASE_WITH_DEBUG_INFO"
+		runtime "Release"
+		symbols "on"
+		optimize "on"
 
-		filter "configurations:Release"
-			defines "PFF_RELEASE"
-			runtime "Release"
-			symbols "off"
-			optimize "on"
+	filter "configurations:Release"
+		defines "PFF_RELEASE"
+		runtime "Release"
+		symbols "off"
+		optimize "on"

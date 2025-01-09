@@ -99,22 +99,22 @@ namespace PFF::logger {
     static const char* SeperatorStringBig = "====================================================================================================================";
     static const char* SeperatorStringSmall = "--------------------------------------------------------------------------------------------------------------------";
     static const char* SeverityNames[log_msg_severity::NUM_SEVERITIES]{ "TRACE", "DEBUG", "INFO", "WARN", "ERROR", "FATAL" };
-    static std::string LogFileName = "logFile.txt";
-    static std::string LogCoreFileName = "logFileCORE.txt";
+    static const char* LogFileName = "logFile.txt";
+    static const char* LogCoreFileName = "logFileCORE.txt";
     static std::string LogMessageFormat = "[$B$T:$J$E] [$B$L$X - $A - $F:$G$E] $C$Z";
     static std::string LogMessageFormat_BACKUP = "$B[$T] $L$E - $C";
-    static std::string displayed_Path_Start = "VulkanTest\\";
-    static std::string displayed_FuncName_Start = "Gluttony::";
-    static std::string ConsoleRESET = "\x1b[97m\x1b[40m";
+    static const char* displayed_Path_Start = "vulkan_test\\";                          // MAYBE: remove
+    static const char* displayed_FuncName_Start = "PFF::";                              // MAYBE: remove
+    static const char* ConsoleRESET = "\x1b[0m";
     static int Buffer_Level;
     static int LegLevelToBuffer = 3;
     static const char* ConsoleColorTable[log_msg_severity::NUM_SEVERITIES] = {
-        "\x1b[90m",           // Gray
-        "\x1b[94m",           // Blue
-        "\x1b[92m",           // Green
-        "\x1b[33m",           // Yellow
-        "\x1b[31m",           // Red
-        "\x1b[41m\x1b[30m",   // Red Background
+        "\x1b[38;5;246m",           // Trace: Gray
+        "\x1b[94m",           // Debug: Blue
+        "\x1b[92m",           // Info: Green
+        "\x1b[33m",           // Warn: Yellow
+        "\x1b[31m",           // Error: Red
+        "\x1b[41m\x1b[30m",   // Fatal: Red Background
     };
 
     // [$B$T:$J$E] [$B$L$X $I - $P:$G$E] $C$Z
@@ -165,8 +165,6 @@ namespace PFF::logger {
 
         CORE_LOG(Trace, "Subsystem [Logger] initialized");
         CORE_LOG_SEPERATOR_BIG;
-
-
         return true;
     }
 
@@ -190,7 +188,6 @@ namespace PFF::logger {
 
         if (newLevel > 0 && newLevel < 5)
             LegLevelToBuffer = newLevel;
-
     }
 
 

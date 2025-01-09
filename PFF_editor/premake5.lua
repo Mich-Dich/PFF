@@ -63,7 +63,10 @@ project "PFF_editor"
 			"{MKDIR} %{wks.location}/bin/" .. outputs .. "/PFF_editor/wiki",
 			"{COPY} %{wks.location}/.github/wiki %{wks.location}/bin/" .. outputs .. "/PFF_editor/wiki",
 
-			table.unpack(copy_content_of_dir(outputs, {"PFF_editor/shaders", "PFF_editor/defaults", "PFF_editor/assets"})),
+			copy_content_of_dir("PFF_editor/shaders"),
+			copy_content_of_dir("PFF_editor/assets"),
+			copy_content_of_dir("PFF_editor/defaults"),
+			-- table.unpack(copy_content_of_dir({"PFF_editor/shaders", "PFF_editor/defaults", "PFF_editor/assets"})),
 		}
 
 	filter "configurations:Debug"
@@ -100,21 +103,43 @@ project "PFF_editor"
 
 		links
 		{
-			"glfw",
+			"%{wks.location}/PFF/vendor/glfw/build/src/glfw3",
+			-- "glfw",
 			"imgui",
-			"%{Library.Vulkan}",
+			"vulkan",
+			"vulkan",
+
+			"gtk-3",  						-- Link against GTK
+			"gdk-3",  						-- Link against GDK
+			"glib-2.0", 					-- Link against GLib
+			"gobject-2.0", 					-- Link against GObject
+			"gio-2.0", 						-- Link against GIO
+			"gmodule-2.0", 					-- Link against GModule
+			"gthread-2.0", 					-- Link against GThread
+			"pango-1.0", 					-- Link against Pango
 		}
 
 		libdirs
 		{
+			"%{wks.location}/PFF/vendor/glfw/build/src",
+			
 			"/usr/lib/x86_64-linux-gnu",  -- Default library path for system libraries
-			"%{IncludeDir.VulkanSDK}/lib",
+			-- "%{IncludeDir.VulkanSDK}/lib",
 		}
 
 		includedirs
 		{
+			"/usr/include/vulkan",
 			"%{IncludeDir.glfw}/include",
-			"%{IncludeDir.VulkanSDK}",
+
+			"/usr/include/gtk-3.0",
+			"/usr/include/atk-1.0",			-- needed for GTK
+			"/usr/include/gdk-pixbuf-2.0",	-- needed for GTK
+			"/usr/include/harfbuzz",		-- needed for GTK
+			"/usr/include/cairo",			-- needed for GTK
+			"/usr/include/glib-2.0",
+			"/usr/include/pango-1.0",
+			"/usr/lib/x86_64-linux-gnu/glib-2.0/include", -- GLib include path
 		}
 
 	filter "configurations:Debug"
