@@ -6,10 +6,6 @@ project "PFF"
 	cppdialect "C++20"
 	staticruntime "on"
 
-	prebuildmessage ("======================================== BUILDING PFF ========================================")
-	postbuildmessage ("======================================== BUILDING PFF ========================================")
-
-
 	targetdir ("%{wks.location}/bin/" .. outputs  .. "/%{prj.name}")
 	objdir ("%{wks.location}/bin-int/" .. outputs  .. "/%{prj.name}")
 	
@@ -56,10 +52,10 @@ project "PFF"
         -- "%{Library.Vulkan}",
 	}
 
-	prebuildcommands {
+	postbuildcommands {
 
-		-- os.execute("cmake -S . -B vendor/glfw/build"),		-- manuel compilation
-		-- os.execute("cmake --build vendor/glfw//build"),		-- manuel compilation
+		-- Copy content of directories
+		table.unpack(copy_content_of_dir(outputs, {"PFF/shaders", "PFF/assets"})),
 	}
 
 	libdirs 
@@ -86,23 +82,21 @@ project "PFF"
 			-- copy premake exe (needed for engine projects)
 			"{MKDIR} %{wks.location}/bin/" .. outputs .. "/vendor/premake",
 			"{COPY} %{wks.location}/vendor/premake %{wks.location}/bin/" .. outputs .. "/vendor/premake",
-			
-			-- postbuildcommands { copy_content_of_dir(outputs, {"PFF/shaders", "PFF/defaults", "PFF/assets"}), }
-			copy_content_of_dir("PFF/shaders"),
-			copy_content_of_dir("PFF/assets"),
 		}
-
-	-- filter { "system:linux", "action:gmake" }
-  	-- 	buildoptions { "`wx-config --cxxflags`", "-ansi" }
 		  
 	filter "system:linux"
 		systemversion "latest"
 		defines "PFF_PLATFORM_LINUX"
-		-- toolset "clang"
-		
-		links { "vulkan" }
 
-		includedirs {
+		-- -- ANSI escape codes for colors
+		-- local RESET = "\27[0m"
+		-- local GREEN = "\27[32m"
+
+		-- prebuildmessage ("================= Building PFF %{cfg.buildcfg}-%{cfg.system}-%{cfg.architecture} =================")
+		-- postbuildmessage ("================= Done building PFF %{cfg.buildcfg}-%{cfg.system}-%{cfg.architecture} =================")
+		
+		includedirs
+		{
 			"/usr/include/vulkan",
 
 			"/usr/include/gtk-3.0",
@@ -115,12 +109,15 @@ project "PFF"
 			"/usr/lib/x86_64-linux-gnu/glib-2.0/include", -- GLib include path
 		}
 	
-		libdirs {
+		libdirs
+		{
 			"%{wks.location}/PFF/vendor/glfw/build/src",
 			"/usr/lib/x86_64-linux-gnu", -- Library directory for linking
 		}
 	
-		links {
+		links
+		{
+			"vulkan",
 			"glfw",
 
 			"gtk-3",  						-- Link against GTK
@@ -138,14 +135,8 @@ project "PFF"
 		postbuildcommands
 		{
 			-- Create the directory if it doesn't exist
-			"mkdir -p %{wks.location}/bin/" .. outputs .. "/vendor/premake",
-			"cp %{wks.location}/premake5 %{wks.location}/bin/" .. outputs .. "/vendor/premake",
-			
-			-- Copy content of directories
-
-			copy_content_of_dir("PFF/shaders"),
-			copy_content_of_dir("PFF/assets"),
-			-- copy_content_of_dir({"PFF/shaders", "PFF/assets"}),
+			"{MKDIR} %{wks.location}/bin/" .. outputs .. "/vendor/premake",
+			"{COPY} %{wks.location}/premake5 %{wks.location}/bin/" .. outputs .. "/vendor/premake",
 		}
 		
 	filter "configurations:Debug"

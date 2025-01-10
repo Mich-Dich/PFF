@@ -63,27 +63,11 @@ project "PFF_editor"
 			"{MKDIR} %{wks.location}/bin/" .. outputs .. "/PFF_editor/wiki",
 			"{COPY} %{wks.location}/.github/wiki %{wks.location}/bin/" .. outputs .. "/PFF_editor/wiki",
 
-			copy_content_of_dir("PFF_editor/shaders"),
-			copy_content_of_dir("PFF_editor/assets"),
-			copy_content_of_dir("PFF_editor/defaults"),
+			copy_content_of_dir(outputs, "PFF_editor/shaders"),
+			copy_content_of_dir(outputs, "PFF_editor/assets"),
+			copy_content_of_dir(outputs, "PFF_editor/defaults"),
 			-- table.unpack(copy_content_of_dir({"PFF_editor/shaders", "PFF_editor/defaults", "PFF_editor/assets"})),
 		}
-
-	filter "configurations:Debug"
-		defines "PFF_EDITOR_DEBUG"
-		runtime "Debug"
-		symbols "on"
-
-	filter "configurations:RelWithDebInfo"
-		defines "PFF_EDITOR_RELEASE_WITH_DEBUG_INFO"
-		runtime "Release"
-		symbols "on"
-		optimize "on"
-
-	filter "configurations:Release"
-		defines "PFF_EDITOR_RELEASE"
-		runtime "Release"
-		optimize "on"
 
 
 	filter "system:linux"
