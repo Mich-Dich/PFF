@@ -25,7 +25,7 @@ namespace PFF::mesh_factory {
 
     std::optional<std::unordered_map<std::string, ref<PFF::geometry::mesh_asset>>> load_gltf_meshes(std::filesystem::path file_path) {
 
-        CORE_VALIDATE(std::filesystem::exists(file_path), return {}, "Loading GLTF: " << file_path, "provided file path does not exist");
+        VALIDATE(std::filesystem::exists(file_path), return {}, "Loading GLTF: " << file_path, "provided file path does not exist");
 
         fastgltf::GltfDataBuffer data;
         data.loadFromFile(file_path);
@@ -34,7 +34,7 @@ namespace PFF::mesh_factory {
         fastgltf::Parser parser{};
         auto load = parser.loadGltfBinary(&data, file_path.parent_path(), gltfOptions);
 
-        CORE_VALIDATE(load, return {}, "", "Failed to load glTF: [" << fastgltf::getErrorMessage(load.error()) << "]");
+        VALIDATE(load, return {}, "", "Failed to load glTF: [" << fastgltf::getErrorMessage(load.error()) << "]");
 
         fastgltf::Asset gltf;
         gltf = std::move(load.get());
@@ -50,7 +50,7 @@ namespace PFF::mesh_factory {
             geometry::mesh_asset loc_mesh{};
             //loc_mesh.name = mesh.name;
 
-            CORE_LOG(Trace, "name of surface: " << mesh.name)
+            LOG(Trace, "name of surface: " << mesh.name)
 
             // clear the mesh arrays each mesh, we dont want to merge them by error
             loc_mesh.indices.clear();
@@ -58,7 +58,7 @@ namespace PFF::mesh_factory {
 
             for (auto&& p : mesh.primitives) {
 
-                CORE_LOG(Trace, "name of surface: " << mesh.name)
+                LOG(Trace, "name of surface: " << mesh.name)
 
                 geometry::Geo_surface new_surface;
                 new_surface.startIndex = (u32)loc_mesh.indices.size();
@@ -166,18 +166,18 @@ namespace PFF::mesh_factory {
         // TODO: check if source_path is valid
         // TODO: check if destination_path is free
 
-        CORE_LOG(Trace, "source_path: " << source_path << " destination_path: " << destination_path);
+        LOG(Trace, "source_path: " << source_path << " destination_path: " << destination_path);
 
         // load file from source_path and
         std::optional<std::unordered_map<std::string, ref<PFF::geometry::mesh_asset>>> loc_mesh_assets = load_gltf_meshes(source_path);
-        CORE_VALIDATE(loc_mesh_assets.has_value(), return false, "loaded source file", "Failed to load meshes");
+        VALIDATE(loc_mesh_assets.has_value(), return false, "loaded source file", "Failed to load meshes");
 
         if (options.combine_meshes) {
 
             //static_mesh_file_metadata metadata{};
             //metadata.mesh_index = 0;
 
-            //CORE_LOG(Warn, "Not implemented yet");                  // <= HERE
+            //LOG(Warn, "Not implemented yet");                  // <= HERE
             //return false;
 
 
@@ -249,7 +249,7 @@ namespace PFF::mesh_factory {
             }
         }
 
-        CORE_LOG(Trace, "FUNCTION END");
+        LOG(Trace, "FUNCTION END");
 
         return true;
     }

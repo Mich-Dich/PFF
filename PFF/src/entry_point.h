@@ -4,7 +4,7 @@
 extern PFF::application* PFF::create_application();
 
 
-#if defined(PFF_PLATFORM_WINDOWS)
+#if defined(PLATFORM_WINDOWS)
 
 #include <windows.h>
 
@@ -28,7 +28,7 @@ int wmain(int argc, wchar_t* argv[]) {
     return EXIT_SUCCESS;
 }
 
-#elif defined(PFF_PLATFORM_LINUX)
+#elif defined(PLATFORM_LINUX)
 
 int main(int argc, char* argv[]) {
 

@@ -14,7 +14,7 @@ namespace PFF::render::util {
 
 	//void compile_shaders_in_dir(const std::filesystem::path path_to_dir, bool compile_subdirectory) {
 
-	//	CORE_LOG(Trace, "Compiling shaders");
+	//	LOG(Trace, "Compiling shaders");
 	//	std::filesystem::path absolute_path = std::filesystem::absolute(path_to_dir);
 	//	for (const auto& entry : std::filesystem::directory_iterator(absolute_path)) {
 
@@ -39,13 +39,13 @@ namespace PFF::render::util {
 
 	//	if (std::filesystem::exists(compield_file)) {
 	//		if (std::filesystem::last_write_time(absolute_path).time_since_epoch().count() < std::filesystem::last_write_time(compield_file).time_since_epoch().count()) {
-	//			CORE_LOG(Trace, "shader is already compield: [" << EXTRACT_AFTER_PFF(absolute_path.string()) << "]");
+	//			LOG(Trace, "shader is already compield: [" << EXTRACT_AFTER_PFF(absolute_path.string()) << "]");
 	//			return;
 	//		}
 	//	}
 
-	//	CORE_LOG(Trace, "compiling shader: [" << EXTRACT_AFTER_PFF(absolute_path.string()) << "]");
-	//	CORE_ASSERT(system(system_command.c_str()) == 0, "", "shader could not be compiled: [" << absolute_path.string() << "]");
+	//	LOG(Trace, "compiling shader: [" << EXTRACT_AFTER_PFF(absolute_path.string()) << "]");
+	//	ASSERT(system(system_command.c_str()) == 0, "", "shader could not be compiled: [" << absolute_path.string() << "]");
 	//}
 
 

@@ -240,10 +240,10 @@ namespace PFF::render::vulkan {
         for (VkWriteDescriptorSet& write : writes)
             write.dstSet = set;
 #else
-        CORE_VALIDATE(!writes.empty(), return, "", "Error: No writes available for updating descriptor set.");
+        VALIDATE(!writes.empty(), return, "", "Error: No writes available for updating descriptor set.");
         for (VkWriteDescriptorSet& write : writes) {
 
-            CORE_VALIDATE(write.sType == VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET, return, "", "Error: Invalid write descriptor set structure type.");    // Check if write is valid
+            VALIDATE(write.sType == VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET, return, "", "Error: Invalid write descriptor set structure type.");    // Check if write is valid
             write.dstSet = set;
         }
 #endif

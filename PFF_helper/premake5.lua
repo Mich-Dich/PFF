@@ -36,7 +36,7 @@ project "PFF_helper"
 	filter "system:windows"
 		systemversion "latest"
 		defines {
-			"PFF_PLATFORM_WINDOWS",
+			"PLATFORM_WINDOWS",
 			"GLSLC_PATH=\"%{VULKAN_SDK}/Bin/glslc.exe\"",
 		}
 		files { "../metadata/app_icon.rc" }
@@ -44,7 +44,7 @@ project "PFF_helper"
 	filter "system:linux"
 		systemversion "latest"
 		defines {
-			"PFF_PLATFORM_LINUX",
+			"PLATFORM_LINUX",
 			"GLSLC_PATH=\"/usr/bin/glslc\"",
 		}
 	
@@ -75,18 +75,18 @@ project "PFF_helper"
 		}
 		
 	filter "configurations:Debug"
-		defines "PFF_DEBUG"
+		defines "DEBUG"
 		runtime "Debug"
 		symbols "on"
 
 	filter "configurations:RelWithDebInfo"
-		defines "PFF_RELEASE_WITH_DEBUG_INFO"
+		defines "RELEASE_WITH_DEBUG_INFO"
 		runtime "Release"
 		symbols "on"
 		optimize "on"
 
 	filter "configurations:Release"
-		defines "PFF_RELEASE"
+		defines "RELEASE"
 		runtime "Release"
 		symbols "off"
 		optimize "on"

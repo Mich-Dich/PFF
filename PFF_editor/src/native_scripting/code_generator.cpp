@@ -111,7 +111,7 @@ namespace PFF::code_generator {
 	}
 
 	filter "system:windows"
-		defines "PFF_PLATFORM_WINDOWS"
+		defines "PLATFORM_WINDOWS"
 		systemversion "latest"
 		buildcommands { "del /S *.pdb" }
 

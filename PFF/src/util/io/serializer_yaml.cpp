@@ -13,7 +13,7 @@ namespace PFF::serializer {
 		: m_filename(filename), m_name(section_name), m_option(option) {
 
 		std::filesystem::path path = filename.parent_path();
-		CORE_ASSERT(io::create_directory(path), "", "Could not create file-path");
+		ASSERT(io::create_directory(path), "", "Could not create file-path");
 
 		// make shure the file exists
 		if (!std::filesystem::exists(m_filename)) {
@@ -42,7 +42,7 @@ namespace PFF::serializer {
 	void yaml::serialize() {
 
 		auto istream = std::ifstream(m_filename);
-		CORE_ASSERT(istream.is_open(), "", "input-file-stream is not open");
+		ASSERT(istream.is_open(), "", "input-file-stream is not open");
 
 		// make new stream to buffer updated file
 		std::ostringstream updated_file;
@@ -82,7 +82,7 @@ namespace PFF::serializer {
 		istream.close();
 
 		auto ostream = std::ofstream(m_filename);
-		CORE_ASSERT(ostream.is_open(), "", "output-file-stream is not open");
+		ASSERT(ostream.is_open(), "", "output-file-stream is not open");
 
 		ostream << updated_file.str();
 		ostream.close();
@@ -90,10 +90,10 @@ namespace PFF::serializer {
 
 	yaml& yaml::deserialize() {
 
-		CORE_ASSERT(!m_name.empty(), "", "name of section to find is empty");
+		ASSERT(!m_name.empty(), "", "name of section to find is empty");
 
 		m_istream = std::ifstream(m_filename);
-		CORE_VALIDATE(m_istream.is_open(), return *this, "", "file-stream is not open");
+		VALIDATE(m_istream.is_open(), return *this, "", "file-stream is not open");
 
 		const u32 SECTION_INDENTATION = 0;
 		bool found_section = false;

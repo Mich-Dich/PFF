@@ -33,7 +33,7 @@ namespace PFF::util {
 
         } else {
 
-            CORE_LOG(Trace, "NOT FOUND");
+            LOG(Trace, "NOT FOUND");
             return {};
         }
     }

@@ -1,13 +1,13 @@
 
 #include "util/pffpch.h"
 
-#ifdef PFF_PLATFORM_WINDOWS
+#ifdef PLATFORM_WINDOWS
 
 	#include <Windows.h>
 	#include <Psapi.h>
 	#include <TlHelp32.h>
 
-#elif defined(PFF_PLATFORM_LINUX)
+#elif defined(PLATFORM_LINUX)
 
 	#include <dirent.h>
 	#include <unistd.h>
@@ -26,7 +26,7 @@ namespace PFF::io {
 	bool read_file(const std::string& file_path, std::vector<char>& content_buffer) {
 
 		std::ifstream file{ file_path, std::ios::ate | std::ios::binary };
-		CORE_VALIDATE(file.is_open(), return false, "", "Failed to open file at: [" << file_path << "]");
+		VALIDATE(file.is_open(), return false, "", "Failed to open file at: [" << file_path << "]");
 
 		size_t file_size = static_cast<size_t>(file.tellg());
 		content_buffer.clear();
@@ -36,7 +36,7 @@ namespace PFF::io {
 		file.read(content_buffer.data(), file_size);
 		file.close();
 
-		CORE_LOG(Trace, "loaded file at [" << file_path << "] with length[" << file_size << "]");
+		LOG(Trace, "loaded file at [" << file_path << "] with length[" << file_size << "]");
 		return true;
 	}
 
@@ -44,12 +44,12 @@ namespace PFF::io {
 	bool write_file(const std::string& file_path, const std::vector<char>& content_buffer) {
 
 		std::ofstream file{ file_path, std::ios::binary };
-		CORE_VALIDATE(file.is_open(), return false, "", "Failed to open file for writing at: " << file_path);
+		VALIDATE(file.is_open(), return false, "", "Failed to open file for writing at: " << file_path);
 
 		file.write(content_buffer.data(), content_buffer.size());
 		file.close();
 
-		CORE_LOG(Trace, "Wrote content to file at [" << file_path << "] with length [" << content_buffer.size() << "]");
+		LOG(Trace, "Wrote content to file at [" << file_path << "] with length [" << content_buffer.size() << "]");
 		return true;
 	}
 
@@ -58,7 +58,7 @@ namespace PFF::io {
 
 		try {
 		
-			CORE_VALIDATE(std::filesystem::exists(full_path_to_file), return false, "", "Source file does not exist: " << full_path_to_file);
+			VALIDATE(std::filesystem::exists(full_path_to_file), return false, "", "Source file does not exist: " << full_path_to_file);
 
 			// Check if the target directory exists, if not, create it
 			if (!std::filesystem::exists(target_directory)) {
@@ -72,11 +72,11 @@ namespace PFF::io {
 
 		} catch (const std::filesystem::filesystem_error& e) {
 
-			CORE_LOG(Error, "Filesystem error: " << e.what());
+			LOG(Error, "Filesystem error: " << e.what());
 			return false;
 		} catch (const std::exception& e) {
 
-			CORE_LOG(Error, "Error copying file: " << e.what());
+			LOG(Error, "Error copying file: " << e.what());
 			return false;
 		}
 	}
@@ -86,14 +86,14 @@ namespace PFF::io {
 
 		// Check if the directory exists
 		if (!std::filesystem::is_directory(path))
-			CORE_VALIDATE(std::filesystem::create_directories(path), return false, "", "Failed to create directory: " << path);
+			VALIDATE(std::filesystem::create_directories(path), return false, "", "Failed to create directory: " << path);
 		
 		return true;
 	}
 
 	std::vector<std::string> get_processes_using_file(const std::wstring& filePath) {
 
-#ifdef PFF_PLATFORM_WINDOWS
+#ifdef PLATFORM_WINDOWS
 
 		std::vector<std::string> processNames;
 		HANDLE hSnapshot = CreateToolhelp32Snapshot(TH32CS_SNAPPROCESS, 0);
@@ -140,7 +140,7 @@ namespace PFF::io {
 		CloseHandle(hSnapshot);
 		return processNames;
 
-#elif defined(PFF_PLATFORM_LINUX)
+#elif defined(PLATFORM_LINUX)
 
 	std::vector<std::string> processNames;
     std::string filePathStr(filePath.begin(), filePath.end()); // Convert wstring to string
@@ -191,7 +191,7 @@ namespace PFF::io {
     closedir(procDir);
     return processNames;
 
-#elif  defined(PFF_PLATFORM_MAC)
+#elif  defined(PLATFORM_MAC)
 	#error undefined platform
 #endif
 
@@ -227,7 +227,7 @@ namespace PFF::io {
 	bool write_to_file(const char* data, const std::filesystem::path& filename) {
 
 		std::ofstream outStream(filename.string());
-		CORE_VALIDATE(outStream.is_open(), return false, "", "could not open " << filename);
+		VALIDATE(outStream.is_open(), return false, "", "could not open " << filename);
 		outStream << data;
 		outStream.close();
 		return true;

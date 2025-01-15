@@ -25,14 +25,14 @@ namespace PFF::config {
         PFF_PROFILE_FUNCTION();
 
         io::create_directory(PFF_dir / CONFIG_DIR);
-        CORE_LOG(Trace, "Checking Engine config files at: " << PFF_dir / CONFIG_DIR);
+        LOG(Trace, "Checking Engine config files at: " << PFF_dir / CONFIG_DIR);
         for (int i = 0; i <= static_cast<int>(file::input); ++i) {
 
             std::filesystem::path file_path = PFF_dir / CONFIG_DIR / (config::file_type_to_string(static_cast<file>(i)) + FILE_EXTENSION_CONFIG);
             std::ofstream config_file(file_path, std::ios::app);
             if (!config_file.is_open()) {
 
-                CORE_LOG(Error, "Failed to open/create config file: [" << file_path << "]");
+                LOG(Error, "Failed to open/create config file: [" << file_path << "]");
                 return;
             }
             config_file.close();
@@ -43,14 +43,14 @@ namespace PFF::config {
     void create_config_files_for_project(std::filesystem::path project_dir) {
 
         io::create_directory(project_dir / CONFIG_DIR);
-        CORE_LOG(Trace, "Checking project config files at: " << project_dir / CONFIG_DIR);
+        LOG(Trace, "Checking project config files at: " << project_dir / CONFIG_DIR);
         for (int i = 0; i <= static_cast<int>(file::input); ++i) {
 
             std::filesystem::path file_path = project_dir / CONFIG_DIR / (config::file_type_to_string(static_cast<file>(i)) + FILE_EXTENSION_CONFIG);
             std::ofstream config_file(file_path, std::ios::app);
             if (!config_file.is_open()) {
 
-                CORE_LOG(Error, "Failed to open/create config file: [" << file_path << "]");
+                LOG(Error, "Failed to open/create config file: [" << file_path << "]");
                 return;
             }
             config_file.close();
@@ -78,7 +78,7 @@ namespace PFF::config {
 
         std::filesystem::path file_path = BUILD_CONFIG_PATH(target_config_file);
         std::ifstream configFile(file_path, std::ios::in | std::ios::binary);
-        CORE_VALIDATE(configFile.is_open(), return false, "", "Fauled to open file: [" << file_path << "]");
+        VALIDATE(configFile.is_open(), return false, "", "Fauled to open file: [" << file_path << "]");
 
         bool found_key = false;
         bool section_found = false;
@@ -153,7 +153,7 @@ namespace PFF::config {
             // Open the file in truncation mode to clear its content
             std::ofstream outFile(file_path, std::ios::trunc);
             if (!outFile.is_open()) {
-                CORE_LOG(Error, "problems opening file");
+                LOG(Error, "problems opening file");
                 return false;
             }
 
@@ -166,7 +166,7 @@ namespace PFF::config {
             }
 
             outFile.close();
-            // CORE_LOG(Trace, "File [" << file_path << "] updated with [" << std::setw(20) << std::left << section << " / " << std::setw(25) << std::left << key << "]: [" << value << "]");
+            // LOG(Trace, "File [" << file_path << "] updated with [" << std::setw(20) << std::left << section << " / " << std::setw(25) << std::left << key << "]: [" << value << "]");
         }
         return false; // Key not found
     }

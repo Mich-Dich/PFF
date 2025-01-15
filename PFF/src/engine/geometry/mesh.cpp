@@ -10,7 +10,7 @@ namespace PFF::geometry {
 
 	void mesh_asset::calc_bounds() {
 		
-		CORE_ASSERT(surfaces.size() > 0, "", "Cannot calculate the bounds of an emty mesh_asset. Needs to have atleast one surface");
+		ASSERT(surfaces.size() > 0, "", "Cannot calculate the bounds of an emty mesh_asset. Needs to have atleast one surface");
 
 		PFF_ISOLATED_PROFILER_SCOPED(1000, "calc frustum planes ", PFF::duration_precision::microseconds);
 
@@ -49,7 +49,7 @@ namespace PFF::geometry {
 
 	//procedural_mesh_asset::~procedural_mesh_asset() { 
 	//	
-	//	CORE_LOG(Error, "SHUTINGDOWN procedural_mesh_script");
+	//	LOG(Error, "SHUTINGDOWN procedural_mesh_script");
 	//	GET_RENDERER.cleanup_procedural_mesh(this);
 	//}
 

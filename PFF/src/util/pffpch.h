@@ -2,25 +2,32 @@
 
 // =================================================================================  general  ================================================================================
 
+#include <iostream>
+#include <thread>
+#include <condition_variable>
+#include <atomic>
+#include <system_error>
+#include <signal.h> // sigaction
+
 #include <cassert>
 #include <cstdlib>
 #include <stdexcept>
-#include <iostream>
 #include <memory>
 #include <utility>
 #include <algorithm>
 #include <functional>
 #include <cstdio>
 #include <chrono>
-#include <thread>
 #include <future>
 #include <random>
 #include <filesystem>
 #include <concepts>
 
 #include <string>
+#include <string_view>
 #include <cstring>
 #include <sstream>
+
 #include <vector>
 #include <unordered_map>
 #include <unordered_set>
@@ -58,12 +65,12 @@
 
 // ============================================================================  platform specific  ============================================================================
 
-#ifdef PFF_PLATFORM_WINDOWS
+#if defined(PLATFORM_WINDOWS)
 	#include "util/platform/windows_util.h"
 	#ifndef NOMINMAX
 		#define NOMINMAX				// See github.com/skypjack/entt/wiki/Frequently-Asked-Questions#warning-c4003-the-min-the-max-and-the-macro
 	#endif
-#elif defined(PFF_PLATFORM_LINUX)
+#elif defined(PLATFORM_LINUX)
 	#include "util/platform/linux_util.h"
 	#include <cxxabi.h>
 	// #include <dirent.h>

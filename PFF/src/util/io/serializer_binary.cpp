@@ -15,12 +15,12 @@ namespace PFF::serializer {
 		if (m_option == option::save_to_file) {
 
 			m_ostream = std::ofstream(m_filename, std::ios::binary);
-			CORE_VALIDATE(m_ostream, return, "", "Failed to create file: [" << m_filename << "]");
+			VALIDATE(m_ostream, return, "", "Failed to create file: [" << m_filename << "]");
 
 		} else {
 
 			m_istream = std::ifstream(m_filename, std::ios::binary);
-			CORE_VALIDATE(m_istream, return, "", "Failed to create file: [" << m_filename << "]");
+			VALIDATE(m_istream, return, "", "Failed to create file: [" << m_filename << "]");
 
 		}
 

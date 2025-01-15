@@ -5,6 +5,7 @@
 
 # Compile results
 /logs
+logs/
 *.log
 
 config/

@@ -65,7 +65,7 @@ namespace PFF::UI {
 
 	imgui_layer::imgui_layer() : layer("imgui_layer") { 
 		
-		CORE_LOG_INIT(); 
+		LOG_INIT(); 
 		
 		main_color = { .0f,	.4088f,	1.0f,	1.f };
 		window_border = false;
@@ -92,7 +92,7 @@ namespace PFF::UI {
 
 		GET_RENDERER.imgui_shutdown();
 		ImGui::DestroyContext(m_context);
-		CORE_LOG_SHUTDOWN();
+		LOG_SHUTDOWN();
 	}
 
 
@@ -501,7 +501,7 @@ namespace PFF::UI {
 	
 	void update_UI_theme() {
 		
-		//CORE_LOG(Debug, "updating UI theme");
+		//LOG(Debug, "updating UI theme");
 
 		ImGuiStyle* style = &ImGui::GetStyle();
 		ImVec4* colors = style->Colors;

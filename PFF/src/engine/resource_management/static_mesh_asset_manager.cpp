@@ -20,7 +20,7 @@ namespace PFF {
 
 	ref<geometry::mesh_asset> static_mesh_asset_manager::get_from_path(const std::filesystem::path path) {
 
-		CORE_VALIDATE(path.extension() == PFF_ASSET_EXTENTION, return nullptr, "", "Provided path is not a PFF-asset");
+		VALIDATE(path.extension() == PFF_ASSET_EXTENTION, return nullptr, "", "Provided path is not a PFF-asset");
 		//return nullptr;		// NOT FINISHED YET
 
 		std::filesystem::path mesh_path = application::get().get_project_path() / CONTENT_DIR / path;
@@ -37,7 +37,7 @@ namespace PFF {
 			s_instance.m_uploaded_mesh_assets[mesh_path] = create_ref<geometry::mesh_asset>();
 			serialize_mesh(mesh_path, s_instance.m_uploaded_mesh_assets[mesh_path], asset_file_header, general_header, static_mesh_header, serializer::option::load_from_file);
 
-			CORE_ASSERT(asset_file_header.type == file_type::mesh, "", "Tryed to load an asset file that is not a mesh");
+			ASSERT(asset_file_header.type == file_type::mesh, "", "Tryed to load an asset file that is not a mesh");
 			// TODO: validate deserialized headers [general_header] / [static_mesh_header]
 
 			// upload mesh to GPU
@@ -75,7 +75,7 @@ namespace PFF {
 //#ifdef PROFILE_GENERATION
 //	for (size_t i = 0; i < 10; i++) {
 //		loc_mesh = geometry::mesh{};		// reset
-//		CORE_LOG(Trace, "starting mesh generation iteration: " << i);
+//		LOG(Trace, "starting mesh generation iteration: " << i);
 //		PFF_PROFILE_SCOPE("Procedural Grid Mesh");
 //#endif
 //

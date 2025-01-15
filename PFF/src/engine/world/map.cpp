@@ -56,13 +56,13 @@ namespace PFF {
 	map::map() {
 
 		m_path = application::get().get_project_path() / CONTENT_DIR / "worlds" / "test_map.pffasset";
-		CORE_LOG(Trace, "Loading map: " << m_path);
+		LOG(Trace, "Loading map: " << m_path);
 
 		serialize(serializer::option::load_from_file);
 
 #ifdef DEV_ONLY
 
-		//CORE_LOG(Debug, "create entity and add [simple_terrain_script]");
+		//LOG(Debug, "create entity and add [simple_terrain_script]");
 		//entity loc_entitiy = create_entity("procedural_script_test");
 		//script_system::add_component_from_string("simple_terrain_script", loc_entitiy);
 
@@ -227,21 +227,21 @@ namespace PFF {
 		});
 
 		//auto& registry = m_registry;
-		//CORE_LOG(Info, "Registry address in update loop: " << &registry);
+		//LOG(Info, "Registry address in update loop: " << &registry);
 
 		//try {
 		//	registry.storage<procedural_mesh_component>();
 		//	auto view = registry.view<procedural_mesh_component>();
-		//	CORE_LOG(Info, "View created successfully");
-		//	CORE_LOG(Info, "Number of procedural_mesh_components in view: " << view.size());
-		//	CORE_VALIDATE_S(view.size() == 0, return);
+		//	LOG(Info, "View created successfully");
+		//	LOG(Info, "Number of procedural_mesh_components in view: " << view.size());
+		//	VALIDATE_S(view.size() == 0, return);
 
 
 
 		//} catch (const std::exception& e) {
-		//	CORE_LOG(Error, "Exception when creating view: " << e.what());
+		//	LOG(Error, "Exception when creating view: " << e.what());
 		//} catch (...) {
-		//	CORE_LOG(Error, "Unknown exception when creating view");
+		//	LOG(Error, "Unknown exception when creating view");
 		//}
 
 #endif // RUNTIME_IMPLEMENTED
@@ -253,10 +253,10 @@ namespace PFF {
 
 			if (script_comp.instance) {
 
-				CORE_LOG(Trace, "Destroying script");
+				LOG(Trace, "Destroying script");
 				script_comp.destroy_script(&script_comp);
 
-				CORE_LOG(Trace, "Recreating script");
+				LOG(Trace, "Recreating script");
 				script_comp.instance = script_comp.create_script();
 				script_comp.instance->m_entity = PFF::entity{ entity, this };
 				script_comp.instance->on_create();

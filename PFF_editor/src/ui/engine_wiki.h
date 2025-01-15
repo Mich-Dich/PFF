@@ -14,7 +14,7 @@ namespace PFF::UI {
 	std::string read_file_to_string(const std::filesystem::path filepath) {
 
 		std::ifstream stream(filepath);
-		CORE_VALIDATE(stream.is_open(), return std::string("Could not open file"), "", "File [" << filepath << "] could not be opend");
+		VALIDATE(stream.is_open(), return std::string("Could not open file"), "", "File [" << filepath << "] could not be opend");
 
 		std::stringstream buffer;
 		buffer << stream.rdbuf();
@@ -105,7 +105,7 @@ namespace PFF::UI {
 
 		}, [] {
 
-			ImGui::BeginChild("ayosöfdhg");
+			ImGui::BeginChild("ayosï¿½fdhg");
 			UI::markdown(wiki_text);
 			ImGui::EndChild();
 
@@ -117,9 +117,9 @@ namespace PFF::UI {
 }
 //
 //
-//CORE_LOG(Trace, "Home is clicked");
+//LOG(Trace, "Home is clicked");
 //
 //if (UI::add_gray_button("Home")) {
 //
-//	CORE_LOG(Trace, "BUTTON is clicked");
+//	LOG(Trace, "BUTTON is clicked");
 //}

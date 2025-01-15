@@ -42,7 +42,7 @@
 #include <glm/gtx/quaternion.hpp>
 #include <cstdlib> // for system calls (conpieling shaders)
 
-#if defined(PFF_PLATFORM_LINUX)
+#if defined(PLATFORM_LINUX)
 	#include <xmmintrin.h> // For SSE
 	#include <emmintrin.h> // For SSE2
 	#include <smmintrin.h> // For SSE4.1
@@ -79,7 +79,7 @@ namespace PFF::render::vulkan {
 		m_dq_device = nullptr;
 		m_dq_allocator = nullptr;
 		
-		CORE_LOG_SHUTDOWN();
+		LOG_SHUTDOWN();
 	}
 
 	void deletion_queue::push_func(std::function<void()>&& function) { m_deletors.push_back(function); }
@@ -122,7 +122,7 @@ namespace PFF::render::vulkan {
 			}
 
 			else
-				CORE_LOG(Error, "Renderer deletion queue used with an unknown type [" << entry.first.name() << "]");
+				LOG(Error, "Renderer deletion queue used with an unknown type [" << entry.first.name() << "]");
 		}
 		m_pointers.clear();
 	}
@@ -134,17 +134,17 @@ namespace PFF::render::vulkan {
 		m_window = window;
 		m_layer_stack = layer_stack;
 
-		CORE_LOG_INIT();
+		LOG_INIT();
 
-#if defined(PFF_PLATFORM_WINDOWS)					// compile_shaders_in_dir
+#if defined(PLATFORM_WINDOWS)					// compile_shaders_in_dir
 		const std::filesystem::path path_to_build_script = PFF::util::get_executable_path().parent_path() / "PFF_helper" / "PFF_helper.exe";
 		std::string cmdArgs = "1 1 0 " + (PFF::util::get_executable_path().parent_path() / "PFF/shaders").generic_string() + " 1 ";
-#elif defined(PFF_PLATFORM_LINUX)
+#elif defined(PLATFORM_LINUX)
 		const std::filesystem::path path_to_build_script = PFF::util::get_executable_path().parent_path() / "PFF_helper" / "PFF_helper";
 		std::string cmdArgs = "1 1 0 " + (PFF::util::get_executable_path().parent_path() / "PFF/shaders").generic_string() + " 1 ";
 #endif
 
-		CORE_ASSERT(PFF::util::run_program(path_to_build_script, cmdArgs), "Successfully compiled shaders", "Failed to compile shaders using PFF_helper");			// make sure PFF_helper is build
+		ASSERT(PFF::util::run_program(path_to_build_script, cmdArgs), "Successfully compiled shaders", "Failed to compile shaders using PFF_helper");			// make sure PFF_helper is build
 
 		//make the vulkan instance, with basic debug features
 		vkb::InstanceBuilder builder;
@@ -255,7 +255,7 @@ namespace PFF::render::vulkan {
 		m_window.reset();
 		m_layer_stack.reset();
 
-		CORE_LOG_SHUTDOWN();
+		LOG_SHUTDOWN();
 	}
 
 	void vk_renderer::resource_free() {
@@ -319,12 +319,12 @@ namespace PFF::render::vulkan {
 		if (!std::filesystem::exists(UI::ini_file_location)) {
 
 			std::ofstream file(UI::ini_file_location);
-			CORE_ASSERT(file.is_open(), "", "Failed to open [" << UI::ini_file_location << "] default: [" << io.IniFilename << "]");
+			ASSERT(file.is_open(), "", "Failed to open [" << UI::ini_file_location << "] default: [" << io.IniFilename << "]");
 
 			std::ifstream default_config_file(PFF::util::get_executable_path() / "defaults" / "imgui.ini");
-			CORE_ASSERT(default_config_file.is_open(), "", "Failed to open [default_config_file]");
+			ASSERT(default_config_file.is_open(), "", "Failed to open [default_config_file]");
 
-			CORE_LOG(Trace, "[imgui_config.ini] is empty. Copying data from default file");
+			LOG(Trace, "[imgui_config.ini] is empty. Copying data from default file");
 			file << default_config_file.rdbuf();
 
 			default_config_file.close();
@@ -333,7 +333,7 @@ namespace PFF::render::vulkan {
 		ImGui::LoadIniSettingsFromDisk(UI::ini_file_location.string().c_str());
 
 
-		CORE_ASSERT(ImGui_ImplGlfw_InitForVulkan(m_window->get_window(), true), "", "Failed to initalize imgui -> init GLFW for Vulkan");
+		ASSERT(ImGui_ImplGlfw_InitForVulkan(m_window->get_window(), true), "", "Failed to initalize imgui -> init GLFW for Vulkan");
 
 		// this initializes imgui for Vulkan
 		ImGui_ImplVulkan_InitInfo init_info = {};
@@ -349,7 +349,7 @@ namespace PFF::render::vulkan {
 		init_info.PipelineRenderingCreateInfo.colorAttachmentCount = 1;
 		init_info.PipelineRenderingCreateInfo.pColorAttachmentFormats = &m_swapchain_image_format;
 		init_info.MSAASamples = VK_SAMPLE_COUNT_1_BIT;
-		CORE_ASSERT(ImGui_ImplVulkan_Init(&init_info), "", "Failed to initalize ImGui-Vulkan");
+		ASSERT(ImGui_ImplVulkan_Init(&init_info), "", "Failed to initalize ImGui-Vulkan");
 
 		// execute a gpu command to upload imgui font textures
 		// immediate_submit([&](VkCommandBuffer cmd) { ImGui_ImplVulkan_CreateFontsTexture(); });
@@ -431,7 +431,7 @@ namespace PFF::render::vulkan {
 		// Free resources 
 		{
 			for (auto& func : s_resource_free_queue[(m_frame_number) % FRAME_COUNT]) {
-				CORE_LOG(Info, "Executing free QUEUE");
+				LOG(Info, "Executing free QUEUE");
 				func();
 			}
 			s_resource_free_queue[(m_frame_number) % FRAME_COUNT].clear();
@@ -560,7 +560,7 @@ namespace PFF::render::vulkan {
 
 	void vk_renderer::refresh(f32 delta_time) {
 	
-		//CORE_LOG(Debug, "Refreching renderer");
+		//LOG(Debug, "Refreching renderer");
 		resize_swapchain();
 		draw_frame(delta_time);
 	}
@@ -732,7 +732,7 @@ namespace PFF::render::vulkan {
 			1 
 		};
 		m_window->get_monitor_size((int*)&drawImageExtent.width, (int*)&drawImageExtent.height);
-		CORE_LOG(Trace, "render image extend: " << drawImageExtent.width << "/" << drawImageExtent.height);
+		LOG(Trace, "render image extend: " << drawImageExtent.width << "/" << drawImageExtent.height);
 
 		VmaAllocationCreateInfo image_alloc_CI = {};
 		image_alloc_CI.usage = VMA_MEMORY_USAGE_GPU_ONLY;												// for the m_draw_image & m_depth_image, allocate it from GPU local memory
@@ -931,7 +931,7 @@ namespace PFF::render::vulkan {
 		// ====================================================== Add pipeline [grid] ====================================================== 
 
 		VkShaderModule grid_shader;
-		CORE_ASSERT(util::load_shader_module(PFF::util::get_executable_path() / "../PFF/shaders/gradient.comp.spv", m_device, &grid_shader), "", "Error when building the compute shader");
+		ASSERT(util::load_shader_module(PFF::util::get_executable_path() / "../PFF/shaders/gradient.comp.spv", m_device, &grid_shader), "", "Error when building the compute shader");
 		compute_pipeline_CI.stage.module = grid_shader;		//change the shader module only
 
 		render::compute_effect grid{};
@@ -945,7 +945,7 @@ namespace PFF::render::vulkan {
 		// ====================================================== Add pipeline [gradient] ====================================================== 		
 
 		VkShaderModule gradient_shader;
-		CORE_ASSERT(util::load_shader_module(PFF::util::get_executable_path() / "../PFF/shaders/gradient_color.comp.spv", m_device, &gradient_shader), "", "Error when building the compute shader");
+		ASSERT(util::load_shader_module(PFF::util::get_executable_path() / "../PFF/shaders/gradient_color.comp.spv", m_device, &gradient_shader), "", "Error when building the compute shader");
 		compute_pipeline_CI.stage.module = gradient_shader;	//change the shader module only
 
 		render::compute_effect gradient{};
@@ -962,7 +962,7 @@ namespace PFF::render::vulkan {
 		// ====================================================== Add pipeline [sky] ====================================================== 
 
 		VkShaderModule sky_shader;
-		CORE_ASSERT(util::load_shader_module(PFF::util::get_executable_path() / "../PFF/shaders/sky.comp.spv", m_device, &sky_shader), "", "Error when building the compute shader");
+		ASSERT(util::load_shader_module(PFF::util::get_executable_path() / "../PFF/shaders/sky.comp.spv", m_device, &sky_shader), "", "Error when building the compute shader");
 		compute_pipeline_CI.stage.module = sky_shader;		//change the shader module only
 
 		render::compute_effect sky{};
@@ -990,10 +990,10 @@ namespace PFF::render::vulkan {
 	
 #if 1	// Try new initalization with new shader
 		VkShaderModule mesh_frag_shader;
-		CORE_ASSERT(util::load_shader_module(PFF::util::get_executable_path() / "../PFF/shaders/tex_image.frag.spv", m_device, &mesh_frag_shader), "Triangle fragment shader succesfully loaded", "Error when building the fragment shader");
+		ASSERT(util::load_shader_module(PFF::util::get_executable_path() / "../PFF/shaders/tex_image.frag.spv", m_device, &mesh_frag_shader), "Triangle fragment shader succesfully loaded", "Error when building the fragment shader");
 
 		VkShaderModule mesh_vertex_shader;
-		CORE_ASSERT(util::load_shader_module(PFF::util::get_executable_path() / "../PFF/shaders/colored_triangle_mesh.vert.spv", m_device, &mesh_vertex_shader), "Triangle vertex shader succesfully loaded", "Error when building the vertex shader");
+		ASSERT(util::load_shader_module(PFF::util::get_executable_path() / "../PFF/shaders/colored_triangle_mesh.vert.spv", m_device, &mesh_vertex_shader), "Triangle vertex shader succesfully loaded", "Error when building the vertex shader");
 
 		VkPushConstantRange bufferRange{};
 		bufferRange.offset = 0;
@@ -1008,10 +1008,10 @@ namespace PFF::render::vulkan {
 		VK_CHECK_S(vkCreatePipelineLayout(m_device, &pipeline_layout_info, nullptr, &m_mesh_pipeline_layout));
 #else
 		VkShaderModule mesh_frag_shader;
-		CORE_ASSERT(util::load_shader_module(PFF::util::get_executable_path() / "../PFF/shaders/colored_triangle.frag.spv", m_device, &mesh_frag_shader), "", "Error when building the triangle fragment shader module");
+		ASSERT(util::load_shader_module(PFF::util::get_executable_path() / "../PFF/shaders/colored_triangle.frag.spv", m_device, &mesh_frag_shader), "", "Error when building the triangle fragment shader module");
 
 		VkShaderModule mesh_vertex_shader;
-		CORE_ASSERT(util::load_shader_module(PFF::util::get_executable_path() / "../PFF/shaders/colored_triangle_mesh.vert.spv", m_device, &mesh_vertex_shader), "", "Error when building the triangle vertex shader module");
+		ASSERT(util::load_shader_module(PFF::util::get_executable_path() / "../PFF/shaders/colored_triangle_mesh.vert.spv", m_device, &mesh_vertex_shader), "", "Error when building the triangle vertex shader module");
 
 		VkPushConstantRange push_constant_range{};
 		push_constant_range.offset = 0;
@@ -1472,7 +1472,7 @@ namespace PFF::render::vulkan {
 		if (!mesh.vertex_buffer.buffer || !mesh.index_buffer.buffer ||
 			mesh.vertex_buffer.info.size < vertexBufferSize || mesh.index_buffer.info.size < indexBufferSize) {
 
-			//CORE_LOG(Warn, "Mesh not created yet or size changed, calling [upload_mesh()]");
+			//LOG(Warn, "Mesh not created yet or size changed, calling [upload_mesh()]");
 			mesh = upload_mesh(indices, vertices);
 			return;
 		}
@@ -1510,7 +1510,7 @@ namespace PFF::render::vulkan {
 		if (!mesh.mesh_buffers.vertex_buffer.buffer || !mesh.mesh_buffers.index_buffer.buffer
 			|| mesh.mesh_buffers.vertex_buffer.info.size < vertexBufferSize || mesh.mesh_buffers.index_buffer.info.size < indexBufferSize) {
 
-			//CORE_LOG(Warn, "Mesh not created yet or size changed, calling [upload_mesh()]");
+			//LOG(Warn, "Mesh not created yet or size changed, calling [upload_mesh()]");
 			mesh.mesh_buffers = upload_mesh(indices, vertices);
 			mesh.indices = indices;
 			mesh.vertices = vertices;
@@ -1522,16 +1522,16 @@ namespace PFF::render::vulkan {
 		if (mesh.staging_buffer_size < totalSize) {
 			if (mesh.staging_buffer.buffer) {
 
-				CORE_LOG(Info, "Destroying existing staging buffer");
+				LOG(Info, "Destroying existing staging buffer");
 				destroy_buffer(mesh.staging_buffer);
 				mesh.staging_buffer = {};
 				mesh.staging_data = nullptr;
 				mesh.staging_buffer_size = 0;
 			}
 			
-			CORE_LOG(Info, "Creating new staging buffer of size: [" << totalSize << "]");
+			LOG(Info, "Creating new staging buffer of size: [" << totalSize << "]");
 			mesh.staging_buffer = create_buffer(totalSize, VK_BUFFER_USAGE_TRANSFER_SRC_BIT, VMA_MEMORY_USAGE_CPU_TO_GPU);
-			CORE_VALIDATE(mesh.staging_buffer.buffer, return, "", "Failed to create staging buffer");
+			VALIDATE(mesh.staging_buffer.buffer, return, "", "Failed to create staging buffer");
 
 			mesh.staging_data = mesh.staging_buffer.allocation->GetMappedData();
 			mesh.staging_buffer_size = totalSize;
@@ -1606,7 +1606,7 @@ namespace PFF::render::vulkan {
 			mesh.index_buffer = {};  // Reset to empty state
 		}
 		mesh.vertex_buffer_address = 0;
-		CORE_LOG(Trace, "Mesh released from GPU memory");
+		LOG(Trace, "Mesh released from GPU memory");
 	}
 
 #ifdef PFF_RENDERER_DEBUG_CAPABILITY

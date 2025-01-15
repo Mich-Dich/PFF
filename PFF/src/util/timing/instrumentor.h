@@ -38,7 +38,7 @@ namespace PFF {
                 f32 duration = -1.f;                                                                                                                                                                  \
                 {   PFF::stopwatch loc_stpowatch(&duration);                                                                                                                                          \
                     for (size_t x = 0; x < num_of_iterations; x++) { func }                                                                                                                           \
-                } CORE_LOG(Info, message << " => sample count: " << num_of_iterations << " average duration: " << (duration / (f64)num_of_iterations) << PFF_DURATION_##profile_duration_precision);  \
+                } LOG(Info, message << " => sample count: " << num_of_iterations << " average duration: " << (duration / (f64)num_of_iterations) << PFF_DURATION_##profile_duration_precision);  \
             }
 
 		class simple_profiler {

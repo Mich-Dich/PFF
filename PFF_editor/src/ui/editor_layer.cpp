@@ -371,7 +371,7 @@ namespace PFF {
 
 								item_current_idx = n;
 								UI::set_UI_theme_selection(static_cast<UI::theme_selection>(item_current_idx));
-								CORE_LOG(Debug, "updating UI theme" << (int)UI::UI_theme);
+								LOG(Debug, "updating UI theme" << (int)UI::UI_theme);
 								UI::update_UI_theme();
 							}
 						}

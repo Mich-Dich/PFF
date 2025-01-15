@@ -40,10 +40,10 @@ namespace PFF {
 
 					std::filesystem::path destination = folder_path / file_path.filename();
 					std::filesystem::rename(file_path, destination);
-					CORE_LOG(Info, "File moved successfully!");
+					LOG(Info, "File moved successfully!");
 
 				} catch (const std::filesystem::filesystem_error& e)
-					CORE_LOG(Error, "Error: " << e.what());
+					LOG(Error, "Error: " << e.what());
 
 			}
 			ImGui::EndDragDropTarget();
@@ -159,7 +159,7 @@ namespace PFF {
 	void handle_drop(const std::filesystem::path& target_directory) {
 
 		// Implement your file move logic here
-		CORE_LOG(Info, "NOT IMPLEMENTED YET");
+		LOG(Info, "NOT IMPLEMENTED YET");
 	}
 
 	//static std::string search_query;
@@ -214,7 +214,7 @@ namespace PFF {
 
 			switch (UI::get_mouse_interation_on_item()) {
 				case UI::mouse_interation::double_click:
-					CORE_LOG(Trace, "Set TreeNode to open ID[" << current_ID << "]");
+					LOG(Trace, "Set TreeNode to open ID[" << current_ID << "]");
 					ImGui::TreeNodeSetOpen(folder_display_window->GetID(current_ID), true);
 					select_new_directory(entry.path());
 					return;
@@ -249,7 +249,7 @@ namespace PFF {
 
 				const std::string path_string = entry.path().string();
 				ImGui::SetDragDropPayload("PROJECT_CONTENT_FOLDER", path_string.c_str(), path_string.length() + 1);
-				CORE_LOG(Trace, "DRAG-DROP  FOLDER");
+				LOG(Trace, "DRAG-DROP  FOLDER");
 				ImGui::Image(m_folder_big_icon->get_descriptor_set(), m_icon_size, ImVec2(0, 0), ImVec2(1, 1), UI::get_action_color_gray_active_ref());
 				ImGui::TextWrapped("%s", item_name.c_str());
 				ImGui::EndDragDropSource();
@@ -284,7 +284,7 @@ namespace PFF {
 			}
 			if (const ImGuiPayload* payload = ImGui::AcceptDragDropPayload("PROJECT_CONTENT_FILE")) {
 				std::string file_path(static_cast<const char*>(payload->Data));
-				CORE_LOG(Error, "file_path: " << file_path);
+				LOG(Error, "file_path: " << file_path);
 				handle_drop(path / std::filesystem::path(file_path).filename());
 			}
 			ImGui::EndDragDropTarget();
@@ -379,12 +379,12 @@ namespace PFF {
 		if (ImGui::BeginPopupContextItem(popup_name.c_str())) {
 
 			if (ImGui::MenuItem("Rename"))
-				CORE_LOG(Info, "NOT IMPLEMENTED YET");
+				LOG(Info, "NOT IMPLEMENTED YET");
 
 			if (ImGui::MenuItem("Delete")) {
 
 				std::error_code error_code{};
-				CORE_VALIDATE(std::filesystem::remove(file_path, error_code), return, "deleting file from content folder: [" << file_path << "]", "FAILED to delete file from content folder: [" << file_path << "] error: " << error_code);
+				VALIDATE(std::filesystem::remove(file_path, error_code), return, "deleting file from content folder: [" << file_path << "]", "FAILED to delete file from content folder: [" << file_path << "] error: " << error_code);
 			}
 
 
@@ -396,7 +396,7 @@ namespace PFF {
 
 		switch (item_mouse_interation) {
 			case UI::mouse_interation::double_click:
-				CORE_LOG(Info, "NOT IMPLEMENTED YET => should opening coresponding editor window");
+				LOG(Info, "NOT IMPLEMENTED YET => should opening coresponding editor window");
 				break;
 
 			case UI::mouse_interation::right_click:

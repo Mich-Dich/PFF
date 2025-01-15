@@ -28,7 +28,7 @@ namespace PFF::toolkit {
 	texture_editor::~texture_editor() {
 	
 		m_image.reset();
-		CORE_LOG_SHUTDOWN();
+		LOG_SHUTDOWN();
 	}
 
 	void texture_editor::window() {

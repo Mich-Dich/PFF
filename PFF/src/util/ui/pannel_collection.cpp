@@ -475,7 +475,7 @@ namespace PFF::UI {
 			std::string button_text = " X ##Clear_search_query__" + std::string(lable);
 			if (ImGui::Button(button_text.c_str())) {
 
-				CORE_LOG(Trace, "Trigger clear button")
+				LOG(Trace, "Trigger clear button")
 				search_text = "";
 			}
 		}

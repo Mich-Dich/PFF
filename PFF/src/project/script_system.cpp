@@ -13,9 +13,9 @@
 #include "engine/world/map.h"
 #include "engine/world/entity.h"
 
-#if defined(PFF_PLATFORM_WINDOWS)
+#if defined(PLATFORM_WINDOWS)
 	#include <Windows.h>
-#elif defined(PFF_PLATFORM_LINUX)
+#elif defined(PLATFORM_LINUX)
 	#include <dlfcn.h> // For dynamic library loading on Linux
 #else
 	#error Platform not supported
@@ -39,14 +39,14 @@ namespace PFF::script_system {
 #endif
 
 
-#if defined(PFF_PLATFORM_WINDOWS)
+#if defined(PLATFORM_WINDOWS)
 
 	static HMODULE			m_module;
 
 	static FARPROC __stdcall try_load_function(const char* functionName) {
 
 		auto func = GetProcAddress(m_module, functionName);
-		CORE_VALIDATE(func, , "successfully loaded function [" << functionName << "]", "Could not load dll function [" << functionName << "]");
+		VALIDATE(func, , "successfully loaded function [" << functionName << "]", "Could not load dll function [" << functionName << "]");
 		return func;
 	}
 
@@ -60,7 +60,7 @@ namespace PFF::script_system {
 
 		if (!FreeLibrary(m_module)) {
 			DWORD errorCode = GetLastError();
-			CORE_LOG(Warn, "Could not free script dll. Error Code: " << errorCode);
+			LOG(Warn, "Could not free script dll. Error Code: " << errorCode);
 			return false;
 		}
 
@@ -68,13 +68,13 @@ namespace PFF::script_system {
 		return true;
 	}
 
-#elif defined(PFF_PLATFORM_LINUX)
+#elif defined(PLATFORM_LINUX)
 
 	static void* m_module; // Use void* for the module handle
 
 	static void* try_load_function(const char* functionName) {
 		void* func = dlsym(m_module, functionName);
-		CORE_VALIDATE(func, , "successfully loaded function [" << functionName << "]", "Could not load shared library function [" << functionName << "]");
+		VALIDATE(func, , "successfully loaded function [" << functionName << "]", "Could not load shared library function [" << functionName << "]");
 		return func;
 	}
 
@@ -85,7 +85,7 @@ namespace PFF::script_system {
 
 	static bool free_library() {
 		if (dlclose(m_module) != 0) {
-			CORE_LOG(Warn, "Could not free script shared library. Error: " << dlerror());
+			LOG(Warn, "Could not free script shared library. Error: " << dlerror());
 			return false;
 		}
 		m_module = nullptr;
@@ -113,7 +113,7 @@ namespace PFF::script_system {
 	static init_scripts_Fn																					m_init_scripts = nullptr;
 	static serialize_script_Fn																				m_serialize_script = nullptr;
 
-	static void add_component_stub(std::string, PFF::entity)												{ CORE_LOG(Warn, "Adding component from STUB"); }
+	static void add_component_stub(std::string, PFF::entity)												{ LOG(Warn, "Adding component from STUB"); }
 	void init()																								{ reload(); }
 	void shutdown()																							{ free_script_library(true); }
 	void add_component_from_string(std::string class_name, PFF::entity entity)								{ TRY_EXECUTE_FUNCTION(m_add_component_from_string)(class_name, entity); }
@@ -127,7 +127,7 @@ namespace PFF::script_system {
 	static void serialize_scripts(serializer::option option) {
 
 		std::filesystem::path script_components_serializer_file = PROJECT_PATH / CONFIG_DIR / "script_components.yml";
-		CORE_LOG(Trace, "serializing script components to: [" << script_components_serializer_file.generic_string() << "]");
+		LOG(Trace, "serializing script components to: [" << script_components_serializer_file.generic_string() << "]");
 
 		asset_file_header file_header{};
 		file_header.file_version = version(1, 0, 0);
@@ -208,35 +208,35 @@ namespace PFF::script_system {
 
 	void reinit_scripts() {
 
-		CORE_VALIDATE(m_init_scripts, return, "", "COULD NOT reinit_scripts");
-		CORE_VALIDATE(GET_MAP, return, "", "COULD NOT reinit_scripts");
+		VALIDATE(m_init_scripts, return, "", "COULD NOT reinit_scripts");
+		VALIDATE(GET_MAP, return, "", "COULD NOT reinit_scripts");
 
-			CORE_LOG(Debug, "Type ID of procedural_mesh_component before reinit: " << entt::type_hash<procedural_mesh_component>::value());
+			LOG(Debug, "Type ID of procedural_mesh_component before reinit: " << entt::type_hash<procedural_mesh_component>::value());
 			m_init_scripts(&GET_REGISTRY_OF_MAP);
-			CORE_LOG(Debug, "Type ID of procedural_mesh_component after reinit: " << entt::type_hash<procedural_mesh_component>::value());
+			LOG(Debug, "Type ID of procedural_mesh_component after reinit: " << entt::type_hash<procedural_mesh_component>::value());
 
 			auto& registry = GET_REGISTRY_OF_MAP;
-			CORE_LOG(Info, "Registry address in reinit_scripts: " << &registry);
+			LOG(Info, "Registry address in reinit_scripts: " << &registry);
 
 		m_is_initalized = true;
 
-		CORE_LOG(Info, "succesfully initalized scripts");
+		LOG(Info, "succesfully initalized scripts");
 	}
 
 	void reload(bool delete_script_components) {
 
-		CORE_LOG(Debug, "called script_system::reload(" << util::to_string(delete_script_components) << ")");
-		CORE_VALIDATE(free_script_library(delete_script_components), return, "freeed scripting library", "Count not free scripting library");
+		LOG(Debug, "called script_system::reload(" << util::to_string(delete_script_components) << ")");
+		VALIDATE(free_script_library(delete_script_components), return, "freeed scripting library", "Count not free scripting library");
 		
 			auto& registry = GET_REGISTRY_OF_MAP;
-			CORE_LOG(Info, "Registry address in reload: " << &registry);
+			LOG(Info, "Registry address in reload: " << &registry);
 
 		const std::filesystem::path project_temp_dll = PROJECT_PATH / "bin" / (PROJECT_NAME + PFF_PROJECT_TEMP_DLL_PATH) / (PROJECT_NAME + ".dll");
 		const std::filesystem::path project_dll_path = PROJECT_PATH / "bin" / PROJECT_NAME;
 		const std::filesystem::path project_dll = project_dll_path / (PROJECT_NAME + ".dll");
-		CORE_VALIDATE(io::copy_file(project_temp_dll, project_dll_path), return, "COPY SUCCESS", "Failed to copy new DLL after multiple attempts");			// copy the new DLL
-		CORE_VALIDATE(io::is_file(project_dll), return, "", "provided path is not a file [" << project_dll << "]");
-		CORE_VALIDATE(load_library(project_dll), return, "loaded project DLL", "could not load project [" << project_dll << "]");
+		VALIDATE(io::copy_file(project_temp_dll, project_dll_path), return, "COPY SUCCESS", "Failed to copy new DLL after multiple attempts");			// copy the new DLL
+		VALIDATE(io::is_file(project_dll), return, "", "provided path is not a file [" << project_dll << "]");
+		VALIDATE(load_library(project_dll), return, "loaded project DLL", "could not load project [" << project_dll << "]");
 
 		m_add_component_from_string			= (add_component_Fn)try_load_function("add_component");
 		m_init_scripts						= (init_scripts_Fn)try_load_function("init_scripts");
@@ -248,14 +248,14 @@ namespace PFF::script_system {
 
 		reinit_scripts();
 
-		CORE_LOG(Info, "---------------------------------------------------- LOADED DLL ----------------------------------------------------");
+		LOG(Info, "---------------------------------------------------- LOADED DLL ----------------------------------------------------");
 	}
 
 	bool free_script_library(bool delete_script_components) {
 
 		// TODO: Add way to clear a pool so that we can remove hot reload only script components, while leaving the rest of the scene intact. This might not be possible, so we shal see 
 
-		CORE_VALIDATE(m_is_loaded, return true, "", "Scripting Library not loaded yet");
+		VALIDATE(m_is_loaded, return true, "", "Scripting Library not loaded yet");
 
 		serialize_scripts(serializer::option::save_to_file);
 		//GET_REGISTRY_OF_MAP.view<procedural_mesh_component>().each([=](auto entity, auto& script_comp) {
@@ -264,8 +264,8 @@ namespace PFF::script_system {
 		//		script_comp.destroy_script(&script_comp);
 		//});
 		//GET_REGISTRY_OF_MAP.clear<procedural_mesh_component>();
-		//CORE_LOG(Debug, "clearing all [procedural_mesh_component] from registry");
-		CORE_LOG(Debug, "Number of procedural_mesh_components after clearing: " << GET_REGISTRY_OF_MAP.view<procedural_mesh_component>().size());
+		//LOG(Debug, "clearing all [procedural_mesh_component] from registry");
+		LOG(Debug, "Number of procedural_mesh_components after clearing: " << GET_REGISTRY_OF_MAP.view<procedural_mesh_component>().size());
 
 		//if (delete_script_components && m_delete_scripts)
 		//	m_delete_scripts();
@@ -277,7 +277,7 @@ namespace PFF::script_system {
 		m_display_properties			= nullptr;
 		m_serialize_script				= nullptr;
 
-		CORE_VALIDATE(free_library(), return false, "unloaded project DLL", "could not unload project_DLL");
+		VALIDATE(free_library(), return false, "unloaded project DLL", "could not unload project_DLL");
 
 		m_is_loaded = false;
 		m_is_initalized = false;

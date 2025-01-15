@@ -12,12 +12,12 @@ namespace PFF {
 	
 	world_layer::world_layer() { 
 
-		CORE_LOG_INIT();
+		LOG_INIT();
 	}
 
 	world_layer::~world_layer() { 
 		
-		CORE_LOG_SHUTDOWN();
+		LOG_SHUTDOWN();
 		m_map.reset();
 	}
 
@@ -44,7 +44,7 @@ namespace PFF {
 		//float aspect = m_swapchain->get_extentAspectRatio();
 		//m_editor_camera.set_view_target(glm::vec3(-1.0f, -2.0f, -3.0f), glm::vec3(0.0f));
 		
-		CORE_LOG(Trace, "attaching world_layer");
+		LOG(Trace, "attaching world_layer");
 	}
 
 	void world_layer::on_detach() { 
@@ -52,7 +52,7 @@ namespace PFF {
 		m_player_controller.reset();
 		m_editor_camera.reset();
 		
-		CORE_LOG(Trace, "detaching world_layer");
+		LOG(Trace, "detaching world_layer");
 	}
 
 	void world_layer::on_update(const f32 delta_time) {

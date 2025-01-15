@@ -21,7 +21,7 @@ namespace PFF {
 
 	static bool s_GLFWinitialized = false;
 		
-	static FORCEINLINE void GLFW_error_callback(int errorCode, const char* description) { CORE_LOG(Error, "[GLFW Error: " << errorCode << "]: " << description); }
+	static FORCEINLINE void GLFW_error_callback(int errorCode, const char* description) { LOG(Error, "[GLFW Error: " << errorCode << "]: " << description); }
 	
 	// =============================================================================  serializer  =============================================================================
 
@@ -53,7 +53,7 @@ namespace PFF {
 		if (!s_GLFWinitialized) {
 
 			glfwSetErrorCallback(GLFW_error_callback);
-			CORE_ASSERT(glfwInit(), "GLFW initialized", "Could not initialize GLFW");
+			ASSERT(glfwInit(), "GLFW initialized", "Could not initialize GLFW");
 			s_GLFWinitialized = true;
 		}
 
@@ -74,7 +74,7 @@ namespace PFF {
 			max_posible_height = math::max(max_posible_height, height);
 			max_posible_width = math::max(max_posible_width, width);
 
-			CORE_LOG(Trace, "Monitor: " << x << " data: " << xpos << " / " << ypos << " / " << width << " / " << height);
+			LOG(Trace, "Monitor: " << x << " data: " << xpos << " / " << ypos << " / " << width << " / " << height);
 		}
 
 		// ensure window is never bigger than possible OR smaller then logical
@@ -84,12 +84,12 @@ namespace PFF {
 		m_data.width -= 8;
 		m_Window = glfwCreateWindow(static_cast<int>(m_data.width), static_cast<int>(m_data.height), m_data.title.c_str(), nullptr, nullptr);
 
-		CORE_ASSERT(glfwVulkanSupported(), "", "GLFW does not support Vulkan");
-		CORE_LOG(Trace, "Creating window [" << m_data.title << " width: " << m_data.width << "  height: " << m_data.height << "]");
+		ASSERT(glfwVulkanSupported(), "", "GLFW does not support Vulkan");
+		LOG(Trace, "Creating window [" << m_data.title << " width: " << m_data.width << "  height: " << m_data.height << "]");
 
 		//glfwSetWindowPos(m_Window, 100, 100);
 		glfwSetWindowPos(m_Window, m_data.pos_x, m_data.pos_y);
-		CORE_LOG(Trace, "window pos [" << m_data.title << " X: " << m_data.pos_x << "  Y: " << m_data.pos_y << "]");
+		LOG(Trace, "window pos [" << m_data.title << " X: " << m_data.pos_x << "  Y: " << m_data.pos_y << "]");
 		
 		glfwSetWindowUserPointer(m_Window, &m_data);
 		glfwGetCursorPos(m_Window, &m_data.cursor_pos_x, &m_data.cursor_pos_y);
@@ -105,7 +105,7 @@ namespace PFF {
 
 		//	int xpos, ypos, width, height;
 		//	glfwGetMonitorWorkarea(monitors[x], &xpos, &ypos, &width, &height);
-		//	CORE_LOG(Trace, "Monitor: " << x << " data: "<< xpos << " / " << ypos << " / " << width << " / " << height);
+		//	LOG(Trace, "Monitor: " << x << " data: "<< xpos << " / " << ypos << " / " << width << " / " << height);
 		//}
 
 		//   check vertical									  check horicontal
@@ -200,14 +200,14 @@ namespace PFF {
 
 		glfwSetWindowPosCallback(m_Window, [](GLFWwindow* window, int x, int y) {
 
-			// CORE_LOG(Trace, "Moving Window");
+			// LOG(Trace, "Moving Window");
 		});
 
 		glfwSetWindowMaximizeCallback(m_Window, [](GLFWwindow* window, int maximized) {
 
 			window_attrib& Data = *(window_attrib*)glfwGetWindowUserPointer(window);
 			Data.size_state = maximized? window_size_state::fullscreen : window_size_state::windowed;
-			 CORE_LOG(Trace, "Maximize window: " << maximized);
+			 LOG(Trace, "Maximize window: " << maximized);
 		});
 
 		glfwSetScrollCallback(m_Window, [](GLFWwindow* window, double xOffset, double yOffset) {
@@ -267,7 +267,7 @@ namespace PFF {
 
 	void pff_window::release_cursor() { glfwSetInputMode(m_Window, GLFW_CURSOR, GLFW_CURSOR_NORMAL); }
 
-	void pff_window::set_vsync(bool enable) { CORE_LOG(Warn, "VSync functionality not supported yet"); }
+	void pff_window::set_vsync(bool enable) { LOG(Warn, "VSync functionality not supported yet"); }
 
 	VkExtent2D pff_window::get_extend() { return { static_cast<u32>(m_data.width), static_cast<u32>(m_data.height) }; }
 
@@ -322,7 +322,7 @@ namespace PFF {
 
 	void pff_window::create_vulkan_surface(VkInstance_T* instance, VkSurfaceKHR_T** get_surface) {
 
-		CORE_ASSERT(glfwCreateWindowSurface(instance, m_Window, nullptr, get_surface) == VK_SUCCESS, "", "Failed to create a window surface");
+		ASSERT(glfwCreateWindowSurface(instance, m_Window, nullptr, get_surface) == VK_SUCCESS, "", "Failed to create a window surface");
 	}
 
 }

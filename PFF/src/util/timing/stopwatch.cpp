@@ -29,7 +29,7 @@ namespace PFF {
                     default:
                     case PFF::duration_precision::milliseconds:     precition_string = " milliseconds"; break;
                 }
-                CORE_LOG(Info, m_message << " => sample count: " << m_number_of_values << " average duration: " << (m_durations / (f64)m_number_of_values) << precition_string);
+                LOG(Info, m_message << " => sample count: " << m_number_of_values << " average duration: " << (m_durations / (f64)m_number_of_values) << precition_string);
             }
             return true;
         }

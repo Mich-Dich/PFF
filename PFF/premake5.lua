@@ -46,10 +46,12 @@ project "PFF"
 		"%{IncludeDir.VulkanSDK}",
 	}
 	
-	links
+	links { "ImGui", }
+
+	libdirs 
 	{
-		"ImGui",
-        -- "%{Library.Vulkan}",
+		"vendor/imgui/bin/Debug-windows-x86_64/ImGui",
+		"%{IncludeDir.VulkanSDK}/lib",
 	}
 
 	postbuildcommands {
@@ -58,12 +60,7 @@ project "PFF"
 		table.unpack(copy_content_of_dir(outputs, {"PFF/shaders", "PFF/assets"})),
 	}
 
-	libdirs 
-	{
-		"vendor/imgui/bin/Debug-windows-x86_64/ImGui",
-        "%{IncludeDir.VulkanSDK}/lib",
-	}
-
+	
 	filter "files:vendor/ImGuizmo/**.cpp"
 		flags { "NoPCH" }
 	
@@ -72,10 +69,14 @@ project "PFF"
 		
 		defines
 		{
-			"PFF_PLATFORM_WINDOWS",
+			"PLATFORM_WINDOWS",
 		}
 
-		links { "glfw", }
+		links
+		{
+			"glfw",
+			"%{Library.Vulkan}"
+		}
 	
 		postbuildcommands
 		{
@@ -86,12 +87,11 @@ project "PFF"
 		  
 	filter "system:linux"
 		systemversion "latest"
-		defines "PFF_PLATFORM_LINUX"
+		defines "PLATFORM_LINUX"
 
 		-- -- ANSI escape codes for colors
 		-- local RESET = "\27[0m"
 		-- local GREEN = "\27[32m"
-
 		-- prebuildmessage ("================= Building PFF %{cfg.buildcfg}-%{cfg.system}-%{cfg.architecture} =================")
 		-- postbuildmessage ("================= Done building PFF %{cfg.buildcfg}-%{cfg.system}-%{cfg.architecture} =================")
 		
@@ -134,24 +134,24 @@ project "PFF"
 
 		postbuildcommands
 		{
-			-- Create the directory if it doesn't exist
+			-- copy premake (needed for engine projects)
 			"{MKDIR} %{wks.location}/bin/" .. outputs .. "/vendor/premake",
 			"{COPY} %{wks.location}/premake5 %{wks.location}/bin/" .. outputs .. "/vendor/premake",
 		}
 		
 	filter "configurations:Debug"
-		defines "PFF_DEBUG"
+		defines "DEBUG"
 		runtime "Debug"
 		symbols "on"
 
 	filter "configurations:RelWithDebInfo"
-		defines "PFF_RELEASE_WITH_DEBUG_INFO"
+		defines "RELEASE_WITH_DEBUG_INFO"
 		runtime "Release"
 		symbols "on"
 		optimize "on"
 
 	filter "configurations:Release"
-		defines "PFF_RELEASE"
+		defines "RELEASE"
 		runtime "Release"
 		symbols "off"
 		optimize "on"

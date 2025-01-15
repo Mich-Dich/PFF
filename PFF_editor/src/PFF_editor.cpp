@@ -42,7 +42,7 @@ namespace PFF {
 		pop_overlay(m_editor_layer);
 		delete m_editor_layer;
 
-		CORE_LOG_SHUTDOWN(); 
+		LOG_SHUTDOWN(); 
 		return true;
 	}
 

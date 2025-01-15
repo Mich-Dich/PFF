@@ -76,10 +76,11 @@ namespace PFF {
 		PFF_PROFILE_BEGIN_SESSION("startup", "benchmarks", "PFF_benchmark_startup.json");
 		PFF_PROFILE_FUNCTION();
 
-		PFF::logger::init("[$B$T:$J$E] [$B$L$X $I - $P:$G$E] $C$Z");
-		CORE_ASSERT(!s_instance, "", "Application already exists");
+		PFF::logger::init("[$B$T:$J$E] [$B$L$X $I - $P:$G$E] $C$Z", true);
+		PFF::logger::register_label_for_thread("main");
+		ASSERT(!s_instance, "", "Application already exists");
 
-		CORE_LOG_INIT();
+		LOG_INIT();
 		s_instance = this;
 	}
 
@@ -106,7 +107,7 @@ namespace PFF {
 		
 		m_layerstack.reset();
 		m_window.reset();
-		CORE_LOG_SHUTDOWN();
+		LOG_SHUTDOWN();
 		PFF_PROFILE_END_SESSION();
 	}
 
@@ -139,7 +140,7 @@ namespace PFF {
 		PFF_PROFILE_END_SESSION();
 		PFF_PROFILE_BEGIN_SESSION("shutdown", "benchmarks", "PFF_benchmark_shutdown.json");
 
-		CORE_ASSERT(shutdown(), "client application is shutdown", "client-defint shutdown() has failed");			// init user code / potentally make every actor have own function (like UNREAL)
+		ASSERT(shutdown(), "client application is shutdown", "client-defint shutdown() has failed");			// init user code / potentally make every actor have own function (like UNREAL)
 	}
 
 	// ==================================================================== PUBLIC ====================================================================
@@ -202,7 +203,7 @@ namespace PFF {
 	void application::client_init() {
 
 		// ---------------------------------------- client side ----------------------------------------
-		CORE_ASSERT(init(), "client application is intalized", "client-defint init() has failed");			// init user code / potentally make every actor have own function (like UNREAL)
+		ASSERT(init(), "client application is intalized", "client-defint init() has failed");			// init user code / potentally make every actor have own function (like UNREAL)
 
 		// ---------------------------------------- finished setup ----------------------------------------
 		GET_RENDERER.set_state(system_state::active);
@@ -257,7 +258,7 @@ namespace PFF {
 		if (m_arguments.size() > 1) {
 
 			m_project_path = std::filesystem::path(m_arguments[1]);
-			CORE_ASSERT((!m_project_path.empty() && std::filesystem::exists(m_project_path) && m_project_path.extension() == PFF_PROJECT_EXTENTION), "", "path to project-file is invalid [" << m_project_path << "]. ABORTING");
+			ASSERT((!m_project_path.empty() && std::filesystem::exists(m_project_path) && m_project_path.extension() == PFF_PROJECT_EXTENTION), "", "path to project-file is invalid [" << m_project_path << "]. ABORTING");
 			m_project_path = m_project_path.parent_path();					// fwitch from project file to project directory
 		}
 

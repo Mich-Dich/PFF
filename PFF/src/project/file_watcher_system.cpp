@@ -5,7 +5,7 @@
 
 #include "file_watcher_system.h"
 
-#ifdef PFF_PLATFORM_WINDOWS
+#ifdef PLATFORM_WINDOWS
 	#include "Windows.h"
 
 	static HANDLE m_H_stop_event;
@@ -57,7 +57,7 @@ namespace PFF {
 		m_pending_events[file] = { action, now };
 	}
 
-#ifdef PFF_PLATFORM_WINDOWS
+#ifdef PLATFORM_WINDOWS
 
 	void file_watcher_system::start_thread() {
 
@@ -76,7 +76,7 @@ namespace PFF {
 
 		if (dirHandle == INVALID_HANDLE_VALUE) {
 		
-			CORE_LOG(Error, "Invalid file access. Could not create file_system_watcher for " << path.string().c_str());
+			LOG(Error, "Invalid file access. Could not create file_system_watcher for " << path.string().c_str());
 			return;
 		}
 
@@ -101,7 +101,7 @@ namespace PFF {
 		pollingOverlap.hEvent = CreateEventA(NULL, TRUE, FALSE, NULL);
 		
 		if (pollingOverlap.hEvent == NULL) {
-			CORE_LOG(Error, "Could not create event watcher for FileSystemWatcher " << path.string().c_str());
+			LOG(Error, "Could not create event watcher for FileSystemWatcher " << path.string().c_str());
 			return;
 		}
 
@@ -113,7 +113,7 @@ namespace PFF {
 		hEvents[1] = CreateEventA(NULL, TRUE, FALSE, NULL);
 		m_H_stop_event = hEvents[1];
 		
-		CORE_LOG(Debug, "Compiling project");
+		LOG(Debug, "Compiling project");
 		TRY_CALL_FUNCTION(compile)();
 
 		while (result && m_enable_raising_events) {
@@ -198,7 +198,7 @@ namespace PFF {
 		
 	}
 
-#elif defined(PFF_PLATFORM_LINUX)
+#elif defined(PLATFORM_LINUX)
 
 	void file_watcher_system::start_thread() { }
 

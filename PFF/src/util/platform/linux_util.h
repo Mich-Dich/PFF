@@ -34,8 +34,6 @@
     #define USE_IN_EDITOR	
 #endif
 
-#define DEBUG_BREAK()                          __builtin_trap()
-
 #ifdef CDECL
     #undef CDECL
 #endif

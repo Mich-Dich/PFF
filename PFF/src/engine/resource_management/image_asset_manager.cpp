@@ -14,7 +14,7 @@ namespace PFF {
 
 	ref<image> image_asset_manager::get_from_path(const std::filesystem::path path) {
 
-		CORE_VALIDATE(path.extension() == PFF_ASSET_EXTENTION, return nullptr, "", "Provided path is not a PFF-asset");
+		VALIDATE(path.extension() == PFF_ASSET_EXTENTION, return nullptr, "", "Provided path is not a PFF-asset");
 
 		std::filesystem::path loc_path = application::get().get_project_path() / CONTENT_DIR / path;
 
@@ -32,7 +32,7 @@ namespace PFF {
 
 			s_instance.m_uploaded_image_assets[loc_path] = create_ref<image>();
 			serialize_texture(loc_path, s_instance.m_uploaded_image_assets[loc_path], asset_file_header, texture_header, serializer::option::load_from_file);
-			CORE_ASSERT(asset_file_header.type == file_type::texture, "", "Tryed to load an asset file that is not a mesh");
+			ASSERT(asset_file_header.type == file_type::texture, "", "Tryed to load an asset file that is not a mesh");
 #endif
 
 			return s_instance.m_uploaded_image_assets[loc_path];

@@ -81,7 +81,7 @@ namespace PFF {
 	image::~image() {
 		
 		release();
-		CORE_LOG_SHUTDOWN();
+		LOG_SHUTDOWN();
 	}
 
 	void image::allocate_memory(void* data, extent_3D size, image_format format, bool mipmapped, VkImageUsageFlags usage) {

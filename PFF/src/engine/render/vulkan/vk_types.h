@@ -44,5 +44,5 @@ namespace PFF::render::vulkan {
 
 }
 
-#define VK_CHECK_S(expr)		                        CORE_ASSERT_S(expr == VK_SUCCESS)
-#define VK_CHECK(expr, successMsg, failureMsg)		    CORE_ASSERT(expr == VK_SUCCESS)
+#define VK_CHECK_S(expr)		                        ASSERT_S(expr == VK_SUCCESS)
+#define VK_CHECK(expr, successMsg, failureMsg)		    ASSERT(expr == VK_SUCCESS)

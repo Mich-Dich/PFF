@@ -114,7 +114,7 @@ namespace PFF {
 		if (option == serializer::option::save_to_file) {
 
 			selected_ID = m_selected_entity.get_UUID();
-			CORE_LOG(Trace, "Save UUID: " << selected_ID);
+			LOG(Trace, "Save UUID: " << selected_ID);
 		}
 
 		serializer::yaml(config::get_filepath_from_configtype(application::get().get_project_path(), config::file::editor), "world_vieport_data", option)
@@ -123,11 +123,11 @@ namespace PFF {
 		//if (option == serializer::option::load_from_file) {
 
 		//	// TODO: load selected entity after loading world/map
-		//	CORE_LOG(Trace, "Load UUID: " << selected_ID);
+		//	LOG(Trace, "Load UUID: " << selected_ID);
 		//	if (auto loc_entity = application::get().get_world_layer()->get_map()->get_entity_by_UUID(selected_ID)) {
 
 		//		m_selected_entity = loc_entity;
-		//		CORE_LOG(Info, "FOUND UUID: " << selected_ID);
+		//		LOG(Info, "FOUND UUID: " << selected_ID);
 		//	}
 		//}
 
@@ -164,7 +164,7 @@ namespace PFF {
 			PFF::entity child = loc_map->get_entity_by_UUID(child_ID);
 			if (!child) {
 
-				CORE_LOG(Warn, "Bad UUID pointer: " << child_ID);
+				LOG(Warn, "Bad UUID pointer: " << child_ID);
 				continue;
 			}			
 
@@ -259,7 +259,7 @@ namespace PFF {
 		ImGui::SameLine();
 		if (ImGui::ImageButton(m_folder_add_icon->get_descriptor_set(), ImVec2{ 15 }, ImVec2(0), ImVec2(1))) {
 
-			CORE_LOG(Trace, "Add folder to outliner: NOT IMPLEMENTED YET");
+			LOG(Trace, "Add folder to outliner: NOT IMPLEMENTED YET");
 		}
 				
 		ImDrawList* draw_list = ImGui::GetWindowDrawList();
@@ -375,7 +375,7 @@ namespace PFF {
 		std::string search_text = "";
 		if (UI::serach_input("##serach_in_world_viewport_details_panel", search_text)) {
 
-			CORE_LOG(Debug, "Search not implemented yet");
+			LOG(Debug, "Search not implemented yet");
 		}
 
 		ImGui::SameLine();
@@ -528,7 +528,7 @@ namespace PFF {
 				case file_type::mesh:
 				{
 
-					CORE_LOG(Trace, "Adding static mesh, Name: " << "SM_" + file_path.filename().replace_extension("").string());
+					LOG(Trace, "Adding static mesh, Name: " << "SM_" + file_path.filename().replace_extension("").string());
 
 					mesh_component mesh_comp{};
 					mesh_comp.asset_path = util::extract_path_from_project_content_folder(file_path);
@@ -579,7 +579,7 @@ namespace PFF {
 					case file_type::mesh:
 					{
 
-						CORE_LOG(Trace, "Adding static mesh, Name: " << "SM_" + file_path.filename().replace_extension("").string());
+						LOG(Trace, "Adding static mesh, Name: " << "SM_" + file_path.filename().replace_extension("").string());
 
 						mesh_component mesh_comp{};
 						mesh_comp.asset_path = util::extract_path_from_project_content_folder(file_path);
@@ -635,7 +635,7 @@ namespace PFF {
 			ImGui::SetCursorPos(start_pos + box_padding);
 			if (ImGui::ImageButton(m_transfrom_translation_image->get_descriptor_set(), ImVec2{ 15 }, ImVec2(0), ImVec2(1), 0, color)) {
 
-				CORE_LOG(Trace, "TRANSLATE button");
+				LOG(Trace, "TRANSLATE button");
 				m_gizmo_operation = transform_operation::translate;
 			}
 		}
@@ -650,7 +650,7 @@ namespace PFF {
 			ImGui::SetCursorPos(start_pos + ImVec2(button_length, 0) + box_padding);
 			if (ImGui::ImageButton(m_transfrom_rotation_image->get_descriptor_set(), ImVec2{ 15 }, ImVec2(0), ImVec2(1), 0, color)) {
 
-				CORE_LOG(Trace, "ROTATE button");
+				LOG(Trace, "ROTATE button");
 				m_gizmo_operation = transform_operation::rotate;
 			}
 		}
@@ -665,7 +665,7 @@ namespace PFF {
 			ImGui::SetCursorPos(start_pos + ImVec2(button_length * 2, 0) + box_padding);
 			if (ImGui::ImageButton(m_transfrom_scale_image->get_descriptor_set(), ImVec2{ 15 }, ImVec2(0), ImVec2(1), 0, color)) {
 
-				CORE_LOG(Trace, "SCALE button");
+				LOG(Trace, "SCALE button");
 				m_gizmo_operation = transform_operation::scale;
 			}
 		}

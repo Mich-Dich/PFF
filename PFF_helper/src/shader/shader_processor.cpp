@@ -54,11 +54,11 @@ namespace shader_processor {
 
 	bool start(int argc, char* argv[]) {
 
-		PFF::logger::use_format_backup();
-		if (std::stoi(argv[1]))
-			PFF::logger::set_format("[$B$T:$J$E] [$B$L$X $I - $P:$G$E] $C$Z");
-		else
-			PFF::logger::set_format("[$T:$J PFF_helper/shader_processor] $C$Z");
+		// PFF::logger::use_previous_format();
+		// if (std::stoi(argv[1]))
+		// 	PFF::logger::set_format("[$B$T:$J$E] [$B$L$X $I - $P:$G$E] $C$Z");
+		// else
+		// 	PFF::logger::set_format("[$T:$J PFF_helper/shader_processor] $C$Z");
 
 		int operation_number = std::stoi(argv[3]);
 		shader_operation operation = static_cast<shader_operation>(operation_number);

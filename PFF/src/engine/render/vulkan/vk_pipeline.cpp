@@ -127,7 +127,7 @@ namespace PFF::render::vulkan {
         graphics_pipeline_CI.pDynamicState = &dynamic_state_CI;
         
         VkPipeline newPipeline;
-        CORE_VALIDATE(vkCreateGraphicsPipelines(device, VK_NULL_HANDLE, 1, &graphics_pipeline_CI, nullptr, &newPipeline) == VK_SUCCESS, return VK_NULL_HANDLE, "", "failed to create pipeline");
+        VALIDATE(vkCreateGraphicsPipelines(device, VK_NULL_HANDLE, 1, &graphics_pipeline_CI, nullptr, &newPipeline) == VK_SUCCESS, return VK_NULL_HANDLE, "", "failed to create pipeline");
         return newPipeline;
     }
 
