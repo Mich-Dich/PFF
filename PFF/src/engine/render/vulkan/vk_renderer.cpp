@@ -4,7 +4,6 @@
 // ========== vulkan utils ============
 #include "vk_types.h"
 #define VMA_IMPLEMENTATION
-#include "vendor/vk_mem_alloc.h"
 
 #include <vulkan/vulkan.h>
 #include <vulkan/vk_enum_string_helper.h>

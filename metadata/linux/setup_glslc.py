@@ -6,11 +6,11 @@ from .. import utils
 class glslc_configuration:
     glslc_version = "latest"  # You can specify a version if needed
     glslc_zip_url = "https://example.com/path/to/glslc-linux.tar.gz"  # Replace with actual URL
-    glslc_directory = "./"
+    glslc_directory = "/usr/bin/"
 
     @classmethod
     def validate(cls):
-        if not cls.check_glslc():
+        if cls.check_glslc() == False:
             utils.print_c("glslc not installed correctly.", "red")
             return False
         else:
@@ -19,7 +19,7 @@ class glslc_configuration:
 
     @classmethod
     def check_glslc(cls):
-        glslc_path = Path("/usr/bin/glslc")
+        glslc_path = Path(f"{cls.glslc_directory}glslc")
         if glslc_path.exists():
             utils.print_c("Located glslc", "green")
             return True

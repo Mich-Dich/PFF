@@ -22,12 +22,28 @@ else:
     raise Exception("Unsupported operating system")
 
 
+def update_submodule(submodule_path, branch="main"):
+    print(f"\nupdate submodule: {os.path.basename(submodule_path)}")
+    try:
+        os.chdir(submodule_path)
+        subprocess.run(["git", "fetch", "origin"], check=True)
+        subprocess.run(["git", "checkout", branch], check=True)
+        subprocess.run(["git", "pull", "origin", branch], check=True)
+        os.chdir(os.path.join("..", "..", ".."))
+        utils.print_c(f"Successfully updated {submodule_path} to the latest commit.", "green")
+
+    except subprocess.CalledProcessError as e:
+        utils.print_c(f"Failed to update {submodule_path}: {e}", "red")
+        sys.exit(1)
+
 
 try:
     utils.print_u("\nCHECK FOR ANY UPDATES")
-    # subprocess.call(["git", "pull"])
-    print("git submodule update --init --recursive")
-    subprocess.call(["git", "submodule", "update", "--init", "--recursive"])
+    print("updating main repo")
+    subprocess.call(["git", "pull"])
+    update_submodule("PFF/vendor/glfw", "master")
+    update_submodule("PFF/vendor/imgui", "docking")
+    update_submodule("PFF/vendor/ImGuizmo", "master")
 
     utils.print_u("\nCHECKING PYTHON SETUP")
     python_installed = python_requirements.validate()
