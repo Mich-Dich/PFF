@@ -55,7 +55,7 @@ project "PFF_editor"
 
 	filter "system:windows"
 		systemversion "latest"
-		defines { "PLATFORM_WINDOWS" }
+		defines { "PFF_PLATFORM_WINDOWS" }
 		files { "../metadata/app_icon.rc" }
 
         postbuildcommands
@@ -73,7 +73,7 @@ project "PFF_editor"
 	filter "system:linux"
 		pic "On"
 		systemversion "latest"
-		defines { "PLATFORM_LINUX" }
+		defines { "PFF_PLATFORM_LINUX" }
 
 		postbuildcommands
 		{
@@ -127,18 +127,18 @@ project "PFF_editor"
 		}
 
 	filter "configurations:Debug"
-		defines "DEBUG"
+		defines "PFF_DEBUG"
 		runtime "Debug"
 		symbols "on"
 
 	filter "configurations:RelWithDebInfo"
-		defines "RELEASE_WITH_DEBUG_INFO"
+		defines "PFF_RELEASE_WITH_DEBUG_INFO"
 		runtime "Release"
 		symbols "on"
 		optimize "on"
 
 	filter "configurations:Release"
-		defines "RELEASE"
+		defines "PFF_RELEASE"
 		runtime "Release"
 		symbols "off"
 		optimize "on"

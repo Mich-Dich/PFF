@@ -1,12 +1,12 @@
 
 #include "util/pffpch.h"
 
-#if defined(PLATFORM_WINDOWS)
+#if defined(PFF_PLATFORM_WINDOWS)
     #include <Windows.h>
     #include <commdlg.h>
     #include <iostream>
     #include <tchar.h>              // For _T() macros
-#elif defined(PLATFORM_LINUX)
+#elif defined(PFF_PLATFORM_LINUX)
     #include <sys/types.h>          // For pid_t
     #include <sys/wait.h>           // For waitpid
     #include <unistd.h>             // For fork, execv, etc.
@@ -33,7 +33,7 @@ namespace PFF::util {
 
         bool result = false;
 
-#if defined(PLATFORM_WINDOWS)
+#if defined(PFF_PLATFORM_WINDOWS)
 
         STARTUPINFOA startupInfo;
         PROCESS_INFORMATION processInfo;
@@ -68,7 +68,7 @@ namespace PFF::util {
         } else
             LOG(Error, "Unsuccessfully started process: " << path_to_exe.generic_string());
 
-#elif defined(PLATFORM_LINUX)
+#elif defined(PFF_PLATFORM_LINUX)
 
     std::string cmdArguments = path_to_exe.generic_string() + " " + cmd_args;                       // Prepare the command line arguments
     
@@ -139,7 +139,7 @@ namespace PFF::util {
 
         system_time loc_system_time{};
 
-#if defined(PLATFORM_WINDOWS)
+#if defined(PFF_PLATFORM_WINDOWS)
 
         SYSTEMTIME win_time;
         GetLocalTime(&win_time);
@@ -152,7 +152,7 @@ namespace PFF::util {
         loc_system_time.secund = static_cast<u8>(win_time.wSecond);
         loc_system_time.millisecends = static_cast<u16>(win_time.wMilliseconds);
 
-#elif defined(PLATFORM_LINUX)
+#elif defined(PFF_PLATFORM_LINUX)
 
         struct timeval tv;
         gettimeofday(&tv, NULL);
@@ -171,9 +171,9 @@ namespace PFF::util {
     }
 
 
-    std::filesystem::path file_dialog(const std::string& title, const std::vector<std::pair<std::string, std::string>>& filters) {
+    std::filesystem::path file_diaLOG(const std::string& title, const std::vector<std::pair<std::string, std::string>>& filters) {
 
-    #if defined(PLATFORM_WINDOWS)
+    #if defined(PFF_PLATFORM_WINDOWS)
         // Assuming you have a way to get the handle of your main window
         HWND hwndOwner = GetActiveWindow(); // or your main window handle
 
@@ -206,21 +206,15 @@ namespace PFF::util {
 
         return std::filesystem::path();
 
-    #elif defined(PLATFORM_LINUX)
+    #elif defined(PFF_PLATFORM_LINUX)
 
         GtkWidget *dialog;
         std::filesystem::path selected_path;
 
-        // Initialize GTK if it hasn't been initialized yet
-        if (!gtk_init_check(nullptr, nullptr)) {
-            // Handle initialization error if needed
-            return selected_path;
-        }
-
-        GtkFileChooserAction action = GTK_FILE_CHOOSER_ACTION_OPEN;
+        gtk_init(nullptr, nullptr);                     // Initialize GTK
 
         // Create a file chooser dialog
-        dialog = gtk_file_chooser_dialog_new(title.c_str(), nullptr, action, "_Cancel", GTK_RESPONSE_CANCEL, "_Open", GTK_RESPONSE_ACCEPT, nullptr);
+        dialog = gtk_file_chooser_dialog_new(title.c_str(), nullptr, GTK_FILE_CHOOSER_ACTION_OPEN, "_Cancel", GTK_RESPONSE_CANCEL, "_Open", GTK_RESPONSE_ACCEPT, nullptr);
         
         // Add filters to the dialog
         for (const auto& filter : filters) {
@@ -234,10 +228,10 @@ namespace PFF::util {
         if (gtk_dialog_run(GTK_DIALOG(dialog)) == GTK_RESPONSE_ACCEPT) {
             gchar *filename = gtk_file_chooser_get_filename(GTK_FILE_CHOOSER(dialog));
             selected_path = std::filesystem::path(filename);
-            g_free(filename); // Free the filename string
+            g_free(filename);                           // Free the filename string
         }
 
-        gtk_widget_destroy(dialog); // Destroy the dialog
+        gtk_widget_destroy(dialog);                     // Destroy the dialog
         return selected_path;
     
     #endif
@@ -246,7 +240,7 @@ namespace PFF::util {
 
     std::filesystem::path get_executable_path() {
 
-    #if defined(PLATFORM_WINDOWS)
+    #if defined(PFF_PLATFORM_WINDOWS)
 
         wchar_t path[MAX_PATH];
         if (GetModuleFileNameW(NULL, path, MAX_PATH)) {
@@ -254,7 +248,7 @@ namespace PFF::util {
             return execPath.parent_path();
         }
 
-    #elif defined(PLATFORM_LINUX)
+    #elif defined(PFF_PLATFORM_LINUX)
         
         char path[PATH_MAX];
         ssize_t count = readlink("/proc/self/exe", path, PATH_MAX);

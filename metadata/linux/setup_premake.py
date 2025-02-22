@@ -26,9 +26,7 @@ class premake_configuration:
                 break                                                               # found preamke5
 
             utils.print_c("You don't have premake5 installed!", "orange")
-            if (cls.__install_premake() == True):
-                input("Press enter to continue after instalation ...")
-            else:
+            if (cls.__install_premake() == False):
                 return False
 
         utils.print_c(f"Located premake", "green")

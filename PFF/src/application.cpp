@@ -76,8 +76,8 @@ namespace PFF {
 		PFF_PROFILE_BEGIN_SESSION("startup", "benchmarks", "PFF_benchmark_startup.json");
 		PFF_PROFILE_FUNCTION();
 
-		PFF::logger::init("[$B$T:$J$E] [$B$L$X $I - $P:$G$E] $C$Z", true);
-		PFF::logger::register_label_for_thread("main");
+		PFF::logger::init("[$B$T:$J$E] [$B$L$X $I - $P:$G$E] $C$Z");
+		logger::set_buffer_threshhold(logger::severity::Warn);
 		ASSERT(!s_instance, "", "Application already exists");
 
 		LOG_INIT();
@@ -265,7 +265,7 @@ namespace PFF {
 		else {																// project directory not given as argument, need to manually select it
 
 			const std::vector<std::pair<std::string, std::string>> project_file_filters = { {"PFF Project File", "*.pffproj"} };
-			m_project_path = util::file_dialog("Open PFF-Project", project_file_filters).parent_path();
+			m_project_path = util::file_diaLOG("Open PFF-Project", project_file_filters).parent_path();
 		}
 
 		m_project_data = serialize_projects_data(m_project_path, serializer::option::load_from_file);

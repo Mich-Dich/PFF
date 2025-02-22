@@ -103,7 +103,7 @@ namespace PFF {
 		template <typename T>
 		T get_data() const {
 
-			static_assert(std::is_same<T, bool>::value || std::is_same<T, f32>::value || std::is_same<T, glm::vec2>::value,
+			static_ASSERT(std::is_same<T, bool>::value || std::is_same<T, f32>::value || std::is_same<T, glm::vec2>::value,
 				"Unsupported data type");
 
 			switch (value) {

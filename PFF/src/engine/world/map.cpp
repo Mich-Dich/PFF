@@ -234,7 +234,7 @@ namespace PFF {
 		//	auto view = registry.view<procedural_mesh_component>();
 		//	LOG(Info, "View created successfully");
 		//	LOG(Info, "Number of procedural_mesh_components in view: " << view.size());
-		//	VALIDATE_S(view.size() == 0, return);
+		//	ALIDATE_S(view.size() == 0, return);
 
 
 

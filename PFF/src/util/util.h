@@ -44,11 +44,11 @@
 #include "util/ui/imgui_markdown.h"
 #include "util/ui/pannel_collection.h"
 
-#if defined(PLATFORM_WINDOWS)
+#if defined(PFF_PLATFORM_WINDOWS)
     #include "util/platform/windows_util.h"
-#elif defined(PLATFORM_LINUX)
+#elif defined(PFF_PLATFORM_LINUX)
     #include "util/platform/linux_util.h"
-#elif defined(PLATFORM_MAC)
+#elif defined(PFF_PLATFORM_MAC)
     #include "util/platform/mac_util.h"
 #endif
 

@@ -20,7 +20,7 @@ workspace "PFF"
 	-- TODO: PFF_USING_EDITOR should not be defined in the backaged builds of game
 	defines
 	{
-		-- "PFF_USING_EDITOR",
+		"PFF_USING_EDITOR",
 	}
 
 	outputs  = "%{cfg.buildcfg}-%{cfg.system}-%{cfg.architecture}"
@@ -29,7 +29,7 @@ workspace "PFF"
 	-- local GREEN = "\27[32m"
 
     -- Set a custom build message
-    buildmessage(" ?????????????????????????? Building %{prj.name} (%{cfg.buildcfg} - %{cfg.system} - %{cfg.architecture})")
+    -- buildmessage(GREEN .. " ?????????????????????????? Building %{prj.name} (%{cfg.buildcfg} - %{cfg.system} - %{cfg.architecture})")
 
 	if os.target() == "linux" then
 		print("---------- target platform is linux => manually compile GLFW ----------")

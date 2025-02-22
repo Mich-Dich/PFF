@@ -4,8 +4,8 @@ import metadata.linux.lin_utils as lin_utils
 from .. import utils
 
 class glslc_configuration:
-    glslc_version = "latest"  # You can specify a version if needed
-    glslc_zip_url = "https://example.com/path/to/glslc-linux.tar.gz"  # Replace with actual URL
+    glslc_version = "latest"                                            # You can specify a version if needed
+    glslc_zip_url = "https://example.com/path/to/glslc-linux.tar.gz"
     glslc_directory = "/usr/bin/"
 
     @classmethod
@@ -25,9 +25,7 @@ class glslc_configuration:
             return True
 
         utils.print_c("You don't have glslc installed!", "orange")
-        if cls.__install_glslc():
-            input("Press enter to continue after installation ...")
-        else:
+        if not cls.__install_glslc():
             return False
 
         return True

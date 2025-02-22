@@ -1,13 +1,13 @@
 
 #include "util/pffpch.h"
 
-#ifdef PLATFORM_WINDOWS
+#ifdef PFF_PLATFORM_WINDOWS
 
 	#include <Windows.h>
 	#include <Psapi.h>
 	#include <TlHelp32.h>
 
-#elif defined(PLATFORM_LINUX)
+#elif defined(PFF_PLATFORM_LINUX)
 
 	#include <dirent.h>
 	#include <unistd.h>
@@ -93,7 +93,7 @@ namespace PFF::io {
 
 	std::vector<std::string> get_processes_using_file(const std::wstring& filePath) {
 
-#ifdef PLATFORM_WINDOWS
+#ifdef PFF_PLATFORM_WINDOWS
 
 		std::vector<std::string> processNames;
 		HANDLE hSnapshot = CreateToolhelp32Snapshot(TH32CS_SNAPPROCESS, 0);
@@ -140,7 +140,7 @@ namespace PFF::io {
 		CloseHandle(hSnapshot);
 		return processNames;
 
-#elif defined(PLATFORM_LINUX)
+#elif defined(PFF_PLATFORM_LINUX)
 
 	std::vector<std::string> processNames;
     std::string filePathStr(filePath.begin(), filePath.end()); // Convert wstring to string
@@ -191,7 +191,7 @@ namespace PFF::io {
     closedir(procDir);
     return processNames;
 
-#elif  defined(PLATFORM_MAC)
+#elif  defined(PFF_PLATFORM_MAC)
 	#error undefined platform
 #endif
 

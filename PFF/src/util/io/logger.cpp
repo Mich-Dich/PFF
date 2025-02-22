@@ -1,60 +1,86 @@
 
 #include "util/pffpch.h"
 
-// the gracefull signal handeling was inspired by reckless_log: https://github.com/mattiasflodin/reckless
+#include "util/system.h"
+#include "util/io/io.h"
+#include "util/system.h"
 
-#if defined(PLATFORM_WINDOWS)
+#include <list>
+#include <map>
+#include <type_traits>
+#include <stdio.h>
+#include <cstdarg>
+#include <fstream>
+#include <iomanip>
+
+#include "logger.h"
+
+
+#define SETW(width)             std::setw(width) << std::setfill('0')
+
+
+
+#if defined PFF_PLATFORM_WINDOWS
     #include <Windows.h>
-#elif defined(PLATFORM_LINUX)
-    #include <time.h>
-    #include <sys/time.h>
-    #include <ctime>
+#elif defined PFF_PLATFORM_LINUX || defined PFF_PLATFORM_MAC
+    #include <iostream>
+    #include <unistd.h>
+    #include <termios.h>
 #endif
 
-#include "util/util.h"
-#include "logger.h"
 
 namespace PFF::logger {
 
-#define SETW(width)                                             std::setw(width) << std::setfill('0')
-#define SHORT_FILE(text)                                        (strrchr(text, "\\") ? strrchr(text, "\\") + 1 : text)
-#define SHORTEN_FUNC_NAME(text)                                 (strstr(text, "::") ? strstr(text, "::") + 2 : text)
+    #define SETW(width)                 std::setw(width) << std::setfill('0')
+    #define INTERNAL_LOG(message)       { std::ostringstream oss{}; oss << message; log_string(std::move(oss.str())); }
 
-    // const after init() and bevor shutdown()
-    static bool                                                 is_init = false;
-    static bool                                                 write_logs_to_console = false;
-    static std::filesystem::path                                main_log_dir = "";
-    static std::filesystem::path                                main_log_file_path = "";
-    static std::thread                                          worker_thread;
+    static bool                         is_init = false;
+    static bool                         write_log_to_console = false;
+    static std::string                  format_current = "";
+    static std::string                  format_prev = "";
 
-    // thread savety related
-    static std::condition_variable                              cv{};
-    static std::mutex                                           queue_mutex{};                      // only queue related
-    static std::mutex                                           general_mutex{};                    // for everything else
-    static std::atomic<bool>                                    ready = false;
-    static std::atomic<bool>                                    stop = false;
+    static severity                     severity_level_buffering_threshhold = severity::Trace;
+    static size_t                       buffer_size = 1024;
+    static std::string                  buffered_messages{};
 
-    // always const variables
-    static std::string_view                                     severity_names[] = { "TRACE", "DEBUG", "INFO", "WARN", "ERROR", "FATAL" };
-    static std::string_view                                     console_reset = "\x1b[0m";
-    static std::string_view                                     console_color_table[] = {
-        "\x1b[38;5;246m",                                           // Trace: Gray
-        "\x1b[94m",                                                 // Debug: Blue
-        "\x1b[92m",                                                 // Info: Green
-        "\x1b[33m",                                                 // Warn: Yellow
-        "\x1b[31m",                                                 // Error: Red
-        "\x1b[41m\x1b[30m",                                         // Fatal: Red Background
+    const std::string_view              severity_names[] = {"TRACE", "DEBUG", "INFO", "WARN", "ERROR", "FATAL"};
+    const std::string_view              console_rest = "\x1b[0m";
+    const std::string_view              console_color_table[] = {
+        "\x1b[38;5;246m",                   // Trace: Gray
+        "\x1b[94m",                         // Debug: Blue
+        "\x1b[92m",                         // Info: Green
+        "\x1b[33m",                         // Warn: Yellow
+        "\x1b[31m",                         // Error: Red
+        "\x1b[41m\x1b[30m",                 // Fatal: Red Background
     };
 
-    static std::string                                          format_current = "";
-    static std::string                                          format_prev = "";
-    static std::ofstream                                        main_file;
-    static std::queue<message_format>                           log_queue{};
-    static std::unordered_map<std::thread::id, std::string>     thread_lable_map = {};
+    static std::filesystem::path        main_log_dir = "";
+    static std::filesystem::path        main_log_file_path = "";
+    static std::ofstream                main_file{};
 
-    void process_queue();
-    void process_log_message(const message_format message);
-    void detach_crash_handler();
+    inline void log_string(std::string&& log_str, const bool force_direct_logging = true) {
+
+        if (!(force_direct_logging || (buffered_messages.capacity() - buffered_messages.size()) <= log_str.size())) {
+
+            buffered_messages.append(log_str);
+            return;
+        }
+        
+        main_file = std::ofstream(main_log_file_path, std::ios::app);
+        if (!main_file.is_open()) {
+            std::cerr << "Failed to open main log files" << std::endl;
+            std::quick_exit(1);
+        }
+
+        main_file << buffered_messages << log_str;
+
+        main_file.close();
+
+        if (write_log_to_console) 
+            std::cout << buffered_messages << log_str;
+
+        buffered_messages.clear();
+    }
 
     inline const char* get_filename(const char* filepath) {
 
@@ -68,313 +94,241 @@ namespace PFF::logger {
         return filename + 1;  // Skip the path separator
     }
 
+    static int enable_ANSI_escape_codes() {
 
-#define OPEN_MAIN_FILE(append)              { if (!main_file.is_open()) {                                                                               \
-                                                main_file = std::ofstream(main_log_file_path, (append) ? std::ios::app : std::ios::out);                \
-                                                if (!main_file.is_open())                                                                               \
-                                                    DEBUG_BREAK("FAILED to open log main_file") } }
+        #if defined(PFF_PLATFORM_WINDOWS)
+        
+                // Enable ANSI escape codes
+                HANDLE hOut = GetStdHandle(STD_OUTPUT_HANDLE);
+                if (hOut == INVALID_HANDLE_VALUE) {
+                    std::cerr << "Failed to get handle to console." << std::endl;
+                    return -1;
+                }
+        
+                DWORD dwMode = 0;
+                if (!GetConsoleMode(hOut, &dwMode)) {
+                    std::cerr << "Failed to get console mode." << std::endl;
+                    return -1;
+                }
+        
+                dwMode |= ENABLE_VIRTUAL_TERMINAL_PROCESSING;
+                if (!SetConsoleMode(hOut, dwMode)) {
+                    std::cerr << "Failed to set console mode." << std::endl;
+                    return -1;
+                }
+        
+                return 0;
+        
+        #elif defined(PFF_PLATFORM_LINUX) || defined(PFF_PLATFORM_MAC)
+        
+                struct termios term;
+                if (tcgetattr(STDOUT_FILENO, &term) == -1) {
+                    std::cerr << "Failed to get terminal attributes." << std::endl;
+                    return -1;
+                }
+        
+                term.c_lflag &= ~(ICANON | ECHO);       // Disable canonical mode and echo
+                term.c_oflag |= OPOST;                  // Enable output processing
+                if (tcsetattr(STDOUT_FILENO, TCSANOW, &term) == -1) {
+                    std::cerr << "Failed to set terminal attributes." << std::endl;
+                    return -1;
+                }
+        
+                return 0;
+        #endif
+        
+    }
 
-#define CLOSE_MAIN_FILE()                   main_file.close();
-
-
-
-    // ====================================================================================================================================
+    // ========================================================================================================================
     // init / shutdown
-    // ====================================================================================================================================
+    // ========================================================================================================================
 
     bool init(const std::string& format, const bool log_to_console, const std::filesystem::path log_dir, const std::string& main_log_file_name, const bool use_append_mode) {
 
-        if (is_init)
-            DEBUG_BREAK("Tryed to init lgging system multiple times")
+        if (is_init) {
+            std::cerr << "Tryed to init logger system multiple times" << std::endl;
+            std::quick_exit(1);
+        }
 
         format_current = format;
         format_prev = format;
-        write_logs_to_console = log_to_console;
+        write_log_to_console = log_to_console;
 
-        if (!std::filesystem::is_directory(log_dir))                            // if not already created
-            if (!std::filesystem::create_directory(log_dir))                    // try to create dir
-                DEBUG_BREAK("FAILED to create directory for log files")
+        if (!std::filesystem::is_directory(log_dir))
+            if (!std::filesystem::create_directory(log_dir)) {
+                std::cerr << "Failed to create the directory for log files" << std::endl;
+                std::quick_exit(1);
+            }
 
         main_log_dir = log_dir;
         main_log_file_path = log_dir / main_log_file_name;
 
-        OPEN_MAIN_FILE(use_append_mode)
+        main_file = std::ofstream(main_log_file_path, (use_append_mode) ? std::ios::app : std::ios::out );
+        if (!main_file.is_open()) {
+            std::cerr << "Failed to open main log files" << std::endl;
+            std::quick_exit(1);
+        }
 
-        if (use_append_mode)
-            main_file << "\n=============================================================================\n";
+        main_file << "\n========================================================\n";
 
-        // add some general info to beginning of file
         auto now = std::time(nullptr);
         auto tm = *std::localtime(&now);
-        main_file << "Log initialized at [" << std::put_time(&tm, "%Y-%m-%d %H:%M:%S") << "]\n"
-            << "Inital Log Format: '" << format << "' \nEnabled Log Levels: ";
+        main_file << "Log initalized at [" << std::put_time(&tm, "%Y-%m-%d %H:%M:%S") << "]\n";
 
-        const char* log_sev_strings[] = { "Fatal", " + Error", " + Warn", " + Info", " + Debug", " + Trace"};
-        for (int x = 0; x < LOG_LEVEL_ENABLED +2; x++)
-            main_file << log_sev_strings[x];
-        main_file << "\n=============================================================================\n";
+        main_file << "========================================================\n";
+        main_file.close();
+        buffered_messages.reserve(buffer_size);
 
-        worker_thread = std::thread(&process_queue);
-
-        CLOSE_MAIN_FILE()
         is_init = true;
         return true;
     }
 
     void shutdown() {
 
-        if (!is_init)
-            DEBUG_BREAK("logger::shutdown() was called bevor logger was initalized")
+        if (!is_init) {
+            std::cerr << "Tried to shutdown logger bevor initilization" << std::endl;
+            std::quick_exit(1);
+        }
 
-        stop = true;
-        cv.notify_all();
-        detach_crash_handler();
+        if ( !buffered_messages.empty()) {
 
-        if (worker_thread.joinable())
-            worker_thread.join();
+            main_file = std::ofstream(main_log_file_path, std::ios::app);
+            if (!main_file.is_open()) {
+                std::cerr << "Failed to open main log files" << std::endl;
+                std::quick_exit(1);
+            }
+
+            main_file << buffered_messages;
+
+            if (write_log_to_console)
+                std::cout << buffered_messages;
+
+        }
 
         if (main_file.is_open())
-            CLOSE_MAIN_FILE()
+            main_file.close();
 
         is_init = false;
-    }
+    }    
 
-    // ====================================================================================================================================
-    // signal handeling         need to catch signals related to termination to flash remaining log messages
-    // ====================================================================================================================================
-
-    const std::initializer_list<int> signals = {
-        SIGHUP, SIGINT, SIGQUIT, SIGILL, SIGABRT, SIGFPE, SIGKILL, SIGSEGV, SIGPIPE, SIGALRM, SIGTERM, SIGUSR1, SIGUSR2,    // POSIX.1-1990 signals
-        SIGBUS, SIGPOLL, SIGPROF, SIGSYS, SIGTRAP, SIGVTALRM, SIGXCPU, SIGXFSZ,                                             // SUSv2 + POSIX.1-2001 signals
-        SIGIOT, SIGSTKFLT, SIGIO, SIGPWR,                                                                                   // Various other signals
-    };
-    std::vector<std::pair<int, struct sigaction>> g_old_sigactions;
-
-    void signal_handler(int) {
-
-        logger::shutdown();
-    }
-
-    void detach_crash_handler() {
-
-        while(!g_old_sigactions.empty()) {
-            auto const& p = g_old_sigactions.back();
-            auto signal = p.first;
-            auto const& oldact = p.second;
-            if(0 != sigaction(signal, &oldact, nullptr))
-                throw std::system_error(errno, std::system_category());
-            g_old_sigactions.pop_back();
-        }
-    }
-
-    // ====================================================================================================================================
+    // ========================================================================================================================
     // settings
-    // ====================================================================================================================================
+    // ========================================================================================================================
 
     void set_format(const std::string& new_format) {
 
-        std::lock_guard<std::mutex> lock(general_mutex);
-        OPEN_MAIN_FILE(true)
         format_prev = format_current;
-        format_current = new_format;
-        main_file << "[LOGGER] Changing log-format. From [" << format_prev << "] to [" << format_current << "]\n";
-        CLOSE_MAIN_FILE()
+        format_current = std::move(new_format);
+        INTERNAL_LOG("[LOGGER] changed log-format. From[" << format_prev << "] to [" << format_current << "]\n");
     }
 
     void use_previous_format() {
 
-        std::lock_guard<std::mutex> lock(general_mutex);
-        OPEN_MAIN_FILE(true);
         const std::string buffer = format_current;
         format_current = format_prev;
         format_prev = buffer;
-        main_file << "[LOGGER] Changing to previous log-format. From [" << format_prev << "] to [" << format_current << "]\n";
-        CLOSE_MAIN_FILE()
+        INTERNAL_LOG("[LOGGER] Changed to previous log-format. From [" << format_prev << "] to [" << format_current << "]\n");
     }
 
     const std::string get_format() { return format_current; }
 
-    void register_label_for_thread(const std::string& thread_lable, std::thread::id thread_id) {
+    void set_buffer_threshhold(const severity new_threshhold) {
 
-        std::lock_guard<std::mutex> lock(general_mutex);
-        OPEN_MAIN_FILE(true);
+        severity_level_buffering_threshhold = static_cast<severity>(std::min(static_cast<u8>(new_threshhold), static_cast<u8>(severity::Error)));
 
-        if (thread_lable_map.find(thread_id) != thread_lable_map.end())
-            main_file << "[LOGGER] Thread with ID: [" << thread_id << "] already has lable [" << thread_lable_map[thread_id] << "] registered. Overriding with the lable: [" << thread_lable << "]\n";
-        else
-            main_file << "[LOGGER] Registering Thread-ID: [" << thread_id << "] with the lable: [" << thread_lable << "]\n";
-
-        thread_lable_map[thread_id] = thread_lable;
-        CLOSE_MAIN_FILE()
+        INTERNAL_LOG("[LOGGER] Changed buffering threshhold to [" << severity_names[static_cast<u8>(severity_level_buffering_threshhold)] << "]\n");
     }
 
-    void unregister_label_for_thread(std::thread::id thread_id) {
+    void set_buffer_size(const size_t new_size) {
 
-        if (thread_lable_map.find(thread_id) == thread_lable_map.end()) {
+        INTERNAL_LOG("[LOGGER] Changed buffer size to [" << new_size << "]\n");
+        buffer_size = new_size;
 
-            std::lock_guard<std::mutex> lock(general_mutex);
-            OPEN_MAIN_FILE(true)
-            main_file << "[LOGGER] Tried to unregister lable for Thread-ID: [" << thread_id << "]. IGNORED\n";
-            CLOSE_MAIN_FILE()
-            return;
-        }
+        if (is_init && buffered_messages.size() >= buffer_size) {
 
-        std::lock_guard<std::mutex> lock(general_mutex);
-        OPEN_MAIN_FILE(true)
-        main_file << "[LOGGER] Unregistering Thread-ID: [" << thread_id << "] with the lable: [" << thread_lable_map[thread_id] << "]\n";
-        CLOSE_MAIN_FILE()
-
-        thread_lable_map.erase(thread_id);
-    }
-
-    // ====================================================================================================================================
-    // log message handeling
-    // ====================================================================================================================================
-
-    void process_queue() {
-
-        struct sigaction act;
-        std::memset(&act, 0, sizeof(act));
-        act.sa_handler = &signal_handler;
-        sigfillset(&act.sa_mask);
-        act.sa_flags = SA_RESETHAND;
-
-        // Some signals are synonyms for each other. Some are explictly specified
-        // as such, but others may just be implemented that way on specific
-        // systems. So we'll remove duplicate entries here before we loop through
-        // all the signal numbers.
-        std::vector<int> unique_signals(signals);
-        sort(begin(unique_signals), end(unique_signals));
-        unique_signals.erase(unique(begin(unique_signals), end(unique_signals)),
-                end(unique_signals));
-        try {
-            g_old_sigactions.reserve(unique_signals.size());
-            for(auto signal : unique_signals) {
-                struct sigaction oldact;
-                if(0 != sigaction(signal, nullptr, &oldact))
-                    throw std::system_error(errno, std::system_category());
-                if(oldact.sa_handler == SIG_DFL) {
-                    if(0 != sigaction(signal, &act, nullptr))
-                    {
-                        if(errno == EINVAL)             // If we get EINVAL then we assume that the kernel does not know about this particular signal number.
-                            continue;
-
-                        throw std::system_error(errno, std::system_category());
-                    }
-                    g_old_sigactions.push_back({signal, oldact});
-                }
+            main_file = std::ofstream(main_log_file_path, std::ios::app);
+            if (!main_file.is_open()) {
+                std::cerr << "Failed to open main log file" << std::endl;
+                std::quick_exit(1);
             }
-        } catch(...) {
-            detach_crash_handler();
-            throw;
+            main_file << buffered_messages;
+            main_file.close();
+
+            if (write_log_to_console)
+                std::cout << buffered_messages;
+
+            buffered_messages.clear();
         }
 
-
-        while (!stop || !log_queue.empty()) { // Continue until stop is true and the queue is empty
-
-            std::unique_lock<std::mutex> lock(queue_mutex);
-            cv.wait(lock, [] { return !log_queue.empty(); });
-
-            while (!log_queue.empty()) {
-
-                // get message from queue
-                if (!lock.owns_lock())
-                    lock.lock();
-                message_format message = std::move(log_queue.front());
-                log_queue.pop();
-                lock.unlock();
-
-                process_log_message(std::move(message)); // Process the message (format and write to file)
-            }
-
-            if (lock.owns_lock())                               // savety check
-                lock.unlock();
-        }
+        buffered_messages.shrink_to_fit();
+        buffered_messages.reserve(buffer_size);
     }
 
-    void log_msg(const severity msg_sev , const char* file_name, const char* function_name, const int line, const std::thread::id thread_id, const std::string& message) {
+    // ========================================================================================================================
+    // handle message
+    // ========================================================================================================================
+
+    void log_msg(const severity msg_sev, const char* file_name, const char* function_name, const int line, std::string&& message) {
+
+#define SHORTEN_FUNC_NAME(text)                                 (strstr(text, "::") ? strstr(text, "::") + 2 : text)
 
         if (message.empty())
-            return;                      // dont log empty lines
-
-        if (!is_init) {
-
-    		std::cerr << "Tryed to log message bevor logger was initalized. file_name[" << file_name << "] function_name[" << function_name << "] line[" << line << "] thread_id[" << thread_id << "]  MESSAGE: [" << message << "] " << std::endl;
             return;
-        }
 
-        {
-            std::lock_guard<std::mutex> lock(queue_mutex);
-            log_queue.emplace(msg_sev, file_name, function_name, line, thread_id, std::move(message));
-        }
-        cv.notify_all();
-    }
+        // create helper vars
+        std::ostringstream format_filled{};
+        format_filled.flush();
+        char format_command{};
+        system_time loc_sys_time = util::get_system_time();
 
-    void process_log_message(const message_format message) {
+        // loop over format string and build final message
+        int format_length = static_cast<int>(format_current.length());
+        for (int x = 0; x < format_length; x++) {
 
-        // Create Buffer vars
-        std::ostringstream Format_Filled;
-        Format_Filled.flush();
-        char Format_Command;
+            if (format_current[x] == '$' && x+1 < format_length) {          // detected a format specifier prefix
 
-        system_time loc_system_time = util::get_system_time();
+                format_command = format_current[x + 1];
+                switch (format_command) {
 
-        // Loop over Format string and build Final Message
-        int FormatLen = static_cast<int>(format_current.length());
-        for (int x = 0; x < FormatLen; x++) {
+                // ------------------------ Basic info ------------------------
+                case 'B': format_filled << console_color_table[(u8)msg_sev]; break;                                         // Color start
+                case 'E': format_filled << console_rest; break;                                                             // Color end
+                case 'C': format_filled << message; break;                                                                  // input text (message)
+                case 'L': format_filled << severity_names[(u8)msg_sev]; break;                                              // log severity
+                case 'X': if(msg_sev == severity::Info || msg_sev == severity::Warn) {format_filled << " "; } break;        // alignment
+                case 'Z': format_filled << "\n"; break;                                                                     // line breake
+                
+                // ------------------------ Basic info ------------------------
+                case 'F': format_filled << function_name; break;                                                            // function name
+                case 'P': format_filled << SHORTEN_FUNC_NAME(function_name); break;                                         // short function name
+                case 'A': format_filled << file_name; break;                                                                // file name
+                case 'I': format_filled << get_filename(file_name); break;                                                  // short file name
+                case 'G': format_filled << line; break;                                                                     // line
+                
+                // ------------------------ time ------------------------
+                case 'T': format_filled << SETW(2) << (u16)loc_sys_time.hour << ":" << SETW(2) << (u16)loc_sys_time.minute << ":" << SETW(2) << (u16)loc_sys_time.secund; break;        // formated time
+                case 'H': format_filled << SETW(2) << (u16)loc_sys_time.hour; break;                                                                                                    // hour
+                case 'M': format_filled << SETW(2) << (u16)loc_sys_time.minute; break;                                                                                                  // minute
+                case 'S': format_filled << SETW(2) << (u16)loc_sys_time.secund; break;                                                                                                  // second
+                case 'J': format_filled << SETW(3) << (u16)loc_sys_time.millisecends; break;                                                                                            // miliseond
 
-            if (format_current[x] == '$' && x + 1 < FormatLen) {
+                // ------------------------ data ------------------------
+                case 'N': format_filled << SETW(4) << (u16)loc_sys_time.year << "/" << SETW(2) << (u16)loc_sys_time.month <<"/" << SETW(2) << (u16)loc_sys_time.day; break;             // data yy/mm/dd
+                case 'Y': format_filled << SETW(4) << (u16)loc_sys_time.year; break;                                                                                                    // year
+                case 'O': format_filled << SETW(2) << (u16)loc_sys_time.month; break;                                                                                                   // month
+                case 'D': format_filled << SETW(2) << (u16)loc_sys_time.day; break;                                                                                                     // day
 
-                Format_Command = format_current[x + 1];
-                switch (Format_Command) {
-
-                // ------------------------------------  Basic Info  -------------------------------------------------------------------------------
-                case 'B':   Format_Filled << console_color_table[(u8)message.msg_sev]; break;                                                                                               // Color Start
-                case 'E':   Format_Filled << console_reset; break;                                                                                                                          // Color End
-                case 'C':   Format_Filled << message.message; break;                                                                                                                        // input text (message)
-                case 'L':   Format_Filled << severity_names[(u8)message.msg_sev]; break;                                                                                                    // Log Level
-                case 'X':   if (message.msg_sev == severity::Info || message.msg_sev == severity::Warn) { Format_Filled << " "; } break;                                                    // Alignment
-                case 'Z':   Format_Filled << std::endl; break;                                                                                                                              // Alignment
-
-                // ------------------------------------  Source  -------------------------------------------------------------------------------
-                case 'Q':   if (thread_lable_map.find(message.thread_id) != thread_lable_map.end()) {Format_Filled << thread_lable_map[message.thread_id]; } else { Format_Filled << message.thread_id; } break;      // Thread id or asosiated lable
-                case 'F':   Format_Filled << message.function_name; break;                                                                                                                  // Function Name
-                case 'P':   Format_Filled << SHORTEN_FUNC_NAME(message.function_name); break;                                                                                               // Function Name
-                case 'A':   Format_Filled << message.file_name; break;                                                                                                                      // File Name
-                case 'I':   Format_Filled << get_filename(message.file_name); break;                                                                                                        // Only File Name
-                case 'G':   Format_Filled << message.line; break;                                                                                                                           // Line
-
-                // ------------------------------------  Time  -------------------------------------------------------------------------------
-                case 'T':   Format_Filled << SETW(2) << (u16)loc_system_time.hour << ":" << SETW(2) << (u16)loc_system_time.minute << ":" << SETW(2) << (u16)loc_system_time.secund; break; // Clock hh:mm:ss
-                case 'H':   Format_Filled << SETW(2) << (u16)loc_system_time.hour; break;                                                                                                   // Clock secunde
-                case 'M':   Format_Filled << SETW(2) << (u16)loc_system_time.minute; break;                                                                                                 // Clock minute
-                case 'S':   Format_Filled << SETW(2) << (u16)loc_system_time.secund; break;                                                                                                 // Clock second
-                case 'J':   Format_Filled << SETW(3) << (u16)loc_system_time.millisecends; break;                                                                                           // Clock millisec.
-
-                // ------------------------------------  Date  -------------------------------------------------------------------------------
-                case 'N':   Format_Filled << SETW(4) << (u16)loc_system_time.year << "/" << SETW(2) << (u16)loc_system_time.month << "/" << SETW(2) << (u16)loc_system_time.day; break;     // Data yyyy/mm/dd
-                case 'Y':   Format_Filled << SETW(4) << (u16)loc_system_time.year; break;                                                                                                   // Year
-                case 'O':   Format_Filled << SETW(2) << (u16)loc_system_time.month; break;                                                                                                  // Month
-                case 'D':   Format_Filled << SETW(2) << (u16)loc_system_time.day; break;                                                                                                    // Day
-
-                // ------------------------------------  Default  -------------------------------------------------------------------------------
                 default: break;
                 }
 
                 x++;
             }
-
+            
             else
-                Format_Filled << format_current[x];
+                format_filled << format_current[x];
         }
 
-        std::lock_guard<std::mutex> file_lock(general_mutex);
-        OPEN_MAIN_FILE(true);
-        main_file << Format_Filled.str();
-        CLOSE_MAIN_FILE()
-
-        if (write_logs_to_console)
-            std::cout << Format_Filled.str();
+        log_string(std::move(format_filled.str()), static_cast<u8>(msg_sev) >= static_cast<u8>(severity_level_buffering_threshhold));
     }
-
+    
 }

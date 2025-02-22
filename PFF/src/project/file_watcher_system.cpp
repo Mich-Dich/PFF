@@ -5,7 +5,7 @@
 
 #include "file_watcher_system.h"
 
-#ifdef PLATFORM_WINDOWS
+#ifdef PFF_PLATFORM_WINDOWS
 	#include "Windows.h"
 
 	static HANDLE m_H_stop_event;
@@ -57,7 +57,7 @@ namespace PFF {
 		m_pending_events[file] = { action, now };
 	}
 
-#ifdef PLATFORM_WINDOWS
+#ifdef PFF_PLATFORM_WINDOWS
 
 	void file_watcher_system::start_thread() {
 
@@ -198,7 +198,7 @@ namespace PFF {
 		
 	}
 
-#elif defined(PLATFORM_LINUX)
+#elif defined(PFF_PLATFORM_LINUX)
 
 	void file_watcher_system::start_thread() { }
 

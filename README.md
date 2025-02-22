@@ -34,11 +34,32 @@ To get started with PFF, follow these simple steps (You need to have the followi
         - Windows: create a VS 2022 solution.
         - Linux: (still in dev)
 
+3. Compile the code:
+   ```
+   make -j
+   ```
+
+4. Launch the editor (dedicated `launcher` not created yet):
+   Replace "Debug-linux-x86_64" with the version you want to launch
+   ```
+   bin/Debug-linux-x86_64/PFF_editor/PFF_editor
+   ```
+
+
+Summary:
+   ```
+   git clone --branch dev --recursive git@github.com:Mich-Dich/PFF.git
+   cd PFF
+   python setup.py
+   make -j
+   bin/Debug-linux-x86_64/PFF_editor/PFF_editor
+   ```
+
 For more detailed instructions please visit our [Instalation wiki](https://github.com/Mich-Dich/PFF/wiki/Instalation)
 
 ## Usage
 
-The engine always need a project to work with. As the ``` launcher ``` is still under development, it is recomended to start with our [PFF test project](https://github.com/Mich-Dich/PFF_test_project).
+The engine always need a project to work with. As the `launcher` is still under development, it is recomended to start with our [PFF test project](https://github.com/Mich-Dich/PFF_test_project).
 
 You can direcktly start the Project, this will open the editor and then load the project.
 

@@ -262,7 +262,7 @@ namespace PFF::util {
 
 
         else
-            DEBUG_BREAK("Input value is not supported");
+            DEBUG_BREAK();		// Input value is not supported
     }
 
     template<typename T>
@@ -387,7 +387,7 @@ namespace PFF::util {
         }
 
         else
-            DEBUG_BREAK("Input value is not supported");
+            DEBUG_BREAK();		// Input value is not supported
     }
 
     template<typename T>

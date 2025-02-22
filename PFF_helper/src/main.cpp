@@ -13,7 +13,7 @@ enum class operation {
     END_OF_ENUM             = 2,
 };
 
-inline std::string operation_to_string(operation selected_operation) {
+std::string operation_to_string(operation selected_operation) {
 
     switch (selected_operation) {
     case operation::native_scripting:   return "native scripting";
@@ -30,16 +30,19 @@ inline std::string operation_to_string(operation selected_operation) {
 
 int main(int argc, char* argv[]) {
 
-    PFF::logger::init("[$B$T:$J  $L$X  $I $P:$G$E] $C$Z", true);
+    PFF::logger::init("[$B$T:$J  $L$X  $I $F:$G$E] $C$Z", false, "./logs", "helper.log");
+
     VALIDATE(argc >= 3, return 1, "", "Usage: " << argv[0] << " <operation_number> <file_path>");
-
-    if (!std::stoi(argv[1]))
-    	PFF::logger::set_format("[$T:$J  $L$X  $I $P:$G] $C$Z");
-
-    operation loc_operation = static_cast<operation>(std::stoi(argv[2]));
 
     f32 time_result = 0;
     PFF::stopwatch loc_stopwatch{ &time_result, PFF::duration_precision::seconds };
+
+    if (std::stoi(argv[1]))
+        PFF::logger::set_format("[$B$T:$J$E] [$B$L$X $I - $P:$G$E] $C$Z");
+    else
+        PFF::logger::set_format("[$T:$J PFF_helper] $C$Z");
+
+    operation loc_operation = static_cast<operation>(std::stoi(argv[2]));
 
     bool result = false;
     switch (loc_operation) {
@@ -50,7 +53,6 @@ int main(int argc, char* argv[]) {
         
     loc_stopwatch.stop();
     LOG(Trace, "========== PFF_helper " << ((result) ? "FAILED" : "SUCCEDED") << " and took [" << time_result << " s] ==========");
-    
     PFF::logger::shutdown();
     return result;
 }

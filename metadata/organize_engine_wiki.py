@@ -48,7 +48,7 @@ def start(target_dir):
     if os.path.exists(target_dir):
         shutil.rmtree(target_dir)
     
-    run_silent_subprocess(fr'rmdir {os.path.join(target_dir, ".git")}')
+    run_silent_subprocess(fr'rmdir /s /q {os.path.join(target_dir, ".git")}')
     run_silent_subprocess(fr'git clone https://github.com/Mich-Dich/PFF.wiki.git {target_dir}')
 
     # Parse the sidebar to get the structure

@@ -458,7 +458,7 @@ namespace PFF {
 
 			if (ImGui::Button(" import ##content_browser_import")) {
 
-				std::filesystem::path source_path = util::file_dialog("Import asset", import_files);
+				std::filesystem::path source_path = util::file_diaLOG("Import asset", import_files);
 
 				if (source_path.extension() == ".gltf" || source_path.extension() == ".glb")
 					PFF_editor::get().get_editor_layer()->add_window<mesh_import_window>(source_path, m_selected_directory);

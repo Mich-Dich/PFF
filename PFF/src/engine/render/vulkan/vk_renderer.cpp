@@ -4,6 +4,7 @@
 // ========== vulkan utils ============
 #include "vk_types.h"
 #define VMA_IMPLEMENTATION
+#include <vma/vk_mem_alloc.h>
 
 #include <vulkan/vulkan.h>
 #include <vulkan/vk_enum_string_helper.h>
@@ -41,7 +42,7 @@
 #include <glm/gtx/quaternion.hpp>
 #include <cstdlib> // for system calls (conpieling shaders)
 
-#if defined(PLATFORM_LINUX)
+#if defined(PFF_PLATFORM_LINUX)
 	#include <xmmintrin.h> // For SSE
 	#include <emmintrin.h> // For SSE2
 	#include <smmintrin.h> // For SSE4.1
@@ -135,10 +136,10 @@ namespace PFF::render::vulkan {
 
 		LOG_INIT();
 
-#if defined(PLATFORM_WINDOWS)					// compile_shaders_in_dir
+#if defined(PFF_PLATFORM_WINDOWS)					// compile_shaders_in_dir
 		const std::filesystem::path path_to_build_script = PFF::util::get_executable_path().parent_path() / "PFF_helper" / "PFF_helper.exe";
 		std::string cmdArgs = "1 1 0 " + (PFF::util::get_executable_path().parent_path() / "PFF/shaders").generic_string() + " 1 ";
-#elif defined(PLATFORM_LINUX)
+#elif defined(PFF_PLATFORM_LINUX)
 		const std::filesystem::path path_to_build_script = PFF::util::get_executable_path().parent_path() / "PFF_helper" / "PFF_helper";
 		std::string cmdArgs = "1 1 0 " + (PFF::util::get_executable_path().parent_path() / "PFF/shaders").generic_string() + " 1 ";
 #endif

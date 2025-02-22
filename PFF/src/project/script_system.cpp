@@ -13,9 +13,9 @@
 #include "engine/world/map.h"
 #include "engine/world/entity.h"
 
-#if defined(PLATFORM_WINDOWS)
+#if defined(PFF_PLATFORM_WINDOWS)
 	#include <Windows.h>
-#elif defined(PLATFORM_LINUX)
+#elif defined(PFF_PLATFORM_LINUX)
 	#include <dlfcn.h> // For dynamic library loading on Linux
 #else
 	#error Platform not supported
@@ -39,7 +39,7 @@ namespace PFF::script_system {
 #endif
 
 
-#if defined(PLATFORM_WINDOWS)
+#if defined(PFF_PLATFORM_WINDOWS)
 
 	static HMODULE			m_module;
 
@@ -68,7 +68,7 @@ namespace PFF::script_system {
 		return true;
 	}
 
-#elif defined(PLATFORM_LINUX)
+#elif defined(PFF_PLATFORM_LINUX)
 
 	static void* m_module; // Use void* for the module handle
 
