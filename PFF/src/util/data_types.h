@@ -97,7 +97,7 @@ namespace PFF {
 		u8 hour;
 		u8 minute;
 		u8 secund;
-		u16 millisecends;
+		u16 millisecend;
 	};
 	//#pragma pack(pop)
 

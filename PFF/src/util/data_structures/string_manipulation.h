@@ -183,7 +183,7 @@ namespace PFF::util {
                 << ' ' << (u16)src_value.hour
                 << ' ' << (u16)src_value.minute
                 << ' ' << (u16)src_value.secund
-                << ' ' << (u16)src_value.millisecends;
+                << ' ' << (u16)src_value.millisecend;
             dest_string = oss.str();
             return;
         }
@@ -307,7 +307,7 @@ namespace PFF::util {
                 >> dest_value.hour
                 >> dest_value.minute
                 >> dest_value.secund
-                >> dest_value.millisecends;
+                >> dest_value.millisecend;
             return;
         }
 

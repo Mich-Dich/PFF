@@ -19,6 +19,7 @@
 #include <concepts>
 
 #include <string>
+#include <string_view>
 #include <cstring>
 #include <sstream>
 #include <vector>
@@ -41,6 +42,11 @@
 #include <cstdarg>
 #include <fstream>
 #include <iomanip>
+
+// ------------------------------- multithreading -------------------------------
+#include <condition_variable>
+#include <mutex>
+#include <atomic>
 
 // ========== glm math ============
 #define GLM_ENABLE_EXPERIMENTAL
@@ -85,3 +91,6 @@
 #include "util/macros.h"
 
 #include "util/io/logger.h"
+
+
+

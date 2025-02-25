@@ -40,7 +40,13 @@ def update_submodule(submodule_path, branch="main"):
 try:
     utils.print_u("\nCHECK FOR ANY UPDATES")
     print("updating main repo")
-    subprocess.call(["git", "pull"])
+    try:
+        subprocess.call(["git", "pull"])
+        utils.print_c(f"Successfully updated main repo to the latest commit.", "green")
+    except subprocess.CalledProcessError as e:
+        utils.print_c(f"Failed to update main repo: {e}", "red")
+        sys.exit(1)
+    
     update_submodule("PFF/vendor/glfw", "master")
     update_submodule("PFF/vendor/imgui", "docking")
     update_submodule("PFF/vendor/ImGuizmo", "master")

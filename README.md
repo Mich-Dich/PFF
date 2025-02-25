@@ -16,7 +16,8 @@
 ![first_image](/.github/resources/PFF_editor_fKegSGzSd4.png?raw=true "image of the editor as it is now")
 
 ## Getting Started
-To get started with PFF, follow these simple steps (You need to have the following software preinstalled: ```Git, Python```):
+To get started with PFF, follow these simple steps
+(You need to have the following software preinstalled: ```Git, Python```):
 
 1. Clone the repository using:
    ```

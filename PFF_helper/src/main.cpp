@@ -30,7 +30,7 @@ std::string operation_to_string(operation selected_operation) {
 
 int main(int argc, char* argv[]) {
 
-    PFF::logger::init("[$B$T:$J  $L$X  $I $F:$G$E] $C$Z", false, "./logs", "helper.log");
+    PFF::logger::init("[$B$T:$J  $L$X  $I $F:$G$E] $C$Z", false, "./logs", "helper.log", true);
 
     VALIDATE(argc >= 3, return 1, "", "Usage: " << argv[0] << " <operation_number> <file_path>");
 

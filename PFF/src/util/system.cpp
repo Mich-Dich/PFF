@@ -150,7 +150,7 @@ namespace PFF::util {
         loc_system_time.hour = static_cast<u8>(win_time.wHour);
         loc_system_time.minute = static_cast<u8>(win_time.wMinute);
         loc_system_time.secund = static_cast<u8>(win_time.wSecond);
-        loc_system_time.millisecends = static_cast<u16>(win_time.wMilliseconds);
+        loc_system_time.millisecend = static_cast<u16>(win_time.wMilliseconds);
 
 #elif defined(PFF_PLATFORM_LINUX)
 
@@ -164,7 +164,7 @@ namespace PFF::util {
         loc_system_time.hour = static_cast<u8>(ptm->tm_hour);
         loc_system_time.minute = static_cast<u8>(ptm->tm_min);
         loc_system_time.secund = static_cast<u8>(ptm->tm_sec);
-        loc_system_time.millisecends = static_cast<u16>(tv.tv_usec / 1000);
+        loc_system_time.millisecend = static_cast<u16>(tv.tv_usec / 1000);
 
 #endif
         return loc_system_time;
