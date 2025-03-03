@@ -85,6 +85,26 @@ project "PFF_editor"
 			table.unpack(copy_content_of_dir(outputs, {"PFF_editor/shaders", "PFF_editor/defaults", "PFF_editor/assets"})),
 		}
 
+		includedirs
+		{
+			"/usr/include/vulkan",
+			"%{IncludeDir.glfw}/include",
+
+			"/usr/include/x86_64-linux-gnu/qt5", 				-- Base Qt include path
+			"/usr/include/x86_64-linux-gnu/qt5/QtCore",
+			"/usr/include/x86_64-linux-gnu/qt5/QtWidgets",
+			"/usr/include/x86_64-linux-gnu/qt5/QtGui",
+		}
+
+		libdirs
+		{
+			"%{wks.location}/PFF/vendor/glfw/build/src",
+			
+			"/usr/lib/x86_64-linux-gnu",  -- Default library path for system libraries
+			"/usr/lib/x86_64-linux-gnu/qt5",
+			-- "%{IncludeDir.VulkanSDK}/lib",
+		}
+
 		links
 		{
 			"%{wks.location}/PFF/vendor/glfw/build/src/glfw3",
@@ -93,38 +113,11 @@ project "PFF_editor"
 			"vulkan",
 			"vulkan",
 
-			"gtk-3",  						-- Link against GTK
-			"gdk-3",  						-- Link against GDK
-			"glib-2.0", 					-- Link against GLib
-			"gobject-2.0", 					-- Link against GObject
-			"gio-2.0", 						-- Link against GIO
-			"gmodule-2.0", 					-- Link against GModule
-			"gthread-2.0", 					-- Link against GThread
-			"pango-1.0", 					-- Link against Pango
+			"Qt5Core",
+			"Qt5Widgets",
+			"Qt5Gui",
 		}
 
-		libdirs
-		{
-			"%{wks.location}/PFF/vendor/glfw/build/src",
-			
-			"/usr/lib/x86_64-linux-gnu",  -- Default library path for system libraries
-			-- "%{IncludeDir.VulkanSDK}/lib",
-		}
-
-		includedirs
-		{
-			"/usr/include/vulkan",
-			"%{IncludeDir.glfw}/include",
-
-			"/usr/include/gtk-3.0",
-			"/usr/include/atk-1.0",			-- needed for GTK
-			"/usr/include/gdk-pixbuf-2.0",	-- needed for GTK
-			"/usr/include/harfbuzz",		-- needed for GTK
-			"/usr/include/cairo",			-- needed for GTK
-			"/usr/include/glib-2.0",
-			"/usr/include/pango-1.0",
-			"/usr/lib/x86_64-linux-gnu/glib-2.0/include", -- GLib include path
-		}
 
 	filter "configurations:Debug"
 		defines "PFF_DEBUG"

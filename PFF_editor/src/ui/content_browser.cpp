@@ -199,15 +199,15 @@ namespace PFF {
 
 			// Begin a new group for each item
 			const int current_ID = hash_path(entry.path());
-			const std::string item_name = entry.path().filename().string();
+			const char* item_name = entry.path().filename().string().c_str();
 			const ImVec4& color = (m_selected_items.find(entry.path()) != m_selected_items.end()) ? UI::get_action_color_00_active_ref() : UI::get_action_color_gray_active_ref();
 			ImGui::BeginGroup();
 			{
 				ImGui::PushID(current_ID);
 				ImGui::Image(m_folder_big_icon->get_descriptor_set(), m_icon_size, ImVec2(0, 0), ImVec2(1, 1), color);
-				ImVec2 text_size = ImGui::CalcTextSize(item_name.c_str());
+				ImVec2 text_size = ImGui::CalcTextSize(item_name);
 				ImGui::SetCursorPos(ImGui::GetCursorPos() + ImVec2((m_icon_size.x - text_size.x) * 0.5f, 0));
-				ImGui::TextWrapped(item_name.c_str());
+				ImGui::TextWrapped("%s", item_name);
 				ImGui::PopID();
 			}
 			ImGui::EndGroup();
@@ -251,7 +251,7 @@ namespace PFF {
 				ImGui::SetDragDropPayload("PROJECT_CONTENT_FOLDER", path_string.c_str(), path_string.length() + 1);
 				LOG(Trace, "DRAG-DROP  FOLDER");
 				ImGui::Image(m_folder_big_icon->get_descriptor_set(), m_icon_size, ImVec2(0, 0), ImVec2(1, 1), UI::get_action_color_gray_active_ref());
-				ImGui::TextWrapped("%s", item_name.c_str());
+				ImGui::TextWrapped("%s", item_name);
 				ImGui::EndDragDropSource();
 			}
 
@@ -330,8 +330,8 @@ namespace PFF {
 				default: break;
 			}
 
-			std::string wrapped_text = UI::wrap_text_at_underscore(item_name, m_icon_size.x);
-			ImGui::TextWrapped(wrapped_text.c_str());
+			const auto wrapped_text = UI::wrap_text_at_underscore(item_name, m_icon_size.x).c_str();
+			ImGui::TextWrapped("%s", wrapped_text);
 
 			ImGui::PopID();
 		}
@@ -458,7 +458,7 @@ namespace PFF {
 
 			if (ImGui::Button(" import ##content_browser_import")) {
 
-				std::filesystem::path source_path = util::file_diaLOG("Import asset", import_files);
+				std::filesystem::path source_path = util::file_dialog("Import asset", import_files);
 
 				if (source_path.extension() == ".gltf" || source_path.extension() == ".glb")
 					PFF_editor::get().get_editor_layer()->add_window<mesh_import_window>(source_path, m_selected_directory);

@@ -10,7 +10,9 @@
     #include <sys/types.h>          // For pid_t
     #include <sys/wait.h>           // For waitpid
     #include <unistd.h>             // For fork, execv, etc.
-    #include <gtk/gtk.h>            // file dialog
+    #include <QApplication>
+    #include <QFileDialog>
+    #include <QString>
     #include <sys/time.h>
     #include <ctime>
     #include <limits.h>
@@ -171,7 +173,7 @@ namespace PFF::util {
     }
 
 
-    std::filesystem::path file_diaLOG(const std::string& title, const std::vector<std::pair<std::string, std::string>>& filters) {
+    std::filesystem::path file_dialog(const std::string& title, const std::vector<std::pair<std::string, std::string>>& filters) {
 
     #if defined(PFF_PLATFORM_WINDOWS)
         // Assuming you have a way to get the handle of your main window
@@ -208,32 +210,28 @@ namespace PFF::util {
 
     #elif defined(PFF_PLATFORM_LINUX)
 
-        GtkWidget *dialog;
-        std::filesystem::path selected_path;
+        int argc = 0;
+        char **argv = nullptr;
+        QApplication app(argc, argv);                                                                                                   // Create a QApplication instance
 
-        gtk_init(nullptr, nullptr);                     // Initialize GTK
-
-        // Create a file chooser dialog
-        dialog = gtk_file_chooser_dialog_new(title.c_str(), nullptr, GTK_FILE_CHOOSER_ACTION_OPEN, "_Cancel", GTK_RESPONSE_CANCEL, "_Open", GTK_RESPONSE_ACCEPT, nullptr);
-        
-        // Add filters to the dialog
-        for (const auto& filter : filters) {
-            GtkFileFilter *file_filter = gtk_file_filter_new();
-            gtk_file_filter_set_name(file_filter, filter.first.c_str());
-            gtk_file_filter_add_pattern(file_filter, filter.second.c_str());
-            gtk_file_chooser_add_filter(GTK_FILE_CHOOSER(dialog), file_filter);
+        QString filterString;
+        for (auto& filter : filters) {                                                                                                  // Prepare the filter string for QFileDialog
+            
+            // Replace semicolons with spaces
+            std::string buffer = filter.second;
+            size_t pos = 0;
+            while ((pos = buffer.find(';', pos)) != std::string::npos) {                                                                // Replace ';' with ' ' 
+                buffer.replace(pos, 1, " ");
+                pos += 1;
+            }
+            
+            filterString += QString::fromStdString(filter.first) + " (" + QString::fromStdString(buffer) + ");;";
         }
+        filterString.chop(2); // Remove the last ";;"
 
-        // Show the dialog and wait for user response
-        if (gtk_dialog_run(GTK_DIALOG(dialog)) == GTK_RESPONSE_ACCEPT) {
-            gchar *filename = gtk_file_chooser_get_filename(GTK_FILE_CHOOSER(dialog));
-            selected_path = std::filesystem::path(filename);
-            g_free(filename);                           // Free the filename string
-        }
+        QString fileName = QFileDialog::getOpenFileName(nullptr, QString::fromUtf8(title.data()), QString(), filterString);             // Open the file dialog
+        return std::filesystem::path(fileName.toStdString());
 
-        gtk_widget_destroy(dialog);                     // Destroy the dialog
-        return selected_path;
-    
     #endif
     }
 

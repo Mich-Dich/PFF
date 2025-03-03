@@ -294,9 +294,9 @@ namespace PFF::UI {
 		ImGui::PushFont(application::get().get_imgui_layer()->get_font("regular_big"));
 
 		if (wrapped)
-			ImGui::TextWrapped(text);
+			ImGui::TextWrapped("%s", text);
 		else
-			ImGui::Text(text);
+			ImGui::Text("%s", text);
 
 		ImGui::PopFont();
 	}
@@ -307,9 +307,9 @@ namespace PFF::UI {
 		ImGui::PushFont(application::get().get_imgui_layer()->get_font("bold"));
 
 		if (wrapped)
-			ImGui::TextWrapped(text);
+			ImGui::TextWrapped("%s", text);
 		else
-			ImGui::Text(text);
+			ImGui::Text("%s", text);
 
 		ImGui::PopFont();
 	}
@@ -320,9 +320,9 @@ namespace PFF::UI {
 		ImGui::PushFont(application::get().get_imgui_layer()->get_font("italic"));
 
 		if (wrapped)
-			ImGui::TextWrapped(text);
+			ImGui::TextWrapped("%s", text);
 		else
-			ImGui::Text(text);
+			ImGui::Text("%s", text);
 
 		ImGui::PopFont();
 	}

@@ -4,6 +4,9 @@
 
 #include "crash_handler.h"
 
+#if defined(PFF_PLATFORM_WINDOWS)
+    #include <windows.h>
+#endif
 
 namespace PFF {
 
@@ -73,6 +76,53 @@ namespace PFF {
 	}
 
 #elif defined(PFF_PLATFORM_WINDOWS)
+
+    void detach_crash_handler() {
+        if (g_vectored_exception_handler) {
+            RemoveVectoredExceptionHandler(g_vectored_exception_handler);
+            g_vectored_exception_handler = nullptr;
+        }
+        
+        if (g_old_console_handler) {
+            SetConsoleCtrlHandler(g_old_console_handler, TRUE);
+            g_old_console_handler = nullptr;
+        }
+    }
+
+    LONG WINAPI exception_handler(PEXCEPTION_POINTERS pExceptionInfo) {
+        logger::shutdown();
+        detach_crash_handler();
+        ExitProcess(1);
+        return EXCEPTION_CONTINUE_SEARCH;
+    }
+
+    BOOL WINAPI console_handler(DWORD dwCtrlType) {
+        logger::shutdown();
+        detach_crash_handler();
+        ExitProcess(0);
+        return TRUE;
+    }
+
+    void attach_crash_handler() {
+        // Add vectored exception handler for critical exceptions
+        g_vectored_exception_handler = AddVectoredExceptionHandler(1, exception_handler);
+        if (!g_vectored_exception_handler) {
+            throw std::system_error(GetLastError(), std::system_category(), "AddVectoredExceptionHandler failed");
+        }
+
+        // Set console control handler for termination signals
+        if (!SetConsoleCtrlHandler(console_handler, TRUE)) {
+            RemoveVectoredExceptionHandler(g_vectored_exception_handler);
+            g_vectored_exception_handler = nullptr;
+            throw std::system_error(GetLastError(), std::system_category(), "SetConsoleCtrlHandler failed");
+        }
+        
+        // Store the previous console handler (if any)
+        g_old_console_handler = SetConsoleCtrlHandler(nullptr, FALSE);
+        if (g_old_console_handler) {
+            SetConsoleCtrlHandler(g_old_console_handler, TRUE);
+        }
+    }
 
 #endif
 

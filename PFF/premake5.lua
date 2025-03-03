@@ -77,9 +77,7 @@ project "PFF"
 
 		links { "glfw", }
 	
-		postbuildcommands
-		{
-			-- copy premake exe (needed for engine projects)
+		postbuildcommands {										-- copy premake exe (needed for engine projects)
 			"{MKDIR} %{wks.location}/bin/" .. outputs .. "/vendor/premake",
 			"{COPY} %{wks.location}/vendor/premake %{wks.location}/bin/" .. outputs .. "/vendor/premake",
 		}
@@ -99,42 +97,34 @@ project "PFF"
 		{
 			"/usr/include/vulkan",
 
-			"/usr/include/gtk-3.0",
-			"/usr/include/atk-1.0",			-- needed for GTK
-			"/usr/include/gdk-pixbuf-2.0",	-- needed for GTK
-			"/usr/include/harfbuzz",		-- needed for GTK
-			"/usr/include/cairo",			-- needed for GTK
-			"/usr/include/glib-2.0",
-			"/usr/include/pango-1.0",
-			"/usr/lib/x86_64-linux-gnu/glib-2.0/include", -- GLib include path
+			"/usr/include/x86_64-linux-gnu/qt5", 				-- Base Qt include path
+			"/usr/include/x86_64-linux-gnu/qt5/QtCore",
+			"/usr/include/x86_64-linux-gnu/qt5/QtWidgets",
+			"/usr/include/x86_64-linux-gnu/qt5/QtGui",
 		}
 	
 		libdirs
 		{
 			"%{wks.location}/PFF/vendor/glfw/build/src",
-			"/usr/lib/x86_64-linux-gnu", -- Library directory for linking
+			"/usr/lib/x86_64-linux-gnu",
+			"/usr/lib/x86_64-linux-gnu/qt5",
 		}
 	
 		links
 		{
 			"vulkan",
 			"glfw",
-
-			"gtk-3",  						-- Link against GTK
-			"gdk-3",  						-- Link against GDK
-			"glib-2.0", 					-- Link against GLib
-			"gobject-2.0", 					-- Link against GObject
-			"gio-2.0", 						-- Link against GIO
-			"gmodule-2.0", 					-- Link against GModule
-			"gthread-2.0", 					-- Link against GThread
-			"pango-1.0", 					-- Link against Pango
+			"Qt5Core",
+			"Qt5Widgets",
+			"Qt5Gui",
 		}
 
-		buildoptions { "-msse4.1" }  -- include the SSE4.1 flag for Linux builds
+		buildoptions {
+			"-msse4.1",										  	-- include the SSE4.1 flag for Linux builds
+			"-fPIC",
+		}
 
-		postbuildcommands
-		{
-			-- Create the directory if it doesn't exist
+		postbuildcommands {										-- copy premake (needed for engine projects)
 			"{MKDIR} %{wks.location}/bin/" .. outputs .. "/vendor/premake",
 			"{COPY} %{wks.location}/premake5 %{wks.location}/bin/" .. outputs .. "/vendor/premake",
 		}

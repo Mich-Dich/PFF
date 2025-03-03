@@ -25,7 +25,7 @@ namespace PFF::util {
         {"All Files", "*.*"}
     };
 
-	std::filesystem::path file_diaLOG(const std::string& title = "Open", const std::vector<std::pair<std::string, std::string>>& filters = default_filters);
+	std::filesystem::path file_dialog(const std::string& title = "Open", const std::vector<std::pair<std::string, std::string>>& filters = default_filters);
 
 	std::filesystem::path get_executable_path();
 

@@ -267,7 +267,7 @@ namespace PFF {
 		else {																// project directory not given as argument, need to manually select it
 
 			const std::vector<std::pair<std::string, std::string>> project_file_filters = { {"PFF Project File", "*.pffproj"} };
-			m_project_path = util::file_diaLOG("Open PFF-Project", project_file_filters).parent_path();
+			m_project_path = util::file_dialog("Open PFF-Project", project_file_filters).parent_path();
 		}
 
 		m_project_data = serialize_projects_data(m_project_path, serializer::option::load_from_file);

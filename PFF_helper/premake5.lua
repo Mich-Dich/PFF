@@ -49,29 +49,21 @@ project "PFF_helper"
 		}
 	
 		includedirs {
-			"/usr/include/gtk-3.0",
-			"/usr/include/atk-1.0",			-- needed for GTK
-			"/usr/include/gdk-pixbuf-2.0",	-- needed for GTK
-			"/usr/include/harfbuzz",		-- needed for GTK
-			"/usr/include/cairo",			-- needed for GTK
-			"/usr/include/glib-2.0",
-			"/usr/include/pango-1.0",
-			"/usr/lib/x86_64-linux-gnu/glib-2.0/include", -- GLib include path
+			"/usr/include/x86_64-linux-gnu/qt5", 				-- Base Qt include path
+			"/usr/include/x86_64-linux-gnu/qt5/QtCore", 		-- Specific QtCore include path
+			"/usr/include/x86_64-linux-gnu/qt5/QtWidgets", 		-- Specific QtWidgets include path
+			"/usr/include/x86_64-linux-gnu/qt5/QtGui", 			-- Specific QtGui include path
 		}
 	
 		libdirs {
 			"/usr/lib/x86_64-linux-gnu", -- Library directory for linking
+			"/usr/lib/x86_64-linux-gnu/qt5",
 		}
 	
 		links {
-			"gtk-3",  						-- Link against GTK
-			"gdk-3",  						-- Link against GDK
-			"glib-2.0", 					-- Link against GLib
-			"gobject-2.0", 					-- Link against GObject
-			"gio-2.0", 						-- Link against GIO
-			"gmodule-2.0", 					-- Link against GModule
-			"gthread-2.0", 					-- Link against GThread
-			"pango-1.0", 					-- Link against Pango
+			"Qt5Core",    -- Link against Qt5Core
+			"Qt5Widgets", -- Link against Qt5Widgets
+			"Qt5Gui",     -- Link against Qt5Gui
 		}
 		
 	filter "configurations:Debug"

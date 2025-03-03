@@ -231,10 +231,10 @@ namespace PFF {
 
 		// display project title
 		ImGui::PushFont(application::get().get_imgui_layer()->get_font("header_1"));
-		const static std::string project_name = application::get().get_project_data().display_name;
-		const auto project_name_size = ImGui::CalcTextSize(project_name.c_str());
+		const static auto project_name = application::get().get_project_data().display_name.c_str();
+		const auto project_name_size = ImGui::CalcTextSize(project_name);
 		ImGui::SetCursorPos(ImVec2(viewport->Size.x - (window_padding.x + (button_spaccing * 2) + (button_width * 3)) - project_name_size.x - 30, window_padding.y + titlebar_vertical_offset));
-		ImGui::Text(project_name.c_str());
+		ImGui::Text(project_name);
 		ImGui::PopFont();
 
 		ImGui::SetCursorPos(ImVec2(viewport->Size.x - (window_padding.x + (button_spaccing * 2) + (button_width * 3)), window_padding.y + titlebar_vertical_offset));

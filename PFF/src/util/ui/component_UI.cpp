@@ -22,8 +22,8 @@ namespace PFF::UI {
 			}, [&]() {
 
 				ImGui::SetNextItemWidth(ImGui::GetColumnWidth());
-				const std::string comp_asset_path = component.asset_path.string();
-				ImGui::Text(comp_asset_path.c_str());
+				const auto comp_asset_path = component.asset_path.string().c_str();
+				ImGui::Text("%s", comp_asset_path);
 
 				if (ImGui::BeginDragDropTarget()) {
 					if (const ImGuiPayload* payload = ImGui::AcceptDragDropPayload("PROJECT_CONTENT_FILE")) {

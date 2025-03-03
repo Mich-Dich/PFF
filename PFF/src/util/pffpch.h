@@ -45,6 +45,7 @@
 
 #include <system_error>
 #include <signal.h>
+#include <csignal>
 
 // ------------------------------- multithreading -------------------------------
 #include <condition_variable>

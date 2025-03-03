@@ -299,7 +299,7 @@ namespace PFF::toolkit::todo {
 							collum_width = ImGui::GetColumnWidth();
 							const ImVec2 description_input_size = { ImGui::GetColumnWidth(), (ImGui::GetTextLineHeight() * (float)util::count_lines(task_buf.description)) + ImGui::GetTextLineHeightWithSpacing() };
 							ImGui::InputTextMultiline("##new_task_description", task_buf.description, CHAR_BUFFER_DEFAULT_SIZE * CHAR_BUFFER_DEFAULT_MULTIPLIER, description_input_size,
-							ImGuiInputTextFlags_AllowTabInput | ImGuiInputTextFlags_Multiline | ImGuiInputTextFlags_NoHorizontalScroll);
+							ImGuiInputTextFlags_AllowTabInput | static_cast<ImGuiInputTextFlags>(ImGuiInputTextFlags_Multiline) | ImGuiInputTextFlags_NoHorizontalScroll);
 
 						}, [] {
 
@@ -313,7 +313,7 @@ namespace PFF::toolkit::todo {
 						collum_width = ImGui::GetColumnWidth();
 						const ImVec2 description_input_size = { ImGui::GetColumnWidth(), (ImGui::GetTextLineHeight() * (float)util::count_lines(task_buf.description)) + ImGui::GetTextLineHeightWithSpacing() };
 						ImGui::InputTextMultiline("##new_task_description", task_buf.description, CHAR_BUFFER_DEFAULT_SIZE * CHAR_BUFFER_DEFAULT_MULTIPLIER, description_input_size,
-							ImGuiInputTextFlags_AllowTabInput | ImGuiInputTextFlags_Multiline | ImGuiInputTextFlags_NoHorizontalScroll);
+							ImGuiInputTextFlags_AllowTabInput | static_cast<ImGuiInputTextFlags>(ImGuiInputTextFlags_Multiline) | ImGuiInputTextFlags_NoHorizontalScroll);
 					}
 
 					{	// display number of charecters
@@ -383,7 +383,8 @@ namespace PFF::toolkit::todo {
 								ImGui::SameLine();
 								UI::big_text(s_topics[x].tasks[y].title.c_str());
 								UI::shift_cursor_pos(inner_offset_x + 5, 0);
-								ImGui::Text(s_topics[x].tasks[y].description.c_str());
+								const auto description_c_str= s_topics[x].tasks[y].description.c_str();
+								ImGui::Text(description_c_str);
 							}
 						}
 					}
