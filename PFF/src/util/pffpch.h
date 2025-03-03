@@ -22,10 +22,10 @@
 #include <string_view>
 #include <cstring>
 #include <sstream>
+
 #include <vector>
 #include <unordered_map>
 #include <unordered_set>
-
 #include <optional>
 #include <queue>
 #include <span>
@@ -42,6 +42,9 @@
 #include <cstdarg>
 #include <fstream>
 #include <iomanip>
+
+#include <system_error>
+#include <signal.h>
 
 // ------------------------------- multithreading -------------------------------
 #include <condition_variable>

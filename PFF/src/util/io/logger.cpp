@@ -4,13 +4,6 @@
 #include "logger.h"
 
 
-// #define ENABLE_STUPID_LOG
-#ifdef ENABLE_STUPID_LOG
-    #define STUPID_LOG(message)                                 { std::cout << message << std::endl; }
-#else
-    #define STUPID_LOG(message)
-#endif
-
 
 namespace PFF::logger {
 
@@ -24,8 +17,6 @@ namespace PFF::logger {
     #define LOGGER_REGISTER_THREAD_LABLE                        "LOGGER register thread label"
     #define LOGGER_UNREGISTER_THREAD_LABLE                      "LOGGER unregister thread label"
     
-    #define QUEUE_MAX_SIZE                                      32
-
     #define OPEN_FILE                                           main_file = std::ofstream(main_log_file_path, std::ios::app);                       \
                                                                 if (!main_file.is_open()) {                                                         \
                                                                     std::cerr << "Failed to open main log files" << std::endl;                      \
@@ -167,8 +158,6 @@ namespace PFF::logger {
 
     void shutdown() {
 
-        STUPID_LOG("shutting down")
-
         if (!is_init) {
             std::cerr << "Tried to shutdown logger bevor initilization" << std::endl;
             std::quick_exit(1);
@@ -176,13 +165,8 @@ namespace PFF::logger {
 
         stop = true;
         cv.notify_all();
-        STUPID_LOG("stop && cv")
-        if (worker_thread.joinable()) {
-
-            STUPID_LOG("waiting for join")    
+        if (worker_thread.joinable())
             worker_thread.join();
-            STUPID_LOG("join")    
-        }
 
         // Process any remaining messages in the queue after worker thread has stopped
         std::queue<message_format> remaining_messages;
@@ -197,7 +181,6 @@ namespace PFF::logger {
             process_log_message(std::move(msg)); // Process each message
         }
 
-        STUPID_LOG("buffered_messages: " << buffered_messages)
         if ( !buffered_messages.empty()) {
             OPEN_FILE
             main_file << buffered_messages;
@@ -298,7 +281,6 @@ namespace PFF::logger {
 
                 if (strcmp(message.function_name, LOGGER_UPDATE_FORMAT) == 0) {
 
-                    STUPID_LOG("processing: LOGGER_UPDATE_FORMAT")
                     std::lock_guard<std::mutex> lock(general_mutex);
                     format_prev = format_current;
                     format_current = static_cast<std::string>(message.message);
@@ -307,7 +289,6 @@ namespace PFF::logger {
                 
                 } else if (strcmp(message.function_name, LOGGER_REVERSE_FORMAT) == 0) {
                     
-                    STUPID_LOG("processing: LOGGER_REVERSE_FORMAT")
                     std::lock_guard<std::mutex> lock(general_mutex);
                     const std::string buffer = format_current;
                     format_current = format_prev;
@@ -315,7 +296,6 @@ namespace PFF::logger {
 
                 } else if (strcmp(message.function_name, LOGGER_CHANGE_THRESHHOLD) == 0) {
 
-                    STUPID_LOG("processing: LOGGER_CHANGE_THRESHHOLD")
                     std::lock_guard<std::mutex> lock(general_mutex);
                     severity_level_buffering_threshhold = static_cast<severity>(std::min(static_cast<u8>(message.msg_sev), static_cast<u8>(severity::Error)));   
 
@@ -343,10 +323,8 @@ namespace PFF::logger {
                 
                 } else if (strcmp(message.function_name, LOGGER_REGISTER_THREAD_LABLE) == 0) {            // process_reverse_in_msg_format();
 
-                    STUPID_LOG("processing: LOGGER_REGISTER_THREAD_LABLE")
                     std::lock_guard<std::mutex> lock(general_mutex);
                     
-                    STUPID_LOG("register_label_for_thread")
                     if (thread_labels.find(message.thread_id) != thread_labels.end())
                     WRITE_TO_FILE("[LOGGER] Thread with ID: [" << message.thread_id << "] already has lable [" << thread_labels[message.thread_id] << "] registered. Overriding with the lable: [" << message.message << "]\n")
                     else
@@ -356,7 +334,6 @@ namespace PFF::logger {
                 
                 } else if (strcmp(message.function_name, LOGGER_UNREGISTER_THREAD_LABLE) == 0) {
 
-                    STUPID_LOG("processing: LOGGER_UNREGISTER_THREAD_LABLE")
                     std::lock_guard<std::mutex> lock(general_mutex);
                     thread_labels.erase(message.thread_id);
                 }
@@ -446,8 +423,6 @@ namespace PFF::logger {
             else
                 format_filled << format_current[x];
         }
-
-        STUPID_LOG("buffered_messages: " << buffered_messages)
 
         std::string log_str = format_filled.str();
         if (!((static_cast<u8>(message.msg_sev) >= static_cast<u8>(severity_level_buffering_threshhold)) || (buffered_messages.capacity() - buffered_messages.size()) <= log_str.size())) {
