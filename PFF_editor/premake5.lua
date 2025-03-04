@@ -77,10 +77,7 @@ project "PFF_editor"
 			"{MKDIR} %{wks.location}/bin/" .. outputs .. "/PFF_editor/wiki",
 			"{COPY} %{wks.location}/.github/wiki %{wks.location}/bin/" .. outputs .. "/PFF_editor/wiki",
 
-			copy_content_of_dir(outputs, "PFF_editor/shaders"),
-			copy_content_of_dir(outputs, "PFF_editor/assets"),
-			copy_content_of_dir(outputs, "PFF_editor/defaults"),
-			-- table.unpack(copy_content_of_dir({"PFF_editor/shaders", "PFF_editor/defaults", "PFF_editor/assets"})),
+			table.unpack(copy_content_of_dir(outputs, {"PFF_editor/shaders", "PFF_editor/assets", "PFF_editor/defaults", "PFF_editor/project_templates"})),
 		}
 
 

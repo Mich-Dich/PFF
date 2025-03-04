@@ -128,9 +128,6 @@ namespace PFF::logger {
                 std::quick_exit(1);
             }
 
-        std::cout << "Output directory: " << PFF_OUTPUTS << std::endl;
-        std::cout << "main_log_dir: " << main_log_dir << std::endl;
-
         OPEN_FILE
         main_file << "\n========================================================\n";
         auto now = std::time(nullptr);
@@ -299,8 +296,7 @@ namespace PFF::logger {
                     buffer_size = static_cast<size_t>(message.line);
 
                     OPEN_FILE
-                    main_file << message.message;
-                    
+                    main_file << message.message;                    
                     if (is_init && buffered_messages.size() >= buffer_size) {                   // Handle buffer overflow if the new size is smaller than the current buffer content
                         
                         main_file << buffered_messages;
