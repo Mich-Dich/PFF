@@ -41,6 +41,7 @@ try:
     utils.print_u("\nCHECK FOR ANY UPDATES")
     print("updating main repo")
     try:
+        subprocess.run(["git", "fetch", "origin"], check=True)
         subprocess.call(["git", "pull"])
         utils.print_c(f"Successfully updated main repo to the latest commit.", "green")
     except subprocess.CalledProcessError as e:
