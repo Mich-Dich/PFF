@@ -49,7 +49,7 @@ To get started with PFF, follow these simple steps
 
 Summary:
    ```
-   git clone --branch dev --recursive git@github.com:Mich-Dich/PFF.git
+   git clone --recursive git@github.com:Mich-Dich/PFF.git
    cd PFF
    python setup.py
    make -j
