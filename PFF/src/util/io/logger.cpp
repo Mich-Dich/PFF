@@ -20,7 +20,7 @@ namespace PFF::logger {
     
     #define OPEN_FILE                                           main_file = std::ofstream(main_log_file_path, std::ios::app);                       \
                                                                 if (!main_file.is_open()) {                                                         \
-                                                                    std::cerr << "Failed to open main log files" << std::endl;                      \
+                                                                    std::cerr << "Failed to open main log file path: [" << main_log_file_path << "]" << std::endl;                      \
                                                                     std::quick_exit(1);                                                             \
                                                                 }
 
@@ -82,15 +82,9 @@ namespace PFF::logger {
             return;
         }
         
-        main_file = std::ofstream(main_log_file_path, std::ios::app);
-        if (!main_file.is_open()) {
-            std::cerr << "Failed to open main log files" << std::endl;
-            std::quick_exit(1);
-        }
-
+        OPEN_FILE
         main_file << buffered_messages << log_str;
-
-        main_file.close();
+        CLOSE_FILE
 
         if (write_log_to_console) 
             std::cout << buffered_messages << log_str;
@@ -125,29 +119,26 @@ namespace PFF::logger {
         format_prev = format;
         write_log_to_console = log_to_console;
 
-        if (!std::filesystem::is_directory(log_dir))
-            if (!std::filesystem::create_directory(log_dir)) {
+        main_log_dir = std::filesystem::absolute(log_dir);
+        main_log_file_path = main_log_dir / main_log_file_name;
+
+        if (!std::filesystem::is_directory(main_log_dir))
+            if (!std::filesystem::create_directory(main_log_dir)) {
                 std::cerr << "Failed to create the directory for log files" << std::endl;
                 std::quick_exit(1);
             }
 
-        main_log_dir = log_dir;
-        main_log_file_path = log_dir / main_log_file_name;
+        std::cout << "Output directory: " << PFF_OUTPUTS << std::endl;
+        std::cout << "main_log_dir: " << main_log_dir << std::endl;
 
-        main_file = std::ofstream(main_log_file_path, (use_append_mode) ? std::ios::app : std::ios::out );
-        if (!main_file.is_open()) {
-            std::cerr << "Failed to open main log files" << std::endl;
-            std::quick_exit(1);
-        }
-
+        OPEN_FILE
         main_file << "\n========================================================\n";
-
         auto now = std::time(nullptr);
         auto tm = *std::localtime(&now);
         main_file << "Log initalized at [" << std::put_time(&tm, "%Y-%m-%d %H:%M:%S") << "]\n";
-
         main_file << "========================================================\n";
-        main_file.close();
+        CLOSE_FILE
+
         buffered_messages.reserve(buffer_size);
 
         is_init = true;
@@ -207,14 +198,14 @@ namespace PFF::logger {
         }
         
         std::lock_guard<std::mutex> lock(queue_mutex);
-        log_queue.emplace(severity::Trace, "", LOGGER_UPDATE_FORMAT, 0, static_cast<std::thread::id>(0), new_format.c_str());
+        log_queue.emplace(severity::Trace, "", LOGGER_UPDATE_FORMAT, 0, std::thread::id(), new_format.c_str());
         cv.notify_all();
     }
 
     void use_previous_format() {
         
         std::lock_guard<std::mutex> lock(queue_mutex);
-        log_queue.emplace(severity::Trace, "", LOGGER_REVERSE_FORMAT, 0, static_cast<std::thread::id>(0), "");
+        log_queue.emplace(severity::Trace, "", LOGGER_REVERSE_FORMAT, 0, std::thread::id(), "");
         cv.notify_all();
     }
 
@@ -244,14 +235,14 @@ namespace PFF::logger {
     void set_buffer_threshhold(const severity new_threshhold) {
 
         std::lock_guard<std::mutex> lock(queue_mutex);
-        log_queue.emplace(new_threshhold, "", LOGGER_CHANGE_THRESHHOLD, 0, static_cast<std::thread::id>(0), "[LOGGER] Changed buffering threshhold to [" + severity_names[static_cast<u8>(severity_level_buffering_threshhold)] + "]");
+        log_queue.emplace(new_threshhold, "", LOGGER_CHANGE_THRESHHOLD, 0, std::thread::id(), "[LOGGER] Changed buffering threshhold to [" + severity_names[static_cast<u8>(severity_level_buffering_threshhold)] + "]");
         cv.notify_all();
     }
 
     void set_buffer_size(const size_t new_size) {
 
         std::lock_guard<std::mutex> lock(queue_mutex);
-        log_queue.emplace(severity::Trace, "", LOGGER_CHANGE_BUFFER_SIZE, static_cast<int>(new_size), static_cast<std::thread::id>(0), "[LOGGER] Changed buffer size to [" + std::to_string(new_size) + "]");
+        log_queue.emplace(severity::Trace, "", LOGGER_CHANGE_BUFFER_SIZE, static_cast<int>(new_size), std::thread::id(), "[LOGGER] Changed buffer size to [" + std::to_string(new_size) + "]");
         cv.notify_all();
     }
 
@@ -260,6 +251,7 @@ namespace PFF::logger {
     // ========================================================================================================================
 
     void process_queue() {
+
         std::unique_lock<std::mutex> lock(queue_mutex);
         while (!stop) {
 

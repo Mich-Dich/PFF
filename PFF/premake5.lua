@@ -49,7 +49,6 @@ project "PFF"
 	links
 	{
 		"ImGui",
-        -- "%{Library.Vulkan}",
 	}
 
 	postbuildcommands {
@@ -68,14 +67,20 @@ project "PFF"
 		flags { "NoPCH" }
 	
 	filter "system:windows"
-		systemversion "latest"
-		
-		defines
+		systemversion "latest"		
+		defines "PFF_PLATFORM_WINDOWS"
+
+		links
 		{
-			"PFF_PLATFORM_WINDOWS",
+			"glfw",
+			"%{Library.Vulkan}",
 		}
 
-		links { "glfw", }
+		libdirs 
+		{
+			"vendor/imgui/bin/Debug-windows-x86_64/ImGui",
+			"%{IncludeDir.VulkanSDK}/Lib",  -- Ensure this points to the Vulkan SDK's Lib directory
+		}
 	
 		postbuildcommands {										-- copy premake exe (needed for engine projects)
 			"{MKDIR} %{wks.location}/bin/" .. outputs .. "/vendor/premake",
@@ -96,7 +101,6 @@ project "PFF"
 		includedirs
 		{
 			"/usr/include/vulkan",
-
 			"/usr/include/x86_64-linux-gnu/qt5", 				-- Base Qt include path
 			"/usr/include/x86_64-linux-gnu/qt5/QtCore",
 			"/usr/include/x86_64-linux-gnu/qt5/QtWidgets",

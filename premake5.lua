@@ -17,13 +17,11 @@ workspace "PFF"
 		"MultiProcessorCompile"
 	}
 
-	-- TODO: PFF_USING_EDITOR should not be defined in the backaged builds of game
-	defines
-	{
-		"PFF_USING_EDITOR",
-	}
-
 	outputs  = "%{cfg.buildcfg}-%{cfg.system}-%{cfg.architecture}"
+	defines {
+		"PFF_OUTPUTS=\"" .. outputs .. "\"",
+		"PFF_USING_EDITOR",							-- TODO: PFF_USING_EDITOR should not be defined in the packaged builds of game
+	}
 
 	-- local RESET = "\27[0m"
 	-- local GREEN = "\27[32m"

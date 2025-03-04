@@ -38,7 +38,6 @@ class vulkan_configuration:
             if (vulkan_SDK is None):
                 print("\nYou don't have the Vulkan SDK installed!")
                 cls.__install_vulkan_SDK()
-                input("Press enter to continue after instalation ...")
             elif (cls.required_vulkan_version not in vulkan_SDK):
                 print(f"You don't have the correct Vulkan SDK version! (Engine requires {cls.required_vulkan_version})")
                 cls.__install_vulkan_SDK()

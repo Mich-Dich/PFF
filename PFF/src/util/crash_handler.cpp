@@ -10,9 +10,31 @@
 
 namespace PFF {
 
+    // need to catch signals related to termination to shutdown gracefully (eg: flash remaining log messages). Was inspired by reckless_log: https://github.com/mattiasflodin/reckless
+
+	/* Copyright 2015 - 2020 Mattias Flodin <git@codepentry.com>
+	 *
+	 * Permission is hereby granted, free of charge, to any person obtaining a copy
+	 * of this software and associated documentation files(the "Software"), to deal
+	 * in the Software without restriction, including without limitation the rights
+	 * to use, copy, modify, merge, publish, distribute, sublicense, and /or sell
+	 * copies of the Software, and to permit persons to whom the Software is
+	 * furnished to do so, subject to the following conditions :
+	 *
+	 * The above copyright notice and this permission notice shall be included in all
+	 * copies or substantial portions of the Software.
+	 *
+	 * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+	 * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+	 * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT.IN NO EVENT SHALL THE
+	 * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+	 * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+	 * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+	 * SOFTWARE.
+	 */
+
 #if defined(PFF_PLATFORM_LINUX)
 
-    // need to catch signals related to termination to shutdown gracefully (eg: flash remaining log messages). Was inspired by reckless_log: https://github.com/mattiasflodin/reckless
 	const std::initializer_list<int> signals = {
 		SIGHUP, SIGINT, SIGQUIT, SIGILL, SIGABRT, SIGFPE, SIGKILL, SIGSEGV, SIGPIPE, SIGALRM, SIGTERM, SIGUSR1, SIGUSR2,    // POSIX.1-1990 signals
 		SIGBUS, SIGPOLL, SIGPROF, SIGSYS, SIGTRAP, SIGVTALRM, SIGXCPU, SIGXFSZ,                                             // SUSv2 + POSIX.1-2001 signals
@@ -77,52 +99,35 @@ namespace PFF {
 
 #elif defined(PFF_PLATFORM_WINDOWS)
 
-    void detach_crash_handler() {
-        if (g_vectored_exception_handler) {
-            RemoveVectoredExceptionHandler(g_vectored_exception_handler);
-            g_vectored_exception_handler = nullptr;
-        }
-        
-        if (g_old_console_handler) {
-            SetConsoleCtrlHandler(g_old_console_handler, TRUE);
-            g_old_console_handler = nullptr;
-        }
-    }
+	LPTOP_LEVEL_EXCEPTION_FILTER old_exception_filter = nullptr;
 
-    LONG WINAPI exception_handler(PEXCEPTION_POINTERS pExceptionInfo) {
-        logger::shutdown();
-        detach_crash_handler();
-        ExitProcess(1);
-        return EXCEPTION_CONTINUE_SEARCH;
-    }
+	LONG WINAPI exception_filter(_EXCEPTION_POINTERS* ExceptionInfo) {
 
-    BOOL WINAPI console_handler(DWORD dwCtrlType) {
-        logger::shutdown();
-        detach_crash_handler();
-        ExitProcess(0);
-        return TRUE;
-    }
+		logger::shutdown();
 
-    void attach_crash_handler() {
-        // Add vectored exception handler for critical exceptions
-        g_vectored_exception_handler = AddVectoredExceptionHandler(1, exception_handler);
-        if (!g_vectored_exception_handler) {
-            throw std::system_error(GetLastError(), std::system_category(), "AddVectoredExceptionHandler failed");
-        }
+		// Save the old filter and detach the crash handler
+		LPTOP_LEVEL_EXCEPTION_FILTER old_filter = old_exception_filter;
+		detach_crash_handler();
 
-        // Set console control handler for termination signals
-        if (!SetConsoleCtrlHandler(console_handler, TRUE)) {
-            RemoveVectoredExceptionHandler(g_vectored_exception_handler);
-            g_vectored_exception_handler = nullptr;
-            throw std::system_error(GetLastError(), std::system_category(), "SetConsoleCtrlHandler failed");
-        }
-        
-        // Store the previous console handler (if any)
-        g_old_console_handler = SetConsoleCtrlHandler(nullptr, FALSE);
-        if (g_old_console_handler) {
-            SetConsoleCtrlHandler(g_old_console_handler, TRUE);
-        }
-    }
+		if (old_filter)
+			return old_filter(ExceptionInfo);
+		else
+			return EXCEPTION_CONTINUE_SEARCH;
+	}
+
+	void attach_crash_handler() {
+
+		assert(old_exception_filter == nullptr);
+		old_exception_filter = SetUnhandledExceptionFilter(&exception_filter);
+	}
+
+	void detach_crash_handler() {
+
+		if (old_exception_filter) {
+			SetUnhandledExceptionFilter(old_exception_filter);
+			old_exception_filter = nullptr;
+		}
+	}
 
 #endif
 

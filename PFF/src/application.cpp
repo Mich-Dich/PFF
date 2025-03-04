@@ -77,7 +77,11 @@ namespace PFF {
 		PFF_PROFILE_FUNCTION();
 		attach_crash_handler();
 
+#if defined(PFF_PLATFORM_LINUX)
 		PFF::logger::init("[$B$T:$J$E] [$B$L$X $I - $P:$G$E] $C$Z", true);
+#elif defined(PFF_PLATFORM_WINDOWS)
+		PFF::logger::init("[$B$T:$J$E] [$B$L$X $I - $P:$G$E] $C$Z", true, std::filesystem::path("..") / "bin" / PFF_OUTPUTS / "logs" );
+#endif
 		logger::set_buffer_threshhold(logger::severity::Warn);
 		ASSERT(!s_instance, "", "Application already exists");
 
@@ -259,6 +263,7 @@ namespace PFF {
 		m_arguments = args;
 		if (m_arguments.size() > 1) {
 
+			LOG(Trace, "Provided path to PFF Project File: " << m_project_path);
 			m_project_path = std::filesystem::path(m_arguments[1]);
 			ASSERT((!m_project_path.empty() && std::filesystem::exists(m_project_path) && m_project_path.extension() == PFF_PROJECT_EXTENTION), "", "path to project-file is invalid [" << m_project_path << "]. ABORTING");
 			m_project_path = m_project_path.parent_path();					// fwitch from project file to project directory
@@ -266,8 +271,10 @@ namespace PFF {
 
 		else {																// project directory not given as argument, need to manually select it
 
+			LOG(Trace, "No path to PFF Project File provided, opening file dialog");
 			const std::vector<std::pair<std::string, std::string>> project_file_filters = { {"PFF Project File", "*.pffproj"} };
 			m_project_path = util::file_dialog("Open PFF-Project", project_file_filters).parent_path();
+			LOG(Trace, "Selected file: " << m_project_path)
 		}
 
 		m_project_data = serialize_projects_data(m_project_path, serializer::option::load_from_file);
@@ -276,6 +283,8 @@ namespace PFF {
 
 	//
 	void application::init_engine() {
+
+		LOG(Trace, "init engine")
 
 		// ---------------------------------------- general subsystems ----------------------------------------
 		config::init(util::get_executable_path());

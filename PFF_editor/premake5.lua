@@ -55,10 +55,24 @@ project "PFF_editor"
 
 	filter "system:windows"
 		systemversion "latest"
-		defines { "PFF_PLATFORM_WINDOWS" }
-		files { "../metadata/app_icon.rc" }
+		defines "PFF_PLATFORM_WINDOWS"
 
-        postbuildcommands
+		files
+		{
+			"../metadata/app_icon.rc",
+		}
+
+	    links
+		{
+			"%{Library.Vulkan}",  -- Add this line to link Vulkan
+		}
+		
+		libdirs
+		{
+			"%{IncludeDir.VulkanSDK}/Lib",
+		}
+        
+		postbuildcommands
 		{
 			"{MKDIR} %{wks.location}/bin/" .. outputs .. "/PFF_editor/wiki",
 			"{COPY} %{wks.location}/.github/wiki %{wks.location}/bin/" .. outputs .. "/PFF_editor/wiki",
@@ -73,17 +87,7 @@ project "PFF_editor"
 	filter "system:linux"
 		pic "On"
 		systemversion "latest"
-		defines { "PFF_PLATFORM_LINUX" }
-
-		postbuildcommands
-		{
-			-- Create the directory if it doesn't exist
-			"mkdir -p %{wks.location}/bin/" .. outputs .. "/PFF_editor/wiki",
-			"cp -r %{wks.location}/.github/wiki %{wks.location}/bin/" .. outputs .. "/PFF_editor/wiki",
-
-			-- Copy content of directories
-			table.unpack(copy_content_of_dir(outputs, {"PFF_editor/shaders", "PFF_editor/defaults", "PFF_editor/assets"})),
-		}
+		defines "PFF_PLATFORM_LINUX"
 
 		includedirs
 		{
@@ -116,6 +120,16 @@ project "PFF_editor"
 			"Qt5Core",
 			"Qt5Widgets",
 			"Qt5Gui",
+		}
+		
+		postbuildcommands
+		{
+			-- Create the directory if it doesn't exist
+			"mkdir -p %{wks.location}/bin/" .. outputs .. "/PFF_editor/wiki",
+			"cp -r %{wks.location}/.github/wiki %{wks.location}/bin/" .. outputs .. "/PFF_editor/wiki",
+
+			-- Copy content of directories
+			table.unpack(copy_content_of_dir(outputs, {"PFF_editor/shaders", "PFF_editor/defaults", "PFF_editor/assets"})),
 		}
 
 
