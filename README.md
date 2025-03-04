@@ -21,7 +21,7 @@ To get started with PFF, follow these simple steps
 
 1. Clone the repository using:
    ```
-   git clone --branch dev --recursive git@github.com:Mich-Dich/PFF.git
+   git clone --recursive git@github.com:Mich-Dich/PFF.git
    ```
 
 2. On Windows/Linux execute the setup script (Apple currently not supported)
