@@ -250,14 +250,16 @@ namespace PFF::render::vulkan::init {
     }
 
     //> image_set
-    VkImageCreateInfo image_create_info(VkFormat format, VkImageUsageFlags usageFlags, VkExtent3D extent) {
+    VkImageCreateInfo image_create_info(VkFormat format, VkImageUsageFlags usageFlags, extent_3D extent) {
         
         VkImageCreateInfo info = {};
         info.sType = VK_STRUCTURE_TYPE_IMAGE_CREATE_INFO;
         info.pNext = nullptr;
         info.imageType = VK_IMAGE_TYPE_2D;
         info.format = format;
-        info.extent = extent;
+        info.extent.width = extent.width;
+        info.extent.height = extent.height;
+        info.extent.depth = extent.depth;
         info.mipLevels = 1;
         info.arrayLayers = 1;
         info.samples = VK_SAMPLE_COUNT_1_BIT;   // MSAA => will not be used by default, so default it to 1 sample per pixel

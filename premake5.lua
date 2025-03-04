@@ -1,6 +1,5 @@
 
 include "dependencies.lua"
-client_project_name = "Sandbox"						-- This is the name of your project
 
 workspace "PFF"
 	platforms "x64"
@@ -18,46 +17,56 @@ workspace "PFF"
 		"MultiProcessorCompile"
 	}
 
-	-- TODO: PFF_USING_EDITOR should not be defined in the backaged builds of game
-	defines
-	{
-		"PFF_USING_EDITOR",
+	outputs  = "%{cfg.buildcfg}-%{cfg.system}-%{cfg.architecture}"
+	defines {
+		"PFF_OUTPUTS=\"" .. outputs .. "\"",
+		"PFF_USING_EDITOR",							-- TODO: PFF_USING_EDITOR should not be defined in the packaged builds of game
 	}
 
-	outputs  = "%{cfg.buildcfg}-%{cfg.system}-%{cfg.architecture}"
+	-- local RESET = "\27[0m"
+	-- local GREEN = "\27[32m"
+
+    -- Set a custom build message
+    -- buildmessage(GREEN .. " ?????????????????????????? Building %{prj.name} (%{cfg.buildcfg} - %{cfg.system} - %{cfg.architecture})")
+
+	if os.target() == "linux" then
+		print("---------- target platform is linux => manually compile GLFW ----------")
+		os.execute("cmake -S ./PFF/vendor/glfw -B ./PFF/vendor/glfw/build")		-- manuel compilation
+		os.execute("cmake --build ./PFF/vendor/glfw/build")						-- manuel compilation
+		print("---------- Done compiling GLFW ----------")
+	end
 
 group "dependencies"
 	include "PFF/vendor/fastgltf"
 	include "PFF/vendor/imgui"
-	include "PFF/vendor/glfw"
+	if os.target() == "windows" then
+		include "PFF/vendor/glfw"
+	end
 group ""
 
 function copy_content_of_dir(outputs, dir_names)
-	local commands = {}
+    local commands = {}
+    for _, dir_name in ipairs(dir_names) do
+        local target_dir = "%{wks.location}/bin/" .. outputs .. "/" .. dir_name
+        local source_dir = "%{wks.location}/" .. dir_name
 
-	for _, dir_name in ipairs(dir_names) do
-		local target_dir = "%{wks.location}/bin/" .. outputs .. "/" .. dir_name
-		local source_dir = "%{wks.location}/" .. dir_name
-
-		-- Debug print
-		print("Copying directory: " .. source_dir .. " to " .. target_dir)
-
-		-- Create target directory
 		table.insert(commands, "{MKDIR} " .. target_dir)
 
-		-- Add copy command
-		table.insert(commands, "{COPY} " .. source_dir .. " " .. target_dir)
+        if os.target() == "windows" then
+			table.insert(commands, "{COPY} " .. source_dir .. " " .. target_dir)
+        elseif os.target() == "linux" then
+            table.insert(commands, "{COPY} " .. source_dir .. " " .. target_dir .. "/..")
+	    end
 	end
 
-	-- Debug print all commands
-	-- print("Generated commands:")
-	-- for _, cmd in ipairs(commands) do
-	-- 	print(cmd)ls
-	-- end
-
-	return commands
+    return commands
 end
 
-include "PFF"
-include "PFF_editor"
-include "Sandbox"
+group "Engine"
+	include "PFF"
+group ""
+
+group "Tools"
+	include "PFF_editor"
+	include "PFF_helper"
+group ""

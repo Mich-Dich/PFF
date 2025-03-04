@@ -5,7 +5,7 @@
 #include <stdint.h>
 
 #include "application.h"
-#include "util/profiling/instrumentor.h"
+#include "util/timing/instrumentor.h"
 #include "pannel_collection.h"
 
 #include "imgui_markdown.h"

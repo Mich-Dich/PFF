@@ -1,14 +1,20 @@
 #pragma once
 
 #include "util/pffpch.h"
-#include "util/UUID.h"
+#include "util/data_structures/UUID.h"
 
 namespace PFF {
 
 	struct project_data {
 
+		FORCEINLINE bool is_project_path_valid() { return (!project_path.empty() && std::filesystem::exists(project_path) && project_path.extension() == PFF_PROJECT_EXTENTION); }
+
+		std::filesystem::path		project_path;			// system path to the first world when developing the project
 		// meta_data
-		std::string					name{};						// this name will be used in the launcher and when building
+
+		std::string					display_name{};				// this name will be used in the launcher and editor
+		std::string					name{};						// this name is the name of the solution & export-folder
+		
 		UUID						ID;
 		version						engine_version{};			// version of the engine used, used by launcher, engine, editor, ...
 		version						project_version{};			// version of this project, mostly uesfull to the user for version managemant

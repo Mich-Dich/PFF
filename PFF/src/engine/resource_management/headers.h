@@ -6,7 +6,6 @@ namespace PFF {
 
 	static version		current_asset_file_header_version(1, 0, 0);
 
-
 	enum class file_type : u32 {
 
 		none,
@@ -22,7 +21,7 @@ namespace PFF {
 
 	struct asset_file_header {
 
-		version				version{};
+		version				file_version{};
 		file_type			type{};
 		system_time			timestamp{};
 	};

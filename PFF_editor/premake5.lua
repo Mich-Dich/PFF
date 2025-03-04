@@ -2,9 +2,9 @@
 project "PFF_editor"
 	location "%{wks.location}/PFF_editor"
 	kind "ConsoleApp"
-	staticruntime "off"
 	language "C++"
-	cppdialect "C++17"
+	cppdialect "C++20"
+	staticruntime "on"
 
 	targetdir ("%{wks.location}/bin/" .. outputs  .. "/%{prj.name}")
 	objdir ("%{wks.location}/bin-int/" .. outputs  .. "/%{prj.name}")
@@ -16,15 +16,14 @@ project "PFF_editor"
 
 	defines
 	{
-		"ENGINE_NAME=PFF",
-		"PROJECT_NAME=PFF_editor",
-		"PFF_INSIDE_EDITOR",
+		"PFF_EDITOR",
 	}
 
 	files
 	{
 		"src/**.h",
 		"src/**.cpp",
+		"src/**.embed",
 	}
 
 	includedirs
@@ -33,6 +32,7 @@ project "PFF_editor"
 		"assets",
 		"content",
 		"%{wks.location}/PFF/src",
+		"%{wks.location}/PFF/vendor",
 
 		"%{IncludeDir.entt}",
 		"%{IncludeDir.glm}",
@@ -42,48 +42,107 @@ project "PFF_editor"
 		"%{IncludeDir.tinyobjloader}",
 		"%{IncludeDir.stb_image}",
 		"%{IncludeDir.ImGuizmo}",
-
-		"C:/VulkanSDK/1.3.250.1/Include",
+		"%{IncludeDir.VulkanSDK}",
 	}
 
 	links
 	{
+		"PFF",
+		"PFF_helper",
 		"ImGui",
 		"fastgltf",
-		"PFF",
 	}
-	
+
 	filter "system:windows"
 		systemversion "latest"
+		defines "PFF_PLATFORM_WINDOWS"
 
-		linkoptions 
+		files
 		{
-			 "/NODEFAULTLIB:LIBCMTD",
-			 "/NODEFAULTLIB:MSVCRT",
+			"../metadata/app_icon.rc",
 		}
 
-		defines
+	    links
 		{
-			"PFF_PLATFORM_WINDOWS",
+			"%{Library.Vulkan}",  -- Add this line to link Vulkan
 		}
 		
-        postbuildcommands { table.unpack(copy_content_of_dir(outputs, {"PFF_editor/shaders", "PFF_editor/defaults", "PFF_editor/assets"})), }
+		libdirs
+		{
+			"%{IncludeDir.VulkanSDK}/Lib",
+		}
+        
+		postbuildcommands
+		{
+			"{MKDIR} %{wks.location}/bin/" .. outputs .. "/PFF_editor/wiki",
+			"{COPY} %{wks.location}/.github/wiki %{wks.location}/bin/" .. outputs .. "/PFF_editor/wiki",
+
+			table.unpack(copy_content_of_dir(outputs, {"PFF_editor/shaders", "PFF_editor/assets", "PFF_editor/defaults", "PFF_editor/project_templates"})),
+		}
+
+
+	filter "system:linux"
+		pic "On"
+		systemversion "latest"
+		defines "PFF_PLATFORM_LINUX"
+
+		includedirs
+		{
+			"/usr/include/vulkan",
+			"%{IncludeDir.glfw}/include",
+
+			"/usr/include/x86_64-linux-gnu/qt5", 				-- Base Qt include path
+			"/usr/include/x86_64-linux-gnu/qt5/QtCore",
+			"/usr/include/x86_64-linux-gnu/qt5/QtWidgets",
+			"/usr/include/x86_64-linux-gnu/qt5/QtGui",
+		}
+
+		libdirs
+		{
+			"%{wks.location}/PFF/vendor/glfw/build/src",
+			
+			"/usr/lib/x86_64-linux-gnu",  -- Default library path for system libraries
+			"/usr/lib/x86_64-linux-gnu/qt5",
+			-- "%{IncludeDir.VulkanSDK}/lib",
+		}
+
+		links
+		{
+			"%{wks.location}/PFF/vendor/glfw/build/src/glfw3",
+			-- "glfw",
+			"imgui",
+			"vulkan",
+			"vulkan",
+
+			"Qt5Core",
+			"Qt5Widgets",
+			"Qt5Gui",
+		}
 		
+		postbuildcommands
+		{
+			-- Create the directory if it doesn't exist
+			"mkdir -p %{wks.location}/bin/" .. outputs .. "/PFF_editor/wiki",
+			"cp -r %{wks.location}/.github/wiki %{wks.location}/bin/" .. outputs .. "/PFF_editor/wiki",
+
+			-- Copy content of directories
+			table.unpack(copy_content_of_dir(outputs, {"PFF_editor/shaders", "PFF_editor/defaults", "PFF_editor/assets"})),
+		}
+
+
 	filter "configurations:Debug"
-		buildoptions "/MDd"
-		defines "PFF_EDITOR_DEBUG"
+		defines "PFF_DEBUG"
 		runtime "Debug"
 		symbols "on"
 
 	filter "configurations:RelWithDebInfo"
-		defines "PFF_EDITOR_RELEASE_WITH_DEBUG_INFO"
+		defines "PFF_RELEASE_WITH_DEBUG_INFO"
 		runtime "Release"
 		symbols "on"
-		optimize "speed"
+		optimize "on"
 
 	filter "configurations:Release"
-		buildoptions "/MD"
-		defines "PFF_EDITOR_RELEASE"
+		defines "PFF_RELEASE"
 		runtime "Release"
+		symbols "off"
 		optimize "on"
-			

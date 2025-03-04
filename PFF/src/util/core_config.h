@@ -12,10 +12,5 @@
 
 // log assert and validation behaviour?
 // NOTE - expr in assert/validation will still be executed
-#define ENABLE_LOGGING_OF_VALIDATION			1
-#define ENABLED_LOGGING_OF_ASSERTS				1
-
-// log client assert and validation behaviour?
-// NOTE - expr in assert/validation will still be executed
-#define ENABLE_LOGGING_OF_CLIENT_VALIDATION		1
-#define ENABLED_LOGGING_OF_CLIENT_ASSERTS		1
+#define ENABLE_LOGGING_FOR_ASSERTS              1
+#define ENABLE_LOGGING_FOR_VALIDATION           1

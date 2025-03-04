@@ -118,7 +118,7 @@ namespace PFF::render::vulkan::init {
     //@param [usageFlags] Flags describing the intended usage of the image.
     //@param [extent] The extent (width, height, depth) of the image.
     //@return VkImageCreateInfo structure initialized with the provided parameters.
-    VkImageCreateInfo image_create_info(VkFormat format, VkImageUsageFlags usageFlags, VkExtent3D extent);
+    VkImageCreateInfo image_create_info(VkFormat format, VkImageUsageFlags usageFlags, extent_3D extent);
     
     //@brief Initializes an image view create info with specified properties.
     //@param [format] The format of the image.

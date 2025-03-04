@@ -4,24 +4,63 @@
 #define GLFW_INCLUDE_VULKAN
 #include <GLFW/glfw3.h>
 
+#include "util/crash_handler.h"
+
 #include "engine/events/event.h"
 #include "engine/events/application_event.h"
 #include "engine/events/mouse_event.h"
 #include "engine/events/key_event.h"
 
+// #include "util/io/serializer_data.h"
+// #include "engine/world/entity.h"
 #include "engine/layer/layer.h"
 #include "engine/layer/layer_stack.h"
 #include "engine/layer/imgui_layer.h"
 #include "engine/layer/world_layer.h"
 
 #include "engine/platform/pff_window.h"
+#include "engine/game_objects/camera.h"
+
 #include "engine/render/renderer.h"
 #include "engine/render/render_util.h"
-#include "engine/game_objects/camera.h"
+#include "engine/render/vulkan/vk_renderer.h"
+
+// ================= IN DEV =================
+#include "project/script_system.h"
+// ================= IN DEV =================
 
 #include "application.h"
 
 namespace PFF {
+
+	project_data serialize_projects_data(const std::filesystem::path& project_path, serializer::option option) {
+
+		project_data data{};
+		for (const auto& entry : std::filesystem::directory_iterator(project_path)) {
+
+			if (entry.is_directory() || entry.path().extension() != PFF_PROJECT_EXTENTION)
+				continue;
+
+			serializer::yaml(entry.path(), "project_data", option)
+				.entry(KEY_VALUE(data.display_name))
+				.entry(KEY_VALUE(data.name))
+				//.entry(KEY_VALUE(data.ID))
+				.entry(KEY_VALUE(data.engine_version))
+				.entry(KEY_VALUE(data.project_version))
+				.entry(KEY_VALUE(data.build_path))
+				.entry(KEY_VALUE(data.start_world))
+				.entry(KEY_VALUE(data.editor_start_world))
+				.entry(KEY_VALUE(data.last_modified))
+				.entry(KEY_VALUE(data.description))
+				.vector("tags", data.tags, [&](serializer::yaml& inner, u64 x) {
+					inner.entry("tag", data.tags[x]);
+				});
+
+			break;
+		}
+
+		return data;
+	}
 
 	// ==================================================================== setup ====================================================================
 
@@ -32,137 +71,57 @@ namespace PFF {
 	bool application::m_is_titlebar_hovered;
 	bool application::m_running;
 
-
 	application::application() {
 
 		PFF_PROFILE_BEGIN_SESSION("startup", "benchmarks", "PFF_benchmark_startup.json");
 		PFF_PROFILE_FUNCTION();
+		attach_crash_handler();
 
-		PFF::logger::init("[$B$T:$J$E] [$B$L$X $I - $P:$G$E] $C$Z");
-		CORE_ASSERT(!s_instance, "", "Application already exists");
-
-		CORE_LOG_INIT();
-		s_instance = this;
-
-		// ---------------------------------------- general subsystems ----------------------------------------
-
-		// ======================================= DEV force load project dir ======================================= 
-		serializer::yaml(config::get_filepath_from_configtype(util::get_executable_path(), config::file::editor), "editor_data", serializer::option::load_from_file)
-			.entry("last_opened_project", m_project_path);
-
-		if (!m_project_path.empty()) {
-			for (const auto& entry : std::filesystem::directory_iterator(m_project_path)) {
-				
-				if (entry.is_directory() || entry.path().extension() != PFF_PROJECT_EXTENTION)
-					continue;
-				
-				serializer::yaml(entry.path(), "project_data", serializer::option::load_from_file)
-					.entry(KEY_VALUE(m_project_data.name))
-					//.entry(KEY_VALUE(m_project_data.ID))
-					.entry(KEY_VALUE(m_project_data.engine_version))
-					.entry(KEY_VALUE(m_project_data.project_version))
-					.entry(KEY_VALUE(m_project_data.build_path))
-					.entry(KEY_VALUE(m_project_data.start_world))
-					.entry(KEY_VALUE(m_project_data.editor_start_world))
-					.entry(KEY_VALUE(m_project_data.last_modified))
-					.entry(KEY_VALUE(m_project_data.description))
-					.vector("tags", m_project_data.tags, [&](serializer::yaml& inner, u64 x) {
-						inner.entry("tag", m_project_data.tags[x]);
-					});
-
-				break;
-			}
-		}
-
-					//m_project_data{};
-		// ========================================================== TODO ==========================================================
-		//		Editor needs to set the [project_path] in the yaml file bevor starting the engine <= IMPORTANT
-		// ========================================================== TODO ==========================================================
-
-		config::init(m_project_path, util::get_executable_path());
-
-		// LOAD PROJECT_DATA
-
-		serialize(serializer::option::load_from_file);
-		set_fps_settings(m_target_fps);
-
-		m_layerstack = create_ref<layer_stack>();
-
-		m_window = std::make_shared<pff_window>();
-		m_window->set_event_callback(BIND_FUNKTION(application::on_event));
-		
-		// ---------------------------------------- renderer ----------------------------------------
-
-#if defined PFF_RENDER_API_VULKAN
-		GET_RENDERER.setup(m_window, m_layerstack);
+#if defined(PFF_PLATFORM_LINUX)
+		PFF::logger::init("[$B$T:$J$E] [$B$L$X $I - $P:$G$E] $C$Z", true);
+#elif defined(PFF_PLATFORM_WINDOWS)
+		PFF::logger::init("[$B$T:$J$E] [$B$L$X $I - $P:$G$E] $C$Z", true, std::filesystem::path("..") / "bin" / PFF_OUTPUTS / "logs" );
 #endif
-		// ---------------------------------------- layers ----------------------------------------
-		m_world_layer = new world_layer();
-		m_layerstack->push_layer(m_world_layer);
-		GET_RENDERER.set_active_camera(m_world_layer->get_editor_camera());
+		logger::set_buffer_threshhold(logger::severity::Warn);
+		ASSERT(!s_instance, "", "Application already exists");
 
-		m_imgui_layer = new UI::imgui_layer();
-		m_layerstack->push_overlay(m_imgui_layer);
-
-		PFF_PROFILE_END_SESSION();
+		LOG_INIT();
+		s_instance = this;
 	}
 
 	application::~application() {
 
-		PFF_PROFILE_BEGIN_SESSION("shutdown", "benchmarks", "PFF_benchmark_shutdown.json");
-		
 		GET_RENDERER.set_state(system_state::inactive);
 		serialize(serializer::option::save_to_file);
 
-		for (size_t x = 0; x < m_timers.size(); x++)
-			util::cancel_timer(m_timers[x]);
-		m_timers.clear();
-
-		//m_current_map.reset();
-		//m_layerstack.pop_layer(m_world_layer);
-		//delete m_world_layer;
+		// for (size_t x = 0; x < m_timers.size(); x++)
+		// 	util::cancel_timer(m_timers[x]);
+		// m_timers.clear();
 
 		GET_RENDERER.resource_free();
 
 		m_layerstack->pop_overlay(m_imgui_layer);
 		delete m_imgui_layer;
+		m_imgui_layer = nullptr;
+
+		m_layerstack->pop_overlay(m_world_layer);
+		delete m_world_layer;
+		m_world_layer = nullptr;
 
 		GET_RENDERER.shutdown();
-
-
+		
 		m_layerstack.reset();
-
 		m_window.reset();
-
-		CORE_LOG_SHUTDOWN();
+		detach_crash_handler();
+		LOG_SHUTDOWN();
 		PFF_PROFILE_END_SESSION();
 	}
 
 	// ==================================================================== main loop ====================================================================
 
-	std::future<void>& application::add_future(std::future<void>& future, std::shared_ptr<std::pair<std::atomic<bool>, std::condition_variable>>& shared_state) {
-
-		std::lock_guard<std::mutex> lock(m_global_futures_mutex);
-		m_timers.push_back({ std::move(future), shared_state });
-		return m_timers.back().future;
-	}
-
-
-	void application::remove_timer(std::future<void>& future) {
-
-		std::lock_guard<std::mutex> lock(m_global_futures_mutex);
-
-		LOG(Trace, "timer vector length: " << m_timers.size());
-		/*m_timers.erase(std::remove_if(m_timers.begin(), m_timers.end(),
-			[&future](const util::timer& t) { return t.future._Ptr() == future._Ptr(); }),
-			m_timers.end());*/
-		LOG(Trace, "timer vector length: " << m_timers.size());
-	}
-
-
-
 	void application::run() {
 
+		PFF_PROFILE_END_SESSION();
 		PFF_PROFILE_BEGIN_SESSION("runtime", "benchmarks", "PFF_benchmark_runtime.json");
 
 		client_init();
@@ -183,13 +142,32 @@ namespace PFF {
 		}
 
 		GET_RENDERER.wait_idle();
-		
-		CORE_ASSERT(shutdown(), "client application is shutdown", "client-defint shutdown() has failed");			// init user code / potentally make every actor have own function (like UNREAL)
 
 		PFF_PROFILE_END_SESSION();
+		PFF_PROFILE_BEGIN_SESSION("shutdown", "benchmarks", "PFF_benchmark_shutdown.json");
+
+		ASSERT(shutdown(), "client application is shutdown", "client-defint shutdown() has failed");			// init user code / potentally make every actor have own function (like UNREAL)
 	}
 
 	// ==================================================================== PUBLIC ====================================================================
+
+	// std::future<void>& application::add_future(std::future<void>& future, std::shared_ptr<std::pair<std::atomic<bool>, std::condition_variable>>& shared_state) {
+
+	// 	std::lock_guard<std::mutex> lock(m_global_futures_mutex);
+	// 	m_timers.push_back({ std::move(future), shared_state });
+	// 	return m_timers.back().future;
+	// }
+
+	// void application::remove_timer(std::future<void>& future) {
+
+	// 	std::lock_guard<std::mutex> lock(m_global_futures_mutex);
+
+	// 	LOG(Trace, "timer vector length: " << m_timers.size());
+	// 	/*m_timers.erase(std::remove_if(m_timers.begin(), m_timers.end(),
+	// 		[&future](const util::timer& t) { return t.future._Ptr() == future._Ptr(); }),
+	// 		m_timers.end());*/
+	// 	LOG(Trace, "timer vector length: " << m_timers.size());
+	// }
 
 	void application::set_fps_settings(const bool set_for_engine_focused, const u32 new_limit) {
 
@@ -231,7 +209,7 @@ namespace PFF {
 	void application::client_init() {
 
 		// ---------------------------------------- client side ----------------------------------------
-		CORE_ASSERT(init(), "client application is intalized", "client-defint init() has failed");			// init user code / potentally make every actor have own function (like UNREAL)
+		ASSERT(init(), "client application is intalized", "client-defint init() has failed");			// init user code / potentally make every actor have own function (like UNREAL)
 
 		// ---------------------------------------- finished setup ----------------------------------------
 		GET_RENDERER.set_state(system_state::active);
@@ -277,6 +255,65 @@ namespace PFF {
 		m_delta_time = std::min<f32>(time - m_last_frame_time, 100000);
 		m_last_frame_time = time;
 		m_fps = static_cast<u32>(1.0 / (m_work_time + (m_sleep_time * 0.001)) + 0.5); // Round to nearest integer
+	}
+
+	//
+	void application::set_arguments(const std::vector<std::string>& args) {
+
+		m_arguments = args;
+		if (m_arguments.size() > 1) {
+
+			LOG(Trace, "Provided path to PFF Project File: " << m_project_path);
+			m_project_path = std::filesystem::path(m_arguments[1]);
+			ASSERT((!m_project_path.empty() && std::filesystem::exists(m_project_path) && m_project_path.extension() == PFF_PROJECT_EXTENTION), "", "path to project-file is invalid [" << m_project_path << "]. ABORTING");
+			m_project_path = m_project_path.parent_path();					// fwitch from project file to project directory
+		}
+
+		else {																// project directory not given as argument, need to manually select it
+
+			LOG(Trace, "No path to PFF Project File provided, opening file dialog");
+			const std::vector<std::pair<std::string, std::string>> project_file_filters = { {"PFF Project File", "*.pffproj"} };
+			m_project_path = util::file_dialog("Open PFF-Project", project_file_filters).parent_path();
+			LOG(Trace, "Selected file: " << m_project_path)
+		}
+
+		m_project_data = serialize_projects_data(m_project_path, serializer::option::load_from_file);
+		serialize(serializer::option::load_from_file);							// load project data
+	}
+
+	//
+	void application::init_engine() {
+
+		LOG(Trace, "init engine")
+
+		// ---------------------------------------- general subsystems ----------------------------------------
+		config::init(util::get_executable_path());
+		config::create_config_files_for_project(m_project_path);
+
+		serialize(serializer::option::load_from_file);
+		set_fps_settings(m_target_fps);
+
+		m_layerstack = create_ref<layer_stack>();
+
+		m_window = std::make_shared<pff_window>();
+		m_window->set_event_callback(BIND_FUNKTION(application::on_event));
+
+		// ---------------------------------------- renderer ----------------------------------------
+
+		GET_RENDERER.setup(m_window, m_layerstack);												// init renderer
+
+		// ---------------------------------------- layers ----------------------------------------
+		m_world_layer = new world_layer();
+		m_layerstack->push_layer(m_world_layer);
+		GET_RENDERER.set_active_camera(m_world_layer->get_editor_camera());
+
+		m_imgui_layer = new UI::imgui_layer();
+		m_layerstack->push_overlay(m_imgui_layer);
+
+		script_system::init();
+
+		// TODO: load the map specefied in the project settings as editor_start_world
+		m_world_layer->set_map(create_ref<map>());
 	}
 
 	// ==================================================================== event handling ====================================================================

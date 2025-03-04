@@ -87,7 +87,7 @@ namespace PFF::toolkit::todo {
 	// can define here because header is only included in editor_layer.cpp file
 	void serialize_todo_list(std::vector<topic>& m_topics, serializer::option option) {
 
-		PFF::serializer::yaml(application::get().get_project_path() / "meta_data" / "todo_list.yml", "todo_list", option)
+		PFF::serializer::yaml(application::get().get_project_path() / CONFIG_DIR / "todo_list.yml", "todo_list", option)
 			.vector(KEY_VALUE(m_topics), [&](serializer::yaml& yaml, const u64 x) {
 
 				yaml.entry(KEY_VALUE(m_topics[x].name))
@@ -159,7 +159,7 @@ namespace PFF::toolkit::todo {
 		const ImVec2 button_size = { 50.f, ImGui::GetTextLineHeightWithSpacing() + style->FramePadding.y * 2 };
 		const ImVec2 button_size_small = { 50.f, 21 };
 
-		UI::custom_frame_NEW(first_width, false, UI::default_gray_1, [&] {
+		UI::custom_frame_NEW(first_width, false, ImGui::ColorConvertFloat4ToU32(UI::get_default_gray_1_ref()), [&] {
 
 			const f32 start_pos = ImGui::GetCursorPosX();
 			const f32 inner_padding = 20.f;
@@ -201,7 +201,7 @@ namespace PFF::toolkit::todo {
 
 			UI::shift_cursor_pos(inner_padding + 5, 10);
 
-			ImGui::PushStyleColor(ImGuiCol_ChildBg, (ImU32)UI::default_gray_1);
+			ImGui::PushStyleColor(ImGuiCol_ChildBg, ImGui::ColorConvertFloat4ToU32(UI::get_default_gray_1_ref()));
 			ImGui::BeginChild("Child##for_todo_topics", { inner_width + (inner_padding - 10), ImGui::GetContentRegionAvail().y - inner_padding }, true, 0);
 			ImGui::PopStyleColor();
 
@@ -218,7 +218,7 @@ namespace PFF::toolkit::todo {
 				}
 
 				char buf[32];
-				sprintf_s(buf, 32, "X##kill_%llu", n);
+				snprintf(buf, 32, "X##kill_%llu", n);
 
 				ImGui::SameLine();
 				if (s_topics[n].hovered) {
@@ -276,7 +276,7 @@ namespace PFF::toolkit::todo {
 							auto pos_buffer = ImGui::GetCursorPos();
 							ImGui::SetCursorPos(start_pos);
 							UI::shift_cursor_pos(ImGui::GetColumnWidth() - 60, 4);
-							ImGui::Text("%d/%d", strlen(task_buf.name), CHAR_BUFFER_DEFAULT_SIZE);
+							ImGui::Text("%ld/%d", strlen(task_buf.name), CHAR_BUFFER_DEFAULT_SIZE);
 							ImGui::SetCursorPos(pos_buffer);
 						}
 
@@ -299,7 +299,7 @@ namespace PFF::toolkit::todo {
 							collum_width = ImGui::GetColumnWidth();
 							const ImVec2 description_input_size = { ImGui::GetColumnWidth(), (ImGui::GetTextLineHeight() * (float)util::count_lines(task_buf.description)) + ImGui::GetTextLineHeightWithSpacing() };
 							ImGui::InputTextMultiline("##new_task_description", task_buf.description, CHAR_BUFFER_DEFAULT_SIZE * CHAR_BUFFER_DEFAULT_MULTIPLIER, description_input_size,
-							ImGuiInputTextFlags_AllowTabInput | ImGuiInputTextFlags_Multiline | ImGuiInputTextFlags_NoHorizontalScroll);
+							ImGuiInputTextFlags_AllowTabInput | static_cast<ImGuiInputTextFlags>(ImGuiInputTextFlags_Multiline) | ImGuiInputTextFlags_NoHorizontalScroll);
 
 						}, [] {
 
@@ -313,14 +313,14 @@ namespace PFF::toolkit::todo {
 						collum_width = ImGui::GetColumnWidth();
 						const ImVec2 description_input_size = { ImGui::GetColumnWidth(), (ImGui::GetTextLineHeight() * (float)util::count_lines(task_buf.description)) + ImGui::GetTextLineHeightWithSpacing() };
 						ImGui::InputTextMultiline("##new_task_description", task_buf.description, CHAR_BUFFER_DEFAULT_SIZE * CHAR_BUFFER_DEFAULT_MULTIPLIER, description_input_size,
-							ImGuiInputTextFlags_AllowTabInput | ImGuiInputTextFlags_Multiline | ImGuiInputTextFlags_NoHorizontalScroll);
+							ImGuiInputTextFlags_AllowTabInput | static_cast<ImGuiInputTextFlags>(ImGuiInputTextFlags_Multiline) | ImGuiInputTextFlags_NoHorizontalScroll);
 					}
 
 					{	// display number of charecters
 						auto pos_buffer = ImGui::GetCursorPos();
 						ImGui::SetCursorPos(start_pos);
 						UI::shift_cursor_pos(collum_width - 60, 4);
-						ImGui::Text("%d/%d", strlen(task_buf.description), CHAR_BUFFER_DEFAULT_SIZE * CHAR_BUFFER_DEFAULT_MULTIPLIER);
+						ImGui::Text("%ld/%d", strlen(task_buf.description), CHAR_BUFFER_DEFAULT_SIZE * CHAR_BUFFER_DEFAULT_MULTIPLIER);
 						ImGui::SetCursorPos(pos_buffer);
 					}
 
@@ -352,7 +352,7 @@ namespace PFF::toolkit::todo {
 
 						if (!s_topics[x].tasks[y].done) {
 
-							sprintf_s(buf, 32, "##topic_%llutask_%llu", x, y);
+							snprintf(buf, 64, "##topic_%llu_task_%llu", x, y);
 							ImGui::Checkbox(buf, &s_topics[x].tasks[y].done);
 							ImGui::SameLine();
 							UI::big_text(s_topics[x].tasks[y].title.c_str(), true);
@@ -378,12 +378,13 @@ namespace PFF::toolkit::todo {
 
 							if (s_topics[x].tasks[y].done) {
 
-								sprintf_s(buf, 32, "##topic_%llutask_%llu", x, y);
+								snprintf(buf, 64, "##topic_%llutask_%llu", x, y);
 								ImGui::Checkbox(buf, &s_topics[x].tasks[y].done);
 								ImGui::SameLine();
 								UI::big_text(s_topics[x].tasks[y].title.c_str());
 								UI::shift_cursor_pos(inner_offset_x + 5, 0);
-								ImGui::Text(s_topics[x].tasks[y].description.c_str());
+								const auto description_c_str= s_topics[x].tasks[y].description.c_str();
+								ImGui::Text(description_c_str);
 							}
 						}
 					}

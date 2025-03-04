@@ -1,37 +1,52 @@
 
 #include "util/pch_editor.h"
 
-#include <entt.hpp>
+#include <entt/entt.hpp>
 #include <glm/gtc/type_ptr.hpp>
 #include <imgui.h>
 #include <ImGuizmo.h>
 
 #include "util/ui/pannel_collection.h"
+#include "util/ui/component_UI.h"
 #include "engine/world/map.h"
-
-#include "engine/resource_management/static_mesh_asset_manager.h"
 #include "engine/resource_management/mesh_serializer.h"
+
+#include "PFF_editor.h"
 
 #include "world_viewport.h"
 
 namespace PFF {
 
 
-
-
-
-
 	world_viewport_window::world_viewport_window() {
 
 		serialize(serializer::option::load_from_file);
 
-		m_transfrom_translation_image = create_ref<image>(util::get_executable_path() / "assets" / "icons" / "transfrom_translation.png", image_format::RGBA);
-		m_transfrom_rotation_image = create_ref<image>(util::get_executable_path() / "assets" / "icons" / "transfrom_rotation.png", image_format::RGBA);
-		m_transfrom_scale_image = create_ref<image>(util::get_executable_path() / "assets" / "icons" / "transfrom_scale.png", image_format::RGBA);
+		auto* editor_layer = PFF_editor::get().get_editor_layer();
+		m_transfrom_translation_image	= editor_layer->get_transfrom_translation_image();
+		m_transfrom_rotation_image		= editor_layer->get_transfrom_rotation_image();
+		m_transfrom_scale_image			= editor_layer->get_transfrom_scale_image();
+		m_folder_add_icon				= editor_layer->get_folder_add_icon();
+		m_mesh_asset_icon				= editor_layer->get_mesh_asset_icon();
+		m_relation_icon					= editor_layer->get_relation_icon();
+		m_file_icon						= editor_layer->get_file_icon();
+		m_file_proc_icon				= editor_layer->get_file_proc_icon();
+		m_mesh_mini_icon				= editor_layer->get_mesh_mini_icon();
+		m_show_icon						= editor_layer->get_hide_icon();
+		m_hide_icon						= editor_layer->get_show_icon();
+
 	}
 
 	world_viewport_window::~world_viewport_window() {
 
+		m_transfrom_translation_image.reset();
+		m_transfrom_rotation_image.reset();
+		m_transfrom_scale_image.reset();
+		m_folder_add_icon.reset();
+		m_mesh_asset_icon.reset();
+		m_relation_icon.reset();
+		m_file_icon.reset();
+		m_mesh_mini_icon.reset();
 		serialize(serializer::option::save_to_file);
 	}
 
@@ -64,6 +79,8 @@ namespace PFF {
 		}
 		ImGui::End();
 
+
+		m_deletion_queue.flush();
 	}
 
 	void world_viewport_window::show_possible_sub_window_options() {
@@ -97,27 +114,22 @@ namespace PFF {
 		if (option == serializer::option::save_to_file) {
 
 			selected_ID = m_selected_entity.get_UUID();
-			CORE_LOG(Trace, "Save UUID: " << selected_ID);
+			LOG(Trace, "Save UUID: " << selected_ID);
 		}
 
 		serializer::yaml(config::get_filepath_from_configtype(application::get().get_project_path(), config::file::editor), "world_vieport_data", option)
 			.entry("selected_entity", selected_ID);
 
-		if (option == serializer::option::load_from_file) {
+		//if (option == serializer::option::load_from_file) {
 
-			// TODO: load selected entity after loading world/map
-			CORE_LOG(Trace, "Load UUID: " << selected_ID);
-			const auto& maps = application::get().get_world_layer()->get_maps();
-			for (const auto& loc_map : maps) {
+		//	// TODO: load selected entity after loading world/map
+		//	LOG(Trace, "Load UUID: " << selected_ID);
+		//	if (auto loc_entity = application::get().get_world_layer()->get_map()->get_entity_by_UUID(selected_ID)) {
 
-				if (auto loc_entity = loc_map->get_entity_by_UUID(selected_ID)) {
-
-					m_selected_entity = loc_entity;
-					CORE_LOG(Info, "FOUND UUID: " << selected_ID);
-					break;
-				}
-			}
-		}
+		//		m_selected_entity = loc_entity;
+		//		LOG(Info, "FOUND UUID: " << selected_ID);
+		//	}
+		//}
 
 	}
 
@@ -125,41 +137,112 @@ namespace PFF {
 	// Sub windows
 	// ------------------------------------------------------------------------------------------------------------------------------------------------------------------
 
-	void world_viewport_window::display_entity_children(ref<map> loc_map, entity& entity) {
+	void world_viewport_window::add_show_hide_icon(PFF::entity& entity) {
 
+		if (entity.has_component<mesh_component>()) {
+
+			mesh_component& mesh_comp = entity.get_component<mesh_component>();
+			ImGui::PushStyleColor(ImGuiCol_Button, IM_COL32(240, 240, 240, 20));
+			ImGui::PushStyleVar(ImGuiStyleVar_FramePadding, ImVec2(0));
+			
+			if (ImGui::ImageButton(((mesh_comp.shoudl_render) ? m_show_icon->get_descriptor_set() : m_hide_icon->get_descriptor_set()), ImVec2(15)))
+				mesh_comp.shoudl_render = !mesh_comp.shoudl_render;
+
+			ImGui::PopStyleVar();
+			ImGui::PopStyleColor();
+			ImGui::SameLine();
+		}
+	}
+
+	void world_viewport_window::display_entity_children(ref<map> loc_map, entity& entity, u64& index, const f32 pos_x, const ImVec2 size, const f32 position_x) {
+
+		const ImVec2 pos_offset = ImVec2(ImGui::GetStyle().WindowPadding.x, 0);
+		ImDrawList* draw_list = ImGui::GetWindowDrawList();
 		auto& relation_comp = entity.get_component<relationship_component>();
 		for (const auto child_ID : relation_comp.children_ID) {
 
 			PFF::entity child = loc_map->get_entity_by_UUID(child_ID);
+			if (!child) {
+
+				LOG(Warn, "Bad UUID pointer: " << child_ID);
+				continue;
+			}			
+
+			if (index % 2) {
+
+				const ImVec2 pos = ImVec2(pos_x, ImGui::GetCursorScreenPos().y -2);
+				draw_list->AddRectFilled(pos, pos + size, IM_COL32(240, 240, 240, 10));
+			}
+			
 			const char* name = child.get_component<tag_component>().tag.c_str();
 
+			add_show_hide_icon(entity);
+
+			std::string item_name = "outliner_entity_" + index++;
+			ImGui::PushID(item_name.c_str());
 			// Does have childer itself
 			if (child.get_component<relationship_component>().children_ID.size() > static_cast<size_t>(0)) {
 
-				ImGui::Text("O");		// TODO: replace with hide/show button
-				ImGui::SameLine();
-				const bool is_open = ImGui::TreeNodeEx(name,
-					outliner_base_flags | ((m_selected_entity == child) ? ImGuiTreeNodeFlags_Selected : 0));
+				const bool is_open = ImGui::TreeNodeEx(name, outliner_base_flags | ((m_selected_entity == child) ? ImGuiTreeNodeFlags_Selected : 0));
+				ImGui::PopID();
 
 				if (ImGui::IsItemClicked())
 					m_selected_entity = child;
 
+				list_all_components(entity, position_x);
+				outliner_entity_popup(item_name.c_str(), loc_map, child);
+
 				if (is_open) {
 
-					display_entity_children(loc_map, child);
+					display_entity_children(loc_map, child, index, pos_x, size, position_x);
 					ImGui::TreePop();
 				}
 				continue;
 			}
 
 			// Does not have more childer
-			ImGui::Text("O");		// TODO: replace with hide/show button
-			ImGui::SameLine();
-			ImGui::TreeNodeEx(name,
-				outliner_base_flags | ImGuiTreeNodeFlags_Leaf | ImGuiTreeNodeFlags_NoTreePushOnOpen | ((m_selected_entity == child) ? ImGuiTreeNodeFlags_Selected : 0));
+			
+			ImGui::TreeNodeEx(name, outliner_base_flags | ImGuiTreeNodeFlags_Leaf | ImGuiTreeNodeFlags_NoTreePushOnOpen | ((m_selected_entity == child) ? ImGuiTreeNodeFlags_Selected : 0));
+			ImGui::PopID();
+
 			if (ImGui::IsItemClicked())
 				m_selected_entity = child;
+
+			list_all_components(entity, position_x);
+			outliner_entity_popup(item_name.c_str(), loc_map, child);
 		}
+	}
+
+	void world_viewport_window::list_all_components(PFF::entity entity, const f32 position_x) {
+
+		ImGui::SameLine();
+		ImGui::SetCursorPosX(position_x);
+
+		if (entity.has_component<relationship_component>()) {
+
+			ImGui::Image(m_relation_icon->get_descriptor_set(), ImVec2(15));
+			ImGui::SameLine();
+		}
+		
+		if (entity.has_component<mesh_component>()) {
+
+			ImGui::Image(m_mesh_mini_icon->get_descriptor_set(), ImVec2(15));
+			ImGui::SameLine();
+		}
+		
+		if (entity.has_component<script_component>()) {
+
+			ImGui::Image(m_file_icon->get_descriptor_set(), ImVec2(15));
+			ImGui::SameLine();
+		}
+		
+		if (entity.has_component<procedural_mesh_component>()) {
+
+			ImGui::Image(m_file_proc_icon->get_descriptor_set(), ImVec2(15));
+			ImGui::SameLine();
+		}
+
+		ImGui::NewLine();
 	}
 
 	void world_viewport_window::window_outliner() {
@@ -170,54 +253,110 @@ namespace PFF {
 		ImGuiWindowFlags window_flags{};
 		ImGui::Begin("Outliner", &m_show_outliner, window_flags);
 
-		const auto& maps = application::get().get_world_layer()->get_maps();
-		for (const auto& loc_map : maps) {
+		static std::string search_query;
+		UI::serach_input("##serach_in_world_viewport_details_panel", search_query);
 
-			for (const auto entity_ID : loc_map->m_registry.view<entt::entity>()) {
+		ImGui::SameLine();
+		if (ImGui::ImageButton(m_folder_add_icon->get_descriptor_set(), ImVec2{ 15 }, ImVec2(0), ImVec2(1))) {
 
-				PFF::entity loc_entity = entity(entity_ID, loc_map.get());
-				const auto& tag_comp = loc_entity.get_component<tag_component>();
+			LOG(Trace, "Add folder to outliner: NOT IMPLEMENTED YET");
+		}
+				
+		ImDrawList* draw_list = ImGui::GetWindowDrawList();
+		const auto style = ImGui::GetStyle();
+		const ImVec2 pos_offset = ImVec2(style.WindowPadding.x, 0);
+		const f32 pos_x = ImGui::GetCursorScreenPos().x - style.WindowPadding.x;
+		const ImVec2 size = ImVec2(ImGui::GetContentRegionAvail().x, ImGui::GetTextLineHeightWithSpacing()) + pos_offset;
 
-				// has relationship
-				if (loc_entity.has_component<relationship_component>()) {
+		UI::shift_cursor_pos(40, 0);
+		UI::begin_table("##window_outliner", false);
 
-					auto& relation_comp = loc_entity.get_component<relationship_component>();
-					if (relation_comp.parent_ID != 0)	// skip all children in main display (will be displayed in [display_entity_children()])
-						continue;
+		ImGui::TableNextRow();
+		ImGui::TableSetColumnIndex(0);
+		ImGui::Text("entity");
+		ImGui::TableSetColumnIndex(1);
+		const f32 position_x = ImGui::GetCursorPosX();
+		ImGui::Text("components");
 
-					ImGui::Text("O");		// TODO: replace with hide/show button
-					ImGui::SameLine();
-					const bool is_open = ImGui::TreeNodeEx(tag_comp.tag.c_str(),
-						outliner_base_flags | ((m_selected_entity == loc_entity) ? ImGuiTreeNodeFlags_Selected : 0));
-					if (ImGui::IsItemClicked())
-						m_selected_entity = loc_entity;
+		UI::end_table();
 
-					if (is_open) {
+		u64 index = 0;
+		const auto& loc_map = application::get().get_world_layer()->get_map();
+		for (const auto entity_ID : loc_map->m_registry.view<entt::entity>()) {
 
-						display_entity_children(loc_map, loc_entity);
-						ImGui::TreePop();
-					}
+			PFF::entity loc_entity = entity(entity_ID, loc_map.get());
+			const auto& tag_comp = loc_entity.get_component<tag_component>();
+
+			if (index % 2) {
+
+				const ImVec2 pos = ImVec2(pos_x, ImGui::GetCursorScreenPos().y -2);
+				draw_list->AddRectFilled(pos, pos + size, IM_COL32(240, 240, 240, 10));
+			}
+
+			// has relationship
+			if (loc_entity.has_component<relationship_component>()) {
+
+				auto& relation_comp = loc_entity.get_component<relationship_component>();
+				if (relation_comp.parent_ID != 0)	// skip all children in main display (will be displayed in [display_entity_children()])
 					continue;
-				}
 
+				add_show_hide_icon(loc_entity);
 
-				// has no relationship
-				ImGui::Text("O");		// TODO: replace with hide/show button
-				ImGui::SameLine();
-				ImGui::TreeNodeEx(tag_comp.tag.c_str(),
-					outliner_base_flags | ImGuiTreeNodeFlags_Leaf | ImGuiTreeNodeFlags_NoTreePushOnOpen | ((m_selected_entity == loc_entity) ? ImGuiTreeNodeFlags_Selected : 0));
+				std::string item_name = "outliner_entity_" + index++;
+				ImGui::PushID(item_name.c_str());
+				const bool is_open = ImGui::TreeNodeEx(tag_comp.tag.c_str(), outliner_base_flags | ((m_selected_entity == loc_entity) ? ImGuiTreeNodeFlags_Selected : 0));
+				ImGui::PopID();
+
 				if (ImGui::IsItemClicked())
 					m_selected_entity = loc_entity;
 
+				list_all_components(loc_entity, position_x);
+				if (is_open) {
+
+					display_entity_children(loc_map, loc_entity, index, pos_x, size, position_x);
+					ImGui::TreePop();
+				}
+
+				continue;
 			}
 
+			// has no relationship
+			add_show_hide_icon(loc_entity);
+			
+			std::string item_name = "outliner_entity_" + index++;
+			ImGui::PushID(item_name.c_str());
+			ImGui::TreeNodeEx(tag_comp.tag.c_str(), outliner_base_flags | ImGuiTreeNodeFlags_Leaf | ImGuiTreeNodeFlags_NoTreePushOnOpen | ((m_selected_entity == loc_entity) ? ImGuiTreeNodeFlags_Selected : 0));
+			ImGui::PopID();
+
+			if (ImGui::IsItemClicked())
+				m_selected_entity = loc_entity;
+
+			list_all_components(loc_entity, position_x);
+			outliner_entity_popup(item_name.c_str(), loc_map, loc_entity);
 		}
+
 
 		// Reset m_selected_entity when clicking on empty space
 		if (ImGui::IsWindowHovered() && ImGui::IsMouseClicked(ImGuiMouseButton_Left) && !ImGui::IsAnyItemHovered())
 			m_selected_entity = entity();
 
 		ImGui::End();
+	}
+
+	void world_viewport_window::outliner_entity_popup(const char* name, ref<map> map, PFF::entity entity) {
+
+		// Add a popup menu to the tree node
+		if (ImGui::BeginPopupContextItem(name, ImGuiPopupFlags_MouseButtonRight)) {
+			if (ImGui::MenuItem("Delete")) {
+
+				if (entity == m_selected_entity)
+					m_selected_entity = PFF::entity{};
+
+				m_deletion_queue.push_func([=]() {map->destroy_entity(entity); });
+			}
+
+			ImGui::EndPopup();
+		}
 	}
 
 
@@ -230,118 +369,36 @@ namespace PFF {
 		if (!ImGui::Begin("Details", &m_show_details, window_flags))
 			return;
 
-
-
 		const auto button_size = ImGui::CalcTextSize("Add Component").x;
 
 		ImGui::SetNextItemWidth(ImGui::GetContentRegionAvail().x - button_size - (ImGui::GetStyle().ItemSpacing.x * 3));
 		std::string search_text = "";
 		if (UI::serach_input("##serach_in_world_viewport_details_panel", search_text)) {
 
-			CORE_LOG(Debug, "Search not implemented yet");
+			LOG(Debug, "Search not implemented yet");
 		}
+
 		ImGui::SameLine();
-
-
 		if (ImGui::Button("Add Component"), button_size) {
 
 
 		}
 
-
 		if (m_selected_entity == entity()) {
+
+			ImGui::Text("No entity selected");
 
 			ImGui::End();
 			return;
 		}
 
-		// Component that every entity has
-		if (ImGui::CollapsingHeader("Tag"), ImGuiTreeNodeFlags_DefaultOpen) {
+		UI::display_tag_comp(m_selected_entity);
 
-			auto& tag_comp = m_selected_entity.get_component<tag_component>();
-			UI::begin_table("entity_component", false);
+		UI::display_transform_comp(m_selected_entity);
 
+		UI::try_display_mesh_comp(m_selected_entity);
 
-			static bool enable_tag_editing = false;
-			UI::table_row("tag", tag_comp.tag, enable_tag_editing);
-			UI::end_table();
-		}
-
-		// Component that every entity has
-		if (ImGui::CollapsingHeader("Transform"), ImGuiTreeNodeFlags_DefaultOpen) {
-
-			UI::begin_table("entity_component", false);
-
-			auto& entity_transform = (glm::mat4&)m_selected_entity.get_component<transform_component>();
-			glm::mat4 buffer_transform = entity_transform;
-
-			if (UI::table_row("transform", entity_transform)) {
-
-				const glm::mat4 root_transform = buffer_transform;
-				buffer_transform = glm::inverse(buffer_transform) * entity_transform;		// trandform delta
-				m_selected_entity.propegate_transform_to_children(root_transform, buffer_transform);
-			}
-
-			UI::end_table();
-		}
-
-		if (m_selected_entity.has_component<mesh_component>()) {
-
-			// Component that every entity has
-			if (ImGui::CollapsingHeader("Mesh"), ImGuiTreeNodeFlags_DefaultOpen) {
-
-				auto& mesh_comp = m_selected_entity.get_component<mesh_component>();
-				UI::begin_table("entity_component", false);
-
-				UI::table_row([]() {
-					ImGui::Text("mobility");
-				}, [&]() {
-
-					static const char* items[] = { "locked", "movable", "dynamic" };
-					static int item_current_idx = static_cast<std::underlying_type_t<mobility>>(mesh_comp.mobility);
-					const char* combo_preview_value = items[item_current_idx];
-					static ImGuiComboFlags flags = 0;
-					ImGui::SetNextItemWidth(ImGui::GetColumnWidth());
-					if (ImGui::BeginCombo("##details_window_mesh_component_mobility", combo_preview_value, flags)) {
-
-						for (int n = 0; n < IM_ARRAYSIZE(items); n++) {
-							const bool is_selected = (item_current_idx == n);
-							if (ImGui::Selectable(items[n], is_selected))
-								item_current_idx = n;
-
-							if (is_selected)		// Set the initial focus when opening the combo (scrolling + keyboard navigation focus)
-								ImGui::SetItemDefaultFocus();
-						}
-
-						ImGui::EndCombo();
-					}
-				});
-				UI::table_row("shoudl render", mesh_comp.shoudl_render);
-
-				UI::table_row([]() {
-				ImGui::Text("mesh asset");
-
-				}, [&]() {
-
-					ImGui::SetNextItemWidth(ImGui::GetColumnWidth());
-					ImGui::Text(mesh_comp.asset_path.string().c_str());
-
-					if (ImGui::BeginDragDropTarget()) {
-						if (const ImGuiPayload* payload = ImGui::AcceptDragDropPayload("PROJECT_CONTENT_FILE")) {
-
-							const std::filesystem::path file_path = (const char*)payload->Data;
-							mesh_comp.asset_path = util::extract_path_from_project_content_folder(file_path);
-							mesh_comp.mesh_asset = static_mesh_asset_manager::get_from_path(mesh_comp.asset_path);
-						}
-						ImGui::EndDragDropTarget();
-					}
-
-				});
-
-				UI::end_table();
-			}
-		}
-
+		UI::try_display_procedural_script_comp(m_selected_entity);
 
 		ImGui::End();
 	}
@@ -400,8 +457,8 @@ namespace PFF {
 						//glm::vec3 camera_pos = get_editor_camera_pos();
 						UI::begin_table("##Camera_params", false);
 
-						UI::table_row("Position", glm::vec3(), 0);
-						UI::table_row("Direction", glm::vec2(), 0);
+						//UI::table_row(static_cast<std::string_view>("Position"), glm::vec3(), .0f);
+						//UI::table_row("Direction", glm::vec2(), .0f);
 
 						UI::end_table();
 
@@ -461,7 +518,7 @@ namespace PFF {
 				} else if (file_path.extension() == ".pffworld") {
 
 					serializer::yaml(file_path, "PFF_asset_file", serializer::option::load_from_file)
-						.entry(KEY_VALUE(loc_asset_file_header.version))
+						.entry(KEY_VALUE(loc_asset_file_header.file_version))
 						.entry(KEY_VALUE(loc_asset_file_header.type))
 						.entry(KEY_VALUE(loc_asset_file_header.timestamp));
 				}
@@ -471,7 +528,7 @@ namespace PFF {
 				case file_type::mesh:
 				{
 
-					CORE_LOG(Trace, "Adding static mesh, Name: " << "SM_" + file_path.filename().replace_extension("").string());
+					LOG(Trace, "Adding static mesh, Name: " << "SM_" + file_path.filename().replace_extension("").string());
 
 					mesh_component mesh_comp{};
 					mesh_comp.asset_path = util::extract_path_from_project_content_folder(file_path);
@@ -482,7 +539,7 @@ namespace PFF {
 						break;
 					}
 
-					const auto loc_map = application::get().get_world_layer()->get_maps()[0];
+					const auto loc_map = application::get().get_world_layer()->get_map();
 					entity loc_entitiy = loc_map->create_entity("SM_" + file_path.filename().replace_extension("").string());
 
 					loc_entitiy.add_mesh_component(mesh_comp);
@@ -497,6 +554,59 @@ namespace PFF {
 				}
 
 			}
+
+			else if (const ImGuiPayload* payload = ImGui::AcceptDragDropPayload("PROJECT_CONTENT_FILE_MULTI")) {
+
+				std::set<std::filesystem::path>* file_path = static_cast<std::set<std::filesystem::path>*>(payload->Data);
+
+				for (const std::filesystem::path file_path : *file_path) {
+					asset_file_header loc_asset_file_header;
+					if (file_path.extension() == ".pffasset") {
+
+						serializer::binary(file_path, "PFF_asset_file", serializer::option::load_from_file)
+							.entry(loc_asset_file_header);
+
+					} else if (file_path.extension() == ".pffworld") {
+
+						serializer::yaml(file_path, "PFF_asset_file", serializer::option::load_from_file)
+							.entry(KEY_VALUE(loc_asset_file_header.file_version))
+							.entry(KEY_VALUE(loc_asset_file_header.type))
+							.entry(KEY_VALUE(loc_asset_file_header.timestamp));
+					}
+
+					switch (loc_asset_file_header.type) {
+
+					case file_type::mesh:
+					{
+
+						LOG(Trace, "Adding static mesh, Name: " << "SM_" + file_path.filename().replace_extension("").string());
+
+						mesh_component mesh_comp{};
+						mesh_comp.asset_path = util::extract_path_from_project_content_folder(file_path);
+
+						if (m_selected_entity != entity()) {
+
+							m_selected_entity.add_mesh_component(mesh_comp);
+							break;
+						}
+
+						const auto loc_map = application::get().get_world_layer()->get_map();
+						entity loc_entitiy = loc_map->create_entity("SM_" + file_path.filename().replace_extension("").string());
+
+						loc_entitiy.add_mesh_component(mesh_comp);
+
+						//mesh_comp.mesh_asset = static_mesh_asset_manager::get_from_path(util::extract_path_from_project_content_folder(file_path));
+						//mesh_comp.material = GET_RENDERER.get_default_material_pointer();		// get correct shader
+
+					} break;
+
+					default:
+						break;
+					}
+				}
+
+			}
+
 			ImGui::EndDragDropTarget();
 
 		}
@@ -509,27 +619,28 @@ namespace PFF {
 		const ImVec2 button_size = ImVec2(15); // size of the button
 		const ImVec2 box_padding = ImVec2(5); // padding around the button
 		const f32 button_length = button_size.x + (box_padding.x * 2);
-		auto color = m_gizmo_operation == transform_operation::translate ? ImGui::GetStyle().Colors[ImGuiCol_Button] : UI::default_gray;
+		ImVec4 color = (m_gizmo_operation == transform_operation::translate) ? ImGui::GetStyle().Colors[ImGuiCol_Button] : UI::get_default_gray_ref();
+		const ImU32 color_u32 = ImGui::ColorConvertFloat4ToU32(color);
 		{
 			const ImVec2 box_min = ImGui::GetWindowPos() + start_pos; // top-left corner
 			const ImVec2 box_max = box_min + button_size + (box_padding * 2); // bottom-right corner
 			const f32 corner_size = 7;
 
-			draw_list->AddRectFilled(box_min, ImVec2(box_max.x, box_max.y - corner_size), ImGui::ColorConvertFloat4ToU32(color));
-			draw_list->AddRectFilled(ImVec2(box_min.x + corner_size, box_max.y - corner_size), box_max, ImGui::ColorConvertFloat4ToU32(color));
+			draw_list->AddRectFilled(box_min, ImVec2(box_max.x, box_max.y - corner_size), color_u32);
+			draw_list->AddRectFilled(ImVec2(box_min.x + corner_size, box_max.y - corner_size), box_max, color_u32);
 			draw_list->AddTriangleFilled(ImVec2(box_min.x, box_max.y - corner_size),
 				ImVec2(box_min.x + corner_size, box_max.y - corner_size),
-				ImVec2(box_min.x + corner_size, box_max.y), ImGui::ColorConvertFloat4ToU32(color));
+				ImVec2(box_min.x + corner_size, box_max.y), color_u32);
 
 			ImGui::SetCursorPos(start_pos + box_padding);
 			if (ImGui::ImageButton(m_transfrom_translation_image->get_descriptor_set(), ImVec2{ 15 }, ImVec2(0), ImVec2(1), 0, color)) {
 
-				CORE_LOG(Trace, "TRANSLATE button");
+				LOG(Trace, "TRANSLATE button");
 				m_gizmo_operation = transform_operation::translate;
 			}
 		}
 
-		color = m_gizmo_operation == transform_operation::rotate ? ImGui::GetStyle().Colors[ImGuiCol_Button] : UI::default_gray;
+		color = m_gizmo_operation == transform_operation::rotate ? ImGui::GetStyle().Colors[ImGuiCol_Button] : UI::get_default_gray_ref();
 		{
 			const ImVec2 box_min = ImGui::GetWindowPos() + start_pos + ImVec2(button_length, 0);
 			const ImVec2 box_max = box_min + button_size + (box_padding * 2);
@@ -539,12 +650,12 @@ namespace PFF {
 			ImGui::SetCursorPos(start_pos + ImVec2(button_length, 0) + box_padding);
 			if (ImGui::ImageButton(m_transfrom_rotation_image->get_descriptor_set(), ImVec2{ 15 }, ImVec2(0), ImVec2(1), 0, color)) {
 
-				CORE_LOG(Trace, "ROTATE button");
+				LOG(Trace, "ROTATE button");
 				m_gizmo_operation = transform_operation::rotate;
 			}
 		}
 
-		color = m_gizmo_operation == transform_operation::scale ? ImGui::GetStyle().Colors[ImGuiCol_Button] : UI::default_gray;
+		color = m_gizmo_operation == transform_operation::scale ? ImGui::GetStyle().Colors[ImGuiCol_Button] : UI::get_default_gray_ref();
 		{
 			const ImVec2 box_min = ImGui::GetWindowPos() + start_pos + ImVec2(button_length * 2, 0);
 			const ImVec2 box_max = box_min + button_size + (box_padding * 2);
@@ -554,7 +665,7 @@ namespace PFF {
 			ImGui::SetCursorPos(start_pos + ImVec2(button_length * 2, 0) + box_padding);
 			if (ImGui::ImageButton(m_transfrom_scale_image->get_descriptor_set(), ImVec2{ 15 }, ImVec2(0), ImVec2(1), 0, color)) {
 
-				CORE_LOG(Trace, "SCALE button");
+				LOG(Trace, "SCALE button");
 				m_gizmo_operation = transform_operation::scale;
 			}
 		}

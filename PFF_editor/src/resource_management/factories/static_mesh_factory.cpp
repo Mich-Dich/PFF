@@ -23,9 +23,9 @@ namespace PFF::mesh_factory {
     ref<PFF::geometry::mesh_asset> load_gltf_mesh(std::filesystem::path filePath);
 
 
-    std::optional<std::vector<ref<PFF::geometry::mesh_asset>>> load_gltf_meshes(std::filesystem::path file_path) {
+    std::optional<std::unordered_map<std::string, ref<PFF::geometry::mesh_asset>>> load_gltf_meshes(std::filesystem::path file_path) {
 
-        CORE_VALIDATE(std::filesystem::exists(file_path), return {}, "Loading GLTF: " << file_path, "provided file path does not exist");
+        VALIDATE(std::filesystem::exists(file_path), return {}, "Loading GLTF: " << file_path, "provided file path does not exist");
 
         fastgltf::GltfDataBuffer data;
         data.loadFromFile(file_path);
@@ -34,12 +34,12 @@ namespace PFF::mesh_factory {
         fastgltf::Parser parser{};
         auto load = parser.loadGltfBinary(&data, file_path.parent_path(), gltfOptions);
 
-        CORE_VALIDATE(load, return {}, "", "Failed to load glTF: [" << fastgltf::to_underlying(load.error()) << "]");
+        VALIDATE(load, return {}, "", "Failed to load glTF: [" << fastgltf::getErrorMessage(load.error()) << "]");
 
         fastgltf::Asset gltf;
         gltf = std::move(load.get());
 
-        std::vector<ref<geometry::mesh_asset>> meshes{};
+        std::unordered_map<std::string, ref<geometry::mesh_asset>> meshes{};
 
         // use the same vectors for all meshes so that the memory doesnt reallocate as often
 
@@ -48,9 +48,9 @@ namespace PFF::mesh_factory {
         for (fastgltf::Mesh& mesh : gltf.meshes) {
 
             geometry::mesh_asset loc_mesh{};
-            loc_mesh.name = mesh.name;
+            //loc_mesh.name = mesh.name;
 
-            CORE_LOG(Trace, "name of surface: " << mesh.name)
+            LOG(Trace, "name of surface: " << mesh.name)
 
             // clear the mesh arrays each mesh, we dont want to merge them by error
             loc_mesh.indices.clear();
@@ -58,7 +58,7 @@ namespace PFF::mesh_factory {
 
             for (auto&& p : mesh.primitives) {
 
-                CORE_LOG(Trace, "name of surface: " << mesh.name)
+                LOG(Trace, "name of surface: " << mesh.name)
 
                 geometry::Geo_surface new_surface;
                 new_surface.startIndex = (u32)loc_mesh.indices.size();
@@ -128,9 +128,9 @@ namespace PFF::mesh_factory {
                     maxpos = glm::max(maxpos, loc_mesh.vertices[x].position);
                 }
                 // calculate origin and extents from the min/max, use extent lenght for radius
-                new_surface.bounds.origin = (maxpos + minpos) / 2.f;
-                new_surface.bounds.extents = (maxpos - minpos) / 2.f;
-                new_surface.bounds.sphere_radius = glm::length(new_surface.bounds.extents);
+                new_surface.bounds_data.origin = (maxpos + minpos) / 2.f;
+                new_surface.bounds_data.extents = (maxpos - minpos) / 2.f;
+                new_surface.bounds_data.sphere_radius = glm::length(new_surface.bounds_data.extents);
 
                 loc_mesh.surfaces.push_back(new_surface);
             }
@@ -143,18 +143,18 @@ namespace PFF::mesh_factory {
             }
 
             // calc mesh_asset bounds based on surfaces
-            glm::vec3 minpos = loc_mesh.surfaces[0].bounds.origin - loc_mesh.surfaces[0].bounds.extents;
-            glm::vec3 maxpos = loc_mesh.surfaces[0].bounds.origin + loc_mesh.surfaces[0].bounds.extents;
+            glm::vec3 minpos = loc_mesh.surfaces[0].bounds_data.origin - loc_mesh.surfaces[0].bounds_data.extents;
+            glm::vec3 maxpos = loc_mesh.surfaces[0].bounds_data.origin + loc_mesh.surfaces[0].bounds_data.extents;
             for (size_t x = 0; x < loc_mesh.surfaces.size(); x++) {
-                minpos = glm::min(minpos, loc_mesh.surfaces[x].bounds.origin - loc_mesh.surfaces[x].bounds.extents);
-                maxpos = glm::max(maxpos, loc_mesh.surfaces[x].bounds.origin + loc_mesh.surfaces[x].bounds.extents);
+                minpos = glm::min(minpos, loc_mesh.surfaces[x].bounds_data.origin - loc_mesh.surfaces[x].bounds_data.extents);
+                maxpos = glm::max(maxpos, loc_mesh.surfaces[x].bounds_data.origin + loc_mesh.surfaces[x].bounds_data.extents);
             }
-            loc_mesh.bounds.origin = (maxpos + minpos) / 2.f;
-            loc_mesh.bounds.extents = (maxpos - minpos) / 2.f;
-            loc_mesh.bounds.sphere_radius = glm::length(loc_mesh.bounds.extents);
+            loc_mesh.bounds_data.origin = (maxpos + minpos) / 2.f;
+            loc_mesh.bounds_data.extents = (maxpos - minpos) / 2.f;
+            loc_mesh.bounds_data.sphere_radius = glm::length(loc_mesh.bounds_data.extents);
 
             // new_mesh.meshBuffers = engine->uploadMesh(indices, vertices);
-            meshes.emplace_back(create_ref<geometry::mesh_asset>(std::move(loc_mesh)));
+            meshes.emplace(mesh.name, create_ref<geometry::mesh_asset>(std::move(loc_mesh)));
         }
 
         return meshes;
@@ -166,31 +166,73 @@ namespace PFF::mesh_factory {
         // TODO: check if source_path is valid
         // TODO: check if destination_path is free
 
-        CORE_LOG(Trace, "source_path: " << source_path << " destination_path: " << destination_path);
+        LOG(Trace, "source_path: " << source_path << " destination_path: " << destination_path);
 
         // load file from source_path and
-        std::optional<std::vector<ref<PFF::geometry::mesh_asset>>> loc_mesh_assets = load_gltf_meshes(source_path);
-        CORE_VALIDATE(loc_mesh_assets.has_value(), return false, "loaded source file", "Failed to load meshes");
+        std::optional<std::unordered_map<std::string, ref<PFF::geometry::mesh_asset>>> loc_mesh_assets = load_gltf_meshes(source_path);
+        VALIDATE(loc_mesh_assets.has_value(), return false, "loaded source file", "Failed to load meshes");
 
         if (options.combine_meshes) {
 
-            static_mesh_file_metadata metadata{};
-            metadata.mesh_index = 0;
+            //static_mesh_file_metadata metadata{};
+            //metadata.mesh_index = 0;
 
-            // TODO: serialize mesh_asset into new file
-            CORE_LOG(Warn, "Not implemented yet");
-            return false;
+            //LOG(Warn, "Not implemented yet");                  // <= HERE
+            //return false;
+
+
+
+            ref<PFF::geometry::mesh_asset> combined_mesh = std::make_shared<PFF::geometry::mesh_asset>();                           // Create a new mesh to hold the combined data
+
+            // Variables to keep track of the current vertex and index count
+            size_t current_vertex_count = 0;
+            size_t current_index_count = 0;
+
+            for (const auto& mesh_pair : loc_mesh_assets.value()) {                                                                 // Iterate through each mesh and combine them
+                const auto& mesh = mesh_pair.second;
+
+                combined_mesh->vertices.insert(combined_mesh->vertices.end(), mesh->vertices.begin(), mesh->vertices.end());        // Append vertices to the combined mesh
+
+                for (const auto& index : mesh->indices)                                                                            // Adjust indices and append to the combined mesh
+                    combined_mesh->indices.push_back(index + static_cast<u32>(current_vertex_count));
+
+                current_vertex_count += mesh->vertices.size();                                                                      // Update the current vertex count
+            }
+
+            // Create metadata for the combined mesh
+            static_mesh_file_metadata metadata{};
+            metadata.name = source_path.filename().replace_extension("").string() + "_combined";
+
+            asset_file_header asset_header{};
+            asset_header.type = file_type::mesh;
+            asset_header.file_version = current_asset_file_header_version;
+            asset_header.timestamp = util::get_system_time();
+
+            general_mesh_file_header general_mesh_header{};
+            general_mesh_header.type = mesh_type::static_mesh;
+
+            static_mesh_file_header static_mesh_header{};
+            static_mesh_header.version = 1;
+            static_mesh_header.source_file = source_path;
+            static_mesh_header.mesh_index = 0;
+
+            // Serialize the combined mesh to the destination path
+            std::filesystem::path output_path = destination_path / (metadata.name + PFF_ASSET_EXTENTION);
+            serialize_mesh(output_path, combined_mesh, asset_header, general_mesh_header, static_mesh_header, serializer::option::save_to_file);
+
+            return true;
 
         } else {
 
-            for (size_t x = 0; x < loc_mesh_assets.value().size(); x++) {
+            u32 counter = 0;
+            for (const auto mesh : loc_mesh_assets.value()) {
 
                 static_mesh_file_metadata metadata{};
-                metadata.name = source_path.filename().replace_extension("").string() + "_" + loc_mesh_assets.value()[x]->name;
+                metadata.name = source_path.filename().replace_extension("").string() + "_" + mesh.first;
 
                 asset_file_header asset_header{};
                 asset_header.type = file_type::mesh;
-                asset_header.version = current_asset_file_header_version;
+                asset_header.file_version = current_asset_file_header_version;
                 asset_header.timestamp = util::get_system_time();
 
                 general_mesh_file_header general_mesh_header{};
@@ -199,15 +241,15 @@ namespace PFF::mesh_factory {
                 static_mesh_file_header static_mesh_header{};
                 static_mesh_header.version = 1;
                 static_mesh_header.source_file = source_path;
-                static_mesh_header.mesh_index = x;
+                static_mesh_header.mesh_index = counter;
+                counter++;
 
                 std::filesystem::path output_path = destination_path / (metadata.name + PFF_ASSET_EXTENTION);
-
-                serialize_mesh(output_path, loc_mesh_assets.value()[x], asset_header, general_mesh_header, static_mesh_header, serializer::option::save_to_file);
+                serialize_mesh(output_path, mesh.second, asset_header, general_mesh_header, static_mesh_header, serializer::option::save_to_file);
             }
         }
 
-        CORE_LOG(Trace, "FUNCTION END");
+        LOG(Trace, "FUNCTION END");
 
         return true;
     }

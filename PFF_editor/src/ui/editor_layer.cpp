@@ -16,6 +16,7 @@
 
 // TEST 
 #include "application.h"
+#include "PFF_editor.h"
 #include "engine/render/renderer.h"
 //#include "engine/render/renderer.h"
 //#include "engine/render/vk_swapchain.h"
@@ -25,13 +26,40 @@
 
 namespace PFF {
 
-	editor_layer::editor_layer(ImGuiContext* context) : layer("editor_layer"), m_context(context) { LOG_INIT(); }
+
+	editor_layer::editor_layer(ImGuiContext* context) : layer("editor_layer"), m_context(context) {
+		
+		LOG_INIT();
+	}
 
 	editor_layer::~editor_layer() { LOG_SHUTDOWN(); }
 
 	void editor_layer::on_attach() {
 
 		LOG(Trace, "attaching editor_layer");
+
+		const std::filesystem::path icon_path = util::get_executable_path() / "assets" / "icons";
+#define LOAD_ICON(name)			m_##name##_icon = create_ref<image>(icon_path / #name ".png", image_format::RGBA)
+		LOAD_ICON(folder);
+		LOAD_ICON(folder_open);
+		LOAD_ICON(folder_add);
+		LOAD_ICON(folder_big);
+		LOAD_ICON(world);
+		LOAD_ICON(mesh_asset);
+		LOAD_ICON(relation);
+		LOAD_ICON(file);
+		LOAD_ICON(file_proc);
+		LOAD_ICON(mesh_mini);
+		LOAD_ICON(show);
+		LOAD_ICON(hide);
+#undef	LOAD_ICON
+
+		m_transfrom_translation_image	= create_ref<image>(icon_path / "transfrom_translation.png", image_format::RGBA);
+		m_transfrom_rotation_image		= create_ref<image>(icon_path / "transfrom_rotation.png", image_format::RGBA);
+		m_transfrom_scale_image			= create_ref<image>(icon_path / "transfrom_scale.png", image_format::RGBA);
+
+		m_world_viewport_window = new world_viewport_window();
+
 		// inform GLFW window to hide title_bar
 		application::get().get_window()->show_titlebar(false);
 		
@@ -39,6 +67,23 @@ namespace PFF {
 	}
 
 	void editor_layer::on_detach() {
+
+		delete m_world_viewport_window;
+
+		m_folder_icon.reset();
+		m_folder_big_icon.reset();
+		m_folder_add_icon.reset();
+		m_folder_big_icon.reset();
+		m_world_icon.reset();
+		m_mesh_asset_icon.reset();
+		m_file_icon.reset();
+		m_file_proc_icon.reset();
+		m_mesh_mini_icon.reset();
+		m_show_icon.reset();
+		m_hide_icon.reset();
+		m_transfrom_translation_image.reset();
+		m_transfrom_rotation_image.reset();
+		m_transfrom_scale_image.reset();
 
 		serialize(serializer::option::save_to_file);
 
@@ -72,7 +117,7 @@ namespace PFF {
 
 		//ImGui::DockSpaceOverViewport(ImGui::GetMainViewport());
 
-		m_world_viewport_window.window();
+		m_world_viewport_window->window();
 
 		window_editor_settings();								// TODO: convert into editor window
 		window_general_settings();								// TODO: convert into editor window
@@ -101,12 +146,12 @@ namespace PFF {
 			.entry("show_graphics_engine_settings", m_show_graphics_engine_settings)
 			.entry("show_editor_settings", m_show_editor_settings)
 			.entry("show_general_settings", m_show_general_settings)
-			.entry("show_style_editor", style_editor)
 			.entry("show_engine_wiki", PFF::UI::show_engine_wiki)
-
-			.entry("show_todo_lis", PFF::toolkit::todo::s_show_todo_list)
-
-			.entry("show_demo_window", demo_window);
+#ifdef PFF_EDITOR_DEBUG
+			.entry("show_style_editor", style_editor)
+			.entry("show_demo_window", demo_window)
+#endif
+			.entry("show_todo_lis", PFF::toolkit::todo::s_show_todo_list);
 	}
 
 
@@ -145,21 +190,13 @@ namespace PFF {
 		ImGui::SetCursorPos(ImVec2(0.f, titlebar_vertical_offset));
 		ImVec2 titlebar_min = ImGui::GetCursorScreenPos();
 		const ImVec2 titlebar_max = { ImGui::GetCursorScreenPos().x + ImGui::GetWindowWidth(),
-										ImGui::GetCursorScreenPos().y + m_titlebar_height };
-
-		/*auto* bg_draw_list = ImGui::GetBackgroundDrawList();
-		auto* fg_draw_list = ImGui::GetForegroundDrawList();*/
-		// bg_draw_list->AddRectFilled(titlebar_min, titlebar_max, IM_COL32(21, 251, 21, 255));
+									  ImGui::GetCursorScreenPos().y + m_titlebar_height };
 
 		auto* window_draw_list = ImGui::GetWindowDrawList();
-		//window_draw_list->AddRectFilled(uperleft_corner, lowerright_corner, IM_COL32(51, 255, 51, 255));
 
 		window_draw_list->AddRectFilled(titlebar_min, { titlebar_min.x + 200.f, titlebar_max.y }, main_color);
 		titlebar_min.x += 200.f;
 		window_draw_list->AddRectFilledMultiColor(titlebar_min, { titlebar_min.x + 550.f, titlebar_max.y }, main_color, BG_color, BG_color, main_color);
-
-		// Debug titlebar bounds
-		//fg_draw_list->AddRect(titlebar_min, titlebar_max, IM_COL32(222, 43, 43, 255));
 
 		static f32 move_offset_y;
 		static f32 move_offset_x;
@@ -168,8 +205,7 @@ namespace PFF {
 		const f32 button_spaccing = 8.f;
 		const f32 button_area_width = viewport->Size.x - ((button_spaccing * 3) + (button_width * 3));
 
-		// tilebar drag area
-		ImGui::SetCursorPos(ImVec2(0.f, titlebar_vertical_offset));
+		ImGui::SetCursorPos(ImVec2(0.f, titlebar_vertical_offset));														// tilebar drag area
 
 #if 1	// FOR DEBUG VISAUL
 		ImGui::InvisibleButton("##titlebar_drag_zone", ImVec2(button_area_width, m_titlebar_height));
@@ -185,7 +221,7 @@ namespace PFF {
 
 		}
 
-		const ImVec2 window_padding = { style->WindowPadding.x / 2,style->WindowPadding.y + 3.f };
+		const ImVec2 window_padding = { style->WindowPadding.x / 2, style->WindowPadding.y + 3.f };
 
 		ImGui::SetItemAllowOverlap();
 		ImGui::PushFont(application::get().get_imgui_layer()->get_font("giant"));
@@ -195,10 +231,10 @@ namespace PFF {
 
 		// display project title
 		ImGui::PushFont(application::get().get_imgui_layer()->get_font("header_1"));
-		const static std::string project_name = application::get().get_project_data().name;
-		const auto project_name_size = ImGui::CalcTextSize(project_name.c_str());
+		const static auto project_name = application::get().get_project_data().display_name.c_str();
+		const auto project_name_size = ImGui::CalcTextSize(project_name);
 		ImGui::SetCursorPos(ImVec2(viewport->Size.x - (window_padding.x + (button_spaccing * 2) + (button_width * 3)) - project_name_size.x - 30, window_padding.y + titlebar_vertical_offset));
-		ImGui::Text(project_name.c_str());
+		ImGui::Text(project_name);
 		ImGui::PopFont();
 
 		ImGui::SetCursorPos(ImVec2(viewport->Size.x - (window_padding.x + (button_spaccing * 2) + (button_width * 3)), window_padding.y + titlebar_vertical_offset));
@@ -335,7 +371,7 @@ namespace PFF {
 
 								item_current_idx = n;
 								UI::set_UI_theme_selection(static_cast<UI::theme_selection>(item_current_idx));
-								CORE_LOG(Debug, "updating UI theme" << (int)UI::UI_theme);
+								LOG(Debug, "updating UI theme" << (int)UI::UI_theme);
 								UI::update_UI_theme();
 							}
 						}
@@ -354,7 +390,7 @@ namespace PFF {
 							.entry(KEY_VALUE(window_border));
 						//config::load(config::file::editor, "UI", "window_border", window_border);
 
-						backup_color = UI::main_color;
+						backup_color = UI::get_main_color_ref();
 						ImGui::SetColorEditOptions(ImGuiColorEditFlags_Float | ImGuiColorEditFlags_HDR | ImGuiColorEditFlags_PickerHueWheel);
 						backup_color_init = true;
 					}
@@ -377,8 +413,8 @@ namespace PFF {
 						saved_palette_init = false;
 					}
 
-					if (ImGui::ColorPicker4("##picker", (float*)&UI::main_color, ImGuiColorEditFlags_NoSidePreview | ImGuiColorEditFlags_NoSmallPreview))
-						UI::update_UI_colors(UI::main_color);
+					if (ImGui::ColorPicker4("##picker", (float*)&UI::get_main_color_ref(), ImGuiColorEditFlags_NoSidePreview | ImGuiColorEditFlags_NoSmallPreview))
+						UI::update_UI_colors(UI::get_main_color_ref());
 
 					ImGui::SameLine();
 					ImGui::BeginGroup();
@@ -386,7 +422,7 @@ namespace PFF {
 						ImGui::BeginGroup();
 						{
 							ImGui::Text("Current");
-							ImGui::ColorButton("##current", UI::main_color, ImGuiColorEditFlags_NoPicker | ImGuiColorEditFlags_AlphaPreviewHalf, ImVec2(60, 40));
+							ImGui::ColorButton("##current", UI::get_main_color_ref(), ImGuiColorEditFlags_NoPicker | ImGuiColorEditFlags_AlphaPreviewHalf, ImVec2(60, 40));
 						}
 						ImGui::EndGroup();
 
@@ -408,7 +444,7 @@ namespace PFF {
 
 							ImGuiColorEditFlags palette_button_flags = ImGuiColorEditFlags_NoAlpha | ImGuiColorEditFlags_NoPicker | ImGuiColorEditFlags_NoTooltip;
 							if (ImGui::ColorButton("##palette", saved_palette[n], palette_button_flags, ImVec2(21, 21)))
-								UI::update_UI_colors(ImVec4(saved_palette[n].x, saved_palette[n].y, saved_palette[n].z, UI::main_color.w));
+								UI::update_UI_colors(ImVec4(saved_palette[n].x, saved_palette[n].y, saved_palette[n].z, UI::get_main_color_ref().w));
 
 							// Allow user to drop colors into each palette entry. Note that ColorButton() is already a
 							// drag source by default, unless specifying the ImGuiColorEditFlags_NoDragDrop flag.
@@ -440,8 +476,10 @@ namespace PFF {
 			if (ImGui::BeginMenu("Windows")) {
 
 				ImGui::MenuItem("ToDo List", "", &PFF::toolkit::todo::s_show_todo_list);
+#ifdef PFF_EDITOR_DEBUG
 				ImGui::MenuItem("Style Editor", "", &style_editor);
 				ImGui::MenuItem("Demo Window", "", &demo_window);
+#endif
 				ImGui::MenuItem("Engine Wiki", "", &PFF::UI::show_engine_wiki);
 
 				// IN DEV
@@ -452,7 +490,7 @@ namespace PFF {
 
 				ImGui::Separator();		
 
-				m_world_viewport_window.show_possible_sub_window_options();
+				m_world_viewport_window->show_possible_sub_window_options();
 
 				ImGui::EndMenu();
 			}

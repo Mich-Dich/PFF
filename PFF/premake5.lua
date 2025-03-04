@@ -1,10 +1,10 @@
 
 project "PFF"
 	location "%{wks.location}/PFF"
-	kind "SharedLib"
-	staticruntime "off"
+	kind "StaticLib"
 	language "C++"
-	cppdialect "C++17"
+	cppdialect "C++20"
+	staticruntime "on"
 
 	targetdir ("%{wks.location}/bin/" .. outputs  .. "/%{prj.name}")
 	objdir ("%{wks.location}/bin-int/" .. outputs  .. "/%{prj.name}")
@@ -14,9 +14,8 @@ project "PFF"
 
 	defines
 	{
-		"ENGINE_NAME=PFF",
-		'PROJECT_NAME="' .. client_project_name .. '"',
-		"PFF_INSIDE_ENGINE",
+		"PFF_ENGINE",
+		"_CRT_SECURE_NO_WARNINGS",
 		"GLFW_INCLUDE_NONE",
 	}
 
@@ -24,7 +23,7 @@ project "PFF"
 	{
 		"src/**.h",
 		"src/**.cpp",
-		"src/**.embeded",
+		"src/**.embed",
 		"**..pffproj",
 		"**..pff",
 
@@ -43,16 +42,19 @@ project "PFF"
 		"%{IncludeDir.ImGui}/backends/",
 		"%{IncludeDir.stb_image}",
 		"%{IncludeDir.entt}",
-		"%{IncludeDir.ImGuizmo}",
-		
+		"%{IncludeDir.ImGuizmo}",		
 		"%{IncludeDir.VulkanSDK}",
 	}
 	
 	links
 	{
-		"glfw",
-		"imgui",
-        "%{Library.Vulkan}",
+		"ImGui",
+	}
+
+	postbuildcommands {
+
+		-- Copy content of directories
+		table.unpack(copy_content_of_dir(outputs, {"PFF/shaders", "PFF/assets"})),
 	}
 
 	libdirs 
@@ -65,35 +67,73 @@ project "PFF"
 		flags { "NoPCH" }
 	
 	filter "system:windows"
+		systemversion "latest"		
+		defines "PFF_PLATFORM_WINDOWS"
+
+		links
+		{
+			"glfw",
+			"%{Library.Vulkan}",
+		}
+
+		libdirs 
+		{
+			"vendor/imgui/bin/Debug-windows-x86_64/ImGui",
+			"%{IncludeDir.VulkanSDK}/Lib",  -- Ensure this points to the Vulkan SDK's Lib directory
+		}
+	
+		postbuildcommands {										-- copy premake exe (needed for engine projects)
+			"{MKDIR} %{wks.location}/bin/" .. outputs .. "/vendor/premake",
+			"{COPY} %{wks.location}/vendor/premake %{wks.location}/bin/" .. outputs .. "/vendor/premake",
+		}
+		  
+	filter "system:linux"
 		systemversion "latest"
+		defines "PFF_PLATFORM_LINUX"
+
+		-- -- ANSI escape codes for colors
+		-- local RESET = "\27[0m"
+		-- local GREEN = "\27[32m"
+
+		-- prebuildmessage ("================= Building PFF %{cfg.buildcfg}-%{cfg.system}-%{cfg.architecture} =================")
+		-- postbuildmessage ("================= Done building PFF %{cfg.buildcfg}-%{cfg.system}-%{cfg.architecture} =================")
 		
-		linkoptions 
+		includedirs
 		{
-			 "/NODEFAULTLIB:LIBCMTD",
-			 "/NODEFAULTLIB:MSVCRT",
+			"/usr/include/vulkan",
+			"/usr/include/x86_64-linux-gnu/qt5", 				-- Base Qt include path
+			"/usr/include/x86_64-linux-gnu/qt5/QtCore",
+			"/usr/include/x86_64-linux-gnu/qt5/QtWidgets",
+			"/usr/include/x86_64-linux-gnu/qt5/QtGui",
+		}
+	
+		libdirs
+		{
+			"%{wks.location}/PFF/vendor/glfw/build/src",
+			"/usr/lib/x86_64-linux-gnu",
+			"/usr/lib/x86_64-linux-gnu/qt5",
+		}
+	
+		links
+		{
+			"vulkan",
+			"glfw",
+			"Qt5Core",
+			"Qt5Widgets",
+			"Qt5Gui",
 		}
 
-		defines
-		{
-			"PFF_PLATFORM_WINDOWS",
+		buildoptions {
+			"-msse4.1",										  	-- include the SSE4.1 flag for Linux builds
+			"-fPIC",
 		}
 
-		postbuildcommands
-		{
-			"{MKDIR} %{wks.location}/bin/" .. outputs .. "/" .. client_project_name,
-			"{COPY} %{cfg.buildtarget.relpath} %{wks.location}/bin/" .. outputs  .. "/" .. client_project_name,
-			
-			"{MKDIR} %{wks.location}/bin/" .. outputs .. "/PFF_editor",
-			"{COPY} %{cfg.buildtarget.relpath} %{wks.location}/bin/" .. outputs  .. "/PFF_editor",
-			
-			"{MKDIR} %{wks.location}/bin/" .. outputs .. "/" .. client_project_name,
-			"{COPY} %{cfg.buildtarget.relpath} %{wks.location}/bin/" .. outputs  .. "/" .. client_project_name,
-
-			postbuildcommands { table.unpack(copy_content_of_dir(outputs, {"PFF/shaders", "PFF/defaults", "PFF/assets"})), }
+		postbuildcommands {										-- copy premake (needed for engine projects)
+			"{MKDIR} %{wks.location}/bin/" .. outputs .. "/vendor/premake",
+			"{COPY} %{wks.location}/premake5 %{wks.location}/bin/" .. outputs .. "/vendor/premake",
 		}
-
+		
 	filter "configurations:Debug"
-		buildoptions "/MDd"
 		defines "PFF_DEBUG"
 		runtime "Debug"
 		symbols "on"
@@ -102,10 +142,10 @@ project "PFF"
 		defines "PFF_RELEASE_WITH_DEBUG_INFO"
 		runtime "Release"
 		symbols "on"
-		optimize "speed"
+		optimize "on"
 
 	filter "configurations:Release"
-		buildoptions "/MD"
 		defines "PFF_RELEASE"
 		runtime "Release"
+		symbols "off"
 		optimize "on"

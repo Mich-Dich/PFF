@@ -1,18 +1,14 @@
-[submodule "PFF/vendor/tinyobjloader"]
-	path = PFF/vendor/tinyobjloader
-	url = https://github.com/tinyobjloader/tinyobjloader
 [submodule "PFF/vendor/glfw"]
 	path = PFF/vendor/glfw
 	url = https://github.com/Mich-Dich/glfw
+	branch = master
 [submodule "PFF/vendor/imgui"]
 	path = PFF/vendor/imgui
 	url = https://github.com/Mich-Dich/imgui
+	branch = docking
 [submodule "PFF/vendor/glm"]
 	path = PFF/vendor/glm
 	url = https://github.com/Mich-Dich/glm
-[submodule "PFF/vendor/fastgltf"]
-	path = PFF/vendor/fastgltf
-	url = https://github.com/Mich-Dich/fastgltf
 [submodule "PFF/vendor/ImGuizmo"]
 	path = PFF/vendor/ImGuizmo
 	url = https://github.com/Mich-Dich/ImGuizmo

@@ -1,7 +1,11 @@
 #pragma once
 
-#include <entt.hpp>
+#include <entt/entt.hpp>
 #include <glm/glm.hpp>
+
+#include "util/data_structures/UUID.h"
+// #include "engine/world/entity.h"
+#include "components.h"
 
 namespace PFF {
 
@@ -10,7 +14,7 @@ namespace PFF {
 	// @brief The map class represents a segment of the in-game world, functioning as a chunk in the world layer.
 	// @brief A large in-game world can be split into different chunks, each represented by a map. The map can be as large as needed.
 	// @brief Active maps are those that the engine should display, and they are managed within the world_layer, which contains multiple maps
-	class PFF_API map {
+	class map {
 	public:
 
 		map();
@@ -77,21 +81,23 @@ namespace PFF {
 		void on_simulation_stop();
 
 		void on_update(const f32 delta_time);
+		void recreate_scripts();
 
-		void serialize(serializer::option option);
+		void serialize(PFF::serializer::option option);
+
 
 	private:
 
-		template<typename T>
-		FORCEINLINE void on_component_added(entity entity, T& component) {
-
-			if constexpr (std::is_same_v<T, mesh_component>) {
-
-			}
-		}
-
 		friend class entity;
 		friend class world_viewport_window;
+
+		// template<typename T>
+		// FORCEINLINE void on_component_added(entity map_entity, T& component) {
+
+		// 	if constexpr (std::is_same_v<T, mesh_component>) {
+
+		// 	}
+		// }
 
 		glm::mat4								m_transform;					// transform of map (map could be a small chunk of the ingame world)
 		f64										m_width, m_length, m_height;	// size of map

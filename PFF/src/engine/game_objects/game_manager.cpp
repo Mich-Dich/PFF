@@ -11,7 +11,7 @@ namespace PFF {
 	
 	game_manager::~game_manager() {
 
-		CORE_LOG(Info, "Shutdown");
+		LOG(Info, "Shutdown");
 	}
 
 }

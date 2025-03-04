@@ -4,7 +4,7 @@
 
 namespace PFF::serializer {
 
-	class PFF_API yaml {
+	class yaml {
 	public:
 
 		yaml(const std::filesystem::path filename, const std::string& section_name, option option);
@@ -39,7 +39,7 @@ namespace PFF::serializer {
 			if (m_option == PFF::serializer::option::save_to_file) {
 
 				std::string buffer{};
-				if constexpr (PFF::util::is_vector<T>::value) {			// value is a vector
+				if constexpr (PFF::is_vector<T>::value) {			// value is a vector
 
 					m_file_content << util::add_spaces(m_level_of_indention) << m_prefix << key_name << ":\n";
 					for (auto interation : value) {
@@ -56,7 +56,7 @@ namespace PFF::serializer {
 
 			} else {				// load from file
 
-				if constexpr (PFF::util::is_vector<T>::value) {			// value is a vector
+				if constexpr (PFF::is_vector<T>::value) {			// value is a vector
 
 					// deserialize content of subsections				
 					T buffer{};

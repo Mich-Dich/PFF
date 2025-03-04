@@ -261,9 +261,9 @@ namespace PFF::UI {
 
 	bool gray_button(const char* lable, const ImVec2& size) {
 
-		ImGui::PushStyleColor(ImGuiCol_Button, (ImU32)UI::default_gray);
-		ImGui::PushStyleColor(ImGuiCol_ButtonHovered, UI::action_color_gray_hover);
-		ImGui::PushStyleColor(ImGuiCol_ButtonActive, UI::action_color_gray_active);
+		ImGui::PushStyleColor(ImGuiCol_Button, UI::get_default_gray_ref());
+		ImGui::PushStyleColor(ImGuiCol_ButtonHovered, UI::get_action_color_gray_hover_ref());
+		ImGui::PushStyleColor(ImGuiCol_ButtonActive, UI::get_action_color_gray_active_ref());
 
 		const bool result = ImGui::Button(lable, size);
 
@@ -276,9 +276,9 @@ namespace PFF::UI {
 		// show weaker color if toggle_bool is false
 		if (!bool_var) {
 
-			ImGui::PushStyleColor(ImGuiCol_Button, UI::action_color_00_faded);
-			ImGui::PushStyleColor(ImGuiCol_ButtonHovered, UI::action_color_00_weak);
-			ImGui::PushStyleColor(ImGuiCol_ButtonActive, UI::action_color_00_default);
+			ImGui::PushStyleColor(ImGuiCol_Button, UI::get_action_color_00_faded_ref());
+			ImGui::PushStyleColor(ImGuiCol_ButtonHovered, UI::get_action_color_00_weak_ref());
+			ImGui::PushStyleColor(ImGuiCol_ButtonActive, UI::get_action_color_00_default_ref());
 		}
 
 		const bool result = ImGui::Button("show Markdown", ImVec2(100, 21));
@@ -294,9 +294,9 @@ namespace PFF::UI {
 		ImGui::PushFont(application::get().get_imgui_layer()->get_font("regular_big"));
 
 		if (wrapped)
-			ImGui::TextWrapped(text);
+			ImGui::TextWrapped("%s", text);
 		else
-			ImGui::Text(text);
+			ImGui::Text("%s", text);
 
 		ImGui::PopFont();
 	}
@@ -307,9 +307,9 @@ namespace PFF::UI {
 		ImGui::PushFont(application::get().get_imgui_layer()->get_font("bold"));
 
 		if (wrapped)
-			ImGui::TextWrapped(text);
+			ImGui::TextWrapped("%s", text);
 		else
-			ImGui::Text(text);
+			ImGui::Text("%s", text);
 
 		ImGui::PopFont();
 	}
@@ -320,9 +320,9 @@ namespace PFF::UI {
 		ImGui::PushFont(application::get().get_imgui_layer()->get_font("italic"));
 
 		if (wrapped)
-			ImGui::TextWrapped(text);
+			ImGui::TextWrapped("%s", text);
 		else
-			ImGui::Text(text);
+			ImGui::Text("%s", text);
 
 		ImGui::PopFont();
 	}
@@ -475,7 +475,7 @@ namespace PFF::UI {
 			std::string button_text = " X ##Clear_search_query__" + std::string(lable);
 			if (ImGui::Button(button_text.c_str())) {
 
-				CORE_LOG(Trace, "Trigger clear button")
+				LOG(Trace, "Trigger clear button")
 				search_text = "";
 			}
 		}
@@ -620,6 +620,21 @@ namespace PFF::UI {
 				column_width = table->Columns[1].WidthGiven;
 		
 		UI::progressbar_with_text("", progress_bar_text, percent, 0.0f, column_width, progressbar_size_y);
+	}
+
+	bool begin_collapsing_header_section(const char* lable) {
+
+		ImGui::Indent();
+		bool buffer = ImGui::CollapsingHeader(lable, ImGuiTreeNodeFlags_DefaultOpen);
+
+		if (!buffer)
+			ImGui::Unindent();
+
+		return buffer;
+	}
+
+	void end_collapsing_header_section() {
+		ImGui::Unindent();
 	}
 
 }

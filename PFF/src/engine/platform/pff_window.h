@@ -30,7 +30,7 @@ namespace PFF {
 		u32 height{};
 		bool vsync{};
 		application* app_ref{};
-		window_size_state window_size_state = window_size_state::windowed;
+		window_size_state size_state = window_size_state::windowed;
 
 		EventCallbackFn event_callback;
 
@@ -50,32 +50,32 @@ namespace PFF {
 
 		PFF_DELETE_COPY_CONSTRUCTOR(pff_window);
 
-		FORCEINLINE bool is_vsync() const { return m_data.vsync; }
-		FORCEINLINE u32 get_width() const { return m_data.width; }
-		FORCEINLINE u32 get_height() const { return m_data.height; }
-		FORCEINLINE window_attrib get_attributes() const { return m_data; }
-		FORCEINLINE GLFWwindow* get_window() const { return m_Window; }
-		FORCEINLINE void set_event_callback(const EventCallbackFn& callback) { m_data.event_callback = callback; }
-		FORCEINLINE f64 get_cursor_pos_x() const { return m_data.cursor_pos_x; }
-		FORCEINLINE f64 get_cursor_pos_y() const { return m_data.cursor_pos_y; }
-		FORCEINLINE window_size_state get_window_size_state() const { return m_data.window_size_state; }
-		FORCEINLINE PFF_API_EDITOR void get_framebuffer_size(int* width, int* height);
+		FORCEINLINE bool is_vsync() const										{ return m_data.vsync; }
+		FORCEINLINE u32 get_width() const										{ return m_data.width; }
+		FORCEINLINE u32 get_height() const										{ return m_data.height; }
+		FORCEINLINE window_attrib get_attributes() const						{ return m_data; }
+		FORCEINLINE GLFWwindow* get_window() const								{ return m_Window; }
+		FORCEINLINE void set_event_callback(const EventCallbackFn& callback)	{ m_data.event_callback = callback; }
+		FORCEINLINE f64 get_cursor_pos_x() const								{ return m_data.cursor_pos_x; }
+		FORCEINLINE f64 get_cursor_pos_y() const								{ return m_data.cursor_pos_y; }
+		FORCEINLINE window_size_state get_window_size_state() const				{ return m_data.size_state; }
+		void get_framebuffer_size(int* width, int* height);
 
-		PFF_API void show_window(bool show);
-		PFF_API bool is_maximized();
-		PFF_API void minimize_window();
-		PFF_API void restore_window();
-		PFF_API void maximize_window();
-		PFF_API void show_titlebar(bool show);
-		PFF_API void get_monitor_size(int* width, int* height);
+		void show_window(bool show);
+		bool is_maximized();
+		void minimize_window();
+		void restore_window();
+		void maximize_window();
+		void show_titlebar(bool show);
+		void get_monitor_size(int* width, int* height);
 
 		void create_vulkan_surface(VkInstance_T* instance, VkSurfaceKHR_T** get_surface);
 
 		VkExtent2D get_extend();
 		bool should_close();
 		void poll_events();
-		PFF_API void capture_cursor();
-		PFF_API void release_cursor();
+		void capture_cursor();
+		void release_cursor();
 
 		template<typename Func>
 		void queue_event(Func&& func) {
@@ -87,7 +87,7 @@ namespace PFF {
 
 		std::mutex m_event_queue_mutex;
 		std::queue<std::function<void()>> m_event_queue;
-		std::filesystem::path m_icon_path = "./assets/logo.png";
+		std::filesystem::path m_icon_path;
 
 		void bind_event_calbacks();
 		void set_vsync(bool enable);

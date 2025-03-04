@@ -1,5 +1,6 @@
 
 #include "util/pffpch.h"
+
 #include <limits>
 
 #include "camera.h"
@@ -45,7 +46,7 @@ namespace PFF {
 
 		PFF_PROFILE_FUNCTION();
 
-		CORE_VALIDATE((target - position) != glm::vec3(0.0f, 0.0f, 0.0f), return, "", "Provided position and target are identical")
+		VALIDATE((target - position) != glm::vec3(0.0f, 0.0f, 0.0f), return, "", "Provided position and target are identical")
 		set_view_direction(position, target - position, up);
 	}
 
@@ -137,7 +138,7 @@ namespace PFF {
 
 		PFF_PROFILE_FUNCTION();
 
-		CORE_ASSERT(glm::abs(aspect_ratio - std::numeric_limits<float>::epsilon()) > 0.0f, "", "Aspect ratio check failed: [aspect_ratio - epsilon] > 0.0f");
+		ASSERT(glm::abs(aspect_ratio - std::numeric_limits<float>::epsilon()) > 0.0f, "", "Aspect ratio check failed: [aspect_ratio - epsilon] > 0.0f");
 		const float tanHalfFovy = tan(fov_y / 2.f);
 		m_projection_matrix= glm::mat4{ 0.0f };
 		m_projection_matrix[0][0] = 1.f / (aspect_ratio * tanHalfFovy);

@@ -2,6 +2,7 @@
 
 #include "util/pffpch.h"
 
+// #include "util/timing/timer.h"
 #include "engine/layer/layer_stack.h"			// need to include this for some reason
 #include "engine/layer/imgui_layer.h"
 #include "engine/layer/world_layer.h"
@@ -10,6 +11,8 @@
 #include "engine/render/vulkan/vk_renderer.h"
 
 namespace PFF {
+
+	static project_data serialize_projects_data(const std::filesystem::path& project_path, serializer::option option);
 
 	class pff_window;
 	class renderer;
@@ -20,17 +23,16 @@ namespace PFF {
 	class window_focus_event;
 	class map;
 	class camera;
+	// class PFF::render::vulkan::vk_renderer;
+	// class util::timer;
 
-	class PFF_API application {
+	class application {
 	public:
 
 		application();
 		virtual ~application();
 
 		PFF_DELETE_COPY_CONSTRUCTOR(application);
-
-		FORCEINLINE std::filesystem::path get_project_path()				{ return m_project_path; }
-		FORCEINLINE void set_project_path(std::filesystem::path path)		{ m_project_path = path; }
 
 		PFF_DEFAULT_GETTER(project_data,									project_data)
 		PFF_DEFAULT_GETTER_C(f64,											delta_time)
@@ -48,23 +50,26 @@ namespace PFF {
 		FORCEINLINE static void close_application()							{ m_running = false; }
 		FORCEINLINE static RENDERER& get_renderer()							{ return GET_RENDERER; }
 		FORCEINLINE static void set_render_state(system_state state)		{ GET_RENDERER.set_state(state); }
-
 		FORCEINLINE USE_IN_EDITOR void push_overlay(layer* overlay)			{ m_layerstack->push_overlay(overlay); }
 		FORCEINLINE USE_IN_EDITOR void pop_overlay(layer* overlay)			{ m_layerstack->pop_overlay(overlay); }
+		FORCEINLINE std::filesystem::path get_project_path()				{ return m_project_path; }
+		FORCEINLINE void set_project_path(std::filesystem::path path)		{ m_project_path = path; }
 
-		std::future<void>& add_future(std::future<void>& future, std::shared_ptr<std::pair<std::atomic<bool>, std::condition_variable>>& shared_state);
-		void remove_timer(std::future<void>& future);
 		void run();
 
+
+		// std::future<void>& add_future(std::future<void>& future, std::shared_ptr<std::pair<std::atomic<bool>, std::condition_variable>>& shared_state);
+		// void remove_timer(std::future<void>& future);
+		
 		// [set_target_fps] if true: set the fps-limit for if the window is focused, if false: set the fps-limit for if the window is not focused
 		void set_fps_settings(const bool set_for_engine_focused, const u32 new_limit);
 
 		void limit_fps(const bool new_value, const u32 new_limit);
-		FORCEINLINE void capture_cursor();
-		FORCEINLINE void release_cursor();
-		FORCEINLINE void minimize_window();
-		FORCEINLINE void restore_window();
-		FORCEINLINE void maximize_window();
+		void capture_cursor();
+		void release_cursor();
+		void minimize_window();
+		void restore_window();
+		void maximize_window();
 
 		void register_player_controller(ref<player_controller> player_controller) { m_world_layer->register_player_controller(player_controller); }
 		void get_fps_values(bool& limit_fps, u32& target_fps, u32& current_fps, f32& work_time, f32& sleep_time);
@@ -81,47 +86,52 @@ namespace PFF {
 		void end_fps_measurement(f32& work_time);
 		void limit_fps();
 
+		void set_arguments(const std::vector<std::string>& args);
+		const std::vector<std::string>& get_arguments() const { return m_arguments; }
+		void init_engine();
+
 	private:
 
 		void client_init();
 		void client_shutdown();
 
 		void serialize(serializer::option option);
-		
 		void on_event(event& event);
 		bool on_window_close(window_close_event& event);
 		bool on_window_resize(window_resize_event& event);
 		bool on_window_refresh(window_refresh_event& event);
 		bool on_window_focus(window_focus_event& event);
 
-		static application* s_instance;
+		static application*			s_instance;
 
-		static ref<pff_window> m_window;
-		static bool m_is_titlebar_hovered;
-		static bool m_running;
-		UI::imgui_layer* m_imgui_layer;
-		world_layer* m_world_layer;
+		static ref<pff_window>		m_window;
+		static bool					m_is_titlebar_hovered;
+		static bool					m_running;
+		UI::imgui_layer*			m_imgui_layer;
+		world_layer*				m_world_layer;
 
-		ref<layer_stack> m_layerstack{};
-		std::vector<event> m_event_queue;		// TODO: change to queue
-		ref<map> m_current_map = nullptr;
+		ref<layer_stack>			m_layerstack{};
+		std::vector<event>			m_event_queue;		// TODO: change to queue
+		ref<map>					m_current_map = nullptr;
 
-		bool m_focus = true;
-		bool m_limit_fps = true;
-		u32 m_target_fps = 60;
-		u32 m_nonefocus_fps = 30;
-		u32 m_fps{};
-		f32 m_delta_time = 0.f;
-		f32 m_work_time{}, m_sleep_time{};
-		f32 target_duration{};
-		f32 m_last_frame_time = 0.f;
+		bool						m_focus = true;
+		bool						m_limit_fps = true;
+		u32							m_target_fps = 60;
+		u32							m_nonefocus_fps = 30;
+		u32							m_fps{};
+		f32							m_delta_time = 0.f;
+		f32							m_work_time{}, m_sleep_time{};
+		f32							target_duration{};
+		f32							m_last_frame_time = 0.f;
 
 		// vector to store futures (from timer_async and other std::async tasks)
-		std::vector<util::timer> m_timers{};
-		std::mutex m_global_futures_mutex{}; // Mutex to protect global_futures
+		// std::vector<util::timer>	m_timers{};
+		std::mutex					m_global_futures_mutex{}; // Mutex to protect global_futures
 
-		std::filesystem::path	m_project_path{};
-		project_data			m_project_data{};
+		std::filesystem::path		m_project_path{};
+		project_data				m_project_data{};
+
+		std::vector<std::string>	m_arguments;
 	};
 
 	// to be defined in Client

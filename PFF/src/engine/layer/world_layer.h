@@ -4,6 +4,7 @@
 #include "engine/game_objects/camera.h"
 #include "engine/game_objects/player_controller.h"
 
+// #include "engine/world/entity.h"		// importa map
 #include "engine/world/map.h"
 
 namespace PFF {
@@ -13,21 +14,15 @@ namespace PFF {
 
 		world_layer();
 		~world_layer();
-
 		PFF_DELETE_COPY_CONSTRUCTOR(world_layer);
 
 		PFF_DEFAULT_GETTER_C(ref<camera>, editor_camera)
-		PFF_DEFAULT_GETTER_C(const std::vector<ref<map>>&, maps)
+		PFF_DEFAULT_GETTER_C(const ref<map>&, map)
 		PFF_GETTER_C(ref<player_controller>, current_player_controller, m_player_controller)
 
 		void register_player_controller(ref<player_controller> player_controller);
-
-		// TODO: add util functions to m_maps
-		//        -> add/remove map
-		//        -> check for map
-
-		FORCEINLINE void add_map(const ref<map> map) { m_maps.emplace_back(map); }
-
+		void set_map(const ref<map> map);
+		
 		virtual void on_attach();
 		virtual void on_detach();
 		virtual void on_update(const f32 delta_time);
@@ -51,7 +46,7 @@ namespace PFF {
 
 	private:
 
-		std::vector<ref<map>>		m_maps{};
+		ref<map>					m_map{};
 		ref<camera>					m_editor_camera{};
 		ref<player_controller>		m_player_controller{};
 		system_state				m_system_state = system_state::inactive;

@@ -3,23 +3,35 @@
 
 #include "application.h"
 #include "engine/render/renderer.h"
-#include "engine/Events/Event.h"
+#include "engine/events/event.h"
+#include "project/script_system.h"
+
 #include "world_layer.h"
 
 namespace PFF {
 	
 	world_layer::world_layer() { 
 
-		CORE_LOG_INIT();
+		LOG_INIT();
 	}
 
-	world_layer::~world_layer() { CORE_LOG_SHUTDOWN(); }
+	world_layer::~world_layer() { 
+		
+		LOG_SHUTDOWN();
+		m_map.reset();
+	}
 
 
 	void world_layer::register_player_controller(ref<player_controller> player_controller) {
 
 		m_player_controller = player_controller;
 		m_player_controller->set_world_layer_ref(this);
+	}
+
+	void world_layer::set_map(const ref<map> map) {
+
+		m_map = map;
+		script_system::reinit_scripts();		// reregister scripts
 	}
 
 	void world_layer::on_attach() {
@@ -32,7 +44,7 @@ namespace PFF {
 		//float aspect = m_swapchain->get_extentAspectRatio();
 		//m_editor_camera.set_view_target(glm::vec3(-1.0f, -2.0f, -3.0f), glm::vec3(0.0f));
 		
-		CORE_LOG(Trace, "attaching world_layer");
+		LOG(Trace, "attaching world_layer");
 	}
 
 	void world_layer::on_detach() { 
@@ -40,7 +52,7 @@ namespace PFF {
 		m_player_controller.reset();
 		m_editor_camera.reset();
 		
-		CORE_LOG(Trace, "detaching world_layer");
+		LOG(Trace, "detaching world_layer");
 	}
 
 	void world_layer::on_update(const f32 delta_time) {
@@ -49,8 +61,7 @@ namespace PFF {
 
 		m_player_controller->update_internal(delta_time);
 	
-		for (const auto& map : m_maps)
-			map->on_update(delta_time);
+		m_map->on_update(delta_time);
 		
 	}
 

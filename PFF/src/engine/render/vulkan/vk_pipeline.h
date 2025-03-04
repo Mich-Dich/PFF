@@ -5,7 +5,7 @@ namespace PFF::render::vulkan {
     namespace util {
 
         // @brief Consider abstracting the path to work from a folder set in a config file, and only select the shader (e.g: combute.comp => internally looking in correct folder) (platform agnostic)
-        bool load_shader_module(const char* filePath, VkDevice device, VkShaderModule* outShaderModule);
+        bool load_shader_module(const std::filesystem::path& filePath, VkDevice device, VkShaderModule* outShaderModule);
     }
 
     class pipeline_builder {
@@ -28,6 +28,7 @@ namespace PFF::render::vulkan {
 
         // feature
         pipeline_builder& disable_blending();
+        pipeline_builder& disable_culling();
         pipeline_builder& enable_blending_additive();
         pipeline_builder& enable_blending_alphablend();
         pipeline_builder& disable_depthtest();

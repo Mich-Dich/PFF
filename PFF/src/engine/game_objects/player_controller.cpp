@@ -2,9 +2,9 @@
 #include "util/pffpch.h"
 
 #include "application.h"
-#include "engine/Events/Event.h"
-#include "engine/Events/mouse_event.h"
-#include "engine/Events/key_event.h"
+#include "engine/events/event.h"
+#include "engine/events/mouse_event.h"
+#include "engine/events/key_event.h"
 #include "engine/layer/world_layer.h"
 
 #include "player_controller.h"
@@ -72,7 +72,7 @@ namespace PFF {
 
 				if (key_binding_details->modefier_flags & INPUT_ACTION_MODEFIER_SMOOTH_INTERP) {
 
-					CORE_LOG(Info, "INPUT_ACTION_MODEFIER_SMOOTH_INTERP is not supported yet");
+					LOG(Info, "INPUT_ACTION_MODEFIER_SMOOTH_INTERP is not supported yet");
 				}
 
 				switch (action->value) {
@@ -179,7 +179,7 @@ namespace PFF {
 
 		PFF_PROFILE_FUNCTION();
 
-		//CORE_LOG(Trace, event.get_keycode());
+		//LOG(Trace, event.get_keycode());
 		for (u32 x = 0; x < m_input_mapping->get_length(); x++) {				// get input_action
 			input_action* action = m_input_mapping->get_action(x);
 
@@ -217,7 +217,7 @@ namespace PFF {
 
 					if (key_binding_details->trigger_flags & INPUT_ACTION_TRIGGER_KEY_TAP) {
 
-						CORE_LOG(Warn, "INPUT_ACTION_TRIGGER_KEY_TAP - not implemented yet");
+						LOG(Warn, "INPUT_ACTION_TRIGGER_KEY_TAP - not implemented yet");
 						action->m_time_stamp = time_now;
 					}
 
@@ -227,7 +227,7 @@ namespace PFF {
 					if (key_binding_details->trigger_flags & INPUT_ACTION_TRIGGER_KEY_MOVE_DOWN) {
 
 						m_buffer = (event.m_key_state == key_state::press && key_binding_details->active == false);
-						// CORE_LOG(Info, "Current buffer: " << m_buffer << " [" << util::bool_to_str(event.m_key_state == key_state::press) << "/" << util::bool_to_str(key_binding_details->active == false) << "]");
+						// LOG(Info, "Current buffer: " << m_buffer << " [" << util::bool_to_str(event.m_key_state == key_state::press) << "/" << util::bool_to_str(key_binding_details->active == false) << "]");
 					}
 
 					if (m_buffer)
@@ -250,8 +250,8 @@ namespace PFF {
 
 		PFF_PROFILE_FUNCTION();
 
-		CORE_ASSERT(m_input_mapping, "", "m_input_mapping is not set");
-		// CORE_LOG(Trace, event << " key code: [" << std::setw(4) << static_cast<int32>(event.get_keycode()) << "] num of actions: " << m_input_mapping->get_length());
+		ASSERT(m_input_mapping, "", "m_input_mapping is not set");
+		// LOG(Trace, event << " key code: [" << std::setw(4) << static_cast<int32>(event.get_keycode()) << "] num of actions: " << m_input_mapping->get_length());
 
 		for (u32 x = 0; x < m_input_mapping->get_length(); x++) {			// get input_action
 			input_action* action = m_input_mapping->get_action(x);
@@ -289,7 +289,7 @@ namespace PFF {
 					} while (false);
 
 					key_binding_details->active = (m_buffer) ? static_cast<int16>(event_value) : 0;
-					//CORE_LOG(Info, "action value: " << bool_to_str(action->data.boolean));
+					//LOG(Info, "action value: " << bool_to_str(action->data.boolean));
 
 				}
 			}

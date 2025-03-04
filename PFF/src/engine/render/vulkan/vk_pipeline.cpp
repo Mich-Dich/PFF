@@ -10,7 +10,7 @@ namespace PFF::render::vulkan {
 
     namespace util {
 
-        bool load_shader_module(const char* filePath, VkDevice device, VkShaderModule* outShaderModule) {
+        bool load_shader_module(const std::filesystem::path& filePath, VkDevice device, VkShaderModule* outShaderModule) {
 
             // open the file. With cursor at the end
             std::ifstream file(filePath, std::ios::ate | std::ios::binary);
@@ -127,7 +127,7 @@ namespace PFF::render::vulkan {
         graphics_pipeline_CI.pDynamicState = &dynamic_state_CI;
         
         VkPipeline newPipeline;
-        CORE_VALIDATE(vkCreateGraphicsPipelines(device, VK_NULL_HANDLE, 1, &graphics_pipeline_CI, nullptr, &newPipeline) == VK_SUCCESS, return VK_NULL_HANDLE, "", "failed to create pipeline");
+        VALIDATE(vkCreateGraphicsPipelines(device, VK_NULL_HANDLE, 1, &graphics_pipeline_CI, nullptr, &newPipeline) == VK_SUCCESS, return VK_NULL_HANDLE, "", "failed to create pipeline");
         return newPipeline;
     }
 
@@ -188,6 +188,12 @@ namespace PFF::render::vulkan {
     }
 
     // ========================================================================================= feature =========================================================================================
+
+    pipeline_builder& pipeline_builder::disable_culling() {
+
+        p_rasterizer_CI.cullMode = VK_CULL_MODE_NONE;
+        return *this;
+    }
 
     pipeline_builder& pipeline_builder::disable_blending() {
         

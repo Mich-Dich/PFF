@@ -2,7 +2,7 @@
 
 #include "util/pffpch.h"
 
-#include "vendor/vk_mem_alloc.h"
+#include <vma/vk_mem_alloc.h>
 #include <vulkan/vulkan.h>
 #include <vulkan/vk_enum_string_helper.h>
 #include <glm/mat4x4.hpp>
@@ -26,20 +26,23 @@
 //    VkFormat            m_image_format{};
 //};
 
-struct vk_buffer {
+namespace PFF::render::vulkan {
 
-    VkBuffer            buffer;
-    VmaAllocation       allocation;
-    VmaAllocationInfo   info;
-};
+    struct vk_buffer {
 
-// push constants for our mesh object draws
-struct GPU_draw_push_constants {
+        VkBuffer            buffer;
+        VmaAllocation       allocation;
+        VmaAllocationInfo   info;
+    };
 
-    glm::mat4           world_matrix;
-    VkDeviceAddress     vertex_buffer;
-};
+    // push constants for our mesh object draws
+    struct GPU_draw_push_constants {
 
+        glm::mat4           world_matrix;
+        VkDeviceAddress     vertex_buffer;
+    };
 
-#define VK_CHECK_S(expr)		                        CORE_ASSERT_S(expr == VK_SUCCESS)
-#define VK_CHECK(expr, successMsg, failureMsg)		    CORE_ASSERT(expr == VK_SUCCESS)
+}
+
+#define VK_CHECK_S(expr)		                        ASSERT_S(expr == VK_SUCCESS)
+#define VK_CHECK(expr, successMsg, failureMsg)		    ASSERT(expr == VK_SUCCESS)

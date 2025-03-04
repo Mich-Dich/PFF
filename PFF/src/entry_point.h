@@ -1,32 +1,48 @@
 
 #include "application.h"
 
-#ifdef PFF_PLATFORM_WINDOWS
-
 extern PFF::application* PFF::create_application();
 
-int main() {
-	
-	auto app = PFF::create_application();
-	app->run();
-	delete app;
 
-	return EXIT_SUCCESS;
+#if defined(PFF_PLATFORM_WINDOWS)
+
+#include <windows.h>
+
+int wmain(int argc, wchar_t* argv[]) {
+
+    std::vector<std::string> args;                  // Convert wide arguments to standard strings
+    for (int i = 0; i < argc; i++) {
+        int size = WideCharToMultiByte(CP_UTF8, 0, argv[i], -1, nullptr, 0, nullptr, nullptr);
+        std::string arg(size, 0);
+        WideCharToMultiByte(CP_UTF8, 0, argv[i], -1, &arg[0], size, nullptr, nullptr);
+        arg.pop_back(); // Remove null terminator
+        args.push_back(arg);
+    }
+
+    auto app = PFF::create_application();
+    app->set_arguments(args);
+    app->init_engine();
+    app->run();
+    delete app;
+
+    return EXIT_SUCCESS;
+}
+
+#elif defined(PFF_PLATFORM_LINUX)
+
+int main(int argc, char* argv[]) {
+
+    std::vector<std::string> args;                  // Convert char* arguments to strings
+    for (int i = 0; i < argc; i++)
+        args.emplace_back(argv[i]);
+
+    auto app = PFF::create_application();
+    app->set_arguments(args);
+    app->init_engine();
+    app->run();
+    delete app;
+
+    return EXIT_SUCCESS;
 }
 
 #endif
-
-
-/*
-ToDo:
-
-	- split maintread into main/physics/render
-	- add event to input action (maybe func pointer)
-	- create level editor
-	- enable switch between dynamic_mesh and static_mesh at runtime
-	- add input smoothing
-	- add lighting capability
-	- add modle import
-	- add texture import
-
-*/

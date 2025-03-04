@@ -1,10 +1,6 @@
 
 #include "util/pffpch.h"
 
-#include "application.h"
-#include "engine/resource_management/static_mesh_asset_manager.h"
-#include "engine/resource_management/mesh_serializer.h"
-
 #define GLM_ENABLE_EXPERIMENTAL
 #include <glm/gtx/quaternion.hpp>
 #include <glm/gtc/matrix_transform.hpp>
@@ -13,19 +9,28 @@
 #include <glm/gtx/transform.hpp> // For glm::translate, glm::rotate
 #include <glm/gtx/euler_angles.hpp> // For glm::eulerAngleYXZ
 
+#include "application.h"
+#include "engine/resource_management/static_mesh_asset_manager.h"
+#include "engine/resource_management/mesh_serializer.h"
+// #include "map.h"
+
 #include "entity.h"
 
 namespace PFF {
+	
+	
+	bool entity::is_valid() { return m_map->m_registry.valid(m_entity_handle); }
+
 
 	void entity::add_mesh_component(mesh_component& mesh_comp) {
 
-		CORE_ASSERT(!mesh_comp.asset_path.empty(), "", "Provided path is empty");
+		ASSERT(!mesh_comp.asset_path.empty(), "", "Provided path is empty");
 
 		asset_file_header asset_header;
 		general_mesh_file_header general_header;
 		auto serializer = serializer::binary(application::get().get_project_path() / CONTENT_DIR / mesh_comp.asset_path, "PFF_asset_file", serializer::option::load_from_file);
 		serialize_mesh_headers(serializer, asset_header, general_header);
-		CORE_ASSERT(asset_header.type == file_type::mesh, "", "Tryed to add mesh_component but provided asset_path is not a mesh");
+		ASSERT(asset_header.type == file_type::mesh, "", "Tryed to add mesh_component but provided asset_path is not a mesh");
 
 		switch (general_header.type) {
 		case mesh_type::static_mesh: {
@@ -38,7 +43,7 @@ namespace PFF {
 			//TODO: check 
 			//		if (user defined a material_instance) || ([static_mesh_header] has a material_instance)
 			//		else use default_material
-			CORE_LOG(Warn, "Added mesh comp <= STILL NEED TO CHECK FOR DEFAULT MATERIAL");
+			LOG(Warn, "Added mesh comp <= STILL NEED TO CHECK FOR DEFAULT MATERIAL");
 
 		} break;
 
@@ -46,9 +51,9 @@ namespace PFF {
 		case mesh_type::skeletal_mesh:
 		case mesh_type::mesh_collection:
 		case mesh_type::procedural_mesh:
-			CORE_LOG(Trace, "Adding of mesh_type not supported yet"); break;
+			LOG(Trace, "Adding of mesh_type not supported yet"); break;
 
-		default: CORE_LOG(Trace, "unidentified [mesh_type] used"); break;
+		default: LOG(Trace, "unidentified [mesh_type] used"); break;
 		}
 
 
@@ -73,7 +78,7 @@ namespace PFF {
 
 		std::vector<UUID> cildren{};
 		cildren.push_back(child.get_component<ID_component>().ID);
-		add_component<relationship_component>(NULL, cildren);		// register child
+		add_component<relationship_component>(get_UUID(), cildren);		// register child
 		return;
 
 	}
@@ -103,7 +108,7 @@ namespace PFF {
 
 	void entity::accumulate_transform_from_parents(glm::mat4& transform) {
 
-		CORE_LOG(Warn, "Not implemented yet");
+		LOG(Warn, "Not implemented yet");
 	}
 
 }
