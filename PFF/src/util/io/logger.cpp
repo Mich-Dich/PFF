@@ -8,7 +8,7 @@
 namespace PFF::logger {
 
     #define SETW(width)                                         std::setw(width) << std::setfill('0')
-    #define INTERNAL_LOG(message)                               { std::ostringstream oss{}; oss << message; log_string(std::move(oss.str())); }
+    // #define INTERNAL_LOG(message)                               { std::ostringstream oss{}; oss << message; log_string(std::move(oss.str())); }
 
     #define LOGGER_UPDATE_FORMAT                                "LOGGER update format"
     #define LOGGER_REVERSE_FORMAT                               "LOGGER reverse format"
@@ -74,23 +74,23 @@ namespace PFF::logger {
     void process_log_message(const message_format&& message);
     void process_queue();
 
-    inline void log_string(std::string&& log_str, const bool force_direct_logging = true) {
+    // inline void log_string(std::string&& log_str, const bool force_direct_logging = true) {
 
-        if (!(force_direct_logging || (buffered_messages.capacity() - buffered_messages.size()) <= log_str.size())) {
+    //     if (!(force_direct_logging || (buffered_messages.capacity() - buffered_messages.size()) <= log_str.size())) {
 
-            buffered_messages.append(log_str);
-            return;
-        }
+    //         buffered_messages.append(log_str);
+    //         return;
+    //     }
         
-        OPEN_FILE
-        main_file << buffered_messages << log_str;
-        CLOSE_FILE
+    //     OPEN_FILE
+    //     main_file << buffered_messages << log_str;
+    //     CLOSE_FILE
 
-        if (write_log_to_console) 
-            std::cout << buffered_messages << log_str;
+    //     if (write_log_to_console) 
+    //         std::cout << buffered_messages << log_str;
 
-        buffered_messages.clear();
-    }
+    //     buffered_messages.clear();
+    // }
 
     inline const char* get_filename(const char* filepath) {
 
@@ -128,7 +128,11 @@ namespace PFF::logger {
                 std::quick_exit(1);
             }
 
-        OPEN_FILE
+        main_file = std::ofstream(main_log_file_path, (use_append_mode) ? std::ios::app : std::ios::out);
+        if (!main_file.is_open()) {
+            std::cerr << "Failed to open main log file path: [" << main_log_file_path << "]" << std::endl;
+            std::quick_exit(1);
+        }
         main_file << "\n========================================================\n";
         auto now = std::time(nullptr);
         auto tm = *std::localtime(&now);
@@ -175,8 +179,8 @@ namespace PFF::logger {
             main_file << buffered_messages;
             CLOSE_FILE
 
-            if (write_log_to_console)
-                std::cout << buffered_messages;
+            // if (write_log_to_console)
+            //     std::cout << buffered_messages;
         }
 
         is_init = false;
@@ -300,8 +304,8 @@ namespace PFF::logger {
                     if (is_init && buffered_messages.size() >= buffer_size) {                   // Handle buffer overflow if the new size is smaller than the current buffer content
                         
                         main_file << buffered_messages;
-                        if (write_log_to_console)
-                        std::cout << buffered_messages;
+                        // if (write_log_to_console)
+                        // std::cout << buffered_messages;
                         
                         buffered_messages.clear();
                     }
@@ -398,7 +402,7 @@ namespace PFF::logger {
                 case 'J': format_filled << SETW(3) << (u16)loc_sys_time.millisecend; break;                                                                                            // miliseond
 
                 // ------------------------ data ------------------------
-                case 'N': format_filled << SETW(4) << (u16)loc_sys_time.year << "/" << SETW(2) << (u16)loc_sys_time.month <<"/" << SETW(2) << (u16)loc_sys_time.day; break;             // data yy/mm/dd
+                case 'N': format_filled << SETW(4) << (u16)loc_sys_time.year << "/" << SETW(2) << (u16)loc_sys_time.month << "/" << SETW(2) << (u16)loc_sys_time.day; break;             // data yy/mm/dd
                 case 'Y': format_filled << SETW(4) << (u16)loc_sys_time.year; break;                                                                                                    // year
                 case 'O': format_filled << SETW(2) << (u16)loc_sys_time.month; break;                                                                                                    // month
                 case 'D': format_filled << SETW(2) << (u16)loc_sys_time.day; break;                                                                                                     // day
@@ -414,6 +418,9 @@ namespace PFF::logger {
         }
 
         std::string log_str = format_filled.str();
+        if (write_log_to_console)                               // write to console becor checking for file write conditions
+            std::cout << log_str;
+
         if (!((static_cast<u8>(message.msg_sev) >= static_cast<u8>(severity_level_buffering_threshhold)) || (buffered_messages.capacity() - buffered_messages.size()) <= log_str.size())) {
 
             buffered_messages.append(log_str);
@@ -423,9 +430,6 @@ namespace PFF::logger {
         OPEN_FILE
         main_file << buffered_messages << log_str;
         CLOSE_FILE
-
-        if (write_log_to_console) 
-            std::cout << buffered_messages << log_str;
 
         buffered_messages.clear();
     }

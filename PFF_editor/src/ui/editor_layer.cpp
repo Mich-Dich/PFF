@@ -68,6 +68,7 @@ namespace PFF {
 
 	void editor_layer::on_detach() {
 
+		LOG(Fatal, "void editor_layer::on_detach()")
 		delete m_world_viewport_window;
 
 		m_folder_icon.reset();
@@ -234,7 +235,7 @@ namespace PFF {
 		const static auto project_name = application::get().get_project_data().display_name.c_str();
 		const auto project_name_size = ImGui::CalcTextSize(project_name);
 		ImGui::SetCursorPos(ImVec2(viewport->Size.x - (window_padding.x + (button_spaccing * 2) + (button_width * 3)) - project_name_size.x - 30, window_padding.y + titlebar_vertical_offset));
-		ImGui::Text(project_name);
+		ImGui::Text("%s", project_name);
 		ImGui::PopFont();
 
 		ImGui::SetCursorPos(ImVec2(viewport->Size.x - (window_padding.x + (button_spaccing * 2) + (button_width * 3)), window_padding.y + titlebar_vertical_offset));
@@ -250,8 +251,11 @@ namespace PFF {
 		}
 
 		ImGui::SetCursorPos(ImVec2(viewport->Size.x - (window_padding.x + button_width), window_padding.y + titlebar_vertical_offset));
-		if (ImGui::Button("X##Close", ImVec2(button_width, button_width)))
+		if (ImGui::Button("X##Close", ImVec2(button_width, button_width))) {
+
+			LOG(Trace, "Titlebar close button clicked")
 			application::get().close_application();
+		}
 
 		// make new window with menubar because I dont know how to limit the extend of a MenuBar
 		// just ImGui::MenuBar() would bo over the entire width of [appliaction_titlebar]

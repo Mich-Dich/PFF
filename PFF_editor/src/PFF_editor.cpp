@@ -37,8 +37,10 @@ namespace PFF {
 
 	bool PFF_editor::shutdown() {
 
+		LOG(Trace, "serializing editor data")
 		serialize(serializer::option::save_to_file);
 
+		LOG(Trace, "Removing editor layer")
 		pop_overlay(m_editor_layer);
 		delete m_editor_layer;
 

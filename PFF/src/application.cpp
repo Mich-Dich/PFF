@@ -141,11 +141,13 @@ namespace PFF {
 			limit_fps();
 		}
 
+		LOG(Trace, "Exiting main run loop")
 		GET_RENDERER.wait_idle();
 
 		PFF_PROFILE_END_SESSION();
 		PFF_PROFILE_BEGIN_SESSION("shutdown", "benchmarks", "PFF_benchmark_shutdown.json");
 
+		LOG(Trace, "shuting down client application")
 		ASSERT(shutdown(), "client application is shutdown", "client-defint shutdown() has failed");			// init user code / potentally make every actor have own function (like UNREAL)
 	}
 

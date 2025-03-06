@@ -55,7 +55,7 @@ namespace PFF {
 
 	map::map() {
 
-		m_path = application::get().get_project_path() / CONTENT_DIR / "worlds" / "test_map.pffasset";
+		m_path = application::get().get_project_path() / CONTENT_DIR / "worlds" / "test_map.pffasset";			// TODO: Change to load the map from the .pffproj file
 		LOG(Trace, "Loading map: " << m_path);
 
 		serialize(serializer::option::load_from_file);

@@ -47,7 +47,7 @@ namespace PFF::code_generator {
 		source << "extern \"C\" namespace PFF::init {\n\n";
 
 		// ------------------------------------------------------ static variables ------------------------------------------------------
-		source << "\tstatic const char* procedural_mesh_scripts[] = {\n";
+		source << "\tconst char* procedural_mesh_scripts[] = {\n";
 		for (auto clazz : classes) {
 			if (clazz.parent_class_name.find("procedural_mesh_script") != std::string::npos)
 				source << "\t\t\"" << clazz.class_name.c_str() << "\",\n";
@@ -55,7 +55,7 @@ namespace PFF::code_generator {
 		source << "\t\tnullptr\n\t};\n\n";
 
 
-		source << "\tstatic const char* scripts[] = {\n";
+		source << "\tconst char* scripts[] = {\n";
 		for (auto clazz : classes) {
 			if (clazz.parent_class_name.find("entity_script") != std::string::npos)
 				source << "\t\t\"" << clazz.class_name.c_str() << "\",\n";
@@ -150,7 +150,7 @@ namespace PFF::code_generator {
 
 #define PFF_DISPLAY_PROPERTIE_GENERATED_MACRO(name, cast)		for (auto str_class : reflect_##name::string_to_map) {					\
 																	if (str_class.first != class_name) continue;						\
-																	reflect_##name::display_properties((##cast*) script);				\
+																	reflect_##name::display_properties((cast*) script);					\
 																	return;}
 
 #define PFF_SERIALIZE_SCRIPT_GENERATED_MACRO(name, cast)		for (auto str_class : reflect_##name::string_to_map) {					\

@@ -42,7 +42,8 @@ project "PFF_editor"
 		"%{IncludeDir.tinyobjloader}",
 		"%{IncludeDir.stb_image}",
 		"%{IncludeDir.ImGuizmo}",
-		"%{IncludeDir.VulkanSDK}",
+		"%{IncludeDir.Vulkan}",
+		"%{IncludeDir.VulkanUtils}",
 	}
 
 	links
@@ -64,12 +65,12 @@ project "PFF_editor"
 
 	    links
 		{
-			"%{Library.Vulkan}",  -- Add this line to link Vulkan
+			-- "%{Library.Vulkan}",
 		}
 		
 		libdirs
 		{
-			"%{IncludeDir.VulkanSDK}/Lib",
+			"%{IncludeDir.Vulkan}/Lib",
 		}
         
 		postbuildcommands
@@ -88,7 +89,7 @@ project "PFF_editor"
 
 		includedirs
 		{
-			"/usr/include/vulkan",
+			-- "/usr/include/vulkan",
 			"%{IncludeDir.glfw}/include",
 
 			"/usr/include/x86_64-linux-gnu/qt5", 				-- Base Qt include path
@@ -103,7 +104,7 @@ project "PFF_editor"
 			
 			"/usr/lib/x86_64-linux-gnu",  -- Default library path for system libraries
 			"/usr/lib/x86_64-linux-gnu/qt5",
-			-- "%{IncludeDir.VulkanSDK}/lib",
+			-- "%{IncludeDir.Vulkan}/lib",
 		}
 
 		links
@@ -111,7 +112,6 @@ project "PFF_editor"
 			"%{wks.location}/PFF/vendor/glfw/build/src/glfw3",
 			-- "glfw",
 			"imgui",
-			"vulkan",
 			"vulkan",
 
 			"Qt5Core",

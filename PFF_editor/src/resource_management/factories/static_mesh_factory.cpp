@@ -163,8 +163,8 @@ namespace PFF::mesh_factory {
 
     bool import_gltf_mesh(const std::filesystem::path source_path, const std::filesystem::path destination_path, const load_options options) {
 
-        // TODO: check if source_path is valid
-        // TODO: check if destination_path is free
+        VALIDATE(std::filesystem::exists(source_path) && (source_path.extension() == ".gltf" || source_path.extension() == ".glb")&& std::filesystem::is_regular_file(source_path), return false, "", "provided source path invalid [" << source_path << "]");
+        // VALIDATE(!std::filesystem::exists(destination_path), return false, "", "provided destination path already exists [" << destination_path << "]");
 
         LOG(Trace, "source_path: " << source_path << " destination_path: " << destination_path);
 
@@ -179,9 +179,7 @@ namespace PFF::mesh_factory {
 
             //LOG(Warn, "Not implemented yet");                  // <= HERE
             //return false;
-
-
-
+            
             ref<PFF::geometry::mesh_asset> combined_mesh = std::make_shared<PFF::geometry::mesh_asset>();                           // Create a new mesh to hold the combined data
 
             // Variables to keep track of the current vertex and index count

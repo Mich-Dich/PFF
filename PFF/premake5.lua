@@ -42,8 +42,9 @@ project "PFF"
 		"%{IncludeDir.ImGui}/backends/",
 		"%{IncludeDir.stb_image}",
 		"%{IncludeDir.entt}",
-		"%{IncludeDir.ImGuizmo}",		
-		"%{IncludeDir.VulkanSDK}",
+		"%{IncludeDir.ImGuizmo}",
+		"%{IncludeDir.Vulkan}",
+		"%{IncludeDir.VulkanUtils}",
 	}
 	
 	links
@@ -59,8 +60,8 @@ project "PFF"
 
 	libdirs 
 	{
-		"vendor/imgui/bin/Debug-windows-x86_64/ImGui",
-        "%{IncludeDir.VulkanSDK}/lib",
+		"vendor/imgui/bin/" .. outputs .. "/ImGui",
+		"%{Library.Vulkan}",
 	}
 
 	filter "files:vendor/ImGuizmo/**.cpp"
@@ -78,8 +79,8 @@ project "PFF"
 
 		libdirs 
 		{
-			"vendor/imgui/bin/Debug-windows-x86_64/ImGui",
-			"%{IncludeDir.VulkanSDK}/Lib",  -- Ensure this points to the Vulkan SDK's Lib directory
+			"vendor/imgui/bin/" .. outputs .. "/ImGui",
+			-- "%{IncludeDir.Vulkan}/Lib",
 		}
 	
 		postbuildcommands {										-- copy premake exe (needed for engine projects)
@@ -100,7 +101,6 @@ project "PFF"
 		
 		includedirs
 		{
-			"/usr/include/vulkan",
 			"/usr/include/x86_64-linux-gnu/qt5", 				-- Base Qt include path
 			"/usr/include/x86_64-linux-gnu/qt5/QtCore",
 			"/usr/include/x86_64-linux-gnu/qt5/QtWidgets",

@@ -21,7 +21,7 @@ namespace PFF {
 
 		if (serializer.get_option() == serializer::option::save_to_file) {					// verify the file content
 
-			ASSERT(asset_header.type == file_type::mesh, "", "Tryed to but provided asset_path is a mesh");
+			ASSERT(asset_header.type == file_type::mesh, "", "Tryed to serialize mesh header, but provided asset_path is not a mesh");
 		}
 
 		serializer.entry(asset_header)
@@ -29,7 +29,7 @@ namespace PFF {
 
 		if (serializer.get_option() == serializer::option::load_from_file) {				// verify the file content
 
-			ASSERT(asset_header.type == file_type::mesh, "", "Tryed to but provided asset_path is a mesh");
+			ASSERT(asset_header.type == file_type::mesh, "", "Tryed to deserialize mesh header, but provided asset_path is not a mesh");
 		}
 	}
 

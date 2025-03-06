@@ -218,7 +218,7 @@ namespace PFF::toolkit::todo {
 				}
 
 				char buf[32];
-				snprintf(buf, 32, "X##kill_%llu", n);
+				snprintf(buf, 32, "X##kill_%lu", n);
 
 				ImGui::SameLine();
 				if (s_topics[n].hovered) {
@@ -352,7 +352,7 @@ namespace PFF::toolkit::todo {
 
 						if (!s_topics[x].tasks[y].done) {
 
-							snprintf(buf, 64, "##topic_%llu_task_%llu", x, y);
+							snprintf(buf, 64, "##topic_%lu_task_%lu", x, y);
 							ImGui::Checkbox(buf, &s_topics[x].tasks[y].done);
 							ImGui::SameLine();
 							UI::big_text(s_topics[x].tasks[y].title.c_str(), true);
@@ -378,13 +378,13 @@ namespace PFF::toolkit::todo {
 
 							if (s_topics[x].tasks[y].done) {
 
-								snprintf(buf, 64, "##topic_%llutask_%llu", x, y);
+								snprintf(buf, 64, "##topic_%lutask_%lu", x, y);
 								ImGui::Checkbox(buf, &s_topics[x].tasks[y].done);
 								ImGui::SameLine();
 								UI::big_text(s_topics[x].tasks[y].title.c_str());
 								UI::shift_cursor_pos(inner_offset_x + 5, 0);
 								const auto description_c_str= s_topics[x].tasks[y].description.c_str();
-								ImGui::Text(description_c_str);
+								ImGui::Text("%s", description_c_str);
 							}
 						}
 					}
