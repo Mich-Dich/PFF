@@ -68,7 +68,6 @@ namespace PFF {
 
 	void editor_layer::on_detach() {
 
-		LOG(Fatal, "void editor_layer::on_detach()")
 		delete m_world_viewport_window;
 
 		m_folder_icon.reset();

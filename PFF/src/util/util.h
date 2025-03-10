@@ -58,6 +58,8 @@
 
 namespace PFF::util {
 
+    void init();
+
     // ================================================= utilits =================================================
 
     template<typename key_type, typename value_type>
@@ -67,5 +69,4 @@ namespace PFF::util {
     //@param [ptr] Pointer to check.
     //@return [conat char*] "valid" if the pointer is not null, "invalid" otherwise.
     FORCEINLINE constexpr const char* ptr_validity_check(const void* ptr) { return (ptr != nullptr) ? "valid" : "invalid"; }
-
 }

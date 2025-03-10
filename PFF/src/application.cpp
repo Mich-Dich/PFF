@@ -1,10 +1,10 @@
 
 #include "util/pffpch.h"
 
+#include "util/util.h"
+
 #define GLFW_INCLUDE_VULKAN
 #include <GLFW/glfw3.h>
-
-#include "util/crash_handler.h"
 
 #include "engine/events/event.h"
 #include "engine/events/application_event.h"
@@ -75,13 +75,15 @@ namespace PFF {
 
 		PFF_PROFILE_BEGIN_SESSION("startup", "benchmarks", "PFF_benchmark_startup.json");
 		PFF_PROFILE_FUNCTION();
-		attach_crash_handler();
 
 #if defined(PFF_PLATFORM_LINUX)
 		PFF::logger::init("[$B$T:$J$E] [$B$L$X $I - $P:$G$E] $C$Z", true);
 #elif defined(PFF_PLATFORM_WINDOWS)
 		PFF::logger::init("[$B$T:$J$E] [$B$L$X $I - $P:$G$E] $C$Z", true, std::filesystem::path("..") / "bin" / PFF_OUTPUTS / "logs" );
 #endif
+		
+		util::init();
+
 		logger::set_buffer_threshhold(logger::severity::Warn);
 		ASSERT(!s_instance, "", "Application already exists");
 
@@ -112,7 +114,7 @@ namespace PFF {
 		
 		m_layerstack.reset();
 		m_window.reset();
-		detach_crash_handler();
+
 		LOG_SHUTDOWN();
 		PFF_PROFILE_END_SESSION();
 	}

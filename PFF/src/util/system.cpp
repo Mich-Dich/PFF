@@ -172,6 +172,51 @@ namespace PFF::util {
         return loc_system_time;
     }
 
+#if defined(PFF_PLATFORM_LINUX)                                     // QT related functions (Linux only)
+
+    namespace {
+        std::unique_ptr<QApplication> qt_app;
+        int qt_argc = 1;
+        char qt_argv0[] = "PFF_editor";  // Permanent storage for argv[0]
+        char* qt_argv[] = {qt_argv0, nullptr};
+    }
+
+    void qt_message_handler(QtMsgType type, const QMessageLogContext& context, const QString& msg) {
+        
+        // Map Qt message type to your severity levels
+        PFF::logger::severity sev = PFF::logger::severity::Debug;
+        switch(type) {
+            case QtDebugMsg:    sev = PFF::logger::severity::Debug; break;
+            case QtInfoMsg:     sev = PFF::logger::severity::Info; break;
+            case QtWarningMsg:  sev = PFF::logger::severity::Warn; break;
+            case QtCriticalMsg: sev = PFF::logger::severity::Error; break;
+            case QtFatalMsg:    sev = PFF::logger::severity::Fatal; break;
+        }
+        
+        // Extract context information
+        const char* file            = context.file ? context.file : "none";
+        const char* function        = context.function ? context.function : "none";
+        int line                    = context.line;
+        std::thread::id threadId    = std::this_thread::get_id();
+        std::string message         = msg.toStdString();
+        PFF::logger::log_msg(sev, file, function, line, threadId, std::move(message));
+    }
+    
+    void init_qt() {
+            
+        LOG(Trace, "Initiating QT");
+    
+        qInstallMessageHandler(qt_message_handler);
+        
+        if (!qt_app) {
+            QApplication::setAttribute(Qt::AA_EnableHighDpiScaling);
+            qt_app = std::make_unique<QApplication>(qt_argc, qt_argv);
+        }
+    }
+    
+    void shutdown_qt() { qt_app.reset(); }
+
+#endif
 
     std::filesystem::path file_dialog(const std::string& title, const std::vector<std::pair<std::string, std::string>>& filters) {
 
@@ -209,10 +254,11 @@ namespace PFF::util {
         return std::filesystem::path();
 
     #elif defined(PFF_PLATFORM_LINUX)
-
-        int argc = 0;
-        char **argv = nullptr;
-        QApplication app(argc, argv);                                                                                                   // Create a QApplication instance
+   
+         if (!qt_app) {
+            LOG(Error, "QApplication not initialized!");
+            return {};
+        }
 
         QString filterString;
         for (auto& filter : filters) {                                                                                                  // Prepare the filter string for QFileDialog

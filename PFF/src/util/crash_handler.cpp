@@ -56,8 +56,10 @@ namespace PFF {
 
 	void signal_handler(const int signal) {
 
+		std::cout << "signal caught => terminating" << std::endl;
+		LOG(Fatal, "crash_hander caught signal [" << signal << "]. flushing remaining logs")
 		logger::shutdown();
-		detach_crash_handler();
+		// detach_crash_handler();
 	}
 
 	void attach_crash_handler() {
