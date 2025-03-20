@@ -9,7 +9,7 @@
 
 namespace PFF {
 
-	// ref<project_file_watcher> p_project_file_watcher{};
+	 ref<project_file_watcher> p_project_file_watcher{};
 
 	void PFF_editor::serialize(serializer::option option) {
 
@@ -31,7 +31,7 @@ namespace PFF {
 		serialize(serializer::option::load_from_file);
 
 		// TODO: load from project data
-		// p_project_file_watcher = create_ref<project_file_watcher>();
+		p_project_file_watcher = create_ref<project_file_watcher>();
 		return true;
 	}
 

@@ -5,9 +5,9 @@
 
 #undef ERROR
 
-#ifndef DEBUG_BREAK
-	#define DEBUG_BREAK() __debugbreak()
-#endif // !DEBUG_BREAK
+//#ifndef DEBUG_BREAK
+//	#define DEBUG_BREAK() __debugbreak()
+//#endif // !DEBUG_BREAK
 
 namespace PFF::logger {
 
@@ -175,17 +175,17 @@ namespace PFF::logger {
                 LOG(Trace, message_success)                                                 \
             else {                                                                          \
                 LOG(Fatal, message_failure)                                                 \
-                DEBUG_BREAK;                                                                \
+                DEBUG_BREAK();                                                              \
             }
 
         #define ASSERT_S(expr)                                                              \
             if (!(expr)) {                                                                  \
                 LOG(Fatal, #expr)                                                           \
-                DEBUG_BREAK;                                                                \
+                DEBUG_BREAK();                                                              \
             }
     #else
-        #define ASSERT(expr, message_success, message_failure)                              if (!(expr)) { DEBUG_BREAK }
-        #define ASSERT_S(expr)                                                              if (!(expr)) { DEBUG_BREAK }
+        #define ASSERT(expr, message_success, message_failure)                              if (!(expr)) { DEBUG_BREAK() }
+        #define ASSERT_S(expr)                                                              if (!(expr)) { DEBUG_BREAK() }
     #endif
 
 #elif defined (PFF_PLATFORM_LINUX)

@@ -18,7 +18,9 @@ workspace "PFF"
 	}
 
 	outputs  = "%{cfg.buildcfg}-%{cfg.system}-%{cfg.architecture}"
+	local project_path = os.getcwd()
 	defines {
+		"ENGINE_INSTALL_DIR=\"" .. project_path .. "/bin/" .. outputs .. "\"",
 		"PFF_OUTPUTS=\"" .. outputs .. "\"",
 		"PFF_USING_EDITOR",							-- TODO: PFF_USING_EDITOR should not be defined in the packaged builds of game
 	}

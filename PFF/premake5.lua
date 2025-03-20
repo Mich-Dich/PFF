@@ -44,7 +44,7 @@ project "PFF"
 		"%{IncludeDir.entt}",
 		"%{IncludeDir.ImGuizmo}",
 		"%{IncludeDir.Vulkan}",
-		"%{IncludeDir.VulkanUtils}",
+		-- "%{IncludeDir.VulkanUtils}",
 	}
 	
 	links
@@ -56,6 +56,20 @@ project "PFF"
 
 		-- Copy content of directories
 		table.unpack(copy_content_of_dir(outputs, {"PFF/shaders", "PFF/assets"})),
+
+		'{COPY} "%{wks.location}/dependencies.lua" "%{wks.location}/bin/' .. outputs .. '/"',
+		'{COPYDIR} "%{wks.location}/PFF/src" "%{wks.location}/bin/' .. outputs .. '/PFF/src"',
+
+
+		-- Copy vendor dependencies
+		'{COPY} "%{wks.location}/PFF/vendor/entt/LICENSE.txt" "%{wks.location}/bin/' .. outputs .. '/vendor/entt"',
+		'{COPYDIR} "%{wks.location}/PFF/vendor/entt/include" "%{wks.location}/bin/' .. outputs .. '/vendor/entt"',
+		'{COPYDIR} "%{wks.location}/PFF/vendor/glm/glm" "%{wks.location}/bin/' .. outputs .. '/vendor/glm/glm"',
+
+		-- Copy GLFW
+		"{MKDIR} %{wks.location}/bin/" .. outputs .. "/vendor/glfw",
+		'{COPYDIR} "%{wks.location}/PFF/vendor/glfw/bin/' .. outputs .. '/GLFW" "%{wks.location}/bin/' .. outputs .. '/vendor/glfw"',
+		'{COPY} "%{wks.location}/PFF/vendor/glfw/LICENSE.md" "%{wks.location}/bin/' .. outputs .. '/vendor/glfw"',
 	}
 
 	libdirs 

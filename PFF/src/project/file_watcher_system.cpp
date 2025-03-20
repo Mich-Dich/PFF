@@ -35,7 +35,11 @@ namespace PFF {
 
 	file_watcher_system::file_watcher_system() { }
 
-	void file_watcher_system::start() { m_thread = std::thread(&file_watcher_system::start_thread, this); }
+	void file_watcher_system::start() { 
+	
+		LOG(Fatal, "starting file watcher system");
+		m_thread = std::thread(&file_watcher_system::start_thread, this);
+	}
 
 	static bool should_ignore_file(const std::string filename) {
 
@@ -192,6 +196,7 @@ namespace PFF {
 
 	void file_watcher_system::stop() {
 	
+		LOG(Info, "Stopping thread [file_watcher_system]")
 		if (!m_enable_raising_events)
 			return;
 

@@ -225,7 +225,7 @@ namespace PFF::script_system {
 
 	void reload(bool delete_script_components) {
 
-		LOG(Debug, "called script_system::reload(" << util::to_string(delete_script_components) << ")");
+		LOG(Debug, "called script_system::reload(delete_script_components=" << util::to_string(delete_script_components) << ")");
 		VALIDATE(free_script_library(delete_script_components), return, "freeed scripting library", "Count not free scripting library");
 		
 			auto& registry = GET_REGISTRY_OF_MAP;

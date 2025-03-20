@@ -7,7 +7,7 @@
 
 namespace PFF::logger {
 
-#if 1       // multithreaded version
+#if 0       // multithreaded version
 
     #define SETW(width)                                         std::setw(width) << std::setfill('0')
     // #define INTERNAL_LOG(message)                               { std::ostringstream oss{}; oss << message; log_string(std::move(oss.str())); }
