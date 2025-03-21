@@ -38,6 +38,24 @@ workspace "PFF"
 		print("---------- Done compiling GLFW ----------")
 	end
 
+function copy_content_of_dir(outputs, dir_names)
+	local commands = {}
+	for _, dir_name in ipairs(dir_names) do
+		local target_dir = "%{wks.location}/bin/" .. outputs .. "/" .. dir_name
+		local source_dir = "%{wks.location}/" .. dir_name
+
+		table.insert(commands, "{MKDIR} " .. target_dir)
+
+		if os.target() == "windows" then
+			table.insert(commands, "{COPY} " .. source_dir .. " " .. target_dir)
+		elseif os.target() == "linux" then
+			table.insert(commands, "{COPY} " .. source_dir .. " " .. target_dir .. "/..")
+		end
+	end
+
+	return commands
+end
+
 group "dependencies"
 	include "PFF/vendor/fastgltf"
 	include "PFF/vendor/imgui"
@@ -45,24 +63,6 @@ group "dependencies"
 		include "PFF/vendor/glfw"
 	end
 group ""
-
-function copy_content_of_dir(outputs, dir_names)
-    local commands = {}
-    for _, dir_name in ipairs(dir_names) do
-        local target_dir = "%{wks.location}/bin/" .. outputs .. "/" .. dir_name
-        local source_dir = "%{wks.location}/" .. dir_name
-
-		table.insert(commands, "{MKDIR} " .. target_dir)
-
-        if os.target() == "windows" then
-			table.insert(commands, "{COPY} " .. source_dir .. " " .. target_dir)
-        elseif os.target() == "linux" then
-            table.insert(commands, "{COPY} " .. source_dir .. " " .. target_dir .. "/..")
-	    end
-	end
-
-    return commands
-end
 
 group "Engine"
 	include "PFF"

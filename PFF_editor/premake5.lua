@@ -14,20 +14,15 @@ project "PFF_editor"
 
 	-- glslc = "%{wks.location}/PFF/vendor/vulkan-glslc/glslc.exe"
 
-	defines
-	{
-		"PFF_EDITOR",
-	}
+	defines { "PFF_EDITOR" }
 
-	files
-	{
+	files {
 		"src/**.h",
 		"src/**.cpp",
 		"src/**.embed",
 	}
 
-	includedirs
-	{
+	includedirs {
 		"src",
 		"assets",
 		"content",
@@ -46,8 +41,7 @@ project "PFF_editor"
 		"%{IncludeDir.VulkanUtils}",
 	}
 
-	links
-	{
+	links {
 		"PFF",
 		"PFF_helper",
 		"ImGui",
@@ -58,27 +52,31 @@ project "PFF_editor"
 		systemversion "latest"
 		defines "PFF_PLATFORM_WINDOWS"
 
-		files
-		{
+		files {
 			"../metadata/app_icon.rc",
 		}
 
-	    links
-		{
+	    links {
 			-- "%{Library.Vulkan}",
 		}
 		
-		libdirs
-		{
+		libdirs {
 			"%{IncludeDir.Vulkan}/Lib",
 		}
         
 		postbuildcommands
 		{
-			"{MKDIR} %{wks.location}/bin/" .. outputs .. "/PFF_editor/wiki",
-			"{COPY} %{wks.location}/.github/wiki %{wks.location}/bin/" .. outputs .. "/PFF_editor/wiki",
+			-- "{MKDIR} %{wks.location}/bin/" .. outputs .. "/PFF_editor/wiki",
+			-- "{COPY} %{wks.location}/.github/wiki %{wks.location}/bin/" .. outputs .. "/PFF_editor/wiki",
 
-			table.unpack(copy_content_of_dir(outputs, {"PFF_editor/shaders", "PFF_editor/assets", "PFF_editor/defaults", "PFF_editor/project_templates"})),
+			-- table.unpack(copy_content_of_dir(outputs, {"PFF_editor/shaders", "PFF_editor/assets", "PFF_editor/defaults", "PFF_editor/project_templates"})),
+					
+			-- table.unpack(copy_content_of_dir(outputs, {"PFF_editor/shaders", "PFF_editor/defaults", "PFF_editor/defaults"})),
+			"{MKDIR} %{wks.location}/bin/" .. outputs .. "/PFF_editor/shaders",
+			'{COPYDIR} "%{wks.location}/PFF_editor/shaders" "%{wks.location}/bin/' .. outputs .. '/PFF_editor/"',
+			'{COPYDIR} "%{wks.location}/PFF_editor/assets" "%{wks.location}/bin/' .. outputs .. '/PFF_editor/assets"',
+			'{COPYDIR} "%{wks.location}/PFF_editor/defaults" "%{wks.location}/bin/' .. outputs .. '/PFF_editor/defaults"',
+			'{COPYDIR} "%{wks.location}/PFF_editor/project_templates" "%{wks.location}/bin/' .. outputs .. '/PFF_editor"',
 		}
 
 
@@ -87,8 +85,8 @@ project "PFF_editor"
 		systemversion "latest"
 		defines "PFF_PLATFORM_LINUX"
 
-		includedirs
-		{
+		includedirs {
+
 			-- "/usr/include/vulkan",
 			"%{IncludeDir.glfw}/include",
 
@@ -98,8 +96,8 @@ project "PFF_editor"
 			"/usr/include/x86_64-linux-gnu/qt5/QtGui",
 		}
 
-		libdirs
-		{
+		libdirs {
+
 			"%{wks.location}/PFF/vendor/glfw/build/src",
 			
 			"/usr/lib/x86_64-linux-gnu",  -- Default library path for system libraries
@@ -107,8 +105,8 @@ project "PFF_editor"
 			-- "%{IncludeDir.Vulkan}/lib",
 		}
 
-		links
-		{
+		links {
+
 			"%{wks.location}/PFF/vendor/glfw/build/src/glfw3",
 			-- "glfw",
 			"imgui",
@@ -119,16 +117,14 @@ project "PFF_editor"
 			"Qt5Gui",
 		}
 		
-		postbuildcommands
-		{
-			-- Create the directory if it doesn't exist
-			"mkdir -p %{wks.location}/bin/" .. outputs .. "/PFF_editor/wiki",
-			"cp -r %{wks.location}/.github/wiki %{wks.location}/bin/" .. outputs .. "/PFF_editor/wiki",
-
-			-- Copy content of directories
-			table.unpack(copy_content_of_dir(outputs, {"PFF_editor/shaders", "PFF_editor/defaults", "PFF_editor/assets"})),
+		postbuildcommands {
+			
+			'{COPYDIR} "%{wks.location}/.github/wiki" "%{wks.location}/bin/' .. outputs .. '/PFF_editor"',
+			'{COPYDIR} "%{wks.location}/PFF_editor/shaders" "%{wks.location}/bin/' .. outputs .. '/PFF_editor"',
+			'{COPYDIR} "%{wks.location}/PFF_editor/assets" "%{wks.location}/bin/' .. outputs .. '/PFF_editor"',
+			'{COPYDIR} "%{wks.location}/PFF_editor/defaults" "%{wks.location}/bin/' .. outputs .. '/PFF_editor"',
+			'{COPYDIR} "%{wks.location}/PFF_editor/project_templates" "%{wks.location}/bin/' .. outputs .. '/PFF_editor"',
 		}
-
 
 	filter "configurations:Debug"
 		defines "PFF_DEBUG"

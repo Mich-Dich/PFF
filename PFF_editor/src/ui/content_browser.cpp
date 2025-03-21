@@ -192,7 +192,7 @@ namespace PFF {
 		const float window_visible_x2 = ImGui::GetWindowPos().x + ImGui::GetWindowContentRegionMax().x;
 		u32 count = 0;
 
-		for (const auto& entry : std::filesystem::directory_iterator(path)) {
+		for (const auto& entry : std::filesystem::directory_iterator(path)) {											// display directorys first
 
 			if (!entry.is_directory())
 				continue;
@@ -268,8 +268,9 @@ namespace PFF {
 			if (entry.is_directory())
 				continue;
 
+			const std::filesystem::path current_path = entry.path();
 			const int current_ID = hash_path(entry.path());
-			display_file(entry.path(), current_ID);
+			display_file(current_path, current_ID);
 			const float next_item_x2 = ImGui::GetItemRectMax().x + style.ItemSpacing.x + m_icon_size.x;		// Expected position if next item was on the same line
 			if (next_item_x2 < window_visible_x2)															// handle item wrapping
 				ImGui::SameLine();
@@ -330,8 +331,8 @@ namespace PFF {
 				default: break;
 			}
 
-			const auto wrapped_text = UI::wrap_text_at_underscore(item_name, m_icon_size.x).c_str();
-			ImGui::TextWrapped("%s", wrapped_text);
+			const std::string wrapped_text = UI::wrap_text_at_underscore(item_name, m_icon_size.x);
+			ImGui::TextWrapped("%s", wrapped_text.c_str());
 
 			ImGui::PopID();
 		}
