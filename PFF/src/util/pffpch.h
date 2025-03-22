@@ -22,6 +22,7 @@
 #include <string_view>
 #include <cstring>
 #include <sstream>
+#include <regex>
 
 #include <vector>
 #include <unordered_map>

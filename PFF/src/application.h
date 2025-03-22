@@ -86,8 +86,7 @@ namespace PFF {
 		void end_fps_measurement(f32& work_time);
 		void limit_fps();
 
-		void set_arguments(const std::vector<std::string>& args);
-		const std::vector<std::string>& get_arguments() const { return m_arguments; }
+		void set_arguments(int argc, char** argv);
 		void init_engine();
 
 	private:
@@ -130,8 +129,6 @@ namespace PFF {
 
 		std::filesystem::path		m_project_path{};
 		project_data				m_project_data{};
-
-		std::vector<std::string>	m_arguments;
 	};
 
 	// to be defined in Client

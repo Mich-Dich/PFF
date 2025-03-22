@@ -262,6 +262,7 @@ namespace PFF {
 	}
 
 	//
+#if 0
 	void application::set_arguments(const std::vector<std::string>& args) {
 
 		m_arguments = args;
@@ -284,6 +285,32 @@ namespace PFF {
 		m_project_data = serialize_projects_data(m_project_path, serializer::option::load_from_file);
 		serialize(serializer::option::load_from_file);							// load project data
 	}
+
+#else
+
+	void application::set_arguments(int argc, char** argv) {
+
+		if (argc > 1) {
+
+			LOG(Trace, "Provided path to PFF Project File: " << m_project_path);
+			m_project_path = std::filesystem::path(argv[1]);
+			ASSERT((!m_project_path.empty() && std::filesystem::exists(m_project_path) && m_project_path.extension() == PFF_PROJECT_EXTENTION), "", "path to project-file is invalid [" << m_project_path << "]. ABORTING");
+			m_project_path = m_project_path.parent_path();					// fwitch from project file to project directory
+		}
+
+		else {																// project directory not given as argument, need to manually select it
+
+			LOG(Trace, "No path to PFF Project File provided, opening file dialog");
+			const std::vector<std::pair<std::string, std::string>> project_file_filters = { {"PFF Project File", "*.pffproj"} };
+			m_project_path = util::file_dialog("Open PFF-Project", project_file_filters).parent_path();
+			ASSERT(!m_project_path.empty(), "", "User failed to provide project path");
+			LOG(Trace, "Selected file: " << m_project_path)
+		}
+
+		m_project_data = serialize_projects_data(m_project_path, serializer::option::load_from_file);
+		serialize(serializer::option::load_from_file);							// load project data
+	}
+#endif
 
 	//
 	void application::init_engine() {

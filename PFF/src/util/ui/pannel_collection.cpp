@@ -24,77 +24,119 @@ namespace PFF::UI {
 		return ImGui::IsMouseHoveringRect(item_pos, item_max) && ImGui::IsMouseDoubleClicked(0);
 	}
 
-	mouse_interation get_mouse_interation_on_item(const f32 target_click_duration) {
+	void set_mouse_interaction_state(mouse_interation& state, bool& is_left_button_down, bool& is_right_button_down, bool& is_middle_button_down) {
 
-		static std::chrono::steady_clock::time_point left_click_time;
-		static std::chrono::steady_clock::time_point right_click_time;
+		// Check for left mouse button interactions
+		if (ImGui::IsMouseClicked(ImGuiMouseButton_Left))
+			state = mouse_interation::left_clicked;
+
+		if (ImGui::IsMouseDoubleClicked(ImGuiMouseButton_Left))
+			state = mouse_interation::left_double_clicked;
+
+		else if (ImGui::IsMouseDragging(ImGuiMouseButton_Left))
+			state = mouse_interation::dragged;
+
+		else if (ImGui::IsMouseDown(ImGuiMouseButton_Left)) {
+			is_left_button_down = true;
+			state = mouse_interation::left_pressed;
+		}
+		else if (ImGui::IsMouseReleased(ImGuiMouseButton_Left) && is_left_button_down) {
+			is_left_button_down = false;
+			state = mouse_interation::left_released;
+		}
+
+		// Check for right mouse button interactions
+		if (ImGui::IsMouseClicked(ImGuiMouseButton_Right))
+			state = mouse_interation::right_clicked;
+
+		if (ImGui::IsMouseDoubleClicked(ImGuiMouseButton_Right))
+			state = mouse_interation::right_double_clicked;
+
+		else if (ImGui::IsMouseDown(ImGuiMouseButton_Right)) {
+			is_right_button_down = true;
+			state = mouse_interation::right_pressed;
+		}
+		else if (ImGui::IsMouseReleased(ImGuiMouseButton_Right) && is_right_button_down) {
+			is_right_button_down = false;
+			state = mouse_interation::right_pressed;
+		}
+
+		// Check for middle mouse button interactions
+		if (ImGui::IsMouseClicked(ImGuiMouseButton_Middle))
+			state = mouse_interation::middle_clicked;
+
+		else if (ImGui::IsMouseDoubleClicked(ImGuiMouseButton_Middle))
+			state = mouse_interation::middle_double_clicked;
+
+		else if (ImGui::IsMouseDown(ImGuiMouseButton_Middle)) {
+			is_middle_button_down = true;
+			state = mouse_interation::middle_pressed;
+		}
+		else if (ImGui::IsMouseReleased(ImGuiMouseButton_Middle) && is_middle_button_down) {
+			is_middle_button_down = false;
+			state = mouse_interation::middle_release;
+		}
+	}
+
+	mouse_interation get_mouse_interation_on_item(const f32 target_click_duration) {
+		
+		static bool is_left_button_down = false;
+		static bool is_right_button_down = false;
+		static bool is_middle_button_down = false;
 
 		const ImVec2 item_pos = ImGui::GetItemRectMin();
 		const ImVec2 item_max = item_pos + ImGui::GetItemRectSize();
-
-		// If the mouse is not hovering over the item, return none
-		if (!ImGui::IsMouseHoveringRect(item_pos, item_max))
+		if (!ImGui::IsMouseHoveringRect(item_pos, item_max))							// If the mouse is not hovering over the item, return none
 			return mouse_interation::none;
 
-		// Right mouse button interaction
-		if (ImGui::IsMouseClicked(ImGuiMouseButton_Right)) {
-			right_click_time = std::chrono::steady_clock::now();
-		}
-		if (ImGui::IsMouseReleased(ImGuiMouseButton_Right)) {
-			auto click_duration = std::chrono::steady_clock::now() - right_click_time;
-			if (std::chrono::duration_cast<std::chrono::milliseconds>(click_duration).count() < (target_click_duration * 1000))
-				return (ImGui::GetIO().MouseClickedLastCount[ImGuiMouseButton_Right] >= 2) ? mouse_interation::right_double_click : mouse_interation::right_click;
-		}
+		mouse_interation state = mouse_interation::hovered;								// default to hover state
 
-		// Left mouse button interaction
-		if (ImGui::IsMouseClicked(ImGuiMouseButton_Left)) {
-			left_click_time = std::chrono::steady_clock::now();
-		}
-		if (ImGui::IsMouseReleased(ImGuiMouseButton_Left)) {
-			auto click_duration = std::chrono::steady_clock::now() - left_click_time;
-			
-			if (std::chrono::duration_cast<std::chrono::milliseconds>(click_duration).count() < (target_click_duration * 1000))
-				return (ImGui::GetIO().MouseClickedLastCount[ImGuiMouseButton_Left] >= 2) ? mouse_interation::double_click : mouse_interation::single_click;
-		}
+		if (ImGui::IsItemFocused())
+			state = mouse_interation::focused;
 
-		return mouse_interation::hovered;
+		if (ImGui::IsItemActive())
+			state = mouse_interation::active;
+
+		if (ImGui::IsItemDeactivated())
+			state = mouse_interation::deactivated;
+
+		if (ImGui::IsItemDeactivatedAfterEdit())
+			state = mouse_interation::deactivated_after_edit;
+
+		set_mouse_interaction_state(state, is_left_button_down, is_right_button_down, is_middle_button_down);
+
+		return state;
 	}
 
 	mouse_interation get_mouse_interation_on_window(const f32 target_click_duration) {
 
-		static std::chrono::steady_clock::time_point left_click_time;
-		static std::chrono::steady_clock::time_point right_click_time;
-
-		const ImVec2 item_pos = ImGui::GetWindowPos();
-		const ImVec2 item_max = item_pos + ImGui::GetWindowSize();
+		static bool is_left_button_down = false;
+		static bool is_right_button_down = false;
+		static bool is_middle_button_down = false;
 
 		// If the mouse is not hovering over the item, return none
+		const ImVec2 item_pos = ImGui::GetWindowPos();
+		const ImVec2 item_max = item_pos + ImGui::GetWindowSize();
 		if (!ImGui::IsMouseHoveringRect(item_pos, item_max))
 			return mouse_interation::none;
 
-		// Right mouse button interaction
-		if (ImGui::IsMouseClicked(ImGuiMouseButton_Right)) 
-			right_click_time = std::chrono::steady_clock::now();
-		
-		if (ImGui::IsMouseReleased(ImGuiMouseButton_Right)) {
+		mouse_interation state = mouse_interation::hovered;								// default to hover state
 
-			auto click_duration = std::chrono::steady_clock::now() - right_click_time;
-			if (std::chrono::duration_cast<std::chrono::milliseconds>(click_duration).count() < (target_click_duration * 1000))
-				return (ImGui::GetIO().MouseClickedLastCount[ImGuiMouseButton_Right] >= 2) ? mouse_interation::right_double_click : mouse_interation::right_click;
-		}
+		if (ImGui::IsItemFocused())
+			state = mouse_interation::focused;
 
-		// Left mouse button interaction
-		if (ImGui::IsMouseClicked(ImGuiMouseButton_Left))
-			left_click_time = std::chrono::steady_clock::now();
-		
-		if (ImGui::IsMouseReleased(ImGuiMouseButton_Left)) {
+		if (ImGui::IsItemActive())
+			state = mouse_interation::active;
 
-			auto click_duration = std::chrono::steady_clock::now() - left_click_time;
-			if (std::chrono::duration_cast<std::chrono::milliseconds>(click_duration).count() < (target_click_duration * 1000))
-				return (ImGui::GetIO().MouseClickedLastCount[ImGuiMouseButton_Left] >= 2) ? mouse_interation::double_click : mouse_interation::single_click;
-		}
+		if (ImGui::IsItemDeactivated())
+			state = mouse_interation::deactivated;
 
-		return mouse_interation::hovered;
+		if (ImGui::IsItemDeactivatedAfterEdit())
+			state = mouse_interation::deactivated_after_edit;
+
+		set_mouse_interaction_state(state, is_left_button_down, is_right_button_down, is_middle_button_down);
+
+		return state;
 	}
 
 	std::string wrap_text_at_underscore(const std::string& text, float wrap_width) {
@@ -205,7 +247,6 @@ namespace PFF::UI {
 			ImGui::EndPopup();
 		}
 	}
-
 
 	void shift_cursor_pos(const f32 shift_x, const f32 shift_y) {
 
@@ -327,6 +368,218 @@ namespace PFF::UI {
 		ImGui::PopFont();
 	}
 
+
+	// ================================================================================================================================================================================================
+	// ANCI escape code parsing
+	// ================================================================================================================================================================================================
+
+	inline ImVec4 get_background_8_color(int index) {
+		const static ImVec4 colors[] = {
+			ImVec4(0.0f, 0.0f, 0.0f, 1.0f),         // 40: Black
+			ImVec4(0.5f, 0.0f, 0.0f, 1.0f),         // 41: Red
+			ImVec4(0.0f, 0.5f, 0.0f, 1.0f),         // 42: Green
+			ImVec4(0.5f, 0.5f, 0.0f, 1.0f),         // 43: Yellow
+			ImVec4(0.0f, 0.0f, 0.5f, 1.0f),         // 44: Blue
+			ImVec4(0.5f, 0.0f, 0.5f, 1.0f),         // 45: Magenta
+			ImVec4(0.0f, 0.5f, 0.5f, 1.0f),         // 46: Cyan
+			ImVec4(0.75f, 0.75f, 0.75f, 1.0f),      // 47: White
+		};
+		if (index >= 0 && index < 8)
+			return colors[index];
+		return ImVec4(0.0f, 0.0f, 0.0f, 0.0f);      // Transparent default
+	}
+
+	inline ImVec4 get_background_16_color(int index) {
+		const static ImVec4 colors[] = {
+			ImVec4(0.5f, 0.5f, 0.5f, 1.0f),        // 100: Bright Black (Gray)
+			ImVec4(1.0f, 0.0f, 0.0f, 1.0f),        // 101: Bright Red
+			ImVec4(0.0f, 1.0f, 0.0f, 1.0f),        // 102: Bright Green
+			ImVec4(1.0f, 1.0f, 0.0f, 1.0f),        // 103: Bright Yellow
+			ImVec4(0.0f, 0.0f, 1.0f, 1.0f),        // 104: Bright Blue
+			ImVec4(1.0f, 0.0f, 1.0f, 1.0f),        // 105: Bright Magenta
+			ImVec4(0.0f, 1.0f, 1.0f, 1.0f),        // 106: Bright Cyan
+			ImVec4(1.0f, 1.0f, 1.0f, 1.0f),        // 107: Bright White
+		};
+		if (index >= 0 && index < 8)
+			return colors[index];
+		return ImVec4(0.0f, 0.0f, 0.0f, 0.0f);      // Transparent default
+	}
+
+	inline ImVec4 get_8_color(int index) {
+		const static ImVec4 colors[] = {
+			ImVec4(0.0f, 0.0f, 0.0f, 1.0f),         // 0: Black
+			ImVec4(0.9f, 0.1f, 0.1f, 1.0f),         // 1: Red
+			ImVec4(0.0f, 0.5f, 0.0f, 1.0f),         // 2: Green
+			ImVec4(0.9f, 0.9f, 0.1f, 1.0f),         // 3: Yellow
+			ImVec4(0.0f, 0.0f, 0.5f, 1.0f),         // 4: Blue
+			ImVec4(0.5f, 0.0f, 0.5f, 1.0f),         // 5: Magenta
+			ImVec4(0.0f, 0.5f, 0.5f, 1.0f),         // 6: Cyan
+			ImVec4(0.75f, 0.75f, 0.75f, 1.0f),      // 7: White
+		};
+		if (index >= 0 && index < 8)
+			return colors[index];
+		return ImVec4(1.0f, 1.0f, 1.0f, 1.0f);
+	}
+
+	inline ImVec4 get_16_color(int index) {
+		const static ImVec4 colors[] = {
+			ImVec4(0.5f, 0.5f, 0.5f, 1.0f),         // 8: Bright Black (Gray)
+			ImVec4(1.0f, 0.0f, 0.0f, 1.0f),         // 9: Bright Red
+			ImVec4(0.0f, 1.0f, 0.0f, 1.0f),         // 10: Bright Green
+			ImVec4(1.0f, 1.0f, 0.0f, 1.0f),         // 11: Bright Yellow
+			ImVec4(0.0f, 0.0f, 1.0f, 1.0f),         // 12: Bright Blue
+			ImVec4(1.0f, 0.0f, 1.0f, 1.0f),         // 13: Bright Magenta
+			ImVec4(0.0f, 1.0f, 1.0f, 1.0f),         // 14: Bright Cyan
+			ImVec4(1.0f, 1.0f, 1.0f, 1.0f),         // 15: Bright White
+		};
+		if (index >= 8 && index < 16)
+			return colors[index - 8];
+		return ImVec4(1.0f, 1.0f, 1.0f, 1.0f);
+	}
+
+	inline ImVec4 get_256_color(int index) {
+
+		index = math::clamp(index, 0, 255);
+		if (index < 16)
+			return index < 8 ? get_8_color(index) : get_16_color(index);
+
+		else if (index < 232) {
+
+			const int cube_index = index - 16;
+			const int r = cube_index / 36;
+			const int g = (cube_index % 36) / 6;
+			const int b = cube_index % 6;
+			const int values[] = { 0, 95, 135, 175, 215, 255 };
+			return ImVec4(values[r] / 255.0f, values[g] / 255.0f, values[b] / 255.0f, 1.0f);
+
+		}
+		else {
+
+			const int gray = 8 + (index - 232) * 10;
+			const float intensity = gray / 255.0f;
+			return ImVec4(intensity, intensity, intensity, 1.0f);
+		}
+	}
+
+
+	void render_text_segment(const char* text, int length, ImVec4 fg_color, ImVec4 bg_color) {
+
+		ImVec2 pos = ImGui::GetCursorScreenPos();
+		const ImVec2 text_size = ImGui::CalcTextSize(text, text + length);
+
+		if (bg_color.w > 0.0f)                                                                                                                  // Draw background if needed
+			ImGui::GetWindowDrawList()->AddRectFilled(pos, ImVec2(pos.x + text_size.x, pos.y + text_size.y), ImGui::GetColorU32(bg_color));
+
+		ImGui::TextColored(fg_color, "%.*s", length, text);
+		ImGui::SameLine(0, 0);
+	}
+
+	void anci_text(std::string_view text) {
+
+		size_t current_position = 0;
+		ImVec4 color = ImVec4(1.f);
+		ImVec4 bg_color = ImVec4(0.f);
+
+		while (current_position < text.length()) {
+
+			size_t anci_start = text.find('\033', current_position);
+
+			if (anci_start >= text.length() || anci_start == std::string::npos) {																// No more ANSI codes, print the remaining text
+				render_text_segment(text.data() + current_position, static_cast<int>(text.length() - current_position), color, bg_color);
+				break;
+			}
+
+			if (anci_start > current_position)
+				render_text_segment(text.data() + current_position, static_cast<int>(anci_start - current_position), color, bg_color);
+
+			current_position = anci_start;
+			size_t anci_end = text.find('m', anci_start);
+			VALIDATE(anci_end != std::string::npos, break, "", "Detected ANCS escape code is not closed [" << text << "] at pos [" << anci_start << "]");
+
+			if (anci_start + 1 >= text.length() || text[anci_start + 1] != '[')                                                                 // Check if ANSI code starts with '['
+				current_position = anci_start + 1;
+
+			// Parse ANSI code
+			const std::string_view code = text.substr(anci_start, anci_end - anci_start);
+			if (code.size() > 2 && code[0] == '\033' && code[1] == '[') {
+				std::vector<int> params;
+				size_t pos = 2;
+
+				while (pos < code.size()) {
+					const size_t end = code.find(';', pos);
+					const auto sub = code.substr(pos, (end == std::string::npos ? code.size() : end) - pos);
+
+					int value = 0;
+					auto result = std::from_chars(sub.data(), sub.data() + sub.size(), value);
+					if (result.ec == std::errc())
+						params.push_back(value);
+
+					pos = end != std::string::npos ? end + 1 : code.size();
+				}
+
+				// Process parameters
+				for (size_t i = 0; i < params.size();) {
+					const int p = params[i++];
+
+					if (p == 0) {                                               // Reset
+						color = ImVec4(1.f);
+						bg_color = ImVec4(0.f);
+					}
+					else if (p == 1) {                                          // Bold
+						color.x = std::min(color.x * 1.2f, 1.0f);
+						color.y = std::min(color.y * 1.2f, 1.0f);
+						color.z = std::min(color.z * 1.2f, 1.0f);
+					}
+
+					// Foreground colors
+					else if (p >= 30 && p <= 37)
+						color = get_8_color(p - 30);
+
+					else if (p >= 90 && p <= 97)
+						color = get_16_color(p - 90 + 8);
+
+					else if (p == 38) {                                         // Extended foreground
+						if (i < params.size()) {
+							const int type = params[i++];
+							if (type == 5 && i < params.size())
+								color = get_256_color(params[i++]);
+
+							else if (type == 2 && i + 2 < params.size())
+								color = ImVec4(params[i++] / 255.0f, params[i++] / 255.0f, params[i++] / 255.0f, 1.0f);
+						}
+					}
+
+					// Background colors
+					else if (p >= 40 && p <= 47)
+						bg_color = get_background_8_color(p - 40);
+
+					else if (p >= 100 && p <= 107)
+						bg_color = get_background_16_color(p - 100);
+
+					else if (p == 48) {                                         // Extended background
+						if (i < params.size()) {
+							const int type = params[i++];
+							if (type == 5 && i < params.size())
+								bg_color = get_256_color(params[i++]);
+
+							else if (type == 2 && i + 2 < params.size())
+								bg_color = ImVec4(params[i++] / 255.0f, params[i++] / 255.0f, params[i++] / 255.0f, 1.0f);
+						}
+					}
+					else if (p == 49)                                           // Reset background
+						bg_color = ImVec4(0.0f, 0.0f, 0.0f, 0.0f);
+				}
+			}
+
+			current_position = anci_end + 1;
+		}
+
+		ImGui::NewLine();
+	}
+
+	// ================================================================================================================================================================================================
+	// ANCI escape code parsing
+	// ================================================================================================================================================================================================
 
 	void help_marker(const char* desc) {
 
@@ -546,7 +799,7 @@ namespace PFF::UI {
 		} else {
 
 			UI::gray_button(text.c_str());
-			if (get_mouse_interation_on_item() == mouse_interation::double_click) 
+			if (get_mouse_interation_on_item() == mouse_interation::left_double_clicked) 
 				enable_input = true;
 		}
 

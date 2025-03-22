@@ -11,12 +11,16 @@
 #include "engine/world/map.h"
 #include "engine/resource_management/mesh_serializer.h"
 
+#include "content_browser.h"
+#include "ui/logger_window.h"
+
 #include "PFF_editor.h"
 
 #include "world_viewport.h"
 
 namespace PFF {
 
+	static logger_window m_logger_window;
 
 	world_viewport_window::world_viewport_window() {
 
@@ -35,6 +39,7 @@ namespace PFF {
 		m_show_icon						= editor_layer->get_hide_icon();
 		m_hide_icon						= editor_layer->get_show_icon();
 
+		m_logger_window					= logger_window{};
 	}
 
 	world_viewport_window::~world_viewport_window() {
@@ -73,6 +78,9 @@ namespace PFF {
 
 			m_content_browser.window();
 
+			if (m_show_log_display)
+				m_logger_window.window();
+
 			window_outliner();
 			window_details();
 
@@ -85,6 +93,7 @@ namespace PFF {
 
 	void world_viewport_window::show_possible_sub_window_options() {
 
+		ImGui::MenuItem("log display", "", &m_show_log_display);
 		ImGui::MenuItem("content browser 0", "", &m_show_content_browser_0);
 		ImGui::MenuItem("content browser 1", "", &m_show_content_browser_1);
 		ImGui::MenuItem("world settings", "", &m_show_world_settings);
@@ -100,7 +109,8 @@ namespace PFF {
 			.entry("show_general_debugger", m_show_general_debugger)
 			.entry("show_outliner", m_show_outliner)
 			.entry("show_details", m_show_details)
-			.entry("show_world_settings", m_show_world_settings);
+			.entry("show_log_display", m_show_world_settings)
+			.entry("show_world_settings", m_show_log_display);
 
 		serializer::yaml(config::get_filepath_from_configtype(application::get().get_project_path(), config::file::editor), "guizmo_data", option)
 			.entry("operation", m_gizmo_operation);
@@ -677,7 +687,7 @@ namespace PFF {
 		application::get().get_imgui_layer()->show_renderer_metrik();
 		window_renderer_backgrond_effect();
 
-		if (UI::get_mouse_interation_on_window() == UI::mouse_interation::right_double_click)
+		if (UI::get_mouse_interation_on_window() == UI::mouse_interation::right_double_clicked)
 			ImGui::OpenPopup("viewport additional functionality");
 		if (ImGui::BeginPopup("viewport additional functionality")) {
 

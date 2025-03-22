@@ -39,6 +39,8 @@ namespace PFF::logger {
     // shutdown the logging system
     void shutdown();
 
+    std::filesystem::path get_log_file_location();
+
     // The format of log-messages can be custimized with the following tags
     // @note to format all following log-messages use: set_format()
     // @note e.g. set_format("$B[$T] $L [$F] $C$E")

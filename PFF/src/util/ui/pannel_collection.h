@@ -40,14 +40,27 @@ namespace PFF::UI {
 		bottom_right = 5,
 	};
 
-	enum class mouse_interation {
+	enum class mouse_interation : u8 {
 
 		none,
-		hovered,
-		single_click,
-		double_click,
-		right_click,
-		right_double_click,
+		hovered,						// The mouse cursor is over the item.
+		left_clicked,					// The mouse button was pressed and released over the item.
+		left_double_clicked,			// The mouse button was clicked twice in quick succession over the item.
+		left_pressed,					// The mouse button is currently held down over the item.
+		left_released,					// The mouse button was released over the item.
+		right_clicked,					// The right mouse button was clicked over the item.
+		right_double_clicked,			// The right mouse button was clicked over the item.
+		right_pressed,					// The mouse button is currently held down over the item.
+		right_released,					// The mouse button was released over the item.
+		middle_clicked,					// The middle mouse button was clicked over the item.
+		middle_double_clicked,			// The middle mouse button was clicked over the item.
+		middle_pressed,					// The mouse button is currently held down over the item.
+		middle_release,					// The mouse button is currently held down over the item.
+		dragged,						// The item is being dragged with the mouse.
+		focused,						// The item has keyboard focus(can be set with mouse clicks).
+		active,							// The item is currently being interacted with
+		deactivated,					// The item was previously active but is no longer being interacted with.
+		deactivated_after_edit,			// The item was active and edited, but the interaction has ended.
 	};
 
 
@@ -69,7 +82,6 @@ namespace PFF::UI {
 
 	void next_window_position_selector_popup(window_pos& position, bool& show_window);
 
-
 	// @brief Draws a vertical separation line.
 	void seperation_vertical();
 
@@ -85,6 +97,8 @@ namespace PFF::UI {
 	void text_bold(const char* text, bool wrapped = false);
 
 	void text_italic(const char* text, bool wrapped = false);
+
+	void anci_text(std::string_view text);
 
 	// @brief Displays a help marker with tooltip containing the provided description.
 	// @param [desc] The description text to be displayed in the tooltip.
@@ -237,7 +251,7 @@ namespace PFF::UI {
 			ImGui::SetNextItemWidth(ImGui::GetColumnWidth());
 			return ImGui::DragInt(loc_label.c_str(), &value, drag_speed, min_value, max_value, "%.2f", flags);
 		}
-*/
+	*/
 
 	void table_row_progressbar(std::string_view label, const char* progress_bar_text, const f32 percent, const bool auto_resize = true, const f32 progressbar_size_x = 50.f, const f32 progressbar_size_y = 1.f);
 

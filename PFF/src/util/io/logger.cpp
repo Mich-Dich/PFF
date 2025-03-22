@@ -466,6 +466,8 @@ namespace PFF::logger {
     static std::filesystem::path        main_log_file_path = "";
     static std::ofstream                main_file{};
 
+    std::filesystem::path get_log_file_location() { return main_log_file_path; }
+
     inline void log_string(std::string&& log_str, const bool force_direct_logging = true) {
 
         if (!(force_direct_logging || (buffered_messages.capacity() - buffered_messages.size()) <= log_str.size())) {
@@ -476,7 +478,7 @@ namespace PFF::logger {
         
         main_file = std::ofstream(main_log_file_path, std::ios::app);
         if (!main_file.is_open()) {
-            std::cerr << "Failed to open main log files" << std::endl;
+            std::cerr << "Failed to open main log file" << std::endl;
             std::quick_exit(1);
         }
 

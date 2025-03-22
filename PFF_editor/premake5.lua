@@ -1,7 +1,7 @@
 
 project "PFF_editor"
 	location "%{wks.location}/PFF_editor"
-	kind "ConsoleApp"
+	kind "WindowedApp"
 	language "C++"
 	cppdialect "C++20"
 	staticruntime "on"
@@ -73,7 +73,7 @@ project "PFF_editor"
 					
 			-- table.unpack(copy_content_of_dir(outputs, {"PFF_editor/shaders", "PFF_editor/defaults", "PFF_editor/defaults"})),
 			"{MKDIR} %{wks.location}/bin/" .. outputs .. "/PFF_editor/shaders",
-			'{COPYDIR} "%{wks.location}/PFF_editor/shaders" "%{wks.location}/bin/' .. outputs .. '/PFF_editor/"',
+			'{COPYDIR} "%{wks.location}/PFF_editor/shaders" "%{wks.location}/bin/' .. outputs .. '/PFF_editor/shaders"',
 			'{COPYDIR} "%{wks.location}/PFF_editor/assets" "%{wks.location}/bin/' .. outputs .. '/PFF_editor/assets"',
 			'{COPYDIR} "%{wks.location}/PFF_editor/defaults" "%{wks.location}/bin/' .. outputs .. '/PFF_editor/defaults"',
 			'{COPYDIR} "%{wks.location}/PFF_editor/project_templates" "%{wks.location}/bin/' .. outputs .. '/PFF_editor"',

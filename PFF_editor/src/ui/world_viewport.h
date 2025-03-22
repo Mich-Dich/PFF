@@ -32,11 +32,13 @@ namespace PFF {
 		bool									m_show_renderer_backgrond_effect = false;
 		bool									m_show_world_settings = false;
 		bool									m_show_general_debugger = true;
+		bool									m_show_log_display = true;
 		bool									m_show_content_browser_0 = true;
 		bool									m_show_content_browser_1 = false;
 		bool									m_show_details = false;
 		bool									m_show_outliner = true;
-		content_browser							m_content_browser;
+
+		content_browser							m_content_browser{};
 
 		ImGuiTreeNodeFlags						outliner_base_flags = ImGuiTreeNodeFlags_OpenOnArrow | ImGuiTreeNodeFlags_OpenOnDoubleClick | ImGuiTreeNodeFlags_SpanAvailWidth | ImGuiTreeNodeFlags_DefaultOpen;
 		entity									m_selected_entity = entity();

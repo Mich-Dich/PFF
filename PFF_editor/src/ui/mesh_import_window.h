@@ -16,5 +16,4 @@ namespace PFF {
 		std::filesystem::path destination_path;
 	};
 
-
 }

@@ -199,31 +199,32 @@ namespace PFF {
 
 			// Begin a new group for each item
 			const int current_ID = hash_path(entry.path());
-			const char* item_name = entry.path().filename().string().c_str();
+			const std::string item_name = entry.path().filename().string();
 			const ImVec4& color = (m_selected_items.find(entry.path()) != m_selected_items.end()) ? UI::get_action_color_00_active_ref() : UI::get_action_color_gray_active_ref();
 			ImGui::BeginGroup();
 			{
 				ImGui::PushID(current_ID);
 				ImGui::Image(m_folder_big_icon->get_descriptor_set(), m_icon_size, ImVec2(0, 0), ImVec2(1, 1), color);
-				ImVec2 text_size = ImGui::CalcTextSize(item_name);
+				ImVec2 text_size = ImGui::CalcTextSize(item_name.c_str());
 				ImGui::SetCursorPos(ImGui::GetCursorPos() + ImVec2((m_icon_size.x - text_size.x) * 0.5f, 0));
-				ImGui::TextWrapped("%s", item_name);
+				ImGui::TextWrapped("%s", item_name.c_str());
 				ImGui::PopID();
 			}
 			ImGui::EndGroup();
 
 			switch (UI::get_mouse_interation_on_item()) {
-				case UI::mouse_interation::double_click:
+				case UI::mouse_interation::left_double_clicked:
 					LOG(Trace, "Set TreeNode to open ID[" << current_ID << "]");
+					m_selected_items.clear();
 					ImGui::TreeNodeSetOpen(folder_display_window->GetID(current_ID), true);
 					select_new_directory(entry.path());
 					return;
 
-				case UI::mouse_interation::right_click:
+				case UI::mouse_interation::right_clicked:
 					// TODO: open popup					ImGui::OpenPopup(popup_name.c_str());
 					break;
 
-				case UI::mouse_interation::single_click:
+				case UI::mouse_interation::left_pressed:
 					if (ImGui::GetIO().KeyShift) {
 
 						if (m_selected_items.find(entry.path()) == m_selected_items.end())				// If Shift is held, select the item
@@ -394,17 +395,17 @@ namespace PFF {
 
 			ImGui::EndPopup();
 		}
-
+		
 		switch (item_mouse_interation) {
-			case UI::mouse_interation::double_click:
+			case UI::mouse_interation::left_double_clicked:
 				LOG(Info, "NOT IMPLEMENTED YET => should opening coresponding editor window");
 				break;
 
-			case UI::mouse_interation::right_click:
+			case UI::mouse_interation::right_clicked:
 				ImGui::OpenPopup(popup_name.c_str());
 				break;
 
-			case UI::mouse_interation::single_click:
+			case UI::mouse_interation::left_pressed:
 
 				if (ImGui::GetIO().KeyShift) {
 

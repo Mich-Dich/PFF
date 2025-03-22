@@ -92,7 +92,7 @@ project "PFF"
 			-- copy vendor dependencies
 			'{MKDIR} "%{wks.location}/bin/' .. outputs .. '/vendor/entt"',
 			'{COPY} "%{wks.location}/PFF/vendor/entt/LICENSE.txt" "%{wks.location}/bin/' .. outputs .. '/vendor/entt"',
-			'{COPYDIR} "%{wks.location}/PFF/vendor/entt/include" "%{wks.location}/bin/' .. outputs .. '/vendor/entt/include"',
+			'{COPYDIR} "%{wks.location}/PFF/vendor/entt/include" "%{wks.location}/bin/' .. outputs .. '/vendor/entt"',
 			
 			'{MKDIR} "%{wks.location}/bin/' .. outputs .. '/vendor/glm"',
 			'{COPYDIR} "%{wks.location}/PFF/vendor/glm/glm" "%{wks.location}/bin/' .. outputs .. '/vendor/glm/glm"',
