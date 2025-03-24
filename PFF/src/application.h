@@ -86,8 +86,8 @@ namespace PFF {
 		void end_fps_measurement(f32& work_time);
 		void limit_fps();
 
-		void set_arguments(int argc, char** argv);
-		void init_engine();
+		//void set_arguments(int argc, char** argv);
+		void init_engine(int argc, char** argv);
 
 	private:
 

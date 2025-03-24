@@ -261,10 +261,13 @@ namespace PFF {
 		m_fps = static_cast<u32>(1.0 / (m_work_time + (m_sleep_time * 0.001)) + 0.5); // Round to nearest integer
 	}
 
-	//
-#if 0
-	void application::set_arguments(const std::vector<std::string>& args) {
 
+	//
+	void application::init_engine(int argc, char** argv) {
+
+		LOG(Trace, "processing args");
+
+#if 0
 		m_arguments = args;
 		if (m_arguments.size() > 1) {
 
@@ -284,12 +287,8 @@ namespace PFF {
 
 		m_project_data = serialize_projects_data(m_project_path, serializer::option::load_from_file);
 		serialize(serializer::option::load_from_file);							// load project data
-	}
 
 #else
-
-	void application::set_arguments(int argc, char** argv) {
-
 		if (argc > 1) {
 
 			LOG(Trace, "Provided path to PFF Project File: " << m_project_path);
@@ -309,11 +308,7 @@ namespace PFF {
 
 		m_project_data = serialize_projects_data(m_project_path, serializer::option::load_from_file);
 		serialize(serializer::option::load_from_file);							// load project data
-	}
 #endif
-
-	//
-	void application::init_engine() {
 
 		LOG(Trace, "init engine")
 

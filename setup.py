@@ -22,6 +22,70 @@ else:
     raise Exception("Unsupported operating system")
 
 
+def detect_visual_studio_versions():
+    vs_version_map = {
+        "17": "2022",  # VS 2022 (major version 17)
+        "16": "2019",  # VS 2019 (major version 16)
+        "15": "2017"   # VS 2017 (major version 15)
+    }
+    try:
+        vswhere_path = os.path.join(os.environ["ProgramFiles(x86)"], "Microsoft Visual Studio", "Installer", "vswhere.exe")
+        result = subprocess.run([vswhere_path, "-format", "json", "-products", "*", "-requires", "Microsoft.VisualStudio.Component.VC.Tools.x86.x64"], capture_output=True, text=True)
+        if result.returncode == 0:
+            import json
+            installations = json.loads(result.stdout)
+            versions = []
+            for install in installations:
+                major_version = install["installationVersion"].split('.')[0]
+                premake_id = vs_version_map.get(major_version, None)
+                if premake_id:
+                    versions.append(premake_id)
+            return list(set(versions))  # Remove duplicates
+    except Exception as e:
+        print(f"Error detecting Visual Studio versions: {e}")
+    return []
+
+def detect_rider():
+    # Check common Rider installation paths
+    rider_paths = [
+        os.path.join(os.environ["ProgramFiles"], "JetBrains", "JetBrains Rider *"),
+        os.path.join(os.environ["LocalAppData"], "JetBrains", "Toolbox", "apps", "Rider", "*")
+    ]
+    for path in rider_paths:
+        if os.path.exists(path):
+            return True
+    return False
+
+def prompt_ide_selection():
+    ides = []
+    vs_versions = detect_visual_studio_versions()
+    if vs_versions:
+        ides.extend([f"Visual Studio {version}" for version in vs_versions])
+    if detect_rider():
+        ides.append("JetBrains Rider")
+    if not ides:
+        print("No supported IDEs detected.")
+        sys.exit(1)
+    print("Detected IDEs:")
+    for i, ide in enumerate(ides):
+        print(f"{i}. {ide}")
+
+    if len(ides) == 1:
+        print("only one IDE detected")
+        return ides[0]
+
+    choice = input("Select an IDE to use (enter the number): ")
+    try:
+        choice_index = int(choice)
+        if 0 <= choice_index < len(ides):
+            return ides[choice_index]
+        else:
+            print("Invalid selection.")
+            sys.exit(1)
+    except ValueError:
+        print("Invalid input.")
+        sys.exit(1)
+
 def update_submodule(submodule_path, branch="main"):
     print(f"\nupdate submodule: {os.path.basename(submodule_path)}")
     try:
@@ -72,8 +136,15 @@ try:
             utils.print_u("\nCHECK WORKSPACE SETUP")
             register_icon.register_icon()
 
-            utils.print_u("\nBUILDING PFF (Procedurally Focused Framework) VS 2022 Solution:")
-            premake_result = subprocess.run(['vendor/premake/premake5.exe', 'vs2022'], check=True)
+            selected_ide = prompt_ide_selection()
+            if selected_ide.startswith("Visual Studio"):
+                vs_year = selected_ide.split()[-1]  # Extract "2022" from "Visual Studio 2022"
+                premake_action = f"vs{vs_year}"
+                utils.print_u(f"\nBUILDING PFF (Procedurally Focused Framework) {selected_ide} Solution:")
+                premake_result = subprocess.run(['vendor/premake/premake5.exe', premake_action], check=True)
+            elif selected_ide == "JetBrains Rider":
+                utils.print_u("\nBUILDING PFF (Procedurally Focused Framework) for JetBrains Rider:")
+                premake_result = subprocess.run(['vendor/premake/premake5.exe', 'rider'], check=True)
 
             if premake_result.returncode != 0:
                 utils.print_c(f"BUILD FAILED! the premake script encountered [{premake_result.returncode}] errors", "red")

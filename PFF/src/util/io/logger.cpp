@@ -7,7 +7,7 @@
 
 namespace PFF::logger {
 
-#if 0       // multithreaded version
+#if 1       // multithreaded version
 
     #define SETW(width)                                         std::setw(width) << std::setfill('0')
     // #define INTERNAL_LOG(message)                               { std::ostringstream oss{}; oss << message; log_string(std::move(oss.str())); }
@@ -192,6 +192,7 @@ namespace PFF::logger {
     // settings
     // ========================================================================================================================
 
+    std::filesystem::path get_log_file_location() { return main_log_file_path; }
 
     void set_format(const std::string& new_format) {        // needed to insert this into the queue to preserve the order
 

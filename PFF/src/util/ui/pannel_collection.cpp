@@ -78,7 +78,7 @@ namespace PFF::UI {
 		}
 	}
 
-	mouse_interation get_mouse_interation_on_item(const f32 target_click_duration) {
+	mouse_interation get_mouse_interation_on_item() {
 		
 		static bool is_left_button_down = false;
 		static bool is_right_button_down = false;
@@ -108,7 +108,7 @@ namespace PFF::UI {
 		return state;
 	}
 
-	mouse_interation get_mouse_interation_on_window(const f32 target_click_duration) {
+	mouse_interation get_mouse_interation_on_window() {
 
 		static bool is_left_button_down = false;
 		static bool is_right_button_down = false;
@@ -248,46 +248,6 @@ namespace PFF::UI {
 		}
 	}
 
-	void shift_cursor_pos(const f32 shift_x, const f32 shift_y) {
-
-		auto current_pos = ImGui::GetCursorPos();
-		ImGui::SetCursorPos({ current_pos.x + shift_x, current_pos.y + shift_y });
-	}
-
-	void shift_cursor_pos(const ImVec2 shift) {
-
-		auto current_pos = ImGui::GetCursorPos();
-		ImGui::SetCursorPos({ current_pos.x + shift.x, current_pos.y + shift.y });
-	}
-
-	void progressbar_with_text(const char* lable, const char* progress_bar_text, f32 percent, f32 lable_size, f32 progressbar_size_x, f32 progressbar_size_y) {
-
-		//PFF_PROFILE_FUNCTION();
-
-		ImVec2 curser_pos;
-		ImVec2 progressbar_size;
-		ImVec2 text_size;
-		f32 loc_lable_size;
-
-		ImGuiStyle* style = &ImGui::GetStyle();
-		curser_pos = ImGui::GetCursorPos();
-
-		loc_lable_size = ImGui::CalcTextSize(lable).x;
-		loc_lable_size = std::max<f32>(loc_lable_size, lable_size);
-		ImGui::Text("%s", lable);
-		ImGui::SetCursorPos({ curser_pos.x + loc_lable_size, curser_pos.y });
-
-		text_size = ImGui::CalcTextSize(progress_bar_text);
-		progressbar_size = text_size;
-		progressbar_size.x = std::max<f32>(progressbar_size.x, progressbar_size_x);
-		progressbar_size.y = std::max<f32>(progressbar_size.y, progressbar_size_y);
-
-		curser_pos = ImGui::GetCursorPos();
-		ImGui::ProgressBar(percent, progressbar_size, "");
-		ImGui::SetCursorPos({ curser_pos.x + progressbar_size.x - (text_size.x + style->ItemSpacing.x), curser_pos.y });
-		ImGui::Text("%s", progress_bar_text);
-	}
-
 
 	void seperation_vertical() {
 
@@ -311,7 +271,7 @@ namespace PFF::UI {
 		ImGui::PopStyleColor(3);
 		return result;
 	}
-	
+
 	bool toggle_button(const char* lable, bool& bool_var, const ImVec2& size) {
 
 		// show weaker color if toggle_bool is false
@@ -367,7 +327,6 @@ namespace PFF::UI {
 
 		ImGui::PopFont();
 	}
-
 
 	// ================================================================================================================================================================================================
 	// ANCI escape code parsing
@@ -460,7 +419,6 @@ namespace PFF::UI {
 			return ImVec4(intensity, intensity, intensity, 1.0f);
 		}
 	}
-
 
 	void render_text_segment(const char* text, int length, ImVec4 fg_color, ImVec4 bg_color) {
 
@@ -580,6 +538,46 @@ namespace PFF::UI {
 	// ================================================================================================================================================================================================
 	// ANCI escape code parsing
 	// ================================================================================================================================================================================================
+
+	void shift_cursor_pos(const f32 shift_x, const f32 shift_y) {
+
+		auto current_pos = ImGui::GetCursorPos();
+		ImGui::SetCursorPos({ current_pos.x + shift_x, current_pos.y + shift_y });
+	}
+
+	void shift_cursor_pos(const ImVec2 shift) {
+
+		auto current_pos = ImGui::GetCursorPos();
+		ImGui::SetCursorPos({ current_pos.x + shift.x, current_pos.y + shift.y });
+	}
+
+	void progressbar_with_text(const char* lable, const char* progress_bar_text, f32 percent, f32 lable_size, f32 progressbar_size_x, f32 progressbar_size_y) {
+
+		//PFF_PROFILE_FUNCTION();
+
+		ImVec2 curser_pos;
+		ImVec2 progressbar_size;
+		ImVec2 text_size;
+		f32 loc_lable_size;
+
+		ImGuiStyle* style = &ImGui::GetStyle();
+		curser_pos = ImGui::GetCursorPos();
+
+		loc_lable_size = ImGui::CalcTextSize(lable).x;
+		loc_lable_size = std::max<f32>(loc_lable_size, lable_size);
+		ImGui::Text("%s", lable);
+		ImGui::SetCursorPos({ curser_pos.x + loc_lable_size, curser_pos.y });
+
+		text_size = ImGui::CalcTextSize(progress_bar_text);
+		progressbar_size = text_size;
+		progressbar_size.x = std::max<f32>(progressbar_size.x, progressbar_size_x);
+		progressbar_size.y = std::max<f32>(progressbar_size.y, progressbar_size_y);
+
+		curser_pos = ImGui::GetCursorPos();
+		ImGui::ProgressBar(percent, progressbar_size, "");
+		ImGui::SetCursorPos({ curser_pos.x + progressbar_size.x - (text_size.x + style->ItemSpacing.x), curser_pos.y });
+		ImGui::Text("%s", progress_bar_text);
+	}
 
 	void help_marker(const char* desc) {
 

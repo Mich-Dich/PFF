@@ -64,41 +64,90 @@ namespace PFF::UI {
 	};
 
 
+	// @brief Checks if the mouse is currently hovering over the current ImGui window.
+	// @return True if the mouse is hovering over the window, false otherwise.
 	bool is_holvering_window();
 
+	// @brief Checks if the current ImGui item (e.g., button, text) is double-clicked.
+	// @return True if the item is double-clicked, false otherwise.
 	bool is_item_double_clicked();
 
-	mouse_interation get_mouse_interation_on_item(const f32 target_click_duration = 0.2f);
+	// @brief Determines the mouse interaction state (e.g., hovered, clicked) on the current ImGui item.
+	// @return The mouse interaction state (e.g., hovered, clicked, held).
+	mouse_interation get_mouse_interation_on_item();
 
-	mouse_interation get_mouse_interation_on_window(const f32 target_click_duration = 0.2f);
+	// @brief Determines the mouse interaction state (e.g., hovered, clicked) on the current ImGui window.
+	// @return The mouse interaction state (e.g., hovered, clicked, held).
+	mouse_interation get_mouse_interation_on_window();
 
+	// @brief Wraps text at underscores to fit within a specified width.
+	// @param [text] The text to wrap.
+	// @param [wrap_width] The maximum width before wrapping occurs.
+	// @return The wrapped text as a string.
 	std::string wrap_text_at_underscore(const std::string& text, float wrap_width);
 
+	// @brief Sets the position of the next ImGui window based on a predefined location.
+	// @param [location] The desired position of the window (e.g., center, top-left).
+	// @param [padding] The padding to apply around the window.
 	void set_next_window_pos(window_pos location, f32 padding = 10.f);
 
+	// @brief Sets the position of the next ImGui window relative to the current window.
+	// @param [location] The desired position of the window (e.g., center, top-left).
+	// @param [padding] The padding to apply around the window.
 	void set_next_window_pos_in_window(window_pos location, f32 padding = 10.f);
 
+	// @brief Displays a menu to select the position of the next ImGui window.
+	// @param [position] The current position of the window, which can be modified.
+	// @param [show_window] A boolean flag to control the visibility of the window.
 	void next_window_position_selector(window_pos& position, bool& show_window);
 
+	// @brief Displays a popup menu to select the position of the next ImGui window.
+	// @param [position] The current position of the window, which can be modified.
+	// @param [show_window] A boolean flag to control the visibility of the window.
 	void next_window_position_selector_popup(window_pos& position, bool& show_window);
 
 	// @brief Draws a vertical separation line.
 	void seperation_vertical();
 
-
+	// @brief Creates a button with a gray color scheme.
+	// @param [label] The label displayed on the button.
+	// @param [size] The size of the button. If {0, 0}, the size is automatically calculated.
+	// @return True if the button is clicked, false otherwise.
 	bool gray_button(const char* label, const ImVec2& size = { 0, 0 });
 
+	// @brief Creates a toggle button that changes its appearance based on a boolean variable.
+	// @param [label] The label displayed on the button.
+	// @param [bool_var] The boolean variable that controls the button's state.
+	// @param [size] The size of the button. If {0, 0}, the size is automatically calculated.
+	// @return True if the button is clicked, false otherwise.
 	bool toggle_button(const char* lable, bool& bool_var, const ImVec2& size = { 0, 0 });
 
 	// @brief Draws text using a larger font.
 	// @param [text] The text to be drawn.
 	void big_text(const char* text, bool wrapped = false);
 
+	// @brief Displays text in a bold font.
+	// @param [text] The text to display.
+	// @param [wrapped] Whether the text should be wrapped if it exceeds the available width.
 	void text_bold(const char* text, bool wrapped = false);
 
+	// @brief Displays text in an italic font.
+	// @param [text] The text to display.
+	// @param [wrapped] Whether the text should be wrapped if it exceeds the available width.
 	void text_italic(const char* text, bool wrapped = false);
 
+	// @brief Displays text with a specific style (e.g., ancient text style).
+	// @param [text] The text to display.
 	void anci_text(std::string_view text);
+
+
+
+
+
+
+
+
+
 
 	// @brief Displays a help marker with tooltip containing the provided description.
 	// @param [desc] The description text to be displayed in the tooltip.
@@ -133,8 +182,18 @@ namespace PFF::UI {
 	// @param [right_side] The function representing the content of the right side.
 	void custom_frame(const f32 width_left_side, std::function<void()> left_side, std::function<void()> right_side);
 
+	// @brief Creates a custom frame with a left and right side, allowing for resizing and custom coloring.
+	// @param [width_left_side] The width of the left side panel.
+	// @param [can_resize] Whether the left side panel can be resized.
+	// @param [color_left_side] The background color of the left side panel.
+	// @param [left_side] A function to render the content of the left side panel.
+	// @param [right_side] A function to render the content of the right side panel.
 	void custom_frame_NEW(const f32 width_left_side, const bool can_resize, const ImU32 color_left_side, std::function<void()> left_side, std::function<void()> right_side);
 
+	// @brief Creates a search input field with a clear button.
+	// @param [lable] The label for the search input field.
+	// @param [search_text] A reference to the string that holds the search text.
+	// @return true if the search text was changed, false otherwise.
 	bool serach_input(const char* lable, std::string& search_text);
 
 	// @brief Renders an integer slider within a table row in an ImGui interface.
@@ -152,17 +211,37 @@ namespace PFF::UI {
 	// @return true if the value was changed by the slider, false otherwise.
 	bool table_row_slider(std::string_view label, int& value, int min_value = 0, int max_value = 1, ImGuiInputTextFlags flags = ImGuiInputTextFlags_None);
 
+	// @brief Renders a table row with two columns, each containing custom content.
+	// @param [first_colum] A function to render the content of the first column.
+	// @param [second_colum] A function to render the content of the second column.
 	void table_row(std::function<void()> first_colum, std::function<void()> second_colum);
 
+	// @brief Renders a table row with a label and an editable text field.
+	// @param [label] The label for the row.
+	// @param [text] A reference to the string that holds the text.
+	// @param [enable_input] A reference to a boolean that controls whether the text field is editable.
 	void table_row(std::string_view label, std::string& text, bool& enable_input);
 
+	// @brief Renders a table row with a label and formatted text.
+	// @param [label] The label for the row.
+	// @param [format] The format string for the text.
+	// @param [...] Variable arguments for the format string.
 	void table_row_text(std::string_view label, const char* format, ...);
 
+	// @brief Renders a table row with a label and a checkbox.
+	// @param [label] The label for the row.
+	// @param [value] A reference to the boolean value controlled by the checkbox.
 	void table_row(std::string_view label, bool& value);
 
+	// @brief Renders a table row with a label and a non-editable text value.
+	// @param [label] The label for the row.
+	// @param [value] The text value to display.
 	void table_row(std::string_view label, std::string_view value);
 
-	// returns true when transform was changed
+	// @brief Renders a table row with a label and a 4x4 matrix, allowing for editing of translation, rotation, and scale.
+	// @param [label] The label for the row.
+	// @param [value] A reference to the 4x4 matrix to be edited.
+	// @return true if any component of the matrix was changed, false otherwise.
 	bool table_row(std::string_view label, glm::mat4& value);
 
 	// @brief Adds a row to an ImGui table with a label and corresponding value input field.
@@ -253,10 +332,21 @@ namespace PFF::UI {
 		}
 	*/
 
+	// @brief Renders a table row with a label and a progress bar.
+	// @param [label] The label for the row.
+	// @param [progress_bar_text] The text to display alongside the progress bar.
+	// @param [percent] The percentage value of the progress bar.
+	// @param [auto_resize] Whether the progress bar should automatically resize to fit the column width.
+	// @param [progressbar_size_x] The width of the progress bar.
+	// @param [progressbar_size_y] The height of the progress bar.
 	void table_row_progressbar(std::string_view label, const char* progress_bar_text, const f32 percent, const bool auto_resize = true, const f32 progressbar_size_x = 50.f, const f32 progressbar_size_y = 1.f);
 
+	// @brief Begins a collapsible header section with an indent.
+	// @param [lable] The label for the collapsible header.
+	// @return true if the header is open, false otherwise.
 	bool begin_collapsing_header_section(const char* lable);
 
+	// @brief Ends a collapsible header section and removes the indent.
 	void end_collapsing_header_section();
 
 	// @brief Renders a slider within a table row in an ImGui interface.
