@@ -78,10 +78,7 @@ namespace PFF::UI {
 		}
 	}
 
-	mouse_interation get_mouse_interation_on_item(const bool block_input) {
-
-		if (block_input)
-			return mouse_interation::none;
+	mouse_interation get_mouse_interation_on_item() {
 		
 		static bool is_left_button_down = false;
 		static bool is_right_button_down = false;
