@@ -55,7 +55,6 @@ namespace PFF {
 
 		m_project_directory = PFF_editor::get().get_project_path();
 		select_new_directory(m_project_directory / CONTENT_DIR);
-		m_block_mouse_input = false;
 
 		// load folder image
 		auto* editor_layer = PFF_editor::get().get_editor_layer();

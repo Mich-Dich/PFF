@@ -27,7 +27,6 @@ namespace PFF {
 		
 		std::set<std::filesystem::path>			m_selected_items;							// Set to keep track of selected items
 		std::filesystem::path					m_main_selected_item;
-		std::chrono::steady_clock::time_point 	m_directory_switch_time{};
 		bool   									m_block_mouse_input = false;
 
 		ref<image>								m_folder_icon;
