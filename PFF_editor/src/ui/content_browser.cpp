@@ -55,6 +55,7 @@ namespace PFF {
 
 		m_project_directory = PFF_editor::get().get_project_path();
 		select_new_directory(m_project_directory / CONTENT_DIR);
+		m_block_mouse_input = false;
 
 		// load folder image
 		auto* editor_layer = PFF_editor::get().get_editor_layer();
@@ -158,7 +159,7 @@ namespace PFF {
 	// Function to handle dropping files into the current directory
 	void handle_drop(const std::filesystem::path& target_directory) {
 
-		// Implement your file move logic here
+		// Implement file move logic here
 		LOG(Info, "NOT IMPLEMENTED YET");
 	}
 
@@ -212,36 +213,58 @@ namespace PFF {
 			}
 			ImGui::EndGroup();
 
-			switch (UI::get_mouse_interation_on_item()) {
+			switch (UI::get_mouse_interation_on_item(m_block_mouse_input)) {
+				//case UI::mouse_interation::none						: LOG(Trace, "none"); break;
+				//case UI::mouse_interation::hovered					: LOG(Trace, "hovered"); break;
+				case UI::mouse_interation::left_clicked				: LOG(Trace, "left_clicked"); break;
+				//case UI::mouse_interation::left_double_clicked		: LOG(Trace, "left_double_clicked"); break;
+				case UI::mouse_interation::left_pressed				: LOG(Trace, "left_pressed"); break;
+				case UI::mouse_interation::left_released			: LOG(Trace, "left_released"); break;
+				case UI::mouse_interation::right_clicked			: LOG(Trace, "right_clicked"); break;
+				case UI::mouse_interation::right_double_clicked		: LOG(Trace, "right_double_clicked"); break;
+				case UI::mouse_interation::right_pressed			: LOG(Trace, "right_pressed"); break;
+				case UI::mouse_interation::right_released			: LOG(Trace, "right_released"); break;
+				case UI::mouse_interation::middle_clicked			: LOG(Trace, "middle_clicked"); break;
+				case UI::mouse_interation::middle_double_clicked	: LOG(Trace, "middle_double_clicked"); break;
+				case UI::mouse_interation::middle_pressed			: LOG(Trace, "middle_pressed"); break;
+				case UI::mouse_interation::middle_release			: LOG(Trace, "middle_release"); break;
+				case UI::mouse_interation::dragged					: LOG(Trace, "dragged"); break;
+				case UI::mouse_interation::focused					: LOG(Trace, "focused"); break;
+				case UI::mouse_interation::active					: LOG(Trace, "active"); break;
+				case UI::mouse_interation::deactivated				: LOG(Trace, "deactivated"); break;
+				case UI::mouse_interation::deactivated_after_edit	: LOG(Trace, "deactivated_after_edit"); break;
+
 				case UI::mouse_interation::left_double_clicked:
 					LOG(Trace, "Set TreeNode to open ID[" << current_ID << "]");
+					m_main_selected_item.clear();
 					m_selected_items.clear();
 					ImGui::TreeNodeSetOpen(folder_display_window->GetID(current_ID), true);
+					m_block_mouse_input = true;
 					select_new_directory(entry.path());
 					return;
 
-				case UI::mouse_interation::right_clicked:
-					// TODO: open popup					ImGui::OpenPopup(popup_name.c_str());
-					break;
+				//case UI::mouse_interation::right_clicked:
+				//	ImGui::OpenPopup("Not implemented yet");
+				//	break;
 
-				case UI::mouse_interation::left_pressed:
-					if (ImGui::GetIO().KeyShift) {
+				//case UI::mouse_interation::left_pressed:
+				//	if (ImGui::GetIO().KeyShift) {
 
-						if (m_selected_items.find(entry.path()) == m_selected_items.end())				// If Shift is held, select the item
-							m_selected_items.insert(entry.path());
-						else
-							m_selected_items.erase(entry.path());
+				//		if (m_selected_items.find(entry.path()) == m_selected_items.end())				// If Shift is held, select the item
+				//			m_selected_items.insert(entry.path());
+				//		else
+				//			m_selected_items.erase(entry.path());
 
-					} else {
-						// Clear selection and select the clicked item
-						m_selected_items.clear();
-						m_selected_items.insert(entry.path());
-					}
-					break;
+				//	} else {
+				//		// Clear selection and select the clicked item
+				//		m_selected_items.clear();
+				//		m_selected_items.insert(entry.path());
+				//	}
+				//	break;
 
-				case UI::mouse_interation::hovered:
-					// TODO: draw rectangle behind item
-					break;
+				//case UI::mouse_interation::hovered:
+				//	// TODO: draw rectangle behind item
+				//	break;
 
 				default: break;
 			}
@@ -250,9 +273,9 @@ namespace PFF {
 
 				const std::string path_string = entry.path().string();
 				ImGui::SetDragDropPayload("PROJECT_CONTENT_FOLDER", path_string.c_str(), path_string.length() + 1);
-				LOG(Trace, "DRAG-DROP  FOLDER");
+				// LOG(Trace, "DRAG-DROP  FOLDER");
 				ImGui::Image(m_folder_big_icon->get_descriptor_set(), m_icon_size, ImVec2(0, 0), ImVec2(1, 1), UI::get_action_color_gray_active_ref());
-				ImGui::TextWrapped("%s", item_name);
+				ImGui::TextWrapped("%s", item_name.c_str());
 				ImGui::EndDragDropSource();
 			}
 
@@ -338,7 +361,7 @@ namespace PFF {
 			ImGui::PopID();
 		}
 		ImGui::EndGroup();
-		const auto item_mouse_interation = UI::get_mouse_interation_on_item();
+		const auto item_mouse_interation = UI::get_mouse_interation_on_item(m_block_mouse_input);
 
 		// TODO: make it possible to easyly tell the file type
 		const char* playload_name = "PROJECT_CONTENT_FILE";
@@ -405,7 +428,7 @@ namespace PFF {
 				ImGui::OpenPopup(popup_name.c_str());
 				break;
 
-			case UI::mouse_interation::left_pressed:
+			case UI::mouse_interation::left_released:
 
 				if (ImGui::GetIO().KeyShift) {
 
@@ -457,6 +480,8 @@ namespace PFF {
 
 		}, [&]() {
 
+			if (m_block_mouse_input && ImGui::IsMouseReleased(ImGuiMouseButton_Left))			// block input when double clicking on a folder to avoid selecting new item at same location when switching dirs
+				m_block_mouse_input = false;
 
 			if (ImGui::Button(" import ##content_browser_import")) {
 

@@ -117,6 +117,8 @@ namespace PFF {
 
 		LOG_SHUTDOWN();
 		PFF_PROFILE_END_SESSION();
+
+		logger::shutdown();
 	}
 
 	// ==================================================================== main loop ====================================================================
@@ -303,10 +305,10 @@ namespace PFF {
 			const std::vector<std::pair<std::string, std::string>> project_file_filters = { {"PFF Project File", "*.pffproj"} };
 			m_project_path = util::file_dialog("Open PFF-Project", project_file_filters).parent_path();
 			ASSERT(!m_project_path.empty(), "", "User failed to provide project path");
-			LOG(Trace, "Selected file: " << m_project_path)
 		}
 
 		m_project_data = serialize_projects_data(m_project_path, serializer::option::load_from_file);
+		LOG(Trace, "Selected file: " << m_project_path << "Project Name: " << m_project_data.display_name)
 		serialize(serializer::option::load_from_file);							// load project data
 #endif
 

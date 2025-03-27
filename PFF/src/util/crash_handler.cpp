@@ -10,7 +10,7 @@
 
 namespace PFF {
 
-    // need to catch signals related to termination to shutdown gracefully (eg: flash remaining log messages). Was inspired by reckless_log: https://github.com/mattiasflodin/reckless
+    // need to catch signals related to termination to shutdown gracefully (eg: flush remaining log messages). Was inspired by reckless_log: https://github.com/mattiasflodin/reckless
 
 	/* Copyright 2015 - 2020 Mattias Flodin <git@codepentry.com>
 	 *

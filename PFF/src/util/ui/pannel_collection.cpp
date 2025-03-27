@@ -27,11 +27,11 @@ namespace PFF::UI {
 	void set_mouse_interaction_state(mouse_interation& state, bool& is_left_button_down, bool& is_right_button_down, bool& is_middle_button_down) {
 
 		// Check for left mouse button interactions
-		if (ImGui::IsMouseClicked(ImGuiMouseButton_Left))
-			state = mouse_interation::left_clicked;
-
 		if (ImGui::IsMouseDoubleClicked(ImGuiMouseButton_Left))
 			state = mouse_interation::left_double_clicked;
+			
+		else if (ImGui::IsMouseClicked(ImGuiMouseButton_Left))
+				state = mouse_interation::left_clicked;
 
 		else if (ImGui::IsMouseDragging(ImGuiMouseButton_Left))
 			state = mouse_interation::dragged;
@@ -39,8 +39,8 @@ namespace PFF::UI {
 		else if (ImGui::IsMouseDown(ImGuiMouseButton_Left)) {
 			is_left_button_down = true;
 			state = mouse_interation::left_pressed;
-		}
-		else if (ImGui::IsMouseReleased(ImGuiMouseButton_Left) && is_left_button_down) {
+		
+		} else if (ImGui::IsMouseReleased(ImGuiMouseButton_Left) && is_left_button_down) {
 			is_left_button_down = false;
 			state = mouse_interation::left_released;
 		}
@@ -55,30 +55,33 @@ namespace PFF::UI {
 		else if (ImGui::IsMouseDown(ImGuiMouseButton_Right)) {
 			is_right_button_down = true;
 			state = mouse_interation::right_pressed;
-		}
-		else if (ImGui::IsMouseReleased(ImGuiMouseButton_Right) && is_right_button_down) {
+		
+		} else if (ImGui::IsMouseReleased(ImGuiMouseButton_Right) && is_right_button_down) {
 			is_right_button_down = false;
 			state = mouse_interation::right_pressed;
 		}
 
 		// Check for middle mouse button interactions
-		if (ImGui::IsMouseClicked(ImGuiMouseButton_Middle))
-			state = mouse_interation::middle_clicked;
-
-		else if (ImGui::IsMouseDoubleClicked(ImGuiMouseButton_Middle))
+		if (ImGui::IsMouseDoubleClicked(ImGuiMouseButton_Middle))
 			state = mouse_interation::middle_double_clicked;
+
+		else if (ImGui::IsMouseClicked(ImGuiMouseButton_Middle))
+			state = mouse_interation::middle_clicked;
 
 		else if (ImGui::IsMouseDown(ImGuiMouseButton_Middle)) {
 			is_middle_button_down = true;
 			state = mouse_interation::middle_pressed;
-		}
-		else if (ImGui::IsMouseReleased(ImGuiMouseButton_Middle) && is_middle_button_down) {
+		
+		} else if (ImGui::IsMouseReleased(ImGuiMouseButton_Middle) && is_middle_button_down) {
 			is_middle_button_down = false;
 			state = mouse_interation::middle_release;
 		}
 	}
 
-	mouse_interation get_mouse_interation_on_item() {
+	mouse_interation get_mouse_interation_on_item(const bool block_input) {
+
+		if (block_input)
+			return mouse_interation::none;
 		
 		static bool is_left_button_down = false;
 		static bool is_right_button_down = false;
@@ -102,6 +105,34 @@ namespace PFF::UI {
 
 		if (ImGui::IsItemDeactivatedAfterEdit())
 			state = mouse_interation::deactivated_after_edit;
+			
+		// // ImGui only registers click / double_click on mouse down
+		// static std::chrono::steady_clock::time_point interaction_time_left = {};
+		// static std::chrono::steady_clock::time_point interaction_time_left_double = {};
+		// if (ImGui::IsMouseDoubleClicked(ImGuiMouseButton_Left))
+		// 	interaction_time_left_double = std::chrono::steady_clock::now();
+		// if (ImGui::IsMouseClicked(ImGuiMouseButton_Left))
+		// 	interaction_time_left = std::chrono::steady_clock::now();
+			
+		// if (ImGui::IsMouseDown(ImGuiMouseButton_Right)) {
+		// 	is_right_button_down = true;
+		// 	state = mouse_interation::right_pressed;
+		
+		// } else if (ImGui::IsMouseReleased(ImGuiMouseButton_Right) && is_right_button_down) {
+
+		// 	std::chrono::steady_clock::time_point current = std::chrono::steady_clock::now();
+
+		// 	auto duration = std::chrono::steady_clock::now() - interaction_time_left_double;
+		// 	auto milliseconds = std::chrono::duration_cast<std::chrono::milliseconds>(duration).count();
+		// 	if (milliseconds < 200)
+		// 		return mouse_interation::right_double_clicked;
+
+		// 	duration = std::chrono::steady_clock::now() - interaction_time_left_double;
+		// 	milliseconds = std::chrono::duration_cast<std::chrono::milliseconds>(duration).count();
+		// 	if (milliseconds < 200)
+		// 		return mouse_interation::right_clicked;
+	
+		// }
 
 		set_mouse_interaction_state(state, is_left_button_down, is_right_button_down, is_middle_button_down);
 

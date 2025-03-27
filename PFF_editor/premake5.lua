@@ -66,12 +66,9 @@ project "PFF_editor"
         
 		postbuildcommands
 		{
-			-- "{MKDIR} %{wks.location}/bin/" .. outputs .. "/PFF_editor/wiki",
-			-- "{COPY} %{wks.location}/.github/wiki %{wks.location}/bin/" .. outputs .. "/PFF_editor/wiki",
+			"{MKDIR} %{wks.location}/bin/" .. outputs .. "/PFF_editor/wiki",
+			"{COPY} %{wks.location}/.github/wiki %{wks.location}/bin/" .. outputs .. "/PFF_editor/wiki",
 
-			-- table.unpack(copy_content_of_dir(outputs, {"PFF_editor/shaders", "PFF_editor/assets", "PFF_editor/defaults", "PFF_editor/project_templates"})),
-					
-			-- table.unpack(copy_content_of_dir(outputs, {"PFF_editor/shaders", "PFF_editor/defaults", "PFF_editor/defaults"})),
 			"{MKDIR} %{wks.location}/bin/" .. outputs .. "/PFF_editor/shaders",
 			'{COPYDIR} "%{wks.location}/PFF_editor/shaders" "%{wks.location}/bin/' .. outputs .. '/PFF_editor/shaders"',
 			'{COPYDIR} "%{wks.location}/PFF_editor/assets" "%{wks.location}/bin/' .. outputs .. '/PFF_editor/assets"',

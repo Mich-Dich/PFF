@@ -74,7 +74,7 @@ namespace PFF::UI {
 
 	// @brief Determines the mouse interaction state (e.g., hovered, clicked) on the current ImGui item.
 	// @return The mouse interaction state (e.g., hovered, clicked, held).
-	mouse_interation get_mouse_interation_on_item();
+	mouse_interation get_mouse_interation_on_item(const bool block_input = false);
 
 	// @brief Determines the mouse interaction state (e.g., hovered, clicked) on the current ImGui window.
 	// @return The mouse interaction state (e.g., hovered, clicked, held).

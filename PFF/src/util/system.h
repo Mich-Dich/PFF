@@ -3,6 +3,8 @@
 
 namespace PFF::util {
 
+    void open_console(const char* title, const bool enable_anci_codes = false);
+
     // @brief Executes an external program with the specified command-line arguments.
     //          This function supports both Windows and Linux platforms, handling process creation
     //          and execution differently based on the operating system. On Windows, it uses

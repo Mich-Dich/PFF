@@ -21,19 +21,21 @@ namespace PFF {
 
 		void display_file(const std::filesystem::path file_path, int ID);
 
-		std::filesystem::path				m_project_directory;
-		std::filesystem::path				m_selected_directory;
-		std::filesystem::path				m_partial_selected_directory;
+		std::filesystem::path					m_project_directory;
+		std::filesystem::path					m_selected_directory;
+		std::filesystem::path					m_partial_selected_directory;
 		
-		std::set<std::filesystem::path>		m_selected_items;							// Set to keep track of selected items
-		std::filesystem::path				m_main_selected_item;
+		std::set<std::filesystem::path>			m_selected_items;							// Set to keep track of selected items
+		std::filesystem::path					m_main_selected_item;
+		std::chrono::steady_clock::time_point 	m_directory_switch_time{};
+		bool   									m_block_mouse_input = false;
 
-		ref<image>							m_folder_icon;
-		ref<image>							m_folder_big_icon;
-		ref<image>							m_folder_open_icon;
-		ref<image>							m_world_icon;
-		ref<image>							m_mesh_asset_icon;
-		ImVec2								m_icon_size;
+		ref<image>								m_folder_icon;
+		ref<image>								m_folder_big_icon;
+		ref<image>								m_folder_open_icon;
+		ref<image>								m_world_icon;
+		ref<image>								m_mesh_asset_icon;
+		ImVec2									m_icon_size;
 	};
 
 }

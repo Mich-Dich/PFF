@@ -25,6 +25,55 @@
 
 namespace PFF::util {
 
+    void open_console(const char* title, const bool enable_anci_codes) {
+    
+#if defined(PFF_PLATFORM_WINDOWS)
+        
+        AllocConsole();
+        FILE* p_file;
+        freopen_s(&p_file, "CONOUT$", "w", stdout);
+        freopen_s(&p_file, "CONOUT$", "w", stderr);
+        freopen_s(&p_file, "CONIN$", "r", stdin);
+
+        std::cout.clear();                                      // Clear the error state for each of the C++ standard stream objects
+        std::cerr.clear();
+        std::cin.clear();
+
+        SetConsoleTitleA(title);
+
+        if (!enable_anci_codes)
+            return;
+
+        // Enable ANSI escape codes for the console
+        HANDLE hOut = GetStdHandle(STD_OUTPUT_HANDLE);
+        if (hOut == INVALID_HANDLE_VALUE)
+            std::cerr << "Error: Could not get handle to console output." << std::endl;
+
+        DWORD dwMode = 0;
+        if (!GetConsoleMode(hOut, &dwMode))
+            std::cerr << "Error: Could not get console mode." << std::endl;
+
+        dwMode |= ENABLE_VIRTUAL_TERMINAL_PROCESSING;
+        if (!SetConsoleMode(hOut, dwMode))
+            std::cerr << "Error: Could not set console mode to enable ANSI escape codes." << std::endl;
+
+#elif defined(PFF_PLATFORM_LINUX)
+
+        // On Linux, the standard streams are typically already connected to the terminal so we don't need to allocate a new console like in Windows
+        std::cout.clear();
+        std::cerr.clear();
+        std::cin.clear();
+        
+        if (isatty(STDOUT_FILENO)) {                                // Set terminal title if we're running in a terminal
+            std::cout << "\033]0;" << title << "\007";
+            std::cout.flush();
+        }
+        
+        // [enable_anci_codes] - ANSI codes are typically enabled by default on Linux terminals so we don't need to do anything special for enable_anci_codes
+#endif
+    }
+
+
     //
     bool run_program(const std::filesystem::path& path_to_exe, const std::string& cmd_args, bool open_console) { return run_program(path_to_exe, cmd_args.c_str(), open_console); }
 
