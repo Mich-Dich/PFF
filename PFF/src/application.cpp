@@ -87,6 +87,14 @@ namespace PFF {
 		logger::set_buffer_threshhold(logger::severity::Warn);
 		ASSERT(!s_instance, "", "Application already exists");
 
+		// // ---------------------------------------- finished setup ----------------------------------------
+		// GET_RENDERER.set_state(system_state::active);
+		// m_is_titlebar_hovered = false;
+		// m_running = true;
+		// m_window->show_window(true);
+		// m_window->poll_events();
+		// start_fps_measurement();
+
 		LOG_INIT();
 		s_instance = this;
 	}
@@ -129,6 +137,14 @@ namespace PFF {
 		PFF_PROFILE_BEGIN_SESSION("runtime", "benchmarks", "PFF_benchmark_runtime.json");
 
 		client_init();
+		
+		// ---------------------------------------- finished setup ----------------------------------------
+		GET_RENDERER.set_state(system_state::active);
+		m_is_titlebar_hovered = false;
+		m_running = true;
+		m_window->show_window(true);
+		m_window->poll_events();
+		start_fps_measurement();
 
 		while (m_running) {
 
@@ -216,14 +232,6 @@ namespace PFF {
 
 		// ---------------------------------------- client side ----------------------------------------
 		ASSERT(init(), "client application is intalized", "client-defint init() has failed");			// init user code / potentally make every actor have own function (like UNREAL)
-
-		// ---------------------------------------- finished setup ----------------------------------------
-		GET_RENDERER.set_state(system_state::active);
-		m_is_titlebar_hovered = false;
-		m_running = true;
-		m_window->show_window(true);
-		m_window->poll_events();
-		start_fps_measurement();
 	}
 
 	void application::client_shutdown() {

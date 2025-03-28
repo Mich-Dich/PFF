@@ -18,7 +18,11 @@ namespace PFF::logger {
     #define LOGGER_CHANGE_BUFFER_SIZE                           "LOGGER change buffer size"
     #define LOGGER_REGISTER_THREAD_LABLE                        "LOGGER register thread label"
     #define LOGGER_UNREGISTER_THREAD_LABLE                      "LOGGER unregister thread label"
-    #define QUEUE_MAX_SIZE                                      0
+#if defined(PFF_DEBUG)
+    #define QUEUE_MAX_SIZE                                      0               // fluch messages directly in debug
+#else
+    #define QUEUE_MAX_SIZE                                      512
+#endif
 
     #define OPEN_FILE                                           main_file = std::ofstream(main_log_file_path, std::ios::app);                       \
                                                                 if (!main_file.is_open()) {                                                         \

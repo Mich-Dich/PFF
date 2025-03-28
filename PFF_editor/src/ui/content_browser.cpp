@@ -217,7 +217,13 @@ namespace PFF {
 				//case UI::mouse_interation::hovered					: LOG(Trace, "hovered"); break;
 				case UI::mouse_interation::left_clicked				: LOG(Trace, "left_clicked"); break;
 				//case UI::mouse_interation::left_double_clicked		: LOG(Trace, "left_double_clicked"); break;
-				case UI::mouse_interation::left_pressed				: LOG(Trace, "left_pressed"); break;
+				case UI::mouse_interation::left_pressed:
+
+					// if (OI::get_key_state())
+
+
+					// m_main_selected_item = 
+					break;
 				case UI::mouse_interation::left_released			: LOG(Trace, "left_released"); break;
 				case UI::mouse_interation::right_clicked			: LOG(Trace, "right_clicked"); break;
 				case UI::mouse_interation::right_double_clicked		: LOG(Trace, "right_double_clicked"); break;
