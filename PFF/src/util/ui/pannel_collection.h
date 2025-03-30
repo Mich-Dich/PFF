@@ -140,15 +140,6 @@ namespace PFF::UI {
 	// @param [text] The text to display.
 	void anci_text(std::string_view text);
 
-
-
-
-
-
-
-
-
-
 	// @brief Displays a help marker with tooltip containing the provided description.
 	// @param [desc] The description text to be displayed in the tooltip.
 	void help_marker(const char* desc);
@@ -172,7 +163,6 @@ namespace PFF::UI {
 	
 	// @brief Ends the table started with UI::begin_table().
 	void end_table();
-
 
 	// @brief This function draws a custom frame with two separate sections: [left_side] and [right_side].
 	//          The width of the first column is specified by [width_left_side]. Both sections are contained within
@@ -239,10 +229,11 @@ namespace PFF::UI {
 	void table_row(std::string_view label, std::string_view value);
 
 	// @brief Renders a table row with a label and a 4x4 matrix, allowing for editing of translation, rotation, and scale.
+	// @param [label] As this is mostly used to display transform, you can specify if you want to display the rotation in degree
 	// @param [label] The label for the row.
 	// @param [value] A reference to the 4x4 matrix to be edited.
 	// @return true if any component of the matrix was changed, false otherwise.
-	bool table_row(std::string_view label, glm::mat4& value);
+	bool table_row(std::string_view label, glm::mat4& value, const bool display_in_degree = false);
 
 	// @brief Adds a row to an ImGui table with a label and corresponding value input field.
 	// @tparam [T] The type of the value.

@@ -10,7 +10,6 @@
 
 namespace PFF::UI {
 
-	
 	void try_display_mesh_comp(PFF::entity entity) {
 
 		UI::try_display_component<mesh_component>("Mesh", entity, [](auto& component) {
@@ -22,8 +21,8 @@ namespace PFF::UI {
 			}, [&]() {
 
 				ImGui::SetNextItemWidth(ImGui::GetColumnWidth());
-				const auto comp_asset_path = component.asset_path.string().c_str();
-				ImGui::Text("%s", comp_asset_path);
+				const auto comp_asset_path = component.asset_path.filename().string();
+				ImGui::Text("%s", comp_asset_path.c_str());
 
 				if (ImGui::BeginDragDropTarget()) {
 					if (const ImGuiPayload* payload = ImGui::AcceptDragDropPayload("PROJECT_CONTENT_FILE")) {
@@ -151,14 +150,14 @@ namespace PFF::UI {
 		});
 	}
 
-	void display_transform_comp(PFF::entity entity) {
+	void display_transform_comp(PFF::entity entity, const bool display_rotation_in_degree) {
 
 		UI::try_display_component<transform_component>("Transform", entity, [&](auto& component) {
 
 			auto& entity_transform = (glm::mat4&)component;
 			glm::mat4 buffer_transform = entity_transform;
 
-			if (UI::table_row("transform", entity_transform)) {
+			if (UI::table_row("transform", entity_transform, display_rotation_in_degree)) {
 
 				const glm::mat4 root_transform = buffer_transform;
 				buffer_transform = glm::inverse(buffer_transform) * entity_transform;		// trandform delta
@@ -167,6 +166,5 @@ namespace PFF::UI {
 
 		});
 	}
-
 
 }

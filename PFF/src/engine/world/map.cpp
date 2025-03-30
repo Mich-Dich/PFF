@@ -55,7 +55,7 @@ namespace PFF {
 
 	map::map() {
 
-		m_path = application::get().get_project_path() / CONTENT_DIR / "worlds" / "test_map.pffasset";			// TODO: Change to load the map from the .pffproj file
+		m_path = application::get().get_project_path() / CONTENT_DIR / "worlds" / "test_map.pffworld";			// TODO: Change to load the map from the .pffproj file
 		LOG(Trace, "Loading map: " << m_path);
 
 		serialize(serializer::option::load_from_file);
@@ -316,7 +316,7 @@ namespace PFF {
 
 		asset_file_header file_header{};
 		file_header.file_version = version(1, 0, 0);
-		file_header.type = file_type::map;
+		file_header.type = file_type::world;
 		file_header.timestamp = util::get_system_time();
 
 		auto serializer = serializer::yaml(m_path, "map_data", option);

@@ -47,6 +47,6 @@ namespace PFF::UI {
 
 	void display_tag_comp(PFF::entity entity);
 	
-	void display_transform_comp(PFF::entity entity);
+	void display_transform_comp(PFF::entity entity, const bool display_rotation_in_degree = true);
 
 }

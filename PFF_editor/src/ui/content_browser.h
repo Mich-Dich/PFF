@@ -33,6 +33,7 @@ namespace PFF {
 		ref<image>								m_folder_big_icon;
 		ref<image>								m_folder_open_icon;
 		ref<image>								m_world_icon;
+		ref<image>								m_warning_icon;
 		ref<image>								m_mesh_asset_icon;
 		ImVec2									m_icon_size;
 	};

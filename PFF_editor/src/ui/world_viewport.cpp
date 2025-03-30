@@ -6,6 +6,8 @@
 #include <imgui.h>
 #include <ImGuizmo.h>
 
+#include "PFF_editor.h"
+
 #include "util/ui/pannel_collection.h"
 #include "util/ui/component_UI.h"
 #include "engine/world/map.h"
@@ -13,8 +15,6 @@
 
 #include "content_browser.h"
 #include "ui/logger_window.h"
-
-#include "PFF_editor.h"
 
 #include "world_viewport.h"
 
@@ -155,7 +155,7 @@ namespace PFF {
 			ImGui::PushStyleColor(ImGuiCol_Button, IM_COL32(240, 240, 240, 20));
 			ImGui::PushStyleVar(ImGuiStyleVar_FramePadding, ImVec2(0));
 			
-			if (ImGui::ImageButton(((mesh_comp.shoudl_render) ? m_show_icon->get_descriptor_set() : m_hide_icon->get_descriptor_set()), ImVec2(15)))
+			if (ImGui::ImageButton(((mesh_comp.shoudl_render) ? m_hide_icon->get_descriptor_set() : m_show_icon->get_descriptor_set()), ImVec2(15)))
 				mesh_comp.shoudl_render = !mesh_comp.shoudl_render;
 
 			ImGui::PopStyleVar();
@@ -278,7 +278,7 @@ namespace PFF {
 		const f32 pos_x = ImGui::GetCursorScreenPos().x - style.WindowPadding.x;
 		const ImVec2 size = ImVec2(ImGui::GetContentRegionAvail().x, ImGui::GetTextLineHeightWithSpacing()) + pos_offset;
 
-		UI::shift_cursor_pos(40, 0);
+		UI::shift_cursor_pos(20, 0);
 		UI::begin_table("##window_outliner", false);
 
 		ImGui::TableNextRow();
@@ -404,7 +404,7 @@ namespace PFF {
 
 		UI::display_tag_comp(m_selected_entity);
 
-		UI::display_transform_comp(m_selected_entity);
+		UI::display_transform_comp(m_selected_entity, PFF_editor::get().get_editor_settings_ref().display_rotator_in_degrees);
 
 		UI::try_display_mesh_comp(m_selected_entity);
 
@@ -425,38 +425,38 @@ namespace PFF {
 
 				const f32 tab_width = 60.f;		// TODO: move into [default_tab_width] variable in config-file
 				ImGui::SetNextItemWidth(tab_width);
-				ImGui::BeginTabItem("Inputs");
 
+				if (ImGui::BeginTabItem("Inputs")) {
 
-				UI::begin_table("display_input_actions_params", false);
-				for (input_action* action : *application::get().get_world_layer()->get_current_player_controller()->get_input_mapping()) {						// get input_action
+					UI::begin_table("display_input_actions_params", false);
+					for (input_action* action : *application::get().get_world_layer()->get_current_player_controller()->get_input_mapping()) {						// get input_action
 
-					switch (action->value) {
-					case input::action_type::boolean:
-						UI::table_row(action->get_name(), action->data.boolean, ImGuiInputTextFlags_ReadOnly);
-						break;
+						switch (action->value) {
+						case input::action_type::boolean:
+							UI::table_row(action->get_name(), action->data.boolean, ImGuiInputTextFlags_ReadOnly);
+							break;
 
-					case input::action_type::vec_1D:
-						UI::table_row(action->get_name(), action->data.vec_1D, ImGuiInputTextFlags_ReadOnly);
-						break;
+						case input::action_type::vec_1D:
+							UI::table_row(action->get_name(), action->data.vec_1D, ImGuiInputTextFlags_ReadOnly);
+							break;
 
-					case input::action_type::vec_2D:
-						UI::table_row(action->get_name(), action->data.vec_2D, ImGuiInputTextFlags_ReadOnly);
-						break;
+						case input::action_type::vec_2D:
+							UI::table_row(action->get_name(), action->data.vec_2D, ImGuiInputTextFlags_ReadOnly);
+							break;
 
-					case input::action_type::vec_3D:
-						UI::table_row(action->get_name(), action->data.vec_3D, ImGuiInputTextFlags_ReadOnly);
-						break;
+						case input::action_type::vec_3D:
+							UI::table_row(action->get_name(), action->data.vec_3D, ImGuiInputTextFlags_ReadOnly);
+							break;
 
-					default:
-						break;
+						default:
+							break;
+						}
 					}
+					UI::end_table();
+
+					ImGui::EndTabItem();
 				}
-				UI::end_table();
-
-
-				ImGui::EndTabItem();
-
+				
 				ImGui::SetNextItemWidth(tab_width);
 				if (ImGui::BeginTabItem("Test")) {
 
@@ -567,9 +567,9 @@ namespace PFF {
 
 			else if (const ImGuiPayload* payload = ImGui::AcceptDragDropPayload("PROJECT_CONTENT_FILE_MULTI")) {
 
-				std::set<std::filesystem::path>* file_path = static_cast<std::set<std::filesystem::path>*>(payload->Data);
+				std::set<std::filesystem::path>* file_paths = static_cast<std::set<std::filesystem::path>*>(payload->Data);
 
-				for (const std::filesystem::path file_path : *file_path) {
+				for (const std::filesystem::path file_path : *file_paths) {
 					asset_file_header loc_asset_file_header;
 					if (file_path.extension() == ".pffasset") {
 

@@ -15,6 +15,9 @@ namespace PFF {
 
 		// list all serialize functions
 		m_editor_controller->serialize(option);
+
+		serializer::yaml(config::get_filepath_from_configtype(util::get_executable_path(), config::file::editor), "editor_settings", option)
+			.entry(KEY_VALUE(m_editor_settings.display_rotator_in_degrees));
 	}
 
 	bool PFF_editor::init() { 

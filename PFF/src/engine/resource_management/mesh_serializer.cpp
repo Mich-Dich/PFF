@@ -29,7 +29,7 @@ namespace PFF {
 
 		if (serializer.get_option() == serializer::option::load_from_file) {				// verify the file content
 
-			ASSERT(asset_header.type == file_type::mesh, "", "Tryed to deserialize mesh header, but provided asset_path is not a mesh");
+			ASSERT(asset_header.type == file_type::mesh, "", "Tryed to deserialize mesh header, but provided asset_path is [asset_header.type] instead of mesh");
 		}
 	}
 

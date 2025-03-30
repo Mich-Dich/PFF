@@ -131,7 +131,7 @@ namespace PFF::script_system {
 
 		asset_file_header file_header{};
 		file_header.file_version = version(1, 0, 0);
-		file_header.type = file_type::map;
+		file_header.type = file_type::world;
 		file_header.timestamp = util::get_system_time();
 
 		auto serializer = serializer::yaml(script_components_serializer_file, "script_components", option);

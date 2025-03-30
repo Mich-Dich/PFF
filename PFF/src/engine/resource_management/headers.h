@@ -8,11 +8,11 @@ namespace PFF {
 
 	enum class file_type : u32 {
 
-		none,
+		none = 0,
 		world,
-		map,
-		mesh,
+		//map,						// redundant
 		audio,
+		mesh,
 		texture,
 		material,
 		material_instance,

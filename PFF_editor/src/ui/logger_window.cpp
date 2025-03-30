@@ -5,12 +5,16 @@
 
 namespace PFF {
 
+	static bool show_logger_window = true;
 	logger_window::logger_window() { m_log_file_loc = logger::get_log_file_location(); }
 
 	void logger_window::window() {
 
+		if (!show_logger_window)
+			return;
+
 		ImGuiWindowFlags window_flags = ImGuiWindowFlags_None;
-		ImGui::Begin("Log Display", nullptr, window_flags);
+		ImGui::Begin("Log Display", &show_logger_window, window_flags);
 
 		// TODO: currently: open, read, close, the log file every frame			=> SHIT
 
@@ -47,9 +51,9 @@ namespace PFF {
 		ImGui::End();
 
 
-		LOG(Trace, "time_open_file : " << time_open_file);
-		LOG(Trace, "time_read_file : " << time_read_file);
-		LOG(Trace, "time_close_file  : " << time_close_file);
+		//LOG(Trace, "time_open_file : " << time_open_file);
+		//LOG(Trace, "time_read_file : " << time_read_file);
+		//LOG(Trace, "time_close_file  : " << time_close_file);
 	}
 
 }

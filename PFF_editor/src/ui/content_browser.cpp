@@ -62,6 +62,7 @@ namespace PFF {
 		m_folder_big_icon =		editor_layer->get_folder_big_icon();
 		m_folder_open_icon =	editor_layer->get_folder_icon();
 		m_world_icon =			editor_layer->get_world_icon();
+		m_warning_icon =		editor_layer->get_warning_icon();
 		m_mesh_asset_icon =		editor_layer->get_mesh_asset_icon();
 
 		m_icon_size = { 60, 60 };
@@ -331,10 +332,13 @@ namespace PFF {
 
 		} else if (file_path.extension() == ".pffworld") {
 
-			serializer::yaml(file_path, "PFF_asset_file", serializer::option::load_from_file)
-				.entry(KEY_VALUE(loc_asset_file_header.file_version))
-				.entry(KEY_VALUE(loc_asset_file_header.type))
-				.entry(KEY_VALUE(loc_asset_file_header.timestamp));
+			serializer::yaml(file_path, "map_data", serializer::option::load_from_file)
+				.sub_section("file_header", [&](serializer::yaml& header_section) {
+
+					header_section.entry(KEY_VALUE(loc_asset_file_header.file_version))
+					.entry(KEY_VALUE(loc_asset_file_header.type))
+					.entry(KEY_VALUE(loc_asset_file_header.timestamp));
+			});
 		}
 
 		// Begin a new group for each item
@@ -357,7 +361,11 @@ namespace PFF {
 					ImGui::Image(m_world_icon->get_descriptor_set(), m_icon_size, ImVec2(0, 0), ImVec2(1, 1), color);
 					break;
 
-				default: break;
+				default:
+					std::string faulty_file_name = file_path.filename().generic_string();
+					LOG(Warn, "file [" << faulty_file_name << "] cound not be identified detected asset header type [" << (u32)loc_asset_file_header.type << "]");
+					ImGui::Image(m_warning_icon->get_descriptor_set(), m_icon_size, ImVec2(0, 0), ImVec2(1, 1), (file_path == m_main_selected_item) ? ImVec4(.9f, .5f, 0.f, 1.f) : (m_selected_items.find(file_path) != m_selected_items.end()) ? ImVec4(.8f, .4f, 0.f, 1.f) : ImVec4(1.f, .6f, 0.f, 1.f));
+					break;
 			}
 
 			const std::string wrapped_text = UI::wrap_text_at_underscore(item_name, m_icon_size.x);
@@ -394,7 +402,7 @@ namespace PFF {
 
 			} else {
 
-				const std::string path_string = file_path.string();
+				//const std::string path_string = file_path.string();
 				ImGui::SetDragDropPayload("PROJECT_CONTENT_FILE_MULTI", &m_selected_items, sizeof(&m_selected_items));
 				ImGui::Image(m_mesh_asset_icon->get_descriptor_set(), m_icon_size, ImVec2(0, 0), ImVec2(1, 1), UI::get_action_color_gray_active_ref());
 				ImGui::TextWrapped("[%ld] files", m_selected_items.size());
@@ -529,6 +537,9 @@ namespace PFF {
 			}
 
 			//ImGui::ShowDemoWindow();
+
+			if (UI::mouse_interation::hovered == UI::get_mouse_interation_on_window())
+				LOG(Trace, "Open popup to add new content");
 
 			if (search_query.empty())
 				show_current_folder_content(m_selected_directory);

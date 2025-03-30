@@ -38,6 +38,7 @@ namespace PFF {
 		PFF_DEFAULT_GETTER(ref<image>,		folder_open_icon)
 		PFF_DEFAULT_GETTER(ref<image>,		folder_big_icon)
 		PFF_DEFAULT_GETTER(ref<image>,		world_icon)
+		PFF_DEFAULT_GETTER(ref<image>,		warning_icon)
 		PFF_DEFAULT_GETTER(ref<image>,		mesh_asset_icon)
 		PFF_DEFAULT_GETTER(ref<image>,		relation_icon)
 		PFF_DEFAULT_GETTER(ref<image>,		file_icon)
@@ -56,7 +57,6 @@ namespace PFF {
 		void window_main_title_bar();
 		void window_main_viewport();
 		void window_main_content();
-		void window_editor_settings();
 		void window_general_settings();
 		void main_menu_bar();
 
@@ -66,9 +66,9 @@ namespace PFF {
 		bool m_show_editor_settings = false;
 		bool m_show_general_settings = false;
 
-#ifdef PFF_EDITOR_DEBUG
+#ifdef PFF_DEBUG
 		bool style_editor = false;
-		bool demo_window = true;
+		bool demo_window = false;
 #endif
 
 		std::vector<VkPresentModeKHR>		m_swapchain_supported_presentmodes;
@@ -89,6 +89,7 @@ namespace PFF {
 		ref<image>							m_folder_open_icon;
 		ref<image>							m_folder_big_icon;
 		ref<image>							m_world_icon;
+		ref<image>							m_warning_icon;
 		ref<image>							m_mesh_asset_icon;
 		ref<image>							m_relation_icon;
 		ref<image>							m_file_icon;

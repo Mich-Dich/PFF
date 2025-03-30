@@ -10,9 +10,10 @@
 #include "engine/layer/imgui_layer.h"
 
 #include "toolkit/todo_list/todo_list.h"
-#include "toolkit/settings/graphics_engine_settings.h"
 #include "toolkit/texture_editor.h"
 #include "ui/engine_wiki.h"
+#include "settings/graphics_engine_settings.h"
+#include "settings/editor_settings_window.h"
 
 // TEST 
 #include "application.h"
@@ -27,12 +28,11 @@
 namespace PFF {
 
 
-	editor_layer::editor_layer(ImGuiContext* context) : layer("editor_layer"), m_context(context) {
-		
-		LOG_INIT();
-	}
+	editor_layer::editor_layer(ImGuiContext* context) : layer("editor_layer"), m_context(context) { LOG_INIT(); }
+
 
 	editor_layer::~editor_layer() { LOG_SHUTDOWN(); }
+
 
 	void editor_layer::on_attach() {
 
@@ -45,6 +45,7 @@ namespace PFF {
 		LOAD_ICON(folder_add);
 		LOAD_ICON(folder_big);
 		LOAD_ICON(world);
+		LOAD_ICON(warning);
 		LOAD_ICON(mesh_asset);
 		LOAD_ICON(relation);
 		LOAD_ICON(file);
@@ -66,6 +67,7 @@ namespace PFF {
 		serialize(serializer::option::load_from_file);
 	}
 
+
 	void editor_layer::on_detach() {
 
 		delete m_world_viewport_window;
@@ -75,6 +77,7 @@ namespace PFF {
 		m_folder_add_icon.reset();
 		m_folder_big_icon.reset();
 		m_world_icon.reset();
+		m_warning_icon.reset();
 		m_mesh_asset_icon.reset();
 		m_file_icon.reset();
 		m_file_proc_icon.reset();
@@ -94,6 +97,7 @@ namespace PFF {
 		LOG(Trace, "Detaching editor_layer");
 	}
 
+
 	void editor_layer::on_update(f32 delta_time) {
 	
 		// First pass to mark items for removal
@@ -106,7 +110,9 @@ namespace PFF {
 		m_editor_windows.erase(it, m_editor_windows.end());
 	}
 
+
 	void editor_layer::on_event(event& event) { }
+
 
 	void editor_layer::on_imgui_render() {
 		
@@ -115,11 +121,9 @@ namespace PFF {
 		window_main_title_bar();
 		window_main_content();
 
-		//ImGui::DockSpaceOverViewport(ImGui::GetMainViewport());
-
 		m_world_viewport_window->window();
 
-		window_editor_settings();								// TODO: convert into editor window
+		settings::window_editor_settings(&m_show_editor_settings);
 		window_general_settings();								// TODO: convert into editor window
 		PFF::toolkit::settings::window_graphics_engine();		// TODO: convert into editor window
 		PFF::toolkit::todo::window_todo_list();					// TODO: convert into editor window
@@ -129,7 +133,7 @@ namespace PFF {
 		for (const auto& editor_window : m_editor_windows)
 				editor_window->window();
 
-#ifdef PFF_EDITOR_DEBUG
+#ifdef PFF_DEBUG
 		if (style_editor)
 			ImGui::ShowStyleEditor();
 
@@ -137,6 +141,7 @@ namespace PFF {
 			ImGui::ShowDemoWindow();
 #endif
 	}
+
 
 	void editor_layer::serialize(serializer::option option) {
 
@@ -147,7 +152,7 @@ namespace PFF {
 			.entry("show_editor_settings", m_show_editor_settings)
 			.entry("show_general_settings", m_show_general_settings)
 			.entry("show_engine_wiki", PFF::UI::show_engine_wiki)
-#ifdef PFF_EDITOR_DEBUG
+#ifdef PFF_DEBUG
 			.entry("show_style_editor", style_editor)
 			.entry("show_demo_window", demo_window)
 #endif
@@ -285,8 +290,6 @@ namespace PFF {
 	}
 
 
-
-
 	void editor_layer::window_main_content() {
 
 		auto viewport = ImGui::GetMainViewport();
@@ -313,9 +316,9 @@ namespace PFF {
 		ImGui::End();
 	}
 
-	void editor_layer::window_editor_settings() { }
 
 	void editor_layer::window_general_settings() { }
+
 
 	void editor_layer::main_menu_bar() {
 
@@ -352,7 +355,7 @@ namespace PFF {
 				ImGui::EndMenu();
 			}
 
-			if (ImGui::BeginMenu("settings")) {
+			if (ImGui::BeginMenu("Settings")) {
 				if (ImGui::MenuItem("General Settings"))
 					m_show_general_settings = true;
 
@@ -479,7 +482,7 @@ namespace PFF {
 			if (ImGui::BeginMenu("Windows")) {
 
 				ImGui::MenuItem("ToDo List", "", &PFF::toolkit::todo::s_show_todo_list);
-#ifdef PFF_EDITOR_DEBUG
+#ifdef PFF_DEBUG
 				ImGui::MenuItem("Style Editor", "", &style_editor);
 				ImGui::MenuItem("Demo Window", "", &demo_window);
 #endif
@@ -487,9 +490,9 @@ namespace PFF {
 
 				// IN DEV
 				ImGui::SeparatorText("Settings");
-				ImGui::MenuItem("graphics_engine_settings", "", &m_show_graphics_engine_settings);
-				ImGui::MenuItem("editor_settings", "", &m_show_editor_settings);
-				ImGui::MenuItem("general_settings", "", &m_show_general_settings);
+				ImGui::MenuItem("Graphics Engine Settings", "", &m_show_graphics_engine_settings);
+				ImGui::MenuItem("Editor Settings", "", &m_show_editor_settings);
+				ImGui::MenuItem("General Settings", "", &m_show_general_settings);
 
 				ImGui::Separator();		
 

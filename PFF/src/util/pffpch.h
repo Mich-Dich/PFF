@@ -1,5 +1,10 @@
 #pragma once
 
+
+#ifndef NOMINMAX
+	#define NOMINMAX				// See github.com/skypjack/entt/wiki/Frequently-Asked-Questions#warning-c4003-the-min-the-max-and-the-macro
+#endif
+
 // ======================================================= general =======================================================
 
 // Core Language Features
@@ -81,19 +86,9 @@
 
 #ifdef PFF_PLATFORM_WINDOWS
 	#include "util/platform/windows_util.h"
-	#ifndef NOMINMAX
-		#define NOMINMAX				// See github.com/skypjack/entt/wiki/Frequently-Asked-Questions#warning-c4003-the-min-the-max-and-the-macro
-	#endif
 #elif defined(PFF_PLATFORM_LINUX)
 	#include "util/platform/linux_util.h"
 	#include <cxxabi.h>
-	// #include <dirent.h>
-	// #include <unistd.h>
-	// #include <sys/types.h>
-	// #include <sys/stat.h>
-	#ifndef NOMINMAX
-		#define NOMINMAX				// See github.com/skypjack/entt/wiki/Frequently-Asked-Questions#warning-c4003-the-min-the-max-and-the-macro
-	#endif
 #else
 	#error Unsupported OS detected
 #endif
