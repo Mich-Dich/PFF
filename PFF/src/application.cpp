@@ -87,14 +87,6 @@ namespace PFF {
 		logger::set_buffer_threshhold(logger::severity::Warn);
 		ASSERT(!s_instance, "", "Application already exists");
 
-		// // ---------------------------------------- finished setup ----------------------------------------
-		// GET_RENDERER.set_state(system_state::active);
-		// m_is_titlebar_hovered = false;
-		// m_running = true;
-		// m_window->show_window(true);
-		// m_window->poll_events();
-		// start_fps_measurement();
-
 		LOG_INIT();
 		s_instance = this;
 	}

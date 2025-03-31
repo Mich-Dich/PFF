@@ -22,7 +22,39 @@ else:
     raise Exception("Unsupported operating system")
 
 
-def detect_visual_studio_versions():
+
+
+
+
+
+
+
+
+
+
+
+
+# 
+# 
+# 
+# 
+# 
+# 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+def detect_visual_studio_versions_windows():
     vs_version_map = {
         "17": "2022",  # VS 2022 (major version 17)
         "16": "2019",  # VS 2019 (major version 16)
@@ -45,7 +77,7 @@ def detect_visual_studio_versions():
         print(f"Error detecting Visual Studio versions: {e}")
     return []
 
-def detect_rider():
+def detect_rider_windows():
     # Check common Rider installation paths
     rider_paths = [
         os.path.join(os.environ["ProgramFiles"], "JetBrains", "JetBrains Rider *"),
@@ -56,12 +88,12 @@ def detect_rider():
             return True
     return False
 
-def prompt_ide_selection():
+def prompt_ide_selection_windows():
     ides = []
-    vs_versions = detect_visual_studio_versions()
+    vs_versions = detect_visual_studio_versions_windows()
     if vs_versions:
         ides.extend([f"Visual Studio {version}" for version in vs_versions])
-    if detect_rider():
+    if detect_rider_windows():
         ides.append("JetBrains Rider")
     if not ides:
         print("No supported IDEs detected.")
@@ -85,6 +117,125 @@ def prompt_ide_selection():
     except ValueError:
         print("Invalid input.")
         sys.exit(1)
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+# 
+# 
+# 
+# 
+# 
+# 
+
+
+
+
+
+
+
+
+
+
+
+
+
+def detect_rider_linux():
+    # Check common Rider installation paths on Linux
+    rider_paths = [
+        os.path.expanduser("~/.local/share/JetBrains/Toolbox/apps/Rider"),
+        "/opt/JetBrains Rider",
+        os.path.expanduser("~/.local/share/applications/jetbrains-rider.desktop")
+    ]
+    
+    # Check if rider command exists in PATH
+    try:
+        subprocess.run(["which", "rider"], check=True, capture_output=True)
+        return True
+    except subprocess.CalledProcessError:
+        pass
+
+    # Check physical paths
+    for path in rider_paths:
+        if os.path.exists(path) or len(glob.glob(path)) > 0:
+            return True
+    return False
+
+def prompt_ide_selection_linux():
+    ides = []
+    
+    # Detect available IDEs
+    if detect_rider_linux():
+        ides.append("JetBrains Rider")
+    
+    # Always include Makefile option
+    ides.append("Makefile (CLion/Ninja compatible)")
+    
+    if not ides:
+        print("No supported IDEs detected.")
+        sys.exit(1)
+        
+    print("\nDetected IDEs:")
+    for i, ide in enumerate(ides):
+        print(f"{i}. {ide}")
+
+    if len(ides) == 1:
+        print("Only one IDE detected")
+        return ides[0]
+
+    while True:
+        choice = input("Select an IDE to use (enter the number): ")
+        try:
+            choice_index = int(choice)
+            if 0 <= choice_index < len(ides):
+                return ides[choice_index]
+            print("Invalid selection number.")
+        except ValueError:
+            print("Please enter a valid number.")
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+# 
+# 
+# 
+# 
+# 
+# 
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 def update_submodule(submodule_path, branch="main"):
     print(f"\nupdate submodule: {os.path.basename(submodule_path)}")
@@ -136,7 +287,7 @@ try:
             utils.print_u("\nCHECK WORKSPACE SETUP")
             register_icon.register_icon()
 
-            selected_ide = prompt_ide_selection()
+            selected_ide = prompt_ide_selection_windows()
             if selected_ide.startswith("Visual Studio"):
                 vs_year = selected_ide.split()[-1]  # Extract "2022" from "Visual Studio 2022"
                 premake_action = f"vs{vs_year}"
@@ -157,8 +308,15 @@ try:
             glslc_installed = glslc_configuration.validate()
             
             utils.print_u("\nCHECK WORKSPACE SETUP")
-            premake_result = subprocess.run(['./premake5', 'gmake'], text=True)
-
+            
+            selected_ide = prompt_ide_selection_linux()
+            premake_action = "gmake"  # Default action
+            if selected_ide == "JetBrains Rider":
+                premake_action = "rider"
+            elif "Makefile" in selected_ide:
+                premake_action = "gmake"
+            
+            premake_result = subprocess.run(['./premake5', premake_action], text=True)
             if premake_result.returncode != 0:
                 utils.print_c(f"BUILD FAILED! the premake script encountered [{premake_result.returncode}] errors", "red")
             else:

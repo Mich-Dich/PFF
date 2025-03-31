@@ -11,7 +11,12 @@ namespace PFF::settings {
 
 		ImGuiWindowFlags window_flags = ImGuiWindowFlags_None;
 		ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, ImVec2(0, 0));
-		ImGui::Begin("Editor Settings", show, 0);
+		if (!ImGui::Begin("Editor Settings", show, 0)) {
+
+			ImGui::End();
+			ImGui::PopStyleVar();
+			return;
+		}
 
 		const f32 default_item_width = 250;
 		const f32 first_width = 250.f;
@@ -56,8 +61,8 @@ namespace PFF::settings {
 
 		});
 
-		ImGui::PopStyleVar();
 		ImGui::End();
+		ImGui::PopStyleVar();
 	}
 
 }
