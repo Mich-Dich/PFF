@@ -40,10 +40,12 @@ namespace PFF::UI {
 		bottom_right = 5,
 	};
 
-	enum class mouse_interation : u8 {
+	enum class mouse_interation : u8 {									
 
 		none,
 		hovered,						// The mouse cursor is over the item.
+
+		// DONT CHANGE ORDER OF: LEFT / RIGHT / MIDDLE ENTRYS   else change refrence in: util/ui/pannel_collection/set_mouse_interaction_state()
 		left_clicked,					// The mouse button was pressed and released over the item.
 		left_double_clicked,			// The mouse button was clicked twice in quick succession over the item.
 		left_pressed,					// The mouse button is currently held down over the item.
@@ -56,6 +58,7 @@ namespace PFF::UI {
 		middle_double_clicked,			// The middle mouse button was clicked over the item.
 		middle_pressed,					// The mouse button is currently held down over the item.
 		middle_release,					// The mouse button is currently held down over the item.
+		
 		dragged,						// The item is being dragged with the mouse.
 		focused,						// The item has keyboard focus(can be set with mouse clicks).
 		active,							// The item is currently being interacted with

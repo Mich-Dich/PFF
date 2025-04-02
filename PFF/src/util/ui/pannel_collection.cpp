@@ -26,23 +26,29 @@ namespace PFF::UI {
 
 	void set_mouse_interaction_state(const ImGuiMouseButton_ mouse_button, mouse_interation& state, bool& is_button_down) {
 
+		u8 offset = 0;
+		if (mouse_button == ImGuiMouseButton_Right)
+			offset = 4;
+		if (mouse_button == ImGuiMouseButton_Middle)
+			offset = 8;
+
 		// Check for left mouse button interactions
 		if (ImGui::IsMouseDoubleClicked(mouse_button))
-			state = mouse_interation::left_double_clicked;
+			state = static_cast<mouse_interation>(static_cast<u8>(mouse_interation::left_double_clicked) + offset);
 			
 		else if (ImGui::IsMouseClicked(mouse_button))
-				state = mouse_interation::left_clicked;
+			state = static_cast<mouse_interation>(static_cast<u8>(mouse_interation::left_clicked) + offset);
 
 		else if (ImGui::IsMouseDragging(mouse_button))
 			state = mouse_interation::dragged;
 
 		else if (ImGui::IsMouseDown(mouse_button)) {
 			is_button_down = true;
-			state = mouse_interation::left_pressed;
+			state = static_cast<mouse_interation>(static_cast<u8>(mouse_interation::left_pressed) + offset);
 		
 		} else if (ImGui::IsMouseReleased(mouse_button) && is_button_down) {
 			is_button_down = false;
-			state = mouse_interation::left_released;
+			state = static_cast<mouse_interation>(static_cast<u8>(mouse_interation::left_released) + offset);
 		}
 	}
 
@@ -51,9 +57,9 @@ namespace PFF::UI {
 		if (block_input)
 			return mouse_interation::none;
 		
-		static bool is_left_button_down = false;
-		static bool is_right_button_down = false;
 		static bool is_middle_button_down = false;
+		static bool is_right_button_down = false;
+		static bool is_left_button_down = false;
 
 		const ImVec2 item_pos = ImGui::GetItemRectMin();
 		const ImVec2 item_max = item_pos + ImGui::GetItemRectSize();
@@ -83,9 +89,9 @@ namespace PFF::UI {
 
 	mouse_interation get_mouse_interation_on_window() {
 
-		static bool is_left_button_down = false;
-		static bool is_right_button_down = false;
 		static bool is_middle_button_down = false;
+		static bool is_right_button_down = false;
+		static bool is_left_button_down = false;
 
 		// If the mouse is not hovering over the item, return none
 		const ImVec2 item_pos = ImGui::GetWindowPos();

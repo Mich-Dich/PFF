@@ -491,55 +491,82 @@ namespace PFF {
 				ImGui::TreePop();
 			}
 
-		}, [&]() {
+			}, [&]() {
 
-			if (m_block_mouse_input && ImGui::IsMouseReleased(ImGuiMouseButton_Left))			// block input when double clicking on a folder to avoid selecting new item at same location when switching dirs
-				m_block_mouse_input = false;
+				if (m_block_mouse_input && ImGui::IsMouseReleased(ImGuiMouseButton_Left))			// block input when double clicking on a folder to avoid selecting new item at same location when switching dirs
+					m_block_mouse_input = false;
 
-			if (ImGui::Button(" import ##content_browser_import")) {
+				if (ImGui::Button(" import ##content_browser_import")) {
 
-				std::filesystem::path source_path = util::file_dialog("Import asset", import_files);
+					std::filesystem::path source_path = util::file_dialog("Import asset", import_files);
 
-				if (source_path.extension() == ".gltf" || source_path.extension() == ".glb")
-					PFF_editor::get().get_editor_layer()->add_window<mesh_import_window>(source_path, m_selected_directory);
+					if (source_path.extension() == ".gltf" || source_path.extension() == ".glb")
+						PFF_editor::get().get_editor_layer()->add_window<mesh_import_window>(source_path, m_selected_directory);
 
-				// TODO: add more import dialogs depending on extention
+					// TODO: add more import dialogs depending on extention
 
-			}
-			
-			ImGui::SameLine();
-			UI::shift_cursor_pos(30, 0);
-
-			ImVec2 input_text_size(180, 0); // Set width to 150 pixels, height to default
-			ImGui::SetNextItemWidth(math::clamp<f32>(input_text_size.x, 30, ImGui::GetContentRegionAvail().x));
-			UI::serach_input("##serach_in_world_viewport_details_panel", search_query);
-
-			ImGui::SameLine();
-			UI::shift_cursor_pos(10, 0);
-			std::filesystem::path current_path;
-			for (const auto& part : m_partial_selected_directory) {
-
-				current_path /= part;
-				const std::string part_string = part.string();
-				if (UI::gray_button(part_string.c_str())) {
-
-					select_new_directory(m_project_directory / current_path);
-					break;
 				}
-				drop_target_to_move_file(m_project_directory / current_path);
 
-				if (part != m_partial_selected_directory.filename()) {
+				ImGui::SameLine();
+				UI::shift_cursor_pos(30, 0);
 
-					ImGui::SameLine();
-					ImGui::Text("/");
-					ImGui::SameLine();
+				ImVec2 input_text_size(180, 0); // Set width to 150 pixels, height to default
+				ImGui::SetNextItemWidth(math::clamp<f32>(input_text_size.x, 30, ImGui::GetContentRegionAvail().x));
+				UI::serach_input("##serach_in_world_viewport_details_panel", search_query);
+
+				ImGui::SameLine();
+				UI::shift_cursor_pos(10, 0);
+				std::filesystem::path current_path;
+				for (const auto& part : m_partial_selected_directory) {
+
+					current_path /= part;
+					const std::string part_string = part.string();
+					if (UI::gray_button(part_string.c_str())) {
+
+						select_new_directory(m_project_directory / current_path);
+						break;
+					}
+					drop_target_to_move_file(m_project_directory / current_path);
+
+					if (part != m_partial_selected_directory.filename()) {
+
+						ImGui::SameLine();
+						ImGui::Text("/");
+						ImGui::SameLine();
+					}
 				}
+
+				if (UI::mouse_interation::right_clicked == UI::get_mouse_interation_on_window()) {
+
+					LOG(Trace, "Open popup to add new content");
+					ImGui::OpenPopup("##content_browser_current_dir_popup");
+				}
+
+				if (ImGui::BeginPopup("##content_browser_current_dir_popup")) {
+
+					ImGui::Text("Create New asset");
+
+					if (ImGui::TreeNode("world")) {
+
+						if (ImGui::TreeNodeEx("Create empty world", ImGuiTreeNodeFlags_Leaf | ImGuiTreeNodeFlags_NoTreePushOnOpen))
+							LOG(Info, "Not implemented yet");
+
+						ImGui::TreePop();
+					}
+
+
+				//if (ImGui::Button("Close"))
+
+
+				LOG(Trace, "popup mouse interation: " << (u32)UI::get_mouse_interation_on_item());
+				//if (UI::get_mouse_interation_on_item() == UI::mouse_interation::none) {
+
+				//	LOG(Trace, "CLOSE popup");
+				//	ImGui::CloseCurrentPopup();
+				//}
+
+				ImGui::EndPopup();
 			}
-
-			//ImGui::ShowDemoWindow();
-
-			if (UI::mouse_interation::hovered == UI::get_mouse_interation_on_window())
-				LOG(Trace, "Open popup to add new content");
 
 			if (search_query.empty())
 				show_current_folder_content(m_selected_directory);
@@ -554,7 +581,6 @@ namespace PFF {
 				}
 
 			}
-
 
 		});
 
