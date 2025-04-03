@@ -76,9 +76,10 @@ namespace PFF {
 			return;
 		}
 
+		// ---------------------------------- current entity doesnt have relationship => create new component ----------------------------------
 		std::vector<UUID> cildren{};
 		cildren.push_back(child.get_component<ID_component>().ID);
-		add_component<relationship_component>(get_UUID(), cildren);		// register child
+		add_component<relationship_component>( 0 /*get_UUID()*/, cildren);		// register child
 		return;
 
 	}
