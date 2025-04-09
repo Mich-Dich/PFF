@@ -2,9 +2,10 @@
 #include <util/pffpch.h>
 
 #include "util.h"
+#include "system.h"
 
 namespace PFF::util {
-
+    
     void init() {
 
     #if defined(PFF_PLATFORM_LINUX)

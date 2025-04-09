@@ -21,7 +21,7 @@ namespace PFF::serializer {
 
 				if constexpr (std::is_same_v<T, std::filesystem::path>) {
 
-					std::string path_str = value.string();
+					std::string path_str = value.generic_string();
 					entry<std::string>(path_str);
 
 				} else if constexpr (std::is_same_v<T, std::string>) {

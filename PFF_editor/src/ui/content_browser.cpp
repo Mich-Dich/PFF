@@ -13,6 +13,11 @@
 
 #include "content_browser.h"
 
+
+#define ITEM_DRAD_DRAP_SOURCE_NAME_LENGTH			9	
+
+
+
 namespace PFF {
 
 	static ImGuiTreeNodeFlags	base_flags = ImGuiTreeNodeFlags_OpenOnArrow | ImGuiTreeNodeFlags_OpenOnDoubleClick | ImGuiTreeNodeFlags_SpanAvailWidth;
@@ -218,13 +223,7 @@ namespace PFF {
 				//case UI::mouse_interation::hovered					: LOG(Trace, "hovered"); break;
 				case UI::mouse_interation::left_clicked				: LOG(Trace, "left_clicked"); break;
 				//case UI::mouse_interation::left_double_clicked		: LOG(Trace, "left_double_clicked"); break;
-				case UI::mouse_interation::left_pressed:
-
-					// if (OI::get_key_state())
-
-
-					// m_main_selected_item = 
-					break;
+				case UI::mouse_interation::left_pressed:			break;
 				case UI::mouse_interation::left_released			: LOG(Trace, "left_released"); break;
 				case UI::mouse_interation::right_clicked			: LOG(Trace, "right_clicked"); break;
 				case UI::mouse_interation::right_double_clicked		: LOG(Trace, "right_double_clicked"); break;
@@ -249,39 +248,24 @@ namespace PFF {
 					select_new_directory(entry.path());
 					return;
 
-				//case UI::mouse_interation::right_clicked:
-				//	ImGui::OpenPopup("Not implemented yet");
-				//	break;
-
-				//case UI::mouse_interation::left_pressed:
-				//	if (ImGui::GetIO().KeyShift) {
-
-				//		if (m_selected_items.find(entry.path()) == m_selected_items.end())				// If Shift is held, select the item
-				//			m_selected_items.insert(entry.path());
-				//		else
-				//			m_selected_items.erase(entry.path());
-
-				//	} else {
-				//		// Clear selection and select the clicked item
-				//		m_selected_items.clear();
-				//		m_selected_items.insert(entry.path());
-				//	}
-				//	break;
-
-				//case UI::mouse_interation::hovered:
-				//	// TODO: draw rectangle behind item
-				//	break;
-
 				default: break;
 			}
 
 			if (ImGui::BeginDragDropSource(ImGuiDragDropFlags_SourceAllowNullID)) {
+				
+				char shortened_item_name[ITEM_DRAD_DRAP_SOURCE_NAME_LENGTH + 4];
+				if (item_name.length() -1 > ITEM_DRAD_DRAP_SOURCE_NAME_LENGTH) {
+
+					const auto buffer = item_name.substr(0, ITEM_DRAD_DRAP_SOURCE_NAME_LENGTH);
+					snprintf(shortened_item_name, sizeof(shortened_item_name), "%s...", buffer.c_str());
+				}
+				else
+					snprintf(shortened_item_name, sizeof(shortened_item_name), "%s", item_name.c_str());
 
 				const std::string path_string = entry.path().string();
 				ImGui::SetDragDropPayload("PROJECT_CONTENT_FOLDER", path_string.c_str(), path_string.length() + 1);
-				// LOG(Trace, "DRAG-DROP  FOLDER");
 				ImGui::Image(m_folder_big_icon->get_descriptor_set(), m_icon_size, ImVec2(0, 0), ImVec2(1, 1), UI::get_action_color_gray_active_ref());
-				ImGui::TextWrapped("%s", item_name.c_str());
+				ImGui::Text("%s", shortened_item_name);
 				ImGui::EndDragDropSource();
 			}
 
@@ -322,6 +306,10 @@ namespace PFF {
 		}
 	}
 
+
+
+
+
 	void content_browser::display_file(const std::filesystem::path file_path, int ID) {
 
 		asset_file_header loc_asset_file_header;
@@ -344,9 +332,9 @@ namespace PFF {
 		// Begin a new group for each item
 		const ImVec4& color = (file_path == m_main_selected_item) ? UI::get_action_color_00_active_ref() : (m_selected_items.find(file_path) != m_selected_items.end()) ? UI::get_action_color_00_faded_ref() : ImVec4(1);
 		const std::string item_name = file_path.filename().replace_extension("").string();
+		ImGui::PushID(ID);
 		ImGui::BeginGroup();
 		{
-			ImGui::PushID(ID);
 
 			const ImVec2 item_pos = ImGui::GetCursorScreenPos();
 			ImDrawList* draw_list = ImGui::GetWindowDrawList();
@@ -371,9 +359,9 @@ namespace PFF {
 			const std::string wrapped_text = UI::wrap_text_at_underscore(item_name, m_icon_size.x);
 			ImGui::TextWrapped("%s", wrapped_text.c_str());
 
-			ImGui::PopID();
 		}
 		ImGui::EndGroup();
+		ImGui::PopID();
 		const auto item_mouse_interation = UI::get_mouse_interation_on_item(m_block_mouse_input);
 
 		// TODO: make it possible to easyly tell the file type
@@ -392,12 +380,47 @@ namespace PFF {
 		// Handle drag source for files
 		if (ImGui::BeginDragDropSource(ImGuiDragDropFlags_SourceAllowNullID)) {
 
+#if 0
+			const std::string path_string = file_path.string();
+			ImGui::SetDragDropPayload("PROJECT_CONTENT_FILE", path_string.c_str(), path_string.length() + 1);
+			ImGui::Image(m_mesh_asset_icon->get_descriptor_set(), m_icon_size, ImVec2(0, 0), ImVec2(1, 1), UI::get_action_color_gray_active_ref());
+
+#define ITEM_DRAD_DRAP_SOURCE_NAME_LENGTH			9
+
+			char shortened_item_name[ITEM_DRAD_DRAP_SOURCE_NAME_LENGTH + 4];
+			if (item_name.length() > ITEM_DRAD_DRAP_SOURCE_NAME_LENGTH) {
+
+				const auto buffer = item_name.substr(0, ITEM_DRAD_DRAP_SOURCE_NAME_LENGTH);
+				snprintf(shortened_item_name, sizeof(shortened_item_name), "%s...", buffer.c_str());
+			}
+			else
+				snprintf(shortened_item_name, sizeof(shortened_item_name), "%s", item_name.c_str());
+
+			ImGui::Text("%s", shortened_item_name);
+			ImGui::EndDragDropSource();
+#else
+			LOG(Trace, "m_selected_items count: " << m_selected_items.size());
 			if (m_selected_items.empty()) {
 
+				char shortened_item_name[ITEM_DRAD_DRAP_SOURCE_NAME_LENGTH + 4];
+				if (item_name.length() -1 > ITEM_DRAD_DRAP_SOURCE_NAME_LENGTH) {
+
+					const auto buffer = item_name.substr(0, ITEM_DRAD_DRAP_SOURCE_NAME_LENGTH);
+					snprintf(shortened_item_name, sizeof(shortened_item_name), "%s...", buffer.c_str());
+				}
+				else
+					snprintf(shortened_item_name, sizeof(shortened_item_name), "%s", item_name.c_str());
+
 				const std::string path_string = file_path.string();
-				ImGui::SetDragDropPayload(playload_name, path_string.c_str(), path_string.length() + 1);
-				ImGui::Image(m_mesh_asset_icon->get_descriptor_set(), m_icon_size, ImVec2(0, 0), ImVec2(1, 1), UI::get_action_color_gray_active_ref());
-				ImGui::TextWrapped("%s", item_name.c_str());
+				ImGui::SetDragDropPayload("PROJECT_CONTENT_FILE", path_string.c_str(), path_string.length() + 1);
+
+				switch (loc_asset_file_header.type) {
+					case file_type::mesh:		ImGui::Image(m_mesh_asset_icon->get_descriptor_set(), m_icon_size, ImVec2(0, 0), ImVec2(1, 1), color); break;
+					case file_type::world:		ImGui::Image(m_world_icon->get_descriptor_set(), m_icon_size, ImVec2(0, 0), ImVec2(1, 1), color); break;
+					default:					ImGui::Image(m_warning_icon->get_descriptor_set(), m_icon_size, ImVec2(0, 0), ImVec2(1, 1), (file_path == m_main_selected_item) ? ImVec4(.9f, .5f, 0.f, 1.f) : (m_selected_items.find(file_path) != m_selected_items.end()) ? ImVec4(.8f, .4f, 0.f, 1.f) : ImVec4(1.f, .6f, 0.f, 1.f)); break;
+				}
+
+				ImGui::Text("%s", shortened_item_name);
 				ImGui::EndDragDropSource();
 
 			} else {
@@ -405,11 +428,11 @@ namespace PFF {
 				//const std::string path_string = file_path.string();
 				ImGui::SetDragDropPayload("PROJECT_CONTENT_FILE_MULTI", &m_selected_items, sizeof(&m_selected_items));
 				ImGui::Image(m_mesh_asset_icon->get_descriptor_set(), m_icon_size, ImVec2(0, 0), ImVec2(1, 1), UI::get_action_color_gray_active_ref());
-				ImGui::TextWrapped("[%ld] files", m_selected_items.size());
+				ImGui::Text("[%ld] files", m_selected_items.size());
 				ImGui::EndDragDropSource();
 
 			}
-
+#endif
 		}
 
 		// Context menu popup
@@ -419,12 +442,11 @@ namespace PFF {
 			if (ImGui::MenuItem("Rename"))
 				LOG(Info, "NOT IMPLEMENTED YET");
 
-			if (ImGui::MenuItem("Delete")) {
+			if (ImGui::MenuItem("Delete")) {								// open popup to display consequences of deleting file and ask again
 
 				std::error_code error_code{};
 				VALIDATE(std::filesystem::remove(file_path, error_code), return, "deleting file from content folder: [" << file_path << "]", "FAILED to delete file from content folder: [" << file_path << "] error: " << error_code);
 			}
-
 
 			if (item_mouse_interation == UI::mouse_interation::none && !UI::is_holvering_window())
 				ImGui::CloseCurrentPopup();

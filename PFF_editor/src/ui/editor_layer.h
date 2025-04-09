@@ -46,6 +46,7 @@ namespace PFF {
 		PFF_DEFAULT_GETTER(ref<image>,		mesh_mini_icon)
 		PFF_DEFAULT_GETTER(ref<image>,		show_icon)
 		PFF_DEFAULT_GETTER(ref<image>,		hide_icon)
+		PFF_DEFAULT_GETTER(world_viewport_window*, world_viewport_window)
 
 	private:
 

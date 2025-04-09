@@ -16,6 +16,9 @@ namespace PFF {
 		PFF::input_action look;
 		PFF::input_action toggle_fps;
 
+		PFF::input_action transform_operation_to_translate;
+		PFF::input_action transform_operation_to_rotate;
+		PFF::input_action transform_operation_to_scale;
 	};
 
 	editor_inputs::editor_inputs() {
@@ -64,6 +67,7 @@ namespace PFF {
 		look.set_name("look");
 		register_action(&look, true, util::get_executable_path());
 
+
 		change_move_speed = PFF::input_action{};
 		change_move_speed.description = "increase/decrease the movement speed of the editor camera";
 		change_move_speed.triger_when_paused = false;
@@ -77,7 +81,6 @@ namespace PFF {
 		register_action(&change_move_speed, true, util::get_executable_path());
 
 
-
 		toggle_fps = PFF::input_action{};
 		toggle_fps.description = "toggle the fps limiter";
 		toggle_fps.triger_when_paused = false;
@@ -89,6 +92,45 @@ namespace PFF {
 		};
 		toggle_fps.set_name("toggle_fps");
 		register_action(&toggle_fps, true, util::get_executable_path());
+
+
+		transform_operation_to_translate = PFF::input_action{};
+		transform_operation_to_translate.description = "set transform operation to translate";
+		transform_operation_to_translate.triger_when_paused = false;
+		transform_operation_to_translate.flags = INPUT_ACTION_MODEFIER_AUTO_RESET_ALL;
+		transform_operation_to_translate.value = PFF::input::action_type::boolean;
+		transform_operation_to_translate.duration_in_sec = 0.f;
+		transform_operation_to_translate.keys_bindings = {
+			{key_code::key_E, INPUT_ACTION_TRIGGER_KEY_MOVE_DOWN},
+		};
+		transform_operation_to_translate.set_name("transform_operation_to_translate");
+		register_action(&transform_operation_to_translate, true, util::get_executable_path());
+
+
+		transform_operation_to_rotate = PFF::input_action{};
+		transform_operation_to_rotate.description = "set transform operation to rotate";
+		transform_operation_to_rotate.triger_when_paused = false;
+		transform_operation_to_rotate.flags = INPUT_ACTION_MODEFIER_AUTO_RESET_ALL;
+		transform_operation_to_rotate.value = PFF::input::action_type::boolean;
+		transform_operation_to_rotate.duration_in_sec = 0.f;
+		transform_operation_to_rotate.keys_bindings = {
+			{key_code::key_R, INPUT_ACTION_TRIGGER_KEY_MOVE_DOWN},
+		};
+		transform_operation_to_rotate.set_name("transform_operation_to_rotate");
+		register_action(&transform_operation_to_rotate, true, util::get_executable_path());
+
+
+		transform_operation_to_scale = PFF::input_action{};
+		transform_operation_to_scale.description = "set transform operation to scale";
+		transform_operation_to_scale.triger_when_paused = false;
+		transform_operation_to_scale.flags = INPUT_ACTION_MODEFIER_AUTO_RESET_ALL;
+		transform_operation_to_scale.value = PFF::input::action_type::boolean;
+		transform_operation_to_scale.duration_in_sec = 0.f;
+		transform_operation_to_scale.keys_bindings = {
+			{key_code::key_T, INPUT_ACTION_TRIGGER_KEY_MOVE_DOWN},
+		};
+		transform_operation_to_scale.set_name("transform_operation_to_scale");
+		register_action(&transform_operation_to_scale, true, util::get_executable_path());
 
 	}
 

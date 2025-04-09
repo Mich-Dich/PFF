@@ -112,6 +112,7 @@ namespace PFF {
 
 		GET_RENDERER.shutdown();
 		
+		util::shutdown();
 		m_layerstack.reset();
 		m_window.reset();
 

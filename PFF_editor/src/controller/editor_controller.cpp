@@ -26,6 +26,10 @@ namespace PFF {
 
 	void editor_controller::update(const f32 delta) {
 
+		if (m_input_mapping->transform_operation_to_translate.data.boolean) { PFF_editor::get().get_editor_layer()->get_world_viewport_window()->get_gizmo_operation_ref() = transform_operation::translate; }
+		if (m_input_mapping->transform_operation_to_rotate.data.boolean) { PFF_editor::get().get_editor_layer()->get_world_viewport_window()->get_gizmo_operation_ref() = transform_operation::rotate; }
+		if (m_input_mapping->transform_operation_to_scale.data.boolean) { PFF_editor::get().get_editor_layer()->get_world_viewport_window()->get_gizmo_operation_ref() = transform_operation::scale; }
+
 		//if (m_input_mapping->capture_mouse.get_data<bool>()) { }
 		if (m_input_mapping->capture_mouse.data.boolean) {
 

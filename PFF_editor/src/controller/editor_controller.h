@@ -24,7 +24,7 @@ namespace PFF {
 
 	private:
 		
-		std::shared_ptr<editor_inputs> m_input_mapping{};
+		ref<editor_inputs> m_input_mapping{};
 
 		glm::vec3 m_camera_pos{};
 		glm::vec3 m_camera_direction{};

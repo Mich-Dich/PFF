@@ -14,6 +14,8 @@ namespace PFF {
 		void window() override;
 		virtual void show_possible_sub_window_options() override;
 
+		PFF_DEFAULT_GETTER_REF(transform_operation, gizmo_operation)
+
 	private:
 
 		void serialize(serializer::option option);

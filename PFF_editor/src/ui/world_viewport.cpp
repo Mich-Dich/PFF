@@ -190,7 +190,8 @@ namespace PFF {
 
 			//add_show_hide_icon(entity);
 
-			const bool is_open = ImGui::TreeNodeEx(tag_comp.tag.c_str(), ImGuiTreeNodeFlags_OpenOnDoubleClick | ImGuiTreeNodeFlags_SpanAllColumns | ((m_selected_entity == child) ? ImGuiTreeNodeFlags_Selected : 0));
+			const auto flags = ImGuiTreeNodeFlags_OpenOnArrow | ImGuiTreeNodeFlags_OpenOnDoubleClick | ImGuiTreeNodeFlags_SpanAllColumns;
+			const bool is_open = ImGui::TreeNodeEx(tag_comp.tag.c_str(), flags | ((m_selected_entity == child) ? ImGuiTreeNodeFlags_Selected : 0));
 			if (ImGui::IsItemClicked())
 				m_selected_entity = child;
 
@@ -386,7 +387,8 @@ namespace PFF {
 				
 				//std::string item_name = "outliner_entity_" + index++;
 				//ImGui::PushID(item_name.c_str());
-				const bool is_open = ImGui::TreeNodeEx(tag_comp.tag.c_str(), ImGuiTreeNodeFlags_OpenOnDoubleClick | ImGuiTreeNodeFlags_SpanAllColumns | ((m_selected_entity == loc_entity) ? ImGuiTreeNodeFlags_Selected : 0));
+				const auto flags = ImGuiTreeNodeFlags_OpenOnArrow | ImGuiTreeNodeFlags_OpenOnDoubleClick | ImGuiTreeNodeFlags_SpanAllColumns;
+				const bool is_open = ImGui::TreeNodeEx(tag_comp.tag.c_str(), flags | ((m_selected_entity == loc_entity) ? ImGuiTreeNodeFlags_Selected : 0));
 				//ImGui::PopID();
 
 				if (ImGui::IsItemClicked())
@@ -416,79 +418,6 @@ namespace PFF {
 		}
 
 		ImGui::EndTable();
-
-
-
-
-
-
-
-		//UI::begin_table("##window_outliner", false);
-
-		//ImGui::TableNextRow();
-		//ImGui::TableSetColumnIndex(0);
-		//ImGui::Text("entity");
-		//ImGui::TableSetColumnIndex(1);
-		//const f32 position_x = ImGui::GetCursorPosX();
-		//ImGui::Text("components");
-
-		//UI::end_table();
-
-		//u64 index = 0;
-		//const auto& loc_map = application::get().get_world_layer()->get_map();
-		//for (const auto entity_ID : loc_map->m_registry.view<entt::entity>()) {
-
-		//	PFF::entity loc_entity = entity(entity_ID, loc_map.get());
-		//	const auto& tag_comp = loc_entity.get_component<tag_component>();
-
-		//	if (index % 2) {
-
-		//		const ImVec2 pos = ImVec2(pos_x, ImGui::GetCursorScreenPos().y - 2);
-		//		draw_list->AddRectFilled(pos, pos + size, IM_COL32(240, 240, 240, 10));
-		//	}
-
-		//	// has relationship
-		//	if (loc_entity.has_component<relationship_component>()) {
-
-		//		auto& relation_comp = loc_entity.get_component<relationship_component>();
-		//		if (relation_comp.parent_ID != 0)	// skip all children in main display (will be displayed in [display_entity_children()])
-		//			continue;
-
-		//		add_show_hide_icon(loc_entity);
-
-		//		std::string item_name = "outliner_entity_" + index++;
-		//		ImGui::PushID(item_name.c_str());
-		//		const bool is_open = ImGui::TreeNodeEx(tag_comp.tag.c_str(), outliner_base_flags | ((m_selected_entity == loc_entity) ? ImGuiTreeNodeFlags_Selected : 0));
-		//		ImGui::PopID();
-
-		//		if (ImGui::IsItemClicked())
-		//			m_selected_entity = loc_entity;
-
-		//		list_all_components(loc_entity, position_x);
-		//		if (is_open) {
-
-		//			display_entity_children(loc_map, loc_entity, index, pos_x, size, position_x);
-		//			ImGui::TreePop();
-		//		}
-
-		//		continue;
-		//	}
-
-		//	// has no relationship
-		//	add_show_hide_icon(loc_entity);
-
-		//	std::string item_name = "outliner_entity_" + index++;
-		//	ImGui::PushID(item_name.c_str());
-		//	ImGui::TreeNodeEx(tag_comp.tag.c_str(), outliner_base_flags | ImGuiTreeNodeFlags_Leaf | ImGuiTreeNodeFlags_NoTreePushOnOpen | ((m_selected_entity == loc_entity) ? ImGuiTreeNodeFlags_Selected : 0));
-		//	ImGui::PopID();
-
-		//	if (ImGui::IsItemClicked())
-		//		m_selected_entity = loc_entity;
-
-		//	list_all_components(loc_entity, position_x);
-		//	outliner_entity_popup(item_name.c_str(), loc_map, loc_entity);
-		//}
-
 
 		// Reset m_selected_entity when clicking on empty space
 		if (ImGui::IsWindowHovered() && ImGui::IsMouseClicked(ImGuiMouseButton_Left) && !ImGui::IsAnyItemHovered())

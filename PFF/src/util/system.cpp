@@ -263,7 +263,14 @@ namespace PFF::util {
         }
     }
     
-    void shutdown_qt() { qt_app.reset(); }
+    void shutdown_qt() { 
+
+        if (qt_app) {
+            qInstallMessageHandler(nullptr);
+            qt_app->quit();
+            qt_app.reset();
+        }
+    }
 
 #endif
 
