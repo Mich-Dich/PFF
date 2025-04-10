@@ -206,7 +206,7 @@ namespace PFF {
 			// Begin a new group for each item
 			const int current_ID = hash_path(entry.path());
 			const std::string item_name = entry.path().filename().string();
-			const ImVec4& color = (m_selected_items.find(entry.path()) != m_selected_items.end()) ? UI::get_action_color_00_active_ref() : UI::get_action_color_gray_active_ref();
+			const ImVec4& color = (m_selected_items.item_set.find(entry.path()) != m_selected_items.item_set.end()) ? UI::get_action_color_00_active_ref() : UI::get_action_color_gray_active_ref();
 			ImGui::BeginGroup();
 			{
 				ImGui::PushID(current_ID);
@@ -241,8 +241,8 @@ namespace PFF {
 
 				case UI::mouse_interation::left_double_clicked:
 					LOG(Trace, "Set TreeNode to open ID[" << current_ID << "]");
-					m_main_selected_item.clear();
-					m_selected_items.clear();
+					m_selected_items.main_item.clear();
+					m_selected_items.item_set.clear();
 					ImGui::TreeNodeSetOpen(folder_display_window->GetID(current_ID), true);
 					m_block_mouse_input = true;
 					select_new_directory(entry.path());
@@ -330,7 +330,7 @@ namespace PFF {
 		}
 
 		// Begin a new group for each item
-		const ImVec4& color = (file_path == m_main_selected_item) ? UI::get_action_color_00_active_ref() : (m_selected_items.find(file_path) != m_selected_items.end()) ? UI::get_action_color_00_faded_ref() : ImVec4(1);
+		const ImVec4& color = (file_path == m_selected_items.main_item) ? UI::get_action_color_00_active_ref() : (m_selected_items.item_set.find(file_path) != m_selected_items.item_set.end()) ? UI::get_action_color_00_faded_ref() : ImVec4(1);
 		const std::string item_name = file_path.filename().replace_extension("").string();
 		ImGui::PushID(ID);
 		ImGui::BeginGroup();
@@ -352,7 +352,7 @@ namespace PFF {
 				default:
 					std::string faulty_file_name = file_path.filename().generic_string();
 					LOG(Warn, "file [" << faulty_file_name << "] cound not be identified detected asset header type [" << (u32)loc_asset_file_header.type << "]");
-					ImGui::Image(m_warning_icon->get_descriptor_set(), m_icon_size, ImVec2(0, 0), ImVec2(1, 1), (file_path == m_main_selected_item) ? ImVec4(.9f, .5f, 0.f, 1.f) : (m_selected_items.find(file_path) != m_selected_items.end()) ? ImVec4(.8f, .4f, 0.f, 1.f) : ImVec4(1.f, .6f, 0.f, 1.f));
+					ImGui::Image(m_warning_icon->get_descriptor_set(), m_icon_size, ImVec2(0, 0), ImVec2(1, 1), (file_path == m_selected_items.main_item) ? ImVec4(.9f, .5f, 0.f, 1.f) : (m_selected_items.item_set.find(file_path) != m_selected_items.item_set.end()) ? ImVec4(.8f, .4f, 0.f, 1.f) : ImVec4(1.f, .6f, 0.f, 1.f));
 					break;
 			}
 
@@ -380,27 +380,8 @@ namespace PFF {
 		// Handle drag source for files
 		if (ImGui::BeginDragDropSource(ImGuiDragDropFlags_SourceAllowNullID)) {
 
-#if 0
-			const std::string path_string = file_path.string();
-			ImGui::SetDragDropPayload("PROJECT_CONTENT_FILE", path_string.c_str(), path_string.length() + 1);
-			ImGui::Image(m_mesh_asset_icon->get_descriptor_set(), m_icon_size, ImVec2(0, 0), ImVec2(1, 1), UI::get_action_color_gray_active_ref());
-
-#define ITEM_DRAD_DRAP_SOURCE_NAME_LENGTH			9
-
-			char shortened_item_name[ITEM_DRAD_DRAP_SOURCE_NAME_LENGTH + 4];
-			if (item_name.length() > ITEM_DRAD_DRAP_SOURCE_NAME_LENGTH) {
-
-				const auto buffer = item_name.substr(0, ITEM_DRAD_DRAP_SOURCE_NAME_LENGTH);
-				snprintf(shortened_item_name, sizeof(shortened_item_name), "%s...", buffer.c_str());
-			}
-			else
-				snprintf(shortened_item_name, sizeof(shortened_item_name), "%s", item_name.c_str());
-
-			ImGui::Text("%s", shortened_item_name);
-			ImGui::EndDragDropSource();
-#else
-			LOG(Trace, "m_selected_items count: " << m_selected_items.size());
-			if (m_selected_items.empty()) {
+			// LOG(Trace, "m_selected_items count: " << m_selected_items.size());
+			if (m_selected_items.item_set.empty()) {
 
 				char shortened_item_name[ITEM_DRAD_DRAP_SOURCE_NAME_LENGTH + 4];
 				if (item_name.length() -1 > ITEM_DRAD_DRAP_SOURCE_NAME_LENGTH) {
@@ -412,12 +393,12 @@ namespace PFF {
 					snprintf(shortened_item_name, sizeof(shortened_item_name), "%s", item_name.c_str());
 
 				const std::string path_string = file_path.string();
-				ImGui::SetDragDropPayload("PROJECT_CONTENT_FILE", path_string.c_str(), path_string.length() + 1);
+				ImGui::SetDragDropPayload(playload_name, path_string.c_str(), path_string.length() + 1);
 
 				switch (loc_asset_file_header.type) {
 					case file_type::mesh:		ImGui::Image(m_mesh_asset_icon->get_descriptor_set(), m_icon_size, ImVec2(0, 0), ImVec2(1, 1), color); break;
 					case file_type::world:		ImGui::Image(m_world_icon->get_descriptor_set(), m_icon_size, ImVec2(0, 0), ImVec2(1, 1), color); break;
-					default:					ImGui::Image(m_warning_icon->get_descriptor_set(), m_icon_size, ImVec2(0, 0), ImVec2(1, 1), (file_path == m_main_selected_item) ? ImVec4(.9f, .5f, 0.f, 1.f) : (m_selected_items.find(file_path) != m_selected_items.end()) ? ImVec4(.8f, .4f, 0.f, 1.f) : ImVec4(1.f, .6f, 0.f, 1.f)); break;
+					default:					ImGui::Image(m_warning_icon->get_descriptor_set(), m_icon_size, ImVec2(0, 0), ImVec2(1, 1), (file_path == m_selected_items.main_item) ? ImVec4(.9f, .5f, 0.f, 1.f) : (m_selected_items.item_set.find(file_path) != m_selected_items.item_set.end()) ? ImVec4(.8f, .4f, 0.f, 1.f) : ImVec4(1.f, .6f, 0.f, 1.f)); break;
 				}
 
 				ImGui::Text("%s", shortened_item_name);
@@ -425,14 +406,13 @@ namespace PFF {
 
 			} else {
 
-				//const std::string path_string = file_path.string();
-				ImGui::SetDragDropPayload("PROJECT_CONTENT_FILE_MULTI", &m_selected_items, sizeof(&m_selected_items));
+				selected_files* payload_data = &m_selected_items;
+				ImGui::SetDragDropPayload("PROJECT_CONTENT_FILE_MULTI", &payload_data, sizeof(payload_data));
 				ImGui::Image(m_mesh_asset_icon->get_descriptor_set(), m_icon_size, ImVec2(0, 0), ImVec2(1, 1), UI::get_action_color_gray_active_ref());
-				ImGui::Text("[%ld] files", m_selected_items.size());
+				ImGui::Text("[%ld] files", m_selected_items.item_set.size() + (m_selected_items.main_item.empty() ? 0 : 1));
 				ImGui::EndDragDropSource();
 
 			}
-#endif
 		}
 
 		// Context menu popup
@@ -467,22 +447,21 @@ namespace PFF {
 
 				if (ImGui::GetIO().KeyShift) {
 
-					if (!m_main_selected_item.empty())
-						m_selected_items.insert(m_main_selected_item);
-					m_main_selected_item = file_path;
-					m_selected_items.insert(file_path);
+					if (!m_selected_items.main_item.empty())
+						m_selected_items.item_set.insert(m_selected_items.main_item);
+					m_selected_items.main_item = file_path;
 
 				} else if (ImGui::GetIO().KeyCtrl) {
 
-					if (m_selected_items.find(file_path) == m_selected_items.end())				// If Shift is held, select the item
-						m_selected_items.insert(file_path);
+					if (m_selected_items.item_set.find(file_path) == m_selected_items.item_set.end())				// If Shift is held, select the item
+						m_selected_items.item_set.insert(file_path);
 					else
-						m_selected_items.erase(file_path);
+						m_selected_items.item_set.erase(file_path);
 
 				} else {
 
-					m_selected_items.clear();
-					m_main_selected_item = file_path;
+					m_selected_items.item_set.clear();
+					m_selected_items.main_item = file_path;
 				}
 				break;
 
@@ -576,35 +555,39 @@ namespace PFF {
 						ImGui::TreePop();
 					}
 
+					//if (ImGui::Button("Close"))
 
-				//if (ImGui::Button("Close"))
+					LOG(Trace, "popup mouse interation: " << (u32)UI::get_mouse_interation_on_item());
+					//if (UI::get_mouse_interation_on_item() == UI::mouse_interation::none) {
 
+					//	LOG(Trace, "CLOSE popup");
+					//	ImGui::CloseCurrentPopup();
+					//}
 
-				LOG(Trace, "popup mouse interation: " << (u32)UI::get_mouse_interation_on_item());
-				//if (UI::get_mouse_interation_on_item() == UI::mouse_interation::none) {
-
-				//	LOG(Trace, "CLOSE popup");
-				//	ImGui::CloseCurrentPopup();
-				//}
-
-				ImGui::EndPopup();
-			}
-
-			if (search_query.empty())
-				show_current_folder_content(m_selected_directory);
-			else {
-
-				u32 index_buffer = 0;
-				show_search_result_for_current_folder(m_selected_directory, index_buffer);
-
-				if (index_buffer == 0) {
-					UI::shift_cursor_pos(10, 10);
-					ImGui::Text("Not item found containing [%s]", search_query.c_str());
+					ImGui::EndPopup();
 				}
 
-			}
+				if (search_query.empty())
+					show_current_folder_content(m_selected_directory);
+				else {
 
-		});
+					u32 index_buffer = 0;
+					show_search_result_for_current_folder(m_selected_directory, index_buffer);
+
+					if (index_buffer == 0) {
+						UI::shift_cursor_pos(10, 10);
+						ImGui::Text("Not item found containing [%s]", search_query.c_str());
+					}
+
+				}
+
+				if (ImGui::IsWindowHovered() && ImGui::IsMouseClicked(ImGuiMouseButton_Left) && !ImGui::IsAnyItemHovered()) {
+
+					m_selected_items.item_set.clear();
+					m_selected_items.main_item = {};
+				}
+	
+			});
 
 
 		ImGui::End();

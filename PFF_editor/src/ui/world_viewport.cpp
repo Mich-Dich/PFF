@@ -168,17 +168,17 @@ namespace PFF {
 
 		const auto& tag_comp = entity.get_component<tag_component>();
 		const auto& relationship_comp = entity.get_component<relationship_component>();
-
 		for (size_t x = 0; x < relationship_comp.children_ID.size(); x++) {
 			
 			ImGui::TableNextRow();
 			ImGui::TableSetColumnIndex(0);
 
 			PFF::entity child = loc_map->get_entity_by_UUID(relationship_comp.children_ID[x]);
+			const auto& child_tag_comp = child.get_component<tag_component>();
 			const auto& child_relationship_comp = child.get_component<relationship_component>();
 			if (child_relationship_comp.children_ID.empty()) {
 
-				ImGui::TreeNodeEx(tag_comp.tag.c_str(), ImGuiTreeNodeFlags_SpanAllColumns | ImGuiTreeNodeFlags_Leaf | ImGuiTreeNodeFlags_Bullet | ImGuiTreeNodeFlags_NoTreePushOnOpen | ((m_selected_entity == child) ? ImGuiTreeNodeFlags_Selected : 0));
+				ImGui::TreeNodeEx(child_tag_comp.tag.c_str(), ImGuiTreeNodeFlags_SpanAllColumns | ImGuiTreeNodeFlags_Leaf | ImGuiTreeNodeFlags_Bullet | ImGuiTreeNodeFlags_NoTreePushOnOpen | ((m_selected_entity == child) ? ImGuiTreeNodeFlags_Selected : 0));
 				if (ImGui::IsItemClicked())
 					m_selected_entity = child;
 
@@ -191,7 +191,7 @@ namespace PFF {
 			//add_show_hide_icon(entity);
 
 			const auto flags = ImGuiTreeNodeFlags_OpenOnArrow | ImGuiTreeNodeFlags_OpenOnDoubleClick | ImGuiTreeNodeFlags_SpanAllColumns;
-			const bool is_open = ImGui::TreeNodeEx(tag_comp.tag.c_str(), flags | ((m_selected_entity == child) ? ImGuiTreeNodeFlags_Selected : 0));
+			const bool is_open = ImGui::TreeNodeEx(child_tag_comp.tag.c_str(), flags | ((m_selected_entity == child) ? ImGuiTreeNodeFlags_Selected : 0));
 			if (ImGui::IsItemClicked())
 				m_selected_entity = child;
 
@@ -238,104 +238,6 @@ namespace PFF {
 	}
 
 	void world_viewport_window::window_outliner() {
-
-#if 0			// old version
-
-		if (!m_show_outliner)
-			return;
-
-		ImGuiWindowFlags window_flags{};
-		ImGui::Begin("Outliner", &m_show_outliner, window_flags);
-
-		static std::string search_query;
-		UI::serach_input("##serach_in_world_viewport_details_panel", search_query);
-
-		ImGui::SameLine();
-		if (ImGui::ImageButton(m_folder_add_icon->get_descriptor_set(), ImVec2{ 15 }, ImVec2(0), ImVec2(1))) {
-
-			LOG(Trace, "Add folder to outliner: NOT IMPLEMENTED YET");
-		}
-
-		ImDrawList* draw_list = ImGui::GetWindowDrawList();
-		const auto style = ImGui::GetStyle();
-		const ImVec2 pos_offset = ImVec2(style.WindowPadding.x, 0);
-		const f32 pos_x = ImGui::GetCursorScreenPos().x - style.WindowPadding.x;
-		const ImVec2 size = ImVec2(ImGui::GetContentRegionAvail().x, ImGui::GetTextLineHeightWithSpacing()) + pos_offset;
-
-		UI::shift_cursor_pos(20, 0);
-		UI::begin_table("##window_outliner", false);
-
-		ImGui::TableNextRow();
-		ImGui::TableSetColumnIndex(0);
-		ImGui::Text("entity");
-		ImGui::TableSetColumnIndex(1);
-		const f32 position_x = ImGui::GetCursorPosX();
-		ImGui::Text("components");
-
-		UI::end_table();
-
-		u64 index = 0;
-		const auto& loc_map = application::get().get_world_layer()->get_map();
-		for (const auto entity_ID : loc_map->m_registry.view<entt::entity>()) {
-
-			PFF::entity loc_entity = entity(entity_ID, loc_map.get());
-			const auto& tag_comp = loc_entity.get_component<tag_component>();
-
-			if (index % 2) {
-
-				const ImVec2 pos = ImVec2(pos_x, ImGui::GetCursorScreenPos().y - 2);
-				draw_list->AddRectFilled(pos, pos + size, IM_COL32(240, 240, 240, 10));
-			}
-
-			// has relationship
-			if (loc_entity.has_component<relationship_component>()) {
-
-				auto& relation_comp = loc_entity.get_component<relationship_component>();
-				if (relation_comp.parent_ID != 0)	// skip all children in main display (will be displayed in [display_entity_children()])
-					continue;
-
-				add_show_hide_icon(loc_entity);
-
-				std::string item_name = "outliner_entity_" + index++;
-				ImGui::PushID(item_name.c_str());
-				const bool is_open = ImGui::TreeNodeEx(tag_comp.tag.c_str(), outliner_base_flags | ((m_selected_entity == loc_entity) ? ImGuiTreeNodeFlags_Selected : 0));
-				ImGui::PopID();
-
-				if (ImGui::IsItemClicked())
-					m_selected_entity = loc_entity;
-
-				list_all_components(loc_entity, position_x);
-				if (is_open) {
-
-					display_entity_children(loc_map, loc_entity, index, pos_x, size, position_x);
-					ImGui::TreePop();
-				}
-
-				continue;
-			}
-
-			// has no relationship
-			add_show_hide_icon(loc_entity);
-
-			std::string item_name = "outliner_entity_" + index++;
-			ImGui::PushID(item_name.c_str());
-			ImGui::TreeNodeEx(tag_comp.tag.c_str(), outliner_base_flags | ImGuiTreeNodeFlags_Leaf | ImGuiTreeNodeFlags_NoTreePushOnOpen | ((m_selected_entity == loc_entity) ? ImGuiTreeNodeFlags_Selected : 0));
-			ImGui::PopID();
-
-			if (ImGui::IsItemClicked())
-				m_selected_entity = loc_entity;
-
-			list_all_components(loc_entity, position_x);
-			outliner_entity_popup(item_name.c_str(), loc_map, loc_entity);
-		}
-
-
-		// Reset m_selected_entity when clicking on empty space
-		if (ImGui::IsWindowHovered() && ImGui::IsMouseClicked(ImGuiMouseButton_Left) && !ImGui::IsAnyItemHovered())
-			m_selected_entity = entity();
-
-		ImGui::End();
-#else
 
 		if (!m_show_outliner)
 			return;
@@ -413,6 +315,27 @@ namespace PFF {
 			if (ImGui::IsItemClicked())
 				m_selected_entity = loc_entity;
 
+			const auto item_mouse_interation = UI::get_mouse_interation_on_item();
+			std::string popup_name = "entity_context_menu_" + tag_comp.tag;
+			if (ImGui::BeginPopupContextItem(popup_name.c_str())) {
+
+				if (ImGui::MenuItem("Rename"))
+					LOG(Info, "NOT IMPLEMENTED YET");
+
+				if (ImGui::MenuItem("Delete")) {								// open popup to display consequences of deleting file and ask again
+
+					LOG(Info, "NOT IMPLEMENTED YET");
+					// std::error_code error_code{};
+					// VALIDATE(std::filesystem::remove(file_path, error_code), return, "deleting file from content folder: [" << file_path << "]", "FAILED to delete file from content folder: [" << file_path << "] error: " << error_code);
+				}
+
+				if (item_mouse_interation == UI::mouse_interation::none && !UI::is_holvering_window())
+					ImGui::CloseCurrentPopup();
+
+
+				ImGui::EndPopup();
+			}
+
 			ImGui::TableNextColumn();
 			list_all_components(loc_entity);
 		}
@@ -424,7 +347,6 @@ namespace PFF {
 			m_selected_entity = entity();
 
 		ImGui::End();
-#endif
 	}
 
 	void world_viewport_window::outliner_entity_popup(const char* name, ref<map> map, PFF::entity entity) {
@@ -558,6 +480,54 @@ namespace PFF {
 		ImGui::End();
 	}
 
+	void world_viewport_window::process_drop_of_file(const std::filesystem::path path, const bool set_as_selected_entity) {
+
+		asset_file_header loc_asset_file_header;
+		if (path.extension() == ".pffasset") {
+
+			serializer::binary(path, "PFF_asset_file", serializer::option::load_from_file)
+				.entry(loc_asset_file_header);
+
+		} else if (path.extension() == ".pffworld") {
+
+			serializer::yaml(path, "PFF_asset_file", serializer::option::load_from_file)
+				.entry(KEY_VALUE(loc_asset_file_header.file_version))
+				.entry(KEY_VALUE(loc_asset_file_header.type))
+				.entry(KEY_VALUE(loc_asset_file_header.timestamp));
+		}
+
+		switch (loc_asset_file_header.type) {
+
+		case file_type::mesh: {
+
+			LOG(Trace, "Adding static mesh, Name: " << "SM_" + path.filename().replace_extension("").string());
+
+			mesh_component mesh_comp{};
+			mesh_comp.asset_path = util::extract_path_from_project_content_folder(path);
+
+			if (m_selected_entity != entity()) {
+
+				m_selected_entity.add_mesh_component(mesh_comp);
+				break;
+			}
+
+			const auto loc_map = application::get().get_world_layer()->get_map();
+			entity loc_entitiy = loc_map->create_entity("SM_" + path.filename().replace_extension("").string());
+			loc_entitiy.add_mesh_component(mesh_comp);
+
+			if (set_as_selected_entity)
+				m_selected_entity = loc_entitiy;
+
+			//mesh_comp.mesh_asset = static_mesh_asset_manager::get_from_path(util::extract_path_from_project_content_folder(path));
+			//mesh_comp.material = GET_RENDERER.get_default_material_pointer();		// get correct shader
+
+		} break;
+
+		default:
+			break;
+		}
+	}
+
 	void world_viewport_window::window_main_viewport() {
 
 		ImGuiWindowFlags window_flags = 0//ImGuiWindowFlags_NoResize
@@ -593,105 +563,21 @@ namespace PFF {
 			if (const ImGuiPayload* payload = ImGui::AcceptDragDropPayload("PROJECT_CONTENT_FILE")) {
 
 				const std::filesystem::path file_path = (const char*)payload->Data;
-				asset_file_header loc_asset_file_header;
-				if (file_path.extension() == ".pffasset") {
-
-					serializer::binary(file_path, "PFF_asset_file", serializer::option::load_from_file)
-						.entry(loc_asset_file_header);
-
-				} else if (file_path.extension() == ".pffworld") {
-
-					serializer::yaml(file_path, "PFF_asset_file", serializer::option::load_from_file)
-						.entry(KEY_VALUE(loc_asset_file_header.file_version))
-						.entry(KEY_VALUE(loc_asset_file_header.type))
-						.entry(KEY_VALUE(loc_asset_file_header.timestamp));
-				}
-
-				switch (loc_asset_file_header.type) {
-
-				case file_type::mesh: {
-
-					LOG(Trace, "Adding static mesh, Name: " << "SM_" + file_path.filename().replace_extension("").string());
-
-					mesh_component mesh_comp{};
-					mesh_comp.asset_path = util::extract_path_from_project_content_folder(file_path);
-
-					if (m_selected_entity != entity()) {
-
-						m_selected_entity.add_mesh_component(mesh_comp);
-						break;
-					}
-
-					const auto loc_map = application::get().get_world_layer()->get_map();
-					entity loc_entitiy = loc_map->create_entity("SM_" + file_path.filename().replace_extension("").string());
-
-					loc_entitiy.add_mesh_component(mesh_comp);
-
-					//mesh_comp.mesh_asset = static_mesh_asset_manager::get_from_path(util::extract_path_from_project_content_folder(file_path));
-					//mesh_comp.material = GET_RENDERER.get_default_material_pointer();		// get correct shader
-
-				} break;
-
-				default:
-					break;
-				}
-
+				process_drop_of_file(file_path, true);
+				// m_selected_entity = 
 			}
 
 			else if (const ImGuiPayload* payload = ImGui::AcceptDragDropPayload("PROJECT_CONTENT_FILE_MULTI")) {
 
-				std::set<std::filesystem::path>* file_paths = static_cast<std::set<std::filesystem::path>*>(payload->Data);
+				selected_files** received_ptr = static_cast<selected_files**>(payload->Data);
+				selected_files* file_paths = *received_ptr;
+				for (const std::filesystem::path path : (*file_paths).item_set)
+					process_drop_of_file(path, false);
 
-				for (const std::filesystem::path file_path : *file_paths) {
-					asset_file_header loc_asset_file_header;
-					if (file_path.extension() == ".pffasset") {
-
-						serializer::binary(file_path, "PFF_asset_file", serializer::option::load_from_file)
-							.entry(loc_asset_file_header);
-
-					} else if (file_path.extension() == ".pffworld") {
-
-						serializer::yaml(file_path, "PFF_asset_file", serializer::option::load_from_file)
-							.entry(KEY_VALUE(loc_asset_file_header.file_version))
-							.entry(KEY_VALUE(loc_asset_file_header.type))
-							.entry(KEY_VALUE(loc_asset_file_header.timestamp));
-					}
-
-					switch (loc_asset_file_header.type) {
-
-					case file_type::mesh:
-					{
-
-						LOG(Trace, "Adding static mesh, Name: " << "SM_" + file_path.filename().replace_extension("").string());
-
-						mesh_component mesh_comp{};
-						mesh_comp.asset_path = util::extract_path_from_project_content_folder(file_path);
-
-						if (m_selected_entity != entity()) {
-
-							m_selected_entity.add_mesh_component(mesh_comp);
-							break;
-						}
-
-						const auto loc_map = application::get().get_world_layer()->get_map();
-						entity loc_entitiy = loc_map->create_entity("SM_" + file_path.filename().replace_extension("").string());
-
-						loc_entitiy.add_mesh_component(mesh_comp);
-
-						//mesh_comp.mesh_asset = static_mesh_asset_manager::get_from_path(util::extract_path_from_project_content_folder(file_path));
-						//mesh_comp.material = GET_RENDERER.get_default_material_pointer();		// get correct shader
-
-					} break;
-
-					default:
-						break;
-					}
-				}
-
+				process_drop_of_file(file_paths->main_item, true);
 			}
 
 			ImGui::EndDragDropTarget();
-
 		}
 
 

@@ -30,7 +30,8 @@ namespace PFF {
 		void add_show_hide_icon(PFF::entity& entity);
 		void display_entity_children(ref<map> loc_map, PFF::entity entity);
 		void outliner_entity_popup(const char* name, ref<map> map, PFF::entity entity);
-
+		void process_drop_of_file(const std::filesystem::path path, const bool set_as_selected_entity);
+		
 		bool									m_show_renderer_backgrond_effect = false;
 		bool									m_show_world_settings = false;
 		bool									m_show_general_debugger = true;
@@ -59,6 +60,15 @@ namespace PFF {
 
 		transform_operation						m_gizmo_operation = transform_operation::translate;
 		util::simple_deletion_queue				m_deletion_queue{};
+
+		// Editor only feature			purly for ease of development
+		struct folder_entry {
+
+			std::vector<UUID>				contained_entities;
+			std::vector<folder_entry>		sub_folders;
+		};
+		std::vector<folder_entry>			m_current_world_folders;
+
 	};
 
 }

@@ -13,6 +13,18 @@ namespace PFF {
 
 	class map;
 
+
+	// template<typename T>
+	// T find_owner_of_component(const entt::registry &reg, const T& component) {
+    //     auto view = reg.view<T>();
+    //     for (auto [entity, loc_component] : view.each())
+    //         if (loc_component == component)
+    //             return entity;
+
+    //     return entt::null; // Return entt::null if no entity is found
+    // };
+
+
 	class entity {
 	public:
 
