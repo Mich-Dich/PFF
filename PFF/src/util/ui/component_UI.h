@@ -45,7 +45,7 @@ namespace PFF::UI {
 	
 	void try_display_procedural_script_comp(PFF::entity entity);
 
-	void display_tag_comp(PFF::entity entity);
+	void display_name_comp(PFF::entity entity);
 	
 	void display_transform_comp(PFF::entity entity, const bool display_rotation_in_degree = true);
 

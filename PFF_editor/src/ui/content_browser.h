@@ -8,6 +8,12 @@ namespace PFF {
 
 		std::filesystem::path				main_item;
 		std::set<std::filesystem::path>		item_set;
+
+		void reset() {
+			
+			item_set.clear();
+			main_item = std::filesystem::path();
+		}
 	};
 
 	class content_browser{
@@ -39,6 +45,7 @@ namespace PFF {
 		// std::filesystem::path					m_main_selected_item;
 #endif
 		bool   									m_block_mouse_input = false;
+		bool   									logged_warning_for_current_folder = false;
 
 		ref<image>								m_folder_icon;
 		ref<image>								m_folder_big_icon;

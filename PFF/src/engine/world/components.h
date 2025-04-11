@@ -31,7 +31,7 @@ namespace PFF {
 		operator glm::mat4& () { return transform; }
 		operator const glm::mat4& () { return transform; }
 
-		glm::mat4 transform = glm::mat4(1);
+		glm::mat4 									transform = glm::mat4(1);
 	};
 
 	struct ID_component {
@@ -40,29 +40,75 @@ namespace PFF {
 		ID_component(const UUID& uuid)
 			: ID(uuid) {}
 
-		UUID								ID{};
+		UUID										ID{};
 	};
 
-	/* MAYBE
-		// every entity has a unique name
-		struct name_component {
-
-			PFF_DEFAULT_CONSTRUCTORS(name_component);
-			name_component(const std::string& name)
-				: name(name) {}
-
-			std::string							name;
-		};
-	*/
-
 	// Tag component is a small string often used to find entities that have the same tag (eg: teammates, bullets, ...)
-	struct tag_component {
+	struct name_component {
 
-		PFF_DEFAULT_CONSTRUCTORS(tag_component);
-		tag_component(const std::string& tag)
-			: tag(tag) {}
+		PFF_DEFAULT_CONSTRUCTORS(name_component);
+		name_component(const std::string& name)
+			: name(name) {}
 
-		std::string							tag{};
+		std::string									name{};
+	};
+
+	// MAYBE
+	// 	every entity has a unique name
+	// 	struct tag_component {
+
+	// 		PFF_DEFAULT_CONSTRUCTORS(name_component);
+	// 		name_component(const std::string& name)
+	// 			: name(name) {}
+
+	// 		std::string								tags;
+	// 	};
+	
+	struct enum_tag_component {
+
+		PFF_DEFAULT_CONSTRUCTORS(enum_tag_component);
+		enum_tag_component(const u64 value)
+			: value(value) {}
+
+		u64											value = 0;					// cast this to the actual emun you want to use
+	};
+
+	struct flag_tag_component {
+
+		PFF_DEFAULT_CONSTRUCTORS(flag_tag_component);
+		flag_tag_component(const u64 flags)
+			: flags(flags) {}
+
+		u64											flags = 0;					// cast this to the actual emun you want to use
+	};
+
+	// TODO: iterate over all lifetime_comps in world.update()
+	struct simple_lifetime_component {
+
+		PFF_DEFAULT_CONSTRUCTORS(simple_lifetime_component);
+		simple_lifetime_component(f32 total_lifetime, f32 passed_time, bool auto_destroy)
+			: total_lifetime(total_lifetime), passed_time(passed_time), auto_destroy(auto_destroy) {}
+
+		f32											total_lifetime = 0;			// target lifetime
+		f32											passed_time = 0;			// time the component is already alive
+		bool    									auto_destroy = true;		// wheter to automaticly destroy entity when time expires
+	};
+
+	// TODO: iterate over all lifetime_comps in world.update()
+	struct lifetime_component {
+
+		PFF_DEFAULT_CONSTRUCTORS(lifetime_component);
+		lifetime_component(f32 total_lifetime, f32 passed_time, bool auto_destroy, std::function<void()> on_expired, std::function<void(f32)> on_update)
+			: total_lifetime(total_lifetime), passed_time(passed_time), auto_destroy(auto_destroy), on_expired(on_expired), on_update(on_update) {}
+
+		f32 										total_lifetime = 0;			// target lifetime
+		f32 										passed_time = 0;			// time the component is already alive
+		bool 										auto_destroy = true;		// wheter to automaticly destroy entity when time expires
+		bool 										is_paused = false;			// For pausing/resuming lifetime countdown
+
+		// Optional callback functionality		
+		std::function<void()> 						on_expired;
+		std::function<void(f32)> 					on_update; 					// float is progress (0-1)
 	};
 
 	// ------------------------------------------------------------------------------------------------------------------------
@@ -77,11 +123,11 @@ namespace PFF {
 		mesh_component(ref<PFF::geometry::mesh_asset> mesh_asset_ref)
 			: mesh_asset(mesh_asset_ref) {}
 
-		mobility							mobility_data = mobility::locked;
-		bool								shoudl_render = true;
-		std::filesystem::path				asset_path;							// MAYBE: doesnt need to be saved here, only needed for serializaation, maybe export to asset manager or UUID
-		ref<PFF::geometry::mesh_asset>		mesh_asset = nullptr;				// MAYBE: make private
-		material_instance*					material = nullptr;					// TODO: currently uses one material for all surfaces in mesh_asset, change so it can use diffrent materials per furface
+		mobility									mobility_data = mobility::locked;
+		bool										shoudl_render = true;
+		std::filesystem::path						asset_path;							// MAYBE: doesnt need to be saved here, only needed for serializaation, maybe export to asset manager or UUID
+		ref<PFF::geometry::mesh_asset>				mesh_asset = nullptr;				// MAYBE: make private
+		material_instance*							material = nullptr;					// TODO: currently uses one material for all surfaces in mesh_asset, change so it can use diffrent materials per furface
 	};
 
 	//struct static_mesh_component {
@@ -102,8 +148,8 @@ namespace PFF {
 		relationship_component(const UUID parent_ID, const std::vector<UUID> children_ID)
 			: parent_ID(parent_ID), children_ID(children_ID) {}
 
-		UUID								parent_ID;
-		std::vector<UUID>					children_ID;
+		UUID										parent_ID;
+		std::vector<UUID>							children_ID;
 	};
 
 	// ============================================================ IN-DEV ============================================================
@@ -129,9 +175,9 @@ namespace PFF {
 			destroy_script = [](script_component* script_comp) { delete script_comp->instance; script_comp->instance = nullptr; };
 		}
 
-		entity_script*	instance = nullptr;
-		entity_script*	(*create_script)();
-		void			(*destroy_script)(script_component*);
+		entity_script*								instance = nullptr;
+		entity_script*								(*create_script)();
+		void										(*destroy_script)(script_component*);
 
 		friend class map;
 		friend class entity;
@@ -174,7 +220,10 @@ namespace PFF {
 
 	using all_components =
 		component_group<
-			transform_component, ID_component, tag_component, mesh_component, script_component, procedural_mesh_component
+			transform_component, ID_component, name_component,
+			mesh_component, script_component, procedural_mesh_component,
+			enum_tag_component, flag_tag_component,
+			simple_lifetime_component, lifetime_component
 		>;
 
 }

@@ -88,6 +88,7 @@ namespace PFF {
 
 		m_selected_directory = path;
 		m_partial_selected_directory = util::extract_path_from_project_folder(path);
+		logged_warning_for_current_folder = false;
 	}
 
 
@@ -241,8 +242,7 @@ namespace PFF {
 
 				case UI::mouse_interation::left_double_clicked:
 					LOG(Trace, "Set TreeNode to open ID[" << current_ID << "]");
-					m_selected_items.main_item.clear();
-					m_selected_items.item_set.clear();
+					m_selected_items.reset();
 					ImGui::TreeNodeSetOpen(folder_display_window->GetID(current_ID), true);
 					m_block_mouse_input = true;
 					select_new_directory(entry.path());
@@ -304,6 +304,8 @@ namespace PFF {
 			}
 			ImGui::EndDragDropTarget();
 		}
+
+		logged_warning_for_current_folder = true;
 	}
 
 
@@ -311,6 +313,26 @@ namespace PFF {
 
 
 	void content_browser::display_file(const std::filesystem::path file_path, int ID) {
+
+		bool file_currupted = false;
+		enum file_curruption_source {
+			unknown = 0,
+			empty_file,
+			header_incorrect,
+		};
+		file_curruption_source loc_file_curruption_source = file_curruption_source::unknown;
+
+		std::error_code loc_error_code;
+		if (!std::filesystem::file_size(file_path, loc_error_code)) {
+
+			loc_file_curruption_source = file_curruption_source::empty_file;
+			file_currupted = true;
+							
+			std::string faulty_file_name = file_path.filename().generic_string();
+			if (!logged_warning_for_current_folder)
+				LOG(Warn, "file [" << faulty_file_name << "] is an empty file, will be marked as currupted");
+		}
+		
 
 		asset_file_header loc_asset_file_header;
 		if (file_path.extension() == ".pffasset") {
@@ -340,20 +362,30 @@ namespace PFF {
 			ImDrawList* draw_list = ImGui::GetWindowDrawList();
 			draw_list->AddRectFilled(item_pos, item_pos + m_icon_size, background_color, ImGui::GetStyle().FrameRounding);
 
-			switch (loc_asset_file_header.type) {
-				case file_type::mesh:
-					ImGui::Image(m_mesh_asset_icon->get_descriptor_set(), m_icon_size, ImVec2(0, 0), ImVec2(1, 1), color);
-					break;
+			if (file_currupted) {
 
-				case file_type::world:
-					ImGui::Image(m_world_icon->get_descriptor_set(), m_icon_size, ImVec2(0, 0), ImVec2(1, 1), color);
-					break;
+				ImGui::Image(m_warning_icon->get_descriptor_set(), m_icon_size, ImVec2(0, 0), ImVec2(1, 1), (file_path == m_selected_items.main_item) ? ImVec4(.9f, .5f, 0.f, 1.f) : (m_selected_items.item_set.find(file_path) != m_selected_items.item_set.end()) ? ImVec4(.8f, .4f, 0.f, 1.f) : ImVec4(1.f, .6f, 0.f, 1.f));
+				
+			} else {
 
-				default:
-					std::string faulty_file_name = file_path.filename().generic_string();
-					LOG(Warn, "file [" << faulty_file_name << "] cound not be identified detected asset header type [" << (u32)loc_asset_file_header.type << "]");
-					ImGui::Image(m_warning_icon->get_descriptor_set(), m_icon_size, ImVec2(0, 0), ImVec2(1, 1), (file_path == m_selected_items.main_item) ? ImVec4(.9f, .5f, 0.f, 1.f) : (m_selected_items.item_set.find(file_path) != m_selected_items.item_set.end()) ? ImVec4(.8f, .4f, 0.f, 1.f) : ImVec4(1.f, .6f, 0.f, 1.f));
-					break;
+				switch (loc_asset_file_header.type) {
+					case file_type::mesh:
+						ImGui::Image(m_mesh_asset_icon->get_descriptor_set(), m_icon_size, ImVec2(0, 0), ImVec2(1, 1), color);
+						break;
+	
+					case file_type::world:
+						ImGui::Image(m_world_icon->get_descriptor_set(), m_icon_size, ImVec2(0, 0), ImVec2(1, 1), color);
+						break;
+	
+					default:
+						file_currupted = true;
+						loc_file_curruption_source = file_curruption_source::header_incorrect;
+						std::string faulty_file_name = file_path.filename().generic_string();
+						if (!logged_warning_for_current_folder)
+							LOG(Warn, "file [" << faulty_file_name << "] cound not be identified, detected asset header type [" << asset_header_file_type_to_str(loc_asset_file_header.type) << "]");
+						ImGui::Image(m_warning_icon->get_descriptor_set(), m_icon_size, ImVec2(0, 0), ImVec2(1, 1), (file_path == m_selected_items.main_item) ? ImVec4(.9f, .5f, 0.f, 1.f) : (m_selected_items.item_set.find(file_path) != m_selected_items.item_set.end()) ? ImVec4(.8f, .4f, 0.f, 1.f) : ImVec4(1.f, .6f, 0.f, 1.f));
+						break;
+				}
 			}
 
 			const std::string wrapped_text = UI::wrap_text_at_underscore(item_name, m_icon_size.x);
@@ -363,19 +395,6 @@ namespace PFF {
 		ImGui::EndGroup();
 		ImGui::PopID();
 		const auto item_mouse_interation = UI::get_mouse_interation_on_item(m_block_mouse_input);
-
-		// TODO: make it possible to easyly tell the file type
-		const char* playload_name = "PROJECT_CONTENT_FILE";
-		//switch (loc_asset_file_header.type) {
-		//case file_type::mesh:
-		//	playload_name = "PROJECT_CONTENT_FILE_MESH";
-		//	break;
-		//case file_type::world:
-		//	playload_name = "PROJECT_CONTENT_FILE_WORLD";
-		//	break;
-		//default:
-		//	break;
-		//}
 
 		// Handle drag source for files
 		if (ImGui::BeginDragDropSource(ImGuiDragDropFlags_SourceAllowNullID)) {
@@ -393,7 +412,7 @@ namespace PFF {
 					snprintf(shortened_item_name, sizeof(shortened_item_name), "%s", item_name.c_str());
 
 				const std::string path_string = file_path.string();
-				ImGui::SetDragDropPayload(playload_name, path_string.c_str(), path_string.length() + 1);
+				ImGui::SetDragDropPayload("PROJECT_CONTENT_FILE", path_string.c_str(), path_string.length() + 1);
 
 				switch (loc_asset_file_header.type) {
 					case file_type::mesh:		ImGui::Image(m_mesh_asset_icon->get_descriptor_set(), m_icon_size, ImVec2(0, 0), ImVec2(1, 1), color); break;
@@ -415,10 +434,36 @@ namespace PFF {
 			}
 		}
 
-		// Context menu popup
 		std::string popup_name = "item_context_menu_" + item_name;
-		if (ImGui::BeginPopupContextItem(popup_name.c_str())) {
+		
+		ImVec2 popup_pos(0, 0);
+		ImVec2 mouse_pos = ImGui::GetMousePos();
+		ImVec2 expected_size = ImVec2(20, 50);							// TODO: Adjust based on content
 
+		if (file_currupted) 
+			switch (loc_file_curruption_source) {					// sprocimate size bycorruption type
+				default:
+				case file_curruption_source::unknown:				expected_size = ImVec2(280, 250); break;	// should display everything to help user
+				case file_curruption_source::header_incorrect:		expected_size = ImVec2(280, 250); break;	// should display header
+				case file_curruption_source::empty_file:			expected_size = ImVec2(180, 150); break;	// dosnt need to display anything other than size
+			}
+		
+		popup_pos = mouse_pos;
+		ImVec2 window_pos = ImGui::GetWindowPos();
+		ImVec2 window_size = ImGui::GetWindowSize();
+		
+		if ((popup_pos.x + expected_size.x) > (window_pos.x + window_size.x))				// Check if popup would go out of bounds horizontally
+			popup_pos.x = window_pos.x + window_size.x - expected_size.x;
+		
+		if ((popup_pos.y + expected_size.y) > (window_pos.y + window_size.y))				// Check vertical bounds
+			popup_pos.y = window_pos.y + window_size.y - expected_size.y;
+		
+		ImGui::SetNextWindowPos(popup_pos, ImGuiCond_Appearing);
+
+		if (ImGui::BeginPopupContextItem(popup_name.c_str())) {
+			
+			// Set the adjusted position
+			
 			if (ImGui::MenuItem("Rename"))
 				LOG(Info, "NOT IMPLEMENTED YET");
 
@@ -426,6 +471,42 @@ namespace PFF {
 
 				std::error_code error_code{};
 				VALIDATE(std::filesystem::remove(file_path, error_code), return, "deleting file from content folder: [" << file_path << "]", "FAILED to delete file from content folder: [" << file_path << "] error: " << error_code);
+			}
+
+			if (file_currupted) {											// display everything we know about the file to help user find error
+
+				ImGui::SeparatorEx(ImGuiSeparatorFlags_Horizontal);
+				ImGui::Image(m_warning_icon->get_descriptor_set(), ImVec2(15), ImVec2(0, 0), ImVec2(1, 1), ImVec4(.9f, .5f, 0.f, 1.f));
+				ImGui::SameLine();
+				ImGui::Text("Info about corrupted file");
+
+				switch (loc_file_curruption_source) {
+					default:
+					case file_curruption_source::unknown:				ImGui::Text("Unknown reason for detecting corrupted file"); break;
+					case file_curruption_source::header_incorrect:		ImGui::Text("File corrupted because deserialized header type is incorrect"); break;
+					case file_curruption_source::empty_file:			ImGui::Text("File is empty and can't be used by game engine"); break;
+				}
+
+				ImGui::Text("header data");
+
+				UI::begin_table("currupted_file_data_table", false);
+				std::error_code error_code;
+				const f32 file_size = (f32)std::filesystem::file_size(file_path, error_code) / 1024;
+				const std::string_view file_size_in_MB = util::to_string(file_size) + " MB";
+				UI::table_row("file size", file_size_in_MB);
+				ImGui::EndTable();
+
+				if (loc_file_curruption_source != file_curruption_source::empty_file) {
+
+					ImGui::Text("header data");
+					
+					UI::begin_table("currupted_file_data_table", false);
+					UI::table_row("version", loc_asset_file_header.file_version.to_str() );
+					UI::table_row("file type", asset_header_file_type_to_str(loc_asset_file_header.type) );
+					UI::table_row("timestamp", loc_asset_file_header.timestamp.to_str() );
+					ImGui::EndTable();
+				}
+
 			}
 
 			if (item_mouse_interation == UI::mouse_interation::none && !UI::is_holvering_window())
@@ -439,9 +520,10 @@ namespace PFF {
 				LOG(Info, "NOT IMPLEMENTED YET => should opening coresponding editor window");
 				break;
 
-			case UI::mouse_interation::right_clicked:
+			case UI::mouse_interation::right_clicked: {
+
 				ImGui::OpenPopup(popup_name.c_str());
-				break;
+			} break;
 
 			case UI::mouse_interation::left_released:
 
@@ -569,6 +651,7 @@ namespace PFF {
 
 				if (search_query.empty())
 					show_current_folder_content(m_selected_directory);
+
 				else {
 
 					u32 index_buffer = 0;
@@ -581,11 +664,8 @@ namespace PFF {
 
 				}
 
-				if (ImGui::IsWindowHovered() && ImGui::IsMouseClicked(ImGuiMouseButton_Left) && !ImGui::IsAnyItemHovered()) {
-
-					m_selected_items.item_set.clear();
-					m_selected_items.main_item = {};
-				}
+				if (ImGui::IsWindowHovered() && ImGui::IsMouseClicked(ImGuiMouseButton_Left) && !ImGui::IsAnyItemHovered())
+					m_selected_items.reset();
 	
 			});
 

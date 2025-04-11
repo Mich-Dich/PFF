@@ -153,8 +153,8 @@ namespace PFF::script_system {
 			
 				entity loc_entity = PFF::entity(entities[x], GET_MAP.get());
 
-				auto& tag_comp = loc_entity.get_component<tag_component>();
-				entity_section.entry(KEY_VALUE(tag_comp.tag));
+				auto& name_comp = loc_entity.get_component<name_component>();
+				entity_section.entry(KEY_VALUE(name_comp.name));
 
 				auto& ID_comp = loc_entity.get_component<ID_component>();
 				entity_section.entry(KEY_VALUE(ID_comp.ID));
@@ -180,13 +180,13 @@ namespace PFF::script_system {
 
 			serializer.vector("entities", entities, [&](serializer::yaml& entity_section, u64 x) {
 				
-				std::string tag{};
-				entity_section.entry(KEY_VALUE(tag));
+				std::string name{};
+				entity_section.entry(KEY_VALUE(name));
 
 				UUID ID{};
 				entity_section.entry(KEY_VALUE(ID));
 
-				entity loc_entity = GET_MAP->create_entity_with_UUID(ID, tag);
+				entity loc_entity = GET_MAP->create_entity_with_UUID(ID, name);
 
 				entity_section.sub_section("procedural_mesh_component", [&](serializer::yaml& component_section) {
 

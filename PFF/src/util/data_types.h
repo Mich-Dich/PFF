@@ -85,7 +85,12 @@ namespace PFF {
 		u16 major{};
 		u16 minor{};
 		u16 patch{};
+
+		std::string to_str() const { return std::format("{}:{}:{}", major, minor, patch); }
+		operator std::string_view () { return std::format("{}:{}:{}", major, minor, patch); }
 	};
+	
+	inline std::ostream& operator<<(std::ostream& os, const version& v) { return os << v.to_str(); }
 
 	//#pragma pack(1)
 	struct system_time {
@@ -98,6 +103,8 @@ namespace PFF {
 		u8 minute;
 		u8 secund;
 		u16 millisecend;
+
+		std::string to_str() const { return std::format("{}-{}-{} ({}) {}:{}:{}:{}", year, month, day, day_of_week, hour, minute, secund, millisecend); }
 	};
 	//#pragma pack(pop)
 

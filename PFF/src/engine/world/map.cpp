@@ -92,7 +92,7 @@ namespace PFF {
 
 		entity loc_entity = { m_registry.create(), this };
 		loc_entity.add_component<ID_component>(uuid);
-		loc_entity.add_component<tag_component>(name.empty() ? "Entity" : name);
+		loc_entity.add_component<name_component>(name.empty() ? "Entity" : name);
 		loc_entity.add_component<transform_component>();
 
 		m_entity_map[uuid] = loc_entity;
@@ -135,10 +135,10 @@ namespace PFF {
 
 	entity map::find_entity_by_name(std::string_view name) {
 
-		auto view = m_registry.view<tag_component>();
+		auto view = m_registry.view<name_component>();
 		for (auto loc_entity : view) {
-			const tag_component& tc = view.get<tag_component>(loc_entity);
-			if (tc.tag == name)
+			const name_component& name_comp = view.get<name_component>(loc_entity);
+			if (name_comp.name == name)
 				return entity{ loc_entity, this };
 		}
 		return {};
@@ -337,8 +337,8 @@ namespace PFF {
 
 				entity loc_entity = entity(entities[x], this);
 
-				auto& tag_comp = loc_entity.get_component<tag_component>();
-				entity_section.entry(KEY_VALUE(tag_comp.tag));
+				auto& name_comp = loc_entity.get_component<name_component>();
+				entity_section.entry(KEY_VALUE(name_comp.name));
 
 				auto& ID_comp = loc_entity.get_component<ID_component>();
 				entity_section.entry(KEY_VALUE(ID_comp.ID));
@@ -393,14 +393,14 @@ namespace PFF {
 			serializer.vector("entities", entities, [&](serializer::yaml& entity_section, u64 x) {
 				
 
-				std::string tag{};
-				entity_section.entry(KEY_VALUE(tag));
+				std::string name{};
+				entity_section.entry(KEY_VALUE(name));
 
 				UUID ID{};
 				entity_section.entry(KEY_VALUE(ID));
 
 
-				entity loc_entity = create_entity_with_UUID(ID, tag);
+				entity loc_entity = create_entity_with_UUID(ID, name);
 
 				auto& transform_comp = loc_entity.get_component<transform_component>();
 				entity_section.sub_section("transform_component", [&](serializer::yaml& component_section) {

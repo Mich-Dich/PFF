@@ -86,7 +86,7 @@ namespace PFF {
 		bool operator!=(const entity& other)	const { return !(*this == other); }
 
 		UUID get_UUID()							{ return get_component<ID_component>().ID; }
-		const std::string& get_name()			{ return get_component<tag_component>().tag; }
+		const std::string& get_name()			{ return get_component<name_component>().name; }
 
 	private:
 

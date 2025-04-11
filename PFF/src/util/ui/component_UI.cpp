@@ -141,12 +141,12 @@ namespace PFF::UI {
 
 	}
 
-	void display_tag_comp(PFF::entity entity) {
+	void display_name_comp(PFF::entity entity) {
 
-		UI::try_display_component<tag_component>("Tag", entity, [](auto& component) {
+		UI::try_display_component<name_component>("name", entity, [](auto& component) {
 
-			static bool enable_tag_editing = false;
-			UI::table_row("tag", component.tag, enable_tag_editing);
+			static bool enable_name_editing = false;
+			UI::table_row("name", component.name, enable_name_editing);
 		});
 	}
 
