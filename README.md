@@ -13,7 +13,13 @@
 
 ### Here are screenshots that show the current state of PFF.
 
-![first_image](/.github/resources/PFF_editor_fKegSGzSd4.png?raw=true "image of the editor as it is now")
+![first_image](/.github/resources/Screenshot_20250413_191317.png?raw=true "image of the editor as it is now")
+
+|![first_image](/.github/resources/Screenshot_20250413_191704.png?raw=true "image of the editor as it is now")|![first_image](/.github/resources/Screenshot_20250413_145916.png?raw=true "image of the editor as it is now")|
+|-|-|
+|![first_image](/.github/resources/Screenshot_20250413_191412.png?raw=true "image of the editor as it is now")|![first_image](/.github/resources/Screenshot_20250413_180229.png?raw=true "image of the editor as it is now")|
+
+
 
 ## Getting Started
 To get started with PFF, follow these simple steps
