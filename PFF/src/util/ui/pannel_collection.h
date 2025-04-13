@@ -109,6 +109,8 @@ namespace PFF::UI {
 	// @param [show_window] A boolean flag to control the visibility of the window.
 	void next_window_position_selector_popup(window_pos& position, bool& show_window);
 
+	void adjust_popup_to_window_bounds(const ImVec2 expected_popup_size);
+
 	// @brief Draws a vertical separation line.
 	void seperation_vertical();
 

@@ -48,6 +48,8 @@ namespace PFF {
 		PFF_DEFAULT_GETTER(ref<image>,		hide_icon)
 		PFF_DEFAULT_GETTER(world_viewport_window*, world_viewport_window)
 
+		void show_delete_popup();
+
 	private:
 
 		void serialize(serializer::option option);
@@ -66,6 +68,8 @@ namespace PFF {
 		bool m_show_graphics_engine_settings = false;
 		bool m_show_editor_settings = false;
 		bool m_show_general_settings = false;
+
+		bool m_show_delete_popup = false;
 
 #ifdef PFF_DEBUG
 		bool style_editor = false;

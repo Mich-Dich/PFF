@@ -229,6 +229,34 @@ namespace PFF::UI {
 		}
 	}
 
+	
+	void adjust_popup_to_window_bounds(const ImVec2 expected_popup_size) {
+
+		ImVec2 popup_pos = ImGui::GetMousePos();
+		// ImVec2 mouse_pos = ImGui::GetMousePos();
+		// ImVec2 expected_size = ImVec2(20, 50);							// TODO: Adjust based on content
+
+		// if (file_currupted) 
+		// 	switch (loc_file_curruption_source) {					// sprocimate size bycorruption type
+		// 		default:
+		// 		case file_curruption_source::unknown:				expected_size = ImVec2(280, 250); break;	// should display everything to help user
+		// 		case file_curruption_source::header_incorrect:		expected_size = ImVec2(280, 250); break;	// should display header
+		// 		case file_curruption_source::empty_file:			expected_size = ImVec2(180, 150); break;	// dosnt need to display anything other than size
+		// 	}
+		
+		// popup_pos = mouse_pos;
+		ImVec2 window_pos = ImGui::GetWindowPos();
+		ImVec2 window_size = ImGui::GetWindowSize();
+		
+		if ((popup_pos.x + expected_popup_size.x) > (window_pos.x + window_size.x))				// Check if popup would go out of bounds horizontally
+			popup_pos.x = window_pos.x + window_size.x - expected_popup_size.x;
+		
+		if ((popup_pos.y + expected_popup_size.y) > (window_pos.y + window_size.y))				// Check vertical bounds
+			popup_pos.y = window_pos.y + window_size.y - expected_popup_size.y;
+		
+		ImGui::SetNextWindowPos(popup_pos, ImGuiCond_Appearing);
+	}
+
 
 	void seperation_vertical() {
 

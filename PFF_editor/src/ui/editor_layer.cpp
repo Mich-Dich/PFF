@@ -114,6 +114,44 @@ namespace PFF {
 	void editor_layer::on_event(event& event) { }
 
 
+	const char* delete_popup_lable;
+	const char* delete_popup_explanation;
+	std::function<void()> delete_popup_delete_action;
+
+	// void delete_popup() {
+			
+	// 	ImGui::SetNextWindowPos(ImGui::GetMainViewport()->GetCenter(), ImGuiCond_Appearing, ImVec2(0.5f, 0.5f));
+	// 	if (ImGui::BeginPopupModal("Confirm Delete", NULL, ImGuiWindowFlags_AlwaysAutoResize)) {
+
+	// 		ImGui::Text("Are you sure you want to delete this directory?\nThis action cannot be undone.");
+	// 		ImGui::Separator();
+
+	// 		if (ImGui::Button("Yes", ImVec2(120, 0))) {
+
+	// 			delete_popup_delete_action();
+				
+	// 			ImGui::CloseCurrentPopup();
+	// 		}
+	// 		ImGui::SameLine();
+	// 		if (ImGui::Button("No", ImVec2(120, 0))) {
+
+	// 			ImGui::CloseCurrentPopup();
+	// 		}
+
+	// 		ImGui::EndPopup();
+	// 	}
+	// }
+	
+	void editor_layer::show_delete_popup() {
+
+		ImGui::OpenPopup("editor_delete_popup");
+		LOG(Trace, "Opening editor_delete_popup");
+		m_show_delete_popup = true;
+		// delete_popup_lable = lable;
+		// delete_popup_explanation = explanation;
+		// delete_popup_delete_action = delete_action;
+	}
+
 	void editor_layer::on_imgui_render() {
 		
 		ImGui::SetCurrentContext(m_context);
@@ -131,7 +169,7 @@ namespace PFF {
 
 		// First pass to mark items for removal
 		for (const auto& editor_window : m_editor_windows)
-				editor_window->window();
+			editor_window->window();
 
 #ifdef PFF_DEBUG
 		if (style_editor)
@@ -140,7 +178,32 @@ namespace PFF {
 		if (demo_window)
 			ImGui::ShowDemoWindow();
 #endif
+
+		// // Always center this window when appearing
+		// ImVec2 center = ImGui::GetMainViewport()->GetCenter();
+		// ImGui::SetNextWindowPos(center, ImGuiCond_Appearing, ImVec2(0.5f, 0.5f));
+		// if (ImGui::BeginPopupModal("editor_delete_popup", NULL, ImGuiWindowFlags_AlwaysAutoResize)) {
+
+		// 	ImGui::Text("All those beautiful files will be deleted.\nThis operation cannot be undone!");
+		// 	ImGui::Separator();
+
+		// 	//static int unused_i = 0;
+		// 	//ImGui::Combo("Combo", &unused_i, "Delete\0Delete harder\0");
+
+		// 	static bool dont_ask_me_next_time = false;
+		// 	ImGui::PushStyleVar(ImGuiStyleVar_FramePadding, ImVec2(0, 0));
+		// 	ImGui::Checkbox("Don't ask me next time", &dont_ask_me_next_time);
+		// 	ImGui::PopStyleVar();
+
+		// 	if (ImGui::Button("OK", ImVec2(120, 0))) { ImGui::CloseCurrentPopup(); }
+		// 	ImGui::SetItemDefaultFocus();
+		// 	ImGui::SameLine();
+		// 	if (ImGui::Button("Cancel", ImVec2(120, 0))) { ImGui::CloseCurrentPopup(); }
+		// 	ImGui::EndPopup();
+		// }
+
 	}
+
 
 
 	void editor_layer::serialize(serializer::option option) {

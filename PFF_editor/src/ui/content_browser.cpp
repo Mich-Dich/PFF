@@ -207,6 +207,7 @@ namespace PFF {
 			// Begin a new group for each item
 			const int current_ID = hash_path(entry.path());
 			const std::string item_name = entry.path().filename().string();
+			const std::string popup_name = "dir_context_menu_" + item_name;
 			const ImVec4& color = (m_selected_items.item_set.find(entry.path()) != m_selected_items.item_set.end()) ? UI::get_action_color_00_active_ref() : UI::get_action_color_gray_active_ref();
 			ImGui::BeginGroup();
 			{
@@ -219,26 +220,27 @@ namespace PFF {
 			}
 			ImGui::EndGroup();
 
-			switch (UI::get_mouse_interation_on_item(m_block_mouse_input)) {
-				//case UI::mouse_interation::none						: LOG(Trace, "none"); break;
-				//case UI::mouse_interation::hovered					: LOG(Trace, "hovered"); break;
-				case UI::mouse_interation::left_clicked				: LOG(Trace, "left_clicked"); break;
-				//case UI::mouse_interation::left_double_clicked		: LOG(Trace, "left_double_clicked"); break;
+			const auto dir_mouse_interation = UI::get_mouse_interation_on_item(m_block_mouse_input);
+			switch (dir_mouse_interation) {
+				//case UI::mouse_interation::none: 					LOG(Trace, "none"); break;
+				//case UI::mouse_interation::hovered: 				LOG(Trace, "hovered"); break;
+				case UI::mouse_interation::left_clicked: 			LOG(Trace, "left_clicked"); break;
+				//case UI::mouse_interation::left_double_clicked: 	LOG(Trace, "left_double_clicked"); break;
 				case UI::mouse_interation::left_pressed:			break;
-				case UI::mouse_interation::left_released			: LOG(Trace, "left_released"); break;
-				case UI::mouse_interation::right_clicked			: LOG(Trace, "right_clicked"); break;
-				case UI::mouse_interation::right_double_clicked		: LOG(Trace, "right_double_clicked"); break;
-				case UI::mouse_interation::right_pressed			: LOG(Trace, "right_pressed"); break;
-				case UI::mouse_interation::right_released			: LOG(Trace, "right_released"); break;
-				case UI::mouse_interation::middle_clicked			: LOG(Trace, "middle_clicked"); break;
-				case UI::mouse_interation::middle_double_clicked	: LOG(Trace, "middle_double_clicked"); break;
-				case UI::mouse_interation::middle_pressed			: LOG(Trace, "middle_pressed"); break;
-				case UI::mouse_interation::middle_release			: LOG(Trace, "middle_release"); break;
-				case UI::mouse_interation::dragged					: LOG(Trace, "dragged"); break;
-				case UI::mouse_interation::focused					: LOG(Trace, "focused"); break;
-				case UI::mouse_interation::active					: LOG(Trace, "active"); break;
-				case UI::mouse_interation::deactivated				: LOG(Trace, "deactivated"); break;
-				case UI::mouse_interation::deactivated_after_edit	: LOG(Trace, "deactivated_after_edit"); break;
+				case UI::mouse_interation::left_released: 			LOG(Trace, "left_released"); break;
+				case UI::mouse_interation::right_clicked:			ImGui::OpenPopup(popup_name.c_str()); break;
+				case UI::mouse_interation::right_double_clicked: 	LOG(Trace, "right_double_clicked"); break;
+				case UI::mouse_interation::right_pressed: 			LOG(Trace, "right_pressed"); break;
+				case UI::mouse_interation::right_released: 			LOG(Trace, "right_released"); break;
+				case UI::mouse_interation::middle_clicked: 			LOG(Trace, "middle_clicked"); break;
+				case UI::mouse_interation::middle_double_clicked: 	LOG(Trace, "middle_double_clicked"); break;
+				case UI::mouse_interation::middle_pressed: 			LOG(Trace, "middle_pressed"); break;
+				case UI::mouse_interation::middle_release: 			LOG(Trace, "middle_release"); break;
+				case UI::mouse_interation::dragged: 				LOG(Trace, "dragged"); break;
+				case UI::mouse_interation::focused: 				LOG(Trace, "focused"); break;
+				case UI::mouse_interation::active: 					LOG(Trace, "active"); break;
+				case UI::mouse_interation::deactivated: 			LOG(Trace, "deactivated"); break;
+				case UI::mouse_interation::deactivated_after_edit: 	LOG(Trace, "deactivated_after_edit"); break;
 
 				case UI::mouse_interation::left_double_clicked:
 					LOG(Trace, "Set TreeNode to open ID[" << current_ID << "]");
@@ -268,6 +270,104 @@ namespace PFF {
 				ImGui::Text("%s", shortened_item_name);
 				ImGui::EndDragDropSource();
 			}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+		
+			ImVec2 popup_pos(0, 0);
+			ImVec2 mouse_pos = ImGui::GetMousePos();
+			ImVec2 expected_size = ImVec2(20, 50);							// TODO: Adjust based on content
+			
+			popup_pos = mouse_pos;
+			ImVec2 window_pos = ImGui::GetWindowPos();
+			ImVec2 window_size = ImGui::GetWindowSize();
+			
+			if ((popup_pos.x + expected_size.x) > (window_pos.x + window_size.x))				// Check if popup would go out of bounds horizontally
+				popup_pos.x = window_pos.x + window_size.x - expected_size.x;
+			
+			if ((popup_pos.y + expected_size.y) > (window_pos.y + window_size.y))				// Check vertical bounds
+				popup_pos.y = window_pos.y + window_size.y - expected_size.y;
+			
+			ImGui::SetNextWindowPos(popup_pos, ImGuiCond_Appearing);
+	
+			if (ImGui::BeginPopupContextItem(popup_name.c_str())) {
+	
+				if (dir_mouse_interation == UI::mouse_interation::none && !UI::is_holvering_window())
+					ImGui::CloseCurrentPopup();
+				
+				// Set the adjusted position
+				
+				if (ImGui::MenuItem("Rename"))
+					LOG(Info, "NOT IMPLEMENTED YET");
+	
+				if (ImGui::MenuItem("Delete")) {								// open popup to display consequences of deleting file and ask again
+					
+					ImGui::OpenPopup("editor_delete_popup");
+					LOG(Trace, "trying to open the deletion popup");
+					// std::function<void()> delete_callback = []() { LOG(Info, "simple delete function") };
+					PFF_editor::get().get_editor_layer()->show_delete_popup();
+
+					// ImGui::OpenPopup("Confirm Delete");
+					// std::error_code error_code{};
+					// VALIDATE(std::filesystem::remove_all(entry.path(), error_code), return, "deleting file from content folder: [" << entry.path().generic_string() << "]", "FAILED to delete file from content folder: [" << entry.path().generic_string() << "] error: " << error_code);
+				}
+	
+				ImGui::EndPopup();
+			}
+
+			// // Always center this window when appearing
+			// ImVec2 center = ImGui::GetMainViewport()->GetCenter();
+			// ImGui::SetNextWindowPos(center, ImGuiCond_Appearing, ImVec2(0.5f, 0.5f));
+			// if (ImGui::BeginPopupModal("editor_delete_popup", NULL, ImGuiWindowFlags_AlwaysAutoResize)) {
+
+			// 	ImGui::Text("All those beautiful files will be deleted.\nThis operation cannot be undone!");
+			// 	ImGui::Separator();
+
+			// 	//static int unused_i = 0;
+			// 	//ImGui::Combo("Combo", &unused_i, "Delete\0Delete harder\0");
+
+			// 	static bool dont_ask_me_next_time = false;
+			// 	ImGui::PushStyleVar(ImGuiStyleVar_FramePadding, ImVec2(0, 0));
+			// 	ImGui::Checkbox("Don't ask me next time", &dont_ask_me_next_time);
+			// 	ImGui::PopStyleVar();
+
+			// 	if (ImGui::Button("OK", ImVec2(120, 0))) { ImGui::CloseCurrentPopup(); }
+			// 	ImGui::SetItemDefaultFocus();
+			// 	ImGui::SameLine();
+			// 	if (ImGui::Button("Cancel", ImVec2(120, 0))) { ImGui::CloseCurrentPopup(); }
+			// 	ImGui::EndPopup();
+			// }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 			// Handle dropping files into the current directory
 			drop_target_to_move_file(entry.path());
@@ -305,6 +405,31 @@ namespace PFF {
 			ImGui::EndDragDropTarget();
 		}
 
+		
+		// // Always center this window when appearing
+		// ImVec2 center = ImGui::GetMainViewport()->GetCenter();
+		// ImGui::SetNextWindowPos(center, ImGuiCond_Appearing, ImVec2(0.5f, 0.5f));
+		// if (ImGui::BeginPopupModal("editor_delete_popup", NULL, ImGuiWindowFlags_AlwaysAutoResize)) {
+
+		// 	ImGui::Text("All those beautiful files will be deleted.\nThis operation cannot be undone!");
+		// 	ImGui::Separator();
+
+		// 	//static int unused_i = 0;
+		// 	//ImGui::Combo("Combo", &unused_i, "Delete\0Delete harder\0");
+
+		// 	static bool dont_ask_me_next_time = false;
+		// 	ImGui::PushStyleVar(ImGuiStyleVar_FramePadding, ImVec2(0, 0));
+		// 	ImGui::Checkbox("Don't ask me next time", &dont_ask_me_next_time);
+		// 	ImGui::PopStyleVar();
+
+		// 	if (ImGui::Button("OK", ImVec2(120, 0))) { ImGui::CloseCurrentPopup(); }
+		// 	ImGui::SetItemDefaultFocus();
+		// 	ImGui::SameLine();
+		// 	if (ImGui::Button("Cancel", ImVec2(120, 0))) { ImGui::CloseCurrentPopup(); }
+		// 	ImGui::EndPopup();
+		// }
+
+		
 		logged_warning_for_current_folder = true;
 	}
 
@@ -434,32 +559,18 @@ namespace PFF {
 			}
 		}
 
-		std::string popup_name = "item_context_menu_" + item_name;
 		
-		ImVec2 popup_pos(0, 0);
-		ImVec2 mouse_pos = ImGui::GetMousePos();
-		ImVec2 expected_size = ImVec2(20, 50);							// TODO: Adjust based on content
-
+		ImVec2 expected_size = ImVec2(20, 50);						// Adjust based on content
 		if (file_currupted) 
-			switch (loc_file_curruption_source) {					// sprocimate size bycorruption type
+			switch (loc_file_curruption_source) {					// aprocimate size by corruption type
 				default:
 				case file_curruption_source::unknown:				expected_size = ImVec2(280, 250); break;	// should display everything to help user
 				case file_curruption_source::header_incorrect:		expected_size = ImVec2(280, 250); break;	// should display header
 				case file_curruption_source::empty_file:			expected_size = ImVec2(180, 150); break;	// dosnt need to display anything other than size
 			}
+		UI::adjust_popup_to_window_bounds(expected_size);
 		
-		popup_pos = mouse_pos;
-		ImVec2 window_pos = ImGui::GetWindowPos();
-		ImVec2 window_size = ImGui::GetWindowSize();
-		
-		if ((popup_pos.x + expected_size.x) > (window_pos.x + window_size.x))				// Check if popup would go out of bounds horizontally
-			popup_pos.x = window_pos.x + window_size.x - expected_size.x;
-		
-		if ((popup_pos.y + expected_size.y) > (window_pos.y + window_size.y))				// Check vertical bounds
-			popup_pos.y = window_pos.y + window_size.y - expected_size.y;
-		
-		ImGui::SetNextWindowPos(popup_pos, ImGuiCond_Appearing);
-
+		std::string popup_name = "item_context_menu_" + item_name;
 		if (ImGui::BeginPopupContextItem(popup_name.c_str())) {
 			
 			// Set the adjusted position
@@ -478,7 +589,7 @@ namespace PFF {
 				ImGui::SeparatorEx(ImGuiSeparatorFlags_Horizontal);
 				ImGui::Image(m_warning_icon->get_descriptor_set(), ImVec2(15), ImVec2(0, 0), ImVec2(1, 1), ImVec4(.9f, .5f, 0.f, 1.f));
 				ImGui::SameLine();
-				ImGui::Text("Info about corrupted file");
+				ImGui::Text("file is corrupted:");
 
 				switch (loc_file_curruption_source) {
 					default:
@@ -487,12 +598,11 @@ namespace PFF {
 					case file_curruption_source::empty_file:			ImGui::Text("File is empty and can't be used by game engine"); break;
 				}
 
-				ImGui::Text("header data");
+				ImGui::Text("general data");
 
 				UI::begin_table("currupted_file_data_table", false);
 				std::error_code error_code;
-				const f32 file_size = (f32)std::filesystem::file_size(file_path, error_code) / 1024;
-				const std::string_view file_size_in_MB = util::to_string(file_size) + " MB";
+				const std::string_view file_size_in_MB = util::to_string((f32)std::filesystem::file_size(file_path, error_code) / 1024) + " MB";
 				UI::table_row("file size", file_size_in_MB);
 				ImGui::EndTable();
 
@@ -625,21 +735,41 @@ namespace PFF {
 					ImGui::OpenPopup("##content_browser_current_dir_popup");
 				}
 
+				UI::adjust_popup_to_window_bounds(ImVec2(200, 200));
 				if (ImGui::BeginPopup("##content_browser_current_dir_popup")) {
 
+					
+					if (ImGui::Button("create folder")) {
+
+						LOG(Info, "Not implemented yet");
+					}
+
+					ImGui::Separator();
 					ImGui::Text("Create New asset");
 
-					if (ImGui::TreeNode("world")) {
+					if (ImGui::BeginMenu("world")) {
 
-						if (ImGui::TreeNodeEx("Create empty world", ImGuiTreeNodeFlags_Leaf | ImGuiTreeNodeFlags_NoTreePushOnOpen))
+						if (ImGui::Button("Create empty world")) {
+
 							LOG(Info, "Not implemented yet");
+						}
 
-						ImGui::TreePop();
+						ImGui::EndMenu();
+					}
+
+					if (ImGui::Button("Create empty world")) {
+
+						LOG(Info, "Not implemented yet");
+					}
+
+					if (ImGui::Button("Create empty world")) {
+
+						LOG(Info, "Not implemented yet");
 					}
 
 					//if (ImGui::Button("Close"))
 
-					LOG(Trace, "popup mouse interation: " << (u32)UI::get_mouse_interation_on_item());
+					// LOG(Trace, "popup mouse interation: " << (u32)UI::get_mouse_interation_on_item());
 					//if (UI::get_mouse_interation_on_item() == UI::mouse_interation::none) {
 
 					//	LOG(Trace, "CLOSE popup");
@@ -652,6 +782,7 @@ namespace PFF {
 				if (search_query.empty())
 					show_current_folder_content(m_selected_directory);
 
+					
 				else {
 
 					u32 index_buffer = 0;
@@ -667,9 +798,33 @@ namespace PFF {
 				if (ImGui::IsWindowHovered() && ImGui::IsMouseClicked(ImGuiMouseButton_Left) && !ImGui::IsAnyItemHovered())
 					m_selected_items.reset();
 	
-			});
 
+					
 
+				// Always center this window when appearing
+				ImVec2 center = ImGui::GetMainViewport()->GetCenter();
+				ImGui::SetNextWindowPos(center, ImGuiCond_Appearing, ImVec2(0.5f, 0.5f));
+				if (ImGui::BeginPopupModal("editor_delete_popup", NULL, ImGuiWindowFlags_AlwaysAutoResize)) {
+
+					ImGui::Text("All those beautiful files will be deleted.\nThis operation cannot be undone!");
+					ImGui::Separator();
+
+					//static int unused_i = 0;
+					//ImGui::Combo("Combo", &unused_i, "Delete\0Delete harder\0");
+
+					static bool dont_ask_me_next_time = false;
+					ImGui::PushStyleVar(ImGuiStyleVar_FramePadding, ImVec2(0, 0));
+					ImGui::Checkbox("Don't ask me next time", &dont_ask_me_next_time);
+					ImGui::PopStyleVar();
+
+					if (ImGui::Button("OK", ImVec2(120, 0))) { ImGui::CloseCurrentPopup(); }
+					ImGui::SetItemDefaultFocus();
+					ImGui::SameLine();
+					if (ImGui::Button("Cancel", ImVec2(120, 0))) { ImGui::CloseCurrentPopup(); }
+					ImGui::EndPopup();
+				}
+
+		});
 		ImGui::End();
 	}
 
