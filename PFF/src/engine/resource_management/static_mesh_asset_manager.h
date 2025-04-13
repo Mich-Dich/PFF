@@ -12,6 +12,8 @@ namespace PFF {
 		// @breif path needs to be relative to project_dir/content
 		static ref<geometry::mesh_asset> get_from_path(const std::filesystem::path path);
 
+		static bool is_asset_in_active_use(const std::filesystem::path file_path);
+
 	private:
 
 		static_mesh_asset_manager();

@@ -58,9 +58,11 @@ namespace PFF::UI {
         if (!home_file.path().empty()) {
             std::string filename = home_file.path().filename().replace_extension("").string();
             std::replace(filename.begin(), filename.end(), '_', ' ');
-
-            if (UI::gray_button((indent + filename).c_str()))
+            
+            ImGui::TreeNodeEx((indent + filename).c_str(), ImGuiTreeNodeFlags_Leaf);
+            if (ImGui::IsItemClicked())
                 wiki_text = read_file_to_string(home_file.path());
+            ImGui::TreePop();
         }
 
         // Display sorted directories
@@ -76,8 +78,10 @@ namespace PFF::UI {
             std::string filename = file_entry.path().filename().replace_extension("").string();
             std::replace(filename.begin(), filename.end(), '_', ' ');
 
-            if (UI::gray_button((indent + filename).c_str()))
+            ImGui::TreeNodeEx((indent + filename).c_str(), ImGuiTreeNodeFlags_Leaf);
+            if (ImGui::IsItemClicked())
                 wiki_text = read_file_to_string(file_entry.path());
+            ImGui::TreePop();
         }
 	}
 

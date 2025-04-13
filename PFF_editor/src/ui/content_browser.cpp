@@ -14,7 +14,7 @@
 #include "content_browser.h"
 
 
-#define ITEM_DRAD_DRAP_SOURCE_NAME_LENGTH			9	
+#define ITEM_DRAD_DRAP_SOURCE_NAME_LENGTH			9
 
 
 
@@ -26,6 +26,12 @@ namespace PFF {
 	const ImVec2				folder_open_icon_size(18, 14);																		// Calculate the icon size for the tree (make it smaller than regular icons)
 	const ImVec2				folder_closed_icon_size(18, 17);																	// Calculate the icon size for the tree (make it smaller than regular icons)
 	ImGuiWindow*				folder_display_window{};
+
+	enum file_curruption_source {
+		unknown = 0,
+		empty_file,
+		header_incorrect,
+	};
 
 	const std::vector<std::pair<std::string, std::string>> import_files = {
 		{"glTF 2.0 file", "*.gltf;*.glb"},
@@ -75,7 +81,7 @@ namespace PFF {
 
 
 	content_browser::~content_browser() {
-	
+
 		m_folder_icon.reset();
 		m_folder_big_icon.reset();
 		m_folder_open_icon.reset();
@@ -128,7 +134,7 @@ namespace PFF {
 				ImGui::SameLine(0, 2);
 				ImGui::Text("%s", path_string.c_str());												// Draw folder name text
 				ImGui::EndGroup();
-				
+
 				if (ImGui::IsItemClicked())
 					select_new_directory(entry.path());
 
@@ -150,7 +156,7 @@ namespace PFF {
 				ImGui::SameLine(0, 2);
 				ImGui::Text("%s", path_string.c_str());
 				ImGui::EndGroup();
-				
+
 				if (ImGui::IsItemClicked() && !ImGui::IsItemToggledOpen())
 					select_new_directory(entry.path());
 
@@ -254,7 +260,7 @@ namespace PFF {
 			}
 
 			if (ImGui::BeginDragDropSource(ImGuiDragDropFlags_SourceAllowNullID)) {
-				
+
 				char shortened_item_name[ITEM_DRAD_DRAP_SOURCE_NAME_LENGTH + 4];
 				if (item_name.length() -1 > ITEM_DRAD_DRAP_SOURCE_NAME_LENGTH) {
 
@@ -271,103 +277,25 @@ namespace PFF {
 				ImGui::EndDragDropSource();
 			}
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-		
-			ImVec2 popup_pos(0, 0);
-			ImVec2 mouse_pos = ImGui::GetMousePos();
-			ImVec2 expected_size = ImVec2(20, 50);							// TODO: Adjust based on content
-			
-			popup_pos = mouse_pos;
-			ImVec2 window_pos = ImGui::GetWindowPos();
-			ImVec2 window_size = ImGui::GetWindowSize();
-			
-			if ((popup_pos.x + expected_size.x) > (window_pos.x + window_size.x))				// Check if popup would go out of bounds horizontally
-				popup_pos.x = window_pos.x + window_size.x - expected_size.x;
-			
-			if ((popup_pos.y + expected_size.y) > (window_pos.y + window_size.y))				// Check vertical bounds
-				popup_pos.y = window_pos.y + window_size.y - expected_size.y;
-			
-			ImGui::SetNextWindowPos(popup_pos, ImGuiCond_Appearing);
-	
+			UI::adjust_popup_to_window_bounds(ImVec2(20, 50));
 			if (ImGui::BeginPopupContextItem(popup_name.c_str())) {
-	
+
 				if (dir_mouse_interation == UI::mouse_interation::none && !UI::is_holvering_window())
 					ImGui::CloseCurrentPopup();
-				
+
 				// Set the adjusted position
-				
+
 				if (ImGui::MenuItem("Rename"))
 					LOG(Info, "NOT IMPLEMENTED YET");
-	
-				if (ImGui::MenuItem("Delete")) {								// open popup to display consequences of deleting file and ask again
-					
-					ImGui::OpenPopup("editor_delete_popup");
-					LOG(Trace, "trying to open the deletion popup");
-					// std::function<void()> delete_callback = []() { LOG(Info, "simple delete function") };
-					PFF_editor::get().get_editor_layer()->show_delete_popup();
 
-					// ImGui::OpenPopup("Confirm Delete");
-					// std::error_code error_code{};
-					// VALIDATE(std::filesystem::remove_all(entry.path(), error_code), return, "deleting file from content folder: [" << entry.path().generic_string() << "]", "FAILED to delete file from content folder: [" << entry.path().generic_string() << "] error: " << error_code);
+				if (ImGui::MenuItem("Delete")) {								// open popup to display consequences of deleting file and ask again
+
+					m_deletion_popup = true;
+					m_path_to_delete = entry.path();
 				}
-	
+
 				ImGui::EndPopup();
 			}
-
-			// // Always center this window when appearing
-			// ImVec2 center = ImGui::GetMainViewport()->GetCenter();
-			// ImGui::SetNextWindowPos(center, ImGuiCond_Appearing, ImVec2(0.5f, 0.5f));
-			// if (ImGui::BeginPopupModal("editor_delete_popup", NULL, ImGuiWindowFlags_AlwaysAutoResize)) {
-
-			// 	ImGui::Text("All those beautiful files will be deleted.\nThis operation cannot be undone!");
-			// 	ImGui::Separator();
-
-			// 	//static int unused_i = 0;
-			// 	//ImGui::Combo("Combo", &unused_i, "Delete\0Delete harder\0");
-
-			// 	static bool dont_ask_me_next_time = false;
-			// 	ImGui::PushStyleVar(ImGuiStyleVar_FramePadding, ImVec2(0, 0));
-			// 	ImGui::Checkbox("Don't ask me next time", &dont_ask_me_next_time);
-			// 	ImGui::PopStyleVar();
-
-			// 	if (ImGui::Button("OK", ImVec2(120, 0))) { ImGui::CloseCurrentPopup(); }
-			// 	ImGui::SetItemDefaultFocus();
-			// 	ImGui::SameLine();
-			// 	if (ImGui::Button("Cancel", ImVec2(120, 0))) { ImGui::CloseCurrentPopup(); }
-			// 	ImGui::EndPopup();
-			// }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 			// Handle dropping files into the current directory
 			drop_target_to_move_file(entry.path());
@@ -405,61 +333,27 @@ namespace PFF {
 			ImGui::EndDragDropTarget();
 		}
 
-		
-		// // Always center this window when appearing
-		// ImVec2 center = ImGui::GetMainViewport()->GetCenter();
-		// ImGui::SetNextWindowPos(center, ImGuiCond_Appearing, ImVec2(0.5f, 0.5f));
-		// if (ImGui::BeginPopupModal("editor_delete_popup", NULL, ImGuiWindowFlags_AlwaysAutoResize)) {
-
-		// 	ImGui::Text("All those beautiful files will be deleted.\nThis operation cannot be undone!");
-		// 	ImGui::Separator();
-
-		// 	//static int unused_i = 0;
-		// 	//ImGui::Combo("Combo", &unused_i, "Delete\0Delete harder\0");
-
-		// 	static bool dont_ask_me_next_time = false;
-		// 	ImGui::PushStyleVar(ImGuiStyleVar_FramePadding, ImVec2(0, 0));
-		// 	ImGui::Checkbox("Don't ask me next time", &dont_ask_me_next_time);
-		// 	ImGui::PopStyleVar();
-
-		// 	if (ImGui::Button("OK", ImVec2(120, 0))) { ImGui::CloseCurrentPopup(); }
-		// 	ImGui::SetItemDefaultFocus();
-		// 	ImGui::SameLine();
-		// 	if (ImGui::Button("Cancel", ImVec2(120, 0))) { ImGui::CloseCurrentPopup(); }
-		// 	ImGui::EndPopup();
-		// }
-
-		
 		logged_warning_for_current_folder = true;
 	}
 
 
-
-
-
-	void content_browser::display_file(const std::filesystem::path file_path, int ID) {
+	bool try_to_deserialize_file_header(const std::filesystem::path file_path, const bool log_messages, file_curruption_source& file_curruption_source, asset_file_header& loc_asset_file_header) {
 
 		bool file_currupted = false;
-		enum file_curruption_source {
-			unknown = 0,
-			empty_file,
-			header_incorrect,
-		};
-		file_curruption_source loc_file_curruption_source = file_curruption_source::unknown;
+		file_curruption_source = file_curruption_source::unknown;
 
 		std::error_code loc_error_code;
 		if (!std::filesystem::file_size(file_path, loc_error_code)) {
 
-			loc_file_curruption_source = file_curruption_source::empty_file;
+			file_curruption_source = file_curruption_source::empty_file;
 			file_currupted = true;
-							
+
 			std::string faulty_file_name = file_path.filename().generic_string();
-			if (!logged_warning_for_current_folder)
+			if (log_messages)
 				LOG(Warn, "file [" << faulty_file_name << "] is an empty file, will be marked as currupted");
 		}
-		
 
-		asset_file_header loc_asset_file_header;
+
 		if (file_path.extension() == ".pffasset") {
 
 			serializer::binary(file_path, "PFF_asset_file", serializer::option::load_from_file)
@@ -476,6 +370,17 @@ namespace PFF {
 			});
 		}
 
+		return file_currupted;
+	}
+
+
+	void content_browser::display_file(const std::filesystem::path file_path, int ID) {
+
+		bool file_currupted = false;
+		file_curruption_source loc_file_curruption_source = file_curruption_source::unknown;
+		asset_file_header loc_asset_file_header;
+		file_currupted = try_to_deserialize_file_header(file_path, !logged_warning_for_current_folder, loc_file_curruption_source, loc_asset_file_header);
+
 		// Begin a new group for each item
 		const ImVec4& color = (file_path == m_selected_items.main_item) ? UI::get_action_color_00_active_ref() : (m_selected_items.item_set.find(file_path) != m_selected_items.item_set.end()) ? UI::get_action_color_00_faded_ref() : ImVec4(1);
 		const std::string item_name = file_path.filename().replace_extension("").string();
@@ -490,18 +395,18 @@ namespace PFF {
 			if (file_currupted) {
 
 				ImGui::Image(m_warning_icon->get_descriptor_set(), m_icon_size, ImVec2(0, 0), ImVec2(1, 1), (file_path == m_selected_items.main_item) ? ImVec4(.9f, .5f, 0.f, 1.f) : (m_selected_items.item_set.find(file_path) != m_selected_items.item_set.end()) ? ImVec4(.8f, .4f, 0.f, 1.f) : ImVec4(1.f, .6f, 0.f, 1.f));
-				
+
 			} else {
 
 				switch (loc_asset_file_header.type) {
 					case file_type::mesh:
 						ImGui::Image(m_mesh_asset_icon->get_descriptor_set(), m_icon_size, ImVec2(0, 0), ImVec2(1, 1), color);
 						break;
-	
+
 					case file_type::world:
 						ImGui::Image(m_world_icon->get_descriptor_set(), m_icon_size, ImVec2(0, 0), ImVec2(1, 1), color);
 						break;
-	
+
 					default:
 						file_currupted = true;
 						loc_file_curruption_source = file_curruption_source::header_incorrect;
@@ -559,9 +464,9 @@ namespace PFF {
 			}
 		}
 
-		
+
 		ImVec2 expected_size = ImVec2(20, 50);						// Adjust based on content
-		if (file_currupted) 
+		if (file_currupted)
 			switch (loc_file_curruption_source) {					// aprocimate size by corruption type
 				default:
 				case file_curruption_source::unknown:				expected_size = ImVec2(280, 250); break;	// should display everything to help user
@@ -569,19 +474,19 @@ namespace PFF {
 				case file_curruption_source::empty_file:			expected_size = ImVec2(180, 150); break;	// dosnt need to display anything other than size
 			}
 		UI::adjust_popup_to_window_bounds(expected_size);
-		
+
 		std::string popup_name = "item_context_menu_" + item_name;
 		if (ImGui::BeginPopupContextItem(popup_name.c_str())) {
-			
+
 			// Set the adjusted position
-			
+
 			if (ImGui::MenuItem("Rename"))
 				LOG(Info, "NOT IMPLEMENTED YET");
 
 			if (ImGui::MenuItem("Delete")) {								// open popup to display consequences of deleting file and ask again
-
-				std::error_code error_code{};
-				VALIDATE(std::filesystem::remove(file_path, error_code), return, "deleting file from content folder: [" << file_path << "]", "FAILED to delete file from content folder: [" << file_path << "] error: " << error_code);
+	
+				m_deletion_popup = true;
+				m_path_to_delete = file_path;
 			}
 
 			if (file_currupted) {											// display everything we know about the file to help user find error
@@ -609,7 +514,7 @@ namespace PFF {
 				if (loc_file_curruption_source != file_curruption_source::empty_file) {
 
 					ImGui::Text("header data");
-					
+
 					UI::begin_table("currupted_file_data_table", false);
 					UI::table_row("version", loc_asset_file_header.file_version.to_str() );
 					UI::table_row("file type", asset_header_file_type_to_str(loc_asset_file_header.type) );
@@ -624,7 +529,7 @@ namespace PFF {
 
 			ImGui::EndPopup();
 		}
-		
+
 		switch (item_mouse_interation) {
 			case UI::mouse_interation::left_double_clicked:
 				LOG(Info, "NOT IMPLEMENTED YET => should opening coresponding editor window");
@@ -660,6 +565,55 @@ namespace PFF {
 			default: break;
 		}
 
+	}
+
+
+	bool is_file_used(const std::filesystem::path file_path) {
+
+		bool file_currupted = false;
+		file_curruption_source loc_file_curruption_source = file_curruption_source::unknown;
+		asset_file_header loc_asset_file_header;
+		file_currupted = try_to_deserialize_file_header(file_path, false, loc_file_curruption_source, loc_asset_file_header);
+
+		switch (loc_asset_file_header.type) {
+
+			case file_type::world: 				return false;
+			case file_type::map: 				return false;
+			case file_type::audio: 				return false;
+			case file_type::mesh: {
+				
+				// only checks for active use (in current world)	TODO: add a check that scans user code base for definitive anser
+				bool in_use = static_mesh_asset_manager::is_asset_in_active_use(file_path);
+				return in_use;
+			}
+			case file_type::texture: 			return false;
+			case file_type::material: 			return false;
+			case file_type::material_instance: 	return false;
+			default:
+			case file_type::none: 	return false;
+		}
+
+	}
+
+
+	void ref_check_files_and_sub_directory(std::filesystem::path file_path, std::vector<std::string>& still_used_files, u32& file_count, u32& dir_count) {
+
+		if (!std::filesystem::is_directory(file_path))			// catch any missuses
+			return;
+
+		for (const auto path : std::filesystem::directory_iterator(file_path)) {
+
+			if (std::filesystem::is_directory(path)) {
+
+				dir_count++;
+				ref_check_files_and_sub_directory(path.path(), still_used_files, file_count, dir_count);
+			} else {
+
+				file_count++;
+				if (is_file_used(path.path()))
+					still_used_files.push_back(path.path().filename().replace_extension("").string());
+			}
+		}
 	}
 
 
@@ -738,7 +692,7 @@ namespace PFF {
 				UI::adjust_popup_to_window_bounds(ImVec2(200, 200));
 				if (ImGui::BeginPopup("##content_browser_current_dir_popup")) {
 
-					
+
 					if (ImGui::Button("create folder")) {
 
 						LOG(Info, "Not implemented yet");
@@ -767,22 +721,13 @@ namespace PFF {
 						LOG(Info, "Not implemented yet");
 					}
 
-					//if (ImGui::Button("Close"))
-
-					// LOG(Trace, "popup mouse interation: " << (u32)UI::get_mouse_interation_on_item());
-					//if (UI::get_mouse_interation_on_item() == UI::mouse_interation::none) {
-
-					//	LOG(Trace, "CLOSE popup");
-					//	ImGui::CloseCurrentPopup();
-					//}
-
 					ImGui::EndPopup();
 				}
 
 				if (search_query.empty())
 					show_current_folder_content(m_selected_directory);
 
-					
+
 				else {
 
 					u32 index_buffer = 0;
@@ -797,35 +742,83 @@ namespace PFF {
 
 				if (ImGui::IsWindowHovered() && ImGui::IsMouseClicked(ImGuiMouseButton_Left) && !ImGui::IsAnyItemHovered())
 					m_selected_items.reset();
-	
-
-					
-
-				// Always center this window when appearing
-				ImVec2 center = ImGui::GetMainViewport()->GetCenter();
-				ImGui::SetNextWindowPos(center, ImGuiCond_Appearing, ImVec2(0.5f, 0.5f));
-				if (ImGui::BeginPopupModal("editor_delete_popup", NULL, ImGuiWindowFlags_AlwaysAutoResize)) {
-
-					ImGui::Text("All those beautiful files will be deleted.\nThis operation cannot be undone!");
-					ImGui::Separator();
-
-					//static int unused_i = 0;
-					//ImGui::Combo("Combo", &unused_i, "Delete\0Delete harder\0");
-
-					static bool dont_ask_me_next_time = false;
-					ImGui::PushStyleVar(ImGuiStyleVar_FramePadding, ImVec2(0, 0));
-					ImGui::Checkbox("Don't ask me next time", &dont_ask_me_next_time);
-					ImGui::PopStyleVar();
-
-					if (ImGui::Button("OK", ImVec2(120, 0))) { ImGui::CloseCurrentPopup(); }
-					ImGui::SetItemDefaultFocus();
-					ImGui::SameLine();
-					if (ImGui::Button("Cancel", ImVec2(120, 0))) { ImGui::CloseCurrentPopup(); }
-					ImGui::EndPopup();
-				}
 
 		});
 		ImGui::End();
+
+		if (m_deletion_popup) {
+			m_deletion_popup = false;
+			
+			ImGui::OpenPopup("Deletion confirmation");
+			if (std::filesystem::is_directory(m_path_to_delete)) {
+				
+				number_of_files = 0;
+				number_of_directoryies = 1;
+				m_still_used_files.clear();
+				ref_check_files_and_sub_directory(m_path_to_delete, m_still_used_files, number_of_files, number_of_directoryies);
+			} else {
+				number_of_files = (u32)is_file_used(m_path_to_delete);
+			}
+		}
+
+		// Always center this window when appearing
+		ImVec2 center = ImGui::GetMainViewport()->GetCenter();
+		ImGui::SetNextWindowPos(center, ImGuiCond_Appearing, ImVec2(0.5f, 0.5f));
+		ImGui::SetNextWindowSize(ImVec2(300, 300), ImGuiCond_Always);
+		if (ImGui::BeginPopupModal("Deletion confirmation", NULL, 0)) {
+
+			if (std::filesystem::is_directory(m_path_to_delete)) {
+				
+				ImGui::TextWrapped("You are about to delete [%d] directory/s containing [%d] files\nThis operation cannot be undone!", number_of_directoryies, number_of_files);
+				if (!m_still_used_files.empty()) {
+
+					ImGui::Image(m_warning_icon->get_descriptor_set(), ImVec2(15), ImVec2(0), ImVec2(1), ImVec4(.9f, .5f, 0.f, 1.f));
+					ImGui::SameLine();
+					ImGui::TextWrapped("Assets that are still in use but will be deleted:");
+					ImGui::Indent();
+					for (const auto name : m_still_used_files)
+						ImGui::TextWrapped("%s", name.c_str());
+				}
+
+			} else {
+
+				if (number_of_files) {
+					
+					ImGui::Image(m_warning_icon->get_descriptor_set(), ImVec2(15), ImVec2(0), ImVec2(1), ImVec4(.9f, .5f, 0.f, 1.f));
+					ImGui::SameLine();
+					ImGui::TextWrapped("The asset you are trying to delete is still in use\nThis operation cannot be undone!");
+				} else
+					ImGui::TextWrapped("Are you sure you want to delete this asset\nThis operation cannot be undone!");
+
+			}
+
+			UI::shift_cursor_pos(0, 10);
+			ImGui::Separator();
+
+			if (ImGui::Button("OK", ImVec2(120, 0))) { 
+
+				std::error_code error_code{};
+				if (std::filesystem::is_directory(m_path_to_delete)) {
+					
+					VALIDATE(std::filesystem::remove(m_path_to_delete, error_code), return, "deleting file from content folder: [" << m_path_to_delete.generic_string() << "]", "FAILED to delete file from content folder: [" << m_path_to_delete.generic_string() << "] error: " << error_code);
+				} else {
+
+					VALIDATE(std::filesystem::remove_all(m_path_to_delete, error_code), return, "deleting file from content folder: [" << m_path_to_delete.generic_string() << "]", "FAILED to delete file from content folder: [" << m_path_to_delete.generic_string() << "] error: " << error_code);
+				}
+				ImGui::CloseCurrentPopup();
+			}
+			ImGui::SetItemDefaultFocus();
+			ImGui::SameLine();
+			if (ImGui::Button("Cancel", ImVec2(120, 0))) { 
+			
+				m_path_to_delete = std::filesystem::path();
+				number_of_files = 0;
+				number_of_directoryies = 0;
+				ImGui::CloseCurrentPopup(); 
+			}
+			ImGui::EndPopup();
+		}
+
 	}
 
 }

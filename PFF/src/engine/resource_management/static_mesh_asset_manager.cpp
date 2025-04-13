@@ -18,6 +18,14 @@ namespace PFF {
 
 	static_mesh_asset_manager::static_mesh_asset_manager() { }
 
+
+	bool static_mesh_asset_manager::is_asset_in_active_use(const std::filesystem::path file_path) {
+
+		auto it = s_instance.m_uploaded_mesh_assets.find(file_path);
+		return it != s_instance.m_uploaded_mesh_assets.end();
+	}
+
+
 	ref<geometry::mesh_asset> static_mesh_asset_manager::get_from_path(const std::filesystem::path path) {
 
 		VALIDATE(path.extension() == PFF_ASSET_EXTENTION, return nullptr, "", "Provided path is not a PFF-asset");

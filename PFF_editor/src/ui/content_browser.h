@@ -25,8 +25,9 @@ namespace PFF {
 		void window();
 
 		
-		private:
-		
+	private:
+
+		void call_to_delete_file(const std::filesystem::path file_path);
 		void select_new_directory(const std::filesystem::path& path);
 		void show_directory_tree(const std::filesystem::path& path);
 		void show_search_result_for_current_folder(const std::filesystem::path& path, u32& item_index);
@@ -46,6 +47,12 @@ namespace PFF {
 #endif
 		bool   									m_block_mouse_input = false;
 		bool   									logged_warning_for_current_folder = false;
+
+		bool									m_deletion_popup = false;
+		std::filesystem::path					m_path_to_delete{};
+		u32 									number_of_files = 0;
+		u32 									number_of_directoryies = 0;
+		std::vector<std::string>				m_still_used_files{};
 
 		ref<image>								m_folder_icon;
 		ref<image>								m_folder_big_icon;
