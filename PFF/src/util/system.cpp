@@ -75,14 +75,12 @@ namespace PFF::util {
 
 
     //
-    bool run_program(const std::filesystem::path& path_to_exe, const std::string& cmd_args, bool open_console) { return run_program(path_to_exe, cmd_args.c_str(), open_console); }
+    bool run_program(const std::filesystem::path& path_to_exe, const std::string& cmd_args, bool open_console, const bool display_output_on_succees, const bool display_output_on_failure) { return run_program(path_to_exe, cmd_args.c_str(), open_console, display_output_on_succees, display_output_on_failure); }
 
     //
-    bool run_program(const std::filesystem::path& path_to_exe, const char* cmd_args, bool open_console) {
+    bool run_program(const std::filesystem::path& path_to_exe, const char* cmd_args, bool open_console, const bool display_output_on_succees, const bool display_output_on_failure) {
 
         //LOG(Trace, "executing program at [" << path_to_exe.generic_string() << "]");
-
-        bool result = false;
 
 #if defined(PFF_PLATFORM_WINDOWS)
 
@@ -120,51 +118,87 @@ namespace PFF::util {
             LOG(Error, "Unsuccessfully started process: " << path_to_exe.generic_string());
 
 #elif defined(PFF_PLATFORM_LINUX)
-
-    std::string cmdArguments = path_to_exe.generic_string() + " " + cmd_args;                       // Prepare the command line arguments
-    
-    // Split the command line arguments into a vector
-    std::vector<std::string> args;
-    std::istringstream iss(cmdArguments);
-    std::string arg;
-    while (iss >> arg) {
-        args.push_back(arg);
-    }
-
-    // Prepare the argument list for exec
-    std::vector<char*> execArgs;
-    for (auto& a : args) {
-        execArgs.push_back(&a[0]);
-    }
-    execArgs.push_back(nullptr);                                                                    // execv expects a null-terminated array
-
-    pid_t pid = fork();
-    if (pid == -1) {
-        // Fork failed
-        std::cerr << "Failed to fork process." << std::endl;
-        return false;
-    } else if (pid == 0) {
-        // Child process
-        if (open_console) {
-            // If you want to open a new console, you can use a terminal emulator like xterm
-            execlp("xterm", "xterm", "-e", execArgs[0], (char*)nullptr);
-        } else {
-            // Execute the program
-            execv(path_to_exe.c_str(), execArgs.data());
+            
+        // Build the command string and vector of args
+        std::string cmdArguments = path_to_exe.generic_string() + " " + cmd_args;
+        std::istringstream iss(cmdArguments);
+        std::vector<std::string> args;
+        std::string arg;
+        while (iss >> arg) {
+            args.push_back(arg);
         }
-        // If execv fails
-        std::cerr << "Failed to execute program: " << path_to_exe.generic_string() << std::endl;
-        exit(EXIT_FAILURE);
-    } else {
-        // Parent process
-        int status;
-        waitpid(pid, &status, 0); // Wait for the child process to finish
-        result = WIFEXITED(status) && (WEXITSTATUS(status) == 0);
-    }
+        std::vector<char*> execArgs;
+        for (auto& a : args) {
+            execArgs.push_back(&a[0]);  // Note: &a[0] is safe while a exists.
+        }
+        execArgs.push_back(nullptr);
+
+        // Create a pipe to capture stdout and stderr
+        int pipefd[2];
+        if (pipe(pipefd) == -1) {
+            std::cerr << "Failed to create pipe." << std::endl;
+            return false;
+        }
+
+        pid_t pid = fork();
+        if (pid == -1) {
+            std::cerr << "Failed to fork process." << std::endl;
+            return false;
+
+        } else if (pid == 0) {                                                          // Child process
+
+            // Close the read end of the pipe; not needed in the child.
+            close(pipefd[0]);
+
+            // Redirect stdout and stderr to the pipe's write end.
+            dup2(pipefd[1], STDOUT_FILENO);
+            dup2(pipefd[1], STDERR_FILENO);
+            close(pipefd[1]); // Close after duplicating
+
+            if (open_console) {
+                // Example: open xterm if desired (this will run only the exe without any args
+                execlp("xterm", "xterm", "-e", execArgs[0], (char*)nullptr);
+            } else {
+                // Execute the program
+                execv(path_to_exe.c_str(), execArgs.data());
+            }
+
+            // If execv fails, write to stderr then exit.
+            std::cerr << "Failed to execute program: " << path_to_exe.generic_string() << std::endl;
+            exit(EXIT_FAILURE);
+        } else {
+            // Parent process
+            // Close the write end of the pipe.
+            close(pipefd[1]);
+
+            // Read output from the pipe
+            std::string output;
+            constexpr size_t bufferSize = 1024;
+            char buffer[bufferSize];
+            ssize_t count;
+            while ((count = read(pipefd[0], buffer, bufferSize - 1)) > 0) {
+                buffer[count] = '\0';
+                output.append(buffer);
+            }
+            close(pipefd[0]);
+
+            // Wait for the child process to finish
+            int status;
+            waitpid(pid, &status, 0);
+
+            // Log detailed error output if compilation fails.
+            bool result = WIFEXITED(status) && (WEXITSTATUS(status) == 0);
+            if (!result && display_output_on_failure)
+                    std::cerr << "Program execution failed. Detailed output:\n" << output << std::endl;
+
+            if (result && display_output_on_succees)
+                std::cout << "Program output:" << output << std::endl;
+                
+            return result;
+        }
 
 #endif
 
-        return result;
     }
 
 

@@ -144,7 +144,7 @@ namespace PFF::render::vulkan {
 		std::string cmdArgs = "1 1 0 " + (PFF::util::get_executable_path().parent_path() / "PFF/shaders").generic_string() + " 1 ";
 #endif
 
-		ASSERT(PFF::util::run_program(path_to_build_script, cmdArgs), "Successfully compiled shaders", "Failed to compile shaders using PFF_helper");			// make sure PFF_helper is build
+		ASSERT(PFF::util::run_program(path_to_build_script, cmdArgs), "called to compiled shaders for [" << cmdArgs << "]", "Failed to compile shaders using PFF_helper");			// make sure PFF_helper is build
 
 		//make the vulkan instance, with basic debug features
 		vkb::InstanceBuilder builder;
@@ -392,6 +392,7 @@ namespace PFF::render::vulkan {
 
 	void vk_renderer::imgui_create_fonts() { immediate_submit([&](VkCommandBuffer cmd) { ImGui_ImplVulkan_CreateFontsTexture(); }); }
 
+
 	void vk_renderer::imgui_destroy_fonts() { immediate_submit([&](VkCommandBuffer cmd) { ImGui_ImplVulkan_DestroyFontsTexture(); }); }
 
 
@@ -558,6 +559,7 @@ namespace PFF::render::vulkan {
 		m_frame_number++;
 	}
 
+
 	void vk_renderer::refresh(f32 delta_time) {
 	
 		//LOG(Debug, "Refreching renderer");
@@ -565,9 +567,12 @@ namespace PFF::render::vulkan {
 		draw_frame(delta_time);
 	}
 
+
 	void vk_renderer::set_size(u32 width, u32 height) {}
 
+
 	void vk_renderer::wait_idle() { vkDeviceWaitIdle(m_device); }
+
 
 	void vk_renderer::immediate_submit(std::function<void()>&& function) {
 
@@ -590,6 +595,7 @@ namespace PFF::render::vulkan {
 		VK_CHECK_S(vkWaitForFences(m_device, 1, &m_immFence, true, 9999999999));
 	}
 
+
 	void vk_renderer::immediate_submit(std::function<void(VkCommandBuffer cmd)>&& function) {
 
 		VK_CHECK_S(vkResetFences(m_device, 1, &m_immFence));
@@ -610,6 +616,7 @@ namespace PFF::render::vulkan {
 		VK_CHECK_S(vkQueueSubmit2(m_graphics_queue, 1, &submit, m_immFence));
 		VK_CHECK_S(vkWaitForFences(m_device, 1, &m_immFence, true, 9999999999));
 	}
+
 
 	void vk_renderer::submit_resource_free(std::function<void()>&& func) {
 
@@ -708,6 +715,7 @@ namespace PFF::render::vulkan {
 	 
 	}
 
+
 	void vk_renderer::serialize(const PFF::serializer::option option) {
 
 		PFF::serializer::yaml(config::get_filepath_from_configtype(application::get().get_project_path(), config::file::engine), "renderer_background_effect", option)
@@ -720,6 +728,7 @@ namespace PFF::render::vulkan {
 				.entry("data_3", m_background_effects[x].data.data4);
 			});
 	}
+
 
 	void vk_renderer::init_swapchain() {
 
@@ -898,6 +907,7 @@ namespace PFF::render::vulkan {
 #endif // PFF_RENDERER_DEBUG_CAPABILITY
 	}
 
+
 	void vk_renderer::init_pipelines_background() {
 
 		VkPushConstantRange pushConstant{};
@@ -1067,6 +1077,7 @@ namespace PFF::render::vulkan {
 
 	}
 
+	
 	void vk_renderer::resize_swapchain() {
 
 		vkDeviceWaitIdle(m_device);
@@ -1093,6 +1104,7 @@ namespace PFF::render::vulkan {
 		vkCmdDispatch(cmd, static_cast<u32>(std::ceil(m_draw_extent.width / 16.0)), static_cast<u32>(std::ceil(m_draw_extent.height / 16.0)), 1);
 	}
 
+	
 	void vk_renderer::draw_geometry(VkCommandBuffer cmd) {
 
 		COLLECTING_PERFORMANCE_DATA(PFF::stopwatch loc_stopwatch(&m_renderer_metrik.draw_geometry_time[m_renderer_metrik.current_index]));
@@ -1365,6 +1377,7 @@ namespace PFF::render::vulkan {
 		return true;
 	}
 
+
 	void vk_renderer::draw_imgui(VkCommandBuffer cmd, VkImageView targetImageView) {
 
 		VkRenderingAttachmentInfo colorAttachment = init::attachment_info(targetImageView, nullptr, VK_IMAGE_LAYOUT_GENERAL);
@@ -1374,6 +1387,7 @@ namespace PFF::render::vulkan {
 		ImGui_ImplVulkan_RenderDrawData(ImGui::GetDrawData(), cmd);
 		vkCmdEndRendering(cmd);
 	}
+
 
 	void vk_renderer::create_swapchain(u32 width, u32 height) {
 				
@@ -1465,6 +1479,7 @@ namespace PFF::render::vulkan {
 		return new_mesh;
 	}
 
+
 	void vk_renderer::update_mesh(render::GPU_mesh_buffers& mesh, const std::vector<u32>& indices, const std::vector<PFF::geometry::vertex>& vertices) {
 		
 		const size_t vertexBufferSize = vertices.size() * sizeof(PFF::geometry::vertex);
@@ -1501,6 +1516,7 @@ namespace PFF::render::vulkan {
 		destroy_buffer(staging);
 	}
 	
+
 	void vk_renderer::update_mesh(PFF::geometry::procedural_mesh_asset& mesh, const std::vector<u32>& indices, const std::vector<PFF::geometry::vertex>& vertices) {
 
 		const size_t vertexBufferSize = vertices.size() * sizeof(PFF::geometry::vertex);
@@ -1581,6 +1597,7 @@ namespace PFF::render::vulkan {
 		//mesh.calc_bounds();
 	}
 
+
 	void vk_renderer::cleanup_procedural_mesh(PFF::geometry::procedural_mesh_asset& mesh) {
 
 		if (!mesh.staging_buffer.buffer || mesh.staging_buffer_size == 0 || !mesh.staging_data)
@@ -1591,6 +1608,7 @@ namespace PFF::render::vulkan {
 		mesh.staging_data = nullptr;
 		mesh.staging_buffer_size = 0;
 	}
+
 
 	void vk_renderer::release_mesh(render::GPU_mesh_buffers& mesh) {
 

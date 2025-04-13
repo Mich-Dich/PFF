@@ -14,7 +14,7 @@ namespace PFF::util {
     // @param [open_console] If true, opens a new console window for the program (Windows) or
     //          uses a terminal emulator like `xterm` (Linux).
     // @return Returns true if the program was successfully executed, false otherwise.
-    bool run_program(const std::filesystem::path& path_to_exe, const std::string& cmd_args = "", bool open_console = false);
+    bool run_program(const std::filesystem::path& path_to_exe, const std::string& cmd_args = "", bool open_console = false, const bool display_output_on_succees = false, const bool display_output_on_failure = true);
 
     // @brief Overload of `run_program` that accepts a C-style string for command-line arguments.
     // @param [path_to_exe] The path to the executable file to be run.
@@ -22,7 +22,7 @@ namespace PFF::util {
     // @param [open_console] If true, opens a new console window for the program (Windows) or
     //          uses a terminal emulator like `xterm` (Linux).
     // @return Returns true if the program was successfully executed, false otherwise.
-    bool run_program(const std::filesystem::path& path_to_exe, const char* cmd_args = "", bool open_console = false);
+    bool run_program(const std::filesystem::path& path_to_exe, const char* cmd_args = "", bool open_console = false, const bool display_output_on_succees = false, const bool display_output_on_failure = true);
 
     // @brief Pauses the execution of the current thread for a specified duration with high precision.
     //          This function first uses `std::this_thread::sleep_for` to sleep for nearly the entire duration,
