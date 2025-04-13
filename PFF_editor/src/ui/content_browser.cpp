@@ -424,7 +424,7 @@ namespace PFF {
 		}
 		ImGui::EndGroup();
 		ImGui::PopID();
-		const auto item_mouse_interation = UI::get_mouse_interation_on_item(m_block_mouse_input);
+		auto item_mouse_interation = UI::get_mouse_interation_on_item(m_block_mouse_input);
 
 		// Handle drag source for files
 		if (ImGui::BeginDragDropSource(ImGuiDragDropFlags_SourceAllowNullID)) {
@@ -486,7 +486,10 @@ namespace PFF {
 			if (ImGui::MenuItem("Delete")) {								// open popup to display consequences of deleting file and ask again
 	
 				m_deletion_popup = true;
-				m_path_to_delete = file_path;
+				m_block_mouse_input = true;
+				item_mouse_interation = UI::mouse_interation::none;
+				if (m_selected_items.main_item.empty() && m_selected_items.item_set.empty())
+					m_path_to_delete = file_path;
 			}
 
 			if (file_currupted) {											// display everything we know about the file to help user find error
@@ -596,7 +599,7 @@ namespace PFF {
 	}
 
 
-	void ref_check_files_and_sub_directory(std::filesystem::path file_path, std::vector<std::string>& still_used_files, u32& file_count, u32& dir_count) {
+	void ref_check_files_and_sub_directory(std::filesystem::path file_path, deletion_consequenses& deletion_consequenses) {
 
 		if (!std::filesystem::is_directory(file_path))			// catch any missuses
 			return;
@@ -605,14 +608,49 @@ namespace PFF {
 
 			if (std::filesystem::is_directory(path)) {
 
-				dir_count++;
-				ref_check_files_and_sub_directory(path.path(), still_used_files, file_count, dir_count);
+				deletion_consequenses.number_of_directoryies++;
+				ref_check_files_and_sub_directory(path.path(), deletion_consequenses);
 			} else {
 
-				file_count++;
+				deletion_consequenses.number_of_files++;
 				if (is_file_used(path.path()))
-					still_used_files.push_back(path.path().filename().replace_extension("").string());
+					deletion_consequenses.effected_assets.insert(path.path().filename().replace_extension("").string());
 			}
+		}
+	}
+
+
+	void get_deletion_consequenses(const std::filesystem::path file_path, deletion_consequenses& deletion_consequenses) {
+		
+		if (std::filesystem::is_directory(file_path)) {
+
+			deletion_consequenses.number_of_directoryies++;
+			ref_check_files_and_sub_directory(file_path, deletion_consequenses);
+		
+		} else {
+
+			deletion_consequenses.number_of_files++;
+			if (is_file_used(file_path))
+				deletion_consequenses.effected_assets.insert(file_path.filename().replace_extension("").string());
+		}
+	}
+
+
+	void content_browser::handel_deletion_action(const std::filesystem::path file_path) {
+
+		VALIDATE(std::filesystem::exists(file_path), return, "deleting file [" << file_path << "]", "provided file path does not exist [" << file_path << "]");
+
+		// TODO: remove the file from any asset managers (e.g. static_mesh_asset_manager)
+		LOG(Warn, "Not completely implemented yet, TODO: remove the file from any asset managers (e.g. static_mesh_asset_manager)");
+
+
+		std::error_code error_code{};
+		if (std::filesystem::is_directory(file_path)) {
+			
+			VALIDATE(std::filesystem::remove(file_path, error_code), return, "deleting directory [" << file_path.filename().string() << "]", "FAILED to delete file from content folder: [" << file_path.generic_string() << "] error: " << error_code);
+		} else {
+
+			VALIDATE(std::filesystem::remove_all(file_path, error_code), return, "deleting asset [" << file_path.filename().string() << "]", "FAILED to delete file from content folder: [" << file_path.generic_string() << "] error: " << error_code);
 		}
 	}
 
@@ -748,17 +786,20 @@ namespace PFF {
 
 		if (m_deletion_popup) {
 			m_deletion_popup = false;
+			m_deletion_consequenses.reset();
+			m_block_mouse_input = false;
+
+			if (!m_selected_items.empty()){
+				
+				get_deletion_consequenses(m_selected_items.main_item, m_deletion_consequenses);
+				for (const auto x : m_selected_items.item_set)
+					get_deletion_consequenses(x, m_deletion_consequenses);
+					
+			} else 
+				get_deletion_consequenses(m_path_to_delete, m_deletion_consequenses);
+
 			
 			ImGui::OpenPopup("Deletion confirmation");
-			if (std::filesystem::is_directory(m_path_to_delete)) {
-				
-				number_of_files = 0;
-				number_of_directoryies = 1;
-				m_still_used_files.clear();
-				ref_check_files_and_sub_directory(m_path_to_delete, m_still_used_files, number_of_files, number_of_directoryies);
-			} else {
-				number_of_files = (u32)is_file_used(m_path_to_delete);
-			}
 		}
 
 		// Always center this window when appearing
@@ -767,22 +808,24 @@ namespace PFF {
 		ImGui::SetNextWindowSize(ImVec2(300, 300), ImGuiCond_Always);
 		if (ImGui::BeginPopupModal("Deletion confirmation", NULL, 0)) {
 
-			if (std::filesystem::is_directory(m_path_to_delete)) {
+			if (m_deletion_consequenses.number_of_directoryies) {
 				
-				ImGui::TextWrapped("You are about to delete [%d] directory/s containing [%d] files\nThis operation cannot be undone!", number_of_directoryies, number_of_files);
-				if (!m_still_used_files.empty()) {
+				ImGui::TextWrapped("You are about to delete [%d] directory/s containing [%d] assets\nThis operation cannot be undone!", m_deletion_consequenses.number_of_directoryies, m_deletion_consequenses.number_of_files);
+				if (m_deletion_consequenses.effected_assets.empty()) {
 
 					ImGui::Image(m_warning_icon->get_descriptor_set(), ImVec2(15), ImVec2(0), ImVec2(1), ImVec4(.9f, .5f, 0.f, 1.f));
 					ImGui::SameLine();
 					ImGui::TextWrapped("Assets that are still in use but will be deleted:");
 					ImGui::Indent();
-					for (const auto name : m_still_used_files)
+					for (const auto name : m_deletion_consequenses.effected_assets)
 						ImGui::TextWrapped("%s", name.c_str());
 				}
 
 			} else {
 
-				if (number_of_files) {
+				ImGui::TextWrapped("You are about to delete [%d] assets\nThis operation cannot be undone!", m_deletion_consequenses.number_of_files);
+
+				if (!m_deletion_consequenses.effected_assets.empty()) {
 					
 					ImGui::Image(m_warning_icon->get_descriptor_set(), ImVec2(15), ImVec2(0), ImVec2(1), ImVec4(.9f, .5f, 0.f, 1.f));
 					ImGui::SameLine();
@@ -797,14 +840,16 @@ namespace PFF {
 
 			if (ImGui::Button("OK", ImVec2(120, 0))) { 
 
-				std::error_code error_code{};
-				if (std::filesystem::is_directory(m_path_to_delete)) {
+				handel_deletion_action(m_path_to_delete);
+				if (!m_selected_items.empty()){
 					
-					VALIDATE(std::filesystem::remove(m_path_to_delete, error_code), return, "deleting file from content folder: [" << m_path_to_delete.generic_string() << "]", "FAILED to delete file from content folder: [" << m_path_to_delete.generic_string() << "] error: " << error_code);
-				} else {
-
-					VALIDATE(std::filesystem::remove_all(m_path_to_delete, error_code), return, "deleting file from content folder: [" << m_path_to_delete.generic_string() << "]", "FAILED to delete file from content folder: [" << m_path_to_delete.generic_string() << "] error: " << error_code);
+					handel_deletion_action(m_selected_items.main_item);
+					for (const auto x : m_selected_items.item_set)
+						handel_deletion_action(x);
 				}
+				m_path_to_delete = std::filesystem::path();
+				m_deletion_consequenses.reset();
+				m_selected_items.reset();
 				ImGui::CloseCurrentPopup();
 			}
 			ImGui::SetItemDefaultFocus();
@@ -812,8 +857,7 @@ namespace PFF {
 			if (ImGui::Button("Cancel", ImVec2(120, 0))) { 
 			
 				m_path_to_delete = std::filesystem::path();
-				number_of_files = 0;
-				number_of_directoryies = 0;
+				m_deletion_consequenses.reset();
 				ImGui::CloseCurrentPopup(); 
 			}
 			ImGui::EndPopup();

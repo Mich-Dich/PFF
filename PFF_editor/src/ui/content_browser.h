@@ -14,6 +14,20 @@ namespace PFF {
 			item_set.clear();
 			main_item = std::filesystem::path();
 		}
+
+		inline bool empty() { return main_item.empty() && item_set.empty(); }
+	};
+
+	struct deletion_consequenses {
+		std::set<std::string>				effected_assets{};
+		u32 								number_of_files = 0;
+		u32 								number_of_directoryies = 0;
+
+		void reset() {
+			effected_assets.clear();
+			number_of_files = 0;
+			number_of_directoryies = 0;
+		}
 	};
 
 	class content_browser{
@@ -34,6 +48,7 @@ namespace PFF {
 		void show_current_folder_content(const std::filesystem::path& path);
 		
 		void display_file(const std::filesystem::path file_path, int ID);
+		void handel_deletion_action(const std::filesystem::path file_path);
 		
 		std::filesystem::path					m_project_directory;
 		std::filesystem::path					m_selected_directory;
@@ -48,11 +63,11 @@ namespace PFF {
 		bool   									m_block_mouse_input = false;
 		bool   									logged_warning_for_current_folder = false;
 
+
+		deletion_consequenses					m_deletion_consequenses{};
 		bool									m_deletion_popup = false;
 		std::filesystem::path					m_path_to_delete{};
-		u32 									number_of_files = 0;
-		u32 									number_of_directoryies = 0;
-		std::vector<std::string>				m_still_used_files{};
+		// std::vector<std::string>				m_still_used_files{};
 
 		ref<image>								m_folder_icon;
 		ref<image>								m_folder_big_icon;
