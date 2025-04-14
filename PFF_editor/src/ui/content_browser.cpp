@@ -213,15 +213,16 @@ namespace PFF {
 			// Begin a new group for each item
 			const int current_ID = hash_path(entry.path());
 			const std::string item_name = entry.path().filename().string();
+			const std::string wrapped_text = UI::wrap_text_at_underscore(item_name, m_icon_size.x);
 			const std::string popup_name = "dir_context_menu_" + item_name;
 			const ImVec4& color = (m_selected_items.item_set.find(entry.path()) != m_selected_items.item_set.end()) ? UI::get_action_color_00_active_ref() : UI::get_action_color_gray_active_ref();
 			ImGui::BeginGroup();
 			{
 				ImGui::PushID(current_ID);
 				ImGui::Image(m_folder_big_icon->get_descriptor_set(), m_icon_size, ImVec2(0, 0), ImVec2(1, 1), color);
-				ImVec2 text_size = ImGui::CalcTextSize(item_name.c_str());
+				ImVec2 text_size = ImGui::CalcTextSize(wrapped_text.c_str());
 				ImGui::SetCursorPos(ImGui::GetCursorPos() + ImVec2((m_icon_size.x - text_size.x) * 0.5f, 0));
-				ImGui::TextWrapped("%s", item_name.c_str());
+				ImGui::TextWrapped("%s", wrapped_text.c_str());
 				ImGui::PopID();
 			}
 			ImGui::EndGroup();
@@ -546,17 +547,38 @@ namespace PFF {
 			case UI::mouse_interation::left_released:
 
 				if (ImGui::GetIO().KeyShift) {
+					
+					if (!m_selected_items.main_item.empty()) {										// If main item selected -> perform range selection.
 
+						std::vector<std::filesystem::path> files_in_dir;
+						for (const auto& entry : std::filesystem::directory_iterator(m_selected_directory))
+							files_in_dir.push_back(entry.path());
+
+							auto it_main = std::find(files_in_dir.begin(), files_in_dir.end(), m_selected_items.main_item);
+						auto it_clicked = std::find(files_in_dir.begin(), files_in_dir.end(), file_path);
+						if (it_main != files_in_dir.end() && it_clicked != files_in_dir.end()) {
+
+							auto start = std::min(it_main, it_clicked);
+							auto end = std::max(it_main, it_clicked);
+							m_selected_items.item_set.clear();
+							for (auto it = start; it != std::next(end); ++it)
+								m_selected_items.item_set.insert(*it);
+						}
+
+					} else
+						m_selected_items.main_item = file_path;										// If main item not selected -> simply mark clicked item as main selection.
+						
+				} else if (ImGui::GetIO().KeyCtrl) {
+
+					
 					if (!m_selected_items.main_item.empty())
 						m_selected_items.item_set.insert(m_selected_items.main_item);
 					m_selected_items.main_item = file_path;
 
-				} else if (ImGui::GetIO().KeyCtrl) {
-
-					if (m_selected_items.item_set.find(file_path) == m_selected_items.item_set.end())				// If Shift is held, select the item
-						m_selected_items.item_set.insert(file_path);
-					else
-						m_selected_items.item_set.erase(file_path);
+					// if (m_selected_items.item_set.find(file_path) == m_selected_items.item_set.end())				// If Shift is held, select the item
+					// 	m_selected_items.item_set.insert(file_path);
+					// else
+					// 	m_selected_items.item_set.erase(file_path);
 
 				} else {
 

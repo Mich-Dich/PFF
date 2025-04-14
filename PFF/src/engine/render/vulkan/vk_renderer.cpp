@@ -429,6 +429,16 @@ namespace PFF::render::vulkan {
 		VK_CHECK_S(vkResetFences(m_device, 1, &get_current_frame().render_fence));
 
 
+		// ============================================================ DEV-ONLY ============================================================
+		f32 rotation_speed = glm::radians(10.0f); // 10 degrees per second
+		f32 angle = rotation_speed * delta_time;
+		glm::mat4 rotation = glm::rotate(glm::mat4(1.0f), angle, glm::vec3(0.0f, 1.0f, 0.0f));				// rotation matrix around the Z-axis
+		glm::vec4 rotated_dir = rotation * m_scene_data.sunlight_direction;
+		m_scene_data.sunlight_direction = glm::vec4(rotated_dir.x, rotated_dir.y, rotated_dir.z, m_scene_data.sunlight_direction.w);
+		// ============================================================ DEV-ONLY ============================================================
+
+
+
 		// Free resources 
 		{
 			for (auto& func : s_resource_free_queue[(m_frame_number) % FRAME_COUNT]) {
