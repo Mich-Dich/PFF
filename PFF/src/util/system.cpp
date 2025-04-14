@@ -73,6 +73,30 @@ namespace PFF::util {
 #endif
     }
 
+         
+    std::vector<std::string> parse_arguments(const std::string& cmd) {
+
+        std::vector<std::string> args;
+        std::string arg;
+        bool in_quotes = false;
+        for (char c : cmd) {
+            if (c == '"') {
+                in_quotes = !in_quotes;
+            } else if (std::isspace(c) && !in_quotes) {
+                if (!arg.empty()) {
+                    args.push_back(arg);
+                    arg.clear();
+                }
+            } else {
+                arg += c;
+            }
+        }
+        if (!arg.empty()) {
+            args.push_back(arg);
+        }
+        return args;
+    }
+
 
     //
     bool run_program(const std::filesystem::path& path_to_exe, const std::string& cmd_args, bool open_console, const bool display_output_on_succees, const bool display_output_on_failure) { return run_program(path_to_exe, cmd_args.c_str(), open_console, display_output_on_succees, display_output_on_failure); }
@@ -118,15 +142,17 @@ namespace PFF::util {
             LOG(Error, "Unsuccessfully started process: " << path_to_exe.generic_string());
 
 #elif defined(PFF_PLATFORM_LINUX)
-            
+           
         // Build the command string and vector of args
         std::string cmdArguments = path_to_exe.generic_string() + " " + cmd_args;
-        std::istringstream iss(cmdArguments);
-        std::vector<std::string> args;
-        std::string arg;
-        while (iss >> arg) {
-            args.push_back(arg);
-        }
+        std::vector<std::string> args = parse_arguments(cmdArguments);
+        // std::istringstream iss(cmdArguments);
+        // std::vector<std::string> args;
+        // std::string arg;
+        // while (iss >> arg) {
+        //     args.push_back(arg);
+        // }
+
         std::vector<char*> execArgs;
         for (auto& a : args) {
             execArgs.push_back(&a[0]);  // Note: &a[0] is safe while a exists.
@@ -147,29 +173,22 @@ namespace PFF::util {
 
         } else if (pid == 0) {                                                          // Child process
 
-            // Close the read end of the pipe; not needed in the child.
-            close(pipefd[0]);
-
-            // Redirect stdout and stderr to the pipe's write end.
-            dup2(pipefd[1], STDOUT_FILENO);
+            close(pipefd[0]);                                                           // Close the read end of the pipe; not needed in the child.
+            dup2(pipefd[1], STDOUT_FILENO);                                             // Redirect stdout and stderr to the pipe's write end.
             dup2(pipefd[1], STDERR_FILENO);
-            close(pipefd[1]); // Close after duplicating
+            close(pipefd[1]);                                                           // Close after duplicating
 
-            if (open_console) {
-                // Example: open xterm if desired (this will run only the exe without any args
+            if (open_console)
                 execlp("xterm", "xterm", "-e", execArgs[0], (char*)nullptr);
-            } else {
-                // Execute the program
+            else
                 execv(path_to_exe.c_str(), execArgs.data());
-            }
 
-            // If execv fails, write to stderr then exit.
             std::cerr << "Failed to execute program: " << path_to_exe.generic_string() << std::endl;
             exit(EXIT_FAILURE);
-        } else {
-            // Parent process
-            // Close the write end of the pipe.
-            close(pipefd[1]);
+
+        } else {                                                                        // Parent process
+
+            close(pipefd[1]);                                                           // Close the write end of the pipe.
 
             // Read output from the pipe
             std::string output;
@@ -182,17 +201,25 @@ namespace PFF::util {
             }
             close(pipefd[0]);
 
-            // Wait for the child process to finish
             int status;
             waitpid(pid, &status, 0);
 
-            // Log detailed error output if compilation fails.
             bool result = WIFEXITED(status) && (WEXITSTATUS(status) == 0);
-            if (!result && display_output_on_failure)
-                    std::cerr << "Program execution failed. Detailed output:\n" << output << std::endl;
+            // std::cout << "display_output_on_succees:" << display_output_on_succees << " display_output_on_failure:" << display_output_on_failure << std::endl;
+            std::cout << "Progrom output[" << output << "]" << std::endl;
 
-            if (result && display_output_on_succees)
-                std::cout << "Program output:" << output << std::endl;
+            // if (!result && display_output_on_failure) {
+
+            //     // LOG(Trace, "Program execution failed. Detailed output:\n" << output);
+            //     std::cerr << "Program execution failed. Detailed output:\n" << output << std::endl;
+            //     return false;
+            // }
+
+            // if (result && display_output_on_succees) {
+                
+            //     std::cout << "Program output:" << output << std::endl;
+            //     std::cout.flush();
+            // }
                 
             return result;
         }

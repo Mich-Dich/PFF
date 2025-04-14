@@ -11,7 +11,7 @@ namespace PFF::code_generator {
 
 	void generate_premake_file(const std::filesystem::path& filepath, const std::string_view project_name) {
 
-		LOG(Fatal, "generate_premake_file(filepath = " << filepath << ", project_name = " << project_name << ")")
+		LOG(Trace, "generate_premake_file(filepath = " << filepath << ", project_name = " << project_name << ")")
 
 		const std::filesystem::path engine_install_dir = std::filesystem::path(ENGINE_INSTALL_DIR).make_preferred();
 

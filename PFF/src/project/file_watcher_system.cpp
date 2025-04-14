@@ -37,7 +37,7 @@ namespace PFF {
 
 	void file_watcher_system::start() { 
 	
-		LOG(Fatal, "starting file watcher system");
+		LOG(Trace, "starting file watcher system");
 		m_thread = std::thread(&file_watcher_system::start_thread, this);
 	}
 

@@ -63,6 +63,9 @@ namespace PFF::render::vulkan {
 #endif // COLLECT_PERFORMANCE_DATA
 
 
+// #define TRY_TO_PROVIDE_SCNENE_DATA_TO_COMP
+
+
 	vk_renderer vk_renderer::s_instance = vk_renderer{};
 	static std::vector<std::vector<std::function<void()>>> s_resource_free_queue;
 	// static std::vector<std::unordered_map<std::function<void()>, u16>> s_resource_free_queue_TEST;		// use u16 as a counter to free resources after all command buffers are free
@@ -217,9 +220,11 @@ namespace PFF::render::vulkan {
 		init_descriptors();
 		init_pipelines();
 		init_default_data();
+		init_grid_pipeline();
 
 		m_is_initialized = true;
 	}
+
 
 	void vk_renderer::shutdown() {
 		
@@ -244,6 +249,9 @@ namespace PFF::render::vulkan {
 
 		m_deletion_queue.flush();
 		m_deletion_queue.cleanup();
+
+		vkDestroyPipelineLayout(m_device, m_grid_pipeline_layout, nullptr);
+		vkDestroyPipeline(m_device, m_grid_pipeline, nullptr);
 		
 		destroy_swapchain();
 		vkDestroySurfaceKHR(m_instance, m_surface, nullptr);
@@ -257,6 +265,7 @@ namespace PFF::render::vulkan {
 
 		LOG_SHUTDOWN();
 	}
+
 
 	void vk_renderer::resource_free() {
 
@@ -709,7 +718,7 @@ namespace PFF::render::vulkan {
 		material_resources.data_buffer = material_constant.buffer;
 		material_resources.data_buffer_offset = 0;
 		m_default_material = m_metal_rough_material.create_instance(material_pass::main_color, material_resources, m_global_descriptor_allocator);
-
+		
 #ifdef PFF_RENDERER_DEBUG_CAPABILITY
 
 		material::material_resources debug_lines_material_resources;						//debug material for lines
@@ -895,6 +904,45 @@ namespace PFF::render::vulkan {
 		}
 	}
 
+
+	void vk_renderer::init_grid_pipeline() {
+	
+		VkShaderModule gridVertexShader;
+		ASSERT(util::load_shader_module(PFF::util::get_executable_path() / "../PFF/shaders/world_grid.vert.spv", m_device, &gridVertexShader), "Loaded grid vertex shader", "Error loading grid vertex shader");
+	
+		VkShaderModule gridFragmentShader;
+		ASSERT(util::load_shader_module(PFF::util::get_executable_path() / "../PFF/shaders/world_grid.frag.spv", m_device, &gridFragmentShader), "Loaded grid fragment shader", "Error loading grid fragment shader");
+	
+		// Descriptor set layouts
+		VkDescriptorSetLayout layouts[] = {
+			m_gpu_scene_data_descriptor_layout,  // Set 0: Scene data
+			// Add other layouts if needed
+		};
+
+		// Create a pipeline layout
+		VkPipelineLayoutCreateInfo pipeline_layout_info = init::pipeline_layout_create_info();
+		pipeline_layout_info.setLayoutCount = 1;
+		pipeline_layout_info.pSetLayouts = layouts;
+		pipeline_layout_info.pushConstantRangeCount = 0;
+		VK_CHECK_S(vkCreatePipelineLayout(m_device, &pipeline_layout_info, nullptr, &m_grid_pipeline_layout));
+
+		// Create the graphics pipeline
+		pipeline_builder gridPipelineBuilder;
+		gridPipelineBuilder.set_shaders(gridVertexShader, gridFragmentShader)
+			.set_input_topology(VK_PRIMITIVE_TOPOLOGY_TRIANGLE_LIST)
+			.set_polygon_mode(VK_POLYGON_MODE_FILL)
+			.set_cull_mode(VK_CULL_MODE_NONE, VK_FRONT_FACE_CLOCKWISE)
+			.set_multisampling_none()
+			.set_color_attachment_format(m_draw_image.get_image_format())
+			.set_depth_format(m_depth_image.get_image_format())
+			.set_pipeline_layout(m_grid_pipeline_layout);
+	
+		m_grid_pipeline = gridPipelineBuilder.build(m_device);
+	
+		// Clean up shader modules
+		vkDestroyShaderModule(m_device, gridVertexShader, nullptr);
+		vkDestroyShaderModule(m_device, gridFragmentShader, nullptr);
+	}
 
 	// ================================================================================ INIT PIPELINES ================================================================================
 
@@ -1101,7 +1149,31 @@ namespace PFF::render::vulkan {
 	}
 
 
+	// VkDescriptorSet globalDescriptor;
+
 	void vk_renderer::draw_internal(VkCommandBuffer cmd) {
+
+#ifdef TRY_TO_PROVIDE_SCNENE_DATA_TO_COMP
+		m_scene_data.view = m_active_camera->get_view();
+		m_scene_data.proj = glm::perspective(glm::radians(m_active_camera->get_perspective_fov_y()), (float)m_draw_extent.width / (float)m_draw_extent.height, 100000.f, 0.1f);
+		m_active_camera->force_set_projection_matrix(m_scene_data.proj);
+		m_scene_data.proj[1][1] *= -1;				// invert the Y direction on projection matrix
+		m_scene_data.proj_view = m_scene_data.proj * m_scene_data.view;
+
+		// allocate a new uniform buffer for the scene data
+		vk_buffer gpuSceneDataBuffer = create_buffer(sizeof(render::GPU_scene_data), VK_BUFFER_USAGE_UNIFORM_BUFFER_BIT, VMA_MEMORY_USAGE_CPU_TO_GPU);
+		get_current_frame().del_queue.push_func([this, gpuSceneDataBuffer]() { destroy_buffer(gpuSceneDataBuffer); });
+
+		//write the buffer
+		render::GPU_scene_data* scene_uniform_data = (render::GPU_scene_data*)gpuSceneDataBuffer.allocation->GetMappedData();
+		*scene_uniform_data = m_scene_data;
+		
+		//create a descriptor set that binds that buffer and update it
+		globalDescriptor = get_current_frame().frame_descriptors.allocate(m_device, m_gpu_scene_data_descriptor_layout);
+		descriptor_writer writer;
+		writer.write_buffer(0, gpuSceneDataBuffer.buffer, sizeof(render::GPU_scene_data), 0, VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER);
+		writer.update_set(m_device, globalDescriptor);
+#endif TRY_TO_PROVIDE_SCNENE_DATA_TO_COMP
 
 		render::compute_effect& effect = m_background_effects[m_current_background_effect];
 
@@ -1137,12 +1209,12 @@ namespace PFF::render::vulkan {
 		scissor.extent.height = m_draw_extent.height;
 		vkCmdSetScissor(cmd, 0, 1, &scissor);
 
+#ifndef TRY_TO_PROVIDE_SCNENE_DATA_TO_COMP
 		m_scene_data.view = m_active_camera->get_view();
 		m_scene_data.proj = glm::perspective(glm::radians(m_active_camera->get_perspective_fov_y()), (float)m_draw_extent.width / (float)m_draw_extent.height, 100000.f, 0.1f);
 		m_active_camera->force_set_projection_matrix(m_scene_data.proj);
 		m_scene_data.proj[1][1] *= -1;				// invert the Y direction on projection matrix
 		m_scene_data.proj_view = m_scene_data.proj * m_scene_data.view;
-
 
 		// allocate a new uniform buffer for the scene data
 		vk_buffer gpuSceneDataBuffer = create_buffer(sizeof(render::GPU_scene_data), VK_BUFFER_USAGE_UNIFORM_BUFFER_BIT, VMA_MEMORY_USAGE_CPU_TO_GPU);
@@ -1151,12 +1223,13 @@ namespace PFF::render::vulkan {
 		//write the buffer
 		render::GPU_scene_data* scene_uniform_data = (render::GPU_scene_data*)gpuSceneDataBuffer.allocation->GetMappedData();
 		*scene_uniform_data = m_scene_data;
-
+		
 		//create a descriptor set that binds that buffer and update it
 		VkDescriptorSet globalDescriptor = get_current_frame().frame_descriptors.allocate(m_device, m_gpu_scene_data_descriptor_layout);
 		descriptor_writer writer;
 		writer.write_buffer(0, gpuSceneDataBuffer.buffer, sizeof(render::GPU_scene_data), 0, VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER);
 		writer.update_set(m_device, globalDescriptor);
+#endif TRY_TO_PROVIDE_SCNENE_DATA_TO_COMP
 
 		VkRenderingAttachmentInfo color_attachment = init::attachment_info(m_draw_image.get_image_view(), nullptr, VK_IMAGE_LAYOUT_GENERAL);					// begin a render pass connected to our draw image
 		VkRenderingAttachmentInfo depth_attachment = init::depth_attachment_info(m_depth_image.get_image_view(), VK_IMAGE_LAYOUT_DEPTH_ATTACHMENT_OPTIMAL);
@@ -1164,24 +1237,32 @@ namespace PFF::render::vulkan {
 
 		calc_frustum_planes(m_scene_data.proj_view);
 
+		const auto& loc_map = application::get().get_world_layer()->get_map();										// TODO: implement world chunk system and iterat over chunks
+		if (!loc_map->is_active()) {		// skip maps that are not-loaded/hidden/disabled
+
+			return;
+		}
+
 		vkCmdBeginRendering(cmd, &render_info);
+
+		
+		// Grid drawing -------------------------------------------------
+		vkCmdBindPipeline(cmd, VK_PIPELINE_BIND_POINT_GRAPHICS, m_grid_pipeline);
+		vkCmdBindDescriptorSets(cmd, VK_PIPELINE_BIND_POINT_GRAPHICS, m_grid_pipeline_layout, 
+			0,  // First set
+			1,  // Descriptor count
+			&globalDescriptor,  // scene data descriptor
+			0, nullptr );
+		vkCmdDraw(cmd, 4, 1, 0, 0);  // 4 vertices
+
 
 		material_instance* last_material = nullptr;
 		material_pipeline* last_pipeline = nullptr;
 
 
-
-		const auto& loc_map = application::get().get_world_layer()->get_map();
-		if (!loc_map->is_active()) {		// skip maps that are not-loaded/hidden/disabled
-
-			vkCmdEndRendering(cmd);
-			return;
-		}
-
-
 		// TODO: add high-level culling for map-chunks that don't need rendering
 			// frustum culling
-			// oclution culling (map-chunks may be to big & flat, so occusion may not make sense)
+			// oclution culling (map-chunks may be to big & flat, so oclution may not make sense)
 
 
 		if (script_system::is_ready()) {
@@ -1231,7 +1312,7 @@ namespace PFF::render::vulkan {
 				vkCmdPushConstants(cmd, loc_material->pipeline->layout, VK_SHADER_STAGE_VERTEX_BIT, (u32)0, sizeof(GPU_draw_push_constants), &push_constants);
 				vkCmdBindIndexBuffer(cmd, mesh_asset.mesh_buffers.index_buffer.buffer, 0, VK_INDEX_TYPE_UINT32);
 
-#define KRIPLE_RENDERER_TO_DEBUG_MESH_BOOLEAN_OPERATIONS
+// #define KRIPLE_RENDERER_TO_DEBUG_MESH_BOOLEAN_OPERATIONS
 #ifdef KRIPLE_RENDERER_TO_DEBUG_MESH_BOOLEAN_OPERATIONS
 				vkCmdDrawIndexed(cmd, mesh_asset.surfaces[2].count, 1, mesh_asset.surfaces[2].startIndex, 0, 0);		// POSIBLE OPIMIZATION - Collect all transforms of mesh_comp pointing to same mesh_asset and draw indexed
 
@@ -1309,7 +1390,7 @@ namespace PFF::render::vulkan {
 		}
 
 #ifdef PFF_RENDERER_DEBUG_CAPABILITY
-
+		
 		if (m_debug_lines.vertices.size() > 0) {
 			
 			// binding debug material for lines

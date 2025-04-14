@@ -32,7 +32,7 @@ namespace PFF {
 		ImGui::SetNextWindowSize(ImVec2(400, 300), ImGuiCond_Appearing);
 		ImGui::SetNextWindowPos(ImGui::GetMainViewport()->GetCenter(), ImGuiCond_Appearing, ImVec2(0.5f, 0.5f));
 
-		if (ImGui::Begin("mesh importer", &show_window, window_flags)) {
+		if (ImGui::Begin("Mesh Importer", &show_window, window_flags)) {
 
 			UI::begin_table("Mesh Import Settings");
 
@@ -66,7 +66,6 @@ namespace PFF {
 
 					ImGui::Unindent();
 				}
-
 				
 			}
 			UI::shift_cursor_pos(0, 10);

@@ -144,6 +144,7 @@ namespace PFF::render::vulkan {
 		void init_pipelines();
 		void init_pipelines_background();
 		void init_pipeline_mesh();
+		void init_grid_pipeline();
 
 		void draw_internal(VkCommandBuffer cmd);
 		void draw_geometry(VkCommandBuffer cmd);
@@ -216,6 +217,9 @@ namespace PFF::render::vulkan {
 		VkPipelineLayout							m_mesh_pipeline_layout{};
 		VkPipeline									m_mesh_pipeline{};
 
+		VkPipelineLayout							m_grid_pipeline_layout{};
+		VkPipeline									m_grid_pipeline{};
+
 		// ---------------------------- GPU side global scene data ---------------------------- 
 		render::GPU_scene_data						m_scene_data;
 		VkDescriptorSetLayout						m_gpu_scene_data_descriptor_layout;
@@ -228,8 +232,8 @@ namespace PFF::render::vulkan {
 		VkSampler									m_default_sampler_linear;
 		VkSampler									m_default_sampler_nearest;
 		VkDescriptorSetLayout						m_single_image_descriptor_layout;
-		material_instance							m_default_material;
 		material									m_metal_rough_material;
+		material_instance							m_default_material;
 
 		// ---------------------------- data for debug ---------------------------- 
 #ifdef PFF_RENDERER_DEBUG_CAPABILITY
