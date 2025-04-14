@@ -19,8 +19,6 @@
 |-|-|
 |![first_image](/.github/resources/Screenshot_20250413_191412.png?raw=true "image of the editor as it is now")|![first_image](/.github/resources/Screenshot_20250413_180229.png?raw=true "image of the editor as it is now")|
 
-
-
 ## Getting Started
 To get started with PFF, follow these simple steps
 (You need to have the following software preinstalled: ```Git, Python```):
@@ -63,6 +61,10 @@ Summary:
    ```
 
 For more detailed instructions please visit our [Instalation wiki](https://github.com/Mich-Dich/PFF/wiki/Instalation)
+
+### Tiling Window Manager
+   If you're using a tiling window manager, it's recommended to add window rules.
+   Specifically, under your rules for floating windows, include 'PFF - ' to ensure new windows float by default — especially important for popups and dialog boxes.
 
 ## Usage
 
