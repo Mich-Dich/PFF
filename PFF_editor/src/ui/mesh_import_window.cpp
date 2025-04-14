@@ -9,21 +9,24 @@
 
 namespace PFF {
 
-	// static std::filesystem::path project_dir = std::filesystem::path("C:\\") / "CustomGameEngine" / "PFF" / "test_project" / CONTENT_DIR;
+	static mesh_factory::load_options loc_load_options{};								// should remenber import settings for this session
+	static mesh_factory::load_options loc_prev_load_options{};
 
+	mesh_import_window::mesh_import_window(const std::filesystem::path source_path, const std::filesystem::path destination_path) : source_path(source_path), destination_path(destination_path) {
 
-	// mesh_import_window::mesh_import_window(const std::filesystem::path source_path, const std::filesystem::path destination_path) : source_path(source_path), destination_path(destination_path) {
-
-	// 	asset_alredy_exists = 
-	// }
-
+		loc_prev_load_options.combine_meshes = !loc_load_options.combine_meshes;					// make sure it checks the mesh_factory at startup
+	}
 
 	void mesh_import_window::window() {
 
 		if (!show_window)
 			return;
-		
-		static mesh_factory::load_options loc_load_options{};							// should remenber import settings for this session
+
+		if (loc_load_options != loc_prev_load_options) {		// updated, need to check factory
+			
+			asset_alredy_exists = PFF::mesh_factory::check_if_assets_already_exists(source_path, destination_path, loc_load_options, assets_that_already_exist);
+			loc_prev_load_options = loc_load_options;
+		}
 
 		ImGuiWindowFlags window_flags = ImGuiWindowFlags_NoDocking;
 		ImGui::SetNextWindowSize(ImVec2(400, 300), ImGuiCond_Appearing);
@@ -42,7 +45,7 @@ namespace PFF {
 			UI::end_table();
 
 			UI::shift_cursor_pos(0, 10);
-			if (PFF::mesh_factory::check_if_assets_already_exists(source_path, destination_path, loc_load_options, assets_that_already_exist)) {
+			if (asset_alredy_exists) {
 
 				ImGui::Image(PFF_editor::get().get_editor_layer()->get_warning_icon()->get_descriptor_set(), ImVec2(15), ImVec2(0, 0), ImVec2(1, 1), ImVec4(.9f, .5f, 0.f, 1.f));
 				ImGui::SameLine();

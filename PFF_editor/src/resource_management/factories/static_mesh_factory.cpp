@@ -187,7 +187,7 @@ namespace PFF::mesh_factory {
     bool check_if_assets_already_exists(const std::filesystem::path source_path, const std::filesystem::path destination_path, const load_options options, std::vector<std::string>& assets_that_already_exist) {
 
         VALIDATE(std::filesystem::exists(source_path) && (source_path.extension() == ".gltf" || source_path.extension() == ".glb")&& std::filesystem::is_regular_file(source_path), return false, "", "provided source path invalid [" << source_path << "]");
-        // LOG(Trace, "Checking if gltf mesh can be imported. source: " << source_path << " destination: " << destination_path);
+        LOG(Trace, "Checking if gltf mesh can be imported. source: " << source_path << " destination: " << destination_path);
 
         assets_that_already_exist.clear();
         bool any_assest_already_exists = false;
@@ -205,7 +205,7 @@ namespace PFF::mesh_factory {
             std::filesystem::path output_path = destination_path / (name_buffer + PFF_ASSET_EXTENTION);
             if (std::filesystem::exists(output_path)) {
 
-                // LOG(Trace, "Mesh with name of [" << name_buffer << "] already exists");
+                LOG(Trace, "Mesh with name of [" << name_buffer << "] already exists");
                 any_assest_already_exists = true;
                 assets_that_already_exist.push_back(name_buffer);
             }

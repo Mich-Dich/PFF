@@ -9,6 +9,14 @@ namespace PFF::mesh_factory {
         bool        combine_meshes = false;
         bool        include_file_name_in_asset_name = true;
         bool        auto_generate_LODs = true;
+
+        bool operator==(const load_options& other) {
+
+            return (combine_meshes == other.combine_meshes 
+                && include_file_name_in_asset_name == other.include_file_name_in_asset_name 
+                && auto_generate_LODs == other.auto_generate_LODs);
+        }
+        bool operator!=(const load_options& other) { return !(*this == other); }
     };
 
     struct static_mesh_file_metadata {
