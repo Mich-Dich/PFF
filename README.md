@@ -50,7 +50,6 @@ To get started with PFF, follow these simple steps
    bin/Debug-linux-x86_64/PFF_editor/PFF_editor
    ```
 
-
 Summary:
    ```
    git clone --branch dev --recursive git@github.com:Mich-Dich/PFF.git
@@ -63,7 +62,7 @@ Summary:
 For more detailed instructions please visit our [Instalation wiki](https://github.com/Mich-Dich/PFF/wiki/Instalation)
 
 ### Tiling Window Manager
-   If you're using a tiling window manager, it's recommended to add window rules.
+   If you're using a tiling window manager, it's recommended to add a window rule.
    Specifically, under your rules for floating windows, include 'PFF - ' to ensure new windows float by default — especially important for popups and dialog boxes.
 
 ## Usage

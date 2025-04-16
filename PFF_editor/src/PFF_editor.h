@@ -25,8 +25,9 @@ namespace PFF {
 		bool update(const f32 delta_time) override;
 		bool shutdown() override;
 
-	private:
+		// static void open_import_dialog(const std::filesystem::path destination_path);
 
+	private:
 
 		editor_settings						m_editor_settings{};
 		std::shared_ptr<editor_controller>	m_editor_controller{};

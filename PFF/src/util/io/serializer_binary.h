@@ -78,6 +78,19 @@ namespace PFF::serializer {
 
 
 		template<typename T>
+		binary& array(T* array_start, size_t array_size) {
+
+			size_t total_bytes = sizeof(T) * array_size;
+			if (m_option == option::save_to_file)
+				m_ostream.write(reinterpret_cast<const char*>(array_start), total_bytes);
+			else
+				m_istream.read(reinterpret_cast<char*>(array_start), total_bytes);
+
+			return *this;
+		}
+
+
+		template<typename T>
 		binary& vector(std::vector<T>& vector, std::function<void(PFF::serializer::binary&, const u64 iteration)> vector_function) {
 
 			LOG(Error, "NOT IMPLEMENTED YET");

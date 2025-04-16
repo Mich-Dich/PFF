@@ -7,7 +7,9 @@
 #include <engine/resource_management/mesh_headers.h>
 #include <engine/resource_management/static_mesh_asset_manager.h>
 
-#include "mesh_import_window.h"
+#include "ui/import/mesh_import_window.h"
+#include "ui/import/texture_import_window.h"
+#include "util/import_dialog.h"
 #include "PFF_editor.h"
 #include "editor_layer.h"
 
@@ -33,9 +35,12 @@ namespace PFF {
 		header_incorrect,
 	};
 
-	const std::vector<std::pair<std::string, std::string>> import_files = {
-		{"glTF 2.0 file", "*.gltf;*.glb"},
+	const std::vector<std::pair<std::string, std::string>> posible_import_tile_types = {
+		{"All supported file types", "*.gltf;*.glb;*.png"},
+		{"glTF 2.0 file", "*.gltf;*.glb"},												// for meshes
+		{"PNG", "*.png"},																// for images
 	};
+
 
 	int hash_path(const std::filesystem::path& path) { return static_cast<int>(std::hash<std::string>()(path.string())); }
 
@@ -705,13 +710,17 @@ namespace PFF {
 
 				if (ImGui::Button(" import ##content_browser_import")) {
 
-					std::filesystem::path source_path = util::file_dialog("Import asset", import_files);
-
+					std::filesystem::path source_path = util::file_dialog("Import asset", posible_import_tile_types);
+					
 					if (source_path.extension() == ".gltf" || source_path.extension() == ".glb")
 						PFF_editor::get().get_editor_layer()->add_window<mesh_import_window>(source_path, m_selected_directory);
-
-					// TODO: add more import dialogs depending on extention
-
+					
+					else if (source_path.extension() == ".png")
+						PFF_editor::get().get_editor_layer()->add_window<texture_import_window>(source_path, m_selected_directory);
+						// LOG(Trace, "Tryed to import a PNG => not implemented yet")
+					
+					else
+						LOG(Trace, "Tryed to import unsupported file type")										// TODO: add a notification system to main window
 				}
 
 				ImGui::SameLine();

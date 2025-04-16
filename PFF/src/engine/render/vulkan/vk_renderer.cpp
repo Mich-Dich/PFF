@@ -1149,8 +1149,6 @@ namespace PFF::render::vulkan {
 	}
 
 
-	// VkDescriptorSet globalDescriptor;
-
 	void vk_renderer::draw_internal(VkCommandBuffer cmd) {
 
 #ifdef TRY_TO_PROVIDE_SCNENE_DATA_TO_COMP
@@ -1738,6 +1736,7 @@ namespace PFF::render::vulkan {
 		m_debug_lines.surfaces[0].count = (u32)m_debug_lines.indices.size();
 		update_mesh(m_debug_lines.mesh_buffers, m_debug_lines.indices, m_debug_lines.vertices);
 	}
+
 
 	void vk_renderer::clear_debug_line() {
 

@@ -9,7 +9,8 @@
 
 namespace PFF {
 
-	 ref<project_file_watcher> p_project_file_watcher{};
+	ref<project_file_watcher> p_project_file_watcher{};
+	std::thread import_dialog_thread;
 
 	void PFF_editor::serialize(serializer::option option) {
 
@@ -43,6 +44,10 @@ namespace PFF {
 		LOG(Trace, "serializing editor data")
 		serialize(serializer::option::save_to_file);
 
+		// LOG(Info, "TODO: making sure the import thread is closed")
+		// if (import_dialog_thread.joinable())
+		// 	import_dialog_thread.join();
+
 		LOG(Trace, "Removing editor layer")
 		pop_overlay(m_editor_layer);
 		delete m_editor_layer;
@@ -54,4 +59,29 @@ namespace PFF {
 	bool PFF_editor::render(const f32 delta_time) { return true; }
 
 	bool PFF_editor::update(const f32 delta_time) { return true; }
+
+	// void import_dialog(const std::filesystem::path destination_path) {
+		
+	// 	switch (type) {
+	// 		case import_type::mesh: {
+
+	// 			const std::vector<std::pair<std::string, std::string>> import_file_types = {
+	// 				{"glTF 2.0 file", "*.gltf;*.glb"},
+	// 			};
+	// 			std::filesystem::path source_path = util::file_dialog("Import asset", import_file_types);
+	// 			if (source_path.extension() == ".gltf" || source_path.extension() == ".glb")
+	// 				PFF_editor::get().get_editor_layer()->add_window<mesh_import_window>(source_path, destination_path);
+	// 		} break;
+
+	// 		case import_type::texture: {
+	// 			LOG(Error, "Not implemented yet");	
+	// 		} break;
+		
+	// 		default: LOG(Error, "Tryed to import a file but provided asset type is unknown [" << (u16)type << "]"); break;
+	// 	}
+	// }
+
+	// void PFF_editor::open_import_dialog(const std::filesystem::path destination_path) {
+
+	// }
 }

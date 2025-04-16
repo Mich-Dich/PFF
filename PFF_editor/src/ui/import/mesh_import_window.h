@@ -1,6 +1,6 @@
 #pragma once
 
-#include "editor_window.h"
+#include "ui/editor_window.h"
 
 namespace PFF {
 
