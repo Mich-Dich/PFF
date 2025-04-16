@@ -77,14 +77,19 @@ namespace PFF::serializer {
 		}
 
 
+		// When used with option [load_from_file] will create a new array with "new" -> called has ownership
 		template<typename T>
-		binary& array(T* array_start, size_t array_size) {
+		binary& array(T*& array_start, size_t array_size) {
 
-			size_t total_bytes = sizeof(T) * array_size;
-			if (m_option == option::save_to_file)
+			const size_t total_bytes = sizeof(T) * array_size;
+			if (m_option == option::save_to_file) {
 				m_ostream.write(reinterpret_cast<const char*>(array_start), total_bytes);
-			else
+			} else {
+
+				array_start = (T*)malloc(total_bytes);
+				LOG(Trace, "Deserializing [" << total_bytes << "] bytes into [" << array_start << "]")
 				m_istream.read(reinterpret_cast<char*>(array_start), total_bytes);
+			}
 
 			return *this;
 		}

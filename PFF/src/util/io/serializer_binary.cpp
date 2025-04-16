@@ -3,12 +3,10 @@
 
 #include "serializer_binary.h"
 
-
 namespace PFF::serializer {
 
 	binary::binary(const std::filesystem::path filename, const std::string& section_name, option option) 
 	: m_filename(filename), m_name(section_name), m_option(option) {
-
 
 		if (m_option == option::save_to_file) {
 

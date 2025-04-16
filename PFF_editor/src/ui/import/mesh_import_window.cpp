@@ -28,10 +28,8 @@ namespace PFF {
 			loc_prev_load_options = loc_load_options;
 		}
 
-		ImGuiWindowFlags window_flags = ImGuiWindowFlags_NoDocking;
-		ImGui::SetNextWindowSize(ImVec2(400, 300), ImGuiCond_Appearing);
-		ImGui::SetNextWindowPos(ImGui::GetMainViewport()->GetCenter(), ImGuiCond_Appearing, ImVec2(0.5f, 0.5f));
-
+		ImGuiWindowFlags window_flags = ImGuiWindowFlags_NoDocking | ImGuiWindowFlags_AlwaysAutoResize | ImGuiWindowFlags_NoMove | ImGuiWindowFlags_NoCollapse;
+		ImGui::SetNextWindowPos(ImGui::GetMainViewport()->GetCenter(), ImGuiCond_Always, ImVec2(0.5f, 0.5f));
 		if (ImGui::Begin("Mesh Importer", &show_window, window_flags)) {
 
 			UI::begin_table("Mesh Import Settings");
@@ -51,20 +49,22 @@ namespace PFF {
 				ImGui::SameLine();
 
 				if (loc_load_options.combine_meshes)
-					ImGui::TextWrapped("The asset your trying to import already exists, if you continue you are overwriting the previous asset");
+					ImGui::Text("The asset your trying to import already exists.\nIf you continue you are overwriting the previous asset");
 				else {
 
 					if (assets_that_already_exist.size() == 1)
-						ImGui::TextWrapped("An asset your trying to import already exists, if you continue you are overwriting the previous asset");
+						ImGui::Text("An asset your trying to import already exists, if you continue you are overwriting the previous asset");
 					else
-						ImGui::TextWrapped("Multiple assets your trying to import already exist, if you continue you are overwriting the previous assets");
+						ImGui::Text("Multiple assets your trying to import already exist, if you continue you are overwriting the previous assets");
 
-					ImGui::TextWrapped("Assets that will be overwriten in current directory:");
-					ImGui::Indent();
-					for (const auto name : assets_that_already_exist)
-						ImGui::TextWrapped("%s", name.c_str());
-
-					ImGui::Unindent();
+					ImGui::Text("Assets that will be overwriten in current directory:");
+					
+					UI::shift_cursor_pos(25, 0);
+					ImVec2 childSize = ImVec2(ImGui::GetContentRegionAvail().x - 50, 150); // full width, 150 pixels tall (for example)
+					ImGui::BeginChild("ScrollableNamesSection", childSize, true);
+						for (const auto name : assets_that_already_exist)
+							ImGui::TextWrapped("%s", name.c_str());
+					ImGui::EndChild();
 				}
 				
 			}

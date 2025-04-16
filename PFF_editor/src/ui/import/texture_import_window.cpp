@@ -39,9 +39,8 @@ namespace PFF {
 		}
 #endif
 
-		ImGuiWindowFlags window_flags = ImGuiWindowFlags_NoDocking;
-		ImGui::SetNextWindowSize(ImVec2(400, 300), ImGuiCond_Appearing);
-		ImGui::SetNextWindowPos(ImGui::GetMainViewport()->GetCenter(), ImGuiCond_Appearing, ImVec2(0.5f, 0.5f));
+		ImGuiWindowFlags window_flags = ImGuiWindowFlags_NoDocking | ImGuiWindowFlags_AlwaysAutoResize | ImGuiWindowFlags_NoMove | ImGuiWindowFlags_NoCollapse;
+		ImGui::SetNextWindowPos(ImGui::GetMainViewport()->GetCenter(), ImGuiCond_Always, ImVec2(0.5f, 0.5f));
 
 		if (ImGui::Begin("Texture Importer", &show_window, window_flags)) {
 
@@ -50,12 +49,12 @@ namespace PFF {
 			m_source_string = source_path.string();
 			UI::table_row_text("Source", (m_source_string.c_str()));
 			if (m_metadata_available) {
-				UI::table_row("Width", metadata.width);
-				UI::table_row("Height", metadata.height);
-				UI::table_row("Chanels", metadata.channels);
-				UI::table_row("Format", metadata.format);
+				UI::table_row_text("Width", "%d", metadata.width);
+				UI::table_row_text("Height", "%d", metadata.height);
+				UI::table_row_text("Chanels", "%d", metadata.channels);
+				UI::table_row_text("Format", "%d", metadata.format);
 				if (loc_load_options.generate_mipmaps)
-				UI::table_row("Mip levels", metadata.mip_levels);
+				UI::table_row_text("Mip levels", "%lu", metadata.mip_levels);
 			}
 			UI::end_table();
 			

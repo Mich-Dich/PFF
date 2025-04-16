@@ -120,18 +120,56 @@ namespace PFF::UI {
 		return state;
 	}
 
+	std::string wrap_text(const std::string& text, float wrap_width) {
+		ImGuiContext& g = *ImGui::GetCurrentContext(); // Needed for ImGui::CalcTextSize to work safely
+	
+		const std::string delimiters = " _-/\\."; // Add any others you want here
+		std::string wrapped_text;
+		std::string current_line;
+		std::string token;
+	
+		auto flush_token = [&]() {
+			if (!token.empty()) {
+				std::string next_segment = current_line + token;
+				if (ImGui::CalcTextSize(next_segment.c_str()).x > wrap_width) {
+					if (!current_line.empty()) {
+						wrapped_text += current_line + "\n";
+					}
+					current_line = token;
+				} else {
+					current_line += token;
+				}
+				token.clear();
+			}
+		};
+	
+		for (char c : text) {
+			token += c;
+			if (delimiters.find(c) != std::string::npos) {
+				flush_token();
+			}
+		}
+	
+		flush_token(); // Flush any remaining token
+	
+		if (!current_line.empty()) {
+			wrapped_text += current_line;
+		}
+	
+		return wrapped_text;
+	}
+	
 	std::string wrap_text_at_underscore(const std::string& text, float wrap_width) {
 
 		std::stringstream ss(text);
 		std::string segment;
 		std::string wrapped_text;
 		float text_width = 0.0f;
-		float item_width = wrap_width;
 
 		// Split the text at underscores
 		while (std::getline(ss, segment, '_')) {
 			// Check if adding this segment exceeds the wrap width
-			if (text_width + ImGui::CalcTextSize(segment.c_str()).x > item_width) {
+			if (text_width + ImGui::CalcTextSize(segment.c_str()).x > wrap_width) {
 				wrapped_text += "\n"; // Insert a line break if needed
 				text_width = 0.0f; // Reset the line width counter
 			}

@@ -439,7 +439,7 @@ namespace PFF::render::vulkan {
 
 
 		// ============================================================ DEV-ONLY ============================================================
-		f32 rotation_speed = glm::radians(10.0f); // 10 degrees per second
+		f32 rotation_speed = glm::radians(25.0f); // 25 degrees per second
 		f32 angle = rotation_speed * delta_time;
 		glm::mat4 rotation = glm::rotate(glm::mat4(1.0f), angle, glm::vec3(0.0f, 1.0f, 0.0f));				// rotation matrix around the Z-axis
 		glm::vec4 rotated_dir = rotation * m_scene_data.sunlight_direction;

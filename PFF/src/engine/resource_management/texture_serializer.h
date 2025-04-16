@@ -10,7 +10,7 @@
 
 namespace PFF {
 
-	void serialize_texture(const std::filesystem::path filename, u32* pixel_data, asset_file_header& asset_header, general_texture_file_header& general_header, specific_texture_file_header& static_mesh_header, const serializer::option option);
+	void serialize_texture(const std::filesystem::path filename, u32*& pixel_data, asset_file_header& asset_header, general_texture_file_header& general_header, specific_texture_file_header& static_mesh_header, const serializer::option option);
 
 	void serialize_texture_headers(serializer::binary& serializer, asset_file_header& asset_header, general_texture_file_header& general_mesh_header);
 	

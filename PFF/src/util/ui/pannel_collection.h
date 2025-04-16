@@ -83,6 +83,8 @@ namespace PFF::UI {
 	// @return The mouse interaction state (e.g., hovered, clicked, held).
 	mouse_interation get_mouse_interation_on_window();
 
+	std::string wrap_text(const std::string& text, float wrap_width);
+
 	// @brief Wraps text at underscores to fit within a specified width.
 	// @param [text] The text to wrap.
 	// @param [wrap_width] The maximum width before wrapping occurs.
@@ -279,7 +281,7 @@ namespace PFF::UI {
 				case 4: return ImGui::DragScalar(loc_label.c_str(), ImGuiDataType_U32, &value, drag_speed, &min_value, &max_value, "%u", flags);	// u32
 				case 8: return ImGui::DragScalar(loc_label.c_str(), ImGuiDataType_U64, &value, drag_speed, &min_value, &max_value, "%llu", flags);	// u64
 				default:
-					ImGui::Text("Could not display variable of type unsigned int [size: %llu]", sizeof(T));
+					ImGui::Text("Could not display variable of type unsigned int [size: %zu]", sizeof(T));
 					return false;
 				}
 			} else {
@@ -289,7 +291,7 @@ namespace PFF::UI {
 				case 4: return ImGui::DragScalar(loc_label.c_str(), ImGuiDataType_S32, &value, drag_speed, &min_value, &max_value, "%d", flags);	// i32
 				case 8: return ImGui::DragScalar(loc_label.c_str(), ImGuiDataType_S64, &value, drag_speed, &min_value, &max_value, "%lld", flags);	// i64
 				default:
-					ImGui::Text("Could not display var of type signed int [size: %llu]", sizeof(T));
+					ImGui::Text("Could not display var of type signed int [size: %zu]", sizeof(T));
 					return false;
 				}
 			}
