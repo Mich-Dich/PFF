@@ -717,7 +717,6 @@ namespace PFF {
 					
 					else if (source_path.extension() == ".png")
 						PFF_editor::get().get_editor_layer()->add_window<texture_import_window>(source_path, m_selected_directory);
-						// LOG(Trace, "Tryed to import a PNG => not implemented yet")
 					
 					else
 						LOG(Trace, "Tryed to import unsupported file type")										// TODO: add a notification system to main window

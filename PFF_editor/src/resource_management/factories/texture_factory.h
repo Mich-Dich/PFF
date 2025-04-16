@@ -8,12 +8,14 @@ namespace PFF::texture_factory {
 
         bool generate_mipmaps = true;
         bool compress_texture = false;
-        bool flip_vertically = false;
+        bool flip_x = false;
+        bool flip_y = false;
 
         bool operator==(const load_options& other) const {
-            return (generate_mipmaps   == other.generate_mipmaps &&
-                    compress_texture   == other.compress_texture &&
-                    flip_vertically    == other.flip_vertically);
+            return (generate_mipmaps    == other.generate_mipmaps &&
+                    compress_texture    == other.compress_texture &&
+                    flip_x              == other.flip_x &&
+                    flip_y              == other.flip_y);
         }
         bool operator!=(const load_options& other) const { return !(*this == other); }
     };
@@ -33,6 +35,7 @@ namespace PFF::texture_factory {
         unsupported_format,
     };
 
+    //
     bool check_if_assets_already_exists(const std::filesystem::path source_path, const std::filesystem::path destination_path, const load_options options, std::vector<std::string>& assets_that_already_exist);
 
     // factory loads external assets and convert them into engine-specific-assets in the project/content directory

@@ -15,8 +15,9 @@ namespace PFF {
 		std::filesystem::path 		destination_path;
 		
 	private:
-		bool						asset_alredy_exists = false;;
-		std::vector<std::string> 	assets_that_already_exist;
+		bool						m_asset_alredy_exists = false;
+		std::vector<std::string> 	m_assets_that_already_exist{};
+		std::string 				m_source_string{};
 	};
 
 }

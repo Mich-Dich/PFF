@@ -16,7 +16,7 @@
 #include "engine/resource_management/texture_serializer.h"
 #include "engine/render/image.h"
 
-#include "static_mesh_factory.h"
+#include "texture_factory.h"
 
 namespace PFF::texture_factory {
 
@@ -39,7 +39,8 @@ namespace PFF::texture_factory {
     bool import_texture(const std::filesystem::path source_path, const std::filesystem::path destination_path, const load_options options) {
 
         VALIDATE(std::filesystem::exists(source_path) && (source_path.extension() == ".png") && std::filesystem::is_regular_file(source_path), return false, "", "provided source path invalid [" << source_path << "]");
-        LOG(Trace, "Trying to import texture. source: " << source_path << " destination: " << destination_path);
+        std::filesystem::path new_asset_path = destination_path / source_path.filename().replace_extension(PFF_ASSET_EXTENTION);
+        LOG(Trace, "Trying to import texture. source: " << source_path << " destination: " << new_asset_path);
 
         asset_file_header loc_asset_file_header;
         loc_asset_file_header.file_version = version{1, 0, 0};
@@ -47,16 +48,15 @@ namespace PFF::texture_factory {
         loc_asset_file_header.timestamp = util::get_system_time();
 
         int width = 0, height = 0, channels = 0;
-        stbi_uc* pixelData = stbi_load(file_path.string().c_str(), &width, &height, &channels, STBI_rgb_alpha);                                         // Force the image to load as RGBA (4 channels)
-        VALIDATE(pixelData, return false, "Loading texture: " << file_path, "Failed to load image using stb_image");
+        stbi_uc* pixelData = stbi_load(source_path.string().c_str(), &width, &height, &channels, STBI_rgb_alpha);                                         // Force the image to load as RGBA (4 channels)
+        VALIDATE(pixelData, return false, "Loading texture: " << source_path, "Failed to load image using stb_image");
 
         general_texture_file_header loc_general_texture_file_header;
         loc_general_texture_file_header.type = texture_type::texture2D;                             // FORCE simple 2D for now
-        loc_general_texture_file_header.version = version{1, 0, 0};
+        loc_general_texture_file_header.file_version = version{1, 0, 0};
 
         specific_texture_file_header loc_specific_texture_file_header;
         loc_specific_texture_file_header.name = source_path.filename().string();
-        loc_specific_texture_file_header.version = version{1, 0, 0};
         loc_specific_texture_file_header.source_file = source_path.generic_string();
         loc_specific_texture_file_header.width = width;
         loc_specific_texture_file_header.height = height;
@@ -65,9 +65,9 @@ namespace PFF::texture_factory {
         // Since we forced 4 channels, we can reinterpret the pixel data as an array of u32 values (each pixel consists of 4 bytes: R, G, B, A)         Note: This assumes your platform's endianness is compatible.
         u32* pixels = reinterpret_cast<u32*>(pixelData);
         
-        bool result = serialize_texture(destination_path, pixels, loc_asset_file_header, loc_general_texture_file_header, loc_specific_texture_file_header);
+        serialize_texture(new_asset_path, pixels, loc_asset_file_header, loc_general_texture_file_header, loc_specific_texture_file_header, serializer::option::save_to_file);
         stbi_image_free(pixelData);
-        return result;
+        return true;
     }
 
 }

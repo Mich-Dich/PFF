@@ -2,19 +2,26 @@
 #include "util/pch_editor.h"
 
 #include "util/ui/pannel_collection.h"
-#include "resource_management/factories/static_mesh_factory.h"
+#include "resource_management/factories/texture_factory.h"
 #include "PFF_editor.h"
 
 #include "texture_import_window.h"
 
+#define IGNORE_RECHECKING					// not needed here because a texture cant be combined like static_mesh
 namespace PFF {
 
-	static mesh_factory::load_options loc_load_options{};								// should remenber import settings for this session
-	static mesh_factory::load_options loc_prev_load_options{};
+	static texture_factory::load_options loc_load_options{};								// should remenber import settings for this session
+#ifndef IGNORE_RECHECKING
+	static texture_factory::load_options loc_prev_load_options{};
+#endif
 
 	texture_import_window::texture_import_window(const std::filesystem::path source_path, const std::filesystem::path destination_path) : source_path(source_path), destination_path(destination_path) {
 
+#ifndef IGNORE_RECHECKING
 		loc_prev_load_options.combine_meshes = !loc_load_options.combine_meshes;					// make sure it checks the mesh_factory at startup
+#else
+		m_asset_alredy_exists = PFF::texture_factory::check_if_assets_already_exists(source_path, destination_path, loc_load_options, m_assets_that_already_exist);
+#endif
 	}
 
 	void texture_import_window::window() {
@@ -22,51 +29,38 @@ namespace PFF {
 		if (!show_window)
 			return;
 
+#ifndef IGNORE_RECHECKING
 		if (loc_load_options != loc_prev_load_options) {		// updated, need to check factory
 			
-			asset_alredy_exists = PFF::mesh_factory::check_if_assets_already_exists(source_path, destination_path, loc_load_options, assets_that_already_exist);
+			m_asset_alredy_exists = PFF::texture_factory::check_if_assets_already_exists(source_path, destination_path, loc_load_options, m_assets_that_already_exist);
 			loc_prev_load_options = loc_load_options;
 		}
+#endif
 
 		ImGuiWindowFlags window_flags = ImGuiWindowFlags_NoDocking;
 		ImGui::SetNextWindowSize(ImVec2(400, 300), ImGuiCond_Appearing);
 		ImGui::SetNextWindowPos(ImGui::GetMainViewport()->GetCenter(), ImGuiCond_Appearing, ImVec2(0.5f, 0.5f));
 
-		if (ImGui::Begin("Mesh Importer", &show_window, window_flags)) {
+		if (ImGui::Begin("Texture Importer", &show_window, window_flags)) {
 
-			UI::begin_table("Mesh Import Settings");
+			UI::begin_table("Texture Import Settings");
 
-			UI::table_row_text("Source", (source_path.string().c_str()));
-			UI::table_row("combine meshes", loc_load_options.combine_meshes);
-			if (!loc_load_options.combine_meshes)
-				UI::table_row("include file name in asset name", loc_load_options.include_file_name_in_asset_name);
-			UI::table_row("auto generate LODs", loc_load_options.auto_generate_LODs);
+			m_source_string = source_path.string();
+			UI::table_row_text("Source", (m_source_string.c_str()));
+
+			UI::table_row("generate mipmaps", loc_load_options.generate_mipmaps);
+			UI::table_row("compress texture", loc_load_options.compress_texture);
+			UI::table_row("flip X", loc_load_options.flip_x);
+			UI::table_row("flip Y", loc_load_options.flip_y);
 			
 			UI::end_table();
 
 			UI::shift_cursor_pos(0, 10);
-			if (asset_alredy_exists) {
+			if (m_asset_alredy_exists) {
 
 				ImGui::Image(PFF_editor::get().get_editor_layer()->get_warning_icon()->get_descriptor_set(), ImVec2(15), ImVec2(0, 0), ImVec2(1, 1), ImVec4(.9f, .5f, 0.f, 1.f));
 				ImGui::SameLine();
-
-				if (loc_load_options.combine_meshes)
-					ImGui::TextWrapped("The asset your trying to import already exists, if you continue you are overwriting the previous asset");
-				else {
-
-					if (assets_that_already_exist.size() == 1)
-						ImGui::TextWrapped("An asset your trying to import already exists, if you continue you are overwriting the previous asset");
-					else
-						ImGui::TextWrapped("Multiple assets your trying to import already exist, if you continue you are overwriting the previous assets");
-
-					ImGui::TextWrapped("Assets that will be overwriten in current directory:");
-					ImGui::Indent();
-					for (const auto name : assets_that_already_exist)
-						ImGui::TextWrapped("%s", name.c_str());
-
-					ImGui::Unindent();
-				}
-				
+				ImGui::TextWrapped("The asset your trying to import already exists, if you continue you are overwriting the previous asset");				
 			}
 			UI::shift_cursor_pos(0, 10);
 
@@ -77,7 +71,7 @@ namespace PFF {
 			ImGui::SameLine();
 			if (ImGui::Button("Import", ImVec2(width, 0))) {
 
-				PFF::mesh_factory::import_gltf_mesh(source_path, destination_path, loc_load_options);
+				PFF::texture_factory::import_texture(source_path, destination_path, loc_load_options);
 				show_window = false;
 			}
 
