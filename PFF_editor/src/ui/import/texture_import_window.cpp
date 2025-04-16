@@ -11,6 +11,7 @@
 namespace PFF {
 
 	static texture_factory::load_options loc_load_options{};								// should remenber import settings for this session
+	static texture_factory::texture_metadata metadata{};
 #ifndef IGNORE_RECHECKING
 	static texture_factory::load_options loc_prev_load_options{};
 #endif
@@ -21,6 +22,7 @@ namespace PFF {
 		loc_prev_load_options.combine_meshes = !loc_load_options.combine_meshes;					// make sure it checks the mesh_factory at startup
 #else
 		m_asset_alredy_exists = PFF::texture_factory::check_if_assets_already_exists(source_path, destination_path, loc_load_options, m_assets_that_already_exist);
+		m_metadata_available = texture_factory::get_metadata(source_path, metadata);
 #endif
 	}
 
@@ -43,16 +45,26 @@ namespace PFF {
 
 		if (ImGui::Begin("Texture Importer", &show_window, window_flags)) {
 
-			UI::begin_table("Texture Import Settings");
-
+			ImGui::Text("Metadata");
+			UI::begin_table("texture_import_dialog", false);
 			m_source_string = source_path.string();
 			UI::table_row_text("Source", (m_source_string.c_str()));
-
+			if (m_metadata_available) {
+				UI::table_row("Width", metadata.width);
+				UI::table_row("Height", metadata.height);
+				UI::table_row("Chanels", metadata.channels);
+				UI::table_row("Format", metadata.format);
+				if (loc_load_options.generate_mipmaps)
+				UI::table_row("Mip levels", metadata.mip_levels);
+			}
+			UI::end_table();
+			
+			ImGui::Text("Settings");
+			UI::begin_table("texture_import_dialog", false);
 			UI::table_row("generate mipmaps", loc_load_options.generate_mipmaps);
 			UI::table_row("compress texture", loc_load_options.compress_texture);
 			UI::table_row("flip X", loc_load_options.flip_x);
 			UI::table_row("flip Y", loc_load_options.flip_y);
-			
 			UI::end_table();
 
 			UI::shift_cursor_pos(0, 10);
@@ -71,7 +83,7 @@ namespace PFF {
 			ImGui::SameLine();
 			if (ImGui::Button("Import", ImVec2(width, 0))) {
 
-				PFF::texture_factory::import_texture(source_path, destination_path, loc_load_options);
+				texture_factory::import(source_path, destination_path, loc_load_options);
 				show_window = false;
 			}
 

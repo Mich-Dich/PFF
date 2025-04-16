@@ -4,6 +4,21 @@
 
 namespace PFF::texture_factory {
 
+    // enum class texture_format {
+    //     none = 0,
+    //     RGB,
+    //     RGBA,
+    //     gray_scale,
+    // };
+
+    struct texture_metadata {
+        int width;
+        int height;
+        int channels;
+        std::string format;   // e.g., "RGB", "RGBA", or "Grayscale"
+        int mip_levels;
+    };
+
     struct load_options {
 
         bool generate_mipmaps = true;
@@ -34,11 +49,14 @@ namespace PFF::texture_factory {
         missing_file,
         unsupported_format,
     };
+    
+    //
+    bool get_metadata(const std::filesystem::path& source_path, texture_metadata &metadata);
 
     //
-    bool check_if_assets_already_exists(const std::filesystem::path source_path, const std::filesystem::path destination_path, const load_options options, std::vector<std::string>& assets_that_already_exist);
+    bool check_if_assets_already_exists(const std::filesystem::path& source_path, const std::filesystem::path& destination_path, const load_options options, std::vector<std::string>& assets_that_already_exist);
 
     // factory loads external assets and convert them into engine-specific-assets in the project/content directory
-    bool import_texture(const std::filesystem::path source_path, const std::filesystem::path destination_path, const load_options options);
+    bool import(const std::filesystem::path& source_path, const std::filesystem::path& destination_path, const load_options options);
 
 }

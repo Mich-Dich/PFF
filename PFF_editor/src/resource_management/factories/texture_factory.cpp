@@ -2,15 +2,6 @@
 #include "util/pch_editor.h"
 
 #include <stb_image.h>
-// #include <iostream>
-// #include <glm/gtx/quaternion.hpp>
-// #include <fastgltf/base64.hpp>
-// #include <fastgltf/core.hpp>
-// #include <fastgltf/types.hpp>
-// #include <fastgltf/glm_element_traits.hpp>
-// #include <fastgltf/util.hpp>
-// #include <fastgltf/tools.hpp>
-
 #include "engine/resource_management/headers.h"
 #include "engine/resource_management/texture_headers.h"
 #include "engine/resource_management/texture_serializer.h"
@@ -20,7 +11,32 @@
 
 namespace PFF::texture_factory {
 
-    bool check_if_assets_already_exists(const std::filesystem::path source_path, const std::filesystem::path destination_path, const load_options options, std::vector<std::string>& assets_that_already_exist) {
+    // Function to extract metadata using stb_image.
+    bool get_metadata(const std::filesystem::path& source_path, texture_metadata &metadata) {
+        int width = 0, height = 0, channels = 0;
+
+        // Use stbi_info to read the header information.
+        VALIDATE(stbi_info(source_path.string().c_str(), &width, &height, &channels), return false, "", "Failed to read texture metadata for [" << source_path << "]");
+
+        metadata.width = width;
+        metadata.height = height;
+        metadata.channels = channels;
+        switch (channels) {                                         // Determine the image format based on the number of channels.
+            case 1: metadata.format = "Grayscale"; break;
+            case 3: metadata.format = "RGB"; break;
+            case 4: metadata.format = "RGBA"; break;
+            default:metadata.format = "Unknown"; break;
+        }
+
+        // Calculate the number of mip levels
+        metadata.mip_levels = static_cast<int>(std::floor(std::log2(std::max(width, height)))) + 1;
+        // This assumes the texture is power of two or will be scaled accordingly.
+        // TODO: implement a scalling algorythum to get to a power of two
+        
+        return true;
+    }
+
+    bool check_if_assets_already_exists(const std::filesystem::path& source_path, const std::filesystem::path& destination_path, const load_options options, std::vector<std::string>& assets_that_already_exist) {
 
         VALIDATE(std::filesystem::exists(source_path) && (source_path.extension() == ".png")&& std::filesystem::is_regular_file(source_path), return false, "", "provided source path invalid [" << source_path << "]");
         LOG(Trace, "Checking if texture can be imported. source: " << source_path << " destination: " << destination_path);
@@ -36,7 +52,7 @@ namespace PFF::texture_factory {
     }
 
     
-    bool import_texture(const std::filesystem::path source_path, const std::filesystem::path destination_path, const load_options options) {
+    bool import(const std::filesystem::path& source_path, const std::filesystem::path& destination_path, const load_options options) {
 
         VALIDATE(std::filesystem::exists(source_path) && (source_path.extension() == ".png") && std::filesystem::is_regular_file(source_path), return false, "", "provided source path invalid [" << source_path << "]");
         std::filesystem::path new_asset_path = destination_path / source_path.filename().replace_extension(PFF_ASSET_EXTENTION);

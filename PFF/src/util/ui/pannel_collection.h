@@ -309,7 +309,12 @@ namespace PFF::UI {
 		else if constexpr (std::is_same_v<T, glm::vec4> || std::is_same_v<T, ImVec4>)
 			return ImGui::DragFloat4(loc_label.c_str(), &value[0], drag_speed, min_value[0], max_value[0], "%.2f", flags);
 
-		else if constexpr (std::is_convertible_v<T, std::string>) {
+		else if constexpr (std::is_same_v<T, std::string>) {
+
+			ImGui::Text("%s", value.c_str());
+			return false;
+
+		} else if constexpr (std::is_convertible_v<T, std::string>) {
 
 			ImGui::Text("%s", std::to_string(value).c_str());
 			return false;

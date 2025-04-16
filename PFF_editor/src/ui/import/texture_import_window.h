@@ -18,6 +18,7 @@ namespace PFF {
 		bool						m_asset_alredy_exists = false;
 		std::vector<std::string> 	m_assets_that_already_exist{};
 		std::string 				m_source_string{};
+		bool 						m_metadata_available = false;
 	};
 
 }
