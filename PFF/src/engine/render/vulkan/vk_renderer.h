@@ -56,6 +56,7 @@ namespace PFF::render::vulkan {
 		PFF_DEFAULT_GETTER(VkSampler,				default_sampler_nearest);
 		PFF_DEFAULT_GETTER(VkDevice,				device);
 		PFF_DEFAULT_GETTER(VmaAllocator,			allocator);
+		PFF_DEFAULT_GETTER_POINTER(material,		metal_rough_material);
 		
 		FORCEINLINE void set_imugi_viewport_size(glm::u32vec2 imugi_viewport_size) { m_imugi_viewport_size = imugi_viewport_size; }
 

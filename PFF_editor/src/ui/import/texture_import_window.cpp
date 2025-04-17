@@ -49,10 +49,8 @@ namespace PFF {
 			m_source_string = source_path.string();
 			UI::table_row_text("Source", (m_source_string.c_str()));
 			if (m_metadata_available) {
-				UI::table_row_text("Width", "%d", metadata.width);
-				UI::table_row_text("Height", "%d", metadata.height);
-				UI::table_row_text("Chanels", "%d", metadata.channels);
-				UI::table_row_text("Format", "%d", metadata.format);
+				UI::table_row_text("Size", "%d / %d", metadata.width, metadata.height);
+				UI::table_row_text("Format", "chanels [%d] - format [%s]", metadata.channels, metadata.format.c_str());
 				if (loc_load_options.generate_mipmaps)
 				UI::table_row_text("Mip levels", "%lu", metadata.mip_levels);
 			}

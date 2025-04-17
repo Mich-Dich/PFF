@@ -5,6 +5,13 @@
 #include <imgui_impl_vulkan.h>
 #include <imgui_internal.h>
 
+
+
+#include <emmintrin.h>    // SSE2
+#include <immintrin.h>    // for future‑proofing (AVX)
+
+
+
 #include "pannel_collection.h"
 
 namespace PFF::UI {
@@ -120,44 +127,88 @@ namespace PFF::UI {
 		return state;
 	}
 
-	std::string wrap_text(const std::string& text, float wrap_width) {
-		ImGuiContext& g = *ImGui::GetCurrentContext(); // Needed for ImGui::CalcTextSize to work safely
 	
-		const std::string delimiters = " _-/\\."; // Add any others you want here
-		std::string wrapped_text;
-		std::string current_line;
-		std::string token;
+	FORCEINLINE bool is_delim_char(char c) { return c==' '||c=='_'||c=='-'||c=='/'||c=='\\'||c=='.'; }
+
+
+	void wrap_text(std::string& string, f32 wrap_width, int max_lines) {
+
+		size_t orig = string.size();
+		string.reserve(orig * 2 + 16);
+		size_t read_pos   = 0, write_pos = 0;
+		size_t line_start = 0;
+		size_t last_delim = std::string::npos;
+		int    line_count = 0;
 	
-		auto flush_token = [&]() {
-			if (!token.empty()) {
-				std::string next_segment = current_line + token;
-				if (ImGui::CalcTextSize(next_segment.c_str()).x > wrap_width) {
-					if (!current_line.empty()) {
-						wrapped_text += current_line + "\n";
-					}
-					current_line = token;
-				} else {
-					current_line += token;
-				}
-				token.clear();
-			}
+		// SIMD constants
+		__m128i space  = _mm_set1_epi8(' ');
+		__m128i uscore = _mm_set1_epi8('_');
+		__m128i dash   = _mm_set1_epi8('-');
+		__m128i slash  = _mm_set1_epi8('/');
+		__m128i bslash = _mm_set1_epi8('\\');
+		__m128i dot    = _mm_set1_epi8('.');
+	
+		auto insert_char = [&](size_t pos, char c) {
+			string.insert(string.begin() + pos, c);
+			write_pos++;
 		};
 	
-		for (char c : text) {
-			token += c;
-			if (delimiters.find(c) != std::string::npos) {
-				flush_token();
+		while (read_pos < string.size()) {
+			size_t rem   = string.size() - read_pos;
+			size_t chunk = rem >= 16 ? 16 : rem;
+			__m128i block = _mm_loadu_si128((__m128i*)(string.data()+read_pos));
+			__m128i m = _mm_or_si128(
+				_mm_or_si128(_mm_cmpeq_epi8(block, space),  _mm_cmpeq_epi8(block, uscore)),
+				_mm_or_si128(_mm_or_si128(_mm_cmpeq_epi8(block, dash),
+										  _mm_cmpeq_epi8(block, slash)),
+							 _mm_or_si128(_mm_cmpeq_epi8(block, bslash),
+										  _mm_cmpeq_epi8(block, dot)))
+			);
+	
+			for (size_t i = 0; i < chunk; i++) {
+
+				char c = string[read_pos + i];
+				if (write_pos != read_pos + i) string[write_pos] = c;
+					write_pos++;
+				if (is_delim_char(c))
+					last_delim = write_pos;
+	
+				// Measure only when potential overflow:
+				ImVec2 string_size = ImGui::CalcTextSize(string.c_str() + line_start, string.c_str() + write_pos);
+				if (string_size.x > wrap_width) {
+					bool done = false;
+	
+					// If next line would exceed max_lines, ellipsize THIS line instead of breaking:
+					if (max_lines > 0 && line_count + 1 == max_lines) {
+						size_t end = write_pos;															// find end-of-line = write_pos
+						while (end > line_start && ImGui::CalcTextSize(string.c_str()+line_start, string.c_str()+end).x + ImGui::CalcTextSize("...").x > wrap_width)			// back up so we can fit "..."
+							--end;
+
+						string.replace(end, std::string::npos, "...");									// replace tail with "..."
+						string.resize(end + 3);															// truncate everything after
+						return;
+					}
+	
+					if (last_delim != std::string::npos && last_delim > line_start) {					// Otherwise do normal break
+						insert_char(last_delim, '\n');
+						line_start = last_delim + 1;
+					} else {																			// forced break: replace last char with '-' then newline
+						size_t brk = write_pos - 1;
+						string[brk] = '-';
+						insert_char(brk+1, '\n');
+						line_start = brk + 2;
+					}
+					line_count++;
+					last_delim = std::string::npos;
+					done = false; 																		// continue processing rest
+					break;
+				}
 			}
+			read_pos += chunk;
 		}
-	
-		flush_token(); // Flush any remaining token
-	
-		if (!current_line.empty()) {
-			wrapped_text += current_line;
-		}
-	
-		return wrapped_text;
+		string.resize(write_pos);
 	}
+
 	
 	std::string wrap_text_at_underscore(const std::string& text, float wrap_width) {
 
@@ -184,6 +235,7 @@ namespace PFF::UI {
 
 		return wrapped_text;
 	}
+
 
 	void set_next_window_pos(window_pos location, f32 padding) {
 

@@ -97,23 +97,6 @@ namespace PFF {
 
 		GLFWmonitor* primary = glfwGetPrimaryMonitor();
 		const GLFWvidmode* mode = glfwGetVideoMode(primary);
-		
-		//int monitor_count;
-		//auto monitors = glfwGetMonitors(&monitor_count);
-
-		//for (int x = 0; x < monitor_count; x++) {
-
-		//	int xpos, ypos, width, height;
-		//	glfwGetMonitorWorkarea(monitors[x], &xpos, &ypos, &width, &height);
-		//	LOG(Trace, "Monitor: " << x << " data: "<< xpos << " / " << ypos << " / " << width << " / " << height);
-		//}
-
-		//   check vertical									  check horicontal
-		//if ((m_data.pos_y + m_data.height > mode->height) || (m_data.pos_x + m_data.width > mode->width)) {
-		//
-		//	m_data.pos_y = std::max(m_data.pos_y - ((m_data.pos_y + m_data.height) - mode->height + 30), (u32)0);
-		//	m_data.pos_x = std::max(m_data.pos_x - ((m_data.pos_x + m_data.width) - mode->width + 30), (u32)0);
-		//}
 		glfwSetWindowMonitor(m_Window, NULL, m_data.pos_x, m_data.pos_y, m_data.width, m_data.height, mode->refreshRate);
 
 		if (m_data.size_state == window_size_state::fullscreen

@@ -10,6 +10,7 @@
 
 namespace PFF {
 
+	// TODO: supply with arbuments that inclunce the pipline creation
 	void material::build_pipelines() {
 
 		VkShaderModule meshFragShader;
@@ -80,7 +81,6 @@ namespace PFF {
 		vkDestroyPipeline(device, opaque_pipeline.pipeline, nullptr);
 	}
 
-	// TODO: rename to "create_instance()"
 	material_instance material::create_instance(material_pass pass, const material_resources& resources, render::vulkan::descriptor_allocator_growable& descriptor_allocator) {
 
 		material_instance loc_mat_inst;

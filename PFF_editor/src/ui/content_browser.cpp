@@ -49,9 +49,10 @@ namespace PFF {
 
 	// ================================================ util ================================================
 
-	int hash_path(const std::filesystem::path& path) { return (int)std::filesystem::hash_value(path); }				// hash_value() return a site_t (can be cast to int)
+	FORCEINLINE int hash_path(const std::filesystem::path& path) { return (int)std::filesystem::hash_value(path); }				// hash_value() return a site_t (can be cast to int)
 
-	void downscale_image(const u32* pixel_data, u32 width, u32 height, u32 target_size, std::vector<u32>& out_pixels, u32 &new_width, u32 &new_height) {
+
+	FORCEINLINE void downscale_image(const u32* pixel_data, u32 width, u32 height, u32 target_size, std::vector<u32>& out_pixels, u32 &new_width, u32 &new_height) {
 
 		VALIDATE(pixel_data != nullptr, return, "", "didnt provide pixel data, aborting function")
 
@@ -80,29 +81,131 @@ namespace PFF {
 		}
 	}
 
-	// ================================================ util ================================================
+
+	FORCEINLINE bool try_to_deserialize_file_header(const std::filesystem::path& file_path, const bool log_messages, file_curruption_source& file_curruption_source, asset_file_header& loc_asset_file_header) {
+
+		bool file_currupted = false;
+		file_curruption_source = file_curruption_source::unknown;
+
+		std::error_code loc_error_code;
+		if (!std::filesystem::file_size(file_path, loc_error_code)) {
+
+			file_curruption_source = file_curruption_source::empty_file;
+			file_currupted = true;
+
+			std::string faulty_file_name = file_path.filename().generic_string();
+			if (log_messages)
+				LOG(Warn, "file [" << faulty_file_name << "] is an empty file, will be marked as currupted");
+		}
+
+
+		if (file_path.extension() == ".pffasset") {
+
+			serializer::binary(file_path, "PFF_asset_file", serializer::option::load_from_file)
+				.entry(loc_asset_file_header);
+
+		} else if (file_path.extension() == ".pffworld") {
+
+			serializer::yaml(file_path, "map_data", serializer::option::load_from_file)
+				.sub_section("file_header", [&](serializer::yaml& header_section) {
+
+					header_section.entry(KEY_VALUE(loc_asset_file_header.file_version))
+					.entry(KEY_VALUE(loc_asset_file_header.type))
+					.entry(KEY_VALUE(loc_asset_file_header.timestamp));
+			});
+		}
+
+		return file_currupted;
+	}
+
+
+	FORCEINLINE bool is_file_used(const std::filesystem::path& file_path) {
+
+		bool file_currupted = false;
+		file_curruption_source loc_file_curruption_source = file_curruption_source::unknown;
+		asset_file_header loc_asset_file_header;
+		file_currupted = try_to_deserialize_file_header(file_path, false, loc_file_curruption_source, loc_asset_file_header);
+
+		switch (loc_asset_file_header.type) {
+
+			case file_type::world: 				return false;
+			case file_type::map: 				return false;
+			case file_type::audio: 				return false;
+			case file_type::mesh: {
+				
+				// only checks for active use (in current world)	TODO: add a check that scans user code base for definitive anser
+				bool in_use = static_mesh_asset_manager::is_asset_in_active_use(file_path);
+				return in_use;
+			}
+			case file_type::texture: 			return false;
+			case file_type::material: 			return false;
+			case file_type::material_instance: 	return false;
+			default:
+			case file_type::none: 	return false;
+		}
+
+	}
+
+
+	void ref_check_files_and_sub_directory(std::filesystem::path file_path, deletion_consequenses& deletion_consequenses) {
+
+		if (!std::filesystem::is_directory(file_path))			// catch any missuses
+			return;
+
+		for (const auto path : std::filesystem::directory_iterator(file_path)) {
+
+			if (std::filesystem::is_directory(path)) {
+
+				deletion_consequenses.number_of_directoryies++;
+				ref_check_files_and_sub_directory(path.path(), deletion_consequenses);
+			} else {
+
+				deletion_consequenses.number_of_files++;
+				if (is_file_used(path.path()))
+					deletion_consequenses.effected_assets.insert(path.path().filename().replace_extension("").string());
+			}
+		}
+	}
+
+
+	FORCEINLINE void get_deletion_consequenses(const std::filesystem::path& file_path, deletion_consequenses& deletion_consequenses) {
+		
+		if (std::filesystem::is_directory(file_path)) {
+
+			deletion_consequenses.number_of_directoryies++;
+			ref_check_files_and_sub_directory(file_path, deletion_consequenses);
+		
+		} else {
+
+			deletion_consequenses.number_of_files++;
+			if (is_file_used(file_path))
+				deletion_consequenses.effected_assets.insert(file_path.filename().replace_extension("").string());
+		}
+	}
 	
-
-	static void drop_target_to_move_file(const std::filesystem::path& folder_path) {
-
+	
+	FORCEINLINE static void drop_target_to_move_file(const std::filesystem::path& folder_path) {
+		
 		if (ImGui::BeginDragDropTarget()) {
-
+			
 			if (const ImGuiPayload* payload = ImGui::AcceptDragDropPayload("PROJECT_CONTENT_FILE")) {
-
+				
 				const std::filesystem::path file_path = (const char*)payload->Data;
 				try {
-
+					
 					std::filesystem::path destination = folder_path / file_path.filename();
 					std::filesystem::rename(file_path, destination);
 					LOG(Info, "File moved successfully!");
-
+					
 				} catch (const std::filesystem::filesystem_error& e)
-					LOG(Error, "Error: " << e.what());
-
+				LOG(Error, "Error: " << e.what());
+				
 			}
 			ImGui::EndDragDropTarget();
 		}
 	}
+	
+	// ================================================ util ================================================
 
 
 	content_browser::content_browser() {
@@ -118,6 +221,8 @@ namespace PFF {
 		m_world_icon =			editor_layer->get_world_icon();
 		m_warning_icon =		editor_layer->get_warning_icon();
 		m_mesh_asset_icon =		editor_layer->get_mesh_asset_icon();
+		m_material_icon = 		editor_layer->get_material_icon();
+		m_material_inst_icon = 	editor_layer->get_material_inst_icon();
 
 		m_icon_size = { 60, 60 };
 		m_icon_padding = { 4, 4 };
@@ -219,9 +324,29 @@ namespace PFF {
 		LOG(Info, "NOT IMPLEMENTED YET");
 	}
 
+	
+	FORCEINLINE void content_browser::wrapp_displayed_items(f32& max_text_height, const ImVec2 text_size, const ImVec2 item_padding, const f32 window_area_x) {
+		
+		const ImGuiStyle& style = ImGui::GetStyle();
+		if (text_size.y > max_text_height)
+			max_text_height = text_size.y;
+
+		const float next_item_x2 = ImGui::GetItemRectMax().x + style.ItemSpacing.x + m_icon_size.x + (2*item_padding.x);		// Expected position if next item was on the same line
+		if (next_item_x2 < window_area_x) {														// handle item wrapping
+			ImGui::SameLine();
+			UI::shift_cursor_pos(item_padding.x *2, 0);
+		} else {
+			UI::shift_cursor_pos(0, item_padding.y *3); //  + max_text_height);
+			LOG(Trace, "max_text_height: " << max_text_height << "  text_size.y: " << text_size.y << "    Y: " << item_padding.y + max_text_height - text_size.y);
+			max_text_height = 0;																								// reset when entering new line
+		}
+	}
+
 	//static std::string search_query;
 	void content_browser::show_search_result_for_current_folder(const std::filesystem::path& path, u32& item_index) {
 
+		f32 max_text_height{};
+		ImVec2 text_height{};
 		const float window_visible_x2 = ImGui::GetWindowPos().x + ImGui::GetWindowContentRegionMax().x;
 		for (const auto& entry : std::filesystem::directory_iterator(path)) {
 
@@ -232,12 +357,13 @@ namespace PFF {
 				if (entry.path().filename().string().find(search_query) == std::string::npos)
 					continue;
 
-				display_file(entry.path(), item_index++);
+				display_file(entry.path(), item_index++, text_height);
 
-				// handle item wrapping
-				const float next_item_x2 = ImGui::GetItemRectMax().x + ImGui::GetStyle().ItemSpacing.x + m_icon_size.x; // Expected position if next item was on the same line
-				if (next_item_x2 < window_visible_x2)
-					ImGui::SameLine();
+				wrapp_displayed_items(max_text_height, text_height, m_icon_padding, window_visible_x2);
+				// // handle item wrapping
+				// const float next_item_x2 = ImGui::GetItemRectMax().x + ImGui::GetStyle().ItemSpacing.x + m_icon_size.x; // Expected position if next item was on the same line
+				// if (next_item_x2 < window_visible_x2)
+				// 	ImGui::SameLine();
 			}
 		}
 	}
@@ -249,6 +375,7 @@ namespace PFF {
 		const float window_visible_x2 = ImGui::GetWindowPos().x + ImGui::GetWindowContentRegionMax().x;
 		u32 count = 0;
 
+		f32 max_text_height = 0;
 		for (const auto& entry : std::filesystem::directory_iterator(path)) {											// display directorys first
 
 			if (!entry.is_directory())
@@ -256,17 +383,19 @@ namespace PFF {
 
 			// Begin a new group for each item
 			const int current_ID = hash_path(entry.path());
-			const std::string item_name = entry.path().filename().string();
-			const std::string wrapped_text = UI::wrap_text(item_name, m_icon_size.x);
+			std::string item_name = entry.path().filename().string();
+			UI::wrap_text(item_name, m_icon_size.x, m_max_number_of_lines_in_displayed_title);
+			// const std::string wrapped_text = 
+			ImVec2 text_size{};
 			const std::string popup_name = "dir_context_menu_" + item_name;
 			const ImVec4& color = (m_selected_items.item_set.find(entry.path()) != m_selected_items.item_set.end()) ? UI::get_action_color_00_active_ref() : UI::get_action_color_gray_active_ref();
 			ImGui::BeginGroup();
 			{
 				ImGui::PushID(current_ID);
 				ImGui::Image(m_folder_big_icon->get_descriptor_set(), m_icon_size, ImVec2(0, 0), ImVec2(1, 1), color);
-				ImVec2 text_size = ImGui::CalcTextSize(wrapped_text.c_str());
+				text_size = ImGui::CalcTextSize(item_name.c_str());
 				ImGui::SetCursorPos(ImGui::GetCursorPos() + ImVec2((m_icon_size.x - text_size.x) * 0.5f, 0));
-				ImGui::TextWrapped("%s", wrapped_text.c_str());
+				ImGui::TextWrapped("%s", item_name.c_str());
 				ImGui::PopID();
 			}
 			ImGui::EndGroup();
@@ -345,9 +474,11 @@ namespace PFF {
 			// Handle dropping files into the current directory
 			drop_target_to_move_file(entry.path());
 
-			const float next_item_x2 = ImGui::GetItemRectMax().x + style.ItemSpacing.x;		// Expected position if next item was on the same line
-			if (next_item_x2 < window_visible_x2)															// handle item wrapping
-				ImGui::SameLine();
+			wrapp_displayed_items(max_text_height, text_size, ImVec2(0), window_visible_x2);
+			
+			// const float next_item_x2 = ImGui::GetItemRectMax().x + style.ItemSpacing.x;		// Expected position if next item was on the same line
+			// if (next_item_x2 < window_visible_x2)															// handle item wrapping
+			// 	ImGui::SameLine();
 		}
 		UI::shift_cursor_pos(m_icon_padding.x, 0);
 
@@ -358,14 +489,10 @@ namespace PFF {
 
 			const std::filesystem::path current_path = entry.path();
 			const int current_ID = hash_path(entry.path());
-			display_file(current_path, current_ID);
-			const float next_item_x2 = ImGui::GetItemRectMax().x + style.ItemSpacing.x + m_icon_size.x + (2*m_icon_padding.x);		// Expected position if next item was on the same line
-			if (next_item_x2 < window_visible_x2) {															// handle item wrapping
-				ImGui::SameLine();
-				UI::shift_cursor_pos(m_icon_padding.x *2, 0);
-			} else
-				UI::shift_cursor_pos(0, m_icon_padding.y *2);
+			ImVec2 text_size{};
+			display_file(current_path, current_ID, text_size);
 
+			wrapp_displayed_items(max_text_height, text_size, m_icon_padding, window_visible_x2);
 		}
 
 		// Handle dropping files into the current directory
@@ -386,44 +513,7 @@ namespace PFF {
 	}
 
 
-	bool try_to_deserialize_file_header(const std::filesystem::path& file_path, const bool log_messages, file_curruption_source& file_curruption_source, asset_file_header& loc_asset_file_header) {
-
-		bool file_currupted = false;
-		file_curruption_source = file_curruption_source::unknown;
-
-		std::error_code loc_error_code;
-		if (!std::filesystem::file_size(file_path, loc_error_code)) {
-
-			file_curruption_source = file_curruption_source::empty_file;
-			file_currupted = true;
-
-			std::string faulty_file_name = file_path.filename().generic_string();
-			if (log_messages)
-				LOG(Warn, "file [" << faulty_file_name << "] is an empty file, will be marked as currupted");
-		}
-
-
-		if (file_path.extension() == ".pffasset") {
-
-			serializer::binary(file_path, "PFF_asset_file", serializer::option::load_from_file)
-				.entry(loc_asset_file_header);
-
-		} else if (file_path.extension() == ".pffworld") {
-
-			serializer::yaml(file_path, "map_data", serializer::option::load_from_file)
-				.sub_section("file_header", [&](serializer::yaml& header_section) {
-
-					header_section.entry(KEY_VALUE(loc_asset_file_header.file_version))
-					.entry(KEY_VALUE(loc_asset_file_header.type))
-					.entry(KEY_VALUE(loc_asset_file_header.timestamp));
-			});
-		}
-
-		return file_currupted;
-	}
-
-
-	void content_browser::display_file(const std::filesystem::path& file_path, int ID) {
+	void content_browser::display_file(const std::filesystem::path& file_path, int ID, ImVec2& text_size) {
 
 		size_t hash_value = std::filesystem::hash_value(file_path);
 		bool file_currupted = false;
@@ -433,16 +523,17 @@ namespace PFF {
 
 		// Begin a new group for each item
 		const ImVec4& color = (file_path == m_selected_items.main_item) ? UI::get_action_color_00_active_ref() : (m_selected_items.item_set.find(file_path) != m_selected_items.item_set.end()) ? UI::get_action_color_00_faded_ref() : UI::get_action_color_gray_hover_ref(); // ImGui::GetStyle().Colors[ImGuiCol_ChildBg];
-		const std::string item_name = file_path.filename().replace_extension("").string();
+		std::string item_name = file_path.filename().replace_extension("").string();
+		// const std::string wrapped_text = 
+		UI::wrap_text(item_name, m_icon_size.x, m_max_number_of_lines_in_displayed_title);
 		ImGui::PushID(ID);
 		ImGui::BeginGroup();
 		{
 
 			const ImVec2 item_pos = ImGui::GetCursorScreenPos();
 			ImDrawList* draw_list = ImGui::GetWindowDrawList();
-			const std::string wrapped_text = UI::wrap_text(item_name, m_icon_size.x);
-			const ImVec2 title_size = ImGui::CalcTextSize(wrapped_text.c_str());
-			draw_list->AddRectFilled(item_pos - m_icon_padding, item_pos + m_icon_size + m_icon_padding + ImVec2(0, title_size.y + ImGui::GetStyle().ItemSpacing.y*2), ImGui::GetColorU32(color), ImGui::GetStyle().FrameRounding);
+			text_size = ImGui::CalcTextSize(item_name.c_str());
+			draw_list->AddRectFilled(item_pos - m_icon_padding, item_pos + m_icon_size + m_icon_padding + ImVec2(0, text_size.y + ImGui::GetStyle().ItemSpacing.y*2), ImGui::GetColorU32(color), ImGui::GetStyle().FrameRounding);
 
 			if (file_currupted) {
 
@@ -459,6 +550,14 @@ namespace PFF {
 						ImGui::Image(m_world_icon->get_descriptor_set(), m_icon_size);
 						break;
 
+					case file_type::material:
+						ImGui::Image(m_material_icon->get_descriptor_set(), m_icon_size);
+						break;
+
+					case file_type::material_instance:
+						ImGui::Image(m_material_inst_icon->get_descriptor_set(), m_icon_size);
+						break;
+
 					case file_type::texture: {
 
 						if (m_asset_icons.contains(hash_value)) {
@@ -466,7 +565,7 @@ namespace PFF {
 							ImGui::Image(m_asset_icons[hash_value]->get_descriptor_set(), m_icon_size);
 							break;
 
-						} else {
+						} else {										// create icon
 
 							u32* pixel_data;
 							asset_file_header loc_asset_header{};
@@ -495,7 +594,7 @@ namespace PFF {
 				}
 			}
 
-			ImGui::TextWrapped("%s", wrapped_text.c_str());
+			ImGui::Text("%s", item_name.c_str());
 
 		}
 		ImGui::EndGroup();
@@ -508,25 +607,26 @@ namespace PFF {
 			// LOG(Trace, "m_selected_items count: " << m_selected_items.size());
 			if (m_selected_items.item_set.empty()) {
 
-				char shortened_item_name[ITEM_DRAD_DRAP_SOURCE_NAME_LENGTH + 4];
-				if (item_name.length() -1 > ITEM_DRAD_DRAP_SOURCE_NAME_LENGTH) {
-
-					const auto buffer = item_name.substr(0, ITEM_DRAD_DRAP_SOURCE_NAME_LENGTH);
-					snprintf(shortened_item_name, sizeof(shortened_item_name), "%s...", buffer.c_str());
-				}
-				else
-					snprintf(shortened_item_name, sizeof(shortened_item_name), "%s", item_name.c_str());
-
 				const std::string path_string = file_path.string();
 				ImGui::SetDragDropPayload("PROJECT_CONTENT_FILE", path_string.c_str(), path_string.length() + 1);
 
 				switch (loc_asset_file_header.type) {
-					case file_type::mesh:		ImGui::Image(m_mesh_asset_icon->get_descriptor_set(), m_icon_size, ImVec2(0, 0), ImVec2(1, 1), color); break;
-					case file_type::world:		ImGui::Image(m_world_icon->get_descriptor_set(), m_icon_size, ImVec2(0, 0), ImVec2(1, 1), color); break;
+					case file_type::mesh:				ImGui::Image(m_mesh_asset_icon->get_descriptor_set(), m_icon_size, ImVec2(0, 0), ImVec2(1, 1), color); break;
+					case file_type::world:				ImGui::Image(m_world_icon->get_descriptor_set(), m_icon_size, ImVec2(0, 0), ImVec2(1, 1), color); break;
+					case file_type::material:			ImGui::Image(m_material_icon->get_descriptor_set(), m_icon_size); break;
+					case file_type::material_instance:	ImGui::Image(m_material_inst_icon->get_descriptor_set(), m_icon_size); break;
+					case file_type::texture: {
+						if (m_asset_icons.contains(hash_value)) {
+
+							ImGui::Image(m_asset_icons[hash_value]->get_descriptor_set(), m_icon_size);
+							break;
+						}
+					}
+					[[fallthrough]];			// if image cant be found just show the warning image
 					default:					ImGui::Image(m_warning_icon->get_descriptor_set(), m_icon_size, ImVec2(0, 0), ImVec2(1, 1), (file_path == m_selected_items.main_item) ? ImVec4(.9f, .5f, 0.f, 1.f) : (m_selected_items.item_set.find(file_path) != m_selected_items.item_set.end()) ? ImVec4(.8f, .4f, 0.f, 1.f) : ImVec4(1.f, .6f, 0.f, 1.f)); break;
 				}
 
-				ImGui::Text("%s", shortened_item_name);
+				ImGui::Text("%s", item_name.c_str());
 				ImGui::EndDragDropSource();
 
 			} else {
@@ -551,24 +651,6 @@ namespace PFF {
 		UI::adjust_popup_to_window_bounds(expected_size);
 		std::string popup_name = "item_context_menu_" + item_name;
 		if (ImGui::BeginPopupContextItem(popup_name.c_str())) {
-
-			// if (ImGui::MenuItem("Testing deserialization")) {
-
-			// 	LOG(Trace, "Testing deserialization");
-
-			// 	u32* pixel_data;
-			// 	asset_file_header loc_asset_header{};
-			// 	general_texture_file_header loc_general_header{};
-			// 	specific_texture_file_header loc_specific_texture_header{};
-			// 	serialize_texture(file_path, pixel_data, loc_asset_header, loc_general_header, loc_specific_texture_header, serializer::option::load_from_file);
-
-			// 	std::vector<u32> new_pixels;
-			// 	downscale_image(pixel_data, loc_specific_texture_header.width, loc_specific_texture_header.height, 128, new_pixels, loc_specific_texture_header.width, loc_specific_texture_header.height);
-			// 	m_asset_icons[hash_value] = create_ref<image>(new_pixels.data(), loc_specific_texture_header.width, loc_specific_texture_header.height, image_format::RGBA);
-
-			// 	new_pixels.clear();
-			// 	delete pixel_data;
-			// }
 
 			if (ImGui::MenuItem("Rename"))
 				LOG(Info, "NOT IMPLEMENTED YET");
@@ -682,71 +764,6 @@ namespace PFF {
 	}
 
 
-	bool is_file_used(const std::filesystem::path& file_path) {
-
-		bool file_currupted = false;
-		file_curruption_source loc_file_curruption_source = file_curruption_source::unknown;
-		asset_file_header loc_asset_file_header;
-		file_currupted = try_to_deserialize_file_header(file_path, false, loc_file_curruption_source, loc_asset_file_header);
-
-		switch (loc_asset_file_header.type) {
-
-			case file_type::world: 				return false;
-			case file_type::map: 				return false;
-			case file_type::audio: 				return false;
-			case file_type::mesh: {
-				
-				// only checks for active use (in current world)	TODO: add a check that scans user code base for definitive anser
-				bool in_use = static_mesh_asset_manager::is_asset_in_active_use(file_path);
-				return in_use;
-			}
-			case file_type::texture: 			return false;
-			case file_type::material: 			return false;
-			case file_type::material_instance: 	return false;
-			default:
-			case file_type::none: 	return false;
-		}
-
-	}
-
-
-	void ref_check_files_and_sub_directory(std::filesystem::path file_path, deletion_consequenses& deletion_consequenses) {
-
-		if (!std::filesystem::is_directory(file_path))			// catch any missuses
-			return;
-
-		for (const auto path : std::filesystem::directory_iterator(file_path)) {
-
-			if (std::filesystem::is_directory(path)) {
-
-				deletion_consequenses.number_of_directoryies++;
-				ref_check_files_and_sub_directory(path.path(), deletion_consequenses);
-			} else {
-
-				deletion_consequenses.number_of_files++;
-				if (is_file_used(path.path()))
-					deletion_consequenses.effected_assets.insert(path.path().filename().replace_extension("").string());
-			}
-		}
-	}
-
-
-	void get_deletion_consequenses(const std::filesystem::path& file_path, deletion_consequenses& deletion_consequenses) {
-		
-		if (std::filesystem::is_directory(file_path)) {
-
-			deletion_consequenses.number_of_directoryies++;
-			ref_check_files_and_sub_directory(file_path, deletion_consequenses);
-		
-		} else {
-
-			deletion_consequenses.number_of_files++;
-			if (is_file_used(file_path))
-				deletion_consequenses.effected_assets.insert(file_path.filename().replace_extension("").string());
-		}
-	}
-
-
 	void content_browser::handel_deletion_action(const std::filesystem::path& file_path) {
 
 		VALIDATE(std::filesystem::exists(file_path), return, "deleting file [" << file_path << "]", "provided file path does not exist [" << file_path << "]");
@@ -835,19 +852,28 @@ namespace PFF {
 					}
 				}
 
-				if (UI::mouse_interation::right_clicked == UI::get_mouse_interation_on_window()) {
-
-					LOG(Trace, "Open popup to add new content");
+				if (UI::mouse_interation::right_clicked == UI::get_mouse_interation_on_window())
 					ImGui::OpenPopup("##content_browser_current_dir_popup");
-				}
 
 				UI::adjust_popup_to_window_bounds(ImVec2(200, 200));
 				if (ImGui::BeginPopup("##content_browser_current_dir_popup")) {
 
 
-					if (ImGui::Button("create folder")) {
+					if (UI::gray_button("create directory")) {
 
-						LOG(Info, "Not implemented yet");
+						if (std::filesystem::exists(m_selected_directory / "new_dir_")) {
+							u32 counter = 0;
+							std::stringstream dir_name{};
+							dir_name << "new_dir_" << util::to_string(counter);
+							while (std::filesystem::exists(m_selected_directory / dir_name.str()))  {
+								counter++;
+								dir_name.str("");
+								dir_name.flush();
+								dir_name << "new_dir_" << util::to_string(counter);
+							}
+							std::filesystem::create_directory(m_selected_directory / dir_name.str());
+						} else 
+							std::filesystem::create_directory(m_selected_directory / "new_dir_");
 					}
 
 					ImGui::Separator();
@@ -855,29 +881,35 @@ namespace PFF {
 
 					if (ImGui::BeginMenu("world")) {
 
-						if (ImGui::Button("Create empty world")) {
+						if (UI::gray_button("Create empty world")) {
 
 							LOG(Info, "Not implemented yet");
 						}
 
 						ImGui::EndMenu();
 					}
+					if (ImGui::BeginMenu("world")) {
 
-					if (ImGui::Button("Create empty world")) {
+						if (UI::gray_button("Create Material")) {
 
-						LOG(Info, "Not implemented yet");
-					}
-
-					if (ImGui::Button("Create empty world")) {
-
-						LOG(Info, "Not implemented yet");
+							LOG(Info, "Not implemented yet");
+						}
+	
+						if (UI::gray_button("Create Material Instance")) {
+	
+							
+							LOG(Info, "Not implemented yet");
+						}
+						ImGui::EndMenu();
 					}
 
 					ImGui::EndPopup();
 				}
 
-				if (search_query.empty())
+				if (search_query.empty()) {
+					UI::shift_cursor_pos(0, m_icon_padding.y);
 					show_current_folder_content(m_selected_directory);
+				}
 
 
 				else {

@@ -1,10 +1,6 @@
 
 #include <util/pch_editor.h>
 
-//#include <imgui.h>
-
-//#include "util/io/serializer.h"
-
 #include "util/ui/pannel_collection.h"
 #include "engine/platform/pff_window.h"
 #include "engine/layer/imgui_layer.h"
@@ -19,8 +15,6 @@
 #include "application.h"
 #include "PFF_editor.h"
 #include "engine/render/renderer.h"
-//#include "engine/render/renderer.h"
-//#include "engine/render/vk_swapchain.h"
 
 #include "editor_layer.h"
 
@@ -47,6 +41,8 @@ namespace PFF {
 		LOAD_ICON(world);
 		LOAD_ICON(warning);
 		LOAD_ICON(mesh_asset);
+		LOAD_ICON(material);
+		LOAD_ICON(material_inst);
 		LOAD_ICON(relation);
 		LOAD_ICON(file);
 		LOAD_ICON(file_proc);

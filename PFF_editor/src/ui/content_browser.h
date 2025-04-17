@@ -47,9 +47,10 @@ namespace PFF {
 		void show_search_result_for_current_folder(const std::filesystem::path& path, u32& item_index);
 		void show_current_folder_content(const std::filesystem::path& path);
 		
-		void display_file(const std::filesystem::path& file_path, int ID);
+		void display_file(const std::filesystem::path& file_path, int ID, ImVec2& text_size);
 		void handel_deletion_action(const std::filesystem::path& file_path);
-		
+		void wrapp_displayed_items(f32& max_text_height, const ImVec2 text_size, const ImVec2 item_padding, const f32 window_area_x);
+
 		std::filesystem::path						m_project_directory;
 		std::filesystem::path						m_selected_directory;
 		std::filesystem::path						m_partial_selected_directory;
@@ -68,6 +69,7 @@ namespace PFF {
 		deletion_consequenses						m_deletion_consequenses{};
 		bool										m_deletion_popup = false;
 		std::filesystem::path						m_path_to_delete{};
+		u32											m_max_number_of_lines_in_displayed_title = 3;
 		// std::vector<std::string>					m_still_used_files{};
 
 		ref<image>									m_folder_icon;
@@ -76,6 +78,8 @@ namespace PFF {
 		ref<image>									m_world_icon;
 		ref<image>									m_warning_icon;
 		ref<image>									m_mesh_asset_icon;
+		ref<image>									m_material_icon;
+		ref<image>									m_material_inst_icon;
 		ImVec2										m_icon_size;
 		ImVec2										m_icon_padding;
 	};

@@ -22,6 +22,7 @@ namespace PFF {
 
 	static logger_window m_logger_window;
 
+	
 	world_viewport_window::world_viewport_window() {
 
 		serialize(serializer::option::load_from_file);
@@ -42,6 +43,7 @@ namespace PFF {
 		m_logger_window					= logger_window{};
 	}
 
+
 	world_viewport_window::~world_viewport_window() {
 
 		m_transfrom_translation_image.reset();
@@ -54,6 +56,7 @@ namespace PFF {
 		m_mesh_mini_icon.reset();
 		serialize(serializer::option::save_to_file);
 	}
+
 
 	void world_viewport_window::window() {
 
@@ -91,6 +94,7 @@ namespace PFF {
 		m_deletion_queue.flush();
 	}
 
+
 	void world_viewport_window::show_possible_sub_window_options() {
 
 		ImGui::MenuItem("log display", "", &m_show_log_display);
@@ -101,6 +105,7 @@ namespace PFF {
 		ImGui::MenuItem("outliner", "", &m_show_outliner);
 		ImGui::MenuItem("details", "", &m_show_details);
 	}
+
 
 	void world_viewport_window::serialize(serializer::option option) {
 
@@ -164,6 +169,7 @@ namespace PFF {
 		}
 	}
 
+
 	void world_viewport_window::display_entity_children(ref<map> loc_map, PFF::entity entity) {
 
 		const auto& name_comp = entity.get_component<name_component>();
@@ -206,6 +212,7 @@ namespace PFF {
 		}
 	}
 
+
 	void world_viewport_window::list_all_components(PFF::entity entity) {
 
 		//ImGui::SameLine();
@@ -236,6 +243,7 @@ namespace PFF {
 
 		ImGui::NewLine();
 	}
+
 
 	void world_viewport_window::window_outliner() {
 
@@ -358,6 +366,7 @@ namespace PFF {
 		ImGui::End();
 	}
 
+
 	void world_viewport_window::outliner_entity_popup(const char* name, ref<map> map, PFF::entity entity) {
 
 		// Add a popup menu to the tree node
@@ -417,6 +426,7 @@ namespace PFF {
 
 		ImGui::End();
 	}
+
 
 	void world_viewport_window::window_general_debugger() {
 
@@ -489,6 +499,7 @@ namespace PFF {
 		ImGui::End();
 	}
 
+
 	void world_viewport_window::process_drop_of_file(const std::filesystem::path path, const bool set_as_selected_entity) {
 
 		asset_file_header loc_asset_file_header;
@@ -536,6 +547,7 @@ namespace PFF {
 			break;
 		}
 	}
+
 
 	void world_viewport_window::window_main_viewport() {
 
@@ -697,6 +709,7 @@ namespace PFF {
 		ImGui::End();
 	}
 
+
 	void world_viewport_window::window_renderer_backgrond_effect() {
 
 		if (!m_show_renderer_backgrond_effect)
@@ -751,6 +764,7 @@ namespace PFF {
 		ImGui::End();
 	}
 
+
 	void world_viewport_window::window_world_settings() {
 
 		if (!m_show_world_settings)
@@ -761,7 +775,5 @@ namespace PFF {
 
 		ImGui::End();
 	}
-
-
 
 }
