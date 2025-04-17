@@ -125,9 +125,10 @@ namespace PFF {
 
 		mobility									mobility_data = mobility::locked;
 		bool										shoudl_render = true;
-		std::filesystem::path						asset_path;							// MAYBE: doesnt need to be saved here, only needed for serializaation, maybe export to asset manager or UUID
 		ref<PFF::geometry::mesh_asset>				mesh_asset = nullptr;				// MAYBE: make private
+		std::filesystem::path						asset_path;							// MAYBE: doesnt need to be saved here, only needed for serializaation, maybe export to asset manager or UUID
 		material_instance*							material = nullptr;					// TODO: currently uses one material for all surfaces in mesh_asset, change so it can use diffrent materials per furface
+		std::filesystem::path						material_inst_path;					// MAYBE: doesnt need to be saved here, only needed for serializaation, maybe export to asset manager or UUID
 	};
 
 	//struct static_mesh_component {

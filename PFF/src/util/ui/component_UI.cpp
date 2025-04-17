@@ -14,11 +14,7 @@ namespace PFF::UI {
 
 		UI::try_display_component<mesh_component>("Mesh", entity, [](auto& component) {
 
-			UI::table_row([]() {
-
-				ImGui::Text("mesh asset");
-
-			}, [&]() {
+			UI::table_row([]() { ImGui::Text("mesh asset"); }, [&]() {
 
 				ImGui::SetNextItemWidth(ImGui::GetColumnWidth());
 				const auto comp_asset_path = component.asset_path.filename().string();
@@ -27,6 +23,8 @@ namespace PFF::UI {
 				if (ImGui::BeginDragDropTarget()) {
 					if (const ImGuiPayload* payload = ImGui::AcceptDragDropPayload("PROJECT_CONTENT_FILE")) {
 
+						// TODO: check if asset is a material instance
+						
 						const std::filesystem::path file_path = (const char*)payload->Data;
 						component.asset_path = util::extract_path_from_project_content_folder(file_path);
 						component.mesh_asset = static_mesh_asset_manager::get_from_path(component.asset_path);
@@ -35,11 +33,7 @@ namespace PFF::UI {
 				}
 
 			});
-			UI::table_row([]() {
-
-				ImGui::Text("mobility");
-
-			}, [&]() {
+			UI::table_row([]() { ImGui::Text("mobility"); }, [&]() {
 
 				static const char* items[] = { "locked", "movable", "dynamic" };
 				static int item_current_idx = static_cast<std::underlying_type_t<mobility>>(component.mobility_data);
@@ -61,8 +55,28 @@ namespace PFF::UI {
 				}
 
 			});
+			
 			UI::table_row("shoudl render", component.shoudl_render);
 
+			UI::table_row([]() { ImGui::Text("material instance"); }, [&]() {
+
+				ImGui::SetNextItemWidth(ImGui::GetColumnWidth());
+				const auto comp_asset_path = component.asset_path.filename().string();
+				ImGui::Text("%s", comp_asset_path.c_str());
+
+				if (ImGui::BeginDragDropTarget()) {
+					if (const ImGuiPayload* payload = ImGui::AcceptDragDropPayload("PROJECT_CONTENT_FILE")) {
+
+						// TODO: check if asset is a material instance
+
+						const std::filesystem::path file_path = (const char*)payload->Data;
+						component.material_inst_path = util::extract_path_from_project_content_folder(file_path);
+						component.material = meterial_manager::get_from_path(component.material_inst_path);
+					}
+					ImGui::EndDragDropTarget();
+				}
+
+			});
 		});
 
 	}

@@ -12,7 +12,7 @@ namespace PFF {
 
 	material_asset_manager::material_asset_manager() {}
 
-	ref<image> material_asset_manager::get_from_path(const std::filesystem::path path) {
+	ref<material_inst> material_asset_manager::get_from_path(const std::filesystem::path path) {
 
 		VALIDATE(path.extension() == PFF_ASSET_EXTENTION, return nullptr, "", "Provided path is not a PFF-asset");
 

@@ -3,6 +3,7 @@
 
 #include <imgui_internal.h>
 #include <util/ui/pannel_collection.h>
+#include <engine/resource_management/general_resource_manager.h>
 #include <engine/resource_management/headers.h>
 #include <engine/resource_management/mesh_headers.h>
 #include <engine/resource_management/static_mesh_asset_manager.h>
@@ -34,11 +35,11 @@ namespace PFF {
 	const ImVec2				folder_closed_icon_size(18, 17);																	// Calculate the icon size for the tree (make it smaller than regular icons)
 	ImGuiWindow*				folder_display_window{};
 
-	enum file_curruption_source {
-		unknown = 0,
-		empty_file,
-		header_incorrect,
-	};
+	// enum file_curruption_source {
+	// 	unknown = 0,
+	// 	empty_file,
+	// 	header_incorrect,
+	// };
 
 	const std::vector<std::pair<std::string, std::string>> posible_import_tile_types = {
 		{"All supported file types", "*.gltf;*.glb;*.png"},
@@ -82,41 +83,41 @@ namespace PFF {
 	}
 
 
-	FORCEINLINE bool try_to_deserialize_file_header(const std::filesystem::path& file_path, const bool log_messages, file_curruption_source& file_curruption_source, asset_file_header& loc_asset_file_header) {
+	// FORCEINLINE bool try_to_deserialize_file_header(const std::filesystem::path& file_path, const bool log_messages, file_curruption_source& file_curruption_source, asset_file_header& loc_asset_file_header) {
 
-		bool file_currupted = false;
-		file_curruption_source = file_curruption_source::unknown;
+	// 	bool file_currupted = false;
+	// 	file_curruption_source = file_curruption_source::unknown;
 
-		std::error_code loc_error_code;
-		if (!std::filesystem::file_size(file_path, loc_error_code)) {
+	// 	std::error_code loc_error_code;
+	// 	if (!std::filesystem::file_size(file_path, loc_error_code)) {
 
-			file_curruption_source = file_curruption_source::empty_file;
-			file_currupted = true;
+	// 		file_curruption_source = file_curruption_source::empty_file;
+	// 		file_currupted = true;
 
-			std::string faulty_file_name = file_path.filename().generic_string();
-			if (log_messages)
-				LOG(Warn, "file [" << faulty_file_name << "] is an empty file, will be marked as currupted");
-		}
+	// 		std::string faulty_file_name = file_path.filename().generic_string();
+	// 		if (log_messages)
+	// 			LOG(Warn, "file [" << faulty_file_name << "] is an empty file, will be marked as currupted");
+	// 	}
 
 
-		if (file_path.extension() == ".pffasset") {
+	// 	if (file_path.extension() == ".pffasset") {
 
-			serializer::binary(file_path, "PFF_asset_file", serializer::option::load_from_file)
-				.entry(loc_asset_file_header);
+	// 		serializer::binary(file_path, "PFF_asset_file", serializer::option::load_from_file)
+	// 			.entry(loc_asset_file_header);
 
-		} else if (file_path.extension() == ".pffworld") {
+	// 	} else if (file_path.extension() == ".pffworld") {
 
-			serializer::yaml(file_path, "map_data", serializer::option::load_from_file)
-				.sub_section("file_header", [&](serializer::yaml& header_section) {
+	// 		serializer::yaml(file_path, "map_data", serializer::option::load_from_file)
+	// 			.sub_section("file_header", [&](serializer::yaml& header_section) {
 
-					header_section.entry(KEY_VALUE(loc_asset_file_header.file_version))
-					.entry(KEY_VALUE(loc_asset_file_header.type))
-					.entry(KEY_VALUE(loc_asset_file_header.timestamp));
-			});
-		}
+	// 				header_section.entry(KEY_VALUE(loc_asset_file_header.file_version))
+	// 				.entry(KEY_VALUE(loc_asset_file_header.type))
+	// 				.entry(KEY_VALUE(loc_asset_file_header.timestamp));
+	// 		});
+	// 	}
 
-		return file_currupted;
-	}
+	// 	return file_currupted;
+	// }
 
 
 	FORCEINLINE bool is_file_used(const std::filesystem::path& file_path) {
@@ -124,7 +125,7 @@ namespace PFF {
 		bool file_currupted = false;
 		file_curruption_source loc_file_curruption_source = file_curruption_source::unknown;
 		asset_file_header loc_asset_file_header;
-		file_currupted = try_to_deserialize_file_header(file_path, false, loc_file_curruption_source, loc_asset_file_header);
+		file_currupted = resource_manger::try_to_deserialize_file_header(file_path, false, loc_file_curruption_source, loc_asset_file_header);
 
 		switch (loc_asset_file_header.type) {
 
@@ -517,9 +518,9 @@ namespace PFF {
 
 		size_t hash_value = std::filesystem::hash_value(file_path);
 		bool file_currupted = false;
-		file_curruption_source loc_file_curruption_source = file_curruption_source::unknown;
+		resource_manger::asset_curruption_source loc_file_curruption_source = resource_manger::asset_curruption_source::unknown;
 		asset_file_header loc_asset_file_header;
-		file_currupted = try_to_deserialize_file_header(file_path, !logged_warning_for_current_folder, loc_file_curruption_source, loc_asset_file_header);
+		file_currupted = resource_manger::try_to_deserialize_file_header(file_path, !logged_warning_for_current_folder, loc_file_curruption_source, loc_asset_file_header);
 
 		// Begin a new group for each item
 		const ImVec4& color = (file_path == m_selected_items.main_item) ? UI::get_action_color_00_active_ref() : (m_selected_items.item_set.find(file_path) != m_selected_items.item_set.end()) ? UI::get_action_color_00_faded_ref() : UI::get_action_color_gray_hover_ref(); // ImGui::GetStyle().Colors[ImGuiCol_ChildBg];
@@ -585,7 +586,7 @@ namespace PFF {
 
 					default:
 						file_currupted = true;
-						loc_file_curruption_source = file_curruption_source::header_incorrect;
+						loc_file_curruption_source = resource_manger::asset_curruption_source::header_incorrect;
 						std::string faulty_file_name = file_path.filename().generic_string();
 						if (!logged_warning_for_current_folder)
 							LOG(Warn, "file [" << faulty_file_name << "] cound not be identified, detected asset header type [" << asset_header_file_type_to_str(loc_asset_file_header.type) << "]");
@@ -644,9 +645,9 @@ namespace PFF {
 		if (file_currupted)
 			switch (loc_file_curruption_source) {					// aprocimate size by corruption type
 				default:
-				case file_curruption_source::unknown:				expected_size = ImVec2(280, 250); break;	// should display everything to help user
-				case file_curruption_source::header_incorrect:		expected_size = ImVec2(280, 250); break;	// should display header
-				case file_curruption_source::empty_file:			expected_size = ImVec2(180, 150); break;	// dosnt need to display anything other than size
+				case resource_manger::asset_curruption_source::unknown:				expected_size = ImVec2(280, 250); break;	// should display everything to help user
+				case resource_manger::asset_curruption_source::header_incorrect:		expected_size = ImVec2(280, 250); break;	// should display header
+				case resource_manger::asset_curruption_source::empty_file:			expected_size = ImVec2(180, 150); break;	// dosnt need to display anything other than size
 			}
 		UI::adjust_popup_to_window_bounds(expected_size);
 		std::string popup_name = "item_context_menu_" + item_name;
@@ -673,9 +674,9 @@ namespace PFF {
 
 				switch (loc_file_curruption_source) {
 					default:
-					case file_curruption_source::unknown:				ImGui::Text("Unknown reason for detecting corrupted file"); break;
-					case file_curruption_source::header_incorrect:		ImGui::Text("File corrupted because deserialized header type is incorrect"); break;
-					case file_curruption_source::empty_file:			ImGui::Text("File is empty and can't be used by game engine"); break;
+					case resource_manger::asset_curruption_source::unknown:				ImGui::Text("Unknown reason for detecting corrupted file"); break;
+					case resource_manger::asset_curruption_source::header_incorrect:		ImGui::Text("File corrupted because deserialized header type is incorrect"); break;
+					case resource_manger::asset_curruption_source::empty_file:			ImGui::Text("File is empty and can't be used by game engine"); break;
 				}
 
 				ImGui::Text("general data");
@@ -686,7 +687,7 @@ namespace PFF {
 				UI::table_row("file size", file_size_in_MB);
 				ImGui::EndTable();
 
-				if (loc_file_curruption_source != file_curruption_source::empty_file) {
+				if (loc_file_curruption_source != resource_manger::asset_curruption_source::empty_file) {
 
 					ImGui::Text("header data");
 
