@@ -45,8 +45,11 @@ namespace PFF::UI {
 	
 	void try_display_procedural_script_comp(PFF::entity entity);
 
+	void try_display_relationship_comp(PFF::entity entity);				// , const std::unordered_map<UUID, entt::entity>& entity_map
+	
 	void display_name_comp(PFF::entity entity);
 	
 	void display_transform_comp(PFF::entity entity, const bool display_rotation_in_degree = true);
+
 
 }

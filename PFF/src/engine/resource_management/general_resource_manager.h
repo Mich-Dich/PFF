@@ -2,7 +2,7 @@
 
 #include "engine/resource_management/headers.h"
 
-namespace PFF::resource_manger {
+namespace PFF::resource_manager {
 
 	enum class asset_curruption_source {
 		unknown = 0,

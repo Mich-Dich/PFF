@@ -417,12 +417,10 @@ namespace PFF {
 		}
 
 		UI::display_name_comp(m_selected_entity);
-
 		UI::display_transform_comp(m_selected_entity, PFF_editor::get().get_editor_settings_ref().display_rotator_in_degrees);
-
 		UI::try_display_mesh_comp(m_selected_entity);
-
 		UI::try_display_procedural_script_comp(m_selected_entity);
+		UI::try_display_relationship_comp(m_selected_entity);
 
 		ImGui::End();
 	}

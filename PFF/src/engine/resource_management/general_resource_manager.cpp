@@ -2,6 +2,7 @@
 #include "util/pffpch.h"
 
 #include "util/io/serializer_binary.h"
+#include "util/io/serializer_yaml.h"
 
 #include "general_resource_manager.h"
 
