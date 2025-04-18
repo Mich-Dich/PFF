@@ -17,6 +17,23 @@ namespace PFF {
 		other
 	};
 
+	
+	// ========================== DEV-ONLY ==========================	maybe: move to material and make material a class with inheritence
+	enum class DEV_ONLY_sampler : u8 {
+		linear = 0,
+		nearest,
+	};
+
+	struct material_instance_creation_data {
+	
+		std::filesystem::path				color_texture{};
+		DEV_ONLY_sampler					color_texture_sampler{};
+		std::filesystem::path				metal_rough_texture{};
+		DEV_ONLY_sampler					metal_rough_texture_sampler{};
+	};
+	// ========================== DEV-ONLY ==========================
+	
+
 	struct material_pipeline {
 
 #if defined PFF_RENDER_API_VULKAN

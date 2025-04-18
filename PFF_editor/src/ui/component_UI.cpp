@@ -30,15 +30,15 @@ namespace PFF::UI {
 					ImGui::Text("no material instance selected");
 
 				if (ImGui::BeginDragDropTarget()) {
-					if (const ImGuiPayload* payload = ImGui::AcceptDragDropPayload("PROJECT_ASSET_MESH")) {
+					if (const ImGuiPayload* payload = ImGui::AcceptDragDropPayload(DRAG_DROP_MESH)) {
 
 						const std::filesystem::path file_path = (const char*)payload->Data;
-						bool file_currupted = false;
+						bool file_deserialized = false;
 						PFF::resource_manager::asset_curruption_source loc_asset_curruption_source = PFF::resource_manager::asset_curruption_source::unknown;
 						PFF::asset_file_header loc_asset_file_header;
-						file_currupted = resource_manager::try_to_deserialize_file_header(file_path, true, loc_asset_curruption_source, loc_asset_file_header);
+						file_deserialized = resource_manager::try_to_deserialize_file_header(file_path, true, loc_asset_curruption_source, loc_asset_file_header);
 				
-						if (!file_currupted && loc_asset_file_header.type == PFF::file_type::mesh) {
+						if (file_deserialized && loc_asset_file_header.type == PFF::file_type::mesh) {
 
 							component.asset_path = util::extract_path_from_project_content_folder(file_path);
 							component.mesh_asset = static_mesh_asset_manager::get_from_path(component.asset_path);
@@ -84,17 +84,17 @@ namespace PFF::UI {
 					ImGui::Text("no material instance selected");
 
 				if (ImGui::BeginDragDropTarget()) {
-					if (const ImGuiPayload* payload = ImGui::AcceptDragDropPayload("PROJECT_ASSET_MATERIAL_INST")) {
+					if (const ImGuiPayload* payload = ImGui::AcceptDragDropPayload(DRAG_DROP_MATERIAL_INST)) {
 
 						const std::filesystem::path file_path = (const char*)payload->Data;
 
 						// TODO: check if asset is a material instance
-						bool file_currupted = false;
+						bool file_deserialized = false;
 						PFF::resource_manager::asset_curruption_source loc_asset_curruption_source = PFF::resource_manager::asset_curruption_source::unknown;
 						PFF::asset_file_header loc_asset_file_header;
-						file_currupted = resource_manager::try_to_deserialize_file_header(file_path, true, loc_asset_curruption_source, loc_asset_file_header);
+						file_deserialized = resource_manager::try_to_deserialize_file_header(file_path, true, loc_asset_curruption_source, loc_asset_file_header);
 				
-						if (!file_currupted && loc_asset_file_header.type == PFF::file_type::material_instance) {
+						if (file_deserialized && loc_asset_file_header.type == PFF::file_type::material_instance) {
 
 							component.material_inst_path = util::extract_path_from_project_content_folder(file_path);
 							// component.material = material_manager::get_from_path(component.material_inst_path);

@@ -43,7 +43,7 @@ namespace PFF::resource_manager {
 			});
 		}
 
-		return file_currupted;
+		return !file_currupted;
 	}
 
 

@@ -11,15 +11,15 @@ namespace PFF {
 
 		void window() override;
 
-		std::filesystem::path 		source_path;
-		std::filesystem::path 		destination_path;
+		std::filesystem::path 				source_path;
+		std::filesystem::path 				destination_path;
 		
 	private:
-		bool						m_asset_alredy_exists = false;
-		std::vector<std::string> 	m_assets_that_already_exist{};
-		std::string 				m_source_string{};
-		bool 						m_metadata_available = false;
-		char						m_possible_asset_name[256]{};
+		bool								m_asset_alredy_exists = false;
+		std::vector<std::string> 			m_assets_that_already_exist{};
+		std::string 						m_source_string{};
+		bool 								m_metadata_available = false;
+		char								m_possible_asset_name[256]{};
 	};
 
 }

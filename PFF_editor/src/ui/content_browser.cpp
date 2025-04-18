@@ -95,10 +95,10 @@ namespace PFF {
 	
 	FORCEINLINE bool is_file_used(const std::filesystem::path& file_path) {
 
-		bool file_currupted = false;
 		resource_manager::asset_curruption_source loc_file_curruption_source = resource_manager::asset_curruption_source::unknown;
 		asset_file_header loc_asset_file_header;
-		file_currupted = resource_manager::try_to_deserialize_file_header(file_path, false, loc_file_curruption_source, loc_asset_file_header);
+		if (!resource_manager::try_to_deserialize_file_header(file_path, false, loc_file_curruption_source, loc_asset_file_header))
+			return false;							// assuming currupted files are nover used
 
 		switch (loc_asset_file_header.type) {
 
@@ -491,10 +491,9 @@ namespace PFF {
 
 		const char* drag_drop_source = "PROJECT_CONTENT_FILE";
 		size_t hash_value = std::filesystem::hash_value(file_path);
-		bool file_currupted = false;
 		resource_manager::asset_curruption_source loc_file_curruption_source = resource_manager::asset_curruption_source::unknown;
 		asset_file_header loc_asset_file_header;
-		file_currupted = resource_manager::try_to_deserialize_file_header(file_path, !logged_warning_for_current_folder, loc_file_curruption_source, loc_asset_file_header);
+		bool file_deserialized = resource_manager::try_to_deserialize_file_header(file_path, !logged_warning_for_current_folder, loc_file_curruption_source, loc_asset_file_header);
 
 		// Begin a new group for each item
 		const ImVec4& color = (file_path == m_selected_items.main_item) ? UI::get_action_color_00_active_ref() : (m_selected_items.item_set.find(file_path) != m_selected_items.item_set.end()) ? UI::get_action_color_00_faded_ref() : UI::get_action_color_gray_hover_ref(); // ImGui::GetStyle().Colors[ImGuiCol_ChildBg];
@@ -510,7 +509,7 @@ namespace PFF {
 			text_size = ImGui::CalcTextSize(item_name.c_str());
 			draw_list->AddRectFilled(item_pos - m_icon_padding, item_pos + m_icon_size + m_icon_padding + ImVec2(0, text_size.y + ImGui::GetStyle().ItemSpacing.y*2), ImGui::GetColorU32(color), ImGui::GetStyle().FrameRounding);
 
-			if (file_currupted) {
+			if (!file_deserialized) {
 
 				ImGui::Image(m_warning_icon->get_descriptor_set(), m_icon_size, ImVec2(0, 0), ImVec2(1, 1), (file_path == m_selected_items.main_item) ? ImVec4(.9f, .5f, 0.f, 1.f) : (m_selected_items.item_set.find(file_path) != m_selected_items.item_set.end()) ? ImVec4(.8f, .4f, 0.f, 1.f) : ImVec4(1.f, .6f, 0.f, 1.f));
 
@@ -519,27 +518,27 @@ namespace PFF {
 				switch (loc_asset_file_header.type) {
 					case file_type::mesh:
 						ImGui::Image(m_mesh_asset_icon->get_descriptor_set(), m_icon_size);
-						drag_drop_source = "PROJECT_ASSET_MESH";
+						drag_drop_source = DRAG_DROP_MESH;
 						break;
 
 					case file_type::world:
 						ImGui::Image(m_world_icon->get_descriptor_set(), m_icon_size);
-						drag_drop_source = "PROJECT_ASSET_WORLD";
+						drag_drop_source = DRAG_DROP_WORLD;
 						break;
 
 					case file_type::material:
 						ImGui::Image(m_material_icon->get_descriptor_set(), m_icon_size);
-						drag_drop_source = "PROJECT_ASSET_MATERIAL";
+						drag_drop_source = DRAG_DROP_MATERIAL;
 						break;
 
 					case file_type::material_instance:
 						ImGui::Image(m_material_inst_icon->get_descriptor_set(), m_icon_size);
-						drag_drop_source = "PROJECT_ASSET_MATERIAL_INST";
+						drag_drop_source = DRAG_DROP_MATERIAL_INST;
 						break;
 
 					case file_type::texture: {
 
-						drag_drop_source = "PROJECT_ASSET_TEXTURE";
+						drag_drop_source = DRAG_DROP_TEXTURE;
 						if (m_asset_icons.contains(hash_value)) {
 
 							ImGui::Image(m_asset_icons[hash_value]->get_descriptor_set(), m_icon_size);
@@ -564,8 +563,8 @@ namespace PFF {
 					} break;
 
 					default:
-						file_currupted = true;
-						loc_file_curruption_source = resource_manager::asset_curruption_source::header_incorrect;
+						file_deserialized = false;																		// mark as currupted
+						loc_file_curruption_source = resource_manager::asset_curruption_source::header_incorrect;		// maks as currupted
 						std::string faulty_file_name = file_path.filename().generic_string();
 						if (!logged_warning_for_current_folder)
 							LOG(Warn, "file [" << faulty_file_name << "] cound not be identified, detected asset header type [" << asset_header_file_type_to_str(loc_asset_file_header.type) << "]");
@@ -622,7 +621,7 @@ namespace PFF {
 		}
 
 		ImVec2 expected_size = ImVec2(20, 50);						// Adjust based on content
-		if (file_currupted)
+		if (!file_deserialized)
 			switch (loc_file_curruption_source) {					// aprocimate size by corruption type
 				default:
 				case resource_manager::asset_curruption_source::unknown:				expected_size = ImVec2(280, 250); break;	// should display everything to help user
@@ -645,7 +644,7 @@ namespace PFF {
 					m_path_to_delete = file_path;
 			}
 
-			if (file_currupted) {											// display everything we know about the file to help user find error
+			if (!file_deserialized) {											// display everything we know about the file to help user find error
 
 				ImGui::SeparatorEx(ImGuiSeparatorFlags_Horizontal);
 				ImGui::Image(m_warning_icon->get_descriptor_set(), ImVec2(15), ImVec2(0, 0), ImVec2(1, 1), ImVec4(.9f, .5f, 0.f, 1.f));
@@ -901,10 +900,8 @@ namespace PFF {
 						}
 	
 						if (UI::gray_button("Create Material Instance")) {
-	
-							
-							// PFF_editor::get().get_editor_layer()->add_window<material_inst_create_window>(m_selected_directory);
-
+								
+							PFF_editor::get().get_editor_layer()->add_window<material_inst_create_window>(m_selected_directory);
 						}
 						ImGui::EndMenu();
 					}

@@ -60,11 +60,22 @@ namespace PFF {
 
     // ---------------------- SPECIFIC -----------------------------------------------------------------------------------------------------
     struct specific_material_instance_file_header {
-        std::filesystem::path               source_file{};          // need to also save path_size if required
-
-        material                            parent_material{};      // need to call create_instance() from this
+        std::filesystem::path               source_file{};                      // where is the instance saves on disk
+        std::filesystem::path               parent_material_path{};             // where is the parent saved on disk
         material::material_resources        resources{};
     };
     // -------------------------------------------------------------------------------------------------------------------------------------
 
 }
+
+
+
+/*
+material::material_resources
+    ref<image>						color_image;
+    VkSampler						color_sampler;
+    ref<image>						metal_rough_image;
+    VkSampler						metal_rough_sampler;
+    VkBuffer						data_buffer;
+    u32								data_buffer_offset;
+*/

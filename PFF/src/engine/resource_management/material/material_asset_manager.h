@@ -10,7 +10,8 @@ namespace PFF {
 		//static static_mesh_asset_manager& get() { return s_instance; }
 
 		// @breif path needs to be relative to project_dir/content
-		static ref<material_instance> get_from_path(const std::filesystem::path path);
+		static ref<material> get_material_from_path(const std::filesystem::path path);
+		static ref<material_instance> get_material_instance_from_path(const std::filesystem::path path);
 
 	private:
 

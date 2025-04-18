@@ -40,7 +40,6 @@
 #include "util/timing/stopwatch.h"
 #include "util/timing/timer.h"
 
-#include "util/ui/component_UI.h"
 #include "util/ui/imgui_markdown.h"
 #include "util/ui/pannel_collection.h"
 

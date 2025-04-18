@@ -12,6 +12,7 @@ namespace PFF::serializer {
 	yaml::yaml(const std::filesystem::path filename, const std::string& section_name, option option)
 		: m_filename(filename), m_name(section_name), m_option(option) {
 
+		// ASSERT(std::filesystem::is_regular_file(filename), "", "Provided filepath is not a file [" << filename.generic_string() << "]");
 		std::filesystem::path path = filename.parent_path();
 		ASSERT(io::create_directory(path), "", "Could not create file-path");
 

@@ -9,7 +9,7 @@
 #include "PFF_editor.h"
 
 #include "util/ui/pannel_collection.h"
-#include "util/ui/component_UI.h"
+#include "ui/component_UI.h"
 #include "engine/world/map.h"
 #include "engine/resource_management/mesh_serializer.h"
 

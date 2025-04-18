@@ -57,6 +57,7 @@ namespace PFF::util {
     // @brief Shuts down the Qt application framework.
     //          This function should be called during application cleanup to properly release Qt resources.
     void shutdown_qt();
+
 #endif
 
     // @brief Opens a file dialog to allow the user to select a file.

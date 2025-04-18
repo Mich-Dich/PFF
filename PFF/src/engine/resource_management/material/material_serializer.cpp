@@ -1,6 +1,8 @@
 
 #include "util/pffpch.h"
 
+#include "util/io/serializer_yaml.h"
+
 #include "material_serializer.h"
 
 namespace PFF {
@@ -21,9 +23,7 @@ namespace PFF {
 			ASSERT(asset_header.type == file_type::material, "", "Tryed to serialize mesh header, but provided asset type is not a mesh");
 		}
 
-		serializer.entry(asset_header)
-			.entry(general_header)
-			.entry(specific_header);
+		LOG(Warn, "Not implemented yet");
 
 		if (serializer.get_option() == serializer::option::load_from_file) {				// verify the file content
 
@@ -33,26 +33,55 @@ namespace PFF {
 	}
 	
 
+#define USE_YAML_FOR_TESTING
+#ifdef USE_YAML_FOR_TESTING
 
-	void serialize_material_instance(const std::filesystem::path filename, ref<material_instance> mesh_asset, asset_file_header& asset_header, general_material_instance_file_header& general_header, specific_material_instance_file_header& specific_header, const serializer::option option) {
+	void serialize_material_instance(const std::filesystem::path filename, asset_file_header& asset_header, general_material_instance_file_header& general_header, specific_material_instance_file_header& specific_header, material_instance_creation_data resources, const serializer::option option) {
 
-		auto serializer = serializer::binary(filename, "PFF_asset_file", option);
-		serialize_material_instance_headers(serializer, asset_header, general_header, specific_header, option);
-	// 	serializer.entry(mesh_asset->surfaces)
-	// 		.entry(mesh_asset->vertices)
-	// 		.entry(mesh_asset->indices)
-	// 		.entry(mesh_asset->bounds_data);
+		LOG(Trace, "filename [" << filename.generic_string() << "]");
+		// std::filesystem::file
+		serializer::yaml(filename, "PFF_asset_file", option)
+			.sub_section("asset_header", [&](serializer::yaml& section) {
+
+				section.entry(KEY_VALUE(resources.color_texture))
+					.entry(KEY_VALUE(resources.color_texture_sampler))
+					.entry(KEY_VALUE(resources.metal_rough_texture))
+					.entry(KEY_VALUE(resources.metal_rough_texture_sampler));
+			}).sub_section("asset_header", [&](serializer::yaml& section) {
+
+				section.entry(KEY_VALUE(asset_header.file_version))
+					.entry(KEY_VALUE(asset_header.type))
+					.entry(KEY_VALUE(asset_header.timestamp));
+			}).sub_section("general_header", [&](serializer::yaml& section) {
+
+				section.entry(KEY_VALUE(general_header.file_version));
+			}).sub_section("specific_header", [&](serializer::yaml& section) {
+
+				section.entry(KEY_VALUE(specific_header.source_file))
+					.entry(KEY_VALUE(specific_header.parent_material_path));
+			});
+
 	}
 
-	void serialize_material_instance_headers(serializer::binary& serializer, asset_file_header& asset_header, general_material_instance_file_header& general_header, specific_material_instance_file_header& specific_header, const serializer::option option) {
+	void serialize_material_instance_headers(serializer::yaml& serializer, asset_file_header& asset_header, general_material_instance_file_header& general_header, specific_material_instance_file_header& specific_header, const serializer::option option) {
 		if (serializer.get_option() == serializer::option::save_to_file) {					// verify the file content
 
 			ASSERT(asset_header.type == file_type::material_instance, "", "Tryed to serialize mesh header, but provided asset type is not a mesh");
 		}
 
-		serializer.entry(asset_header)
-			.entry(general_header)
-			.entry(specific_header);
+		serializer.sub_section("asset_header", [&](serializer::yaml& section) {
+
+			section.entry(KEY_VALUE(asset_header.file_version))
+					.entry(KEY_VALUE(asset_header.type))
+					.entry(KEY_VALUE(asset_header.timestamp));
+		}).sub_section("general_header", [&](serializer::yaml& section) {
+
+			section.entry(KEY_VALUE(general_header.file_version));
+		}).sub_section("specific_header", [&](serializer::yaml& section) {
+
+			section.entry(KEY_VALUE(specific_header.source_file))
+				.entry(KEY_VALUE(specific_header.parent_material_path));
+		});
 
 		if (serializer.get_option() == serializer::option::load_from_file) {				// verify the file content
 
@@ -60,5 +89,36 @@ namespace PFF {
 			// ASSERT(asset_header.type == file_type::mesh, "", "Tryed to deserialize mesh header, but provided asset_path is [  ] instead of mesh");
 		}
 	}
+
+#else
+
+void serialize_material_instance(const std::filesystem::path filename, ref<material_instance> mesh_asset, asset_file_header& asset_header, general_material_instance_file_header& general_header, specific_material_instance_file_header& specific_header, material_instance_creation_data resources, const serializer::option option) {
+
+	auto serializer = serializer::binary(filename, "PFF_asset_file", option);
+	serialize_material_instance_headers(serializer, asset_header, general_header, specific_header, option);
+// 	serializer.entry(mesh_asset->surfaces)
+// 		.entry(mesh_asset->vertices)
+// 		.entry(mesh_asset->indices)
+// 		.entry(mesh_asset->bounds_data);
+}
+
+void serialize_material_instance_headers(serializer::binary& serializer, asset_file_header& asset_header, general_material_instance_file_header& general_header, specific_material_instance_file_header& specific_header, const serializer::option option) {
+	if (serializer.get_option() == serializer::option::save_to_file) {					// verify the file content
+
+		ASSERT(asset_header.type == file_type::material_instance, "", "Tryed to serialize mesh header, but provided asset type is not a mesh");
+	}
+
+	serializer.entry(asset_header)
+		.entry(general_header)
+		.entry(specific_header);
+
+	if (serializer.get_option() == serializer::option::load_from_file) {				// verify the file content
+
+		ASSERT(asset_header.type == file_type::material_instance, "", "Tryed to deserialize mesh header, but provided asset_path is [" << asset_header_file_type_to_str(asset_header.type) << "] instead of mesh");
+		// ASSERT(asset_header.type == file_type::mesh, "", "Tryed to deserialize mesh header, but provided asset_path is [  ] instead of mesh");
+	}
+}
+
+#endif
 
 }
