@@ -67,6 +67,8 @@ namespace PFF::util {
     // @return Returns the path to the selected file, or an empty path if no file was selected.
 	std::filesystem::path file_dialog(const std::string& title = "Open", const std::vector<std::pair<std::string, std::string>>& filters = default_filters);
 
+    std::vector<std::filesystem::path> file_dialog_multi(const std::string& title = "Select file", const std::vector<std::pair<std::string, std::string>>& filters = default_filters);
+
     // @brief Retrieves the directory containing the currently running executable.
     //          This function is platform-specific, using `GetModuleFileNameW` on Windows and
     //          `/proc/self/exe` on Linux to determine the executable path.

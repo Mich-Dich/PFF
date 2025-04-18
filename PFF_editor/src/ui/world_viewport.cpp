@@ -411,7 +411,6 @@ namespace PFF {
 		if (m_selected_entity == entity()) {
 
 			ImGui::Text("No entity selected");
-
 			ImGui::End();
 			return;
 		}

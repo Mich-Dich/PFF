@@ -54,7 +54,20 @@ namespace PFF::texture_factory {
     
     bool import(const std::filesystem::path& source_path, const std::filesystem::path& destination_path, const load_options options) {
 
-        VALIDATE(std::filesystem::exists(source_path) && (source_path.extension() == ".png") && std::filesystem::is_regular_file(source_path), return false, "", "provided source path invalid [" << source_path << "]");
+        const bool correct_extention = source_path.extension() == ".png" || 
+                                        source_path.extension() == ".jpg" ||
+                                        source_path.extension() == ".jpeg" || 
+                                        source_path.extension() == ".jpe" || 
+                                        source_path.extension() == ".tga" || 
+                                        source_path.extension() == ".bmp" || 
+                                        source_path.extension() == ".psd" || 
+                                        source_path.extension() == ".gif" || 
+                                        source_path.extension() == ".hdr" || 
+                                        source_path.extension() == ".pic" || 
+                                        source_path.extension() == ".ppm" || 
+                                        source_path.extension() == ".pgm";
+
+        VALIDATE(std::filesystem::exists(source_path) && correct_extention && std::filesystem::is_regular_file(source_path), return false, "", "provided source path invalid [" << source_path << "]");
         std::filesystem::path new_asset_path = destination_path / source_path.filename().replace_extension(PFF_ASSET_EXTENTION);
         LOG(Trace, "Trying to import texture. source: " << source_path << " destination: " << new_asset_path);
 

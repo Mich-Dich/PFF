@@ -24,7 +24,10 @@ namespace PFF::UI {
 
 				ImGui::SetNextItemWidth(ImGui::GetColumnWidth());
 				const auto comp_asset_path = component.asset_path.filename().string();
-				ImGui::Text("%s", comp_asset_path.c_str());
+				if (comp_asset_path.empty())
+					ImGui::Text("%s", comp_asset_path.c_str());
+				else
+					ImGui::Text("no material instance selected");
 
 				if (ImGui::BeginDragDropTarget()) {
 					if (const ImGuiPayload* payload = ImGui::AcceptDragDropPayload("PROJECT_ASSET_MESH")) {
@@ -116,7 +119,7 @@ namespace PFF::UI {
 				UI::table_row_text("parent entity", "%s", entity.get_name().c_str());
 
 
-			UI::table_row([]() { ImGui::Text("child entitys"); }, [&]() {
+			UI::table_row([&]() { ImGui::Text("%ld child entitys", component.children_ID.size()); }, [&]() {
 
 				if (component.children_ID.empty()) {
 					ImGui::Text("no children");

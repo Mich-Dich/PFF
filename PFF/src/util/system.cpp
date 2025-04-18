@@ -383,6 +383,81 @@ namespace PFF::util {
     }
 
 
+    std::vector<std::filesystem::path> file_dialog_multi(const std::string& title, const std::vector<std::pair<std::string, std::string>>& filters) {
+
+#if defined(PFF_PLATFORM_WINDOWS)
+
+        HWND hwndOwner = GetActiveWindow();
+        OPENFILENAMEW ofn;
+        std::vector<std::wstring> filterW;
+        for (auto& f : filters)
+            filterW.push_back(std::wstring(f.first.begin(), f.first.end()) + L'\0' +
+                              std::wstring(f.second.begin(), f.second.end()) + L'\0');
+        // Concatenate filters and double‑null terminate
+        std::wstring filterStr;
+        for (auto& s : filterW) filterStr += s;
+        filterStr += L'\0';
+    
+        wchar_t szFiles[4096] = { 0 };
+        ZeroMemory(&ofn, sizeof(ofn));
+        ofn.lStructSize  = sizeof(ofn);
+        ofn.hwndOwner    = hwndOwner;
+        ofn.lpstrFile    = szFiles;
+        ofn.nMaxFile     = sizeof(szFiles) / sizeof(wchar_t);
+        ofn.lpstrFilter  = filterStr.c_str();
+        ofn.nFilterIndex = 1;
+        ofn.Flags        = OFN_PATHMUSTEXIST | OFN_FILEMUSTEXIST
+                          | OFN_ALLOWMULTISELECT | OFN_EXPLORER;
+        std::wstring wtitle(title.begin(), title.end());
+        ofn.lpstrTitle   = wtitle.c_str();
+    
+        if (GetOpenFileNameW(&ofn)) {
+            std::vector<std::filesystem::path> results;
+            std::wstring dir = szFiles;
+            wchar_t* p = szFiles + dir.size() + 1;
+            if (*p == L'\0') {
+                // Only one file selected
+                results.emplace_back(dir);
+            } else {
+                // Multiple files: parse names after directory
+                while (*p) {
+                    results.emplace_back(std::filesystem::path(dir) / p);
+                    p += wcslen(p) + 1;
+                }
+            }
+            return results;
+        }
+        return {};
+    
+#elif defined(PFF_PLATFORM_LINUX)
+
+         if (!qt_app) {
+            LOG(Error, "QApplication not initialized!");
+            return {};
+        }
+
+        QStringList nameFilters;
+        for (auto& f : filters) {
+            // Replace semicolons in the pattern with spaces
+            std::string pat = f.second;
+            std::replace(pat.begin(), pat.end(), ';', ' ');
+            nameFilters << QString::fromStdString(f.first + " (" + pat + ")");
+        }
+        QStringList files = QFileDialog::getOpenFileNames(
+            nullptr,
+            QString::fromUtf8(title.data()),
+            QString(),
+            nameFilters.join(";;")
+        );
+        std::vector<std::filesystem::path> results;
+        for (const auto& qf : files)
+            results.emplace_back(qf.toStdString());
+        return results;
+
+#endif
+    }
+    
+
     std::filesystem::path get_executable_path() {
 
     #if defined(PFF_PLATFORM_WINDOWS)

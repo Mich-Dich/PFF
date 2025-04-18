@@ -27,10 +27,10 @@ namespace PFF {
     // -------------------------------------------------------------------------------------------------------------------------------------
 
     // ---------------------- SPECIFIC -----------------------------------------------------------------------------------------------------
-    struct specific_texture_file_header {
+    struct specific_material_file_header {
         std::string                         name{};
         std::filesystem::path               source_file{};          // need to also save path_size if required
-        material_type                       material_type{};
+        material_type                       type{};
 
         material                            parent_material{};      // need to call create_instance() from this
         material::material_resources        resources{};
@@ -53,13 +53,13 @@ namespace PFF {
     // -------------------------------------------------------------------------------------------------------------------------------------
 
     // ---------------------- GENERAL ------------------------------------------------------------------------------------------------------
-    struct general_material_file_header {
+    struct general_material_instance_file_header {
         version                             file_version{};         // header version
     };
     // -------------------------------------------------------------------------------------------------------------------------------------
 
     // ---------------------- SPECIFIC -----------------------------------------------------------------------------------------------------
-    struct specific_texture_file_header {
+    struct specific_material_instance_file_header {
         std::filesystem::path               source_file{};          // need to also save path_size if required
 
         material                            parent_material{};      // need to call create_instance() from this

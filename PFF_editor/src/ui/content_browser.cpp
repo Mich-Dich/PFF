@@ -10,6 +10,7 @@
 
 #include "ui/import/mesh_import_window.h"
 #include "ui/import/texture_import_window.h"
+#include "ui/creation/material_inst_create_window.h"
 #include "util/import_dialog.h"
 #include "PFF_editor.h"
 #include "editor_layer.h"
@@ -42,9 +43,18 @@ namespace PFF {
 	// };
 
 	const std::vector<std::pair<std::string, std::string>> posible_import_tile_types = {
-		{"All supported file types", "*.gltf;*.glb;*.png"},
-		{"glTF 2.0 file", "*.gltf;*.glb"},												// for meshes
-		{"PNG", "*.png"},																// for images
+		{"All supported file types",    "*.gltf;*.glb;*.png;*.jpg;*.jpeg;*.jpe;*.tga;*.bmp;*.psd;*.gif;*.hdr;*.pic;*.ppm;*.pgm"},
+		{"glTF 2.0 files",              "*.gltf;*.glb"},
+		{"Images",                 		"*.png;*.jpg;*.jpeg;*.jpe;*.tga;*.bmp;*.psd;*.gif;*.hdr;*.pic;*.ppm;*.pgm"},					// all images
+		{"JPEG images",                 "*.jpg;*.jpeg;*.jpe"},
+		{"PNG images",                  "*.png"},
+		{"TGA images",                  "*.tga"},
+		{"BMP images",                  "*.bmp"},
+		{"PSD images",                  "*.psd"},
+		{"GIF images",                  "*.gif"},
+		{"HDR (Radiance .hdr)",         "*.hdr"},
+		{"Softimage PIC",               "*.pic"},
+		{"PNM (PPM/PGM)",               "*.ppm;*.pgm"},
 	};
 
 
@@ -301,7 +311,7 @@ namespace PFF {
 			UI::shift_cursor_pos(item_padding.x *2, 0);
 		} else {
 			UI::shift_cursor_pos(0, item_padding.y *3); //  + max_text_height);
-			LOG(Trace, "max_text_height: " << max_text_height << "  text_size.y: " << text_size.y << "    Y: " << item_padding.y + max_text_height - text_size.y);
+			// LOG(Trace, "max_text_height: " << max_text_height << "  text_size.y: " << text_size.y << "    Y: " << item_padding.y + max_text_height - text_size.y);
 			max_text_height = 0;																								// reset when entering new line
 		}
 	}
@@ -782,16 +792,38 @@ namespace PFF {
 
 				if (ImGui::Button(" import ##content_browser_import")) {
 
-					std::filesystem::path source_path = util::file_dialog("Import asset", posible_import_tile_types);
-					
-					if (source_path.extension() == ".gltf" || source_path.extension() == ".glb")
-						PFF_editor::get().get_editor_layer()->add_window<mesh_import_window>(source_path, m_selected_directory);
-					
-					else if (source_path.extension() == ".png")
-						PFF_editor::get().get_editor_layer()->add_window<texture_import_window>(source_path, m_selected_directory);
-					
-					else
-						LOG(Trace, "Tryed to import unsupported file type")										// TODO: add a notification system to main window
+					std::vector<std::filesystem::path> source_paths = util::file_dialog_multi("Import asset", posible_import_tile_types);
+
+					std::vector<std::filesystem::path> image_source_paths{};
+					for (const auto path : source_paths)
+						if (path.extension() == ".png" 	||
+							path.extension() == ".jpg" 	||
+							path.extension() == ".jpeg" ||
+							path.extension() == ".jpe" 	||
+							path.extension() == ".tga" 	||
+							path.extension() == ".bmp" 	||
+							path.extension() == ".psd" 	||
+							path.extension() == ".gif" 	||
+							path.extension() == ".hdr" 	||
+							path.extension() == ".pic" 	||
+							path.extension() == ".ppm" 	||
+							path.extension() == ".pgm")
+								image_source_paths.push_back(path);
+
+					PFF_editor::get().get_editor_layer()->add_window<texture_import_window>(std::move(image_source_paths), m_selected_directory);
+				
+
+					for (const auto path : source_paths) {
+
+						if (path.extension() == ".gltf" || path.extension() == ".glb")
+							PFF_editor::get().get_editor_layer()->add_window<mesh_import_window>(path, m_selected_directory);
+						
+						// else if (path.extension() == ".png")
+						// 	PFF_editor::get().get_editor_layer()->add_window<texture_import_window>(source_paths, m_selected_directory);
+						
+						else
+							LOG(Warn, "Tryed to import unsupported file type")										// TODO: add a notification system to main window
+					}
 				}
 
 				ImGui::SameLine();
@@ -845,6 +877,8 @@ namespace PFF {
 							std::filesystem::create_directory(m_selected_directory / dir_name.str());
 						} else 
 							std::filesystem::create_directory(m_selected_directory / "new_dir_");
+
+						ImGui::CloseCurrentPopup();
 					}
 
 					ImGui::Separator();
@@ -859,7 +893,7 @@ namespace PFF {
 
 						ImGui::EndMenu();
 					}
-					if (ImGui::BeginMenu("world")) {
+					if (ImGui::BeginMenu("material")) {
 
 						if (UI::gray_button("Create Material")) {
 
@@ -869,7 +903,8 @@ namespace PFF {
 						if (UI::gray_button("Create Material Instance")) {
 	
 							
-							LOG(Info, "Not implemented yet");
+							// PFF_editor::get().get_editor_layer()->add_window<material_inst_create_window>(m_selected_directory);
+
 						}
 						ImGui::EndMenu();
 					}
