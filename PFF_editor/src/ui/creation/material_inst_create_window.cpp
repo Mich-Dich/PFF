@@ -15,12 +15,13 @@
 namespace PFF {
 
 	static material_instance_creation_data        resources{};
+	static const char* sampler_items[] = { "linear", "nearest" };
 
 
 	material_inst_create_window::material_inst_create_window(const std::filesystem::path destination_path)
 		: destination_path(destination_path) {
 
-		m_asset_alredy_exists = true;														// default to true while in dev
+		m_asset_alredy_exists = false;														// default to true while in dev
 		std::strncpy(m_possible_asset_name, "new_instance", sizeof(m_possible_asset_name) - 1);
 		m_possible_asset_name[sizeof(m_possible_asset_name) - 1] = '\0';
 		resources = material_instance_creation_data{}; 										// reset resources
@@ -33,11 +34,11 @@ namespace PFF {
 
 		ImGuiWindowFlags window_flags = ImGuiWindowFlags_NoDocking | ImGuiWindowFlags_AlwaysAutoResize | ImGuiWindowFlags_NoMove | ImGuiWindowFlags_NoCollapse;
 		ImGui::SetNextWindowPos(ImGui::GetMainViewport()->GetCenter(), ImGuiCond_Always, ImVec2(0.5f, 0.5f));
-
+		ImGui::SetNextWindowSize(ImVec2(200, 200), ImGuiCond_Appearing);
 		if (ImGui::Begin("Material Instance creator", &show_window, window_flags)) {
 
 			ImGui::Text("Name of new material instance");
-			if (ImGui::InputText("Asset Name", m_possible_asset_name, sizeof(m_possible_asset_name)))
+			if (ImGui::InputText("##material_inst_create_window_asset_nName", m_possible_asset_name, sizeof(m_possible_asset_name)))
 			m_asset_alredy_exists = std::filesystem::exists(destination_path / std::string(m_possible_asset_name));
 
 			UI::begin_table("new material instance settings");
@@ -74,6 +75,30 @@ namespace PFF {
 		
 			});
 
+			UI::table_row([]() { ImGui::Text("Color Texture Sampler"); }, [&]() {
+
+				static int item_current_idx = static_cast<std::underlying_type_t<texture_sampler>>(resources.color_texture_sampler);
+				const char* combo_preview_value = sampler_items[item_current_idx];
+				static ImGuiComboFlags flags = 0;
+				ImGui::SetNextItemWidth(ImGui::GetColumnWidth());
+				if (ImGui::BeginCombo("##material_inst_create_window_color_texture_sampler_selector", combo_preview_value, flags)) {
+
+					for (int n = 0; n < IM_ARRAYSIZE(sampler_items); n++) {
+						const bool is_selected = (item_current_idx == n);
+						if (ImGui::Selectable(sampler_items[n], is_selected)) {
+
+							item_current_idx = n;
+							resources.color_texture_sampler = (texture_sampler)item_current_idx;
+						}
+
+						if (is_selected)
+							ImGui::SetItemDefaultFocus();
+					}
+					ImGui::EndCombo();
+				}
+
+			});
+
 			UI::table_row([]() { ImGui::Text("Metal/Roughness Texture"); }, [&]() {
 
 				ImGui::SetNextItemWidth(ImGui::GetColumnWidth());
@@ -100,6 +125,31 @@ namespace PFF {
 				}
 		
 			});
+
+			UI::table_row([]() { ImGui::Text("Metal/Roughness Texture Sampler"); }, [&]() {
+
+				static int item_current_idx = static_cast<std::underlying_type_t<texture_sampler>>(resources.metal_rough_texture_sampler);
+				const char* combo_preview_value = sampler_items[item_current_idx];
+				static ImGuiComboFlags flags = 0;
+				ImGui::SetNextItemWidth(ImGui::GetColumnWidth());
+				if (ImGui::BeginCombo("##material_inst_create_window_metal_rough_texture_sampler_selector", combo_preview_value, flags)) {
+
+					for (int n = 0; n < IM_ARRAYSIZE(sampler_items); n++) {
+						const bool is_selected = (item_current_idx == n);
+						if (ImGui::Selectable(sampler_items[n], is_selected)) {
+
+							item_current_idx = n;
+							resources.metal_rough_texture_sampler = (texture_sampler)item_current_idx;
+						}
+
+						if (is_selected)
+							ImGui::SetItemDefaultFocus();
+					}
+					ImGui::EndCombo();
+				}
+
+			});
+
 			UI::end_table();
 
 			
@@ -142,6 +192,11 @@ namespace PFF {
 			}
 			if (block_continue)
 				ImGui::EndDisabled();
+			
+			if (block_continue && ImGui::BeginItemTooltip()) {
+				ImGui::Text("Material Instance cant be created while [Color Texture] and [Metal/Roughness Texture] are not set");
+				ImGui::EndTooltip();
+			}
 
 		}
 		ImGui::End();

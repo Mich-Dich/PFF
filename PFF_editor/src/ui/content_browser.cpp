@@ -960,6 +960,7 @@ namespace PFF {
 		
 		ImGuiWindowFlags popup_window_flags = ImGuiWindowFlags_NoDocking | ImGuiWindowFlags_AlwaysAutoResize | ImGuiWindowFlags_NoMove | ImGuiWindowFlags_NoCollapse;
 		ImGui::SetNextWindowPos(ImGui::GetMainViewport()->GetCenter(), ImGuiCond_Always, ImVec2(0.5f, 0.5f));
+		ImGui::SetNextWindowSize(ImVec2(200, 200), ImGuiCond_Appearing);
 		if (ImGui::BeginPopupModal("Deletion confirmation", NULL, popup_window_flags)) {
 
 			if (m_deletion_consequenses.number_of_directoryies) {

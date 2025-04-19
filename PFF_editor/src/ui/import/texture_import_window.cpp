@@ -35,6 +35,7 @@ namespace PFF {
 			return;
 
 		ImGuiWindowFlags window_flags = ImGuiWindowFlags_NoDocking | ImGuiWindowFlags_AlwaysAutoResize | ImGuiWindowFlags_NoMove | ImGuiWindowFlags_NoCollapse;
+		ImGui::SetNextWindowSize(ImVec2(200, 200), ImGuiCond_Appearing);
 		ImGui::SetNextWindowPos(ImGui::GetMainViewport()->GetCenter(), ImGuiCond_Always, ImVec2(0.5f, 0.5f));
 
 		if (ImGui::Begin("Texture Importer", &show_window, window_flags)) {

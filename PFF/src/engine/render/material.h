@@ -20,7 +20,7 @@ namespace PFF {
 
 	
 	// ========================== DEV-ONLY ==========================	maybe: move to material and make material a class with inheritence
-	enum class DEV_ONLY_sampler : u8 {
+	enum class texture_sampler : u8 {
 		linear = 0,
 		nearest,
 	};
@@ -28,9 +28,9 @@ namespace PFF {
 	struct material_instance_creation_data {
 	
 		std::filesystem::path				color_texture{};
-		DEV_ONLY_sampler					color_texture_sampler{};
+		texture_sampler						color_texture_sampler{};
 		std::filesystem::path				metal_rough_texture{};
-		DEV_ONLY_sampler					metal_rough_texture_sampler{};
+		texture_sampler						metal_rough_texture_sampler{};
 	};
 	// ========================== DEV-ONLY ==========================
 	

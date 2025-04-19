@@ -30,6 +30,7 @@ namespace PFF {
 
 		ImGuiWindowFlags window_flags = ImGuiWindowFlags_NoDocking | ImGuiWindowFlags_AlwaysAutoResize | ImGuiWindowFlags_NoMove | ImGuiWindowFlags_NoCollapse;
 		ImGui::SetNextWindowPos(ImGui::GetMainViewport()->GetCenter(), ImGuiCond_Always, ImVec2(0.5f, 0.5f));
+		ImGui::SetNextWindowSize(ImVec2(200, 200), ImGuiCond_Appearing);
 		if (ImGui::Begin("Mesh Importer", &show_window, window_flags)) {
 
 			UI::begin_table("Mesh Import Settings");
