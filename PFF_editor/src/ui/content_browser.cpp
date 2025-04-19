@@ -563,6 +563,12 @@ namespace PFF {
 					} break;
 
 					default:
+
+						// ============================== DEV-ONLY (using yaml for serialization as test in material instance) ==============================
+						drag_drop_source = DRAG_DROP_MATERIAL_INST;
+						// ============================== DEV-ONLY (using yaml for serialization as test in material instance) ==============================
+
+
 						file_deserialized = false;																		// mark as currupted
 						loc_file_curruption_source = resource_manager::asset_curruption_source::header_incorrect;		// maks as currupted
 						std::string faulty_file_name = file_path.filename().generic_string();

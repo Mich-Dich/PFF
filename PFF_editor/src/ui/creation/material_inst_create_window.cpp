@@ -47,7 +47,7 @@ namespace PFF {
 				ImGui::SetNextItemWidth(ImGui::GetColumnWidth());
 				const auto comp_asset_path = resources.color_texture.generic_string();
 				if (!comp_asset_path.empty())
-					ImGui::Text("path: %s", comp_asset_path.c_str());
+					ImGui::Text("%s", comp_asset_path.c_str());
 				else
 					ImGui::Text("no texture selected");
 
@@ -62,7 +62,7 @@ namespace PFF {
 						if (resource_manager::try_to_deserialize_file_header(file_path, true, asset_curruption_reason, general_header)) {
 	
 							LOG(Debug, "Setting color texture")
-							resources.color_texture = file_path;
+							resources.color_texture = util::extract_path_from_project_content_folder(file_path);
 						} else
 							LOG(Warn, "Dropped file cant be used because file is currupted [" << (u32)asset_curruption_reason << "]")
 						// image_asset_manager::get_from_path(file_path);											// TODO: save image in resources		load image only on "Confirm" button
@@ -89,7 +89,7 @@ namespace PFF {
 						asset_file_header general_header{};
 						if (resource_manager::try_to_deserialize_file_header(file_path, true, asset_curruption_reason, general_header)) {
 	
-							resources.metal_rough_texture = file_path;
+							resources.metal_rough_texture = util::extract_path_from_project_content_folder(file_path);
 						}
 						// image_asset_manager::get_from_path(file_path);											// TODO: save image in resources		load image only on "Confirm" button
 					}

@@ -56,14 +56,17 @@ namespace PFF::render::vulkan {
 		PFF_DEFAULT_GETTER(VkSampler,				default_sampler_nearest);
 		PFF_DEFAULT_GETTER(VkDevice,				device);
 		PFF_DEFAULT_GETTER(VmaAllocator,			allocator);
-		PFF_DEFAULT_GETTER_POINTER(material,		metal_rough_material);
+		PFF_DEFAULT_GETTER_REF(material,		metal_rough_material);
 		
 		FORCEINLINE void set_imugi_viewport_size(glm::u32vec2 imugi_viewport_size) { m_imugi_viewport_size = imugi_viewport_size; }
 
-		PFF_DEFAULT_GETTER(VkDescriptorSetLayout,	gpu_scene_data_descriptor_layout);
-
-		PFF_DEFAULT_GETTER_POINTER(image,			draw_image)
-		PFF_DEFAULT_GETTER_POINTER(image,			depth_image)
+		PFF_DEFAULT_GETTER(VkDescriptorSetLayout,			gpu_scene_data_descriptor_layout);
+		PFF_DEFAULT_GETTER(descriptor_allocator_growable,	global_descriptor_allocator)
+		
+		VkBuffer get_material_constant_buffer() { return m_material_constant.buffer; }
+		// PFF_DEFAULT_GETTER_POINTER(vk_buffer, 				material_constant)
+		PFF_DEFAULT_GETTER_POINTER(image,					draw_image)
+		PFF_DEFAULT_GETTER_POINTER(image,					depth_image)
 
 		void setup(ref<pff_window> window, ref<PFF::layer_stack> layer_stack);
 		void shutdown();
@@ -234,7 +237,8 @@ namespace PFF::render::vulkan {
 		VkSampler									m_default_sampler_nearest;
 		VkDescriptorSetLayout						m_single_image_descriptor_layout;
 		material									m_metal_rough_material;
-		material_instance							m_default_material;
+		ref<material_instance>						m_default_material;
+		vk_buffer 									m_material_constant;
 
 		// ---------------------------- data for debug ---------------------------- 
 #ifdef PFF_RENDERER_DEBUG_CAPABILITY

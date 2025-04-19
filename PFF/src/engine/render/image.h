@@ -26,6 +26,7 @@ namespace PFF {
         image(void* data, extent_3D size, image_format format, bool mipmapped = false);
         image(void* data, u32 width, u32 height, image_format format, bool mipmapped = false);
         image(std::filesystem::path image_path, image_format format, bool mipmapped = false);
+        // image(std::filesystem::path image_path);                                                        // load from PFF_ASSET
         ~image();
 
         PFF_DEFAULT_GETTER_SETTER_ALL(VkImage,          image);

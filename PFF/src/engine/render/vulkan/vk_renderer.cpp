@@ -701,23 +701,23 @@ namespace PFF::render::vulkan {
 		// =========================================================== DEFAULT MATERIAL =========================================================== 
 
 		//set the uniform buffer for the material data
-		vk_buffer material_constant = create_buffer(sizeof(material::material_constants), VK_BUFFER_USAGE_UNIFORM_BUFFER_BIT, VMA_MEMORY_USAGE_CPU_TO_GPU);
+		m_material_constant = create_buffer(sizeof(material::material_constants), VK_BUFFER_USAGE_UNIFORM_BUFFER_BIT, VMA_MEMORY_USAGE_CPU_TO_GPU);
 
 		//write the buffer
-		material::material_constants* scene_uniform_data = (material::material_constants*)material_constant.allocation->GetMappedData();
+		material::material_constants* scene_uniform_data = (material::material_constants*)m_material_constant.allocation->GetMappedData();
 		scene_uniform_data->color_factors = glm::vec4{ 1, 1, 1, 1 };
 		scene_uniform_data->metal_rough_factors = glm::vec4{ 1, 0.5, 0, 0 };
 
-		m_deletion_queue.push_func([this, material_constant]() { destroy_buffer(material_constant); });
+		m_deletion_queue.push_func([this]() { destroy_buffer(m_material_constant); });
 
 		material::material_resources material_resources;						//default the material textures
 		material_resources.color_image = m_error_checkerboard_image;
 		material_resources.color_sampler = m_default_sampler_nearest;
 		material_resources.metal_rough_image = m_error_checkerboard_image;
 		material_resources.metal_rough_sampler = m_default_sampler_nearest;
-		material_resources.data_buffer = material_constant.buffer;
+		material_resources.data_buffer = m_material_constant.buffer;
 		material_resources.data_buffer_offset = 0;
-		m_default_material = m_metal_rough_material.create_instance(material_pass::main_color, material_resources, m_global_descriptor_allocator);
+		m_default_material = create_ref<material_instance>(m_metal_rough_material.create_instance(material_pass::main_color, material_resources));
 		
 #ifdef PFF_RENDERER_DEBUG_CAPABILITY
 
@@ -726,9 +726,9 @@ namespace PFF::render::vulkan {
 		debug_lines_material_resources.color_sampler = m_default_sampler_nearest;
 		debug_lines_material_resources.metal_rough_image = m_error_checkerboard_image;
 		debug_lines_material_resources.metal_rough_sampler = m_default_sampler_nearest;
-		debug_lines_material_resources.data_buffer = material_constant.buffer;
+		debug_lines_material_resources.data_buffer = m_material_constant.buffer;
 		debug_lines_material_resources.data_buffer_offset = 0;
-		m_debug_lines_material_inst = m_debug_lines_material.create_instance(material_pass::main_color, debug_lines_material_resources, m_global_descriptor_allocator);
+		m_debug_lines_material_inst = m_debug_lines_material.create_instance(material_pass::main_color, debug_lines_material_resources);
 
 #endif // PFF_RENDERER_DEBUG_CAPABILITY
 	 
@@ -1058,10 +1058,10 @@ namespace PFF::render::vulkan {
 	
 #if 1	// Try new initalization with new shader
 		VkShaderModule mesh_frag_shader;
-		ASSERT(util::load_shader_module(PFF::util::get_executable_path() / "../PFF/shaders/tex_image.frag.spv", m_device, &mesh_frag_shader), "Triangle fragment shader succesfully loaded", "Error when building the fragment shader");
+		ASSERT(util::load_shader_module(PFF::util::get_executable_path() / "../PFF/shaders/tex_image.frag.spv", m_device, &mesh_frag_shader), "", "Error when building the fragment shader");
 
 		VkShaderModule mesh_vertex_shader;
-		ASSERT(util::load_shader_module(PFF::util::get_executable_path() / "../PFF/shaders/colored_triangle_mesh.vert.spv", m_device, &mesh_vertex_shader), "Triangle vertex shader succesfully loaded", "Error when building the vertex shader");
+		ASSERT(util::load_shader_module(PFF::util::get_executable_path() / "../PFF/shaders/colored_triangle_mesh.vert.spv", m_device, &mesh_vertex_shader), "", "Error when building the vertex shader");
 
 		VkPushConstantRange bufferRange{};
 		bufferRange.offset = 0;
@@ -1254,7 +1254,7 @@ namespace PFF::render::vulkan {
 		vkCmdDraw(cmd, 4, 1, 0, 0);  // 4 vertices
 
 
-		material_instance* last_material = nullptr;
+		ref<material_instance> last_material = nullptr;
 		material_pipeline* last_pipeline = nullptr;
 
 
@@ -1283,11 +1283,11 @@ namespace PFF::render::vulkan {
 					// oclution culling
 
 				// only bind material and pipeline when needed
-				material_instance* loc_material = (mesh_asset.material != nullptr) ? mesh_asset.material : &m_default_material;
+				ref<material_instance> loc_material = (mesh_asset.material != nullptr) ? mesh_asset.material : m_default_material;
 				if (last_material != loc_material) {
 
 					last_material = loc_material;
-					material_pipeline* loc_pipeline = (loc_material->pipeline != nullptr) ? loc_material->pipeline : m_default_material.pipeline;
+					material_pipeline* loc_pipeline = (loc_material->pipeline != nullptr) ? loc_material->pipeline : m_default_material->pipeline;
 					if (last_pipeline != loc_pipeline) {
 
 						last_pipeline = loc_pipeline;
@@ -1348,11 +1348,11 @@ namespace PFF::render::vulkan {
 				// oclution culling
 
 			// only bind material and pipeline when needed
-			material_instance* loc_material = (mesh_comp.material != nullptr) ? mesh_comp.material : &m_default_material;
+			ref<material_instance> loc_material = (mesh_comp.material != nullptr) ? mesh_comp.material : m_default_material;
 			if (last_material != loc_material) {
 
 				last_material = loc_material;
-				material_pipeline* loc_pipeline = (loc_material->pipeline != nullptr) ? loc_material->pipeline : m_default_material.pipeline;
+				material_pipeline* loc_pipeline = (loc_material->pipeline != nullptr) ? loc_material->pipeline : m_default_material->pipeline;
 				if (last_pipeline != loc_pipeline) {
 
 					last_pipeline = loc_pipeline;
@@ -1439,7 +1439,7 @@ namespace PFF::render::vulkan {
 			__m128 plane_sse = _mm_set_ps(plane.w, plane.z, plane.y, plane.x);
 			__m128 length = _mm_sqrt_ps(_mm_dp_ps(plane_sse, plane_sse, 0x7F));
 			plane_sse = _mm_div_ps(plane_sse, length);
-			_mm_store_ps(&plane.x, plane_sse);
+			_mm_storeu_ps(&plane.x, plane_sse);
 		}
 	}
 

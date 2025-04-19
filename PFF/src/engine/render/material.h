@@ -4,6 +4,7 @@
 #include "render_util.h"
 
 #if defined PFF_RENDER_API_VULKAN
+	// #include "vulkan/vk_renderer.h"
 	#include "vulkan/vk_descriptor.h"
 	#include "vulkan/vk_types.h"
 #endif 
@@ -53,7 +54,7 @@ namespace PFF {
 
 
 	struct material {
-
+		
 		material_pipeline					opaque_pipeline{};
 		material_pipeline					transparent_pipeline{};
 
@@ -79,7 +80,7 @@ namespace PFF {
 		void build_pipelines();
 		void release_resources();
 
-		material_instance create_instance(material_pass pass, const material_resources& resources, render::vulkan::descriptor_allocator_growable& descriptor_allocator);
+		material_instance create_instance(material_pass pass, const material_resources& resources);
 #endif
 
 	};

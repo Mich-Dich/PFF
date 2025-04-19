@@ -75,7 +75,7 @@ namespace PFF::geometry {
         void*                               staging_data = nullptr;
         size_t                              staging_buffer_size = 0;
                         
-        material_instance*                  material = nullptr;		// TODO: currently uses one material for all surfaces in mesh_asset, change so it can use diffrent materials per furface
+        ref<material_instance>              material = nullptr;		// TODO: currently uses one material for all surfaces in mesh_asset, change so it can use diffrent materials per furface
 
         void update(const std::vector<u32>& new_indices, const std::vector<vertex>& new_vertices);
         void cleanup();

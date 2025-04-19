@@ -578,7 +578,7 @@ namespace PFF {
 
 		if (ImGui::BeginDragDropTarget()) {
 
-			if (const ImGuiPayload* payload = ImGui::AcceptDragDropPayload("PROJECT_CONTENT_FILE")) {
+			if (const ImGuiPayload* payload = ImGui::AcceptDragDropPayload(DRAG_DROP_MESH)) {
 
 				const std::filesystem::path file_path = (const char*)payload->Data;
 				process_drop_of_file(file_path, true);

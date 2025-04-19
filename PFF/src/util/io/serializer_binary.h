@@ -27,7 +27,7 @@ namespace PFF::serializer {
 				} else if constexpr (std::is_same_v<T, std::string>) {
 
 					size_t length = value.size();
-					m_ostream.write(reinterpret_cast<const char*>(&length), sizeof(size_t));
+					m_ostream.write(reinterpret_cast<const char*>(&length), sizeof(length));
 					m_ostream.write(reinterpret_cast<const char*>(value.data()), length);
 
 				} else
@@ -44,9 +44,13 @@ namespace PFF::serializer {
 				} else if constexpr (std::is_same_v<T, std::string>) {
 
 					size_t length = 0;
-					m_istream.read(reinterpret_cast<char*>(&length), sizeof(size_t));
+					m_istream.read(reinterpret_cast<char*>(&length), sizeof(length));
+					
+					if (length > 256) 
+						throw std::runtime_error("Corrupted path length");
+
 					value.resize(length);
-					m_istream.read(reinterpret_cast<char*>(value.data()), length);
+					m_istream.read(value.data(), length);
 
 				} else
 					m_istream.read(reinterpret_cast<char*>(&value), sizeof(T));

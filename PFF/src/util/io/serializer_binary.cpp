@@ -11,12 +11,12 @@ namespace PFF::serializer {
 		// ASSERT(std::filesystem::is_regular_file(filename), "", "Provided filepath is not a file [" << filename.generic_string() << "]");
 		if (m_option == option::save_to_file) {
 
-			m_ostream = std::ofstream(m_filename, std::ios::binary);
+			m_ostream = std::ofstream(m_filename, std::ios::out | std::ios::binary | std::ios::trunc);
 			VALIDATE(m_ostream, return, "", "Failed to save to file: [" << m_filename << "]");
 
 		} else {
 
-			m_istream = std::ifstream(m_filename, std::ios::binary);
+			m_istream = std::ifstream(m_filename, std::ios::in | std::ios::binary);
 			VALIDATE(m_istream, return, "", "Failed to load file: [" << m_filename << "]");
 
 		}

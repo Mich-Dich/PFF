@@ -22,5 +22,4 @@ namespace PFF {
 		std::unordered_map<std::filesystem::path, ref<material_instance>>		m_uploaded_material_inst_assets;
 	};
 
-
 }

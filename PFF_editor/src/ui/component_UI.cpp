@@ -6,6 +6,7 @@
 #include "engine/resource_management/headers.h"
 #include "engine/resource_management/general_resource_manager.h"
 #include "engine/resource_management/static_mesh_asset_manager.h"
+#include "engine/resource_management/material/material_asset_manager.h"
 #include "project/script_system.h"
 #include "application.h"
 #include "engine/layer/world_layer.h"
@@ -79,27 +80,32 @@ namespace PFF::UI {
 				ImGui::SetNextItemWidth(ImGui::GetColumnWidth());
 				const auto comp_asset_path = component.material_inst_path.filename().string();
 				if (comp_asset_path.empty())
-					ImGui::Text("%s", comp_asset_path.c_str());
-				else
 					ImGui::Text("no material instance selected");
+				else
+					ImGui::Text("%s", comp_asset_path.c_str());
 
 				if (ImGui::BeginDragDropTarget()) {
 					if (const ImGuiPayload* payload = ImGui::AcceptDragDropPayload(DRAG_DROP_MATERIAL_INST)) {
 
 						const std::filesystem::path file_path = (const char*)payload->Data;
 
-						// TODO: check if asset is a material instance
-						bool file_deserialized = false;
-						PFF::resource_manager::asset_curruption_source loc_asset_curruption_source = PFF::resource_manager::asset_curruption_source::unknown;
-						PFF::asset_file_header loc_asset_file_header;
-						file_deserialized = resource_manager::try_to_deserialize_file_header(file_path, true, loc_asset_curruption_source, loc_asset_file_header);
-				
-						if (file_deserialized && loc_asset_file_header.type == PFF::file_type::material_instance) {
+#define DEV_ONLY						// ============================== DEV-ONLY (using yaml for serialization as test in material instance) ==============================
+#ifdef DEV_ONLY
+						component.material_inst_path = util::extract_path_from_project_content_folder(file_path);
+						component.material = material_asset_manager::get_material_instance_from_path(file_path);
+#else									// ============================== DEV-ONLY (using yaml for serialization as test in material instance) ==============================
 
+						bool file_deserialized = false;
+						PFF::resource_manager::asset_curruption_source curruption_source = PFF::resource_manager::asset_curruption_source::unknown;
+						PFF::asset_file_header asset_header;
+						file_deserialized = resource_manager::try_to_deserialize_file_header(file_path, true, curruption_source, asset_header);
+						if (file_deserialized && asset_header.type == PFF::file_type::material_instance) {
+							
 							component.material_inst_path = util::extract_path_from_project_content_folder(file_path);
-							// component.material = material_manager::get_from_path(component.material_inst_path);
+							component.material = material_asset_manager::get_material_instance_from_path(file_path);
 						} else
 							LOG(Warn, "Tryed to drop a material-instance asset but provided asset")
+#endif
 					}
 					ImGui::EndDragDropTarget();
 				}
