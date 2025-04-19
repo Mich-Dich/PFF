@@ -41,6 +41,7 @@ namespace PFF {
 		LOAD_ICON(world);
 		LOAD_ICON(warning);
 		LOAD_ICON(mesh_asset);
+		LOAD_ICON(texture);
 		LOAD_ICON(material);
 		LOAD_ICON(material_inst);
 		LOAD_ICON(relation);
@@ -75,6 +76,12 @@ namespace PFF {
 		m_world_icon.reset();
 		m_warning_icon.reset();
 		m_mesh_asset_icon.reset();
+
+		m_texture_icon.reset();
+		m_material_icon.reset();
+		m_material_inst_icon.reset();
+		m_relation_icon.reset();
+
 		m_file_icon.reset();
 		m_file_proc_icon.reset();
 		m_mesh_mini_icon.reset();

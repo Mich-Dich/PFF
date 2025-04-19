@@ -40,6 +40,7 @@ namespace PFF {
 		PFF_DEFAULT_GETTER(ref<image>,		world_icon)
 		PFF_DEFAULT_GETTER(ref<image>,		warning_icon)
 		PFF_DEFAULT_GETTER(ref<image>,		mesh_asset_icon)
+		PFF_DEFAULT_GETTER(ref<image>,		texture_icon)
 		PFF_DEFAULT_GETTER(ref<image>,		material_icon)
 		PFF_DEFAULT_GETTER(ref<image>,		material_inst_icon)
 		PFF_DEFAULT_GETTER(ref<image>,		relation_icon)
@@ -98,6 +99,7 @@ namespace PFF {
 		ref<image>							m_world_icon;
 		ref<image>							m_warning_icon;
 		ref<image>							m_mesh_asset_icon;
+		ref<image>							m_texture_icon;
 		ref<image>							m_material_icon;
 		ref<image>							m_material_inst_icon;
 		ref<image>							m_relation_icon;

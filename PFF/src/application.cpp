@@ -101,7 +101,7 @@ namespace PFF {
 		// 	util::cancel_timer(m_timers[x]);
 		// m_timers.clear();
 
-		material_asset_manager::shutdown();
+		material_asset_manager::release_all();
 
 		GET_RENDERER.resource_free();
 

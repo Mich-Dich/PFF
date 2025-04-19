@@ -13,7 +13,7 @@ namespace PFF {
 		static ref<material> get_material_from_path(const std::filesystem::path path);
 		static ref<material_instance> get_material_instance_from_path(const std::filesystem::path path);
 
-		static void shutdown();
+		static void release_all();
 
 	private:
 

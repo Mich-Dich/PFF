@@ -81,6 +81,7 @@ namespace PFF {
 		void release_resources();
 
 		material_instance create_instance(material_pass pass, const material_resources& resources);
+		void release_instance(material_instance& inst);
 #endif
 
 	};

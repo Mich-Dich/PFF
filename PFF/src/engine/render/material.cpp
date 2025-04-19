@@ -103,7 +103,17 @@ namespace PFF {
 		return loc_mat_inst;
 	}
 
+	void material::release_instance(material_instance& inst) {
 
+		// 1 	Return the descriptor set to the allocator
+		// auto allocator = GET_RENDERER.get_global_descriptor_allocator();
+		// allocator.free(GET_RENDERER.get_device(), inst.material_set);
+	
+		// 2	Invalidate the instance so it can't be used again
+		inst.material_set = VK_NULL_HANDLE;
+		inst.pipeline     = nullptr;
+		inst.pass_type    = material_pass::main_color;
+	}
 
 
 

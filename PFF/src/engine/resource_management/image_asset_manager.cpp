@@ -14,6 +14,18 @@ namespace PFF {
 
 	image_asset_manager::image_asset_manager() {}
 
+	void image_asset_manager::release_all() {
+
+		LOG(Trace, "releasing all material instances")
+		for (auto& [path, image_ref] : s_instance.m_uploaded_image_assets) {
+
+			VALIDATE(image_ref, continue, "", "entry in map has invalid image ref for [" << path.generic_string() << "]")
+			LOG(Trace, "releasing image for [" << path.generic_string() << "]")
+			image_ref.reset();
+		}
+		s_instance.m_uploaded_image_assets.clear();
+	}
+
 	ref<image> image_asset_manager::get_from_path(const std::filesystem::path path) {
 
 		VALIDATE(path.extension() == PFF_ASSET_EXTENTION, return nullptr, "", "Provided path is not a PFF-asset, path [" << path.generic_string() << "]");

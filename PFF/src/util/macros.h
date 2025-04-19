@@ -27,7 +27,7 @@
 																	name(const name&) = delete;											\
 																	name& operator=(const name&) = delete
 
-#define PFF__DELETE_MOVE_CONSTRUCTOR(name)						public:																	\
+#define PFF_DELETE_MOVE_CONSTRUCTOR(name)						public:																	\
 																	name(name&&) = delete;												\
 																	name& operator=(name&&) = delete
 

@@ -12,6 +12,8 @@ namespace PFF {
 		// @breif path needs to be relative to project_dir/content
 		static ref<image> get_from_path(const std::filesystem::path path);
 
+		void release_all();
+		
 	private:
 
 		image_asset_manager();

@@ -195,6 +195,7 @@ namespace PFF {
 		m_world_icon =			editor_layer->get_world_icon();
 		m_warning_icon =		editor_layer->get_warning_icon();
 		m_mesh_asset_icon =		editor_layer->get_mesh_asset_icon();
+		m_texture_icon = 		editor_layer->get_texture_icon();
 		m_material_icon = 		editor_layer->get_material_icon();
 		m_material_inst_icon = 	editor_layer->get_material_inst_icon();
 
@@ -546,18 +547,17 @@ namespace PFF {
 
 						} else {										// create icon
 
-							u32* pixel_data;
-							asset_file_header loc_asset_header{};
-							general_texture_file_header loc_general_header{};
-							specific_texture_file_header loc_specific_texture_header{};
-							serialize_texture(file_path, pixel_data, loc_asset_header, loc_general_header, loc_specific_texture_header, serializer::option::load_from_file);
-			
-							std::vector<u32> new_pixels;
-							downscale_image(pixel_data, loc_specific_texture_header.width, loc_specific_texture_header.height, 128, new_pixels, loc_specific_texture_header.width, loc_specific_texture_header.height);
-							m_asset_icons[hash_value] = create_ref<image>(new_pixels.data(), loc_specific_texture_header.width, loc_specific_texture_header.height, image_format::RGBA);
-			
-							new_pixels.clear();
-							delete pixel_data;
+							auto icon = PFF_editor::get().get_icon_manager_ref().request_icon(file_path);
+							if (icon) {
+
+								m_asset_icons[hash_value] = icon;										// save for next iteration
+								ImGui::Image(icon->get_descriptor_set(), m_icon_size);
+								break;
+							}
+								
+							ImGui::Image(m_texture_icon->get_descriptor_set(), m_icon_size);
+							break;
+
 						}
 
 					} break;
