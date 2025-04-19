@@ -57,12 +57,14 @@ namespace PFF {
 						LOG(Debug, "DROP")
 	
 						const std::filesystem::path file_path = (const char*)payload->Data;
+						// const std::filesystem::path absolute_file_path = application::get().get_project_path() / CONTENT_DIR / (const char*)payload->Data;
+
 						resource_manager::asset_curruption_source asset_curruption_reason;
 						asset_file_header general_header{};
 						if (resource_manager::try_to_deserialize_file_header(file_path, true, asset_curruption_reason, general_header)) {
 	
 							LOG(Debug, "Setting color texture")
-							resources.color_texture = util::extract_path_from_project_content_folder(file_path);
+							resources.color_texture = file_path;
 						} else
 							LOG(Warn, "Dropped file cant be used because file is currupted [" << (u32)asset_curruption_reason << "]")
 						// image_asset_manager::get_from_path(file_path);											// TODO: save image in resources		load image only on "Confirm" button
@@ -85,11 +87,12 @@ namespace PFF {
 					if (const ImGuiPayload* payload = ImGui::AcceptDragDropPayload(DRAG_DROP_TEXTURE)) {
 	
 						const std::filesystem::path file_path = (const char*)payload->Data;
+						// const std::filesystem::path absolute_file_path = application::get().get_project_path() / CONTENT_DIR / (const char*)payload->Data;
 						resource_manager::asset_curruption_source asset_curruption_reason;
 						asset_file_header general_header{};
 						if (resource_manager::try_to_deserialize_file_header(file_path, true, asset_curruption_reason, general_header)) {
 	
-							resources.metal_rough_texture = util::extract_path_from_project_content_folder(file_path);
+							resources.metal_rough_texture = file_path;
 						}
 						// image_asset_manager::get_from_path(file_path);											// TODO: save image in resources		load image only on "Confirm" button
 					}
@@ -133,6 +136,7 @@ namespace PFF {
 				specific_header.parent_material_path = std::filesystem::path("/FAKE_PATH_FOR_DEV/DEV_ONLY.pffasset");           // hard code fake here and in material_asset_manger
 
 				// material_factory::create_instance(destination_path, loc_load_options);
+				LOG(Trace, "Serializing an instance to : " << destination_path / (std::string(m_possible_asset_name) + PFF_ASSET_EXTENTION));
 				serialize_material_instance(destination_path / (std::string(m_possible_asset_name) + PFF_ASSET_EXTENTION), asset_header, general_header, specific_header, resources, serializer::option::save_to_file);
 				show_window = false;
 			}

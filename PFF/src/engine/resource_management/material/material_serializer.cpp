@@ -34,7 +34,7 @@ namespace PFF {
 	}
 	
 
-#define USE_YAML_FOR_TESTING
+// #define USE_YAML_FOR_TESTING
 #ifdef USE_YAML_FOR_TESTING
 
 	void serialize_material_instance(const std::filesystem::path filename, asset_file_header& asset_header, general_material_instance_file_header& general_header, specific_material_instance_file_header& specific_header, material_instance_creation_data& resources, const serializer::option option) {
@@ -93,14 +93,15 @@ namespace PFF {
 
 #else
 
-	void serialize_material_instance(const std::filesystem::path filename, asset_file_header& asset_header, general_material_instance_file_header& general_header, specific_material_instance_file_header& specific_header, material_instance_creation_data resources, const serializer::option option) {
+	void serialize_material_instance(const std::filesystem::path filename, asset_file_header& asset_header, general_material_instance_file_header& general_header, specific_material_instance_file_header& specific_header, material_instance_creation_data& resources, const serializer::option option) {
 
 		LOG(Trace, "filename [" << filename.generic_string() << "]");
 		// std::filesystem::file
 		serializer::binary(filename, "PFF_asset_file", option)
 			.entry(asset_header)
 			.entry(general_header)
-			.entry(specific_header)
+			.entry(specific_header.source_file)
+			.entry(specific_header.parent_material_path)
 			.entry(resources.color_texture)
 			.entry(resources.color_texture_sampler)
 			.entry(resources.metal_rough_texture)

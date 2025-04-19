@@ -46,8 +46,7 @@ namespace PFF::serializer {
 					size_t length = 0;
 					m_istream.read(reinterpret_cast<char*>(&length), sizeof(length));
 					
-					if (length > 256) 
-						throw std::runtime_error("Corrupted path length");
+					ASSERT(length < 65565, "", "Corrupted path length")
 
 					value.resize(length);
 					m_istream.read(value.data(), length);

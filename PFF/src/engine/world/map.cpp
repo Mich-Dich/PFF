@@ -357,7 +357,8 @@ namespace PFF {
 				SERIALIZE_SIMPLE_COMPONENT(mesh,
 					.entry(KEY_VALUE(mesh_comp.asset_path))
 					.entry(KEY_VALUE(mesh_comp.mobility_data))
-					.entry(KEY_VALUE(mesh_comp.shoudl_render));
+					.entry(KEY_VALUE(mesh_comp.shoudl_render))
+					.entry(KEY_VALUE(mesh_comp.material_inst_path));
 				);
 
 
@@ -420,7 +421,8 @@ namespace PFF {
 					mesh_component mesh_comp{};
 					component_section.entry(KEY_VALUE(mesh_comp.asset_path))
 					.entry(KEY_VALUE(mesh_comp.mobility_data))
-					.entry(KEY_VALUE(mesh_comp.shoudl_render));
+					.entry(KEY_VALUE(mesh_comp.shoudl_render))
+					.entry(KEY_VALUE(mesh_comp.material_inst_path));
 
 					loc_entity.add_mesh_component(mesh_comp);
 				});

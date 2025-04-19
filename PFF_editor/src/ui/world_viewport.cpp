@@ -499,15 +499,16 @@ namespace PFF {
 
 	void world_viewport_window::process_drop_of_file(const std::filesystem::path path, const bool set_as_selected_entity) {
 
+		std::filesystem::path absolute_path = application::get().get_project_path() / CONTENT_DIR / path;
 		asset_file_header loc_asset_file_header;
 		if (path.extension() == ".pffasset") {
 
-			serializer::binary(path, "PFF_asset_file", serializer::option::load_from_file)
+			serializer::binary(absolute_path, "PFF_asset_file", serializer::option::load_from_file)
 				.entry(loc_asset_file_header);
 
 		} else if (path.extension() == ".pffworld") {
 
-			serializer::yaml(path, "PFF_asset_file", serializer::option::load_from_file)
+			serializer::yaml(absolute_path, "PFF_asset_file", serializer::option::load_from_file)
 				.entry(KEY_VALUE(loc_asset_file_header.file_version))
 				.entry(KEY_VALUE(loc_asset_file_header.type))
 				.entry(KEY_VALUE(loc_asset_file_header.timestamp));
@@ -520,7 +521,7 @@ namespace PFF {
 			LOG(Trace, "Adding static mesh, Name: " << "SM_" + path.filename().replace_extension("").string());
 
 			mesh_component mesh_comp{};
-			mesh_comp.asset_path = util::extract_path_from_project_content_folder(path);
+			mesh_comp.asset_path = path;
 
 			if (m_selected_entity != entity()) {
 

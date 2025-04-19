@@ -593,7 +593,7 @@ namespace PFF {
 			// LOG(Trace, "m_selected_items count: " << m_selected_items.size());
 			if (m_selected_items.item_set.empty()) {
 
-				const std::string path_string = file_path.string();
+				const std::string path_string = util::extract_path_from_project_content_folder(file_path).string();
 				ImGui::SetDragDropPayload(drag_drop_source, path_string.c_str(), path_string.length() + 1);
 
 				switch (loc_asset_file_header.type) {

@@ -41,7 +41,7 @@ namespace PFF::UI {
 				
 						if (file_deserialized && loc_asset_file_header.type == PFF::file_type::mesh) {
 
-							component.asset_path = util::extract_path_from_project_content_folder(file_path);
+							component.asset_path = file_path;
 							component.mesh_asset = static_mesh_asset_manager::get_from_path(component.asset_path);
 						} else
 							LOG(Warn, "Tryed to drop a material-instance asset but provided asset")
@@ -88,24 +88,16 @@ namespace PFF::UI {
 					if (const ImGuiPayload* payload = ImGui::AcceptDragDropPayload(DRAG_DROP_MATERIAL_INST)) {
 
 						const std::filesystem::path file_path = (const char*)payload->Data;
-
-#define DEV_ONLY						// ============================== DEV-ONLY (using yaml for serialization as test in material instance) ==============================
-#ifdef DEV_ONLY
-						component.material_inst_path = util::extract_path_from_project_content_folder(file_path);
-						component.material = material_asset_manager::get_material_instance_from_path(file_path);
-#else									// ============================== DEV-ONLY (using yaml for serialization as test in material instance) ==============================
-
 						bool file_deserialized = false;
 						PFF::resource_manager::asset_curruption_source curruption_source = PFF::resource_manager::asset_curruption_source::unknown;
 						PFF::asset_file_header asset_header;
 						file_deserialized = resource_manager::try_to_deserialize_file_header(file_path, true, curruption_source, asset_header);
 						if (file_deserialized && asset_header.type == PFF::file_type::material_instance) {
 							
-							component.material_inst_path = util::extract_path_from_project_content_folder(file_path);
+							component.material_inst_path = file_path;
 							component.material = material_asset_manager::get_material_instance_from_path(file_path);
 						} else
-							LOG(Warn, "Tryed to drop a material-instance asset but provided asset")
-#endif
+							LOG(Warn, "could not assign provided asset, as it's not a material-instance. could deserialize asset[" << file_deserialized << "] asset type[" << (u32)asset_header.type << "]")
 					}
 					ImGui::EndDragDropTarget();
 				}

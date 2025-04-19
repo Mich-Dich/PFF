@@ -35,10 +35,11 @@ namespace PFF {
 
 	file_watcher_system::file_watcher_system() { }
 
-	void file_watcher_system::start() { 
+	void file_watcher_system::start() {
 	
-		LOG(Trace, "starting file watcher system");
-		m_thread = std::thread(&file_watcher_system::start_thread, this);
+		LOG(Warn, "file watcher system disabled for now");
+		// LOG(Trace, "starting file watcher system");
+		// m_thread = std::thread(&file_watcher_system::start_thread, this);
 	}
 
 	static bool should_ignore_file(const std::string filename) {

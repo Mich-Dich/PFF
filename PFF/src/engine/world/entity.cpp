@@ -11,6 +11,7 @@
 
 #include "application.h"
 #include "engine/resource_management/static_mesh_asset_manager.h"
+#include "engine/resource_management/material/material_asset_manager.h"
 #include "engine/resource_management/mesh_serializer.h"
 // #include "map.h"
 
@@ -39,10 +40,13 @@ namespace PFF {
 				serialize_static_mesh_header(serializer, static_mesh_header);
 				mesh_comp.mesh_asset = static_mesh_asset_manager::get_from_path(mesh_comp.asset_path);
 
+				if (!mesh_comp.material_inst_path.empty())
+				mesh_comp.material = material_asset_manager::get_material_instance_from_path(mesh_comp.material_inst_path);
+
 				//TODO: check 
 				//		if (user defined a material_instance) || ([static_mesh_header] has a material_instance)
 				//		else use default_material
-				LOG(Warn, "Added mesh comp <= STILL NEED TO CHECK FOR DEFAULT MATERIAL");
+				// LOG(Warn, "Added mesh comp <= STILL NEED TO CHECK FOR DEFAULT MATERIAL");
 
 			} break;
 
