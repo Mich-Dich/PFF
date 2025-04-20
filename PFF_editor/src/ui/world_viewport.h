@@ -29,7 +29,6 @@ namespace PFF {
 		void list_all_components(const PFF::entity entity);
 		void add_show_hide_icon(PFF::entity& entity);
 		void display_entity_children(ref<map> loc_map, PFF::entity entity);
-		void outliner_entity_popup(const char* name, ref<map> map, PFF::entity entity);
 		void process_drop_of_file(const std::filesystem::path path, const bool set_as_selected_entity);
 		
 		bool									m_show_renderer_backgrond_effect = false;
@@ -42,9 +41,22 @@ namespace PFF {
 		bool									m_show_outliner = true;
 
 		content_browser							m_content_browser{};
-
 		ImGuiTreeNodeFlags						outliner_base_flags = ImGuiTreeNodeFlags_OpenOnArrow | ImGuiTreeNodeFlags_OpenOnDoubleClick | ImGuiTreeNodeFlags_SpanAvailWidth | ImGuiTreeNodeFlags_DefaultOpen;
-		entity									m_selected_entity = entity();
+
+		struct selected_entitys {
+
+			PFF::entity					main_entity{};
+			std::set<PFF::entity>		entity_set{};
+	
+			void reset() {
+				
+				main_entity = PFF::entity();
+				entity_set.clear();
+			}
+	
+			inline bool empty() { return main_entity.is_valid() && entity_set.empty(); }
+		};
+		selected_entitys						m_selected_entitys{};
 
 		ref<image>								m_transfrom_translation_image;
 		ref<image>								m_transfrom_rotation_image;

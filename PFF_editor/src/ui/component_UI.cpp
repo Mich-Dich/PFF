@@ -31,7 +31,7 @@ namespace PFF::UI {
 					ImGui::Text("no material instance selected");
 
 				if (ImGui::BeginDragDropTarget()) {
-					if (const ImGuiPayload* payload = ImGui::AcceptDragDropPayload(DRAG_DROP_MESH)) {
+					if (const ImGuiPayload* payload = ImGui::AcceptDragDropPayload(DRAG_DROP_CONTENT_BROWSER_MESH)) {
 
 						const std::filesystem::path file_path = (const char*)payload->Data;
 						bool file_deserialized = false;
@@ -85,7 +85,7 @@ namespace PFF::UI {
 					ImGui::Text("%s", comp_asset_path.c_str());
 
 				if (ImGui::BeginDragDropTarget()) {
-					if (const ImGuiPayload* payload = ImGui::AcceptDragDropPayload(DRAG_DROP_MATERIAL_INST)) {
+					if (const ImGuiPayload* payload = ImGui::AcceptDragDropPayload(DRAG_DROP_CONTENT_BROWSER_MATERIAL_INST)) {
 
 						const std::filesystem::path file_path = (const char*)payload->Data;
 						bool file_deserialized = false;

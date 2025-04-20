@@ -4,7 +4,7 @@
 
 namespace PFF {
 
-	struct selected_files {
+	struct selected_paths {
 
 		std::filesystem::path				main_item;
 		std::set<std::filesystem::path>		item_set;
@@ -40,7 +40,7 @@ namespace PFF {
 
 		
 	private:
-
+	
 		void call_to_delete_file(const std::filesystem::path& file_path);
 		void select_new_directory(const std::filesystem::path& path);
 		void show_directory_tree(const std::filesystem::path& path);
@@ -56,7 +56,8 @@ namespace PFF {
 		std::filesystem::path						m_partial_selected_directory;
 		
 #if 1
-		selected_files								m_selected_items{};
+		selected_paths								m_selected_items{};
+		selected_paths								m_selected_directories{};
 #else
 		// std::set<std::filesystem::path>			m_selected_items;							// Set to keep track of selected items
 		// std::filesystem::path					m_main_selected_item;

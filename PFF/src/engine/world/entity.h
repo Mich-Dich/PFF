@@ -84,6 +84,11 @@ namespace PFF {
 		operator u32()							const { return (u32)m_entity_handle; }
 		bool operator==(const entity& other)	const { return m_entity_handle == other.m_entity_handle && m_map == other.m_map; }
 		bool operator!=(const entity& other)	const { return !(*this == other); }
+		bool operator<(const entity& other) 	const noexcept {
+			if (m_map != other.m_map)
+				return m_map < other.m_map;
+			return m_entity_handle < other.m_entity_handle;
+		}
 
 		UUID get_UUID()							{ return get_component<ID_component>().ID; }
 		const std::string& get_name()			{ return get_component<name_component>().name; }

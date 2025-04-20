@@ -57,42 +57,11 @@ namespace PFF {
 		{"PNM (PPM/PGM)",               "*.ppm;*.pgm"},
 	};
 
-
 	// ================================================ util ================================================
 
 	FORCEINLINE int hash_path(const std::filesystem::path& path) { return (int)std::filesystem::hash_value(path); }				// hash_value() return a site_t (can be cast to int)
 
 
-	FORCEINLINE void downscale_image(const u32* pixel_data, u32 width, u32 height, u32 target_size, std::vector<u32>& out_pixels, u32 &new_width, u32 &new_height) {
-
-		VALIDATE(pixel_data != nullptr, return, "", "didnt provide pixel data, aborting function")
-
-		u32 maxSide = (width > height) ? width : height;
-		f32 scale = static_cast<f32>(target_size) / maxSide;
-
-		new_width = static_cast<u32>(width * scale);
-		new_height = static_cast<u32>(height * scale);
-		out_pixels.resize(new_width * new_height);
-
-		for (u32 y = 0; y < new_height; y++) {
-			for (u32 x = 0; x < new_width; x++) {
-
-				// Map the coordinates in the new image back to the original image.
-				// Using nearest neighbor by simply converting floating point coordinates
-				// to the nearest integer coordinate.
-				u32 orig_x = static_cast<u32>(x / scale);
-				u32 orig_y = static_cast<u32>(y / scale);
-
-				// Clamp to the bounds of the original image.
-				if (orig_x >= width)  orig_x = width - 1;
-				if (orig_y >= height) orig_y = height - 1;
-				
-				out_pixels[y * new_width + x] = pixel_data[orig_y * width + orig_x];
-			}
-		}
-	}
-
-	
 	FORCEINLINE bool is_file_used(const std::filesystem::path& file_path) {
 
 		resource_manager::asset_curruption_source loc_file_curruption_source = resource_manager::asset_curruption_source::unknown;
@@ -158,22 +127,58 @@ namespace PFF {
 	}
 	
 	
+	// Function to handle dropping files into the current directory
+	FORCEINLINE void handle_drop(const std::filesystem::path& target_directory, const std::filesystem::path& file) {
+
+		// Implement file move logic here
+		LOG(Debug, "dropping file: " << file.generic_string() << " into target dir: " << target_directory.generic_string());
+					
+		const std::filesystem::path absolute_path = application::get().get_project_path() / CONTENT_DIR / file;
+		std::filesystem::path destination = target_directory / file.filename();
+		try {
+			std::filesystem::rename(absolute_path, destination);										// move the file/directory in one atomic operation
+		
+		} catch (const std::filesystem::filesystem_error& e) {
+
+			if (e.code() == std::errc::cross_device_link) {							// On some platforms, rename() fails if crossing devices → fallback to copy+remove
+				if (std::filesystem::is_directory(absolute_path)) {									// If it's a directory, use recursive copy
+
+					std::filesystem::copy(absolute_path, destination, std::filesystem::copy_options::recursive | std::filesystem::copy_options::overwrite_existing);
+					std::filesystem::remove_all(absolute_path);
+
+				} else {
+					std::filesystem::copy_file(absolute_path, destination, std::filesystem::copy_options::overwrite_existing);
+					std::filesystem::remove(absolute_path);
+				}
+			}
+			else {
+				// Propagate other errors
+				throw;
+			}
+		}
+	}
+
+
 	FORCEINLINE static void drop_target_to_move_file(const std::filesystem::path& folder_path) {
 		
 		if (ImGui::BeginDragDropTarget()) {
+
+#define DROP_FILE(type)		if (const ImGuiPayload* payload = ImGui::AcceptDragDropPayload(type)) {							\
+								const std::filesystem::path file_path = (const char*)payload->Data;							\
+								handle_drop(folder_path, file_path); }
+			DROP_FILE(DRAG_DROP_CONTENT_BROWSER_MESH)
+			DROP_FILE(DRAG_DROP_CONTENT_BROWSER_TEXTURE)
+			DROP_FILE(DRAG_DROP_CONTENT_BROWSER_MATERIAL)
+			DROP_FILE(DRAG_DROP_CONTENT_BROWSER_MATERIAL_INST)
+			DROP_FILE(DRAG_DROP_CONTENT_BROWSER_WORLD)
+#undef DROP_FILE
 			
-			if (const ImGuiPayload* payload = ImGui::AcceptDragDropPayload("PROJECT_CONTENT_FILE")) {
-				
-				const std::filesystem::path file_path = (const char*)payload->Data;
-				try {
-					
-					std::filesystem::path destination = folder_path / file_path.filename();
-					std::filesystem::rename(file_path, destination);
-					LOG(Info, "File moved successfully!");
-					
-				} catch (const std::filesystem::filesystem_error& e)
-				LOG(Error, "Error: " << e.what());
-				
+			if (const ImGuiPayload* payload = ImGui::AcceptDragDropPayload(DRAG_DROP_CONTENT_BROWSER_MULTI)) {
+
+				selected_paths** received_ptr = static_cast<selected_paths**>(payload->Data);
+				selected_paths* file_paths = *received_ptr;
+				for (const std::filesystem::path path : (*file_paths).item_set)
+					handle_drop(folder_path, path);
 			}
 			ImGui::EndDragDropTarget();
 		}
@@ -291,15 +296,8 @@ namespace PFF {
 		}
 
 	}
-
-	// Function to handle dropping files into the current directory
-	void handle_drop(const std::filesystem::path& target_directory) {
-
-		// Implement file move logic here
-		LOG(Info, "NOT IMPLEMENTED YET");
-	}
-
 	
+
 	FORCEINLINE void content_browser::wrapp_displayed_items(f32& max_text_height, const ImVec2 text_size, const ImVec2 item_padding, const f32 window_area_x) {
 		
 		const ImGuiStyle& style = ImGui::GetStyle();
@@ -363,7 +361,7 @@ namespace PFF {
 			// const std::string wrapped_text = 
 			ImVec2 text_size{};
 			const std::string popup_name = "dir_context_menu_" + item_name;
-			const ImVec4& color = (m_selected_items.item_set.find(entry.path()) != m_selected_items.item_set.end()) ? UI::get_action_color_00_active_ref() : UI::get_action_color_gray_active_ref();
+			const ImVec4& color = (entry.path() == m_selected_directories.main_item) ? UI::get_action_color_00_active_ref() : (m_selected_directories.item_set.find(entry.path()) != m_selected_directories.item_set.end()) ? UI::get_action_color_00_faded_ref() : UI::get_action_color_gray_hover_ref(); // ImGui::GetStyle().Colors[ImGuiCol_ChildBg];
 			ImGui::BeginGroup();
 			{
 				ImGui::PushID(current_ID);
@@ -374,32 +372,70 @@ namespace PFF {
 				ImGui::PopID();
 			}
 			ImGui::EndGroup();
+			drop_target_to_move_file(entry.path());
 
 			const auto dir_mouse_interation = UI::get_mouse_interation_on_item(m_block_mouse_input);
 			switch (dir_mouse_interation) {
-				//case UI::mouse_interation::none: 					LOG(Trace, "none"); break;
-				//case UI::mouse_interation::hovered: 				LOG(Trace, "hovered"); break;
-				case UI::mouse_interation::left_clicked: 			LOG(Trace, "left_clicked"); break;
-				//case UI::mouse_interation::left_double_clicked: 	LOG(Trace, "left_double_clicked"); break;
-				case UI::mouse_interation::left_pressed:			break;
-				case UI::mouse_interation::left_released: 			LOG(Trace, "left_released"); break;
-				case UI::mouse_interation::right_clicked:			ImGui::OpenPopup(popup_name.c_str()); break;
-				case UI::mouse_interation::right_double_clicked: 	LOG(Trace, "right_double_clicked"); break;
-				case UI::mouse_interation::right_pressed: 			LOG(Trace, "right_pressed"); break;
-				case UI::mouse_interation::right_released: 			LOG(Trace, "right_released"); break;
-				case UI::mouse_interation::middle_clicked: 			LOG(Trace, "middle_clicked"); break;
-				case UI::mouse_interation::middle_double_clicked: 	LOG(Trace, "middle_double_clicked"); break;
-				case UI::mouse_interation::middle_pressed: 			LOG(Trace, "middle_pressed"); break;
-				case UI::mouse_interation::middle_release: 			LOG(Trace, "middle_release"); break;
-				case UI::mouse_interation::dragged: 				LOG(Trace, "dragged"); break;
-				case UI::mouse_interation::focused: 				LOG(Trace, "focused"); break;
-				case UI::mouse_interation::active: 					LOG(Trace, "active"); break;
-				case UI::mouse_interation::deactivated: 			LOG(Trace, "deactivated"); break;
-				case UI::mouse_interation::deactivated_after_edit: 	LOG(Trace, "deactivated_after_edit"); break;
+				case UI::mouse_interation::left_clicked:{
+
+					if (ImGui::GetIO().KeyShift) {
+					
+						if (!m_selected_directories.main_item.empty()) {										// If main item selected -> perform range selection.
+	
+							std::vector<std::filesystem::path> files_in_dir;
+							for (const auto& entry : std::filesystem::directory_iterator(m_selected_directory))
+								files_in_dir.push_back(entry.path());
+	
+								auto it_main = std::find(files_in_dir.begin(), files_in_dir.end(), m_selected_directories.main_item);
+							auto it_clicked = std::find(files_in_dir.begin(), files_in_dir.end(), entry.path());
+							if (it_main != files_in_dir.end() && it_clicked != files_in_dir.end()) {
+	
+								auto start = std::min(it_main, it_clicked);
+								auto end = std::max(it_main, it_clicked);
+								m_selected_directories.item_set.clear();
+								for (auto it = start; it != std::next(end); ++it)
+									m_selected_directories.item_set.insert(*it);
+							}
+	
+						} else
+						m_selected_directories.main_item = entry.path();										// If main item not selected -> simply mark clicked item as main selection.
+							
+					} else if (ImGui::GetIO().KeyCtrl) {
+	
+						
+						if (!m_selected_directories.main_item.empty())
+						m_selected_directories.item_set.insert(m_selected_directories.main_item);
+						m_selected_directories.main_item = entry.path();
+	
+						// if (m_selected_directories.item_set.find(entry.path()) == m_selected_directories.item_set.end())				// If Shift is held, select the item
+						// 	m_selected_directories.item_set.insert(entry.path());
+						// else
+						// 	m_selected_directories.item_set.erase(entry.path());
+	
+					} else {
+	
+						m_selected_directories.item_set.clear();
+						m_selected_directories.main_item = entry.path();
+					}
+					
+					// m_selected_directories.clear();
+					// m_selected_directories.insert(entry.path());				// make sure dir is in selected set
+
+				}break;
+
+				case UI::mouse_interation::right_clicked: {
+
+					if (m_selected_directories.main_item.empty())
+						m_selected_directories.main_item = entry.path();
+					else
+						m_selected_directories.item_set.insert(entry.path());
+					ImGui::OpenPopup(popup_name.c_str());
+				} break;
 
 				case UI::mouse_interation::left_double_clicked:
 					LOG(Trace, "Set TreeNode to open ID[" << current_ID << "]");
 					m_selected_items.reset();
+					m_selected_directories.reset();
 					ImGui::TreeNodeSetOpen(folder_display_window->GetID(current_ID), true);
 					m_block_mouse_input = true;
 					select_new_directory(entry.path());
@@ -471,18 +507,18 @@ namespace PFF {
 		}
 
 		// Handle dropping files into the current directory
-		if (ImGui::BeginDragDropTarget()) {
-			if (const ImGuiPayload* payload = ImGui::AcceptDragDropPayload("PROJECT_CONTENT_FOLDER")) {
+		// if (ImGui::BeginDragDropTarget()) {
+		// 	if (const ImGuiPayload* payload = ImGui::AcceptDragDropPayload("PROJECT_CONTENT_FOLDER")) {
 
-				// Handle folder drop
-			}
-			if (const ImGuiPayload* payload = ImGui::AcceptDragDropPayload("PROJECT_CONTENT_FILE")) {
-				std::string file_path(static_cast<const char*>(payload->Data));
-				LOG(Error, "file_path: " << file_path);
-				handle_drop(path / std::filesystem::path(file_path).filename());
-			}
-			ImGui::EndDragDropTarget();
-		}
+		// 		// Handle folder drop
+		// 	}
+		// 	if (const ImGuiPayload* payload = ImGui::AcceptDragDropPayload("PROJECT_CONTENT_FILE")) {
+		// 		std::string file_path(static_cast<const char*>(payload->Data));
+		// 		LOG(Error, "file_path: " << file_path);
+		// 		handle_drop(path / std::filesystem::path(file_path).filename());
+		// 	}
+		// 	ImGui::EndDragDropTarget();
+		// }
 
 		logged_warning_for_current_folder = true;
 	}
@@ -537,27 +573,27 @@ namespace PFF {
 				switch (loc_asset_file_header.type) {
 					case file_type::mesh:
 						ImGui::Image(m_mesh_asset_icon->get_descriptor_set(), m_icon_size);
-						drag_drop_source = DRAG_DROP_MESH;
+						drag_drop_source = DRAG_DROP_CONTENT_BROWSER_MESH;
 						break;
 
 					case file_type::world:
 						ImGui::Image(m_world_icon->get_descriptor_set(), m_icon_size);
-						drag_drop_source = DRAG_DROP_WORLD;
+						drag_drop_source = DRAG_DROP_CONTENT_BROWSER_WORLD;
 						break;
 
 					case file_type::material:
 						ImGui::Image(m_material_icon->get_descriptor_set(), m_icon_size);
-						drag_drop_source = DRAG_DROP_MATERIAL;
+						drag_drop_source = DRAG_DROP_CONTENT_BROWSER_MATERIAL;
 						break;
 
 					case file_type::material_instance:
 						ImGui::Image(m_material_inst_icon->get_descriptor_set(), m_icon_size);
-						drag_drop_source = DRAG_DROP_MATERIAL_INST;
+						drag_drop_source = DRAG_DROP_CONTENT_BROWSER_MATERIAL_INST;
 						break;
 
 					case file_type::texture: {
 
-						drag_drop_source = DRAG_DROP_TEXTURE;
+						drag_drop_source = DRAG_DROP_CONTENT_BROWSER_TEXTURE;
 						auto icon = PFF_editor::get().get_icon_manager_ref().request_icon(file_path);
 						if (icon) {
 
@@ -565,7 +601,7 @@ namespace PFF {
 							break;
 						}
 							
-						LOG(Warn, "request an icon")
+						LOG(Trace, "request an icon for [" << item_name << "]")
 						ImGui::Image(m_texture_icon->get_descriptor_set(), m_icon_size);
 						break;
 
@@ -574,7 +610,7 @@ namespace PFF {
 					default:
 
 						// ============================== DEV-ONLY (using yaml for serialization as test in material instance) ==============================
-						drag_drop_source = DRAG_DROP_MATERIAL_INST;
+						drag_drop_source = DRAG_DROP_CONTENT_BROWSER_MATERIAL_INST;
 						// ============================== DEV-ONLY (using yaml for serialization as test in material instance) ==============================
 
 
@@ -631,8 +667,8 @@ namespace PFF {
 
 			} else {
 
-				selected_files* payload_data = &m_selected_items;
-				ImGui::SetDragDropPayload("PROJECT_CONTENT_FILE_MULTI", &payload_data, sizeof(payload_data));
+				selected_paths* payload_data = &m_selected_items;
+				ImGui::SetDragDropPayload(DRAG_DROP_CONTENT_BROWSER_MULTI, &payload_data, sizeof(payload_data));
 				ImGui::Image(m_mesh_asset_icon->get_descriptor_set(), m_icon_size, ImVec2(0, 0), ImVec2(1, 1), UI::get_action_color_gray_active_ref());
 				ImGui::Text("[%ld] files", m_selected_items.item_set.size() + (m_selected_items.main_item.empty() ? 0 : 1));
 				ImGui::EndDragDropSource();
@@ -712,10 +748,20 @@ namespace PFF {
 
 			case UI::mouse_interation::right_clicked: {
 
+				if (m_selected_items.item_set.empty() && m_selected_items.main_item.empty()) {
+
+					m_selected_items.main_item = file_path;
+
+				} else if (!m_selected_items.main_item.empty() && m_selected_items.main_item != file_path) {
+
+					m_selected_items.item_set.insert(m_selected_items.main_item);
+					m_selected_items.main_item = file_path;
+
+				}
 				ImGui::OpenPopup(popup_name.c_str());
 			} break;
 
-			case UI::mouse_interation::left_released:
+			case UI::mouse_interation::left_pressed:
 
 				if (ImGui::GetIO().KeyShift) {
 					
@@ -756,7 +802,7 @@ namespace PFF {
 					m_selected_items.item_set.clear();
 					m_selected_items.main_item = file_path;
 				}
-				break;
+			break;
 
 			default: break;
 		}
@@ -771,7 +817,6 @@ namespace PFF {
 		// TODO: remove the file from any asset managers (e.g. static_mesh_asset_manager)
 		LOG(Warn, "Not completely implemented yet, TODO: remove the file from any asset managers (e.g. static_mesh_asset_manager)");
 
-
 		std::error_code error_code{};
 		if (std::filesystem::is_directory(file_path)) {
 			
@@ -785,8 +830,8 @@ namespace PFF {
 
 	void content_browser::window() {
 
-		//if (!show_window)
-		//	return;
+		// if (!show_window)
+		// 	return;
 
 		ImGuiWindowFlags window_flags = ImGuiWindowFlags_None;
 		ImGui::Begin("Content Browser", nullptr, window_flags);
@@ -814,7 +859,9 @@ namespace PFF {
 					std::vector<std::filesystem::path> source_paths = util::file_dialog_multi("Import asset", posible_import_tile_types);
 
 					std::vector<std::filesystem::path> image_source_paths{};
-					for (const auto path : source_paths)
+					std::vector<std::filesystem::path> mesh_source_paths{};
+					for (const auto path : source_paths) {
+
 						if (path.extension() == ".png" 	||
 							path.extension() == ".jpg" 	||
 							path.extension() == ".jpeg" ||
@@ -829,17 +876,20 @@ namespace PFF {
 							path.extension() == ".pgm")
 								image_source_paths.push_back(path);
 
+						else if (path.extension() == ".gltf" || path.extension() == ".glb")
+							mesh_source_paths.push_back(path);
+					}
+
 					PFF_editor::get().get_editor_layer()->add_window<texture_import_window>(std::move(image_source_paths), m_selected_directory);
-				
 
 					for (const auto path : source_paths) {
 
-						if (path.extension() == ".gltf" || path.extension() == ".glb")
+						if (path.extension() == ".gltf" || path.extension() == ".glb") {
+							
+							LOG(Debug, "TODO: modefy mesh import window to accept multiple paths");
 							PFF_editor::get().get_editor_layer()->add_window<mesh_import_window>(path, m_selected_directory);
-						
-						// else if (path.extension() == ".png")
-						// 	PFF_editor::get().get_editor_layer()->add_window<texture_import_window>(source_paths, m_selected_directory);
-						
+						}
+										
 						else
 							LOG(Warn, "Tryed to import unsupported file type")										// TODO: add a notification system to main window
 					}
@@ -947,8 +997,11 @@ namespace PFF {
 
 				}
 
-				if (ImGui::IsWindowHovered() && ImGui::IsMouseClicked(ImGuiMouseButton_Left) && !ImGui::IsAnyItemHovered())
+				if (ImGui::IsWindowHovered() && ImGui::IsMouseClicked(ImGuiMouseButton_Left) && !ImGui::IsAnyItemHovered()) {
+
 					m_selected_items.reset();
+					m_selected_directories.reset();
+				}
 
 		});
 		ImGui::End();
@@ -1019,6 +1072,7 @@ namespace PFF {
 				m_path_to_delete = std::filesystem::path();
 				m_deletion_consequenses.reset();
 				m_selected_items.reset();
+				m_selected_directories.reset();
 				ImGui::CloseCurrentPopup();
 			}
 			ImGui::SetItemDefaultFocus();

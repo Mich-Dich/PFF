@@ -53,7 +53,7 @@ namespace PFF {
 					ImGui::Text("no texture selected");
 
 				if (ImGui::BeginDragDropTarget()) {
-					if (const ImGuiPayload* payload = ImGui::AcceptDragDropPayload(DRAG_DROP_TEXTURE)) {
+					if (const ImGuiPayload* payload = ImGui::AcceptDragDropPayload(DRAG_DROP_CONTENT_BROWSER_TEXTURE)) {
 	
 						LOG(Debug, "DROP")
 	
@@ -109,7 +109,7 @@ namespace PFF {
 					ImGui::Text("no texture selected");
 
 				if (ImGui::BeginDragDropTarget()) {
-					if (const ImGuiPayload* payload = ImGui::AcceptDragDropPayload(DRAG_DROP_TEXTURE)) {
+					if (const ImGuiPayload* payload = ImGui::AcceptDragDropPayload(DRAG_DROP_CONTENT_BROWSER_TEXTURE)) {
 	
 						const std::filesystem::path file_path = (const char*)payload->Data;
 						// const std::filesystem::path absolute_file_path = application::get().get_project_path() / CONTENT_DIR / (const char*)payload->Data;
