@@ -13,6 +13,7 @@ namespace PFF {
         PFF_DELETE_COPY_MOVE_CONSTRUCTOR(icon_manager);
 
         ref<image> request_icon(const std::filesystem::path& asset_path);
+        void request_icon_refresh(const std::filesystem::path& asset_path);
 
 		// void release_all();
         

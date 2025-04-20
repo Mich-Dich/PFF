@@ -64,7 +64,7 @@ namespace PFF {
 		bool   										m_block_mouse_input = false;
 		bool   										logged_warning_for_current_folder = false;
 
-		std::unordered_map<size_t, ref<image>>		m_asset_icons{};
+		std::unordered_map<size_t, system_time>		m_asset_timestamp{};
 
 		deletion_consequenses						m_deletion_consequenses{};
 		bool										m_deletion_popup = false;

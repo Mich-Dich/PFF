@@ -44,6 +44,20 @@ namespace PFF {
         return nullptr;
     }
 
+    
+    void icon_manager::request_icon_refresh(const std::filesystem::path& asset_path) {
+
+        const size_t path_hash = std::filesystem::hash_value(asset_path);
+        const auto it = m_cache.find(path_hash);
+        if (it != m_cache.end())
+            m_cache.erase(it);
+
+        if (m_jobs_in_queue.insert(path_hash).second) {
+            m_job_queue.push_back(asset_path);
+            m_conditional_var.notify_one();
+        }
+    }
+
 
     void icon_manager::worker_loop() {
 

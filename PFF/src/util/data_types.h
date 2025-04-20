@@ -1,5 +1,7 @@
 #pragma once
 
+#include <tuple>    // for std::tie
+
 #include <inttypes.h>
 
 // =============================================
@@ -128,8 +130,40 @@ namespace PFF {
         u8 secund;          	// Second (0-59)
         u16 millisecend;    	// Millisecond (0-999)
 
+    	// “Older than”
+		bool operator<(const system_time& other) const {
+			return std::tie(year, month, day, hour, minute, secund, millisecend)
+				 < std::tie(other.year, other.month, other.day,
+							other.hour, other.minute, other.secund, other.millisecend);
+		}
+	
+		// “Newer than”
+		bool operator>(const system_time& other) const {
+			return other < *this;
+		}
+	
+		// “Not newer than” (i.e. older or equal)
+		bool operator<=(const system_time& other) const {
+			return !(*this > other);
+		}
+	
+		// “Not older than” (i.e. newer or equal)
+		bool operator>=(const system_time& other) const {
+			return !(*this < other);
+		}
+	
+		// Equality / inequality
+		bool operator==(const system_time& other) const {
+			return std::tie(year, month, day, day_of_week, hour, minute, secund, millisecend)
+				 == std::tie(other.year, other.month, other.day, other.day_of_week,
+							other.hour, other.minute, other.secund, other.millisecend);
+		}
+		bool operator!=(const system_time& other) const {
+			return !(*this == other);
+		}
+
         // @brief Converts system_time to human-readable string
-		std::string to_str() const { return std::format("{}-{}-{} ({}) {}:{}:{}:{}", year, month, day, day_of_week, hour, minute, secund, millisecend); }
+		std::string to_str() const { return std::format("{}-{:02}-{:02} ({}) {:02}:{:02}:{:02}.{:03}", year, month, day, day_of_week, hour, minute, secund, millisecend); }
 	};
 
     // =============================================

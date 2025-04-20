@@ -20,6 +20,7 @@ namespace PFF {
 			show_window = false;
 
 		m_number_of_sources = source_paths.size();
+		m_asset_progress.assign(m_number_of_sources, 0.f);
 		for (const auto path : source_paths) {
 
 			m_asset_alredy_exists = PFF::texture_factory::check_if_assets_already_exists(path, destination_path, loc_load_options, m_assets_that_already_exist);
@@ -29,6 +30,30 @@ namespace PFF {
 		}
 	}
 
+	void texture_import_window::start_import() {
+		m_importing = true;
+		m_current_index = 0;
+	
+		for (size_t i = 0; i < source_paths.size(); ++i) {
+			m_current_index = i;
+			// Reset per-asset
+			m_asset_progress[i] = 0.f;
+	
+			// Call import with a lambda to update per-asset progress.
+			texture_factory::import(source_paths[i], destination_path, loc_load_options,
+				[&](f32 frac) {					// Progress callback: fraction from 0 to 1
+					m_asset_progress[i] = frac;
+				}
+			);
+	
+			// Ensure fully complete
+			m_asset_progress[i] = 1.f;
+		}
+	
+		m_importing = false;
+		show_window = false;
+	}
+	
 	void texture_import_window::window() {
 
 		if (!show_window)
@@ -63,6 +88,15 @@ namespace PFF {
 					UI::end_table();
 					ImGui::Spacing();
 				}
+
+				if (m_importing) {
+
+					const f32 avail = ImGui::GetContentRegionAvail().x;
+					const f32 bar_w = avail * 0.8f;
+					UI::shift_cursor_pos(avail * 0.1f, 0);
+					const std::string progress = std::to_string(int(m_asset_progress[i] * 100));
+					ImGui::ProgressBar(m_asset_progress[i], ImVec2(bar_w, 0), progress.c_str());
+				}
 			}
 
 			ImGui::Text("Settings");
@@ -75,35 +109,40 @@ namespace PFF {
 			UI::end_table();
 
 
+			if (m_importing) {
 
-
-
-			UI::shift_cursor_pos(0, 10);
-			if (m_asset_alredy_exists) {
-
-				ImGui::Image(PFF_editor::get().get_editor_layer()->get_warning_icon()->get_descriptor_set(), ImVec2(15), ImVec2(0, 0), ImVec2(1, 1), ImVec4(.9f, .5f, 0.f, 1.f));
-				ImGui::SameLine();
-				ImGui::TextWrapped("The asset your trying to import already exists, if you continue you are overwriting the previous asset");				
+				UI::shift_cursor_pos(0, 10);
+				ImGui::Separator();
+				ImGui::Text("Import Progress:");
+			
+				// Overall progress: average of assets
+				f32 overall = 0.f;
+				for (auto p : m_asset_progress)
+					overall += p;
+				overall /= f32(m_number_of_sources);
+				
+				const std::string progress_text = "Overall " + std::to_string(int(overall * 100)) + "%";
+				ImGui::ProgressBar(overall, ImVec2(-1, 0), progress_text.c_str());
 			}
-			UI::shift_cursor_pos(0, 10);
-
+		
+			ImGui::Spacing();
+			ImGui::Separator();
+	
+			// Buttons
+			ImGui::BeginDisabled(m_importing);
 			const f32 width = ImGui::GetContentRegionAvail().x / 2 - (ImGui::GetStyle().ItemSpacing.x * 2);
-			if (ImGui::Button("Cancle", ImVec2(width, 0)))
+			if (ImGui::Button("Cancel", ImVec2(width, 0))) {
 				show_window = false;
-
+			}
 			ImGui::SameLine();
 			if (ImGui::Button("Import", ImVec2(width, 0))) {
-
-				if (m_number_of_sources == 1) 												// display of only one file
-					texture_factory::import(source_paths[0], destination_path, loc_load_options);
-
-				else
-					for (const auto path : source_paths)
-						texture_factory::import(path, destination_path, loc_load_options);
-	
-				show_window = false;
+				// Launch worker thread
+				if (!m_importing) {
+					m_import_thread = std::thread(&texture_import_window::start_import, this);
+					m_import_thread.detach();
+				}
 			}
-
+			ImGui::EndDisabled();
 		}
 		ImGui::End();
 	}

@@ -57,6 +57,6 @@ namespace PFF::texture_factory {
     bool check_if_assets_already_exists(const std::filesystem::path& source_path, const std::filesystem::path& destination_path, const load_options options, std::vector<std::string>& assets_that_already_exist);
 
     // factory loads external assets and convert them into engine-specific-assets in the project/content directory
-    bool import(const std::filesystem::path& source_path, const std::filesystem::path& destination_path, const load_options options);
+    bool import(const std::filesystem::path& source_path, const std::filesystem::path& destination_path, const load_options options, std::function<void(float)> progress_callback);
 
 }

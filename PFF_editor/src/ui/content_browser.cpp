@@ -491,10 +491,28 @@ namespace PFF {
 	void content_browser::display_file(const std::filesystem::path& file_path, int ID, ImVec2& text_size) {
 
 		const char* drag_drop_source = "PROJECT_CONTENT_FILE";
-		size_t hash_value = std::filesystem::hash_value(file_path);
+		const size_t hash_value = std::filesystem::hash_value(file_path);
 		resource_manager::asset_curruption_source loc_file_curruption_source = resource_manager::asset_curruption_source::unknown;
 		asset_file_header loc_asset_file_header;
 		bool file_deserialized = resource_manager::try_to_deserialize_file_header(file_path, !logged_warning_for_current_folder, loc_file_curruption_source, loc_asset_file_header);
+
+		if (file_deserialized) {
+
+			if (m_asset_timestamp.contains(hash_value)) {
+
+				const auto asset_timestamp = m_asset_timestamp[hash_value];
+				if (asset_timestamp < loc_asset_file_header.timestamp) {
+
+					LOG(Info, "Found reimported asset")
+					PFF_editor::get().get_icon_manager_ref().request_icon_refresh(file_path);
+					m_asset_timestamp[hash_value] = loc_asset_file_header.timestamp;						// update time
+				}
+
+			} else {
+				m_asset_timestamp[hash_value] = loc_asset_file_header.timestamp;
+			}
+		}
+
 
 		// Begin a new group for each item
 		const ImVec4& color = (file_path == m_selected_items.main_item) ? UI::get_action_color_00_active_ref() : (m_selected_items.item_set.find(file_path) != m_selected_items.item_set.end()) ? UI::get_action_color_00_faded_ref() : UI::get_action_color_gray_hover_ref(); // ImGui::GetStyle().Colors[ImGuiCol_ChildBg];
@@ -540,25 +558,16 @@ namespace PFF {
 					case file_type::texture: {
 
 						drag_drop_source = DRAG_DROP_TEXTURE;
-						if (m_asset_icons.contains(hash_value)) {
+						auto icon = PFF_editor::get().get_icon_manager_ref().request_icon(file_path);
+						if (icon) {
 
-							ImGui::Image(m_asset_icons[hash_value]->get_descriptor_set(), m_icon_size);
+							ImGui::Image(icon->get_descriptor_set(), m_icon_size);
 							break;
-
-						} else {										// create icon
-
-							auto icon = PFF_editor::get().get_icon_manager_ref().request_icon(file_path);
-							if (icon) {
-
-								m_asset_icons[hash_value] = icon;										// save for next iteration
-								ImGui::Image(icon->get_descriptor_set(), m_icon_size);
-								break;
-							}
-								
-							ImGui::Image(m_texture_icon->get_descriptor_set(), m_icon_size);
-							break;
-
 						}
+							
+						LOG(Warn, "request an icon")
+						ImGui::Image(m_texture_icon->get_descriptor_set(), m_icon_size);
+						break;
 
 					} break;
 
@@ -602,11 +611,16 @@ namespace PFF {
 					case file_type::material:			ImGui::Image(m_material_icon->get_descriptor_set(), m_icon_size); break;
 					case file_type::material_instance:	ImGui::Image(m_material_inst_icon->get_descriptor_set(), m_icon_size); break;
 					case file_type::texture: {
-						if (m_asset_icons.contains(hash_value)) {
+						auto icon = PFF_editor::get().get_icon_manager_ref().request_icon(file_path);
+						if (icon) {
 
-							ImGui::Image(m_asset_icons[hash_value]->get_descriptor_set(), m_icon_size);
+							ImGui::Image(icon->get_descriptor_set(), m_icon_size);
 							break;
 						}
+							
+						LOG(Warn, "request an icon")
+						ImGui::Image(m_texture_icon->get_descriptor_set(), m_icon_size);
+						break;
 					}
 					[[fallthrough]];			// if image cant be found just show the warning image
 					default:					ImGui::Image(m_warning_icon->get_descriptor_set(), m_icon_size, ImVec2(0, 0), ImVec2(1, 1), (file_path == m_selected_items.main_item) ? ImVec4(.9f, .5f, 0.f, 1.f) : (m_selected_items.item_set.find(file_path) != m_selected_items.item_set.end()) ? ImVec4(.8f, .4f, 0.f, 1.f) : ImVec4(1.f, .6f, 0.f, 1.f)); break;
