@@ -376,10 +376,10 @@ namespace PFF {
 
 		if (ImGui::BeginPopupContextItem("outliner_entity_context_menu")) {
 
-			if (ImGui::MenuItem("Rename"))
+			if (ImGui::MenuItem("Rename entity"))
 				LOG(Info, "NOT IMPLEMENTED YET");
 
-			if (ImGui::MenuItem("Delete")) {								// open popup to display consequences of deleting file and ask again
+			if (ImGui::MenuItem("Delete entity")) {								// open popup to display consequences of deleting file and ask again
 
 				if (!m_selected_entitys.main_entity.has_component<relationship_component>()) {
 
@@ -756,7 +756,7 @@ namespace PFF {
 
 			UI::begin_table("renderer background values", true, ImVec2(300, 0), 0, true, 0.3f);
 
-			UI::table_row_slider<int>("Effects", background_effect_index, 0, application::get().get_renderer().get_number_of_background_effects() - 1.f);
+			UI::table_row_slider<int>("Effects", background_effect_index, 0, 3);
 
 			if (background_effect_index == 0) {}
 
@@ -769,6 +769,10 @@ namespace PFF {
 
 				UI::table_row_slider<glm::vec3>("bottom color", (glm::vec3&)selected.data.data1);
 				UI::table_row_slider<f32>("star amount", selected.data.data1[3]);
+
+			} else if (background_effect_index == 3) {
+
+				ImGui::Text("Not implemented yet");
 
 			} else {
 

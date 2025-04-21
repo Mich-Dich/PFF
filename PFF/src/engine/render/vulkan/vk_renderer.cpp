@@ -417,6 +417,11 @@ namespace PFF::render::vulkan {
 	}
 
 	
+#define TRY_TO_PROVIDE_SCNENE_DATA_TO_COMP
+// #ifdef TRY_TO_PROVIDE_SCNENE_DATA_TO_COMP
+		// VkDescriptorSet m_global_descriptor;
+// #endif
+
 	void vk_renderer::draw_frame(f32 delta_time) {
 
 		if (m_state != system_state::active)
@@ -439,11 +444,11 @@ namespace PFF::render::vulkan {
 
 
 		// ============================================================ DEV-ONLY ============================================================
-		f32 rotation_speed = glm::radians(25.0f); // 25 degrees per second
-		f32 angle = rotation_speed * delta_time;
-		glm::mat4 rotation = glm::rotate(glm::mat4(1.0f), angle, glm::vec3(0.0f, 1.0f, 0.0f));				// rotation matrix around the Z-axis
-		glm::vec4 rotated_dir = rotation * m_scene_data.sunlight_direction;
-		m_scene_data.sunlight_direction = glm::vec4(rotated_dir.x, rotated_dir.y, rotated_dir.z, m_scene_data.sunlight_direction.w);
+		// f32 rotation_speed = glm::radians(25.0f); // 25 degrees per second
+		// f32 angle = rotation_speed * delta_time;
+		// glm::mat4 rotation = glm::rotate(glm::mat4(1.0f), angle, glm::vec3(0.0f, 1.0f, 0.0f));				// rotation matrix around the Z-axis
+		// glm::vec4 rotated_dir = rotation * m_scene_data.sunlight_direction;
+		// m_scene_data.sunlight_direction = glm::vec4(rotated_dir.x, rotated_dir.y, rotated_dir.z, m_scene_data.sunlight_direction.w);
 		// ============================================================ DEV-ONLY ============================================================
 
 
@@ -471,7 +476,6 @@ namespace PFF::render::vulkan {
 		VkCommandBuffer cmd = get_current_frame().main_command_buffer;
 		VK_CHECK_S(vkResetCommandBuffer(cmd, 0));
 
-
 		VkCommandBufferBeginInfo cmdBeginInfo = init::command_buffer_begin_info(VK_COMMAND_BUFFER_USAGE_ONE_TIME_SUBMIT_BIT);
 
 		if (m_imgui_initalized && !m_render_swapchain) {
@@ -483,6 +487,29 @@ namespace PFF::render::vulkan {
 			m_draw_extent.width = math::min(m_swapchain_extent.width, m_draw_image.get_width()) * (u32)m_render_scale;
 			m_draw_extent.height = math::min(m_swapchain_extent.height, m_draw_image.get_height()) * (u32)m_render_scale;
 		}
+
+#ifdef TRY_TO_PROVIDE_SCNENE_DATA_TO_COMP
+		// ============================================================ calc scene data ============================================================
+		m_scene_data.view = m_active_camera->get_view();
+		m_scene_data.proj = glm::perspective(glm::radians(m_active_camera->get_perspective_fov_y()), (float)m_draw_extent.width / (float)m_draw_extent.height, 100000.f, 0.1f);
+		m_active_camera->force_set_projection_matrix(m_scene_data.proj);
+		m_scene_data.proj[1][1] *= -1;				// invert the Y direction on projection matrix
+		m_scene_data.proj_view = m_scene_data.proj * m_scene_data.view;
+
+		// allocate a new uniform buffer for the scene data
+		vk_buffer gpuSceneDataBuffer = create_buffer(sizeof(render::GPU_scene_data), VK_BUFFER_USAGE_UNIFORM_BUFFER_BIT, VMA_MEMORY_USAGE_CPU_TO_GPU);
+		get_current_frame().del_queue.push_func([this, gpuSceneDataBuffer]() { destroy_buffer(gpuSceneDataBuffer); });
+
+		//write the buffer
+		render::GPU_scene_data* scene_uniform_data = (render::GPU_scene_data*)gpuSceneDataBuffer.allocation->GetMappedData();
+		*scene_uniform_data = m_scene_data;
+
+		//create a descriptor set that binds that buffer and update it
+		m_global_descriptor = get_current_frame().frame_descriptors.allocate(m_device, m_gpu_scene_data_descriptor_layout);
+		descriptor_writer writer;
+		writer.write_buffer(0, gpuSceneDataBuffer.buffer, sizeof(render::GPU_scene_data), 0, VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER);
+		writer.update_set(m_device, m_global_descriptor);
+#endif // TRY_TO_PROVIDE_SCNENE_DATA_TO_COMP
 
 		VK_CHECK_S(vkBeginCommandBuffer(cmd, &cmdBeginInfo));
 
@@ -696,7 +723,7 @@ namespace PFF::render::vulkan {
 
 		m_scene_data.sunlight_color = glm::vec4(1.f, 1.f, 1.f, 0.01f);
 		m_scene_data.ambient_color = glm::vec4(1.f, 1.f, 1.f, 0.001f);
-		m_scene_data.sunlight_direction = glm::vec4(0.2f, 0.2f, 0.2f, 1.0f);
+		m_scene_data.sunlight_direction = glm::vec4(1.0f, 1.0f, 1.0f, 1.0f);
 
 		// =========================================================== DEFAULT MATERIAL =========================================================== 
 
@@ -1044,9 +1071,39 @@ namespace PFF::render::vulkan {
 		m_background_effects.emplace_back(sky);
 		vkDestroyShaderModule(m_device, sky_shader, nullptr);
 
+		// ====================================================== Add pipeline [gradient] ====================================================== 		
+
+
+		VkPushConstantRange skybox_push_const{};
+		skybox_push_const.offset = 0;
+		skybox_push_const.size = sizeof(render::compute_push_constants_dynamic_skybox);
+		skybox_push_const.stageFlags = VK_SHADER_STAGE_COMPUTE_BIT;
+
+		VkPipelineLayoutCreateInfo skybox_compute_lyout_CI{};
+		skybox_compute_lyout_CI.sType = VK_STRUCTURE_TYPE_PIPELINE_LAYOUT_CREATE_INFO;
+		skybox_compute_lyout_CI.pNext = nullptr;
+		skybox_compute_lyout_CI.pSetLayouts = &m_draw_image_descriptor_layout;
+		skybox_compute_lyout_CI.setLayoutCount = 1;
+		skybox_compute_lyout_CI.pPushConstantRanges = &skybox_push_const;
+		skybox_compute_lyout_CI.pushConstantRangeCount = 1;
+		VK_CHECK_S(vkCreatePipelineLayout(m_device, &skybox_compute_lyout_CI, nullptr, &m_skybox_pipeline_layout));
+
+		compute_pipeline_CI.layout = m_skybox_pipeline_layout;
+
+		VkShaderModule skybox_shader;
+		ASSERT(util::load_shader_module(PFF::util::get_executable_path() / "../PFF/shaders/dynamic_skybox.comp.spv", m_device, &skybox_shader), "", "Error when building the compute shader [dynamic_skybox]");
+		compute_pipeline_CI.stage.module = skybox_shader;		//change the shader module only
+
+		//change the shader module only
+		VK_CHECK_S(vkCreateComputePipelines(m_device, VK_NULL_HANDLE, 1, &compute_pipeline_CI, nullptr, &m_skybox_pipeline));
+		vkDestroyShaderModule(m_device, skybox_shader, nullptr);
+
 
 		m_deletion_queue.push_func([&]() {
 
+			vkDestroyPipelineLayout(m_device, m_skybox_pipeline_layout, nullptr);
+			vkDestroyPipeline(m_device, m_skybox_pipeline, nullptr);
+			
 			vkDestroyPipelineLayout(m_device, m_gradient_pipeline_layout, nullptr);
 			for (u64 x = 0; x < m_background_effects.size(); x++)
 				vkDestroyPipeline(m_device, m_background_effects[x].pipeline, nullptr);
@@ -1111,10 +1168,6 @@ namespace PFF::render::vulkan {
 		vkDestroyShaderModule(m_device, mesh_frag_shader, nullptr);
 		vkDestroyShaderModule(m_device, mesh_vertex_shader, nullptr);
 
-		//m_deletion_queue.push_pointer(m_single_image_descriptor_layout);
-		//m_deletion_queue.push_pointer(m_mesh_pipeline_layout);
-		//m_deletion_queue.push_pointer(m_mesh_pipeline);
-
 		m_deletion_queue.push_func([&]() {
 
 			vkDestroyDescriptorSetLayout(m_device, m_single_image_descriptor_layout, nullptr);
@@ -1151,37 +1204,31 @@ namespace PFF::render::vulkan {
 
 	void vk_renderer::draw_internal(VkCommandBuffer cmd) {
 
-#ifdef TRY_TO_PROVIDE_SCNENE_DATA_TO_COMP
-		m_scene_data.view = m_active_camera->get_view();
-		m_scene_data.proj = glm::perspective(glm::radians(m_active_camera->get_perspective_fov_y()), (float)m_draw_extent.width / (float)m_draw_extent.height, 100000.f, 0.1f);
-		m_active_camera->force_set_projection_matrix(m_scene_data.proj);
-		m_scene_data.proj[1][1] *= -1;				// invert the Y direction on projection matrix
-		m_scene_data.proj_view = m_scene_data.proj * m_scene_data.view;
+		if (m_current_background_effect < m_background_effects.size()) {
 
-		// allocate a new uniform buffer for the scene data
-		vk_buffer gpuSceneDataBuffer = create_buffer(sizeof(render::GPU_scene_data), VK_BUFFER_USAGE_UNIFORM_BUFFER_BIT, VMA_MEMORY_USAGE_CPU_TO_GPU);
-		get_current_frame().del_queue.push_func([this, gpuSceneDataBuffer]() { destroy_buffer(gpuSceneDataBuffer); });
-
-		//write the buffer
-		render::GPU_scene_data* scene_uniform_data = (render::GPU_scene_data*)gpuSceneDataBuffer.allocation->GetMappedData();
-		*scene_uniform_data = m_scene_data;
+			render::compute_effect& effect = m_background_effects[m_current_background_effect];
+	
+			// bind the gradient drawing compute pipeline
+			vkCmdBindPipeline(cmd, VK_PIPELINE_BIND_POINT_COMPUTE, effect.pipeline);
+			vkCmdBindDescriptorSets(cmd, VK_PIPELINE_BIND_POINT_COMPUTE, m_gradient_pipeline_layout, 0, 1, &m_draw_image_descriptors, 0, nullptr);		// bind desc_set containing the draw_image for compute pipeline
+			vkCmdPushConstants(cmd, m_gradient_pipeline_layout, VK_SHADER_STAGE_COMPUTE_BIT, 0, sizeof(render::compute_push_constants), &effect.data);
+	
+			// execute the compute pipeline dispatch. We are using 16x16 workgroup size so we need to divide by it
+			vkCmdDispatch(cmd, static_cast<u32>(std::ceil(m_draw_extent.width / 16.0)), static_cast<u32>(std::ceil(m_draw_extent.height / 16.0)), 1);
 		
-		//create a descriptor set that binds that buffer and update it
-		globalDescriptor = get_current_frame().frame_descriptors.allocate(m_device, m_gpu_scene_data_descriptor_layout);
-		descriptor_writer writer;
-		writer.write_buffer(0, gpuSceneDataBuffer.buffer, sizeof(render::GPU_scene_data), 0, VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER);
-		writer.update_set(m_device, globalDescriptor);
-#endif TRY_TO_PROVIDE_SCNENE_DATA_TO_COMP
+		} else {
 
-		render::compute_effect& effect = m_background_effects[m_current_background_effect];
+			
+			render::compute_push_constants_dynamic_skybox skybox_data{};
+			skybox_data.basic_sky_color = glm::vec4(0.3f, 0.15f, 0.25f, 1.f);
+			skybox_data.sun_distance = 1000.f;
+			skybox_data.sun_radius = .05f;
 
-		// bind the gradient drawing compute pipeline
-		vkCmdBindPipeline(cmd, VK_PIPELINE_BIND_POINT_COMPUTE, effect.pipeline);
-		vkCmdBindDescriptorSets(cmd, VK_PIPELINE_BIND_POINT_COMPUTE, m_gradient_pipeline_layout, 0, 1, &m_draw_image_descriptors, 0, nullptr);		// bind desc_set containing the draw_image for compute pipeline
-		vkCmdPushConstants(cmd, m_gradient_pipeline_layout, VK_SHADER_STAGE_COMPUTE_BIT, 0, sizeof(render::compute_push_constants), &effect.data);
-
-		// execute the compute pipeline dispatch. We are using 16x16 workgroup size so we need to divide by it
-		vkCmdDispatch(cmd, static_cast<u32>(std::ceil(m_draw_extent.width / 16.0)), static_cast<u32>(std::ceil(m_draw_extent.height / 16.0)), 1);
+			vkCmdBindPipeline(cmd, VK_PIPELINE_BIND_POINT_COMPUTE, m_skybox_pipeline);
+			vkCmdBindDescriptorSets(cmd, VK_PIPELINE_BIND_POINT_COMPUTE, m_skybox_pipeline_layout, 0, 1, &m_draw_image_descriptors, 0, nullptr);		// bind desc_set containing the draw_image for compute pipeline
+			vkCmdPushConstants(cmd, m_skybox_pipeline_layout, VK_SHADER_STAGE_COMPUTE_BIT, 0, sizeof(skybox_data), &skybox_data);
+			vkCmdDispatch(cmd, static_cast<u32>(std::ceil(m_draw_extent.width / 16.0)), static_cast<u32>(std::ceil(m_draw_extent.height / 16.0)), 1);
+		}
 	}
 
 	
@@ -1227,7 +1274,7 @@ namespace PFF::render::vulkan {
 		descriptor_writer writer;
 		writer.write_buffer(0, gpuSceneDataBuffer.buffer, sizeof(render::GPU_scene_data), 0, VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER);
 		writer.update_set(m_device, globalDescriptor);
-#endif TRY_TO_PROVIDE_SCNENE_DATA_TO_COMP
+#endif // TRY_TO_PROVIDE_SCNENE_DATA_TO_COMP
 
 		VkRenderingAttachmentInfo color_attachment = init::attachment_info(m_draw_image.get_image_view(), nullptr, VK_IMAGE_LAYOUT_GENERAL);					// begin a render pass connected to our draw image
 		VkRenderingAttachmentInfo depth_attachment = init::depth_attachment_info(m_depth_image.get_image_view(), VK_IMAGE_LAYOUT_DEPTH_ATTACHMENT_OPTIMAL);
@@ -1249,7 +1296,7 @@ namespace PFF::render::vulkan {
 		vkCmdBindDescriptorSets(cmd, VK_PIPELINE_BIND_POINT_GRAPHICS, m_grid_pipeline_layout, 
 			0,  // First set
 			1,  // Descriptor count
-			&globalDescriptor,  // scene data descriptor
+			&m_global_descriptor,  // scene data descriptor
 			0, nullptr );
 		vkCmdDraw(cmd, 4, 1, 0, 0);  // 4 vertices
 
@@ -1292,7 +1339,7 @@ namespace PFF::render::vulkan {
 
 						last_pipeline = loc_pipeline;
 						vkCmdBindPipeline(cmd, VK_PIPELINE_BIND_POINT_GRAPHICS, loc_pipeline->pipeline);
-						vkCmdBindDescriptorSets(cmd, VK_PIPELINE_BIND_POINT_GRAPHICS, loc_pipeline->layout, 0, 1, &globalDescriptor, 0, nullptr);
+						vkCmdBindDescriptorSets(cmd, VK_PIPELINE_BIND_POINT_GRAPHICS, loc_pipeline->layout, 0, 1, &m_global_descriptor, 0, nullptr);
 						COLLECTING_PERFORMANCE_DATA(m_renderer_metrik.pipline_binding_count++);
 					}
 					vkCmdBindDescriptorSets(cmd, VK_PIPELINE_BIND_POINT_GRAPHICS, loc_material->pipeline->layout, (u32)1, (u32)1, &loc_material->material_set, (u32)0, nullptr);
@@ -1357,7 +1404,7 @@ namespace PFF::render::vulkan {
 
 					last_pipeline = loc_pipeline;
 					vkCmdBindPipeline(cmd, VK_PIPELINE_BIND_POINT_GRAPHICS, loc_pipeline->pipeline);
-					vkCmdBindDescriptorSets(cmd, VK_PIPELINE_BIND_POINT_GRAPHICS, loc_pipeline->layout, 0, 1, &globalDescriptor, 0, nullptr);
+					vkCmdBindDescriptorSets(cmd, VK_PIPELINE_BIND_POINT_GRAPHICS, loc_pipeline->layout, 0, 1, &m_global_descriptor, 0, nullptr);
 					COLLECTING_PERFORMANCE_DATA(m_renderer_metrik.pipline_binding_count++);
 				}
 				vkCmdBindDescriptorSets(cmd, VK_PIPELINE_BIND_POINT_GRAPHICS, loc_material->pipeline->layout, (u32)1, (u32)1, &loc_material->material_set, (u32)0, nullptr);
@@ -1393,7 +1440,7 @@ namespace PFF::render::vulkan {
 			
 			// binding debug material for lines
 			vkCmdBindPipeline(cmd, VK_PIPELINE_BIND_POINT_GRAPHICS, m_debug_lines_material_inst.pipeline->pipeline);
-			vkCmdBindDescriptorSets(cmd, VK_PIPELINE_BIND_POINT_GRAPHICS, m_debug_lines_material_inst.pipeline->layout, 0, 1, &globalDescriptor, 0, nullptr);
+			vkCmdBindDescriptorSets(cmd, VK_PIPELINE_BIND_POINT_GRAPHICS, m_debug_lines_material_inst.pipeline->layout, 0, 1, &m_global_descriptor, 0, nullptr);
 			vkCmdBindDescriptorSets(cmd, VK_PIPELINE_BIND_POINT_GRAPHICS, m_debug_lines_material_inst.pipeline->layout, (u32)1, (u32)1, &m_debug_lines_material_inst.material_set, (u32)0, nullptr);
 			
 			GPU_draw_push_constants push_constants;

@@ -200,12 +200,15 @@ namespace PFF::render::vulkan {
 		// ---------------------------- descriptors ---------------------------- 
 		//descriptor_allocator						global_descriptor_allocator{};
 		descriptor_allocator_growable				m_global_descriptor_allocator;
+		VkDescriptorSet								m_global_descriptor;
 		VkDescriptorSet								m_draw_image_descriptors{};
 		VkDescriptorSetLayout						m_draw_image_descriptor_layout{};
 		
 		// ---------------------------- pipelines ---------------------------- 
 		VkPipeline									m_gradient_pipeline{};
 		VkPipelineLayout							m_gradient_pipeline_layout{};
+		VkPipelineLayout							m_skybox_pipeline_layout{};
+		VkPipeline									m_skybox_pipeline{};
 
 		// ---------------------------- immediate-submit ---------------------------- 
 		VkFence										m_immFence{};
@@ -239,6 +242,9 @@ namespace PFF::render::vulkan {
 		material									m_metal_rough_material;
 		ref<material_instance>						m_default_material;
 		vk_buffer 									m_material_constant;
+
+
+		render::compute_push_constants_dynamic_skybox 	m_skybox_data{};
 
 		// ---------------------------- data for debug ---------------------------- 
 #ifdef PFF_RENDERER_DEBUG_CAPABILITY
