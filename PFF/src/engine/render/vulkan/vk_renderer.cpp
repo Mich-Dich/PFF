@@ -892,7 +892,7 @@ namespace PFF::render::vulkan {
 			writer.write_image(0, m_draw_image.get_image_view(), VK_NULL_HANDLE, VK_IMAGE_LAYOUT_GENERAL, VK_DESCRIPTOR_TYPE_STORAGE_IMAGE);
 			writer.update_set(m_device, m_draw_image_descriptors);
 		}
-		
+
 		m_deletion_queue.push_pointer(m_draw_image_descriptor_layout);
 		m_deletion_queue.push_pointer(m_single_image_descriptor_layout);
 		m_deletion_queue.push_pointer(m_gpu_scene_data_descriptor_layout);
@@ -1073,17 +1073,18 @@ namespace PFF::render::vulkan {
 
 		// ====================================================== Add pipeline [gradient] ====================================================== 		
 
-
 		VkPushConstantRange skybox_push_const{};
 		skybox_push_const.offset = 0;
 		skybox_push_const.size = sizeof(render::compute_push_constants_dynamic_skybox);
 		skybox_push_const.stageFlags = VK_SHADER_STAGE_COMPUTE_BIT;
 
+		std::array<VkDescriptorSetLayout,2> sets = { m_gpu_scene_data_descriptor_layout, m_draw_image_descriptor_layout };
+
 		VkPipelineLayoutCreateInfo skybox_compute_lyout_CI{};
 		skybox_compute_lyout_CI.sType = VK_STRUCTURE_TYPE_PIPELINE_LAYOUT_CREATE_INFO;
 		skybox_compute_lyout_CI.pNext = nullptr;
-		skybox_compute_lyout_CI.pSetLayouts = &m_draw_image_descriptor_layout;
-		skybox_compute_lyout_CI.setLayoutCount = 1;
+		skybox_compute_lyout_CI.pSetLayouts            = sets.data();
+		skybox_compute_lyout_CI.setLayoutCount         = static_cast<uint32_t>(sets.size());
 		skybox_compute_lyout_CI.pPushConstantRanges = &skybox_push_const;
 		skybox_compute_lyout_CI.pushConstantRangeCount = 1;
 		VK_CHECK_S(vkCreatePipelineLayout(m_device, &skybox_compute_lyout_CI, nullptr, &m_skybox_pipeline_layout));
@@ -1218,14 +1219,20 @@ namespace PFF::render::vulkan {
 		
 		} else {
 
-			
 			render::compute_push_constants_dynamic_skybox skybox_data{};
-			skybox_data.basic_sky_color = glm::vec4(0.3f, 0.15f, 0.25f, 1.f);
+			skybox_data.basic_sky_color = glm::vec4(0.3f, 0.3f, 0.4f, 1.f);
 			skybox_data.sun_distance = 1000.f;
-			skybox_data.sun_radius = .05f;
+			skybox_data.sun_radius = .005f;
 
 			vkCmdBindPipeline(cmd, VK_PIPELINE_BIND_POINT_COMPUTE, m_skybox_pipeline);
-			vkCmdBindDescriptorSets(cmd, VK_PIPELINE_BIND_POINT_COMPUTE, m_skybox_pipeline_layout, 0, 1, &m_draw_image_descriptors, 0, nullptr);		// bind desc_set containing the draw_image for compute pipeline
+			VkDescriptorSet sets[] = {
+				m_global_descriptor,       // scene data
+				m_draw_image_descriptors   // skybox output image + sampler
+			};
+			vkCmdBindDescriptorSets(cmd, VK_PIPELINE_BIND_POINT_COMPUTE, m_skybox_pipeline_layout, 0, 2, sets, 0, nullptr);
+			// vkCmdBindDescriptorSets(cmd, VK_PIPELINE_BIND_POINT_COMPUTE, m_skybox_pipeline_layout, 1, 1, &m_global_descriptor, 0, nullptr);
+			// vkCmdBindDescriptorSets(cmd, VK_PIPELINE_BIND_POINT_COMPUTE, m_skybox_pipeline_layout, 0, 1, &m_draw_image_descriptors, 0, nullptr);		// bind desc_set containing the draw_image for compute pipeline
+		
 			vkCmdPushConstants(cmd, m_skybox_pipeline_layout, VK_SHADER_STAGE_COMPUTE_BIT, 0, sizeof(skybox_data), &skybox_data);
 			vkCmdDispatch(cmd, static_cast<u32>(std::ceil(m_draw_extent.width / 16.0)), static_cast<u32>(std::ceil(m_draw_extent.height / 16.0)), 1);
 		}
@@ -1466,7 +1473,6 @@ namespace PFF::render::vulkan {
 
 		vkCmdEndRendering(cmd);
 	}
-
 
 	// called once per frame
 	void vk_renderer::calc_frustum_planes(const glm::mat4& pro_view) {

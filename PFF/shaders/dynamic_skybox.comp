@@ -2,30 +2,69 @@
 
 layout (local_size_x = 16, local_size_y = 16) in;
 
-layout(rgba16f, set = 0, binding = 0) uniform image2D image;
+layout(set = 0, binding = 0) uniform global_scene_data {
+    mat4 view;
+    mat4 proj;
+    mat4 viewproj;
+    vec4 ambient_color;
+    vec4 sunlight_direction; // w for sun power
+    vec4 sunlight_color;
+} scene_data;
 
-// Push constants
+layout(set = 1, binding = 0) uniform writeonly image2D outImage;
+
 layout(push_constant) uniform constants {
-    vec3 bsic_sky_color;
+    vec4 bsic_sky_color;
     float sun_distance;
-    float sun_radius;    // fraction of screen‐width (0..1), e.g. 0.05
+    float sun_radius; // fraction of screen-width (0..1)
 } PushConstants;
 
+// Shared variables to compute sun position once per workgroup
+shared vec2 shared_sun_uv;
+shared bool shared_sun_visible;
+shared float shared_sun_radius;
+
 void main() {
-
     ivec2 texelCoord = ivec2(gl_GlobalInvocationID.xy);
-	ivec2 size = imageSize(image);
+    ivec2 size = imageSize(outImage);
 
-    if(texelCoord.x < size.x && texelCoord.y < size.y) {
-
-        vec4 color = vec4(0.0, 0.0, 0.0, 1.0);
-
-        if(gl_LocalInvocationID.x != 0 && gl_LocalInvocationID.y != 0) {
-            
-            color.x = float(texelCoord.x)/(size.x);
-            color.y = float(texelCoord.y)/(size.y);	
-        }
-    
-        imageStore(image, texelCoord, color);
+    if (texelCoord.x >= size.x || texelCoord.y >= size.y) {
+        return;
     }
+
+    // First thread in the workgroup computes sun position and visibility
+    if (gl_LocalInvocationID.x == 0 && gl_LocalInvocationID.y == 0) {
+        vec3 sun_dir_world = normalize(scene_data.sunlight_direction.xyz);
+        vec4 sun_pos_world = vec4(sun_dir_world * PushConstants.sun_distance, 1.0);
+        vec4 sun_pos_view = scene_data.view * sun_pos_world;
+        vec4 sun_pos_clip = scene_data.proj * sun_pos_view;
+
+        // Check if the sun is in front of the camera
+        if (sun_pos_clip.w > 0.0) {
+            vec3 sun_pos_ndc = sun_pos_clip.xyz / sun_pos_clip.w;
+            shared_sun_uv = sun_pos_ndc.xy * 0.5 + 0.5;
+            shared_sun_visible = true;
+        } else {
+            shared_sun_visible = false;
+        }
+        shared_sun_radius = PushConstants.sun_radius;
+    }
+
+    barrier();                      // Wait for all threads in the workgroup to reach this point
+
+    vec4 color = PushConstants.bsic_sky_color;
+
+    if (shared_sun_visible) {
+        vec2 uv = vec2(texelCoord) / vec2(size);
+        float aspect_ratio = float(size.y) / float(size.x);
+
+        vec2 delta = uv - shared_sun_uv;
+        delta.y *= aspect_ratio; // Adjust for aspect ratio to maintain circle shape
+
+        if (length(delta) < shared_sun_radius) {
+            color = vec4(1.0); // White for the sun
+        }
+    }
+
+    imageStore(outImage, texelCoord, color);
 }

@@ -45,7 +45,7 @@ namespace PFF::render {
 
 	struct compute_push_constants_dynamic_skybox {
 
-		glm::vec3				basic_sky_color;
+		glm::vec4				basic_sky_color;
 		f32 					sun_distance;
 		f32 					sun_radius;
 	};
