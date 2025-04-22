@@ -751,35 +751,38 @@ namespace PFF {
 		ImGui::SetNextWindowBgAlpha(0.8f); // Transparent background
 		if (ImGui::Begin("Render Debug", &m_show_renderer_backgrond_effect, window_flags)) {
 
-			render::compute_effect& selected = application::get().get_renderer().get_current_background_effect();
 			int& background_effect_index = application::get().get_renderer().get_current_background_effect_index();
 
 			UI::begin_table("renderer background values", true, ImVec2(300, 0), 0, true, 0.3f);
 
 			UI::table_row_slider<int>("Effects", background_effect_index, 0, 3);
 
-			if (background_effect_index == 0) {}
+			if (background_effect_index < 3) {
 
-			else if (background_effect_index == 1) {
+				render::compute_effect& selected = application::get().get_renderer().get_current_background_effect();
+				if (background_effect_index == 0) {}
 
-				UI::table_row_slider("top color", selected.data.data1);
-				UI::table_row_slider("bottom color", selected.data.data2);
+				else if (background_effect_index == 1) {
 
-			} else if (background_effect_index == 2) {
+					UI::table_row_slider("top color", selected.data.data1);
+					UI::table_row_slider("bottom color", selected.data.data2);
 
-				UI::table_row_slider<glm::vec3>("bottom color", (glm::vec3&)selected.data.data1);
-				UI::table_row_slider<f32>("star amount", selected.data.data1[3]);
+				} else if (background_effect_index == 2) {
+
+					UI::table_row_slider<glm::vec3>("bottom color", (glm::vec3&)selected.data.data1);
+					UI::table_row_slider<f32>("star amount", selected.data.data1[3]);
+
+				} else {
+
+					UI::table_row_slider("data 1", selected.data.data1);
+					UI::table_row_slider("data 2", selected.data.data2);
+					UI::table_row_slider("data 3", selected.data.data3);
+					UI::table_row_slider("data 4", selected.data.data4);
+				}
 
 			} else if (background_effect_index == 3) {
 
 				ImGui::Text("Not implemented yet");
-
-			} else {
-
-				UI::table_row_slider("data 1", selected.data.data1);
-				UI::table_row_slider("data 2", selected.data.data2);
-				UI::table_row_slider("data 3", selected.data.data3);
-				UI::table_row_slider("data 4", selected.data.data4);
 			}
 
 			UI::end_table();

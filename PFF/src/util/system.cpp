@@ -119,7 +119,7 @@ namespace PFF::util {
         auto working_dir = util::get_executable_path().generic_string();
 
         // Start the program
-        result = CreateProcessA(
+        bool result = CreateProcessA(
             NULL,							            // Application Name
             (LPSTR)cmdArguments.c_str(),	            // Command Line Args
             NULL,							            // Process Attributes
