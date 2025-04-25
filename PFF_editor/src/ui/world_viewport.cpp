@@ -122,13 +122,13 @@ namespace PFF {
 
 
 
-		if (option == serializer::option::save_to_file && m_selected_entitys.main_entity == entity())
+		if (option == serializer::option::save_to_file && m_selected_entitys.main_item == entity())
 			return;
 
 		UUID selected_ID{};
 		if (option == serializer::option::save_to_file) {
 
-			selected_ID = m_selected_entitys.main_entity.get_UUID();
+			selected_ID = m_selected_entitys.main_item.get_UUID();
 			LOG(Trace, "Save UUID: " << selected_ID);
 		}
 
@@ -141,7 +141,7 @@ namespace PFF {
 		//	LOG(Trace, "Load UUID: " << selected_ID);
 		//	if (auto loc_entity = application::get().get_world_layer()->get_map()->get_entity_by_UUID(selected_ID)) {
 
-		//		m_selected_entitys.main_entity = loc_entity;
+		//		m_selected_entitys.main_item = loc_entity;
 		//		LOG(Info, "FOUND UUID: " << selected_ID);
 		//	}
 		//}
@@ -186,9 +186,9 @@ namespace PFF {
 			const auto& child_relationship_comp = child.get_component<relationship_component>();
 			if (child_relationship_comp.children_ID.empty()) {
 
-				ImGui::TreeNodeEx(child_name_comp.name.c_str(), ImGuiTreeNodeFlags_SpanAllColumns | ImGuiTreeNodeFlags_Leaf | ImGuiTreeNodeFlags_Bullet | ImGuiTreeNodeFlags_NoTreePushOnOpen | ((m_selected_entitys.main_entity == child) ? ImGuiTreeNodeFlags_Selected : 0));
+				ImGui::TreeNodeEx(child_name_comp.name.c_str(), ImGuiTreeNodeFlags_SpanAllColumns | ImGuiTreeNodeFlags_Leaf | ImGuiTreeNodeFlags_Bullet | ImGuiTreeNodeFlags_NoTreePushOnOpen | ((m_selected_entitys.main_item == child) ? ImGuiTreeNodeFlags_Selected : 0));
 				if (ImGui::IsItemClicked())
-					m_selected_entitys.main_entity = child;
+					m_selected_entitys.main_item = child;
 
 				ImGui::TableNextColumn();
 				list_all_components(child);
@@ -197,9 +197,9 @@ namespace PFF {
 			}
 
 			const auto flags = ImGuiTreeNodeFlags_OpenOnArrow | ImGuiTreeNodeFlags_OpenOnDoubleClick | ImGuiTreeNodeFlags_SpanAllColumns;
-			const bool is_open = ImGui::TreeNodeEx(child_name_comp.name.c_str(), flags | ((m_selected_entitys.main_entity == child) ? ImGuiTreeNodeFlags_Selected : 0));
+			const bool is_open = ImGui::TreeNodeEx(child_name_comp.name.c_str(), flags | ((m_selected_entitys.main_item == child) ? ImGuiTreeNodeFlags_Selected : 0));
 			if (ImGui::IsItemClicked())
-				m_selected_entitys.main_entity = child;
+				m_selected_entitys.main_item = child;
 
 			ImGui::TableNextColumn();
 			list_all_components(child);
@@ -277,12 +277,13 @@ namespace PFF {
 		ImGui::TableSetupColumn("components", ImGuiTableColumnFlags_WidthFixed, 70.f);
 		ImGui::TableHeadersRow();
 
+		UI::mouse_interation item_mouse_interation = UI::mouse_interation::none;
 		const auto& map_ref = application::get().get_world_layer()->get_map();
 		for (const auto entity_ID : map_ref->m_registry.view<entt::entity>()) {
 
 			PFF::entity loc_entity = entity(entity_ID, map_ref.get());
 			const auto& name_comp = loc_entity.get_component<name_component>();
-			const ImVec4& color = (loc_entity == m_selected_entitys.main_entity) ? UI::get_action_color_00_active_ref() : (m_selected_entitys.entity_set.find(loc_entity) != m_selected_entitys.entity_set.end()) ? UI::get_action_color_00_faded_ref() : UI::get_action_color_gray_hover_ref(); // ImGui::GetStyle().Colors[ImGuiCol_ChildBg];
+			const ImVec4& color = (loc_entity == m_selected_entitys.main_item) ? UI::get_action_color_00_active_ref() : (m_selected_entitys.item_set.find(loc_entity) != m_selected_entitys.item_set.end()) ? UI::get_action_color_00_faded_ref() : UI::get_action_color_gray_hover_ref(); // ImGui::GetStyle().Colors[ImGuiCol_ChildBg];
 
 			// has relationship
 			if (loc_entity.has_component<relationship_component>()) {
@@ -299,7 +300,8 @@ namespace PFF {
 				//ImGui::PushID(item_name.c_str());
 				const auto flags = ImGuiTreeNodeFlags_OpenOnArrow | ImGuiTreeNodeFlags_OpenOnDoubleClick | ImGuiTreeNodeFlags_SpanAllColumns;
 				ImGui::PushStyleColor(ImGuiCol_Header, color);
-				const bool is_open = ImGui::TreeNodeEx(name_comp.name.c_str(), flags | ((m_selected_entitys.main_entity == loc_entity) ? ImGuiTreeNodeFlags_Selected : 0));
+				const bool is_open = ImGui::TreeNodeEx(name_comp.name.c_str(), flags | ((m_selected_entitys.main_item == loc_entity) ? ImGuiTreeNodeFlags_Selected : 0));
+				item_mouse_interation = UI::get_mouse_interation_on_item();
 				ImGui::PopStyleColor();
 				//ImGui::PopID();
 
@@ -320,47 +322,50 @@ namespace PFF {
 			add_show_hide_icon(loc_entity);
 			
 			ImGui::PushStyleColor(ImGuiCol_Header, color);
-			ImGui::TreeNodeEx(name_comp.name.c_str(), ImGuiTreeNodeFlags_SpanAllColumns | ImGuiTreeNodeFlags_Leaf | ImGuiTreeNodeFlags_Bullet | ImGuiTreeNodeFlags_NoTreePushOnOpen | ((m_selected_entitys.main_entity == loc_entity) ? ImGuiTreeNodeFlags_Selected : 0));
+			ImGui::TreeNodeEx(name_comp.name.c_str(), ImGuiTreeNodeFlags_SpanAllColumns | ImGuiTreeNodeFlags_Leaf | ImGuiTreeNodeFlags_Bullet | ImGuiTreeNodeFlags_NoTreePushOnOpen | ((m_selected_entitys.main_item == loc_entity) ? ImGuiTreeNodeFlags_Selected : 0));
+			item_mouse_interation = UI::get_mouse_interation_on_item();
 			ImGui::PopStyleColor();
-			// if (ImGui::IsItemClicked())
-			// 	m_selected_entitys.main_entity = loc_entity;
 
-			const auto item_mouse_interation = UI::get_mouse_interation_on_item();
-			switch (item_mouse_interation) {
-				// case UI::mouse_interation::left_clicked:	m_selected_entitys.main_entity = loc_entity; break;
-				case UI::mouse_interation::right_clicked:	ImGui::OpenPopup("outliner_entity_context_menu"); break;
-				
-				case UI::mouse_interation::left_pressed:
+			util::process_selection_input<PFF::entity>(m_selected_entitys, item_mouse_interation, loc_entity,"outliner_entity_context_menu", []() {
 
-					if (ImGui::GetIO().KeyShift) {
-						
-						if (m_selected_entitys.main_entity.is_valid()) {										// If main item selected -> perform range selection.
+				LOG(Warn, "Not implemented yet")
+			});
 
-							// TODO: need to perform multi selection somehow
+			//switch (item_mouse_interation) {
+			//	// case UI::mouse_interation::left_clicked:	m_selected_entitys.main_item = loc_entity; break;
+			//	case UI::mouse_interation::right_clicked:	ImGui::OpenPopup("outliner_entity_context_menu"); break;
+			//	
+			//	case UI::mouse_interation::left_pressed:
 
-						} else
-							m_selected_entitys.main_entity = loc_entity;										// If main item not selected -> simply mark clicked item as main selection.
-							
-					} else if (ImGui::GetIO().KeyCtrl) {
+			//		if (ImGui::GetIO().KeyShift) {
+			//			
+			//			if (m_selected_entitys.main_item.is_valid()) {										// If main item selected -> perform range selection.
 
-						
-						if (m_selected_entitys.main_entity.is_valid())
-							m_selected_entitys.entity_set.insert(m_selected_entitys.main_entity);
-						m_selected_entitys.main_entity = loc_entity;
+			//				// TODO: need to perform multi selection somehow
 
-						// if (m_selected_entitys.entity_set.find(loc_entity) == m_selected_entitys.entity_set.end())				// If Shift is held, select the item
-						// 	m_selected_entitys.entity_set.insert(loc_entity);
-						// else
-						// 	m_selected_entitys.entity_set.erase(loc_entity);
+			//			} else
+			//				m_selected_entitys.main_item = loc_entity;										// If main item not selected -> simply mark clicked item as main selection.
+			//				
+			//		} else if (ImGui::GetIO().KeyCtrl) {
 
-					} else {
+			//			
+			//			if (m_selected_entitys.main_item.is_valid())
+			//				m_selected_entitys.item_set.insert(m_selected_entitys.main_item);
+			//			m_selected_entitys.main_item = loc_entity;
 
-						m_selected_entitys.entity_set.clear();
-						m_selected_entitys.main_entity = loc_entity;
-					}
-				break;
-				default: break;
-			}
+			//			// if (m_selected_entitys.item_set.find(loc_entity) == m_selected_entitys.item_set.end())				// If Shift is held, select the item
+			//			// 	m_selected_entitys.item_set.insert(loc_entity);
+			//			// else
+			//			// 	m_selected_entitys.item_set.erase(loc_entity);
+
+			//		} else {
+
+			//			m_selected_entitys.item_set.clear();
+			//			m_selected_entitys.main_item = loc_entity;
+			//		}
+			//	break;
+			//	default: break;
+			//}
 
 			ImGui::TableNextColumn();
 			list_all_components(loc_entity);
@@ -368,11 +373,9 @@ namespace PFF {
 
 		ImGui::EndTable();
 
-		// Reset m_selected_entitys.main_entity when clicking on empty space
+		// Reset m_selected_entitys.main_item when clicking on empty space
 		if (ImGui::IsWindowHovered() && ImGui::IsMouseClicked(ImGuiMouseButton_Left) && !ImGui::IsAnyItemHovered())
-			m_selected_entitys.main_entity = entity();
-
-		ImGui::End();
+			m_selected_entitys.main_item = entity();
 
 		if (ImGui::BeginPopupContextItem("outliner_entity_context_menu")) {
 
@@ -381,20 +384,21 @@ namespace PFF {
 
 			if (ImGui::MenuItem("Delete entity")) {								// open popup to display consequences of deleting file and ask again
 
-				if (!m_selected_entitys.main_entity.has_component<relationship_component>()) {
+				if (!m_selected_entitys.main_item.has_component<relationship_component>()) {
 
 					LOG(Info, "need to cleanup realtionships, TODO: add settings to decide if children will also be deleted or just reparented")
 				}
 
-				m_deletion_queue.push_func([&]() {
-					if (!m_selected_entitys.main_entity.has_component<relationship_component>()) {
+				if (m_selected_entitys.main_item)
+					m_deletion_queue.push_func([&]() {
+						if (!m_selected_entitys.main_item.has_component<relationship_component>()) {
 
-						LOG(Info, "need to cleanup realtionships, TODO: add settings to decide if children will also be deleted or just reparented")
-					}
-					const auto& map_ref = application::get().get_world_layer()->get_map();
-					map_ref->destroy_entity(m_selected_entitys.main_entity);
-					m_selected_entitys.main_entity = PFF::entity{};
-				});
+							LOG(Info, "need to cleanup realtionships, TODO: add settings to decide if children will also be deleted or just reparented")
+						}
+						const auto& map_ref = application::get().get_world_layer()->get_map();
+						map_ref->destroy_entity(m_selected_entitys.main_item);
+						m_selected_entitys.main_item = PFF::entity{};
+					});
 			}
 
 			// const auto interaction = UI::get_mouse_interation_on_window();
@@ -403,6 +407,8 @@ namespace PFF {
 
 			ImGui::EndPopup();
 		}
+
+		ImGui::End();
 	}
 
 
@@ -430,18 +436,18 @@ namespace PFF {
 			// LOG(Info, "Not implemented yet");
 		}
 
-		if (m_selected_entitys.main_entity == entity()) {
+		if (m_selected_entitys.main_item == entity()) {
 
 			ImGui::Text("No entity selected");
 			ImGui::End();
 			return;
 		}
 
-		UI::display_name_comp(m_selected_entitys.main_entity);
-		UI::display_transform_comp(m_selected_entitys.main_entity, PFF_editor::get().get_editor_settings_ref().display_rotator_in_degrees);
-		UI::try_display_mesh_comp(m_selected_entitys.main_entity);
-		UI::try_display_procedural_script_comp(m_selected_entitys.main_entity);
-		UI::try_display_relationship_comp(m_selected_entitys.main_entity);
+		UI::display_name_comp(m_selected_entitys.main_item);
+		UI::display_transform_comp(m_selected_entitys.main_item, PFF_editor::get().get_editor_settings_ref().display_rotator_in_degrees);
+		UI::try_display_mesh_comp(m_selected_entitys.main_item);
+		UI::try_display_procedural_script_comp(m_selected_entitys.main_item);
+		UI::try_display_relationship_comp(m_selected_entitys.main_item);
 
 		ImGui::End();
 	}
@@ -545,9 +551,9 @@ namespace PFF {
 			mesh_component mesh_comp{};
 			mesh_comp.asset_path = path;
 
-			if (m_selected_entitys.main_entity != entity()) {
+			if (m_selected_entitys.main_item != entity()) {
 
-				m_selected_entitys.main_entity.add_mesh_component(mesh_comp);
+				m_selected_entitys.main_item.add_mesh_component(mesh_comp);
 				break;
 			}
 
@@ -556,7 +562,7 @@ namespace PFF {
 			loc_entitiy.add_mesh_component(mesh_comp);
 
 			if (set_as_selected_entity)
-				m_selected_entitys.main_entity = loc_entitiy;
+				m_selected_entitys.main_item = loc_entitiy;
 
 			//mesh_comp.mesh_asset = static_mesh_asset_manager::get_from_path(util::extract_path_from_project_content_folder(path));
 			//mesh_comp.material = GET_RENDERER.get_default_material_pointer();		// get correct shader
@@ -605,13 +611,13 @@ namespace PFF {
 
 				const std::filesystem::path file_path = (const char*)payload->Data;
 				process_drop_of_file(file_path, true);
-				// m_selected_entitys.main_entity = 
+				// m_selected_entitys.main_item = 
 			}
 
 			else if (const ImGuiPayload* payload = ImGui::AcceptDragDropPayload(DRAG_DROP_CONTENT_BROWSER_MULTI)) {
 
-				selected_paths** received_ptr = static_cast<selected_paths**>(payload->Data);
-				selected_paths* file_paths = *received_ptr;
+				util::selected_items<std::filesystem::path>** received_ptr = static_cast<util::selected_items<std::filesystem::path>**>(payload->Data);
+				util::selected_items<std::filesystem::path>* file_paths = *received_ptr;
 				for (const std::filesystem::path path : (*file_paths).item_set)
 					process_drop_of_file(path, false);
 
@@ -701,7 +707,7 @@ namespace PFF {
 		}
 
 		// ---------------------------------------- IGuizmo ----------------------------------------
-		if (m_selected_entitys.main_entity) {
+		if (m_selected_entitys.main_item) {
 
 			ImGuizmo::SetDrawlist();
 			ImGuizmo::SetRect(ImGui::GetWindowPos().x, ImGui::GetWindowPos().y, (f32)ImGui::GetWindowWidth(), (f32)ImGui::GetWindowHeight());
@@ -713,7 +719,7 @@ namespace PFF {
 			projection_matrix[2][2] = -projection_matrix[2][2];
 			projection_matrix[3][2] = -projection_matrix[3][2];
 
-			glm::mat4& entity_transform = (glm::mat4&)m_selected_entitys.main_entity.get_component<transform_component>();
+			glm::mat4& entity_transform = (glm::mat4&)m_selected_entitys.main_item.get_component<transform_component>();
 			glm::mat4 buffer_transform = entity_transform;
 
 			if (ImGuizmo::Manipulate(glm::value_ptr(view_matrix), glm::value_ptr(projection_matrix),
@@ -721,7 +727,7 @@ namespace PFF {
 
 				const glm::mat4 root_transform = buffer_transform;
 				buffer_transform = glm::inverse(buffer_transform) * entity_transform;		// trandform delta
-				m_selected_entitys.main_entity.propegate_transform_to_children(root_transform, buffer_transform);
+				m_selected_entitys.main_item.propegate_transform_to_children(root_transform, buffer_transform);
 			}
 		}
 

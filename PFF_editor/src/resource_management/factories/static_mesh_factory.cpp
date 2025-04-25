@@ -199,6 +199,9 @@ namespace PFF::mesh_factory {
         }
 
         std::optional<std::vector<std::string>> loc_mesh_assets = load_gltf_meshes_names(source_path);
+        if (!loc_mesh_assets.has_value())
+            return false;
+
         for (const auto mesh : loc_mesh_assets.value()) {
 
             std::string name_buffer = (options.include_file_name_in_asset_name) ? source_path.filename().replace_extension("").string() + "_" + mesh : mesh;

@@ -43,20 +43,7 @@ namespace PFF {
 		content_browser							m_content_browser{};
 		ImGuiTreeNodeFlags						outliner_base_flags = ImGuiTreeNodeFlags_OpenOnArrow | ImGuiTreeNodeFlags_OpenOnDoubleClick | ImGuiTreeNodeFlags_SpanAvailWidth | ImGuiTreeNodeFlags_DefaultOpen;
 
-		struct selected_entitys {
-
-			PFF::entity					main_entity{};
-			std::set<PFF::entity>		entity_set{};
-	
-			void reset() {
-				
-				main_entity = PFF::entity();
-				entity_set.clear();
-			}
-	
-			inline bool empty() { return main_entity.is_valid() && entity_set.empty(); }
-		};
-		selected_entitys						m_selected_entitys{};
+		util::selected_items<entity>			m_selected_entitys{};
 
 		ref<image>								m_transfrom_translation_image;
 		ref<image>								m_transfrom_rotation_image;

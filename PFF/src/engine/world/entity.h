@@ -75,6 +75,7 @@ namespace PFF {
 		FORCEINLINE void add_procedural_mesh_component(std::string script_name) { add_component<procedural_mesh_component>().bind<T>(script_name); }
 
 		bool is_valid();
+		bool empty() { return m_entity_handle == entt::null; }
 		void add_mesh_component(mesh_component& mesh_comp);
 		void propegate_transform_to_children(const glm::mat4& root_transform, const glm::mat4& delta_transform);
 		void accumulate_transform_from_parents(glm::mat4& transform);

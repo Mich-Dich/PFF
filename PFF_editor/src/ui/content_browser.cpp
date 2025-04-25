@@ -175,8 +175,8 @@ namespace PFF {
 			
 			if (const ImGuiPayload* payload = ImGui::AcceptDragDropPayload(DRAG_DROP_CONTENT_BROWSER_MULTI)) {
 
-				selected_paths** received_ptr = static_cast<selected_paths**>(payload->Data);
-				selected_paths* file_paths = *received_ptr;
+				util::selected_items<std::filesystem::path>** received_ptr = static_cast<util::selected_items<std::filesystem::path>**>(payload->Data);
+				util::selected_items<std::filesystem::path>* file_paths = *received_ptr;
 				for (const std::filesystem::path path : (*file_paths).item_set)
 					handle_drop(folder_path, path);
 			}
@@ -374,75 +374,26 @@ namespace PFF {
 			ImGui::EndGroup();
 			drop_target_to_move_file(entry.path());
 
+
 			const auto dir_mouse_interation = UI::get_mouse_interation_on_item(m_block_mouse_input);
-			switch (dir_mouse_interation) {
-				case UI::mouse_interation::left_clicked:{
+			util::process_selection_input<std::filesystem::path>(m_selected_directories, dir_mouse_interation, entry.path(), popup_name.c_str(), [&]() {
 
-					if (ImGui::GetIO().KeyShift) {
-					
-						if (!m_selected_directories.main_item.empty()) {										// If main item selected -> perform range selection.
-	
-							std::vector<std::filesystem::path> files_in_dir;
-							for (const auto& entry : std::filesystem::directory_iterator(m_selected_directory))
-								files_in_dir.push_back(entry.path());
-	
-								auto it_main = std::find(files_in_dir.begin(), files_in_dir.end(), m_selected_directories.main_item);
-							auto it_clicked = std::find(files_in_dir.begin(), files_in_dir.end(), entry.path());
-							if (it_main != files_in_dir.end() && it_clicked != files_in_dir.end()) {
-	
-								auto start = std::min(it_main, it_clicked);
-								auto end = std::max(it_main, it_clicked);
-								m_selected_directories.item_set.clear();
-								for (auto it = start; it != std::next(end); ++it)
-									m_selected_directories.item_set.insert(*it);
-							}
-	
-						} else
-						m_selected_directories.main_item = entry.path();										// If main item not selected -> simply mark clicked item as main selection.
-							
-					} else if (ImGui::GetIO().KeyCtrl) {
-	
-						
-						if (!m_selected_directories.main_item.empty())
-						m_selected_directories.item_set.insert(m_selected_directories.main_item);
-						m_selected_directories.main_item = entry.path();
-	
-						// if (m_selected_directories.item_set.find(entry.path()) == m_selected_directories.item_set.end())				// If Shift is held, select the item
-						// 	m_selected_directories.item_set.insert(entry.path());
-						// else
-						// 	m_selected_directories.item_set.erase(entry.path());
-	
-					} else {
-	
-						m_selected_directories.item_set.clear();
-						m_selected_directories.main_item = entry.path();
-					}
-					
-					// m_selected_directories.clear();
-					// m_selected_directories.insert(entry.path());				// make sure dir is in selected set
+				std::vector<std::filesystem::path> files_in_dir;
+				for (const auto& entry : std::filesystem::directory_iterator(m_selected_directory))
+					files_in_dir.push_back(entry.path());
 
-				}break;
+				auto it_main = std::find(files_in_dir.begin(), files_in_dir.end(), m_selected_directories.main_item);
+				auto it_clicked = std::find(files_in_dir.begin(), files_in_dir.end(), entry.path());
+				if (it_main != files_in_dir.end() && it_clicked != files_in_dir.end()) {
 
-				case UI::mouse_interation::right_clicked: {
+					auto start = std::min(it_main, it_clicked);
+					auto end = std::max(it_main, it_clicked);
+					m_selected_directories.item_set.clear();
+					for (auto it = start; it != std::next(end); ++it)
+						m_selected_directories.item_set.insert(*it);
+				}
+			});
 
-					if (m_selected_directories.main_item.empty())
-						m_selected_directories.main_item = entry.path();
-					else
-						m_selected_directories.item_set.insert(entry.path());
-					ImGui::OpenPopup(popup_name.c_str());
-				} break;
-
-				case UI::mouse_interation::left_double_clicked:
-					LOG(Trace, "Set TreeNode to open ID[" << current_ID << "]");
-					m_selected_items.reset();
-					m_selected_directories.reset();
-					ImGui::TreeNodeSetOpen(folder_display_window->GetID(current_ID), true);
-					m_block_mouse_input = true;
-					select_new_directory(entry.path());
-					return;
-
-				default: break;
-			}
 
 			if (ImGui::BeginDragDropSource(ImGuiDragDropFlags_SourceAllowNullID)) {
 
@@ -667,12 +618,11 @@ namespace PFF {
 
 			} else {
 
-				selected_paths* payload_data = &m_selected_items;
+				util::selected_items<std::filesystem::path>* payload_data = &m_selected_items;
 				ImGui::SetDragDropPayload(DRAG_DROP_CONTENT_BROWSER_MULTI, &payload_data, sizeof(payload_data));
 				ImGui::Image(m_mesh_asset_icon->get_descriptor_set(), m_icon_size, ImVec2(0, 0), ImVec2(1, 1), UI::get_action_color_gray_active_ref());
 				ImGui::Text("[%ld] files", m_selected_items.item_set.size() + (m_selected_items.main_item.empty() ? 0 : 1));
 				ImGui::EndDragDropSource();
-
 			}
 		}
 
@@ -682,7 +632,7 @@ namespace PFF {
 				default:
 				case resource_manager::asset_curruption_source::unknown:				expected_size = ImVec2(280, 250); break;	// should display everything to help user
 				case resource_manager::asset_curruption_source::header_incorrect:		expected_size = ImVec2(280, 250); break;	// should display header
-				case resource_manager::asset_curruption_source::empty_file:			expected_size = ImVec2(180, 150); break;	// dosnt need to display anything other than size
+				case resource_manager::asset_curruption_source::empty_file:				expected_size = ImVec2(180, 150); break;	// dosnt need to display anything other than size
 			}
 		UI::adjust_popup_to_window_bounds(expected_size);
 		std::string popup_name = "item_context_menu_" + item_name;
@@ -695,7 +645,6 @@ namespace PFF {
 	
 				m_deletion_popup = true;
 				m_block_mouse_input = true;
-				item_mouse_interation = UI::mouse_interation::none;
 				if (m_selected_items.main_item.empty() && m_selected_items.item_set.empty())
 					m_path_to_delete = file_path;
 			}
@@ -735,78 +684,30 @@ namespace PFF {
 
 			}
 
-			if (item_mouse_interation == UI::mouse_interation::none && !UI::is_holvering_window())
+			m_block_mouse_input = UI::is_holvering_window();
+			if (!m_block_mouse_input)
 				ImGui::CloseCurrentPopup();
 
 			ImGui::EndPopup();
 		}
 
-		switch (item_mouse_interation) {
-			case UI::mouse_interation::left_double_clicked:
-				LOG(Info, "NOT IMPLEMENTED YET => should opening coresponding editor window");
-				break;
+		util::process_selection_input<std::filesystem::path>(m_selected_items, item_mouse_interation, file_path, popup_name.c_str(), [&]() {
 
-			case UI::mouse_interation::right_clicked: {
+			std::vector<std::filesystem::path> files_in_dir;
+			for (const auto& entry : std::filesystem::directory_iterator(m_selected_directory))
+				files_in_dir.push_back(entry.path());
 
-				if (m_selected_items.item_set.empty() && m_selected_items.main_item.empty()) {
+			auto it_main = std::find(files_in_dir.begin(), files_in_dir.end(), m_selected_items.main_item);
+			auto it_clicked = std::find(files_in_dir.begin(), files_in_dir.end(), file_path);
+			if (it_main != files_in_dir.end() && it_clicked != files_in_dir.end()) {
 
-					m_selected_items.main_item = file_path;
-
-				} else if (!m_selected_items.main_item.empty() && m_selected_items.main_item != file_path) {
-
-					m_selected_items.item_set.insert(m_selected_items.main_item);
-					m_selected_items.main_item = file_path;
-
-				}
-				ImGui::OpenPopup(popup_name.c_str());
-			} break;
-
-			case UI::mouse_interation::left_pressed:
-
-				if (ImGui::GetIO().KeyShift) {
-					
-					if (!m_selected_items.main_item.empty()) {										// If main item selected -> perform range selection.
-
-						std::vector<std::filesystem::path> files_in_dir;
-						for (const auto& entry : std::filesystem::directory_iterator(m_selected_directory))
-							files_in_dir.push_back(entry.path());
-
-							auto it_main = std::find(files_in_dir.begin(), files_in_dir.end(), m_selected_items.main_item);
-						auto it_clicked = std::find(files_in_dir.begin(), files_in_dir.end(), file_path);
-						if (it_main != files_in_dir.end() && it_clicked != files_in_dir.end()) {
-
-							auto start = std::min(it_main, it_clicked);
-							auto end = std::max(it_main, it_clicked);
-							m_selected_items.item_set.clear();
-							for (auto it = start; it != std::next(end); ++it)
-								m_selected_items.item_set.insert(*it);
-						}
-
-					} else
-						m_selected_items.main_item = file_path;										// If main item not selected -> simply mark clicked item as main selection.
-						
-				} else if (ImGui::GetIO().KeyCtrl) {
-
-					
-					if (!m_selected_items.main_item.empty())
-						m_selected_items.item_set.insert(m_selected_items.main_item);
-					m_selected_items.main_item = file_path;
-
-					// if (m_selected_items.item_set.find(file_path) == m_selected_items.item_set.end())				// If Shift is held, select the item
-					// 	m_selected_items.item_set.insert(file_path);
-					// else
-					// 	m_selected_items.item_set.erase(file_path);
-
-				} else {
-
-					m_selected_items.item_set.clear();
-					m_selected_items.main_item = file_path;
-				}
-			break;
-
-			default: break;
-		}
-
+				auto start = std::min(it_main, it_clicked);
+				auto end = std::max(it_main, it_clicked);
+				m_selected_items.item_set.clear();
+				for (auto it = start; it != std::next(end); ++it)
+					m_selected_items.item_set.insert(*it);
+			}
+		});
 	}
 
 
