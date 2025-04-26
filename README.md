@@ -146,7 +146,7 @@ By leveraging procedural generation, PFF empowers game developers to break free 
 Feel free to contribute and help shape the future of PFF. Thank you for your interest and support!
 
 ## Acknowledgments
-This project ia a significant undertaking, and I owe a debt of gratitude to the following individuals and projects:
+This project is a significant undertaking, and I owe a debt of gratitude to the following individuals and projects:
 
 - [TheCherno](https://github.com/TheCherno)
 - [Falconerd/engine-from-scratch](https://github.com/Falconerd/engine-from-scratch)
