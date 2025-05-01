@@ -283,7 +283,7 @@ namespace PFF {
 
 			PFF::entity loc_entity = entity(entity_ID, map_ref.get());
 			const auto& name_comp = loc_entity.get_component<name_component>();
-			const ImVec4& color = (loc_entity == m_selected_entitys.main_item) ? UI::get_action_color_00_active_ref() : (m_selected_entitys.item_set.find(loc_entity) != m_selected_entitys.item_set.end()) ? UI::get_action_color_00_faded_ref() : UI::get_action_color_gray_hover_ref(); // ImGui::GetStyle().Colors[ImGuiCol_ChildBg];
+			const ImVec4& color = util::get_item_selection_color(m_selected_entitys, loc_entity);
 
 			// has relationship
 			if (loc_entity.has_component<relationship_component>()) {
@@ -330,42 +330,6 @@ namespace PFF {
 
 				LOG(Warn, "Not implemented yet")
 			});
-
-			//switch (item_mouse_interation) {
-			//	// case UI::mouse_interation::left_clicked:	m_selected_entitys.main_item = loc_entity; break;
-			//	case UI::mouse_interation::right_clicked:	ImGui::OpenPopup("outliner_entity_context_menu"); break;
-			//	
-			//	case UI::mouse_interation::left_pressed:
-
-			//		if (ImGui::GetIO().KeyShift) {
-			//			
-			//			if (m_selected_entitys.main_item.is_valid()) {										// If main item selected -> perform range selection.
-
-			//				// TODO: need to perform multi selection somehow
-
-			//			} else
-			//				m_selected_entitys.main_item = loc_entity;										// If main item not selected -> simply mark clicked item as main selection.
-			//				
-			//		} else if (ImGui::GetIO().KeyCtrl) {
-
-			//			
-			//			if (m_selected_entitys.main_item.is_valid())
-			//				m_selected_entitys.item_set.insert(m_selected_entitys.main_item);
-			//			m_selected_entitys.main_item = loc_entity;
-
-			//			// if (m_selected_entitys.item_set.find(loc_entity) == m_selected_entitys.item_set.end())				// If Shift is held, select the item
-			//			// 	m_selected_entitys.item_set.insert(loc_entity);
-			//			// else
-			//			// 	m_selected_entitys.item_set.erase(loc_entity);
-
-			//		} else {
-
-			//			m_selected_entitys.item_set.clear();
-			//			m_selected_entitys.main_item = loc_entity;
-			//		}
-			//	break;
-			//	default: break;
-			//}
 
 			ImGui::TableNextColumn();
 			list_all_components(loc_entity);
@@ -418,8 +382,11 @@ namespace PFF {
 			return;
 
 		ImGuiWindowFlags window_flags{};
-		if (!ImGui::Begin("Details", &m_show_details, window_flags))
+		if (!ImGui::Begin("Details", &m_show_details, window_flags)) {
+			
+			ImGui::End();
 			return;
+		}
 
 		const auto button_size = ImGui::CalcTextSize("Add Component").x;
 
@@ -787,8 +754,7 @@ namespace PFF {
 				}
 
 			} else if (background_effect_index == 3) {
-
-				ImGui::Text("Not implemented yet");
+				ImGui::Text("settings for the dynamic sky box are in the world settings window");
 			}
 
 			UI::end_table();
@@ -804,9 +770,42 @@ namespace PFF {
 			return;
 
 		ImGuiWindowFlags window_flags{};
-		if (ImGui::Begin("World Settings", &m_show_world_settings, window_flags)) {}
+		if (ImGui::Begin("World Settings", &m_show_world_settings, window_flags)) {
 
-		ImGui::End();
+			if (ImGui::CollapsingHeader("Dynamic Sky Box", ImGuiTreeNodeFlags_DefaultOpen)) {
+
+				int& background_effect_index = application::get().get_renderer().get_current_background_effect_index();
+
+				if (background_effect_index != 3) {
+
+					ImGui::Text("The following settings will only be used if the background effect is set to the [dynamic sky box]");
+					ImGui::BeginDisabled();
+				}
+
+				auto& skybox_data = GET_RENDERER.get_skybox_data_ref();
+
+				ImGui::SeparatorText("Sky Settings");
+				UI::begin_table("world_settings_dynamic_sky_box_settings", false);				
+				UI::table_row_slider("Middle Sky Color", skybox_data.middle_sky_color);
+				UI::table_row_slider("Horizon Sky Color", skybox_data.horizon_sky_color);
+				UI::table_row_slider("Sun Distance", skybox_data.sun_distance, 1.f, 1000000.f);
+				UI::table_row_slider("Sun Radius", skybox_data.sun_radius, 1.f, 10000.f);
+				UI::end_table();
+
+				ImGui::SeparatorText("Cloud Settings");
+				UI::begin_table("world_settings_dynamic_sky_box_settings", false);				
+				UI::table_row_slider("Cloud Hight", skybox_data.cloud_hight, 0.f, 20.f);
+				UI::table_row_slider("Cloud Density", skybox_data.cloud_density, 0.f, 1.f);
+				UI::table_row_slider("Cloud Color", skybox_data.cloud_color);
+				UI::table_row_slider("Cloud Speed", skybox_data.cloud_speed, -5.f, 5.f);
+				UI::table_row_slider("Cloud Coverage", skybox_data.cloud_coverage, 0.f, 1.f);
+				UI::end_table();
+
+				if (background_effect_index != 3)
+					ImGui::EndDisabled();
+			}
+
+		} ImGui::End();
 	}
 
 }

@@ -36,6 +36,7 @@ namespace PFF {
 
 		PFF_DEFAULT_GETTER(project_data,									project_data)
 		PFF_DEFAULT_GETTER_C(f64,											delta_time)
+		PFF_DEFAULT_GETTER_C(f64,											absolute_time)
 		PFF_DEFAULT_GETTER_C(u32,											target_fps)
 		PFF_DEFAULT_GETTERS(u32,											target_fps)
 		PFF_DEFAULT_GETTERS(u32,											nonefocus_fps)
@@ -119,6 +120,7 @@ namespace PFF {
 		u32							m_nonefocus_fps = 30;
 		u32							m_fps{};
 		f32							m_delta_time = 0.f;
+		f32							m_absolute_time = 0.f;
 		f32							m_work_time{}, m_sleep_time{};
 		f32							target_duration{};
 		f32							m_last_frame_time = 0.f;

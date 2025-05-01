@@ -49,19 +49,19 @@ namespace PFF::render::vulkan {
 
 		static vk_renderer& get() { return s_instance; }
 
-		FORCEINLINE f32 get_aspect_ratio()			{ return 1.f; };			// TODO: finish
-		PFF_DEFAULT_GETTERS(VkPhysicalDevice,		chosenGPU);
-		PFF_DEFAULT_GETTER(VkSampler,				texture_sampler);
-		PFF_DEFAULT_GETTER(VkSampler,				default_sampler_linear);
-		PFF_DEFAULT_GETTER(VkSampler,				default_sampler_nearest);
-		PFF_DEFAULT_GETTER(VkDevice,				device);
-		PFF_DEFAULT_GETTER(VmaAllocator,			allocator);
-		PFF_DEFAULT_GETTER_REF(material,		metal_rough_material);
-		
+		FORCEINLINE f32 get_aspect_ratio()										{ return 1.f; };			// TODO: finish
+		PFF_DEFAULT_GETTERS(VkPhysicalDevice,									chosenGPU);
+		PFF_DEFAULT_GETTER(VkSampler,											texture_sampler);
+		PFF_DEFAULT_GETTER(VkSampler,											default_sampler_linear);
+		PFF_DEFAULT_GETTER(VkSampler,											default_sampler_nearest);
+		PFF_DEFAULT_GETTER(VkDevice,											device);
+		PFF_DEFAULT_GETTER(VmaAllocator,										allocator);
+		PFF_DEFAULT_GETTER_REF(material,										metal_rough_material);
+		PFF_DEFAULT_GETTER(VkDescriptorSetLayout,								gpu_scene_data_descriptor_layout);
+		PFF_DEFAULT_GETTER(descriptor_allocator_growable,						global_descriptor_allocator);
+		PFF_DEFAULT_GETTER_REF(render::compute_push_constants_dynamic_skybox,	skybox_data);
+		 		
 		FORCEINLINE void set_imugi_viewport_size(glm::u32vec2 imugi_viewport_size) { m_imugi_viewport_size = imugi_viewport_size; }
-
-		PFF_DEFAULT_GETTER(VkDescriptorSetLayout,			gpu_scene_data_descriptor_layout);
-		PFF_DEFAULT_GETTER(descriptor_allocator_growable,	global_descriptor_allocator)
 		
 		VkBuffer get_material_constant_buffer() { return m_material_constant.buffer; }
 		// PFF_DEFAULT_GETTER_POINTER(vk_buffer, 				material_constant)

@@ -331,12 +331,7 @@ namespace PFF {
 					continue;
 
 				display_file(entry.path(), item_index++, text_height);
-
 				wrapp_displayed_items(max_text_height, text_height, m_icon_padding, window_visible_x2);
-				// // handle item wrapping
-				// const float next_item_x2 = ImGui::GetItemRectMax().x + ImGui::GetStyle().ItemSpacing.x + m_icon_size.x; // Expected position if next item was on the same line
-				// if (next_item_x2 < window_visible_x2)
-				// 	ImGui::SameLine();
 			}
 		}
 	}
@@ -361,7 +356,7 @@ namespace PFF {
 			// const std::string wrapped_text = 
 			ImVec2 text_size{};
 			const std::string popup_name = "dir_context_menu_" + item_name;
-			const ImVec4& color = (entry.path() == m_selected_directories.main_item) ? UI::get_action_color_00_active_ref() : (m_selected_directories.item_set.find(entry.path()) != m_selected_directories.item_set.end()) ? UI::get_action_color_00_faded_ref() : UI::get_action_color_gray_hover_ref(); // ImGui::GetStyle().Colors[ImGuiCol_ChildBg];
+			const ImVec4& color = util::get_item_selection_color(m_selected_directories, entry.path());
 			ImGui::BeginGroup();
 			{
 				ImGui::PushID(current_ID);
@@ -376,6 +371,17 @@ namespace PFF {
 
 
 			const auto dir_mouse_interation = UI::get_mouse_interation_on_item(m_block_mouse_input);
+			switch (dir_mouse_interation) {
+				case UI::mouse_interation::left_double_clicked:
+					LOG(Trace, "Set TreeNode to open ID[" << current_ID << "]");
+					m_selected_items.reset();
+					m_selected_directories.reset();
+					ImGui::TreeNodeSetOpen(folder_display_window->GetID(current_ID), true);
+					m_block_mouse_input = true;
+					select_new_directory(entry.path());
+				break;
+				default: break;
+			}
 			util::process_selection_input<std::filesystem::path>(m_selected_directories, dir_mouse_interation, entry.path(), popup_name.c_str(), [&]() {
 
 				std::vector<std::filesystem::path> files_in_dir;
@@ -433,14 +439,8 @@ namespace PFF {
 				ImGui::EndPopup();
 			}
 
-			// Handle dropping files into the current directory
 			drop_target_to_move_file(entry.path());
-
 			wrapp_displayed_items(max_text_height, text_size, ImVec2(0), window_visible_x2);
-			
-			// const float next_item_x2 = ImGui::GetItemRectMax().x + style.ItemSpacing.x;		// Expected position if next item was on the same line
-			// if (next_item_x2 < window_visible_x2)															// handle item wrapping
-			// 	ImGui::SameLine();
 		}
 		UI::shift_cursor_pos(m_icon_padding.x, 0);
 
@@ -456,20 +456,6 @@ namespace PFF {
 
 			wrapp_displayed_items(max_text_height, text_size, m_icon_padding, window_visible_x2);
 		}
-
-		// Handle dropping files into the current directory
-		// if (ImGui::BeginDragDropTarget()) {
-		// 	if (const ImGuiPayload* payload = ImGui::AcceptDragDropPayload("PROJECT_CONTENT_FOLDER")) {
-
-		// 		// Handle folder drop
-		// 	}
-		// 	if (const ImGuiPayload* payload = ImGui::AcceptDragDropPayload("PROJECT_CONTENT_FILE")) {
-		// 		std::string file_path(static_cast<const char*>(payload->Data));
-		// 		LOG(Error, "file_path: " << file_path);
-		// 		handle_drop(path / std::filesystem::path(file_path).filename());
-		// 	}
-		// 	ImGui::EndDragDropTarget();
-		// }
 
 		logged_warning_for_current_folder = true;
 	}
@@ -502,9 +488,8 @@ namespace PFF {
 
 
 		// Begin a new group for each item
-		const ImVec4& color = (file_path == m_selected_items.main_item) ? UI::get_action_color_00_active_ref() : (m_selected_items.item_set.find(file_path) != m_selected_items.item_set.end()) ? UI::get_action_color_00_faded_ref() : UI::get_action_color_gray_hover_ref(); // ImGui::GetStyle().Colors[ImGuiCol_ChildBg];
+		const ImVec4& color = util::get_item_selection_color(m_selected_items, file_path);
 		std::string item_name = file_path.filename().replace_extension("").string();
-		// const std::string wrapped_text = 
 		UI::wrap_text(item_name, m_icon_size.x, m_max_number_of_lines_in_displayed_title);
 		ImGui::PushID(ID);
 		ImGui::BeginGroup();

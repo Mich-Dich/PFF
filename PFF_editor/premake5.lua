@@ -5,6 +5,7 @@ project "PFF_editor"
 	language "C++"
 	cppdialect "C++20"
 	staticruntime "on"
+	buildoptions { "-Wl,--verbose" }
 
 	targetdir ("%{wks.location}/bin/" .. outputs  .. "/%{prj.name}")
 	objdir ("%{wks.location}/bin-int/" .. outputs  .. "/%{prj.name}")
@@ -39,6 +40,7 @@ project "PFF_editor"
 		"%{IncludeDir.ImGuizmo}",
 		"%{IncludeDir.Vulkan}",
 		"%{IncludeDir.VulkanUtils}",
+		"%{IncludeDir.assimp}",
 	}
 
 	links {
@@ -46,6 +48,11 @@ project "PFF_editor"
 		"PFF_helper",
 		"ImGui",
 		"fastgltf",
+		"assimp",
+	}
+
+	libdirs {
+		'%{wks.location}/%{vendor_path.assimp}/bin/' .. outputs .. '/assimp',
 	}
 
 	filter "system:windows"
@@ -58,6 +65,7 @@ project "PFF_editor"
 
 	    links {
 			-- "%{Library.Vulkan}",
+        	"assimp",
 		}
 		
 		libdirs {
@@ -81,11 +89,12 @@ project "PFF_editor"
 		pic "On"
 		systemversion "latest"
 		defines "PFF_PLATFORM_LINUX"
-
+		
 		includedirs {
 
 			-- "/usr/include/vulkan",
 			"%{IncludeDir.glfw}/include",
+			"%{IncludeDir.assimp}",
 
 			"/usr/include/x86_64-linux-gnu/qt5", 				-- Base Qt include path
 			"/usr/include/x86_64-linux-gnu/qt5/QtCore",
@@ -96,7 +105,9 @@ project "PFF_editor"
 		libdirs {
 
 			"%{wks.location}/PFF/vendor/glfw/build/src",
-			
+			"%{wks.location}/PFF_editor/vendor/assimp/bin/" .. outputs .. "/assimp",
+			"/usr/lib/x86_64-linux-gnu",
+
 			"/usr/lib/x86_64-linux-gnu",  -- Default library path for system libraries
 			"/usr/lib/x86_64-linux-gnu/qt5",
 			-- "%{IncludeDir.Vulkan}/lib",
@@ -108,6 +119,9 @@ project "PFF_editor"
 			-- "glfw",
 			"imgui",
 			"vulkan",
+			"assimp",
+			-- "/home/mich/workspace/PFF/PFF_editor/vendor/assimp/bin/Debug-linux-x86_64/assimp/ibassimp.a",
+			-- "/home/mich/workspace/PFF/PFF_editor/vendor/assimp/bin/Debug-linux-x86_64/assimp/ibassimp.so",
 
 			"Qt5Core",
 			"Qt5Widgets",

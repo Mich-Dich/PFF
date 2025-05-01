@@ -263,6 +263,7 @@ namespace PFF {
 
 		f32 time = static_cast<f32>(glfwGetTime());
 		m_delta_time = std::min<f32>(time - m_last_frame_time, 100000);
+		m_absolute_time += m_delta_time;
 		m_last_frame_time = time;
 		m_fps = static_cast<u32>(1.0 / (m_work_time + (m_sleep_time * 0.001)) + 0.5); // Round to nearest integer
 	}

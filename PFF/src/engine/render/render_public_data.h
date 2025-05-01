@@ -37,19 +37,30 @@ namespace PFF::render {
 
 	struct compute_push_constants {
 
-		glm::vec4				data1;
-		glm::vec4				data2;
-		glm::vec4				data3;
-		glm::vec4				data4;
+		glm::vec4				data1{};
+		glm::vec4				data2{};
+		glm::vec4				data3{};
+		glm::vec4				data4{};
 	};
 
 	struct compute_push_constants_dynamic_skybox {
 
-		glm::vec4				basic_sky_color;
-		f32 					sun_distance;
-		f32 					sun_radius;
-	};
+		glm::mat4				inverse_view{};
+		glm::vec4				middle_sky_color = glm::vec4(0.f, 0.55078f, 0.828125f, 1.f);
+		glm::vec4				horizon_sky_color = glm::vec4(0.57734375f, 0.7375f, 0.7921875f, 1.f);
+		glm::vec2				image_size{};
+		f32 					sun_distance = 100000.f;
+		f32 					sun_radius = 1000.f;
+		f32 					FOV_y = 45.f;
 
+    	// Cloud parameters
+		f32 					cloud_hight = 5.f;
+		f32 					time = 0.f;
+		f32 					cloud_density = 0.4f;
+		glm::vec4 				cloud_color = glm::vec4(0.95f, 0.95f, 1.0f, 0.5f);
+		glm::vec2 				cloud_speed = glm::vec2(0.1f, 0.2f);
+		f32 					cloud_coverage = .5f;
+	};
 
 	struct compute_effect {
 
@@ -63,12 +74,12 @@ namespace PFF::render {
 
 	struct GPU_scene_data {
 
-		glm::mat4			view;
-		glm::mat4			proj;
-		glm::mat4			proj_view;
-		glm::vec4			ambient_color;
-		glm::vec4			sunlight_direction;		// w for sun power
-		glm::vec4			sunlight_color;
+		glm::mat4			view{};
+		glm::mat4			proj{};
+		glm::mat4			proj_view{};
+		glm::vec4			ambient_color{};
+		glm::vec4			sunlight_direction{};		// w for sun power
+		glm::vec4			sunlight_color{};
 	};
 
 

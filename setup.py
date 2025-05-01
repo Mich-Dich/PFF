@@ -14,225 +14,14 @@ if platform.system() == "Windows":
     from metadata.windows.setup_vulkan import vulkan_configuration
     from metadata.windows.setup_premake import premake_configuration
     import metadata.windows.register_icon as register_icon
+    import metadata.windows.IDE_selection as IDE_setup
 elif platform.system() == "Linux":
     from metadata.linux.setup_vulkan import vulkan_configuration
     from metadata.linux.setup_premake import premake_configuration
     from metadata.linux.setup_glslc import glslc_configuration
+    import metadata.linux.IDE_selection as IDE_setup
 else:
     raise Exception("Unsupported operating system")
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-# 
-# 
-# 
-# 
-# 
-# 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-def detect_visual_studio_versions_windows():
-    vs_version_map = {
-        "17": "2022",  # VS 2022 (major version 17)
-        "16": "2019",  # VS 2019 (major version 16)
-        "15": "2017"   # VS 2017 (major version 15)
-    }
-    try:
-        vswhere_path = os.path.join(os.environ["ProgramFiles(x86)"], "Microsoft Visual Studio", "Installer", "vswhere.exe")
-        result = subprocess.run([vswhere_path, "-format", "json", "-products", "*", "-requires", "Microsoft.VisualStudio.Component.VC.Tools.x86.x64"], capture_output=True, text=True)
-        if result.returncode == 0:
-            import json
-            installations = json.loads(result.stdout)
-            versions = []
-            for install in installations:
-                major_version = install["installationVersion"].split('.')[0]
-                premake_id = vs_version_map.get(major_version, None)
-                if premake_id:
-                    versions.append(premake_id)
-            return list(set(versions))  # Remove duplicates
-    except Exception as e:
-        print(f"Error detecting Visual Studio versions: {e}")
-    return []
-
-def detect_rider_windows():
-    # Check common Rider installation paths
-    rider_paths = [
-        os.path.join(os.environ["ProgramFiles"], "JetBrains", "JetBrains Rider *"),
-        os.path.join(os.environ["LocalAppData"], "JetBrains", "Toolbox", "apps", "Rider", "*")
-    ]
-    for path in rider_paths:
-        if os.path.exists(path):
-            return True
-    return False
-
-def prompt_ide_selection_windows():
-    ides = []
-    vs_versions = detect_visual_studio_versions_windows()
-    if vs_versions:
-        ides.extend([f"Visual Studio {version}" for version in vs_versions])
-    if detect_rider_windows():
-        ides.append("JetBrains Rider")
-    if not ides:
-        print("No supported IDEs detected.")
-        sys.exit(1)
-    print("Detected IDEs:")
-    for i, ide in enumerate(ides):
-        print(f"{i}. {ide}")
-
-    if len(ides) == 1:
-        print("only one IDE detected")
-        return ides[0]
-
-    choice = input("Select an IDE to use (enter the number): ")
-    try:
-        choice_index = int(choice)
-        if 0 <= choice_index < len(ides):
-            return ides[choice_index]
-        else:
-            print("Invalid selection.")
-            sys.exit(1)
-    except ValueError:
-        print("Invalid input.")
-        sys.exit(1)
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-# 
-# 
-# 
-# 
-# 
-# 
-
-
-
-
-
-
-
-
-
-
-
-
-
-def detect_rider_linux():
-    # Check common Rider installation paths on Linux
-    rider_paths = [
-        os.path.expanduser("~/.local/share/JetBrains/Toolbox/apps/Rider"),
-        "/opt/JetBrains Rider",
-        os.path.expanduser("~/.local/share/applications/jetbrains-rider.desktop")
-    ]
-    
-    # Check if rider command exists in PATH
-    try:
-        subprocess.run(["which", "rider"], check=True, capture_output=True)
-        return True
-    except subprocess.CalledProcessError:
-        pass
-
-    # Check physical paths
-    for path in rider_paths:
-        if os.path.exists(path) or len(glob.glob(path)) > 0:
-            return True
-    return False
-
-def prompt_ide_selection_linux():
-    ides = []
-    
-    # Detect available IDEs
-    if detect_rider_linux():
-        ides.append("JetBrains Rider")
-    
-    # Always include Makefile option
-    ides.append("Makefile (CLion/Ninja compatible)")
-    
-    if not ides:
-        print("No supported IDEs detected.")
-        sys.exit(1)
-        
-    print("\nDetected IDEs:")
-    for i, ide in enumerate(ides):
-        print(f"{i}. {ide}")
-
-    if len(ides) == 1:
-        print("Only one IDE detected")
-        return ides[0]
-
-    while True:
-        choice = input("Select an IDE to use (enter the number): ")
-        try:
-            choice_index = int(choice)
-            if 0 <= choice_index < len(ides):
-                return ides[choice_index]
-            print("Invalid selection number.")
-        except ValueError:
-            print("Please enter a valid number.")
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-# 
-# 
-# 
-# 
-# 
-# 
-
-
-
-
-
-
-
-
-
-
 
 
 
@@ -266,6 +55,7 @@ try:
     update_submodule("PFF/vendor/glfw", "master")
     update_submodule("PFF/vendor/imgui", "docking")
     update_submodule("PFF/vendor/ImGuizmo", "master")
+    update_submodule("PFF_editor/vendor/assimp", "master")
 
     utils.print_u("\nCHECKING PYTHON SETUP")
     python_installed = python_requirements.validate()
@@ -287,7 +77,7 @@ try:
             utils.print_u("\nCHECK WORKSPACE SETUP")
             register_icon.register_icon()
 
-            selected_ide = prompt_ide_selection_windows()
+            selected_ide = IDE_setup.prompt_ide_selection()
             if selected_ide.startswith("Visual Studio"):
                 vs_year = selected_ide.split()[-1]  # Extract "2022" from "Visual Studio 2022"
                 premake_action = f"vs{vs_year}"
@@ -309,7 +99,7 @@ try:
             
             utils.print_u("\nCHECK WORKSPACE SETUP")
             
-            selected_ide = prompt_ide_selection_linux()
+            selected_ide = IDE_setup.prompt_ide_selection()
             premake_action = "gmake"  # Default action
             if selected_ide == "JetBrains Rider":
                 premake_action = "rider"

@@ -442,7 +442,6 @@ namespace PFF::render::vulkan {
 
 		VK_CHECK_S(vkResetFences(m_device, 1, &get_current_frame().render_fence));
 
-
 		// ============================================================ DEV-ONLY ============================================================
 		// f32 rotation_speed = glm::radians(25.0f); // 25 degrees per second
 		// f32 angle = rotation_speed * delta_time;
@@ -450,8 +449,6 @@ namespace PFF::render::vulkan {
 		// glm::vec4 rotated_dir = rotation * m_scene_data.sunlight_direction;
 		// m_scene_data.sunlight_direction = glm::vec4(rotated_dir.x, rotated_dir.y, rotated_dir.z, m_scene_data.sunlight_direction.w);
 		// ============================================================ DEV-ONLY ============================================================
-
-
 
 		// Free resources 
 		{
@@ -491,7 +488,7 @@ namespace PFF::render::vulkan {
 #ifdef TRY_TO_PROVIDE_SCNENE_DATA_TO_COMP
 		// ============================================================ calc scene data ============================================================
 		m_scene_data.view = m_active_camera->get_view();
-		m_scene_data.proj = glm::perspective(glm::radians(m_active_camera->get_perspective_fov_y()), (float)m_draw_extent.width / (float)m_draw_extent.height, 100000.f, 0.1f);
+		m_scene_data.proj = glm::perspective(glm::radians(m_active_camera->get_perspective_fov_y()), (float)m_draw_extent.width / (float)m_draw_extent.height, m_active_camera->get_clipping_far(), m_active_camera->get_clipping_near());
 		m_active_camera->force_set_projection_matrix(m_scene_data.proj);
 		m_scene_data.proj[1][1] *= -1;				// invert the Y direction on projection matrix
 		m_scene_data.proj_view = m_scene_data.proj * m_scene_data.view;
@@ -680,8 +677,6 @@ namespace PFF::render::vulkan {
 
 	void vk_renderer::init_default_data() {
 
-		//serialize(PFF::serializer::option::load_from_file);
-
 		//3 default textures, white, grey, black. 1 pixel each
 		u32 white = glm::packUnorm4x8(glm::vec4(1, 1, 1, 1));
 		m_white_image = create_ref<image>((void*)&white, 1, 1, image_format::RGBA);
@@ -723,7 +718,7 @@ namespace PFF::render::vulkan {
 
 		m_scene_data.sunlight_color = glm::vec4(1.f, 1.f, 1.f, 0.01f);
 		m_scene_data.ambient_color = glm::vec4(1.f, 1.f, 1.f, 0.001f);
-		m_scene_data.sunlight_direction = glm::vec4(1.0f, 1.0f, 1.0f, 1.0f);
+		m_scene_data.sunlight_direction = glm::vec4(1.0f, 0.5f, 1.0f, 1.0f);
 
 		// =========================================================== DEFAULT MATERIAL =========================================================== 
 
@@ -746,6 +741,22 @@ namespace PFF::render::vulkan {
 		material_resources.data_buffer_offset = 0;
 		m_default_material = create_ref<material_instance>(m_metal_rough_material.create_instance(material_pass::main_color, material_resources));
 		
+		// m_skybox_data.inverse_view = glm::inverse(m_scene_data.view);
+		// m_skybox_data.middle_sky_color = glm::vec4(0.f, 0.55078f, 0.828125f, 1.f);
+		// m_skybox_data.horizon_sky_color = glm::vec4(0.57734375f, 0.7375f, 0.7921875f, 1.f);
+		// m_skybox_data.image_size = glm::vec2(m_imugi_viewport_size.x, m_imugi_viewport_size.y);
+		// m_skybox_data.sun_distance = 100000.f;
+		// m_skybox_data.sun_radius = 1000.f;
+		// m_skybox_data.FOV_y = m_active_camera->get_perspective_fov_y();
+
+		// // Cloud parameters
+		// m_skybox_data.cloud_scale = 9.f;        								// Scale of cloud patterns (smaller = larger clouds)
+		// m_skybox_data.time = application::get().get_absolute_time();          // Should be incremented each frame (e.g., += 0.001f)
+		// m_skybox_data.cloud_density = 0.5f;       							// Cloud thickness/density (0.3-0.7)
+		// m_skybox_data.cloud_color = glm::vec4(0.95f, 0.95f, 1.0f, 0.35f);  	// RGBA (white with slight blue tint)
+		// m_skybox_data.cloud_speed = glm::vec2(0.1f, 0.2f);  			// Cloud movement speed (x,y)
+		// m_skybox_data.cloud_coverage = 0.45f;     							// How much of the sky is covered (0.2-0.8)
+
 #ifdef PFF_RENDERER_DEBUG_CAPABILITY
 
 		material::material_resources debug_lines_material_resources;						//debug material for lines
@@ -1219,22 +1230,20 @@ namespace PFF::render::vulkan {
 		
 		} else {
 
-			render::compute_push_constants_dynamic_skybox skybox_data{};
-			skybox_data.basic_sky_color = glm::vec4(0.3f, 0.3f, 0.4f, 1.f);
-			skybox_data.sun_distance = 1000.f;
-			skybox_data.sun_radius = .005f;
-
 			vkCmdBindPipeline(cmd, VK_PIPELINE_BIND_POINT_COMPUTE, m_skybox_pipeline);
 			VkDescriptorSet sets[] = {
 				m_global_descriptor,       // scene data
 				m_draw_image_descriptors   // skybox output image + sampler
 			};
+			
+			m_skybox_data.inverse_view = glm::inverse(m_scene_data.view);
+			m_skybox_data.image_size = glm::vec2(m_imugi_viewport_size.x, m_imugi_viewport_size.y);
+			m_skybox_data.FOV_y = m_active_camera->get_perspective_fov_y();
+			m_skybox_data.time = application::get().get_absolute_time();
+			
 			vkCmdBindDescriptorSets(cmd, VK_PIPELINE_BIND_POINT_COMPUTE, m_skybox_pipeline_layout, 0, 2, sets, 0, nullptr);
-			// vkCmdBindDescriptorSets(cmd, VK_PIPELINE_BIND_POINT_COMPUTE, m_skybox_pipeline_layout, 1, 1, &m_global_descriptor, 0, nullptr);
-			// vkCmdBindDescriptorSets(cmd, VK_PIPELINE_BIND_POINT_COMPUTE, m_skybox_pipeline_layout, 0, 1, &m_draw_image_descriptors, 0, nullptr);		// bind desc_set containing the draw_image for compute pipeline
-		
-			vkCmdPushConstants(cmd, m_skybox_pipeline_layout, VK_SHADER_STAGE_COMPUTE_BIT, 0, sizeof(skybox_data), &skybox_data);
-			vkCmdDispatch(cmd, static_cast<u32>(std::ceil(m_draw_extent.width / 16.0)), static_cast<u32>(std::ceil(m_draw_extent.height / 16.0)), 1);
+			vkCmdPushConstants(cmd, m_skybox_pipeline_layout, VK_SHADER_STAGE_COMPUTE_BIT, 0, sizeof(render::compute_push_constants_dynamic_skybox), &m_skybox_data);
+			vkCmdDispatch(cmd, static_cast<u32>(std::ceil(m_imugi_viewport_size.x / 16.0)), static_cast<u32>(std::ceil(m_imugi_viewport_size.y / 16.0)), 1);
 		}
 	}
 
@@ -1290,10 +1299,8 @@ namespace PFF::render::vulkan {
 		calc_frustum_planes(m_scene_data.proj_view);
 
 		const auto& loc_map = application::get().get_world_layer()->get_map();										// TODO: implement world chunk system and iterat over chunks
-		if (!loc_map->is_active()) {		// skip maps that are not-loaded/hidden/disabled
-
+		if (!loc_map->is_active()) 		// skip maps that are not-loaded/hidden/disabled
 			return;
-		}
 
 		vkCmdBeginRendering(cmd, &render_info);
 
@@ -1306,7 +1313,6 @@ namespace PFF::render::vulkan {
 			&m_global_descriptor,  // scene data descriptor
 			0, nullptr );
 		vkCmdDraw(cmd, 4, 1, 0, 0);  // 4 vertices
-
 
 		ref<material_instance> last_material = nullptr;
 		material_pipeline* last_pipeline = nullptr;
@@ -1789,7 +1795,6 @@ namespace PFF::render::vulkan {
 		m_debug_lines.surfaces[0].count = (u32)m_debug_lines.indices.size();
 		update_mesh(m_debug_lines.mesh_buffers, m_debug_lines.indices, m_debug_lines.vertices);
 	}
-
 
 	void vk_renderer::clear_debug_line() {
 

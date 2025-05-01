@@ -59,6 +59,7 @@ end
 group "dependencies"
 	include "PFF/vendor/fastgltf"
 	include "PFF/vendor/imgui"
+	include "PFF_editor/vendor/assimp"
 	if os.target() == "windows" then
 		include "PFF/vendor/glfw"
 	end

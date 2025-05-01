@@ -11,6 +11,10 @@
 #include <fastgltf/util.hpp>
 #include <fastgltf/tools.hpp>
 
+#include <assimp/Importer.hpp>
+#include <assimp/scene.h>
+#include <assimp/postprocess.h>
+
 #include "engine/resource_management/headers.h"
 #include "engine/resource_management/mesh_headers.h"
 #include "engine/resource_management/mesh_serializer.h"
@@ -24,6 +28,17 @@ namespace PFF::mesh_factory {
 
 
     std::optional<std::unordered_map<std::string, ref<PFF::geometry::mesh_asset>>> load_gltf_meshes(std::filesystem::path file_path) {
+
+
+        
+        // TODO: sort out linker issues
+
+        // Assimp::Importer importer;
+        // const aiScene* scene = importer.ReadFile(file_path.string(), aiProcess_Triangulate | aiProcess_GenSmoothNormals | aiProcess_FlipUVs | aiProcess_JoinIdenticalVertices);
+        // VALIDATE(scene && !(scene->mFlags & AI_SCENE_FLAGS_INCOMPLETE) && scene->mRootNode, return {}, "", "Assimp: " << importer.GetErrorString());
+
+
+
 
         VALIDATE(std::filesystem::exists(file_path), return {}, "Loading GLTF: " << file_path, "provided file path does not exist");
 

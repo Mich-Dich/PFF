@@ -21,12 +21,19 @@ namespace PFF::util {
 
 
 	template <typename T>
+	ImVec4& get_item_selection_color(util::selected_items<T>& selected_items, const T& item) {
+
+		return (item == selected_items.main_item) ? UI::get_action_color_00_active_ref()
+			: (selected_items.item_set.find(item) != selected_items.item_set.end()) ? UI::get_action_color_00_faded_ref()
+			: UI::get_action_color_gray_hover_ref();
+	}
+
+
+	template <typename T>
 	void process_selection_input(util::selected_items<T>& selected_items, const UI::mouse_interation interation, T item, const char* popup_name, std::function<void()> range_selection) {
 
 		switch (interation) {
-		case UI::mouse_interation::left_double_clicked:
-			LOG(Info, "NOT IMPLEMENTED YET => should opening coresponding editor window");
-			break;
+		// case UI::mouse_interation::left_double_clicked:				double_clicked(); break;
 
 		case UI::mouse_interation::right_clicked: {
 
