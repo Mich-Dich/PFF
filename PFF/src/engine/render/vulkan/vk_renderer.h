@@ -59,6 +59,7 @@ namespace PFF::render::vulkan {
 		PFF_DEFAULT_GETTER_REF(material,										metal_rough_material);
 		PFF_DEFAULT_GETTER(VkDescriptorSetLayout,								gpu_scene_data_descriptor_layout);
 		PFF_DEFAULT_GETTER(descriptor_allocator_growable,						global_descriptor_allocator);
+		PFF_DEFAULT_GETTER_REF(render::GPU_scene_data,							scene_data);
 		PFF_DEFAULT_GETTER_REF(render::compute_push_constants_dynamic_skybox,	skybox_data);
 		 		
 		FORCEINLINE void set_imugi_viewport_size(glm::u32vec2 imugi_viewport_size) { m_imugi_viewport_size = imugi_viewport_size; }

@@ -772,6 +772,17 @@ namespace PFF {
 		ImGuiWindowFlags window_flags{};
 		if (ImGui::Begin("World Settings", &m_show_world_settings, window_flags)) {
 
+			if (ImGui::CollapsingHeader("Lighting", ImGuiTreeNodeFlags_DefaultOpen)) {
+
+				auto& skybox_data = GET_RENDERER.get_scene_data_ref();
+				
+				UI::begin_table("window_world_settings_table", false);
+				UI::table_row_slider("Ambient Color", skybox_data.ambient_color);
+				UI::table_row_slider("Sunlight Direction", skybox_data.sunlight_direction);
+				UI::table_row_slider("Sunlight Color", skybox_data.sunlight_color);
+				UI::end_table();
+			}
+
 			if (ImGui::CollapsingHeader("Dynamic Sky Box", ImGuiTreeNodeFlags_DefaultOpen)) {
 
 				int& background_effect_index = application::get().get_renderer().get_current_background_effect_index();
@@ -784,22 +795,46 @@ namespace PFF {
 
 				auto& skybox_data = GET_RENDERER.get_skybox_data_ref();
 
-				ImGui::SeparatorText("Sky Settings");
-				UI::begin_table("world_settings_dynamic_sky_box_settings", false);				
-				UI::table_row_slider("Middle Sky Color", skybox_data.middle_sky_color);
-				UI::table_row_slider("Horizon Sky Color", skybox_data.horizon_sky_color);
-				UI::table_row_slider("Sun Distance", skybox_data.sun_distance, 1.f, 1000000.f);
-				UI::table_row_slider("Sun Radius", skybox_data.sun_radius, 1.f, 10000.f);
-				UI::end_table();
+				ImGui::Indent();
+				if (ImGui::CollapsingHeader("Sky Settings", ImGuiTreeNodeFlags_DefaultOpen)) {
+					
+					UI::begin_table("window_world_settings_table", false);				
+					UI::table_row_slider("Middle Sky Color", skybox_data.middle_sky_color);
+					UI::table_row_slider("Horizon Sky Color", skybox_data.horizon_sky_color);
+					UI::end_table();
+				}
+				
+				if (ImGui::CollapsingHeader("Sun Settings", ImGuiTreeNodeFlags_DefaultOpen)) {
 
-				ImGui::SeparatorText("Cloud Settings");
-				UI::begin_table("world_settings_dynamic_sky_box_settings", false);				
-				UI::table_row_slider("Cloud Hight", skybox_data.cloud_hight, 0.f, 20.f);
-				UI::table_row_slider("Cloud Density", skybox_data.cloud_density, 0.f, 1.f);
-				UI::table_row_slider("Cloud Color", skybox_data.cloud_color);
-				UI::table_row_slider("Cloud Speed", skybox_data.cloud_speed, -5.f, 5.f);
-				UI::table_row_slider("Cloud Coverage", skybox_data.cloud_coverage, 0.f, 1.f);
-				UI::end_table();
+					UI::begin_table("window_world_settings_table", false);
+					UI::table_row_slider("Distance", skybox_data.sun_distance, 1.f, 1000000.f);
+					UI::table_row_slider("Radius", skybox_data.sun_radius, 1.f, 10000.f);
+					UI::table_row_slider("Core Falloff", skybox_data.sun_core_falloff, .7f, .99f);
+					UI::table_row_slider("Glow Halo Zize", skybox_data.sun_glow_radius_multiplier, 1.5f, 4.f);
+					UI::table_row_slider("Glow Intensity", skybox_data.sun_glow_intensity, .1f, 1.f);
+					UI::table_row_slider("Glow Falloff", skybox_data.sun_glow_falloff, 1.f, 4.f);
+					UI::end_table();
+				}
+
+				if (ImGui::CollapsingHeader("Cloud Settings", ImGuiTreeNodeFlags_DefaultOpen)) {
+
+					UI::begin_table("window_world_settings_table", false);
+					UI::table_row_slider("Height", skybox_data.cloud_height, 0.f, 20.f);
+					UI::table_row_slider("Density", skybox_data.cloud_density, 0.f, 1.f);
+					UI::table_row_slider("Color", skybox_data.cloud_color);
+					UI::table_row_slider("Speed", skybox_data.cloud_speed, -5.f, 5.f);
+					UI::table_row_slider("Scale", skybox_data.cloud_scale, 0.f, 5.f);
+					UI::table_row_slider("Coverage", skybox_data.cloud_coverage, 0.f, 1.f);
+					UI::table_row_slider("Octaves", skybox_data.cloud_octaves, 1, 5);
+					UI::table_row_slider("Persistence", skybox_data.cloud_persistence, .3f, .7f);
+					UI::table_row_slider("Detail", skybox_data.cloud_detail, .1f, .5f);
+					// UI::table_row_slider("Wind Shear", skybox_data.wind_shear, .0f, 1.f);
+					// UI::table_row_slider("Depth", skybox_data.cloud_depth, 0.f, 100.f);
+					// UI::table_row_slider("Height Variation", skybox_data.cloud_height_variation, .0f, .9f);
+	
+					UI::end_table();
+				}
+				ImGui::Unindent();
 
 				if (background_effect_index != 3)
 					ImGui::EndDisabled();

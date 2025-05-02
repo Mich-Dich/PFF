@@ -741,22 +741,6 @@ namespace PFF::render::vulkan {
 		material_resources.data_buffer_offset = 0;
 		m_default_material = create_ref<material_instance>(m_metal_rough_material.create_instance(material_pass::main_color, material_resources));
 		
-		// m_skybox_data.inverse_view = glm::inverse(m_scene_data.view);
-		// m_skybox_data.middle_sky_color = glm::vec4(0.f, 0.55078f, 0.828125f, 1.f);
-		// m_skybox_data.horizon_sky_color = glm::vec4(0.57734375f, 0.7375f, 0.7921875f, 1.f);
-		// m_skybox_data.image_size = glm::vec2(m_imugi_viewport_size.x, m_imugi_viewport_size.y);
-		// m_skybox_data.sun_distance = 100000.f;
-		// m_skybox_data.sun_radius = 1000.f;
-		// m_skybox_data.FOV_y = m_active_camera->get_perspective_fov_y();
-
-		// // Cloud parameters
-		// m_skybox_data.cloud_scale = 9.f;        								// Scale of cloud patterns (smaller = larger clouds)
-		// m_skybox_data.time = application::get().get_absolute_time();          // Should be incremented each frame (e.g., += 0.001f)
-		// m_skybox_data.cloud_density = 0.5f;       							// Cloud thickness/density (0.3-0.7)
-		// m_skybox_data.cloud_color = glm::vec4(0.95f, 0.95f, 1.0f, 0.35f);  	// RGBA (white with slight blue tint)
-		// m_skybox_data.cloud_speed = glm::vec2(0.1f, 0.2f);  			// Cloud movement speed (x,y)
-		// m_skybox_data.cloud_coverage = 0.45f;     							// How much of the sky is covered (0.2-0.8)
-
 #ifdef PFF_RENDERER_DEBUG_CAPABILITY
 
 		material::material_resources debug_lines_material_resources;						//debug material for lines
@@ -1240,7 +1224,7 @@ namespace PFF::render::vulkan {
 			m_skybox_data.image_size = glm::vec2(m_imugi_viewport_size.x, m_imugi_viewport_size.y);
 			m_skybox_data.FOV_y = m_active_camera->get_perspective_fov_y();
 			m_skybox_data.time = application::get().get_absolute_time();
-			
+
 			vkCmdBindDescriptorSets(cmd, VK_PIPELINE_BIND_POINT_COMPUTE, m_skybox_pipeline_layout, 0, 2, sets, 0, nullptr);
 			vkCmdPushConstants(cmd, m_skybox_pipeline_layout, VK_SHADER_STAGE_COMPUTE_BIT, 0, sizeof(render::compute_push_constants_dynamic_skybox), &m_skybox_data);
 			vkCmdDispatch(cmd, static_cast<u32>(std::ceil(m_imugi_viewport_size.x / 16.0)), static_cast<u32>(std::ceil(m_imugi_viewport_size.y / 16.0)), 1);
