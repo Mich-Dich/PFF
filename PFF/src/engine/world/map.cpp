@@ -320,11 +320,43 @@ namespace PFF {
 		file_header.timestamp = util::get_system_time();
 
 		auto serializer = serializer::yaml(m_path, "map_data", option);
-		serializer.sub_section("file_header", [&](serializer::yaml& header_section) {
+		serializer.sub_section("file_header", [&](serializer::yaml& section) {
 
-			header_section.entry(KEY_VALUE(file_header.file_version))
+			section.entry(KEY_VALUE(file_header.file_version))
 				.entry(KEY_VALUE(file_header.type))
 				.entry(KEY_VALUE(file_header.timestamp));
+
+		}).sub_section("render_meta_data", [&](serializer::yaml& section) {
+
+			int& background_effect_index = application::get().get_renderer().get_current_background_effect_index();
+			section.entry(KEY_VALUE(background_effect_index));
+
+		}).sub_section("lighting", [&](serializer::yaml& section) {
+
+			auto& skybox_data = GET_RENDERER.get_scene_data_ref();
+			section.entry(KEY_VALUE(skybox_data.sunlight_direction))
+				.entry(KEY_VALUE(skybox_data.sunlight_direction))
+				.entry(KEY_VALUE(skybox_data.sunlight_color));
+			
+		}).sub_section("dynamic_skybox_data", [&](serializer::yaml& section) {
+
+			section.entry(KEY_VALUE(m_dynamic_skybox_data.middle_sky_color))
+				.entry(KEY_VALUE(m_dynamic_skybox_data.horizon_sky_color))
+				.entry(KEY_VALUE(m_dynamic_skybox_data.sun_distance))
+				.entry(KEY_VALUE(m_dynamic_skybox_data.sun_radius))
+				.entry(KEY_VALUE(m_dynamic_skybox_data.sun_core_falloff))
+				.entry(KEY_VALUE(m_dynamic_skybox_data.sun_glow_radius_multiplier))
+				.entry(KEY_VALUE(m_dynamic_skybox_data.sun_glow_intensity))
+				.entry(KEY_VALUE(m_dynamic_skybox_data.sun_glow_falloff))
+				.entry(KEY_VALUE(m_dynamic_skybox_data.cloud_height))
+				.entry(KEY_VALUE(m_dynamic_skybox_data.cloud_density))
+				.entry(KEY_VALUE(m_dynamic_skybox_data.cloud_color))
+				.entry(KEY_VALUE(m_dynamic_skybox_data.cloud_speed))
+				.entry(KEY_VALUE(m_dynamic_skybox_data.cloud_scale))
+				.entry(KEY_VALUE(m_dynamic_skybox_data.cloud_coverage))
+				.entry(KEY_VALUE(m_dynamic_skybox_data.cloud_octaves))
+				.entry(KEY_VALUE(m_dynamic_skybox_data.cloud_persistence))
+				.entry(KEY_VALUE(m_dynamic_skybox_data.cloud_detail));
 		});
 	
 		if (option == serializer::option::save_to_file) {

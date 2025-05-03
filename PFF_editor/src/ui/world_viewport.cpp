@@ -793,7 +793,8 @@ namespace PFF {
 					ImGui::BeginDisabled();
 				}
 
-				auto& skybox_data = GET_RENDERER.get_skybox_data_ref();
+				auto& skybox_data = application::get().get_world_layer()->get_map()->get_dynamic_skybox_data_ref();
+				// auto& skybox_data = GET_RENDERER.get_skybox_data_ref();
 
 				ImGui::Indent();
 				if (ImGui::CollapsingHeader("Sky Settings", ImGuiTreeNodeFlags_DefaultOpen)) {
@@ -809,29 +810,34 @@ namespace PFF {
 					UI::begin_table("window_world_settings_table", false);
 					UI::table_row_slider("Distance", skybox_data.sun_distance, 1.f, 1000000.f);
 					UI::table_row_slider("Radius", skybox_data.sun_radius, 1.f, 10000.f);
-					UI::table_row_slider("Core Falloff", skybox_data.sun_core_falloff, .7f, .99f);
-					UI::table_row_slider("Glow Halo Zize", skybox_data.sun_glow_radius_multiplier, 1.5f, 4.f);
-					UI::table_row_slider("Glow Intensity", skybox_data.sun_glow_intensity, .1f, 1.f);
-					UI::table_row_slider("Glow Falloff", skybox_data.sun_glow_falloff, 1.f, 4.f);
+					UI::table_row_slider("Core Falloff", skybox_data.sun_core_falloff, .2f, .99f);
+					UI::table_row_slider("Glow Halo Size", skybox_data.sun_glow_radius_multiplier, 1.f, 50.f);
+					UI::table_row_slider("Glow Intensity", skybox_data.sun_glow_intensity, .0f, 2.f);
+					UI::table_row_slider("Glow Falloff", skybox_data.sun_glow_falloff, .1f, 5.f);
 					UI::end_table();
 				}
 
 				if (ImGui::CollapsingHeader("Cloud Settings", ImGuiTreeNodeFlags_DefaultOpen)) {
 
 					UI::begin_table("window_world_settings_table", false);
-					UI::table_row_slider("Height", skybox_data.cloud_height, 0.f, 20.f);
+					UI::table_row_slider("Height", skybox_data.cloud_height, 1000.f, 10000.f);
 					UI::table_row_slider("Density", skybox_data.cloud_density, 0.f, 1.f);
 					UI::table_row_slider("Color", skybox_data.cloud_color);
-					UI::table_row_slider("Speed", skybox_data.cloud_speed, -5.f, 5.f);
-					UI::table_row_slider("Scale", skybox_data.cloud_scale, 0.f, 5.f);
+					UI::table_row_slider("Speed", skybox_data.cloud_speed, -1.f, 1.f);
+					UI::table_row_slider("Scale", skybox_data.cloud_scale, .01f, 10.f);
 					UI::table_row_slider("Coverage", skybox_data.cloud_coverage, 0.f, 1.f);
-					UI::table_row_slider("Octaves", skybox_data.cloud_octaves, 1, 5);
+					UI::table_row_slider_int("Octaves", (int&)skybox_data.cloud_octaves, 1, 5);
 					UI::table_row_slider("Persistence", skybox_data.cloud_persistence, .3f, .7f);
-					UI::table_row_slider("Detail", skybox_data.cloud_detail, .1f, .5f);
-					// UI::table_row_slider("Wind Shear", skybox_data.wind_shear, .0f, 1.f);
-					// UI::table_row_slider("Depth", skybox_data.cloud_depth, 0.f, 100.f);
-					// UI::table_row_slider("Height Variation", skybox_data.cloud_height_variation, .0f, .9f);
-	
+					UI::table_row_slider("Detail", skybox_data.cloud_detail, .01f, 5.f);
+
+					// UI::table_row_slider("thickness", skybox_data.cloud_thickness, .1f, .5f);
+					// UI::table_row_slider("floor_height", skybox_data.cloud_floor_height, .1f, .5f);
+					// UI::table_row_slider("ceil_height", skybox_data.cloud_ceil_height, .1f, .5f);
+					// UI::table_row_slider("shape_scale", skybox_data.cloud_shape_scale, .1f, .5f);
+					// UI::table_row_slider("detail_scale", skybox_data.cloud_detail_scale, .1f, .5f);
+					// UI::table_row_slider("height_ramp", skybox_data.cloud_height_ramp, .1f, .5f);
+					// UI::table_row_slider("depth_attenuation", skybox_data.cloud_depth_attenuation, .1f, .5f);
+
 					UI::end_table();
 				}
 				ImGui::Unindent();

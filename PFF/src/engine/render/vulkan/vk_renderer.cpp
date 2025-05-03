@@ -63,7 +63,6 @@ namespace PFF::render::vulkan {
 #endif // COLLECT_PERFORMANCE_DATA
 
 
-// #define TRY_TO_PROVIDE_SCNENE_DATA_TO_COMP
 
 
 	vk_renderer vk_renderer::s_instance = vk_renderer{};
@@ -417,11 +416,6 @@ namespace PFF::render::vulkan {
 	}
 
 	
-#define TRY_TO_PROVIDE_SCNENE_DATA_TO_COMP
-// #ifdef TRY_TO_PROVIDE_SCNENE_DATA_TO_COMP
-		// VkDescriptorSet m_global_descriptor;
-// #endif
-
 	void vk_renderer::draw_frame(f32 delta_time) {
 
 		if (m_state != system_state::active)
@@ -485,7 +479,6 @@ namespace PFF::render::vulkan {
 			m_draw_extent.height = math::min(m_swapchain_extent.height, m_draw_image.get_height()) * (u32)m_render_scale;
 		}
 
-#ifdef TRY_TO_PROVIDE_SCNENE_DATA_TO_COMP
 		// ============================================================ calc scene data ============================================================
 		m_scene_data.view = m_active_camera->get_view();
 		m_scene_data.proj = glm::perspective(glm::radians(m_active_camera->get_perspective_fov_y()), (float)m_draw_extent.width / (float)m_draw_extent.height, m_active_camera->get_clipping_far(), m_active_camera->get_clipping_near());
@@ -506,7 +499,7 @@ namespace PFF::render::vulkan {
 		descriptor_writer writer;
 		writer.write_buffer(0, gpuSceneDataBuffer.buffer, sizeof(render::GPU_scene_data), 0, VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER);
 		writer.update_set(m_device, m_global_descriptor);
-#endif // TRY_TO_PROVIDE_SCNENE_DATA_TO_COMP
+		// ============================================================ calc scene data ============================================================
 
 		VK_CHECK_S(vkBeginCommandBuffer(cmd, &cmdBeginInfo));
 
@@ -1070,7 +1063,7 @@ namespace PFF::render::vulkan {
 
 		VkPushConstantRange skybox_push_const{};
 		skybox_push_const.offset = 0;
-		skybox_push_const.size = sizeof(render::compute_push_constants_dynamic_skybox);
+		skybox_push_const.size = sizeof(PFF::dynamic_skybox_data);
 		skybox_push_const.stageFlags = VK_SHADER_STAGE_COMPUTE_BIT;
 
 		std::array<VkDescriptorSetLayout,2> sets = { m_gpu_scene_data_descriptor_layout, m_draw_image_descriptor_layout };
@@ -1220,13 +1213,14 @@ namespace PFF::render::vulkan {
 				m_draw_image_descriptors   // skybox output image + sampler
 			};
 			
-			m_skybox_data.inverse_view = glm::inverse(m_scene_data.view);
-			m_skybox_data.image_size = glm::vec2(m_imugi_viewport_size.x, m_imugi_viewport_size.y);
-			m_skybox_data.FOV_y = m_active_camera->get_perspective_fov_y();
-			m_skybox_data.time = application::get().get_absolute_time();
+			auto& skybox_data = application::get().get_world_layer()->get_map()->get_dynamic_skybox_data_ref();
+			skybox_data.inverse_view = glm::inverse(m_scene_data.view);
+			skybox_data.image_size = glm::vec2(m_imugi_viewport_size.x, m_imugi_viewport_size.y);
+			skybox_data.FOV_y = m_active_camera->get_perspective_fov_y();
+			skybox_data.time = application::get().get_absolute_time();
 
 			vkCmdBindDescriptorSets(cmd, VK_PIPELINE_BIND_POINT_COMPUTE, m_skybox_pipeline_layout, 0, 2, sets, 0, nullptr);
-			vkCmdPushConstants(cmd, m_skybox_pipeline_layout, VK_SHADER_STAGE_COMPUTE_BIT, 0, sizeof(render::compute_push_constants_dynamic_skybox), &m_skybox_data);
+			vkCmdPushConstants(cmd, m_skybox_pipeline_layout, VK_SHADER_STAGE_COMPUTE_BIT, 0, sizeof(PFF::dynamic_skybox_data), &skybox_data);
 			vkCmdDispatch(cmd, static_cast<u32>(std::ceil(m_imugi_viewport_size.x / 16.0)), static_cast<u32>(std::ceil(m_imugi_viewport_size.y / 16.0)), 1);
 		}
 	}
@@ -1253,28 +1247,6 @@ namespace PFF::render::vulkan {
 		scissor.extent.width = m_draw_extent.width;
 		scissor.extent.height = m_draw_extent.height;
 		vkCmdSetScissor(cmd, 0, 1, &scissor);
-
-#ifndef TRY_TO_PROVIDE_SCNENE_DATA_TO_COMP
-		m_scene_data.view = m_active_camera->get_view();
-		m_scene_data.proj = glm::perspective(glm::radians(m_active_camera->get_perspective_fov_y()), (float)m_draw_extent.width / (float)m_draw_extent.height, 100000.f, 0.1f);
-		m_active_camera->force_set_projection_matrix(m_scene_data.proj);
-		m_scene_data.proj[1][1] *= -1;				// invert the Y direction on projection matrix
-		m_scene_data.proj_view = m_scene_data.proj * m_scene_data.view;
-
-		// allocate a new uniform buffer for the scene data
-		vk_buffer gpuSceneDataBuffer = create_buffer(sizeof(render::GPU_scene_data), VK_BUFFER_USAGE_UNIFORM_BUFFER_BIT, VMA_MEMORY_USAGE_CPU_TO_GPU);
-		get_current_frame().del_queue.push_func([this, gpuSceneDataBuffer]() { destroy_buffer(gpuSceneDataBuffer); });
-
-		//write the buffer
-		render::GPU_scene_data* scene_uniform_data = (render::GPU_scene_data*)gpuSceneDataBuffer.allocation->GetMappedData();
-		*scene_uniform_data = m_scene_data;
-		
-		//create a descriptor set that binds that buffer and update it
-		VkDescriptorSet globalDescriptor = get_current_frame().frame_descriptors.allocate(m_device, m_gpu_scene_data_descriptor_layout);
-		descriptor_writer writer;
-		writer.write_buffer(0, gpuSceneDataBuffer.buffer, sizeof(render::GPU_scene_data), 0, VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER);
-		writer.update_set(m_device, globalDescriptor);
-#endif // TRY_TO_PROVIDE_SCNENE_DATA_TO_COMP
 
 		VkRenderingAttachmentInfo color_attachment = init::attachment_info(m_draw_image.get_image_view(), nullptr, VK_IMAGE_LAYOUT_GENERAL);					// begin a render pass connected to our draw image
 		VkRenderingAttachmentInfo depth_attachment = init::depth_attachment_info(m_depth_image.get_image_view(), VK_IMAGE_LAYOUT_DEPTH_ATTACHMENT_OPTIMAL);

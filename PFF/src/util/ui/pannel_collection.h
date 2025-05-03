@@ -207,7 +207,7 @@ namespace PFF::UI {
 	// @param flags Optional ImGui input text flags.
 	// 
 	// @return true if the value was changed by the slider, false otherwise.
-	bool table_row_slider(std::string_view label, int& value, int min_value = 0, int max_value = 1, ImGuiInputTextFlags flags = ImGuiInputTextFlags_None);
+	bool table_row_slider_int(std::string_view label, int& value, int min_value = 0, int max_value = 1, ImGuiInputTextFlags flags = ImGuiInputTextFlags_None);
 
 	// @brief Renders a table row with two columns, each containing custom content.
 	// @param [first_colum] A function to render the content of the first column.
@@ -394,6 +394,9 @@ namespace PFF::UI {
 
 		if constexpr (std::is_same_v<T, int>)
 			return ImGui::SliderInt(loc_label.c_str(), &value, static_cast<int>(min_value), static_cast<int>(max_value), "%d", flags);
+		
+		// if constexpr (std::is_same_v<T, u32>)
+		// 	return ImGui::SliderInt(loc_label.c_str(), &value, static_cast<int>(min_value), static_cast<int>(max_value), "%d", flags);
 
 		if constexpr (std::is_same_v<T, f32> || std::is_same_v<T, f64>)
 			return ImGui::SliderFloat(loc_label.c_str(), &value, min_value, max_value, "%.2f", flags);
@@ -406,6 +409,9 @@ namespace PFF::UI {
 
 		if constexpr (std::is_same_v<T, glm::vec4> || std::is_same_v<T, ImVec4>)
 			return ImGui::SliderFloat4(loc_label.c_str(), &value[0], min_value, max_value, "%.2f", flags);
+
+		else
+			ImGui::Text("unsuported data type");
 
 		return false;
 	}

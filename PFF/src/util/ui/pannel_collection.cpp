@@ -833,7 +833,7 @@ namespace PFF::UI {
 		return false;
 	}
 
-	bool table_row_slider(std::string_view label, int& value, int min_value, int max_value, ImGuiInputTextFlags flags) {
+	bool table_row_slider_int(std::string_view label, int& value, int min_value, int max_value, ImGuiInputTextFlags flags) {
 
 		ImGuiStyle& style = ImGui::GetStyle();
 		ImVec2 current_item_spacing = style.ItemSpacing;

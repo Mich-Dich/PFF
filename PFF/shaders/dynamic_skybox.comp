@@ -35,49 +35,69 @@ layout(push_constant) uniform constants {
     float   cloud_density;
     vec4    cloud_color;
     vec2    cloud_speed;
-    vec2    cloud_scale;
+    float   cloud_scale;
     float   cloud_coverage;
     float   cloud_persistence;
     float   cloud_detail;
     uint    cloud_octaves;
 } PushConstants;
 
-// 2D Random
-float rand(vec2 co) { return fract(sin(dot(co, vec2(12.9898, 78.233))) * 43758.5453); }
-
-// 2D Noise
-float noise2D(vec2 pos) {
-    vec2 i = floor(pos);
-    vec2 f = fract(pos);
-    float a = rand(i);
-    float b = rand(i + vec2(1.0, 0.0));
-    float c = rand(i + vec2(0.0, 1.0));
-    float d = rand(i + vec2(1.0, 1.0));
-    vec2 u = f * f * (3.0 - 2.0 * f);
-    return mix(a, b, u.x) + (c - a)* u.y * (1.0 - u.x) + (d - b) * u.x * u.y;
-}
-
-// Fractal Brownian Motion
-float fbm2D(vec2 pos, uint octaves, float persistence) {
-    float total = 0.0;
-    float frequency = 1.0;
-    float amplitude = 1.0;
-    float maxValue = 0.0;
-    for(uint i = 0; i < octaves; ++i) {
-        total += noise2D(pos * frequency) * amplitude;
-        maxValue += amplitude;
-        amplitude *= persistence;
-        frequency *= 2.0;
-    }
-    return total / maxValue;
-}
-
 // Shared variables
 shared vec2 shared_sun_uv;
 shared bool shared_sun_visible;
 shared float shared_sun_radius;
 
+float rand2D(vec2 co) { return fract(sin(dot(co, vec2(12.9898, 78.233))) * 43758.5453); }
+
+float noise2D(vec2 pos) {
+
+    vec2 i = floor(pos);
+    vec2 f = fract(pos);
+    float a = rand2D(i);
+    float b = rand2D(i + vec2(1.0, 0.0));
+    float c = rand2D(i + vec2(0.0, 1.0));
+    float d = rand2D(i + vec2(1.0, 1.0));
+    vec2 u = f * f * (3.0 - 2.0 * f);
+    return mix(a, b, u.x) + (c - a)* u.y * (1.0 - u.x) + (d - b) * u.x * u.y;
+}
+
+float fbm2D(vec2 pos, uint octaves, float persistence) {
+
+    if(octaves == 0 || persistence <= 0.0)
+        return 0.0;
+
+    float total = 0.0;
+    float frequency = 1.0;
+    float amplitude = 1.0;
+    float maxValue = 0.0;
+    uint safeOctaves = min(octaves, 8u);
+    for(uint i = 0u; i < safeOctaves; ++i) {
+        total += noise2D(pos * frequency) * amplitude;
+        maxValue += amplitude;
+        amplitude *= persistence;
+        frequency *= 2.0;
+        if (amplitude < 0.001) break;                       // Early exit if amplitude becomes negligible
+    }
+    return total / max(maxValue, 0.0001);                   // Prevent division by zero
+}
+
+
+// Modified cloud calculation function
+float calculateCloudDensity(vec3 cameraPos, vec3 worldDir) {
+
+    float planeHeight = PushConstants.cloud_height;
+    float t = (planeHeight - cameraPos.y) / worldDir.y;
+    vec3 cloudPos = cameraPos + worldDir * t;
+    vec2 cloudUV = cloudPos.xz * (1 / PushConstants.cloud_scale);
+    cloudUV += PushConstants.cloud_speed * PushConstants.time;
+    float baseNoise = fbm2D(cloudUV, PushConstants.cloud_octaves, PushConstants.cloud_persistence);
+    float detailNoise = fbm2D(cloudUV * PushConstants.cloud_detail, PushConstants.cloud_octaves, PushConstants.cloud_persistence);
+    float combinedNoise = baseNoise * detailNoise;
+    return smoothstep(PushConstants.cloud_coverage, 1.0, combinedNoise) * PushConstants.cloud_density;
+}
+
 void main() {
+
     ivec2 texelCoord = ivec2(gl_GlobalInvocationID.xy);
     ivec2 size = ivec2(PushConstants.image_size);
     if (texelCoord.x >= size.x || texelCoord.y >= size.y)
@@ -87,23 +107,14 @@ void main() {
     if (gl_LocalInvocationID.x == 0 && gl_LocalInvocationID.y == 0) {
         vec3 sun_dir = normalize(scene_data.sunlight_direction.xyz);
         vec3 center = sun_dir * PushConstants.sun_distance;
-        vec3 up = abs(dot(sun_dir, vec3(0,1,0))) < 0.99 ? vec3(0,1,0) : vec3(1,0,0);
-        vec3 U = normalize(cross(sun_dir, up));
-        vec3 R = center + U * PushConstants.sun_radius;
-
         vec4 clipC = scene_data.viewproj * vec4(center, 1.0);
-        vec4 clipR = scene_data.viewproj * vec4(R, 1.0);
-
         if (clipC.w > 0.0) {
             vec2 ndcC = clipC.xy / clipC.w;
-            vec2 ndcR = clipR.xy / clipR.w;
             shared_sun_uv = ndcC * 0.5 + 0.5;
             shared_sun_visible = true;
-
-            float aspect = float(size.y) / float(size.x);
-            vec2 d = ndcR - ndcC;
-            d.y *= aspect;
-            shared_sun_radius = length(d) * 0.5; 
+            float sun_angular_radius = atan(PushConstants.sun_radius / PushConstants.sun_distance);
+            float tanHalfFovY = tan(PushConstants.FOV_y * 0.5);
+            shared_sun_radius = sun_angular_radius / tanHalfFovY;
         } else {
             shared_sun_visible = false;
         }
@@ -122,49 +133,37 @@ void main() {
     float verticalBlend = clamp(worldDir.y, 0.0, 1.0);
     vec4 color = mix(PushConstants.horizon_sky_color, PushConstants.middle_sky_color, verticalBlend);
 
-    // Cloud calculation
-    float cloud = 0.0;
-    if (verticalBlend > 0.0) {
+    // --- CLOUD CALCULATION ---
+    vec3 cameraPos = PushConstants.inverse_view[3].xyz;
+    float cloudAlpha = 0.0;
+    // if (worldDir.y > 0.0) {
+        float density = calculateCloudDensity(cameraPos, worldDir);
+        float horizonFalloff = smoothstep(0.0, 0.3, worldDir.y);
+        density *= horizonFalloff;
+        float absorption = exp(-density * 4.0);
+        vec3 cloudColor = PushConstants.cloud_color.rgb * absorption;
+        cloudAlpha = density * PushConstants.cloud_color.a;
+        color.rgb = mix(color.rgb, cloudColor, cloudAlpha);
+    // }
 
-        vec2 scaledXZ = worldDir.xz * PushConstants.cloud_scale;
-        vec2 cloudPos = (scaledXZ / max(worldDir.y, 0.01)) * PushConstants.cloud_height + PushConstants.cloud_speed * PushConstants.time;
-        float baseNoise = fbm2D(cloudPos, PushConstants.cloud_octaves, PushConstants.cloud_persistence);
-        float detailNoise = fbm2D(cloudPos * 4.0, PushConstants.cloud_octaves + 1, PushConstants.cloud_persistence * 0.8);
-        float noiseVal = baseNoise * (1.0 + detailNoise * PushConstants.cloud_detail);
-        float horizonFactor = 1.0 - verticalBlend;
-        float coverage = mix(PushConstants.cloud_coverage * 0.3, 
-                            PushConstants.cloud_coverage, 
-                            verticalBlend);
-        float density = mix(PushConstants.cloud_density * 2.0, 
-                        PushConstants.cloud_density, 
-                        verticalBlend);
-        
-        cloud = smoothstep(coverage, coverage + density, noiseVal);
-        cloud *= pow(horizonFactor, 0.5);
-        cloud *= smoothstep(0.0, 0.05, verticalBlend);
-        
-        float secondaryNoise = fbm2D(cloudPos * 0.8 + vec2(100.0), 
-                                PushConstants.cloud_octaves - 1, 
-                                PushConstants.cloud_persistence);
-        cloud = max(cloud, secondaryNoise * 0.3 * verticalBlend);
-    }
-    color.rgb = mix(color.rgb, 
-                PushConstants.cloud_color.rgb, 
-                cloud * PushConstants.cloud_color.a);
-
-
-    // Sun disk calculation
+    // --- SUN CALCULATION ---
     if (shared_sun_visible) {
         vec2 delta = uv - shared_sun_uv;
         delta.y *= float(size.y) / float(size.x);
         float distanceToSun = length(delta);
         float sunRadius = shared_sun_radius;
+
+        // Sun core
         float sunMask = 1.0 - smoothstep(sunRadius * PushConstants.sun_core_falloff, sunRadius, distanceToSun);
-        vec3 sunColorCore = scene_data.sunlight_color.rgb * sunMask;
+        vec3 sunColorCore = scene_data.sunlight_color.rgb * sunMask * (1.0 - cloudAlpha);
+
+        // Sun glow
         float glowRadius = sunRadius * PushConstants.sun_glow_radius_multiplier;
         float glow = 1.0 - smoothstep(sunRadius, glowRadius, distanceToSun);
         glow = pow(glow, PushConstants.sun_glow_falloff) * PushConstants.sun_glow_intensity;
-        vec3 sunColorGlow = scene_data.sunlight_color.rgb * glow;
+        vec3 sunColorGlow = scene_data.sunlight_color.rgb * glow * (1.0 - cloudAlpha);
+
+        // Blend with existing color
         color.rgb = mix(color.rgb, sunColorCore, sunMask);
         color.rgb += sunColorGlow;
     }
