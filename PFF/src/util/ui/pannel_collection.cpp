@@ -856,6 +856,121 @@ namespace PFF::UI {
 		return ImGui::SliderInt(loc_label.c_str(), &value, static_cast<int>(min_value), static_cast<int>(max_value), "%d", flags);
 	}
 
+
+	struct PickerState {
+		bool open        = false;
+		bool just_opened = false;
+	};
+	static std::unordered_map<std::string, PickerState> g_picker_states;
+	bool table_row_slider_color(std::string_view label, glm::vec4& value, f32 min_value, f32 max_value, ImGuiInputTextFlags flags) {
+
+		ImGui::TableNextRow();
+		ImGui::TableSetColumnIndex(0);
+		ImGui::Text("%s", label.data());
+		ImGui::TableSetColumnIndex(1);
+	
+		std::string key       = std::string("picker_") + label.data();
+		auto&      state      = g_picker_states[key];
+		const char* popup_id  = (key + "_popup").c_str();
+		std::string btn_id    = "Pick##btn_" + key;
+	
+		if (ImGui::Button(btn_id.c_str())) {
+			state.open        = true;
+			state.just_opened = true;
+		}
+
+		ImGui::SameLine();
+		ImGui::SetNextItemWidth(ImGui::GetColumnWidth());
+		bool changed = ImGui::SliderFloat4(("##slider_" + key).c_str(), &value.x, min_value, max_value, "%.2f", flags);
+	
+		if (state.open)
+			ImGui::OpenPopup(popup_id);
+	
+		if (ImGui::BeginPopup(popup_id, ImGuiWindowFlags_NoMove)) {
+
+			ImGui::ColorPicker4(("##picker_" + key).c_str(), &value.x, ImGuiColorEditFlags_PickerHueWheel | ImGuiColorEditFlags_NoSidePreview | ImGuiColorEditFlags_NoSmallPreview );
+			if (state.just_opened)
+				state.just_opened = false;
+
+			else {
+				bool hover_popup  = ImGui::IsWindowHovered(ImGuiHoveredFlags_AnyWindow);
+				bool hover_button = ImGui::IsItemHovered(ImGuiHoveredFlags_AllowWhenBlockedByPopup);
+				if (!hover_popup && !hover_button)
+					state.open = false;
+			}
+	
+			ImGui::EndPopup();
+		}
+	
+		return changed;
+	}
+
+
+	void color_picker(ImVec4& color) {
+		
+		static bool backup_color_init = false;
+		static ImVec4 backup_color;
+		static bool saved_palette_init = true;
+		static ImVec4 saved_palette[35] = {};
+		if (saved_palette_init) {
+			for (int n = 0; n < ARRAY_SIZE(saved_palette); n++) {
+				ImGui::ColorConvertHSVtoRGB((n / 34.f), .8f, .8f,
+					saved_palette[n].x, saved_palette[n].y, saved_palette[n].z);
+				saved_palette[n].w = 1.0f; // Alpha
+			}
+			saved_palette_init = false;
+		}
+
+		ImGui::ColorPicker4("##picker", &color.x, ImGuiColorEditFlags_NoSidePreview | ImGuiColorEditFlags_NoSmallPreview);
+
+		ImGui::SameLine();
+		ImGui::BeginGroup();
+		{
+			ImGui::BeginGroup();
+			{
+				ImGui::Text("Current");
+				ImGui::ColorButton("##current", UI::get_main_color_ref(), ImGuiColorEditFlags_NoPicker | ImGuiColorEditFlags_AlphaPreviewHalf, ImVec2(60, 40));
+			}
+			ImGui::EndGroup();
+
+			ImGui::SameLine();
+			{
+				ImGui::BeginGroup();
+				ImGui::Text("Previous");
+				if (ImGui::ColorButton("##previous", backup_color, ImGuiColorEditFlags_NoPicker | ImGuiColorEditFlags_AlphaPreviewHalf, ImVec2(60, 40)))
+					UI::update_UI_colors(backup_color);
+			}
+			ImGui::EndGroup();
+
+			ImGui::Separator();
+			ImGui::Text("Palette");
+			for (int n = 0; n < ARRAY_SIZE(saved_palette); n++) {
+				ImGui::PushID(n);
+				if ((n % 5) != 0)
+					ImGui::SameLine(0.0f, ImGui::GetStyle().ItemSpacing.y);
+
+				ImGuiColorEditFlags palette_button_flags = ImGuiColorEditFlags_NoAlpha | ImGuiColorEditFlags_NoPicker | ImGuiColorEditFlags_NoTooltip;
+				if (ImGui::ColorButton("##palette", saved_palette[n], palette_button_flags, ImVec2(21, 21)))
+					UI::update_UI_colors(ImVec4(saved_palette[n].x, saved_palette[n].y, saved_palette[n].z, UI::get_main_color_ref().w));
+
+				// Allow user to drop colors into each palette entry. Note that ColorButton() is already a
+				// drag source by default, unless specifying the ImGuiColorEditFlags_NoDragDrop flag.
+				if (ImGui::BeginDragDropTarget()) {
+					if (const ImGuiPayload* payload = ImGui::AcceptDragDropPayload(IMGUI_PAYLOAD_TYPE_COLOR_3F))
+						memcpy((float*)&saved_palette[n], payload->Data, sizeof(float) * 3);
+					if (const ImGuiPayload* payload = ImGui::AcceptDragDropPayload(IMGUI_PAYLOAD_TYPE_COLOR_4F))
+						memcpy((float*)&saved_palette[n], payload->Data, sizeof(float) * 4);
+					ImGui::EndDragDropTarget();
+				}
+
+				ImGui::PopID();
+			}
+		}
+		ImGui::EndGroup();
+
+	}
+
+
 	void table_row(std::function<void()> first_colum, std::function<void()> second_colum) {
 
 		ImGui::TableNextRow();

@@ -17,8 +17,10 @@ layout(push_constant) uniform constants {
     mat4    inverse_view;
     vec4    middle_sky_color;
     vec4    horizon_sky_color;
+    vec4    sunset_color;
+    vec4    night_color;
     vec2    image_size;
-    
+
     // sun parameters
     float   sun_distance;
     float   sun_radius;
@@ -34,6 +36,7 @@ layout(push_constant) uniform constants {
     float   time;
     float   cloud_density;
     vec4    cloud_color;
+    vec4    cloud_color_night;
     vec2    cloud_speed;
     float   cloud_scale;
     float   cloud_coverage;
@@ -46,6 +49,7 @@ layout(push_constant) uniform constants {
 shared vec2 shared_sun_uv;
 shared bool shared_sun_visible;
 shared float shared_sun_radius;
+shared vec3 shared_sun_dir;
 
 float rand2D(vec2 co) { return fract(sin(dot(co, vec2(12.9898, 78.233))) * 43758.5453); }
 
@@ -86,9 +90,16 @@ float fbm2D(vec2 pos, uint octaves, float persistence) {
 float calculateCloudDensity(vec3 cameraPos, vec3 worldDir) {
 
     float planeHeight = PushConstants.cloud_height;
+    if (worldDir.y == 0.0)
+        return 0.0;
+
     float t = (planeHeight - cameraPos.y) / worldDir.y;
+    if (t < 0.0)
+        return 0.0;
+
+    // Calculate cloud position and sample noise
     vec3 cloudPos = cameraPos + worldDir * t;
-    vec2 cloudUV = cloudPos.xz * (1 / PushConstants.cloud_scale);
+    vec2 cloudUV = cloudPos.xz * (1.0 / PushConstants.cloud_scale);
     cloudUV += PushConstants.cloud_speed * PushConstants.time;
     float baseNoise = fbm2D(cloudUV, PushConstants.cloud_octaves, PushConstants.cloud_persistence);
     float detailNoise = fbm2D(cloudUV * PushConstants.cloud_detail, PushConstants.cloud_octaves, PushConstants.cloud_persistence);
@@ -106,6 +117,7 @@ void main() {
     // First thread computes sun position
     if (gl_LocalInvocationID.x == 0 && gl_LocalInvocationID.y == 0) {
         vec3 sun_dir = normalize(scene_data.sunlight_direction.xyz);
+        shared_sun_dir = sun_dir;
         vec3 center = sun_dir * PushConstants.sun_distance;
         vec4 clipC = scene_data.viewproj * vec4(center, 1.0);
         if (clipC.w > 0.0) {
@@ -122,29 +134,63 @@ void main() {
 
     barrier();
 
-    // Calculate sky color gradient
+
+    // --- SUNSET CALCULATIONS ---
+    float sunElevation = clamp(shared_sun_dir.y, -0.25, 1.0);
+    float sunsetFactor = 1.0 - smoothstep(-0.1, 0.25, sunElevation);
+    float nightFactor = smoothstep(0.0, -0.25, sunElevation);
+
+    // --- SKY COLOR GRADIENT ---
     vec2 uv = vec2(texelCoord) / vec2(size);
     vec2 ndc = uv * 2.0 - 1.0;
     float aspectRatio = PushConstants.image_size.x / PushConstants.image_size.y;
     float tanHalfFOV = tan(PushConstants.FOV_y * 0.5);
+
     vec4 viewDir = vec4(ndc.x * aspectRatio * tanHalfFOV, -ndc.y * tanHalfFOV, -1.35, 0.0);
     viewDir = normalize(viewDir);
     vec3 worldDir = normalize((PushConstants.inverse_view * viewDir).xyz);
+
+    // Base sky colors
+    vec4 dayMiddle = PushConstants.middle_sky_color;
+    vec4 dayHorizon = PushConstants.horizon_sky_color;
+    vec4 sunsetMiddle = mix(PushConstants.sunset_color, dayMiddle, 0.7);
+    vec4 sunsetHorizon = mix(PushConstants.sunset_color, dayHorizon, 0.5);
+    vec4 nightColor = PushConstants.night_color;
+
+    // Vertical blend
     float verticalBlend = clamp(worldDir.y, 0.0, 1.0);
-    vec4 color = mix(PushConstants.horizon_sky_color, PushConstants.middle_sky_color, verticalBlend);
+    vec4 color = mix(mix(dayHorizon, dayMiddle, verticalBlend),
+                    mix(sunsetHorizon, sunsetMiddle, verticalBlend),
+                    sunsetFactor);
+
+    // Add night influence
+    color = mix(color, nightColor, nightFactor);
+
+    // --- ATMOSPHERIC EFFECTS ---
+    float atmosphereBrightness = mix(mix(1.0, 0.6, sunsetFactor), 0.3, nightFactor);
+    color.rgb *= atmosphereBrightness;
+
+    // Final night darkening
+    color.rgb = mix(color.rgb, nightColor.rgb, nightFactor);
+
+    // --- STAR CALCULATION ---
+    vec3 starColor = vec3(1.0);
+    if (nightFactor > 0.0) {
+
+
+    }
 
     // --- CLOUD CALCULATION ---
     vec3 cameraPos = PushConstants.inverse_view[3].xyz;
     float cloudAlpha = 0.0;
-    // if (worldDir.y > 0.0) {
-        float density = calculateCloudDensity(cameraPos, worldDir);
-        float horizonFalloff = smoothstep(0.0, 0.3, worldDir.y);
-        density *= horizonFalloff;
-        float absorption = exp(-density * 4.0);
-        vec3 cloudColor = PushConstants.cloud_color.rgb * absorption;
-        cloudAlpha = density * PushConstants.cloud_color.a;
-        color.rgb = mix(color.rgb, cloudColor, cloudAlpha);
-    // }
+    float density = calculateCloudDensity(cameraPos, worldDir);
+    float verticalFactor = abs(worldDir.y);
+    float horizonFalloff = smoothstep(0.0, 0.3, verticalFactor);
+    density *= horizonFalloff;
+    float absorption = exp(-density * 4.0);
+    vec3 cloudColor = mix(PushConstants.cloud_color.rgb, PushConstants.cloud_color_night.rgb, nightFactor) * absorption;
+    cloudAlpha = density * PushConstants.cloud_color.a;
+    color.rgb = mix(color.rgb, cloudColor, cloudAlpha);
 
     // --- SUN CALCULATION ---
     if (shared_sun_visible) {
@@ -153,17 +199,22 @@ void main() {
         float distanceToSun = length(delta);
         float sunRadius = shared_sun_radius;
 
+        // Modified sun parameters
+        vec3 sunsetSunColor = mix(scene_data.sunlight_color.rgb, vec3(1.0, 0.5, 0.3), sunsetFactor);
+        float sunIntensity = scene_data.sunlight_direction.w * mix(1.0, 0.7, sunsetFactor);
+
         // Sun core
         float sunMask = 1.0 - smoothstep(sunRadius * PushConstants.sun_core_falloff, sunRadius, distanceToSun);
-        vec3 sunColorCore = scene_data.sunlight_color.rgb * sunMask * (1.0 - cloudAlpha);
+        vec3 sunColorCore = sunsetSunColor * sunMask * sunIntensity * (1.0 - cloudAlpha);
 
         // Sun glow
         float glowRadius = sunRadius * PushConstants.sun_glow_radius_multiplier;
         float glow = 1.0 - smoothstep(sunRadius, glowRadius, distanceToSun);
-        glow = pow(glow, PushConstants.sun_glow_falloff) * PushConstants.sun_glow_intensity;
-        vec3 sunColorGlow = scene_data.sunlight_color.rgb * glow * (1.0 - cloudAlpha);
+        float glowIntensity = PushConstants.sun_glow_intensity * (1.0 + sunsetFactor * 2.0);
+        glow = pow(glow, PushConstants.sun_glow_falloff) * glowIntensity;
+        vec3 sunColorGlow = sunsetSunColor * glow * sunIntensity * (1.0 - cloudAlpha);
 
-        // Blend with existing color
+        // Blend with sky
         color.rgb = mix(color.rgb, sunColorCore, sunMask);
         color.rgb += sunColorGlow;
     }

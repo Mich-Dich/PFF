@@ -342,6 +342,8 @@ namespace PFF {
 
 			section.entry(KEY_VALUE(m_dynamic_skybox_data.middle_sky_color))
 				.entry(KEY_VALUE(m_dynamic_skybox_data.horizon_sky_color))
+				.entry(KEY_VALUE(m_dynamic_skybox_data.sunset_color))
+				.entry(KEY_VALUE(m_dynamic_skybox_data.night_color))
 				.entry(KEY_VALUE(m_dynamic_skybox_data.sun_distance))
 				.entry(KEY_VALUE(m_dynamic_skybox_data.sun_radius))
 				.entry(KEY_VALUE(m_dynamic_skybox_data.sun_core_falloff))
@@ -351,6 +353,7 @@ namespace PFF {
 				.entry(KEY_VALUE(m_dynamic_skybox_data.cloud_height))
 				.entry(KEY_VALUE(m_dynamic_skybox_data.cloud_density))
 				.entry(KEY_VALUE(m_dynamic_skybox_data.cloud_color))
+				.entry(KEY_VALUE(m_dynamic_skybox_data.cloud_color_night))
 				.entry(KEY_VALUE(m_dynamic_skybox_data.cloud_speed))
 				.entry(KEY_VALUE(m_dynamic_skybox_data.cloud_scale))
 				.entry(KEY_VALUE(m_dynamic_skybox_data.cloud_coverage))

@@ -15,6 +15,8 @@ namespace PFF {
 		glm::mat4				inverse_view{};
 		glm::vec4				middle_sky_color = glm::vec4(0.f, 0.12f, 0.26f, 1.f);
 		glm::vec4				horizon_sky_color = glm::vec4(0.19f, 0.39f, 0.52f, 1.f);
+		glm::vec4				sunset_color = glm::vec4(0.1f, 0.1f, 0.1f, 1.f);
+		glm::vec4				night_color = glm::vec4(0.05f, 0.05f, 0.1f, 1.f);
 		glm::vec2				image_size{};
 		f32 					sun_distance = 1000000.f;
 		f32 					sun_radius = 565.f;																// --- allignment
@@ -30,6 +32,7 @@ namespace PFF {
 		f32 					time = 0.f;
 		f32 					cloud_density = 0.5f;																// --- allignment
 		glm::vec4 				cloud_color = glm::vec4(0.95f, 0.95f, 1.0f, 0.5f);
+		glm::vec4 				cloud_color_night = glm::vec4(0.0f, 0.0f, 0.0f, 0.9f);
 		glm::vec2 				cloud_speed = glm::vec2(0.1f, 0.2f);
 		f32 					cloud_scale = 100.f;
 		f32 					cloud_coverage = .6f;

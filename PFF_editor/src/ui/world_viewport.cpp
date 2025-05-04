@@ -778,7 +778,7 @@ namespace PFF {
 				
 				UI::begin_table("window_world_settings_table", false);
 				UI::table_row_slider("Ambient Color", skybox_data.ambient_color);
-				UI::table_row_slider("Sunlight Direction", skybox_data.sunlight_direction);
+				UI::table_row_slider("Sunlight Direction", skybox_data.sunlight_direction, -glm::pi<f32>(), glm::pi<f32>());
 				UI::table_row_slider("Sunlight Color", skybox_data.sunlight_color);
 				UI::end_table();
 			}
@@ -800,8 +800,10 @@ namespace PFF {
 				if (ImGui::CollapsingHeader("Sky Settings", ImGuiTreeNodeFlags_DefaultOpen)) {
 					
 					UI::begin_table("window_world_settings_table", false);				
-					UI::table_row_slider("Middle Sky Color", skybox_data.middle_sky_color);
-					UI::table_row_slider("Horizon Sky Color", skybox_data.horizon_sky_color);
+					UI::table_row_slider_color("Middle Sky Color", skybox_data.middle_sky_color);
+					UI::table_row_slider_color("Horizon Sky Color", skybox_data.horizon_sky_color);
+					UI::table_row_slider_color("Sunset Tint", skybox_data.sunset_color);
+					UI::table_row_slider_color("Night Color", skybox_data.night_color);
 					UI::end_table();
 				}
 				
@@ -822,22 +824,14 @@ namespace PFF {
 					UI::begin_table("window_world_settings_table", false);
 					UI::table_row_slider("Height", skybox_data.cloud_height, 1000.f, 10000.f);
 					UI::table_row_slider("Density", skybox_data.cloud_density, 0.f, 1.f);
-					UI::table_row_slider("Color", skybox_data.cloud_color);
+					UI::table_row_slider_color("Color", skybox_data.cloud_color);
+					UI::table_row_slider_color("Color Night", skybox_data.cloud_color_night);
 					UI::table_row_slider("Speed", skybox_data.cloud_speed, -1.f, 1.f);
 					UI::table_row_slider("Scale", skybox_data.cloud_scale, .01f, 10.f);
 					UI::table_row_slider("Coverage", skybox_data.cloud_coverage, 0.f, 1.f);
 					UI::table_row_slider_int("Octaves", (int&)skybox_data.cloud_octaves, 1, 5);
 					UI::table_row_slider("Persistence", skybox_data.cloud_persistence, .3f, .7f);
 					UI::table_row_slider("Detail", skybox_data.cloud_detail, .01f, 5.f);
-
-					// UI::table_row_slider("thickness", skybox_data.cloud_thickness, .1f, .5f);
-					// UI::table_row_slider("floor_height", skybox_data.cloud_floor_height, .1f, .5f);
-					// UI::table_row_slider("ceil_height", skybox_data.cloud_ceil_height, .1f, .5f);
-					// UI::table_row_slider("shape_scale", skybox_data.cloud_shape_scale, .1f, .5f);
-					// UI::table_row_slider("detail_scale", skybox_data.cloud_detail_scale, .1f, .5f);
-					// UI::table_row_slider("height_ramp", skybox_data.cloud_height_ramp, .1f, .5f);
-					// UI::table_row_slider("depth_attenuation", skybox_data.cloud_depth_attenuation, .1f, .5f);
-
 					UI::end_table();
 				}
 				ImGui::Unindent();

@@ -208,6 +208,13 @@ namespace PFF::UI {
 	// 
 	// @return true if the value was changed by the slider, false otherwise.
 	bool table_row_slider_int(std::string_view label, int& value, int min_value = 0, int max_value = 1, ImGuiInputTextFlags flags = ImGuiInputTextFlags_None);
+	
+	
+	bool table_row_slider_color(std::string_view label, glm::vec4& value, f32 min_value = 0.f, f32 max_value = 1.f, ImGuiInputTextFlags flags = ImGuiInputTextFlags_None);
+
+	
+	void color_picker(ImVec4& color);
+
 
 	// @brief Renders a table row with two columns, each containing custom content.
 	// @param [first_colum] A function to render the content of the first column.
