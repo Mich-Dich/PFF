@@ -1,25 +1,20 @@
 
 #include <util/pch_editor.h>
 
-//#include <imgui.h>
-
-//#include "util/io/serializer.h"
-
 #include "util/ui/pannel_collection.h"
 #include "engine/platform/pff_window.h"
 #include "engine/layer/imgui_layer.h"
 
 #include "toolkit/todo_list/todo_list.h"
-#include "toolkit/settings/graphics_engine_settings.h"
 #include "toolkit/texture_editor.h"
 #include "ui/engine_wiki.h"
+#include "settings/graphics_engine_settings.h"
+#include "settings/editor_settings_window.h"
 
 // TEST 
 #include "application.h"
 #include "PFF_editor.h"
 #include "engine/render/renderer.h"
-//#include "engine/render/renderer.h"
-//#include "engine/render/vk_swapchain.h"
 
 #include "editor_layer.h"
 
@@ -27,12 +22,11 @@
 namespace PFF {
 
 
-	editor_layer::editor_layer(ImGuiContext* context) : layer("editor_layer"), m_context(context) {
-		
-		LOG_INIT();
-	}
+	editor_layer::editor_layer(ImGuiContext* context) : layer("editor_layer"), m_context(context) { LOG_INIT(); }
+
 
 	editor_layer::~editor_layer() { LOG_SHUTDOWN(); }
+
 
 	void editor_layer::on_attach() {
 
@@ -45,7 +39,11 @@ namespace PFF {
 		LOAD_ICON(folder_add);
 		LOAD_ICON(folder_big);
 		LOAD_ICON(world);
+		LOAD_ICON(warning);
 		LOAD_ICON(mesh_asset);
+		LOAD_ICON(texture);
+		LOAD_ICON(material);
+		LOAD_ICON(material_inst);
 		LOAD_ICON(relation);
 		LOAD_ICON(file);
 		LOAD_ICON(file_proc);
@@ -66,6 +64,7 @@ namespace PFF {
 		serialize(serializer::option::load_from_file);
 	}
 
+
 	void editor_layer::on_detach() {
 
 		delete m_world_viewport_window;
@@ -75,7 +74,14 @@ namespace PFF {
 		m_folder_add_icon.reset();
 		m_folder_big_icon.reset();
 		m_world_icon.reset();
+		m_warning_icon.reset();
 		m_mesh_asset_icon.reset();
+
+		m_texture_icon.reset();
+		m_material_icon.reset();
+		m_material_inst_icon.reset();
+		m_relation_icon.reset();
+
 		m_file_icon.reset();
 		m_file_proc_icon.reset();
 		m_mesh_mini_icon.reset();
@@ -94,6 +100,7 @@ namespace PFF {
 		LOG(Trace, "Detaching editor_layer");
 	}
 
+
 	void editor_layer::on_update(f32 delta_time) {
 	
 		// First pass to mark items for removal
@@ -106,7 +113,47 @@ namespace PFF {
 		m_editor_windows.erase(it, m_editor_windows.end());
 	}
 
+
 	void editor_layer::on_event(event& event) { }
+
+
+	const char* delete_popup_lable;
+	const char* delete_popup_explanation;
+	std::function<void()> delete_popup_delete_action;
+
+	// void delete_popup() {
+			
+	// 	ImGui::SetNextWindowPos(ImGui::GetMainViewport()->GetCenter(), ImGuiCond_Appearing, ImVec2(0.5f, 0.5f));
+	// 	if (ImGui::BeginPopupModal("Confirm Delete", NULL, ImGuiWindowFlags_AlwaysAutoResize)) {
+
+	// 		ImGui::Text("Are you sure you want to delete this directory?\nThis action cannot be undone.");
+	// 		ImGui::Separator();
+
+	// 		if (ImGui::Button("Yes", ImVec2(120, 0))) {
+
+	// 			delete_popup_delete_action();
+				
+	// 			ImGui::CloseCurrentPopup();
+	// 		}
+	// 		ImGui::SameLine();
+	// 		if (ImGui::Button("No", ImVec2(120, 0))) {
+
+	// 			ImGui::CloseCurrentPopup();
+	// 		}
+
+	// 		ImGui::EndPopup();
+	// 	}
+	// }
+	
+	void editor_layer::show_delete_popup() {
+
+		ImGui::OpenPopup("editor_delete_popup");
+		LOG(Trace, "Opening editor_delete_popup");
+		m_show_delete_popup = true;
+		// delete_popup_lable = lable;
+		// delete_popup_explanation = explanation;
+		// delete_popup_delete_action = delete_action;
+	}
 
 	void editor_layer::on_imgui_render() {
 		
@@ -115,11 +162,9 @@ namespace PFF {
 		window_main_title_bar();
 		window_main_content();
 
-		//ImGui::DockSpaceOverViewport(ImGui::GetMainViewport());
-
 		m_world_viewport_window->window();
 
-		window_editor_settings();								// TODO: convert into editor window
+		settings::window_editor_settings(&m_show_editor_settings);
 		window_general_settings();								// TODO: convert into editor window
 		PFF::toolkit::settings::window_graphics_engine();		// TODO: convert into editor window
 		PFF::toolkit::todo::window_todo_list();					// TODO: convert into editor window
@@ -127,16 +172,42 @@ namespace PFF {
 
 		// First pass to mark items for removal
 		for (const auto& editor_window : m_editor_windows)
-				editor_window->window();
+			editor_window->window();
 
-#ifdef PFF_EDITOR_DEBUG
+#ifdef PFF_DEBUG
 		if (style_editor)
 			ImGui::ShowStyleEditor();
 
 		if (demo_window)
 			ImGui::ShowDemoWindow();
 #endif
+
+		// // Always center this window when appearing
+		// ImVec2 center = ImGui::GetMainViewport()->GetCenter();
+		// ImGui::SetNextWindowPos(center, ImGuiCond_Appearing, ImVec2(0.5f, 0.5f));
+		// if (ImGui::BeginPopupModal("editor_delete_popup", NULL, ImGuiWindowFlags_AlwaysAutoResize)) {
+
+		// 	ImGui::Text("All those beautiful files will be deleted.\nThis operation cannot be undone!");
+		// 	ImGui::Separator();
+
+		// 	//static int unused_i = 0;
+		// 	//ImGui::Combo("Combo", &unused_i, "Delete\0Delete harder\0");
+
+		// 	static bool dont_ask_me_next_time = false;
+		// 	ImGui::PushStyleVar(ImGuiStyleVar_FramePadding, ImVec2(0, 0));
+		// 	ImGui::Checkbox("Don't ask me next time", &dont_ask_me_next_time);
+		// 	ImGui::PopStyleVar();
+
+		// 	if (ImGui::Button("OK", ImVec2(120, 0))) { ImGui::CloseCurrentPopup(); }
+		// 	ImGui::SetItemDefaultFocus();
+		// 	ImGui::SameLine();
+		// 	if (ImGui::Button("Cancel", ImVec2(120, 0))) { ImGui::CloseCurrentPopup(); }
+		// 	ImGui::EndPopup();
+		// }
+
 	}
+
+
 
 	void editor_layer::serialize(serializer::option option) {
 
@@ -147,7 +218,7 @@ namespace PFF {
 			.entry("show_editor_settings", m_show_editor_settings)
 			.entry("show_general_settings", m_show_general_settings)
 			.entry("show_engine_wiki", PFF::UI::show_engine_wiki)
-#ifdef PFF_EDITOR_DEBUG
+#ifdef PFF_DEBUG
 			.entry("show_style_editor", style_editor)
 			.entry("show_demo_window", demo_window)
 #endif
@@ -231,10 +302,10 @@ namespace PFF {
 
 		// display project title
 		ImGui::PushFont(application::get().get_imgui_layer()->get_font("header_1"));
-		const static auto project_name = application::get().get_project_data().display_name.c_str();
-		const auto project_name_size = ImGui::CalcTextSize(project_name);
+		const static auto project_name = application::get().get_project_data().display_name;
+		const auto project_name_size = ImGui::CalcTextSize(project_name.c_str());
 		ImGui::SetCursorPos(ImVec2(viewport->Size.x - (window_padding.x + (button_spaccing * 2) + (button_width * 3)) - project_name_size.x - 30, window_padding.y + titlebar_vertical_offset));
-		ImGui::Text(project_name);
+		ImGui::Text("%s", application::get().get_project_data().display_name.c_str());
 		ImGui::PopFont();
 
 		ImGui::SetCursorPos(ImVec2(viewport->Size.x - (window_padding.x + (button_spaccing * 2) + (button_width * 3)), window_padding.y + titlebar_vertical_offset));
@@ -250,8 +321,11 @@ namespace PFF {
 		}
 
 		ImGui::SetCursorPos(ImVec2(viewport->Size.x - (window_padding.x + button_width), window_padding.y + titlebar_vertical_offset));
-		if (ImGui::Button("X##Close", ImVec2(button_width, button_width)))
+		if (ImGui::Button("X##Close", ImVec2(button_width, button_width))) {
+
+			LOG(Trace, "Titlebar close button clicked")
 			application::get().close_application();
+		}
 
 		// make new window with menubar because I dont know how to limit the extend of a MenuBar
 		// just ImGui::MenuBar() would bo over the entire width of [appliaction_titlebar]
@@ -282,8 +356,6 @@ namespace PFF {
 	}
 
 
-
-
 	void editor_layer::window_main_content() {
 
 		auto viewport = ImGui::GetMainViewport();
@@ -310,9 +382,9 @@ namespace PFF {
 		ImGui::End();
 	}
 
-	void editor_layer::window_editor_settings() { }
 
 	void editor_layer::window_general_settings() { }
+
 
 	void editor_layer::main_menu_bar() {
 
@@ -349,7 +421,7 @@ namespace PFF {
 				ImGui::EndMenu();
 			}
 
-			if (ImGui::BeginMenu("settings")) {
+			if (ImGui::BeginMenu("Settings")) {
 				if (ImGui::MenuItem("General Settings"))
 					m_show_general_settings = true;
 
@@ -476,7 +548,7 @@ namespace PFF {
 			if (ImGui::BeginMenu("Windows")) {
 
 				ImGui::MenuItem("ToDo List", "", &PFF::toolkit::todo::s_show_todo_list);
-#ifdef PFF_EDITOR_DEBUG
+#ifdef PFF_DEBUG
 				ImGui::MenuItem("Style Editor", "", &style_editor);
 				ImGui::MenuItem("Demo Window", "", &demo_window);
 #endif
@@ -484,9 +556,9 @@ namespace PFF {
 
 				// IN DEV
 				ImGui::SeparatorText("Settings");
-				ImGui::MenuItem("graphics_engine_settings", "", &m_show_graphics_engine_settings);
-				ImGui::MenuItem("editor_settings", "", &m_show_editor_settings);
-				ImGui::MenuItem("general_settings", "", &m_show_general_settings);
+				ImGui::MenuItem("Graphics Engine Settings", "", &m_show_graphics_engine_settings);
+				ImGui::MenuItem("Editor Settings", "", &m_show_editor_settings);
+				ImGui::MenuItem("General Settings", "", &m_show_general_settings);
 
 				ImGui::Separator();		
 

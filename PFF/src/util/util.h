@@ -40,7 +40,6 @@
 #include "util/timing/stopwatch.h"
 #include "util/timing/timer.h"
 
-#include "util/ui/component_UI.h"
 #include "util/ui/imgui_markdown.h"
 #include "util/ui/pannel_collection.h"
 
@@ -58,6 +57,9 @@
 
 namespace PFF::util {
 
+    void init();
+    void shutdown();
+
     // ================================================= utilits =================================================
 
     template<typename key_type, typename value_type>
@@ -67,5 +69,4 @@ namespace PFF::util {
     //@param [ptr] Pointer to check.
     //@return [conat char*] "valid" if the pointer is not null, "invalid" otherwise.
     FORCEINLINE constexpr const char* ptr_validity_check(const void* ptr) { return (ptr != nullptr) ? "valid" : "invalid"; }
-
 }

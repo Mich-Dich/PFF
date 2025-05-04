@@ -1,10 +1,10 @@
 
 #include "util/pffpch.h"
 
+#include "util/util.h"
+
 #define GLFW_INCLUDE_VULKAN
 #include <GLFW/glfw3.h>
-
-#include "util/crash_handler.h"
 
 #include "engine/events/event.h"
 #include "engine/events/application_event.h"
@@ -17,6 +17,7 @@
 #include "engine/layer/layer_stack.h"
 #include "engine/layer/imgui_layer.h"
 #include "engine/layer/world_layer.h"
+#include "engine/resource_management/material/material_asset_manager.h"
 
 #include "engine/platform/pff_window.h"
 #include "engine/game_objects/camera.h"
@@ -75,13 +76,15 @@ namespace PFF {
 
 		PFF_PROFILE_BEGIN_SESSION("startup", "benchmarks", "PFF_benchmark_startup.json");
 		PFF_PROFILE_FUNCTION();
-		attach_crash_handler();
 
 #if defined(PFF_PLATFORM_LINUX)
 		PFF::logger::init("[$B$T:$J$E] [$B$L$X $I - $P:$G$E] $C$Z", true);
 #elif defined(PFF_PLATFORM_WINDOWS)
 		PFF::logger::init("[$B$T:$J$E] [$B$L$X $I - $P:$G$E] $C$Z", true, std::filesystem::path("..") / "bin" / PFF_OUTPUTS / "logs" );
 #endif
+		
+		util::init();
+
 		logger::set_buffer_threshhold(logger::severity::Warn);
 		ASSERT(!s_instance, "", "Application already exists");
 
@@ -98,6 +101,8 @@ namespace PFF {
 		// 	util::cancel_timer(m_timers[x]);
 		// m_timers.clear();
 
+		material_asset_manager::release_all();
+
 		GET_RENDERER.resource_free();
 
 		m_layerstack->pop_overlay(m_imgui_layer);
@@ -110,11 +115,14 @@ namespace PFF {
 
 		GET_RENDERER.shutdown();
 		
+		util::shutdown();
 		m_layerstack.reset();
 		m_window.reset();
-		detach_crash_handler();
+
 		LOG_SHUTDOWN();
 		PFF_PROFILE_END_SESSION();
+
+		logger::shutdown();
 	}
 
 	// ==================================================================== main loop ====================================================================
@@ -125,6 +133,14 @@ namespace PFF {
 		PFF_PROFILE_BEGIN_SESSION("runtime", "benchmarks", "PFF_benchmark_runtime.json");
 
 		client_init();
+		
+		// ---------------------------------------- finished setup ----------------------------------------
+		GET_RENDERER.set_state(system_state::active);
+		m_is_titlebar_hovered = false;
+		m_running = true;
+		m_window->show_window(true);
+		m_window->poll_events();
+		start_fps_measurement();
 
 		while (m_running) {
 
@@ -141,11 +157,13 @@ namespace PFF {
 			limit_fps();
 		}
 
+		LOG(Trace, "Exiting main run loop")
 		GET_RENDERER.wait_idle();
 
 		PFF_PROFILE_END_SESSION();
 		PFF_PROFILE_BEGIN_SESSION("shutdown", "benchmarks", "PFF_benchmark_shutdown.json");
 
+		LOG(Trace, "shuting down client application")
 		ASSERT(shutdown(), "client application is shutdown", "client-defint shutdown() has failed");			// init user code / potentally make every actor have own function (like UNREAL)
 	}
 
@@ -210,14 +228,6 @@ namespace PFF {
 
 		// ---------------------------------------- client side ----------------------------------------
 		ASSERT(init(), "client application is intalized", "client-defint init() has failed");			// init user code / potentally make every actor have own function (like UNREAL)
-
-		// ---------------------------------------- finished setup ----------------------------------------
-		GET_RENDERER.set_state(system_state::active);
-		m_is_titlebar_hovered = false;
-		m_running = true;
-		m_window->show_window(true);
-		m_window->poll_events();
-		start_fps_measurement();
 	}
 
 	void application::client_shutdown() {
@@ -253,13 +263,18 @@ namespace PFF {
 
 		f32 time = static_cast<f32>(glfwGetTime());
 		m_delta_time = std::min<f32>(time - m_last_frame_time, 100000);
+		m_absolute_time += m_delta_time;
 		m_last_frame_time = time;
 		m_fps = static_cast<u32>(1.0 / (m_work_time + (m_sleep_time * 0.001)) + 0.5); // Round to nearest integer
 	}
 
-	//
-	void application::set_arguments(const std::vector<std::string>& args) {
 
+	//
+	void application::init_engine(int argc, char** argv) {
+
+		LOG(Trace, "processing args");
+
+#if 0
 		m_arguments = args;
 		if (m_arguments.size() > 1) {
 
@@ -279,10 +294,28 @@ namespace PFF {
 
 		m_project_data = serialize_projects_data(m_project_path, serializer::option::load_from_file);
 		serialize(serializer::option::load_from_file);							// load project data
-	}
 
-	//
-	void application::init_engine() {
+#else
+		if (argc > 1) {
+
+			LOG(Trace, "Provided path to PFF Project File: " << m_project_path);
+			m_project_path = std::filesystem::path(argv[1]);
+			ASSERT((!m_project_path.empty() && std::filesystem::exists(m_project_path) && m_project_path.extension() == PFF_PROJECT_EXTENTION), "", "path to project-file is invalid [" << m_project_path << "]. ABORTING");
+			m_project_path = m_project_path.parent_path();					// fwitch from project file to project directory
+		}
+
+		else {																// project directory not given as argument, need to manually select it
+
+			LOG(Trace, "No path to PFF Project File provided, opening file dialog");
+			const std::vector<std::pair<std::string, std::string>> project_file_filters = { {"PFF Project File", "*.pffproj"} };
+			m_project_path = util::file_dialog("Open PFF-Project", project_file_filters).parent_path();
+			ASSERT(!m_project_path.empty(), "", "User failed to provide project path");
+		}
+
+		m_project_data = serialize_projects_data(m_project_path, serializer::option::load_from_file);
+		LOG(Trace, "Selected file: " << m_project_path << "Project Name: " << m_project_data.display_name)
+		serialize(serializer::option::load_from_file);							// load project data
+#endif
 
 		LOG(Trace, "init engine")
 

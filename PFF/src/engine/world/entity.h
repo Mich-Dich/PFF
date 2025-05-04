@@ -13,6 +13,18 @@ namespace PFF {
 
 	class map;
 
+
+	// template<typename T>
+	// T find_owner_of_component(const entt::registry &reg, const T& component) {
+    //     auto view = reg.view<T>();
+    //     for (auto [entity, loc_component] : view.each())
+    //         if (loc_component == component)
+    //             return entity;
+
+    //     return entt::null; // Return entt::null if no entity is found
+    // };
+
+
 	class entity {
 	public:
 
@@ -63,6 +75,7 @@ namespace PFF {
 		FORCEINLINE void add_procedural_mesh_component(std::string script_name) { add_component<procedural_mesh_component>().bind<T>(script_name); }
 
 		bool is_valid();
+		bool empty() { return m_entity_handle == entt::null; }
 		void add_mesh_component(mesh_component& mesh_comp);
 		void propegate_transform_to_children(const glm::mat4& root_transform, const glm::mat4& delta_transform);
 		void accumulate_transform_from_parents(glm::mat4& transform);
@@ -72,9 +85,14 @@ namespace PFF {
 		operator u32()							const { return (u32)m_entity_handle; }
 		bool operator==(const entity& other)	const { return m_entity_handle == other.m_entity_handle && m_map == other.m_map; }
 		bool operator!=(const entity& other)	const { return !(*this == other); }
+		bool operator<(const entity& other) 	const noexcept {
+			if (m_map != other.m_map)
+				return m_map < other.m_map;
+			return m_entity_handle < other.m_entity_handle;
+		}
 
 		UUID get_UUID()							{ return get_component<ID_component>().ID; }
-		const std::string& get_name()			{ return get_component<tag_component>().tag; }
+		const std::string& get_name()			{ return get_component<name_component>().name; }
 
 	private:
 

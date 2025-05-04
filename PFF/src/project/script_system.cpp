@@ -131,7 +131,7 @@ namespace PFF::script_system {
 
 		asset_file_header file_header{};
 		file_header.file_version = version(1, 0, 0);
-		file_header.type = file_type::map;
+		file_header.type = file_type::world;
 		file_header.timestamp = util::get_system_time();
 
 		auto serializer = serializer::yaml(script_components_serializer_file, "script_components", option);
@@ -153,8 +153,8 @@ namespace PFF::script_system {
 			
 				entity loc_entity = PFF::entity(entities[x], GET_MAP.get());
 
-				auto& tag_comp = loc_entity.get_component<tag_component>();
-				entity_section.entry(KEY_VALUE(tag_comp.tag));
+				auto& name_comp = loc_entity.get_component<name_component>();
+				entity_section.entry(KEY_VALUE(name_comp.name));
 
 				auto& ID_comp = loc_entity.get_component<ID_component>();
 				entity_section.entry(KEY_VALUE(ID_comp.ID));
@@ -180,13 +180,13 @@ namespace PFF::script_system {
 
 			serializer.vector("entities", entities, [&](serializer::yaml& entity_section, u64 x) {
 				
-				std::string tag{};
-				entity_section.entry(KEY_VALUE(tag));
+				std::string name{};
+				entity_section.entry(KEY_VALUE(name));
 
 				UUID ID{};
 				entity_section.entry(KEY_VALUE(ID));
 
-				entity loc_entity = GET_MAP->create_entity_with_UUID(ID, tag);
+				entity loc_entity = GET_MAP->create_entity_with_UUID(ID, name);
 
 				entity_section.sub_section("procedural_mesh_component", [&](serializer::yaml& component_section) {
 
@@ -223,30 +223,30 @@ namespace PFF::script_system {
 		LOG(Info, "succesfully initalized scripts");
 	}
 
-	void reload(bool delete_script_components) {
+	void reload(bool delete_script_components) {					// TODO: causes crash => FIX that
 
-		LOG(Debug, "called script_system::reload(" << util::to_string(delete_script_components) << ")");
-		VALIDATE(free_script_library(delete_script_components), return, "freeed scripting library", "Count not free scripting library");
-		
-			auto& registry = GET_REGISTRY_OF_MAP;
-			LOG(Info, "Registry address in reload: " << &registry);
+		LOG(Debug, "called script_system::reload(delete_script_components=" << util::to_string(delete_script_components) << ")");
+		//VALIDATE(free_script_library(delete_script_components), return, "freeed scripting library", "Count not free scripting library");
+		//
+		//	auto& registry = GET_REGISTRY_OF_MAP;
+		//	LOG(Info, "Registry address in reload: " << &registry);
 
-		const std::filesystem::path project_temp_dll = PROJECT_PATH / "bin" / (PROJECT_NAME + PFF_PROJECT_TEMP_DLL_PATH) / (PROJECT_NAME + ".dll");
-		const std::filesystem::path project_dll_path = PROJECT_PATH / "bin" / PROJECT_NAME;
-		const std::filesystem::path project_dll = project_dll_path / (PROJECT_NAME + ".dll");
-		VALIDATE(io::copy_file(project_temp_dll, project_dll_path), return, "COPY SUCCESS", "Failed to copy new DLL after multiple attempts");			// copy the new DLL
-		VALIDATE(io::is_file(project_dll), return, "", "provided path is not a file [" << project_dll << "]");
-		VALIDATE(load_library(project_dll), return, "loaded project DLL", "could not load project [" << project_dll << "]");
+		//const std::filesystem::path project_temp_dll = PROJECT_PATH / "bin" / (PROJECT_NAME + PFF_PROJECT_TEMP_DLL_PATH) / (PROJECT_NAME + ".dll");
+		//const std::filesystem::path project_dll_path = PROJECT_PATH / "bin" / PROJECT_NAME;
+		//const std::filesystem::path project_dll = project_dll_path / (PROJECT_NAME + ".dll");
+		//VALIDATE(io::copy_file(project_temp_dll, project_dll_path), return, "COPY SUCCESS", "Failed to copy new DLL after multiple attempts");			// copy the new DLL
+		//VALIDATE(io::is_file(project_dll), return, "", "provided path is not a file [" << project_dll << "]");
+		//VALIDATE(load_library(project_dll), return, "loaded project DLL", "could not load project [" << project_dll << "]");
 
-		m_add_component_from_string			= (add_component_Fn)try_load_function("add_component");
-		m_init_scripts						= (init_scripts_Fn)try_load_function("init_scripts");
-		m_serialize_script					= (serialize_script_Fn)try_load_function("serialize_script");
-		m_get_scripts						= (get_scripts_Fn)try_load_function("get_all_scripts");
-		m_get_procedural_mesh_scripts		= (get_scripts_Fn)try_load_function("get_all_procedural_mesh_scripts");
-		m_display_properties				= (display_properties_Fn)try_load_function("display_properties");
-		m_is_loaded = true;
+		//m_add_component_from_string			= (add_component_Fn)try_load_function("add_component");
+		//m_init_scripts						= (init_scripts_Fn)try_load_function("init_scripts");
+		//m_serialize_script					= (serialize_script_Fn)try_load_function("serialize_script");
+		//m_get_scripts						= (get_scripts_Fn)try_load_function("get_all_scripts");
+		//m_get_procedural_mesh_scripts		= (get_scripts_Fn)try_load_function("get_all_procedural_mesh_scripts");
+		//m_display_properties				= (display_properties_Fn)try_load_function("display_properties");
+		//m_is_loaded = true;
 
-		reinit_scripts();
+		//reinit_scripts();
 
 		LOG(Info, "---------------------------------------------------- LOADED DLL ----------------------------------------------------");
 	}
@@ -258,13 +258,13 @@ namespace PFF::script_system {
 		VALIDATE(m_is_loaded, return true, "", "Scripting Library not loaded yet");
 
 		serialize_scripts(serializer::option::save_to_file);
-		//GET_REGISTRY_OF_MAP.view<procedural_mesh_component>().each([=](auto entity, auto& script_comp) {
+		GET_REGISTRY_OF_MAP.view<procedural_mesh_component>().each([=](auto entity, auto& script_comp) {
 
-		//	if (script_comp.instance)
-		//		script_comp.destroy_script(&script_comp);
-		//});
-		//GET_REGISTRY_OF_MAP.clear<procedural_mesh_component>();
-		//LOG(Debug, "clearing all [procedural_mesh_component] from registry");
+			if (script_comp.instance)
+				script_comp.destroy_script(&script_comp);
+		});
+		GET_REGISTRY_OF_MAP.clear<procedural_mesh_component>();
+		LOG(Debug, "clearing all [procedural_mesh_component] from registry");
 		LOG(Debug, "Number of procedural_mesh_components after clearing: " << GET_REGISTRY_OF_MAP.view<procedural_mesh_component>().size());
 
 		//if (delete_script_components && m_delete_scripts)

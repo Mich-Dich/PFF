@@ -1,10 +1,11 @@
 
 project "PFF_editor"
 	location "%{wks.location}/PFF_editor"
-	kind "ConsoleApp"
+	kind "WindowedApp"
 	language "C++"
 	cppdialect "C++20"
 	staticruntime "on"
+	buildoptions { "-Wl,--verbose" }
 
 	targetdir ("%{wks.location}/bin/" .. outputs  .. "/%{prj.name}")
 	objdir ("%{wks.location}/bin-int/" .. outputs  .. "/%{prj.name}")
@@ -14,20 +15,15 @@ project "PFF_editor"
 
 	-- glslc = "%{wks.location}/PFF/vendor/vulkan-glslc/glslc.exe"
 
-	defines
-	{
-		"PFF_EDITOR",
-	}
+	defines { "PFF_EDITOR" }
 
-	files
-	{
+	files {
 		"src/**.h",
 		"src/**.cpp",
 		"src/**.embed",
 	}
 
-	includedirs
-	{
+	includedirs {
 		"src",
 		"assets",
 		"content",
@@ -42,34 +38,38 @@ project "PFF_editor"
 		"%{IncludeDir.tinyobjloader}",
 		"%{IncludeDir.stb_image}",
 		"%{IncludeDir.ImGuizmo}",
-		"%{IncludeDir.VulkanSDK}",
+		"%{IncludeDir.Vulkan}",
+		"%{IncludeDir.VulkanUtils}",
+		"%{IncludeDir.assimp}",
 	}
 
-	links
-	{
+	links {
 		"PFF",
 		"PFF_helper",
 		"ImGui",
 		"fastgltf",
+		"assimp",
+	}
+
+	libdirs {
+		'%{wks.location}/%{vendor_path.assimp}/bin/' .. outputs .. '/assimp',
 	}
 
 	filter "system:windows"
 		systemversion "latest"
 		defines "PFF_PLATFORM_WINDOWS"
 
-		files
-		{
+		files {
 			"../metadata/app_icon.rc",
 		}
 
-	    links
-		{
-			"%{Library.Vulkan}",  -- Add this line to link Vulkan
+	    links {
+			-- "%{Library.Vulkan}",
+        	"assimp",
 		}
 		
-		libdirs
-		{
-			"%{IncludeDir.VulkanSDK}/Lib",
+		libdirs {
+			"%{IncludeDir.Vulkan}/Lib",
 		}
         
 		postbuildcommands
@@ -77,7 +77,11 @@ project "PFF_editor"
 			"{MKDIR} %{wks.location}/bin/" .. outputs .. "/PFF_editor/wiki",
 			"{COPY} %{wks.location}/.github/wiki %{wks.location}/bin/" .. outputs .. "/PFF_editor/wiki",
 
-			table.unpack(copy_content_of_dir(outputs, {"PFF_editor/shaders", "PFF_editor/assets", "PFF_editor/defaults", "PFF_editor/project_templates"})),
+			"{MKDIR} %{wks.location}/bin/" .. outputs .. "/PFF_editor/shaders",
+			'{COPYDIR} "%{wks.location}/PFF_editor/shaders" "%{wks.location}/bin/' .. outputs .. '/PFF_editor/shaders"',
+			'{COPYDIR} "%{wks.location}/PFF_editor/assets" "%{wks.location}/bin/' .. outputs .. '/PFF_editor/assets"',
+			'{COPYDIR} "%{wks.location}/PFF_editor/defaults" "%{wks.location}/bin/' .. outputs .. '/PFF_editor/defaults"',
+			'{COPYDIR} "%{wks.location}/PFF_editor/project_templates" "%{wks.location}/bin/' .. outputs .. '/PFF_editor"',
 		}
 
 
@@ -85,11 +89,12 @@ project "PFF_editor"
 		pic "On"
 		systemversion "latest"
 		defines "PFF_PLATFORM_LINUX"
+		
+		includedirs {
 
-		includedirs
-		{
-			"/usr/include/vulkan",
+			-- "/usr/include/vulkan",
 			"%{IncludeDir.glfw}/include",
+			"%{IncludeDir.assimp}",
 
 			"/usr/include/x86_64-linux-gnu/qt5", 				-- Base Qt include path
 			"/usr/include/x86_64-linux-gnu/qt5/QtCore",
@@ -97,38 +102,40 @@ project "PFF_editor"
 			"/usr/include/x86_64-linux-gnu/qt5/QtGui",
 		}
 
-		libdirs
-		{
+		libdirs {
+
 			"%{wks.location}/PFF/vendor/glfw/build/src",
-			
+			"%{wks.location}/PFF_editor/vendor/assimp/bin/" .. outputs .. "/assimp",
+			"/usr/lib/x86_64-linux-gnu",
+
 			"/usr/lib/x86_64-linux-gnu",  -- Default library path for system libraries
 			"/usr/lib/x86_64-linux-gnu/qt5",
-			-- "%{IncludeDir.VulkanSDK}/lib",
+			-- "%{IncludeDir.Vulkan}/lib",
 		}
 
-		links
-		{
+		links {
+
 			"%{wks.location}/PFF/vendor/glfw/build/src/glfw3",
 			-- "glfw",
 			"imgui",
 			"vulkan",
-			"vulkan",
+			"assimp",
+			-- "/home/mich/workspace/PFF/PFF_editor/vendor/assimp/bin/Debug-linux-x86_64/assimp/ibassimp.a",
+			-- "/home/mich/workspace/PFF/PFF_editor/vendor/assimp/bin/Debug-linux-x86_64/assimp/ibassimp.so",
 
 			"Qt5Core",
 			"Qt5Widgets",
 			"Qt5Gui",
 		}
 		
-		postbuildcommands
-		{
-			-- Create the directory if it doesn't exist
-			"mkdir -p %{wks.location}/bin/" .. outputs .. "/PFF_editor/wiki",
-			"cp -r %{wks.location}/.github/wiki %{wks.location}/bin/" .. outputs .. "/PFF_editor/wiki",
-
-			-- Copy content of directories
-			table.unpack(copy_content_of_dir(outputs, {"PFF_editor/shaders", "PFF_editor/defaults", "PFF_editor/assets"})),
+		postbuildcommands {
+			
+			'{COPYDIR} "%{wks.location}/.github/wiki" "%{wks.location}/bin/' .. outputs .. '/PFF_editor"',
+			'{COPYDIR} "%{wks.location}/PFF_editor/shaders" "%{wks.location}/bin/' .. outputs .. '/PFF_editor"',
+			'{COPYDIR} "%{wks.location}/PFF_editor/assets" "%{wks.location}/bin/' .. outputs .. '/PFF_editor"',
+			'{COPYDIR} "%{wks.location}/PFF_editor/defaults" "%{wks.location}/bin/' .. outputs .. '/PFF_editor"',
+			'{COPYDIR} "%{wks.location}/PFF_editor/project_templates" "%{wks.location}/bin/' .. outputs .. '/PFF_editor"',
 		}
-
 
 	filter "configurations:Debug"
 		defines "PFF_DEBUG"

@@ -7,8 +7,13 @@
 
 #ifdef PFF_PLATFORM_WINDOWS
 	#include "Windows.h"
-
 	static HANDLE m_H_stop_event;
+#elif defined(PFF_PLATFORM_LINUX)
+	#include <sys/inotify.h>
+	#include <unistd.h>
+	#include <limits.h>
+	#include <sys/select.h>
+	#include <errno.h>
 #endif
 
 namespace PFF {
@@ -30,7 +35,12 @@ namespace PFF {
 
 	file_watcher_system::file_watcher_system() { }
 
-	void file_watcher_system::start() { m_thread = std::thread(&file_watcher_system::start_thread, this); }
+	void file_watcher_system::start() {
+	
+		LOG(Warn, "file watcher system disabled for now");
+		// LOG(Trace, "starting file watcher system");
+		// m_thread = std::thread(&file_watcher_system::start_thread, this);
+	}
 
 	static bool should_ignore_file(const std::string filename) {
 
@@ -57,7 +67,7 @@ namespace PFF {
 		m_pending_events[file] = { action, now };
 	}
 
-#ifdef PFF_PLATFORM_WINDOWS
+#if defined(PFF_PLATFORM_WINDOWS)
 
 	void file_watcher_system::start_thread() {
 
@@ -187,6 +197,7 @@ namespace PFF {
 
 	void file_watcher_system::stop() {
 	
+		LOG(Info, "Stopping thread [file_watcher_system]")
 		if (!m_enable_raising_events)
 			return;
 
@@ -194,7 +205,8 @@ namespace PFF {
 		SetEvent(m_H_stop_event);
 
 		if (is_started)
-			m_thread.join();
+			if (m_thread.joinable())
+				m_thread.join();
 		
 	}
 
@@ -203,6 +215,7 @@ namespace PFF {
 	void file_watcher_system::start_thread() { }
 
 	void file_watcher_system::stop() { }
+
 
 #endif
 

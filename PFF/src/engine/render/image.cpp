@@ -74,6 +74,7 @@ namespace PFF {
 		int channels;
 		int width = 0, height = 0;
 		void* data = stbi_load(image_path.string().c_str(), &width, &height, &channels, 4);
+		VALIDATE(data != nullptr, return, "", "Could not load image from path [" << image_path.generic_string() << "]")
 		allocate_memory(data, extent_3D{ (u32)width, (u32)height, 1 }, format, mipmapped);
 		stbi_image_free(data);
 	}

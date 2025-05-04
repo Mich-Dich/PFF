@@ -28,11 +28,9 @@ namespace shader_processor {
 			}
 		}
 
-		// LOG(Trace, "compiling shader: [" << EXTRACT_AFTER_PFF(absolute_path.string()) << "]");
-		LOG(Trace, "compiling shader: [" << absolute_path.string() << "]");
-
-		bool result = PFF::util::run_program(GLSLC_PATH, system_command);
-		VALIDATE(result, , "", "shader could not be compiled: [" << absolute_path.string() << "]");
+		std::string output;
+		bool result = PFF::util::run_program(GLSLC_PATH, system_command, false, true, true, &output);
+		VALIDATE(result, , "Sucessfully compiled shader [" << path.generic_string() << "]", "Shader [" << absolute_path.string() << "] could not be compiled [\n" << output << "] ");
 		return result;
 	}
 

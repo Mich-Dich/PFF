@@ -1,100 +1,102 @@
 #pragma once
 
-// =================================================================================  general  ================================================================================
 
-#include <cassert>
-#include <cstdlib>
-#include <stdexcept>
-#include <iostream>
-#include <memory>
-#include <utility>
+#ifndef NOMINMAX
+	#define NOMINMAX				// See github.com/skypjack/entt/wiki/Frequently-Asked-Questions#warning-c4003-the-min-the-max-and-the-macro
+#endif
+
+// ======================================================= general =======================================================
+
+// Core Language Features
 #include <algorithm>
 #include <functional>
-#include <cstdio>
-#include <chrono>
-#include <thread>
-#include <future>
-#include <random>
-#include <filesystem>
+#include <memory>
+#include <optional>
+#include <stdexcept>
+#include <type_traits>
+#include <typeinfo>
+#include <utility>
 #include <concepts>
 
+// Strings and Text Manipulation
 #include <string>
 #include <string_view>
 #include <cstring>
 #include <sstream>
-
-#include <vector>
-#include <unordered_map>
-#include <unordered_set>
-#include <optional>
-#include <queue>
-#include <span>
-#include <list>
-#include <map>
-#include <deque>
-#include <set>
-#include <array>
-#include <type_traits>
-#include <typeinfo>
-#include <xmmintrin.h>
-
-#include <stdio.h>
-#include <cstdarg>
-#include <fstream>
+#include <regex>
 #include <iomanip>
 
-#include <system_error>
-#include <signal.h>
-#include <csignal>
+// Input/Output and Filesystem
+#include <iostream>
+#include <fstream>
+#include <filesystem>
+#include <cstdio>
+#include <stdio.h>
 
-// ------------------------------- multithreading -------------------------------
-#include <condition_variable>
-#include <mutex>
+// Data Structures and Containers
+#include <array>
+#include <deque>
+#include <forward_list>
+#include <list>
+#include <map>
+#include <queue>
+#include <set>
+#include <span>
+#include <unordered_map>
+#include <unordered_set>
+#include <vector>
+
+// Multithreading and Concurrency
 #include <atomic>
+#include <condition_variable>
+#include <future>
+#include <mutex>
+#include <thread>
 
-// ========== glm math ============
+// Time and Randomness
+#include <chrono>
+#include <random>
+
+// System and Low-Level Utilities
+#include <system_error>
+#include <csignal>
+#include <signal.h>
+#include <xmmintrin.h>
+
+// Variadic and Debugging Utilities
+#include <cstdarg>
+#include <cassert>
+#include <cstdlib>
+
+// glm math
 #define GLM_ENABLE_EXPERIMENTAL
 
 #define GLM_FORCE_RADIANS
 #define GLM_FORCE_DEPTH_ZERO_TO_ONE
 #include <glm/glm.hpp>
 #include <glm/gtc/random.hpp>
-#include <glm/vec3.hpp>							// glm::vec3
-#include <glm/vec4.hpp>							// glm::vec4
-#include <glm/mat4x4.hpp>						// glm::mat4
+#include <glm/vec3.hpp>
+#include <glm/vec4.hpp>
+#include <glm/mat4x4.hpp>
 #include <glm/ext/matrix_transform.hpp>			// glm::translate, glm::rotate, glm::scale
 #include <glm/ext/matrix_clip_space.hpp>		// glm::perspective
 #include <glm/ext/scalar_constants.hpp>			// glm::pi
 
-// ============================================================================  platform specific  ============================================================================
+// ======================================================= platform specific  =======================================================
 
 #ifdef PFF_PLATFORM_WINDOWS
 	#include "util/platform/windows_util.h"
-	#ifndef NOMINMAX
-		#define NOMINMAX				// See github.com/skypjack/entt/wiki/Frequently-Asked-Questions#warning-c4003-the-min-the-max-and-the-macro
-	#endif
 #elif defined(PFF_PLATFORM_LINUX)
 	#include "util/platform/linux_util.h"
 	#include <cxxabi.h>
-	// #include <dirent.h>
-	// #include <unistd.h>
-	// #include <sys/types.h>
-	// #include <sys/stat.h>
-	#ifndef NOMINMAX
-		#define NOMINMAX				// See github.com/skypjack/entt/wiki/Frequently-Asked-Questions#warning-c4003-the-min-the-max-and-the-macro
-	#endif
 #else
 	#error Unsupported OS detected
 #endif
 
 
-// ------------------------------- independent files (single includes) -------------------------------
-#include "util/timing/instrumentor.h"
+// ------------------------- independent files (single includes)-------------------------
 #include "util/core_config.h"
 #include "util/data_types.h"
 #include "util/macros.h"
-
+#include "util/timing/instrumentor.h"
 #include "util/io/logger.h"
-
-
-

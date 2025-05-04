@@ -42,25 +42,22 @@ project "PFF"
 		"%{IncludeDir.ImGui}/backends/",
 		"%{IncludeDir.stb_image}",
 		"%{IncludeDir.entt}",
-		"%{IncludeDir.ImGuizmo}",		
-		"%{IncludeDir.VulkanSDK}",
+		"%{IncludeDir.ImGuizmo}",
+		"%{IncludeDir.Vulkan}",
 	}
 	
 	links
 	{
 		"ImGui",
+		"glfw",
 	}
 
-	postbuildcommands {
 
-		-- Copy content of directories
-		table.unpack(copy_content_of_dir(outputs, {"PFF/shaders", "PFF/assets"})),
-	}
 
 	libdirs 
 	{
-		"vendor/imgui/bin/Debug-windows-x86_64/ImGui",
-        "%{IncludeDir.VulkanSDK}/lib",
+		"vendor/imgui/bin/" .. outputs .. "/ImGui",
+		"%{Library.Vulkan}",
 	}
 
 	filter "files:vendor/ImGuizmo/**.cpp"
@@ -78,11 +75,34 @@ project "PFF"
 
 		libdirs 
 		{
-			"vendor/imgui/bin/Debug-windows-x86_64/ImGui",
-			"%{IncludeDir.VulkanSDK}/Lib",  -- Ensure this points to the Vulkan SDK's Lib directory
+			"vendor/imgui/bin/" .. outputs .. "/ImGui",
+			-- "%{IncludeDir.Vulkan}/Lib",
 		}
 	
-		postbuildcommands {										-- copy premake exe (needed for engine projects)
+		postbuildcommands {
+			
+			-- copy resources
+			'{COPYDIR} "%{wks.location}/PFF/shaders" "%{wks.location}/bin/' .. outputs .. '/PFF/shaders"',
+			'{COPYDIR} "%{wks.location}/PFF/assets" "%{wks.location}/bin/' .. outputs .. '/PFF/assets"',
+			'{COPYDIR} "%{wks.location}/PFF/src" "%{wks.location}/bin/' .. outputs .. '/PFF/src"',
+			'{COPY} "%{wks.location}/dependencies.lua" "%{wks.location}/bin/' .. outputs .. '/"',
+			
+			-- Ensure the destination directory exists before copying
+			
+			-- copy vendor dependencies
+			'{MKDIR} "%{wks.location}/bin/' .. outputs .. '/vendor/entt"',
+			'{COPY} "%{wks.location}/PFF/vendor/entt/LICENSE.txt" "%{wks.location}/bin/' .. outputs .. '/vendor/entt"',
+			'{COPYDIR} "%{wks.location}/PFF/vendor/entt/include" "%{wks.location}/bin/' .. outputs .. '/vendor/entt"',
+			
+			'{MKDIR} "%{wks.location}/bin/' .. outputs .. '/vendor/glm"',
+			'{COPYDIR} "%{wks.location}/PFF/vendor/glm/glm" "%{wks.location}/bin/' .. outputs .. '/vendor/glm/glm"',
+			
+			-- copy GLFW
+			"{MKDIR} %{wks.location}/bin/" .. outputs .. "/vendor/glfw",
+			'{COPYDIR} "%{wks.location}/PFF/vendor/glfw/bin/' .. outputs .. '/GLFW" "%{wks.location}/bin/' .. outputs .. '/vendor/glfw"',
+			'{COPY} "%{wks.location}/PFF/vendor/glfw/LICENSE.md" "%{wks.location}/bin/' .. outputs .. '/vendor/glfw"',
+						
+			-- copy premake exe (needed for engine projects)
 			"{MKDIR} %{wks.location}/bin/" .. outputs .. "/vendor/premake",
 			"{COPY} %{wks.location}/vendor/premake %{wks.location}/bin/" .. outputs .. "/vendor/premake",
 		}
@@ -100,11 +120,11 @@ project "PFF"
 		
 		includedirs
 		{
-			"/usr/include/vulkan",
 			"/usr/include/x86_64-linux-gnu/qt5", 				-- Base Qt include path
 			"/usr/include/x86_64-linux-gnu/qt5/QtCore",
 			"/usr/include/x86_64-linux-gnu/qt5/QtWidgets",
 			"/usr/include/x86_64-linux-gnu/qt5/QtGui",
+			"%{IncludeDir.VulkanUtils}",
 		}
 	
 		libdirs
@@ -128,7 +148,30 @@ project "PFF"
 			"-fPIC",
 		}
 
-		postbuildcommands {										-- copy premake (needed for engine projects)
+		postbuildcommands {
+
+			-- copy resources
+			'{COPYDIR} "%{wks.location}/PFF/shaders" "%{wks.location}/bin/' .. outputs .. '/PFF"',
+			'{COPYDIR} "%{wks.location}/PFF/assets" "%{wks.location}/bin/' .. outputs .. '/PFF"',
+			'{COPYDIR} "%{wks.location}/PFF/src" "%{wks.location}/bin/' .. outputs .. '/PFF/src"',
+			'{COPY} "%{wks.location}/dependencies.lua" "%{wks.location}/bin/' .. outputs .. '/"',
+	
+			-- Ensure the destination directory exists before copying
+			
+			-- copy vendor dependencies
+			'{MKDIR} "%{wks.location}/bin/' .. outputs .. '/vendor/entt"',
+			'{COPY} "%{wks.location}/PFF/vendor/entt/LICENSE.txt" "%{wks.location}/bin/' .. outputs .. '/vendor/entt"',
+			'{COPYDIR} "%{wks.location}/PFF/vendor/entt/include/entt" "%{wks.location}/bin/' .. outputs .. '/vendor/entt"',
+	
+			'{MKDIR} "%{wks.location}/bin/' .. outputs .. '/vendor/glm"',
+			'{COPYDIR} "%{wks.location}/PFF/vendor/glm/glm" "%{wks.location}/bin/' .. outputs .. '/vendor/glm/glm"',
+	
+			-- copy GLFW
+			"{MKDIR} %{wks.location}/bin/" .. outputs .. "/vendor/glfw",
+			'{COPY} "%{wks.location}/PFF/vendor/glfw/build/src/libglfw3.a" "%{wks.location}/bin/' .. outputs .. '/vendor/glfw"',
+			'{COPY} "%{wks.location}/PFF/vendor/glfw/LICENSE.md" "%{wks.location}/bin/' .. outputs .. '/vendor/glfw"',
+
+			-- copy premake (needed for engine projects)
 			"{MKDIR} %{wks.location}/bin/" .. outputs .. "/vendor/premake",
 			"{COPY} %{wks.location}/premake5 %{wks.location}/bin/" .. outputs .. "/vendor/premake",
 		}

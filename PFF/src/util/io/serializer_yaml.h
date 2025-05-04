@@ -11,6 +11,7 @@ namespace PFF::serializer {
 		~yaml();
 
 		PFF_DELETE_COPY_MOVE_CONSTRUCTOR(yaml);
+		PFF_DEFAULT_GETTER(option, option);
 
 		// @brief This function adds or looks for a subsection with the specified section name in the YAML file.
 		//          If the serializer option is set to [save_to_file], it adds the subsection to the YAML content

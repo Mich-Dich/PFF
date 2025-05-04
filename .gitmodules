@@ -12,3 +12,6 @@
 [submodule "PFF/vendor/ImGuizmo"]
 	path = PFF/vendor/ImGuizmo
 	url = https://github.com/Mich-Dich/ImGuizmo
+[submodule "PFF_editor/vendor/assimp"]
+	path = PFF_editor/vendor/assimp
+	url = https://github.com/Mich-Dich/assimp

@@ -7,7 +7,16 @@ namespace PFF::mesh_factory {
     struct load_options {
 
         bool        combine_meshes = false;
+        bool        include_file_name_in_asset_name = true;
         bool        auto_generate_LODs = true;
+
+        bool operator==(const load_options& other) {
+
+            return (combine_meshes == other.combine_meshes 
+                && include_file_name_in_asset_name == other.include_file_name_in_asset_name 
+                && auto_generate_LODs == other.auto_generate_LODs);
+        }
+        bool operator!=(const load_options& other) { return !(*this == other); }
     };
 
     struct static_mesh_file_metadata {
@@ -21,12 +30,9 @@ namespace PFF::mesh_factory {
 
     };
 
+    bool check_if_assets_already_exists(const std::filesystem::path source_path, const std::filesystem::path destination_path, const load_options options, std::vector<std::string>& assets_that_already_exist);
 
-    // factories should load external assets and convert them into engine-specific-assets in the project/content directory
+    // factory loads external assets and convert them into engine-specific-assets in the project/content directory
     bool import_gltf_mesh(const std::filesystem::path source_path, const std::filesystem::path destination_path, const load_options options);
 
-
 }
-
-
-// C:\CustomGameEngine\PFF\test_project\content\meshes

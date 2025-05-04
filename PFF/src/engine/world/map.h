@@ -9,6 +9,35 @@
 
 namespace PFF {
 
+	// TODO: move to world.h when implemented
+	struct dynamic_skybox_data {
+
+		glm::mat4				inverse_view{};
+		glm::vec4				middle_sky_color = glm::vec4(0.f, 0.12f, 0.26f, 1.f);
+		glm::vec4				horizon_sky_color = glm::vec4(0.19f, 0.39f, 0.52f, 1.f);
+		glm::vec2				image_size{};
+		f32 					sun_distance = 1000000.f;
+		f32 					sun_radius = 565.f;																// --- allignment
+    	f32						sun_core_falloff = .99f;          	// [0.8-0.99] smaller = softer core
+    	f32						sun_glow_radius_multiplier = 25.5f; // [1.5-4.0] glow halo size
+    	f32						sun_glow_intensity = .57f;        	// [0.1-1.0] glow brightness
+    	f32						sun_glow_falloff = 5.f;          	// [1.0-4.0] glow edge hardness
+
+		f32 					FOV_y = 45.f;
+
+    	// Cloud parameters
+		f32 					cloud_height = 100.f;
+		f32 					time = 0.f;
+		f32 					cloud_density = 0.5f;																// --- allignment
+		glm::vec4 				cloud_color = glm::vec4(0.95f, 0.95f, 1.0f, 0.5f);
+		glm::vec2 				cloud_speed = glm::vec2(0.1f, 0.2f);
+		f32 					cloud_scale = 100.f;
+		f32 					cloud_coverage = .6f;
+		f32						cloud_persistence = .6f;
+		f32						cloud_detail = 4.6f;
+		u32						cloud_octaves = 3;																	// --- allignment
+	};
+	
 	class entity;
 
 	// @brief The map class represents a segment of the in-game world, functioning as a chunk in the world layer.
@@ -27,7 +56,8 @@ namespace PFF {
 		
 		// ---------------------------- entity ----------------------------
 
-		PFF_DEFAULT_GETTER(entt::registry&, registry)
+		PFF_DEFAULT_GETTER(entt::registry&, 				registry)
+		PFF_DEFAULT_GETTER_REF(PFF::dynamic_skybox_data, 	dynamic_skybox_data)
 
 		// @brief Creates a new entity with an optional name.
 		// @param name The name of the entity (default is an empty string).
@@ -105,6 +135,7 @@ namespace PFF {
 		std::unordered_map<UUID, entt::entity>	m_entity_map;
 		system_state							m_system_state = system_state::active;
 		std::filesystem::path					m_path;
+		dynamic_skybox_data						m_dynamic_skybox_data{};
 	};
 
 }

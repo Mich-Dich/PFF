@@ -49,20 +49,25 @@ namespace PFF::render::vulkan {
 
 		static vk_renderer& get() { return s_instance; }
 
-		FORCEINLINE f32 get_aspect_ratio()			{ return 1.f; };			// TODO: finish
-		PFF_DEFAULT_GETTERS(VkPhysicalDevice,		chosenGPU);
-		PFF_DEFAULT_GETTER(VkSampler,				texture_sampler);
-		PFF_DEFAULT_GETTER(VkSampler,				default_sampler_linear);
-		PFF_DEFAULT_GETTER(VkSampler,				default_sampler_nearest);
-		PFF_DEFAULT_GETTER(VkDevice,				device);
-		PFF_DEFAULT_GETTER(VmaAllocator,			allocator);
-		
+		FORCEINLINE f32 get_aspect_ratio()										{ return 1.f; };			// TODO: finish
+		PFF_DEFAULT_GETTERS(VkPhysicalDevice,									chosenGPU);
+		PFF_DEFAULT_GETTER(VkSampler,											texture_sampler);
+		PFF_DEFAULT_GETTER(VkSampler,											default_sampler_linear);
+		PFF_DEFAULT_GETTER(VkSampler,											default_sampler_nearest);
+		PFF_DEFAULT_GETTER(VkDevice,											device);
+		PFF_DEFAULT_GETTER(VmaAllocator,										allocator);
+		PFF_DEFAULT_GETTER_REF(material,										metal_rough_material);
+		PFF_DEFAULT_GETTER(VkDescriptorSetLayout,								gpu_scene_data_descriptor_layout);
+		PFF_DEFAULT_GETTER(descriptor_allocator_growable,						global_descriptor_allocator);
+		PFF_DEFAULT_GETTER_REF(render::GPU_scene_data,							scene_data);
+		// PFF_DEFAULT_GETTER_REF(render::compute_push_constants_dynamic_skybox,	skybox_data);
+		 		
 		FORCEINLINE void set_imugi_viewport_size(glm::u32vec2 imugi_viewport_size) { m_imugi_viewport_size = imugi_viewport_size; }
-
-		PFF_DEFAULT_GETTER(VkDescriptorSetLayout,	gpu_scene_data_descriptor_layout);
-
-		PFF_DEFAULT_GETTER_POINTER(image,			draw_image)
-		PFF_DEFAULT_GETTER_POINTER(image,			depth_image)
+		
+		VkBuffer get_material_constant_buffer() { return m_material_constant.buffer; }
+		// PFF_DEFAULT_GETTER_POINTER(vk_buffer, 				material_constant)
+		PFF_DEFAULT_GETTER_POINTER(image,					draw_image)
+		PFF_DEFAULT_GETTER_POINTER(image,					depth_image)
 
 		void setup(ref<pff_window> window, ref<PFF::layer_stack> layer_stack);
 		void shutdown();
@@ -144,6 +149,7 @@ namespace PFF::render::vulkan {
 		void init_pipelines();
 		void init_pipelines_background();
 		void init_pipeline_mesh();
+		void init_grid_pipeline();
 
 		void draw_internal(VkCommandBuffer cmd);
 		void draw_geometry(VkCommandBuffer cmd);
@@ -195,12 +201,15 @@ namespace PFF::render::vulkan {
 		// ---------------------------- descriptors ---------------------------- 
 		//descriptor_allocator						global_descriptor_allocator{};
 		descriptor_allocator_growable				m_global_descriptor_allocator;
+		VkDescriptorSet								m_global_descriptor;
 		VkDescriptorSet								m_draw_image_descriptors{};
 		VkDescriptorSetLayout						m_draw_image_descriptor_layout{};
 		
 		// ---------------------------- pipelines ---------------------------- 
 		VkPipeline									m_gradient_pipeline{};
 		VkPipelineLayout							m_gradient_pipeline_layout{};
+		VkPipelineLayout							m_skybox_pipeline_layout{};
+		VkPipeline									m_skybox_pipeline{};
 
 		// ---------------------------- immediate-submit ---------------------------- 
 		VkFence										m_immFence{};
@@ -216,6 +225,9 @@ namespace PFF::render::vulkan {
 		VkPipelineLayout							m_mesh_pipeline_layout{};
 		VkPipeline									m_mesh_pipeline{};
 
+		VkPipelineLayout							m_grid_pipeline_layout{};
+		VkPipeline									m_grid_pipeline{};
+
 		// ---------------------------- GPU side global scene data ---------------------------- 
 		render::GPU_scene_data						m_scene_data;
 		VkDescriptorSetLayout						m_gpu_scene_data_descriptor_layout;
@@ -228,8 +240,12 @@ namespace PFF::render::vulkan {
 		VkSampler									m_default_sampler_linear;
 		VkSampler									m_default_sampler_nearest;
 		VkDescriptorSetLayout						m_single_image_descriptor_layout;
-		material_instance							m_default_material;
 		material									m_metal_rough_material;
+		ref<material_instance>						m_default_material;
+		vk_buffer 									m_material_constant;
+
+
+		// render::compute_push_constants_dynamic_skybox 	m_skybox_data{};
 
 		// ---------------------------- data for debug ---------------------------- 
 #ifdef PFF_RENDERER_DEBUG_CAPABILITY

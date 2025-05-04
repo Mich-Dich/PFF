@@ -10,7 +10,7 @@
 
 namespace PFF {
 
-    // need to catch signals related to termination to shutdown gracefully (eg: flash remaining log messages). Was inspired by reckless_log: https://github.com/mattiasflodin/reckless
+    // need to catch signals related to termination to shutdown gracefully (eg: flush remaining log messages). Was inspired by reckless_log: https://github.com/mattiasflodin/reckless
 
 	/* Copyright 2015 - 2020 Mattias Flodin <git@codepentry.com>
 	 *
@@ -56,8 +56,10 @@ namespace PFF {
 
 	void signal_handler(const int signal) {
 
+		std::cout << "signal caught => terminating" << std::endl;
+		LOG(Fatal, "crash_hander caught signal [" << signal << "]. flushing remaining logs")
 		logger::shutdown();
-		detach_crash_handler();
+		// detach_crash_handler();
 	}
 
 	void attach_crash_handler() {
@@ -100,6 +102,16 @@ namespace PFF {
 #elif defined(PFF_PLATFORM_WINDOWS)
 
 	LPTOP_LEVEL_EXCEPTION_FILTER old_exception_filter = nullptr;
+	static PVOID g_vectoredExceptionHandle = nullptr;
+
+	LONG WINAPI vectored_exception_handler(_EXCEPTION_POINTERS* ExceptionInfo) {
+		if (ExceptionInfo->ExceptionRecord->ExceptionCode == EXCEPTION_BREAKPOINT) {
+			logger::shutdown();  // Flush logs
+			TerminateProcess(GetCurrentProcess(), 1);  // Skip CRT cleanup
+			return EXCEPTION_EXECUTE_HANDLER;
+		}
+		return EXCEPTION_CONTINUE_SEARCH;  // Let other handlers process
+	}
 
 	LONG WINAPI exception_filter(_EXCEPTION_POINTERS* ExceptionInfo) {
 
@@ -119,6 +131,7 @@ namespace PFF {
 
 		assert(old_exception_filter == nullptr);
 		old_exception_filter = SetUnhandledExceptionFilter(&exception_filter);
+		g_vectoredExceptionHandle = AddVectoredExceptionHandler(1, vectored_exception_handler);				// 1 = call first
 	}
 
 	void detach_crash_handler() {
@@ -126,6 +139,11 @@ namespace PFF {
 		if (old_exception_filter) {
 			SetUnhandledExceptionFilter(old_exception_filter);
 			old_exception_filter = nullptr;
+		}
+
+		if (g_vectoredExceptionHandle) {
+			RemoveVectoredExceptionHandler(g_vectoredExceptionHandle);
+			g_vectoredExceptionHandle = nullptr;
 		}
 	}
 

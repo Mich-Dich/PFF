@@ -7,6 +7,7 @@ namespace PFF {
     // -------------------------------------------------------------------------------------------------------------------------------------
     // GUIDLINE
     //      saved file layout:
+    //          asset_file_header           <- general data for any asset (same for all files)
     //          general_header              <- the same for all files
     //          spezific_header
     //          binary_blob
@@ -31,13 +32,12 @@ namespace PFF {
     // ---------------------- SPECIFIC -----------------------------------------------------------------------------------------------------
 	struct static_mesh_file_header {
 
+        std::string             name{};
 		u16                     version{};
         std::filesystem::path   source_file{};        // need to also save path_size
         size_t                  mesh_index{};         // index of this mesh from the original gltf-file
+        PFF::geometry::bounds   mesh_bounds{};
 	};
-
-    // ...
-
     // -------------------------------------------------------------------------------------------------------------------------------------
 
 }

@@ -1,8 +1,9 @@
 #version 450
 #extension GL_EXT_buffer_reference : require
 
-layout (location = 0) out vec3 outColor;
-layout (location = 1) out vec2 outUV;
+layout (location = 0) out vec3 out_color;
+layout (location = 1) out vec2 out_UV;
+layout (location = 2) out vec3 out_normal;
 
 struct vertex {
 
@@ -25,14 +26,11 @@ layout( push_constant ) uniform constants {
 
 } push_constant;
 
-void main() 
-{	
-	// load vertex data from device adress
-	vertex v = push_constant.vertex_buffer.vertices[gl_VertexIndex];
+void main() {	
 
-	// output data
-	gl_Position = push_constant.render_matrix *vec4(v.position, 1.0f);
-	outColor = v.color.xyz;
-	outUV.x = v.uv_x;
-	outUV.y = v.uv_y;
+    vertex v = push_constant.vertex_buffer.vertices[gl_VertexIndex];
+    gl_Position = push_constant.render_matrix * vec4(v.position, 1.0f);
+    out_color = v.color.xyz;
+    out_UV = vec2(v.uv_x, v.uv_y);
+    out_normal = normalize(v.normal);
 }

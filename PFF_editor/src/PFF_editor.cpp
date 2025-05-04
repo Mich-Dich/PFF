@@ -10,11 +10,15 @@
 namespace PFF {
 
 	ref<project_file_watcher> p_project_file_watcher{};
+	std::thread import_dialog_thread;
 
 	void PFF_editor::serialize(serializer::option option) {
 
 		// list all serialize functions
 		m_editor_controller->serialize(option);
+
+		serializer::yaml(config::get_filepath_from_configtype(util::get_executable_path(), config::file::editor), "editor_settings", option)
+			.entry(KEY_VALUE(m_editor_settings.display_rotator_in_degrees));
 	}
 
 	bool PFF_editor::init() { 
@@ -31,14 +35,20 @@ namespace PFF {
 		serialize(serializer::option::load_from_file);
 
 		// TODO: load from project data
-		p_project_file_watcher = create_ref<project_file_watcher>(); 
+		p_project_file_watcher = create_ref<project_file_watcher>();
 		return true;
 	}
 
 	bool PFF_editor::shutdown() {
 
+		LOG(Trace, "serializing editor data")
 		serialize(serializer::option::save_to_file);
 
+		// LOG(Info, "TODO: making sure the import thread is closed")
+		// if (import_dialog_thread.joinable())
+		// 	import_dialog_thread.join();
+
+		LOG(Trace, "Removing editor layer")
 		pop_overlay(m_editor_layer);
 		delete m_editor_layer;
 
@@ -49,4 +59,5 @@ namespace PFF {
 	bool PFF_editor::render(const f32 delta_time) { return true; }
 
 	bool PFF_editor::update(const f32 delta_time) { return true; }
+
 }

@@ -5,9 +5,9 @@
 
 #undef ERROR
 
-#ifndef DEBUG_BREAK
-	#define DEBUG_BREAK() __debugbreak()
-#endif // !DEBUG_BREAK
+//#ifndef DEBUG_BREAK
+//	#define DEBUG_BREAK() __debugbreak()
+//#endif // !DEBUG_BREAK
 
 namespace PFF::logger {
 
@@ -38,6 +38,8 @@ namespace PFF::logger {
 
     // shutdown the logging system
     void shutdown();
+
+    std::filesystem::path get_log_file_location();
 
     // The format of log-messages can be custimized with the following tags
     // @note to format all following log-messages use: set_format()
@@ -167,24 +169,49 @@ namespace PFF::logger {
 
 // ---------------------------------------------------------------------------  Assertion & Validation  ---------------------------------------------------------------------------
 
-#if ENABLE_LOGGING_FOR_ASSERTS
-    #define ASSERT(expr, message_success, message_failure)                              \
-        if (expr)                                                                       \
-            LOG(Trace, message_success)                                                 \
-        else {                                                                          \
-            LOG(Fatal, message_failure)                                                 \
-            LOGGED_EXCEPTION(message_failure);                                          \
-        }
+#if defined (PFF_PLATFORM_WINDOWS)
 
-    #define ASSERT_S(expr)                                                              \
-        if (!(expr)) {                                                                  \
-            LOG(Fatal, #expr)                                                           \
-            LOGGED_EXCEPTION(#expr);                                                    \
-        }
-#else
-    #define ASSERT(expr, message_success, message_failure)                              if (!(expr)) { LOGGED_EXCEPTION(#expr); }
-    #define ASSERT_S(expr)                                                              if (!(expr)) { LOGGED_EXCEPTION(#expr); }
-#endif
+    #if ENABLE_LOGGING_FOR_ASSERTS
+        #define ASSERT(expr, message_success, message_failure)                              \
+            if (expr)                                                                       \
+                LOG(Trace, message_success)                                                 \
+            else {                                                                          \
+                LOG(Fatal, message_failure)                                                 \
+                DEBUG_BREAK();                                                              \
+            }
+
+        #define ASSERT_S(expr)                                                              \
+            if (!(expr)) {                                                                  \
+                LOG(Fatal, #expr)                                                           \
+                DEBUG_BREAK();                                                              \
+            }
+    #else
+        #define ASSERT(expr, message_success, message_failure)                              if (!(expr)) { DEBUG_BREAK() }
+        #define ASSERT_S(expr)                                                              if (!(expr)) { DEBUG_BREAK() }
+    #endif
+
+#elif defined (PFF_PLATFORM_LINUX)
+
+    #if ENABLE_LOGGING_FOR_ASSERTS
+        #define ASSERT(expr, message_success, message_failure)                              \
+            if (expr)                                                                       \
+                LOG(Trace, message_success)                                                 \
+            else {                                                                          \
+                LOG(Fatal, message_failure)                                                 \
+                LOGGED_EXCEPTION(message_failure);                                          \
+            }
+
+        #define ASSERT_S(expr)                                                              \
+            if (!(expr)) {                                                                  \
+                LOG(Fatal, #expr)                                                           \
+                LOGGED_EXCEPTION(#expr);                                                    \
+            }
+    #else
+        #define ASSERT(expr, message_success, message_failure)                              if (!(expr)) { LOGGED_EXCEPTION(#expr); }
+        #define ASSERT_S(expr)                                                              if (!(expr)) { LOGGED_EXCEPTION(#expr); }
+    #endif
+
+    #endif
 
 #if ENABLE_LOGGING_FOR_VALIDATION
     #define VALIDATE(expr, command, message_success, message_failure)                   \

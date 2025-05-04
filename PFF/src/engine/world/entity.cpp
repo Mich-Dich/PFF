@@ -11,6 +11,7 @@
 
 #include "application.h"
 #include "engine/resource_management/static_mesh_asset_manager.h"
+#include "engine/resource_management/material/material_asset_manager.h"
 #include "engine/resource_management/mesh_serializer.h"
 // #include "map.h"
 
@@ -33,27 +34,29 @@ namespace PFF {
 		ASSERT(asset_header.type == file_type::mesh, "", "Tryed to add mesh_component but provided asset_path is not a mesh");
 
 		switch (general_header.type) {
-		case mesh_type::static_mesh: {
+			case mesh_type::static_mesh: {
 
-			static_mesh_file_header static_mesh_header;
-			serialize_static_mesh_header(serializer, static_mesh_header);
+				static_mesh_file_header static_mesh_header;
+				serialize_static_mesh_header(serializer, static_mesh_header);
+				mesh_comp.mesh_asset = static_mesh_asset_manager::get_from_path(mesh_comp.asset_path);
 
-			mesh_comp.mesh_asset = static_mesh_asset_manager::get_from_path(mesh_comp.asset_path);
+				if (!mesh_comp.material_inst_path.empty())
+				mesh_comp.material = material_asset_manager::get_material_instance_from_path(mesh_comp.material_inst_path);
 
-			//TODO: check 
-			//		if (user defined a material_instance) || ([static_mesh_header] has a material_instance)
-			//		else use default_material
-			LOG(Warn, "Added mesh comp <= STILL NEED TO CHECK FOR DEFAULT MATERIAL");
+				//TODO: check 
+				//		if (user defined a material_instance) || ([static_mesh_header] has a material_instance)
+				//		else use default_material
+				// LOG(Warn, "Added mesh comp <= STILL NEED TO CHECK FOR DEFAULT MATERIAL");
 
-		} break;
+			} break;
 
-		case mesh_type::dynamic_mesh:
-		case mesh_type::skeletal_mesh:
-		case mesh_type::mesh_collection:
-		case mesh_type::procedural_mesh:
-			LOG(Trace, "Adding of mesh_type not supported yet"); break;
+			case mesh_type::dynamic_mesh:
+			case mesh_type::skeletal_mesh:
+			case mesh_type::mesh_collection:
+			case mesh_type::procedural_mesh:
+				LOG(Trace, "Adding of mesh_type not supported yet"); break;
 
-		default: LOG(Trace, "unidentified [mesh_type] used"); break;
+			default: LOG(Trace, "unidentified [mesh_type] used"); break;
 		}
 
 
@@ -65,7 +68,8 @@ namespace PFF {
 		}
 
 		// ---------------------------------- already has mesh_component  => add new entity and make child of this entity ----------------------------------
-		entity child = m_map->create_entity("SM_" + mesh_comp.asset_path.filename().replace_extension("").string());
+		const auto new_entity_name = mesh_comp.asset_path.filename().replace_extension("").string();
+		entity child = m_map->create_entity("SM_" + new_entity_name);
 		child.add_component<relationship_component>(get_component<ID_component>().ID);		// register child
 		child.add_component<mesh_component>(mesh_comp);
 
@@ -76,9 +80,10 @@ namespace PFF {
 			return;
 		}
 
+		// ---------------------------------- current entity doesnt have relationship => create new component ----------------------------------
 		std::vector<UUID> cildren{};
 		cildren.push_back(child.get_component<ID_component>().ID);
-		add_component<relationship_component>(get_UUID(), cildren);		// register child
+		add_component<relationship_component>( 0 /*get_UUID()*/, cildren);		// register child
 		return;
 
 	}
@@ -97,11 +102,9 @@ namespace PFF {
 			// Apply the transform to the child
 			auto child = m_map->get_entity_by_UUID(child_ID);
 			glm::mat4& child_transform = (glm::mat4&)child.get_component<transform_component>();
-
 			glm::mat4 child_local_space_transform = glm::inverse(root_transform) * child_transform;
 			child_local_space_transform = delta_transform * child_local_space_transform;		// Apply transform in local space
 			child_transform = root_transform * child_local_space_transform;
-
 			child.propegate_transform_to_children(root_transform, delta_transform);			// call recursive for children
 		}
 	}

@@ -37,7 +37,7 @@ project "PFF_helper"
 		systemversion "latest"
 		defines {
 			"PFF_PLATFORM_WINDOWS",
-			"GLSLC_PATH=\"%{VULKAN_SDK}/Bin/glslc.exe\"",
+			"GLSLC_PATH=\"%{VULKAN}/Bin/glslc.exe\"",
 		}
 		files { "../metadata/app_icon.rc" }
 

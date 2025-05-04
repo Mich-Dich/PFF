@@ -63,6 +63,8 @@ namespace PFF::render::vulkan {
 #endif // COLLECT_PERFORMANCE_DATA
 
 
+
+
 	vk_renderer vk_renderer::s_instance = vk_renderer{};
 	static std::vector<std::vector<std::function<void()>>> s_resource_free_queue;
 	// static std::vector<std::unordered_map<std::function<void()>, u16>> s_resource_free_queue_TEST;		// use u16 as a counter to free resources after all command buffers are free
@@ -144,7 +146,7 @@ namespace PFF::render::vulkan {
 		std::string cmdArgs = "1 1 0 " + (PFF::util::get_executable_path().parent_path() / "PFF/shaders").generic_string() + " 1 ";
 #endif
 
-		ASSERT(PFF::util::run_program(path_to_build_script, cmdArgs), "Successfully compiled shaders", "Failed to compile shaders using PFF_helper");			// make sure PFF_helper is build
+		ASSERT(PFF::util::run_program(path_to_build_script, cmdArgs), "called to compiled shaders for [" << cmdArgs << "]", "Failed to compile shaders using PFF_helper");			// make sure PFF_helper is build
 
 		//make the vulkan instance, with basic debug features
 		vkb::InstanceBuilder builder;
@@ -217,9 +219,11 @@ namespace PFF::render::vulkan {
 		init_descriptors();
 		init_pipelines();
 		init_default_data();
+		init_grid_pipeline();
 
 		m_is_initialized = true;
 	}
+
 
 	void vk_renderer::shutdown() {
 		
@@ -244,6 +248,9 @@ namespace PFF::render::vulkan {
 
 		m_deletion_queue.flush();
 		m_deletion_queue.cleanup();
+
+		vkDestroyPipelineLayout(m_device, m_grid_pipeline_layout, nullptr);
+		vkDestroyPipeline(m_device, m_grid_pipeline, nullptr);
 		
 		destroy_swapchain();
 		vkDestroySurfaceKHR(m_instance, m_surface, nullptr);
@@ -257,6 +264,7 @@ namespace PFF::render::vulkan {
 
 		LOG_SHUTDOWN();
 	}
+
 
 	void vk_renderer::resource_free() {
 
@@ -392,6 +400,7 @@ namespace PFF::render::vulkan {
 
 	void vk_renderer::imgui_create_fonts() { immediate_submit([&](VkCommandBuffer cmd) { ImGui_ImplVulkan_CreateFontsTexture(); }); }
 
+
 	void vk_renderer::imgui_destroy_fonts() { immediate_submit([&](VkCommandBuffer cmd) { ImGui_ImplVulkan_DestroyFontsTexture(); }); }
 
 
@@ -427,6 +436,13 @@ namespace PFF::render::vulkan {
 
 		VK_CHECK_S(vkResetFences(m_device, 1, &get_current_frame().render_fence));
 
+		// ============================================================ DEV-ONLY ============================================================
+		// f32 rotation_speed = glm::radians(25.0f); // 25 degrees per second
+		// f32 angle = rotation_speed * delta_time;
+		// glm::mat4 rotation = glm::rotate(glm::mat4(1.0f), angle, glm::vec3(0.0f, 1.0f, 0.0f));				// rotation matrix around the Z-axis
+		// glm::vec4 rotated_dir = rotation * m_scene_data.sunlight_direction;
+		// m_scene_data.sunlight_direction = glm::vec4(rotated_dir.x, rotated_dir.y, rotated_dir.z, m_scene_data.sunlight_direction.w);
+		// ============================================================ DEV-ONLY ============================================================
 
 		// Free resources 
 		{
@@ -451,7 +467,6 @@ namespace PFF::render::vulkan {
 		VkCommandBuffer cmd = get_current_frame().main_command_buffer;
 		VK_CHECK_S(vkResetCommandBuffer(cmd, 0));
 
-
 		VkCommandBufferBeginInfo cmdBeginInfo = init::command_buffer_begin_info(VK_COMMAND_BUFFER_USAGE_ONE_TIME_SUBMIT_BIT);
 
 		if (m_imgui_initalized && !m_render_swapchain) {
@@ -463,6 +478,28 @@ namespace PFF::render::vulkan {
 			m_draw_extent.width = math::min(m_swapchain_extent.width, m_draw_image.get_width()) * (u32)m_render_scale;
 			m_draw_extent.height = math::min(m_swapchain_extent.height, m_draw_image.get_height()) * (u32)m_render_scale;
 		}
+
+		// ============================================================ calc scene data ============================================================
+		m_scene_data.view = m_active_camera->get_view();
+		m_scene_data.proj = glm::perspective(glm::radians(m_active_camera->get_perspective_fov_y()), (float)m_draw_extent.width / (float)m_draw_extent.height, m_active_camera->get_clipping_far(), m_active_camera->get_clipping_near());
+		m_active_camera->force_set_projection_matrix(m_scene_data.proj);
+		m_scene_data.proj[1][1] *= -1;				// invert the Y direction on projection matrix
+		m_scene_data.proj_view = m_scene_data.proj * m_scene_data.view;
+
+		// allocate a new uniform buffer for the scene data
+		vk_buffer gpuSceneDataBuffer = create_buffer(sizeof(render::GPU_scene_data), VK_BUFFER_USAGE_UNIFORM_BUFFER_BIT, VMA_MEMORY_USAGE_CPU_TO_GPU);
+		get_current_frame().del_queue.push_func([this, gpuSceneDataBuffer]() { destroy_buffer(gpuSceneDataBuffer); });
+
+		//write the buffer
+		render::GPU_scene_data* scene_uniform_data = (render::GPU_scene_data*)gpuSceneDataBuffer.allocation->GetMappedData();
+		*scene_uniform_data = m_scene_data;
+
+		//create a descriptor set that binds that buffer and update it
+		m_global_descriptor = get_current_frame().frame_descriptors.allocate(m_device, m_gpu_scene_data_descriptor_layout);
+		descriptor_writer writer;
+		writer.write_buffer(0, gpuSceneDataBuffer.buffer, sizeof(render::GPU_scene_data), 0, VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER);
+		writer.update_set(m_device, m_global_descriptor);
+		// ============================================================ calc scene data ============================================================
 
 		VK_CHECK_S(vkBeginCommandBuffer(cmd, &cmdBeginInfo));
 
@@ -558,6 +595,7 @@ namespace PFF::render::vulkan {
 		m_frame_number++;
 	}
 
+
 	void vk_renderer::refresh(f32 delta_time) {
 	
 		//LOG(Debug, "Refreching renderer");
@@ -565,9 +603,12 @@ namespace PFF::render::vulkan {
 		draw_frame(delta_time);
 	}
 
+
 	void vk_renderer::set_size(u32 width, u32 height) {}
 
+
 	void vk_renderer::wait_idle() { vkDeviceWaitIdle(m_device); }
+
 
 	void vk_renderer::immediate_submit(std::function<void()>&& function) {
 
@@ -590,6 +631,7 @@ namespace PFF::render::vulkan {
 		VK_CHECK_S(vkWaitForFences(m_device, 1, &m_immFence, true, 9999999999));
 	}
 
+
 	void vk_renderer::immediate_submit(std::function<void(VkCommandBuffer cmd)>&& function) {
 
 		VK_CHECK_S(vkResetFences(m_device, 1, &m_immFence));
@@ -611,6 +653,7 @@ namespace PFF::render::vulkan {
 		VK_CHECK_S(vkWaitForFences(m_device, 1, &m_immFence, true, 9999999999));
 	}
 
+
 	void vk_renderer::submit_resource_free(std::function<void()>&& func) {
 
 		if (m_state == system_state::active)
@@ -626,8 +669,6 @@ namespace PFF::render::vulkan {
 	// ================================================================================ INIT FUNCTION ================================================================================
 
 	void vk_renderer::init_default_data() {
-
-		//serialize(PFF::serializer::option::load_from_file);
 
 		//3 default textures, white, grey, black. 1 pixel each
 		u32 white = glm::packUnorm4x8(glm::vec4(1, 1, 1, 1));
@@ -670,29 +711,29 @@ namespace PFF::render::vulkan {
 
 		m_scene_data.sunlight_color = glm::vec4(1.f, 1.f, 1.f, 0.01f);
 		m_scene_data.ambient_color = glm::vec4(1.f, 1.f, 1.f, 0.001f);
-		m_scene_data.sunlight_direction = glm::vec4(0.2f, 0.2f, 0.2f, 1.0f);
+		m_scene_data.sunlight_direction = glm::vec4(1.0f, 0.5f, 1.0f, 1.0f);
 
 		// =========================================================== DEFAULT MATERIAL =========================================================== 
 
 		//set the uniform buffer for the material data
-		vk_buffer material_constant = create_buffer(sizeof(material::material_constants), VK_BUFFER_USAGE_UNIFORM_BUFFER_BIT, VMA_MEMORY_USAGE_CPU_TO_GPU);
+		m_material_constant = create_buffer(sizeof(material::material_constants), VK_BUFFER_USAGE_UNIFORM_BUFFER_BIT, VMA_MEMORY_USAGE_CPU_TO_GPU);
 
 		//write the buffer
-		material::material_constants* scene_uniform_data = (material::material_constants*)material_constant.allocation->GetMappedData();
+		material::material_constants* scene_uniform_data = (material::material_constants*)m_material_constant.allocation->GetMappedData();
 		scene_uniform_data->color_factors = glm::vec4{ 1, 1, 1, 1 };
 		scene_uniform_data->metal_rough_factors = glm::vec4{ 1, 0.5, 0, 0 };
 
-		m_deletion_queue.push_func([this, material_constant]() { destroy_buffer(material_constant); });
+		m_deletion_queue.push_func([this]() { destroy_buffer(m_material_constant); });
 
 		material::material_resources material_resources;						//default the material textures
 		material_resources.color_image = m_error_checkerboard_image;
 		material_resources.color_sampler = m_default_sampler_nearest;
 		material_resources.metal_rough_image = m_error_checkerboard_image;
 		material_resources.metal_rough_sampler = m_default_sampler_nearest;
-		material_resources.data_buffer = material_constant.buffer;
+		material_resources.data_buffer = m_material_constant.buffer;
 		material_resources.data_buffer_offset = 0;
-		m_default_material = m_metal_rough_material.create_instance(material_pass::main_color, material_resources, m_global_descriptor_allocator);
-
+		m_default_material = create_ref<material_instance>(m_metal_rough_material.create_instance(material_pass::main_color, material_resources));
+		
 #ifdef PFF_RENDERER_DEBUG_CAPABILITY
 
 		material::material_resources debug_lines_material_resources;						//debug material for lines
@@ -700,13 +741,14 @@ namespace PFF::render::vulkan {
 		debug_lines_material_resources.color_sampler = m_default_sampler_nearest;
 		debug_lines_material_resources.metal_rough_image = m_error_checkerboard_image;
 		debug_lines_material_resources.metal_rough_sampler = m_default_sampler_nearest;
-		debug_lines_material_resources.data_buffer = material_constant.buffer;
+		debug_lines_material_resources.data_buffer = m_material_constant.buffer;
 		debug_lines_material_resources.data_buffer_offset = 0;
-		m_debug_lines_material_inst = m_debug_lines_material.create_instance(material_pass::main_color, debug_lines_material_resources, m_global_descriptor_allocator);
+		m_debug_lines_material_inst = m_debug_lines_material.create_instance(material_pass::main_color, debug_lines_material_resources);
 
 #endif // PFF_RENDERER_DEBUG_CAPABILITY
 	 
 	}
+
 
 	void vk_renderer::serialize(const PFF::serializer::option option) {
 
@@ -720,6 +762,7 @@ namespace PFF::render::vulkan {
 				.entry("data_3", m_background_effects[x].data.data4);
 			});
 	}
+
 
 	void vk_renderer::init_swapchain() {
 
@@ -837,7 +880,7 @@ namespace PFF::render::vulkan {
 			writer.write_image(0, m_draw_image.get_image_view(), VK_NULL_HANDLE, VK_IMAGE_LAYOUT_GENERAL, VK_DESCRIPTOR_TYPE_STORAGE_IMAGE);
 			writer.update_set(m_device, m_draw_image_descriptors);
 		}
-		
+
 		m_deletion_queue.push_pointer(m_draw_image_descriptor_layout);
 		m_deletion_queue.push_pointer(m_single_image_descriptor_layout);
 		m_deletion_queue.push_pointer(m_gpu_scene_data_descriptor_layout);
@@ -877,6 +920,45 @@ namespace PFF::render::vulkan {
 	}
 
 
+	void vk_renderer::init_grid_pipeline() {
+	
+		VkShaderModule gridVertexShader;
+		ASSERT(util::load_shader_module(PFF::util::get_executable_path() / "../PFF/shaders/world_grid.vert.spv", m_device, &gridVertexShader), "Loaded grid vertex shader", "Error loading grid vertex shader");
+	
+		VkShaderModule gridFragmentShader;
+		ASSERT(util::load_shader_module(PFF::util::get_executable_path() / "../PFF/shaders/world_grid.frag.spv", m_device, &gridFragmentShader), "Loaded grid fragment shader", "Error loading grid fragment shader");
+	
+		// Descriptor set layouts
+		VkDescriptorSetLayout layouts[] = {
+			m_gpu_scene_data_descriptor_layout,  // Set 0: Scene data
+			// Add other layouts if needed
+		};
+
+		// Create a pipeline layout
+		VkPipelineLayoutCreateInfo pipeline_layout_info = init::pipeline_layout_create_info();
+		pipeline_layout_info.setLayoutCount = 1;
+		pipeline_layout_info.pSetLayouts = layouts;
+		pipeline_layout_info.pushConstantRangeCount = 0;
+		VK_CHECK_S(vkCreatePipelineLayout(m_device, &pipeline_layout_info, nullptr, &m_grid_pipeline_layout));
+
+		// Create the graphics pipeline
+		pipeline_builder gridPipelineBuilder;
+		gridPipelineBuilder.set_shaders(gridVertexShader, gridFragmentShader)
+			.set_input_topology(VK_PRIMITIVE_TOPOLOGY_TRIANGLE_LIST)
+			.set_polygon_mode(VK_POLYGON_MODE_FILL)
+			.set_cull_mode(VK_CULL_MODE_NONE, VK_FRONT_FACE_CLOCKWISE)
+			.set_multisampling_none()
+			.set_color_attachment_format(m_draw_image.get_image_format())
+			.set_depth_format(m_depth_image.get_image_format())
+			.set_pipeline_layout(m_grid_pipeline_layout);
+	
+		m_grid_pipeline = gridPipelineBuilder.build(m_device);
+	
+		// Clean up shader modules
+		vkDestroyShaderModule(m_device, gridVertexShader, nullptr);
+		vkDestroyShaderModule(m_device, gridFragmentShader, nullptr);
+	}
+
 	// ================================================================================ INIT PIPELINES ================================================================================
 
 	void vk_renderer::init_pipelines() {
@@ -897,6 +979,7 @@ namespace PFF::render::vulkan {
 
 #endif // PFF_RENDERER_DEBUG_CAPABILITY
 	}
+
 
 	void vk_renderer::init_pipelines_background() {
 
@@ -976,9 +1059,40 @@ namespace PFF::render::vulkan {
 		m_background_effects.emplace_back(sky);
 		vkDestroyShaderModule(m_device, sky_shader, nullptr);
 
+		// ====================================================== Add pipeline [gradient] ====================================================== 		
+
+		VkPushConstantRange skybox_push_const{};
+		skybox_push_const.offset = 0;
+		skybox_push_const.size = sizeof(PFF::dynamic_skybox_data);
+		skybox_push_const.stageFlags = VK_SHADER_STAGE_COMPUTE_BIT;
+
+		std::array<VkDescriptorSetLayout,2> sets = { m_gpu_scene_data_descriptor_layout, m_draw_image_descriptor_layout };
+
+		VkPipelineLayoutCreateInfo skybox_compute_lyout_CI{};
+		skybox_compute_lyout_CI.sType = VK_STRUCTURE_TYPE_PIPELINE_LAYOUT_CREATE_INFO;
+		skybox_compute_lyout_CI.pNext = nullptr;
+		skybox_compute_lyout_CI.pSetLayouts            = sets.data();
+		skybox_compute_lyout_CI.setLayoutCount         = static_cast<uint32_t>(sets.size());
+		skybox_compute_lyout_CI.pPushConstantRanges = &skybox_push_const;
+		skybox_compute_lyout_CI.pushConstantRangeCount = 1;
+		VK_CHECK_S(vkCreatePipelineLayout(m_device, &skybox_compute_lyout_CI, nullptr, &m_skybox_pipeline_layout));
+
+		compute_pipeline_CI.layout = m_skybox_pipeline_layout;
+
+		VkShaderModule skybox_shader;
+		ASSERT(util::load_shader_module(PFF::util::get_executable_path() / "../PFF/shaders/dynamic_skybox.comp.spv", m_device, &skybox_shader), "", "Error when building the compute shader [dynamic_skybox]");
+		compute_pipeline_CI.stage.module = skybox_shader;		//change the shader module only
+
+		//change the shader module only
+		VK_CHECK_S(vkCreateComputePipelines(m_device, VK_NULL_HANDLE, 1, &compute_pipeline_CI, nullptr, &m_skybox_pipeline));
+		vkDestroyShaderModule(m_device, skybox_shader, nullptr);
+
 
 		m_deletion_queue.push_func([&]() {
 
+			vkDestroyPipelineLayout(m_device, m_skybox_pipeline_layout, nullptr);
+			vkDestroyPipeline(m_device, m_skybox_pipeline, nullptr);
+			
 			vkDestroyPipelineLayout(m_device, m_gradient_pipeline_layout, nullptr);
 			for (u64 x = 0; x < m_background_effects.size(); x++)
 				vkDestroyPipeline(m_device, m_background_effects[x].pipeline, nullptr);
@@ -990,10 +1104,10 @@ namespace PFF::render::vulkan {
 	
 #if 1	// Try new initalization with new shader
 		VkShaderModule mesh_frag_shader;
-		ASSERT(util::load_shader_module(PFF::util::get_executable_path() / "../PFF/shaders/tex_image.frag.spv", m_device, &mesh_frag_shader), "Triangle fragment shader succesfully loaded", "Error when building the fragment shader");
+		ASSERT(util::load_shader_module(PFF::util::get_executable_path() / "../PFF/shaders/tex_image.frag.spv", m_device, &mesh_frag_shader), "", "Error when building the fragment shader");
 
 		VkShaderModule mesh_vertex_shader;
-		ASSERT(util::load_shader_module(PFF::util::get_executable_path() / "../PFF/shaders/colored_triangle_mesh.vert.spv", m_device, &mesh_vertex_shader), "Triangle vertex shader succesfully loaded", "Error when building the vertex shader");
+		ASSERT(util::load_shader_module(PFF::util::get_executable_path() / "../PFF/shaders/colored_triangle_mesh.vert.spv", m_device, &mesh_vertex_shader), "", "Error when building the vertex shader");
 
 		VkPushConstantRange bufferRange{};
 		bufferRange.offset = 0;
@@ -1043,10 +1157,6 @@ namespace PFF::render::vulkan {
 		vkDestroyShaderModule(m_device, mesh_frag_shader, nullptr);
 		vkDestroyShaderModule(m_device, mesh_vertex_shader, nullptr);
 
-		//m_deletion_queue.push_pointer(m_single_image_descriptor_layout);
-		//m_deletion_queue.push_pointer(m_mesh_pipeline_layout);
-		//m_deletion_queue.push_pointer(m_mesh_pipeline);
-
 		m_deletion_queue.push_func([&]() {
 
 			vkDestroyDescriptorSetLayout(m_device, m_single_image_descriptor_layout, nullptr);
@@ -1067,6 +1177,7 @@ namespace PFF::render::vulkan {
 
 	}
 
+	
 	void vk_renderer::resize_swapchain() {
 
 		vkDeviceWaitIdle(m_device);
@@ -1082,17 +1193,39 @@ namespace PFF::render::vulkan {
 
 	void vk_renderer::draw_internal(VkCommandBuffer cmd) {
 
-		render::compute_effect& effect = m_background_effects[m_current_background_effect];
+		if (m_current_background_effect < m_background_effects.size()) {
 
-		// bind the gradient drawing compute pipeline
-		vkCmdBindPipeline(cmd, VK_PIPELINE_BIND_POINT_COMPUTE, effect.pipeline);
-		vkCmdBindDescriptorSets(cmd, VK_PIPELINE_BIND_POINT_COMPUTE, m_gradient_pipeline_layout, 0, 1, &m_draw_image_descriptors, 0, nullptr);		// bind desc_set containing the draw_image for compute pipeline
-		vkCmdPushConstants(cmd, m_gradient_pipeline_layout, VK_SHADER_STAGE_COMPUTE_BIT, 0, sizeof(render::compute_push_constants), &effect.data);
+			render::compute_effect& effect = m_background_effects[m_current_background_effect];
+	
+			// bind the gradient drawing compute pipeline
+			vkCmdBindPipeline(cmd, VK_PIPELINE_BIND_POINT_COMPUTE, effect.pipeline);
+			vkCmdBindDescriptorSets(cmd, VK_PIPELINE_BIND_POINT_COMPUTE, m_gradient_pipeline_layout, 0, 1, &m_draw_image_descriptors, 0, nullptr);		// bind desc_set containing the draw_image for compute pipeline
+			vkCmdPushConstants(cmd, m_gradient_pipeline_layout, VK_SHADER_STAGE_COMPUTE_BIT, 0, sizeof(render::compute_push_constants), &effect.data);
+	
+			// execute the compute pipeline dispatch. We are using 16x16 workgroup size so we need to divide by it
+			vkCmdDispatch(cmd, static_cast<u32>(std::ceil(m_draw_extent.width / 16.0)), static_cast<u32>(std::ceil(m_draw_extent.height / 16.0)), 1);
+		
+		} else {
 
-		// execute the compute pipeline dispatch. We are using 16x16 workgroup size so we need to divide by it
-		vkCmdDispatch(cmd, static_cast<u32>(std::ceil(m_draw_extent.width / 16.0)), static_cast<u32>(std::ceil(m_draw_extent.height / 16.0)), 1);
+			vkCmdBindPipeline(cmd, VK_PIPELINE_BIND_POINT_COMPUTE, m_skybox_pipeline);
+			VkDescriptorSet sets[] = {
+				m_global_descriptor,       // scene data
+				m_draw_image_descriptors   // skybox output image + sampler
+			};
+			
+			auto& skybox_data = application::get().get_world_layer()->get_map()->get_dynamic_skybox_data_ref();
+			skybox_data.inverse_view = glm::inverse(m_scene_data.view);
+			skybox_data.image_size = glm::vec2(m_imugi_viewport_size.x, m_imugi_viewport_size.y);
+			skybox_data.FOV_y = m_active_camera->get_perspective_fov_y();
+			skybox_data.time = application::get().get_absolute_time();
+
+			vkCmdBindDescriptorSets(cmd, VK_PIPELINE_BIND_POINT_COMPUTE, m_skybox_pipeline_layout, 0, 2, sets, 0, nullptr);
+			vkCmdPushConstants(cmd, m_skybox_pipeline_layout, VK_SHADER_STAGE_COMPUTE_BIT, 0, sizeof(PFF::dynamic_skybox_data), &skybox_data);
+			vkCmdDispatch(cmd, static_cast<u32>(std::ceil(m_imugi_viewport_size.x / 16.0)), static_cast<u32>(std::ceil(m_imugi_viewport_size.y / 16.0)), 1);
+		}
 	}
 
+	
 	void vk_renderer::draw_geometry(VkCommandBuffer cmd) {
 
 		COLLECTING_PERFORMANCE_DATA(PFF::stopwatch loc_stopwatch(&m_renderer_metrik.draw_geometry_time[m_renderer_metrik.current_index]));
@@ -1115,51 +1248,35 @@ namespace PFF::render::vulkan {
 		scissor.extent.height = m_draw_extent.height;
 		vkCmdSetScissor(cmd, 0, 1, &scissor);
 
-		m_scene_data.view = m_active_camera->get_view();
-		m_scene_data.proj = glm::perspective(glm::radians(m_active_camera->get_perspective_fov_y()), (float)m_draw_extent.width / (float)m_draw_extent.height, 100000.f, 0.1f);
-		m_active_camera->force_set_projection_matrix(m_scene_data.proj);
-		m_scene_data.proj[1][1] *= -1;				// invert the Y direction on projection matrix
-		m_scene_data.proj_view = m_scene_data.proj * m_scene_data.view;
-
-
-		// allocate a new uniform buffer for the scene data
-		vk_buffer gpuSceneDataBuffer = create_buffer(sizeof(render::GPU_scene_data), VK_BUFFER_USAGE_UNIFORM_BUFFER_BIT, VMA_MEMORY_USAGE_CPU_TO_GPU);
-		get_current_frame().del_queue.push_func([this, gpuSceneDataBuffer]() { destroy_buffer(gpuSceneDataBuffer); });
-
-		//write the buffer
-		render::GPU_scene_data* scene_uniform_data = (render::GPU_scene_data*)gpuSceneDataBuffer.allocation->GetMappedData();
-		*scene_uniform_data = m_scene_data;
-
-		//create a descriptor set that binds that buffer and update it
-		VkDescriptorSet globalDescriptor = get_current_frame().frame_descriptors.allocate(m_device, m_gpu_scene_data_descriptor_layout);
-		descriptor_writer writer;
-		writer.write_buffer(0, gpuSceneDataBuffer.buffer, sizeof(render::GPU_scene_data), 0, VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER);
-		writer.update_set(m_device, globalDescriptor);
-
 		VkRenderingAttachmentInfo color_attachment = init::attachment_info(m_draw_image.get_image_view(), nullptr, VK_IMAGE_LAYOUT_GENERAL);					// begin a render pass connected to our draw image
 		VkRenderingAttachmentInfo depth_attachment = init::depth_attachment_info(m_depth_image.get_image_view(), VK_IMAGE_LAYOUT_DEPTH_ATTACHMENT_OPTIMAL);
 		VkRenderingInfo render_info = init::rendering_info(m_draw_extent, &color_attachment, &depth_attachment);
 
 		calc_frustum_planes(m_scene_data.proj_view);
 
+		const auto& loc_map = application::get().get_world_layer()->get_map();										// TODO: implement world chunk system and iterat over chunks
+		if (!loc_map->is_active()) 		// skip maps that are not-loaded/hidden/disabled
+			return;
+
 		vkCmdBeginRendering(cmd, &render_info);
 
-		material_instance* last_material = nullptr;
+		
+		// Grid drawing -------------------------------------------------
+		vkCmdBindPipeline(cmd, VK_PIPELINE_BIND_POINT_GRAPHICS, m_grid_pipeline);
+		vkCmdBindDescriptorSets(cmd, VK_PIPELINE_BIND_POINT_GRAPHICS, m_grid_pipeline_layout, 
+			0,  // First set
+			1,  // Descriptor count
+			&m_global_descriptor,  // scene data descriptor
+			0, nullptr );
+		vkCmdDraw(cmd, 4, 1, 0, 0);  // 4 vertices
+
+		ref<material_instance> last_material = nullptr;
 		material_pipeline* last_pipeline = nullptr;
-
-
-
-		const auto& loc_map = application::get().get_world_layer()->get_map();
-		if (!loc_map->is_active()) {		// skip maps that are not-loaded/hidden/disabled
-
-			vkCmdEndRendering(cmd);
-			return;
-		}
 
 
 		// TODO: add high-level culling for map-chunks that don't need rendering
 			// frustum culling
-			// oclution culling (map-chunks may be to big & flat, so occusion may not make sense)
+			// oclution culling (map-chunks may be to big & flat, so oclution may not make sense)
 
 
 		if (script_system::is_ready()) {
@@ -1182,16 +1299,16 @@ namespace PFF::render::vulkan {
 					// oclution culling
 
 				// only bind material and pipeline when needed
-				material_instance* loc_material = (mesh_asset.material != nullptr) ? mesh_asset.material : &m_default_material;
+				ref<material_instance> loc_material = (mesh_asset.material != nullptr) ? mesh_asset.material : m_default_material;
 				if (last_material != loc_material) {
 
 					last_material = loc_material;
-					material_pipeline* loc_pipeline = (loc_material->pipeline != nullptr) ? loc_material->pipeline : m_default_material.pipeline;
+					material_pipeline* loc_pipeline = (loc_material->pipeline != nullptr) ? loc_material->pipeline : m_default_material->pipeline;
 					if (last_pipeline != loc_pipeline) {
 
 						last_pipeline = loc_pipeline;
 						vkCmdBindPipeline(cmd, VK_PIPELINE_BIND_POINT_GRAPHICS, loc_pipeline->pipeline);
-						vkCmdBindDescriptorSets(cmd, VK_PIPELINE_BIND_POINT_GRAPHICS, loc_pipeline->layout, 0, 1, &globalDescriptor, 0, nullptr);
+						vkCmdBindDescriptorSets(cmd, VK_PIPELINE_BIND_POINT_GRAPHICS, loc_pipeline->layout, 0, 1, &m_global_descriptor, 0, nullptr);
 						COLLECTING_PERFORMANCE_DATA(m_renderer_metrik.pipline_binding_count++);
 					}
 					vkCmdBindDescriptorSets(cmd, VK_PIPELINE_BIND_POINT_GRAPHICS, loc_material->pipeline->layout, (u32)1, (u32)1, &loc_material->material_set, (u32)0, nullptr);
@@ -1209,7 +1326,7 @@ namespace PFF::render::vulkan {
 				vkCmdPushConstants(cmd, loc_material->pipeline->layout, VK_SHADER_STAGE_VERTEX_BIT, (u32)0, sizeof(GPU_draw_push_constants), &push_constants);
 				vkCmdBindIndexBuffer(cmd, mesh_asset.mesh_buffers.index_buffer.buffer, 0, VK_INDEX_TYPE_UINT32);
 
-#define KRIPLE_RENDERER_TO_DEBUG_MESH_BOOLEAN_OPERATIONS
+// #define KRIPLE_RENDERER_TO_DEBUG_MESH_BOOLEAN_OPERATIONS
 #ifdef KRIPLE_RENDERER_TO_DEBUG_MESH_BOOLEAN_OPERATIONS
 				vkCmdDrawIndexed(cmd, mesh_asset.surfaces[2].count, 1, mesh_asset.surfaces[2].startIndex, 0, 0);		// POSIBLE OPIMIZATION - Collect all transforms of mesh_comp pointing to same mesh_asset and draw indexed
 
@@ -1247,16 +1364,16 @@ namespace PFF::render::vulkan {
 				// oclution culling
 
 			// only bind material and pipeline when needed
-			material_instance* loc_material = (mesh_comp.material != nullptr) ? mesh_comp.material : &m_default_material;
+			ref<material_instance> loc_material = (mesh_comp.material != nullptr) ? mesh_comp.material : m_default_material;
 			if (last_material != loc_material) {
 
 				last_material = loc_material;
-				material_pipeline* loc_pipeline = (loc_material->pipeline != nullptr) ? loc_material->pipeline : m_default_material.pipeline;
+				material_pipeline* loc_pipeline = (loc_material->pipeline != nullptr) ? loc_material->pipeline : m_default_material->pipeline;
 				if (last_pipeline != loc_pipeline) {
 
 					last_pipeline = loc_pipeline;
 					vkCmdBindPipeline(cmd, VK_PIPELINE_BIND_POINT_GRAPHICS, loc_pipeline->pipeline);
-					vkCmdBindDescriptorSets(cmd, VK_PIPELINE_BIND_POINT_GRAPHICS, loc_pipeline->layout, 0, 1, &globalDescriptor, 0, nullptr);
+					vkCmdBindDescriptorSets(cmd, VK_PIPELINE_BIND_POINT_GRAPHICS, loc_pipeline->layout, 0, 1, &m_global_descriptor, 0, nullptr);
 					COLLECTING_PERFORMANCE_DATA(m_renderer_metrik.pipline_binding_count++);
 				}
 				vkCmdBindDescriptorSets(cmd, VK_PIPELINE_BIND_POINT_GRAPHICS, loc_material->pipeline->layout, (u32)1, (u32)1, &loc_material->material_set, (u32)0, nullptr);
@@ -1287,12 +1404,12 @@ namespace PFF::render::vulkan {
 		}
 
 #ifdef PFF_RENDERER_DEBUG_CAPABILITY
-
+		
 		if (m_debug_lines.vertices.size() > 0) {
 			
 			// binding debug material for lines
 			vkCmdBindPipeline(cmd, VK_PIPELINE_BIND_POINT_GRAPHICS, m_debug_lines_material_inst.pipeline->pipeline);
-			vkCmdBindDescriptorSets(cmd, VK_PIPELINE_BIND_POINT_GRAPHICS, m_debug_lines_material_inst.pipeline->layout, 0, 1, &globalDescriptor, 0, nullptr);
+			vkCmdBindDescriptorSets(cmd, VK_PIPELINE_BIND_POINT_GRAPHICS, m_debug_lines_material_inst.pipeline->layout, 0, 1, &m_global_descriptor, 0, nullptr);
 			vkCmdBindDescriptorSets(cmd, VK_PIPELINE_BIND_POINT_GRAPHICS, m_debug_lines_material_inst.pipeline->layout, (u32)1, (u32)1, &m_debug_lines_material_inst.material_set, (u32)0, nullptr);
 			
 			GPU_draw_push_constants push_constants;
@@ -1319,7 +1436,6 @@ namespace PFF::render::vulkan {
 		vkCmdEndRendering(cmd);
 	}
 
-
 	// called once per frame
 	void vk_renderer::calc_frustum_planes(const glm::mat4& pro_view) {
 
@@ -1338,7 +1454,7 @@ namespace PFF::render::vulkan {
 			__m128 plane_sse = _mm_set_ps(plane.w, plane.z, plane.y, plane.x);
 			__m128 length = _mm_sqrt_ps(_mm_dp_ps(plane_sse, plane_sse, 0x7F));
 			plane_sse = _mm_div_ps(plane_sse, length);
-			_mm_store_ps(&plane.x, plane_sse);
+			_mm_storeu_ps(&plane.x, plane_sse);
 		}
 	}
 
@@ -1365,6 +1481,7 @@ namespace PFF::render::vulkan {
 		return true;
 	}
 
+
 	void vk_renderer::draw_imgui(VkCommandBuffer cmd, VkImageView targetImageView) {
 
 		VkRenderingAttachmentInfo colorAttachment = init::attachment_info(targetImageView, nullptr, VK_IMAGE_LAYOUT_GENERAL);
@@ -1374,6 +1491,7 @@ namespace PFF::render::vulkan {
 		ImGui_ImplVulkan_RenderDrawData(ImGui::GetDrawData(), cmd);
 		vkCmdEndRendering(cmd);
 	}
+
 
 	void vk_renderer::create_swapchain(u32 width, u32 height) {
 				
@@ -1465,6 +1583,7 @@ namespace PFF::render::vulkan {
 		return new_mesh;
 	}
 
+
 	void vk_renderer::update_mesh(render::GPU_mesh_buffers& mesh, const std::vector<u32>& indices, const std::vector<PFF::geometry::vertex>& vertices) {
 		
 		const size_t vertexBufferSize = vertices.size() * sizeof(PFF::geometry::vertex);
@@ -1501,6 +1620,7 @@ namespace PFF::render::vulkan {
 		destroy_buffer(staging);
 	}
 	
+
 	void vk_renderer::update_mesh(PFF::geometry::procedural_mesh_asset& mesh, const std::vector<u32>& indices, const std::vector<PFF::geometry::vertex>& vertices) {
 
 		const size_t vertexBufferSize = vertices.size() * sizeof(PFF::geometry::vertex);
@@ -1581,6 +1701,7 @@ namespace PFF::render::vulkan {
 		//mesh.calc_bounds();
 	}
 
+
 	void vk_renderer::cleanup_procedural_mesh(PFF::geometry::procedural_mesh_asset& mesh) {
 
 		if (!mesh.staging_buffer.buffer || mesh.staging_buffer_size == 0 || !mesh.staging_data)
@@ -1591,6 +1712,7 @@ namespace PFF::render::vulkan {
 		mesh.staging_data = nullptr;
 		mesh.staging_buffer_size = 0;
 	}
+
 
 	void vk_renderer::release_mesh(render::GPU_mesh_buffers& mesh) {
 

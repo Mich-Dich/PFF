@@ -6,18 +6,23 @@
 #include <imgui.h>
 #include <ImGuizmo.h>
 
+#include "PFF_editor.h"
+
 #include "util/ui/pannel_collection.h"
-#include "util/ui/component_UI.h"
+#include "ui/component_UI.h"
 #include "engine/world/map.h"
 #include "engine/resource_management/mesh_serializer.h"
 
-#include "PFF_editor.h"
+#include "content_browser.h"
+#include "ui/logger_window.h"
 
 #include "world_viewport.h"
 
 namespace PFF {
 
+	static logger_window m_logger_window;
 
+	
 	world_viewport_window::world_viewport_window() {
 
 		serialize(serializer::option::load_from_file);
@@ -35,7 +40,9 @@ namespace PFF {
 		m_show_icon						= editor_layer->get_hide_icon();
 		m_hide_icon						= editor_layer->get_show_icon();
 
+		m_logger_window					= logger_window{};
 	}
+
 
 	world_viewport_window::~world_viewport_window() {
 
@@ -49,6 +56,7 @@ namespace PFF {
 		m_mesh_mini_icon.reset();
 		serialize(serializer::option::save_to_file);
 	}
+
 
 	void world_viewport_window::window() {
 
@@ -73,6 +81,9 @@ namespace PFF {
 
 			m_content_browser.window();
 
+			if (m_show_log_display)
+				m_logger_window.window();
+
 			window_outliner();
 			window_details();
 
@@ -83,8 +94,10 @@ namespace PFF {
 		m_deletion_queue.flush();
 	}
 
+
 	void world_viewport_window::show_possible_sub_window_options() {
 
+		ImGui::MenuItem("log display", "", &m_show_log_display);
 		ImGui::MenuItem("content browser 0", "", &m_show_content_browser_0);
 		ImGui::MenuItem("content browser 1", "", &m_show_content_browser_1);
 		ImGui::MenuItem("world settings", "", &m_show_world_settings);
@@ -93,6 +106,7 @@ namespace PFF {
 		ImGui::MenuItem("details", "", &m_show_details);
 	}
 
+
 	void world_viewport_window::serialize(serializer::option option) {
 
 		serializer::yaml(config::get_filepath_from_configtype(application::get().get_project_path(), config::file::editor), "world_viewport_windows_to_show", option)
@@ -100,20 +114,21 @@ namespace PFF {
 			.entry("show_general_debugger", m_show_general_debugger)
 			.entry("show_outliner", m_show_outliner)
 			.entry("show_details", m_show_details)
-			.entry("show_world_settings", m_show_world_settings);
+			.entry("show_log_display", m_show_world_settings)
+			.entry("show_world_settings", m_show_log_display);
 
 		serializer::yaml(config::get_filepath_from_configtype(application::get().get_project_path(), config::file::editor), "guizmo_data", option)
 			.entry("operation", m_gizmo_operation);
 
 
 
-		if (option == serializer::option::save_to_file && m_selected_entity == entity())
+		if (option == serializer::option::save_to_file && m_selected_entitys.main_item == entity())
 			return;
 
 		UUID selected_ID{};
 		if (option == serializer::option::save_to_file) {
 
-			selected_ID = m_selected_entity.get_UUID();
+			selected_ID = m_selected_entitys.main_item.get_UUID();
 			LOG(Trace, "Save UUID: " << selected_ID);
 		}
 
@@ -126,7 +141,7 @@ namespace PFF {
 		//	LOG(Trace, "Load UUID: " << selected_ID);
 		//	if (auto loc_entity = application::get().get_world_layer()->get_map()->get_entity_by_UUID(selected_ID)) {
 
-		//		m_selected_entity = loc_entity;
+		//		m_selected_entitys.main_item = loc_entity;
 		//		LOG(Info, "FOUND UUID: " << selected_ID);
 		//	}
 		//}
@@ -145,7 +160,7 @@ namespace PFF {
 			ImGui::PushStyleColor(ImGuiCol_Button, IM_COL32(240, 240, 240, 20));
 			ImGui::PushStyleVar(ImGuiStyleVar_FramePadding, ImVec2(0));
 			
-			if (ImGui::ImageButton(((mesh_comp.shoudl_render) ? m_show_icon->get_descriptor_set() : m_hide_icon->get_descriptor_set()), ImVec2(15)))
+			if (ImGui::ImageButton(((mesh_comp.shoudl_render) ? m_hide_icon->get_descriptor_set() : m_show_icon->get_descriptor_set()), ImVec2(15)))
 				mesh_comp.shoudl_render = !mesh_comp.shoudl_render;
 
 			ImGui::PopStyleVar();
@@ -154,69 +169,53 @@ namespace PFF {
 		}
 	}
 
-	void world_viewport_window::display_entity_children(ref<map> loc_map, entity& entity, u64& index, const f32 pos_x, const ImVec2 size, const f32 position_x) {
 
-		const ImVec2 pos_offset = ImVec2(ImGui::GetStyle().WindowPadding.x, 0);
-		ImDrawList* draw_list = ImGui::GetWindowDrawList();
-		auto& relation_comp = entity.get_component<relationship_component>();
-		for (const auto child_ID : relation_comp.children_ID) {
+	void world_viewport_window::display_entity_children(ref<map> loc_map, PFF::entity entity) {
 
-			PFF::entity child = loc_map->get_entity_by_UUID(child_ID);
-			if (!child) {
-
-				LOG(Warn, "Bad UUID pointer: " << child_ID);
-				continue;
-			}			
-
-			if (index % 2) {
-
-				const ImVec2 pos = ImVec2(pos_x, ImGui::GetCursorScreenPos().y -2);
-				draw_list->AddRectFilled(pos, pos + size, IM_COL32(240, 240, 240, 10));
-			}
+		const auto& name_comp = entity.get_component<name_component>();
+		const auto& relationship_comp = entity.get_component<relationship_component>();
+		for (size_t x = 0; x < relationship_comp.children_ID.size(); x++) {
 			
-			const char* name = child.get_component<tag_component>().tag.c_str();
+			ImGui::TableNextRow();
+			ImGui::TableSetColumnIndex(0);
+			
+			PFF::entity child = loc_map->get_entity_by_UUID(relationship_comp.children_ID[x]);
+			add_show_hide_icon(child);
 
-			add_show_hide_icon(entity);
+			const auto& child_name_comp = child.get_component<name_component>();
+			const auto& child_relationship_comp = child.get_component<relationship_component>();
+			if (child_relationship_comp.children_ID.empty()) {
 
-			std::string item_name = "outliner_entity_" + index++;
-			ImGui::PushID(item_name.c_str());
-			// Does have childer itself
-			if (child.get_component<relationship_component>().children_ID.size() > static_cast<size_t>(0)) {
-
-				const bool is_open = ImGui::TreeNodeEx(name, outliner_base_flags | ((m_selected_entity == child) ? ImGuiTreeNodeFlags_Selected : 0));
-				ImGui::PopID();
-
+				ImGui::TreeNodeEx(child_name_comp.name.c_str(), ImGuiTreeNodeFlags_SpanAllColumns | ImGuiTreeNodeFlags_Leaf | ImGuiTreeNodeFlags_Bullet | ImGuiTreeNodeFlags_NoTreePushOnOpen | ((m_selected_entitys.main_item == child) ? ImGuiTreeNodeFlags_Selected : 0));
 				if (ImGui::IsItemClicked())
-					m_selected_entity = child;
+					m_selected_entitys.main_item = child;
 
-				list_all_components(entity, position_x);
-				outliner_entity_popup(item_name.c_str(), loc_map, child);
+				ImGui::TableNextColumn();
+				list_all_components(child);
 
-				if (is_open) {
-
-					display_entity_children(loc_map, child, index, pos_x, size, position_x);
-					ImGui::TreePop();
-				}
 				continue;
 			}
 
-			// Does not have more childer
-			
-			ImGui::TreeNodeEx(name, outliner_base_flags | ImGuiTreeNodeFlags_Leaf | ImGuiTreeNodeFlags_NoTreePushOnOpen | ((m_selected_entity == child) ? ImGuiTreeNodeFlags_Selected : 0));
-			ImGui::PopID();
-
+			const auto flags = ImGuiTreeNodeFlags_OpenOnArrow | ImGuiTreeNodeFlags_OpenOnDoubleClick | ImGuiTreeNodeFlags_SpanAllColumns;
+			const bool is_open = ImGui::TreeNodeEx(child_name_comp.name.c_str(), flags | ((m_selected_entitys.main_item == child) ? ImGuiTreeNodeFlags_Selected : 0));
 			if (ImGui::IsItemClicked())
-				m_selected_entity = child;
+				m_selected_entitys.main_item = child;
 
-			list_all_components(entity, position_x);
-			outliner_entity_popup(item_name.c_str(), loc_map, child);
+			ImGui::TableNextColumn();
+			list_all_components(child);
+
+			if (is_open) {
+
+				display_entity_children(loc_map, child);
+				ImGui::TreePop();
+			}
 		}
 	}
 
-	void world_viewport_window::list_all_components(PFF::entity entity, const f32 position_x) {
 
-		ImGui::SameLine();
-		ImGui::SetCursorPosX(position_x);
+	void world_viewport_window::list_all_components(PFF::entity entity) {
+
+		//ImGui::SameLine();
 
 		if (entity.has_component<relationship_component>()) {
 
@@ -245,10 +244,13 @@ namespace PFF {
 		ImGui::NewLine();
 	}
 
+
 	void world_viewport_window::window_outliner() {
 
 		if (!m_show_outliner)
 			return;
+
+		bool is_any_item_hovered = false;
 
 		ImGuiWindowFlags window_flags{};
 		ImGui::Begin("Outliner", &m_show_outliner, window_flags);
@@ -261,37 +263,27 @@ namespace PFF {
 
 			LOG(Trace, "Add folder to outliner: NOT IMPLEMENTED YET");
 		}
-				
+
 		ImDrawList* draw_list = ImGui::GetWindowDrawList();
 		const auto style = ImGui::GetStyle();
 		const ImVec2 pos_offset = ImVec2(style.WindowPadding.x, 0);
 		const f32 pos_x = ImGui::GetCursorScreenPos().x - style.WindowPadding.x;
 		const ImVec2 size = ImVec2(ImGui::GetContentRegionAvail().x, ImGui::GetTextLineHeightWithSpacing()) + pos_offset;
 
-		UI::shift_cursor_pos(40, 0);
-		UI::begin_table("##window_outliner", false);
+		//UI::shift_cursor_pos(20, 0);
+		static ImGuiTableFlags flags = ImGuiTableFlags_Resizable | ImGuiTableFlags_RowBg | ImGuiTableFlags_NoBordersInBody;
+		ImGui::BeginTable("world outliner", 2, flags);
+		ImGui::TableSetupColumn("entity", ImGuiTableColumnFlags_NoHide);
+		ImGui::TableSetupColumn("components", ImGuiTableColumnFlags_WidthFixed, 70.f);
+		ImGui::TableHeadersRow();
 
-		ImGui::TableNextRow();
-		ImGui::TableSetColumnIndex(0);
-		ImGui::Text("entity");
-		ImGui::TableSetColumnIndex(1);
-		const f32 position_x = ImGui::GetCursorPosX();
-		ImGui::Text("components");
+		UI::mouse_interation item_mouse_interation = UI::mouse_interation::none;
+		const auto& map_ref = application::get().get_world_layer()->get_map();
+		for (const auto entity_ID : map_ref->m_registry.view<entt::entity>()) {
 
-		UI::end_table();
-
-		u64 index = 0;
-		const auto& loc_map = application::get().get_world_layer()->get_map();
-		for (const auto entity_ID : loc_map->m_registry.view<entt::entity>()) {
-
-			PFF::entity loc_entity = entity(entity_ID, loc_map.get());
-			const auto& tag_comp = loc_entity.get_component<tag_component>();
-
-			if (index % 2) {
-
-				const ImVec2 pos = ImVec2(pos_x, ImGui::GetCursorScreenPos().y -2);
-				draw_list->AddRectFilled(pos, pos + size, IM_COL32(240, 240, 240, 10));
-			}
+			PFF::entity loc_entity = entity(entity_ID, map_ref.get());
+			const auto& name_comp = loc_entity.get_component<name_component>();
+			const ImVec4& color = util::get_item_selection_color(m_selected_entitys, loc_entity);
 
 			// has relationship
 			if (loc_entity.has_component<relationship_component>()) {
@@ -300,63 +292,87 @@ namespace PFF {
 				if (relation_comp.parent_ID != 0)	// skip all children in main display (will be displayed in [display_entity_children()])
 					continue;
 
+				ImGui::TableNextRow();
+				ImGui::TableSetColumnIndex(0);
 				add_show_hide_icon(loc_entity);
+				
+				//std::string item_name = "outliner_entity_" + index++;
+				//ImGui::PushID(item_name.c_str());
+				const auto flags = ImGuiTreeNodeFlags_OpenOnArrow | ImGuiTreeNodeFlags_OpenOnDoubleClick | ImGuiTreeNodeFlags_SpanAllColumns;
+				ImGui::PushStyleColor(ImGuiCol_Header, color);
+				const bool is_open = ImGui::TreeNodeEx(name_comp.name.c_str(), flags | ((m_selected_entitys.main_item == loc_entity) ? ImGuiTreeNodeFlags_Selected : 0));
+				item_mouse_interation = UI::get_mouse_interation_on_item();
+				ImGui::PopStyleColor();
+				//ImGui::PopID();
 
-				std::string item_name = "outliner_entity_" + index++;
-				ImGui::PushID(item_name.c_str());
-				const bool is_open = ImGui::TreeNodeEx(tag_comp.tag.c_str(), outliner_base_flags | ((m_selected_entity == loc_entity) ? ImGuiTreeNodeFlags_Selected : 0));
-				ImGui::PopID();
+				ImGui::TableNextColumn();
+				list_all_components(loc_entity);
 
-				if (ImGui::IsItemClicked())
-					m_selected_entity = loc_entity;
-
-				list_all_components(loc_entity, position_x);
 				if (is_open) {
 
-					display_entity_children(loc_map, loc_entity, index, pos_x, size, position_x);
+					display_entity_children(map_ref, loc_entity);
 					ImGui::TreePop();
 				}
 
 				continue;
 			}
 
-			// has no relationship
+			ImGui::TableNextRow();
+			ImGui::TableSetColumnIndex(0);
 			add_show_hide_icon(loc_entity);
 			
-			std::string item_name = "outliner_entity_" + index++;
-			ImGui::PushID(item_name.c_str());
-			ImGui::TreeNodeEx(tag_comp.tag.c_str(), outliner_base_flags | ImGuiTreeNodeFlags_Leaf | ImGuiTreeNodeFlags_NoTreePushOnOpen | ((m_selected_entity == loc_entity) ? ImGuiTreeNodeFlags_Selected : 0));
-			ImGui::PopID();
+			ImGui::PushStyleColor(ImGuiCol_Header, color);
+			ImGui::TreeNodeEx(name_comp.name.c_str(), ImGuiTreeNodeFlags_SpanAllColumns | ImGuiTreeNodeFlags_Leaf | ImGuiTreeNodeFlags_Bullet | ImGuiTreeNodeFlags_NoTreePushOnOpen | ((m_selected_entitys.main_item == loc_entity) ? ImGuiTreeNodeFlags_Selected : 0));
+			item_mouse_interation = UI::get_mouse_interation_on_item();
+			ImGui::PopStyleColor();
 
-			if (ImGui::IsItemClicked())
-				m_selected_entity = loc_entity;
+			util::process_selection_input<PFF::entity>(m_selected_entitys, item_mouse_interation, loc_entity,"outliner_entity_context_menu", []() {
 
-			list_all_components(loc_entity, position_x);
-			outliner_entity_popup(item_name.c_str(), loc_map, loc_entity);
+				LOG(Warn, "Not implemented yet")
+			});
+
+			ImGui::TableNextColumn();
+			list_all_components(loc_entity);
 		}
 
+		ImGui::EndTable();
 
-		// Reset m_selected_entity when clicking on empty space
+		// Reset m_selected_entitys.main_item when clicking on empty space
 		if (ImGui::IsWindowHovered() && ImGui::IsMouseClicked(ImGuiMouseButton_Left) && !ImGui::IsAnyItemHovered())
-			m_selected_entity = entity();
+			m_selected_entitys.main_item = entity();
 
-		ImGui::End();
-	}
+		if (ImGui::BeginPopupContextItem("outliner_entity_context_menu")) {
 
-	void world_viewport_window::outliner_entity_popup(const char* name, ref<map> map, PFF::entity entity) {
+			if (ImGui::MenuItem("Rename entity"))
+				LOG(Info, "NOT IMPLEMENTED YET");
 
-		// Add a popup menu to the tree node
-		if (ImGui::BeginPopupContextItem(name, ImGuiPopupFlags_MouseButtonRight)) {
-			if (ImGui::MenuItem("Delete")) {
+			if (ImGui::MenuItem("Delete entity")) {								// open popup to display consequences of deleting file and ask again
 
-				if (entity == m_selected_entity)
-					m_selected_entity = PFF::entity{};
+				if (!m_selected_entitys.main_item.has_component<relationship_component>()) {
 
-				m_deletion_queue.push_func([=]() {map->destroy_entity(entity); });
+					LOG(Info, "need to cleanup realtionships, TODO: add settings to decide if children will also be deleted or just reparented")
+				}
+
+				if (m_selected_entitys.main_item)
+					m_deletion_queue.push_func([&]() {
+						if (!m_selected_entitys.main_item.has_component<relationship_component>()) {
+
+							LOG(Info, "need to cleanup realtionships, TODO: add settings to decide if children will also be deleted or just reparented")
+						}
+						const auto& map_ref = application::get().get_world_layer()->get_map();
+						map_ref->destroy_entity(m_selected_entitys.main_item);
+						m_selected_entitys.main_item = PFF::entity{};
+					});
 			}
+
+			// const auto interaction = UI::get_mouse_interation_on_window();
+			// if (UI::get_mouse_interation_on_window() == UI::mouse_interation::none && !UI::is_holvering_window())
+			// 	ImGui::CloseCurrentPopup();
 
 			ImGui::EndPopup();
 		}
+
+		ImGui::End();
 	}
 
 
@@ -366,8 +382,11 @@ namespace PFF {
 			return;
 
 		ImGuiWindowFlags window_flags{};
-		if (!ImGui::Begin("Details", &m_show_details, window_flags))
+		if (!ImGui::Begin("Details", &m_show_details, window_flags)) {
+			
+			ImGui::End();
 			return;
+		}
 
 		const auto button_size = ImGui::CalcTextSize("Add Component").x;
 
@@ -375,33 +394,31 @@ namespace PFF {
 		std::string search_text = "";
 		if (UI::serach_input("##serach_in_world_viewport_details_panel", search_text)) {
 
-			LOG(Debug, "Search not implemented yet");
+			LOG(Info, "Not implemented yet");
 		}
 
 		ImGui::SameLine();
 		if (ImGui::Button("Add Component"), button_size) {
 
-
+			// LOG(Info, "Not implemented yet");
 		}
 
-		if (m_selected_entity == entity()) {
+		if (m_selected_entitys.main_item == entity()) {
 
 			ImGui::Text("No entity selected");
-
 			ImGui::End();
 			return;
 		}
 
-		UI::display_tag_comp(m_selected_entity);
-
-		UI::display_transform_comp(m_selected_entity);
-
-		UI::try_display_mesh_comp(m_selected_entity);
-
-		UI::try_display_procedural_script_comp(m_selected_entity);
+		UI::display_name_comp(m_selected_entitys.main_item);
+		UI::display_transform_comp(m_selected_entitys.main_item, PFF_editor::get().get_editor_settings_ref().display_rotator_in_degrees);
+		UI::try_display_mesh_comp(m_selected_entitys.main_item);
+		UI::try_display_procedural_script_comp(m_selected_entitys.main_item);
+		UI::try_display_relationship_comp(m_selected_entitys.main_item);
 
 		ImGui::End();
 	}
+
 
 	void world_viewport_window::window_general_debugger() {
 
@@ -415,38 +432,38 @@ namespace PFF {
 
 				const f32 tab_width = 60.f;		// TODO: move into [default_tab_width] variable in config-file
 				ImGui::SetNextItemWidth(tab_width);
-				ImGui::BeginTabItem("Inputs");
 
+				if (ImGui::BeginTabItem("Inputs")) {
 
-				UI::begin_table("display_input_actions_params", false);
-				for (input_action* action : *application::get().get_world_layer()->get_current_player_controller()->get_input_mapping()) {						// get input_action
+					UI::begin_table("display_input_actions_params", false);
+					for (input_action* action : *application::get().get_world_layer()->get_current_player_controller()->get_input_mapping()) {						// get input_action
 
-					switch (action->value) {
-					case input::action_type::boolean:
-						UI::table_row(action->get_name(), action->data.boolean, ImGuiInputTextFlags_ReadOnly);
-						break;
+						switch (action->value) {
+						case input::action_type::boolean:
+							UI::table_row(action->get_name(), action->data.boolean, ImGuiInputTextFlags_ReadOnly);
+							break;
 
-					case input::action_type::vec_1D:
-						UI::table_row(action->get_name(), action->data.vec_1D, ImGuiInputTextFlags_ReadOnly);
-						break;
+						case input::action_type::vec_1D:
+							UI::table_row(action->get_name(), action->data.vec_1D, ImGuiInputTextFlags_ReadOnly);
+							break;
 
-					case input::action_type::vec_2D:
-						UI::table_row(action->get_name(), action->data.vec_2D, ImGuiInputTextFlags_ReadOnly);
-						break;
+						case input::action_type::vec_2D:
+							UI::table_row(action->get_name(), action->data.vec_2D, ImGuiInputTextFlags_ReadOnly);
+							break;
 
-					case input::action_type::vec_3D:
-						UI::table_row(action->get_name(), action->data.vec_3D, ImGuiInputTextFlags_ReadOnly);
-						break;
+						case input::action_type::vec_3D:
+							UI::table_row(action->get_name(), action->data.vec_3D, ImGuiInputTextFlags_ReadOnly);
+							break;
 
-					default:
-						break;
+						default:
+							break;
+						}
 					}
+					UI::end_table();
+
+					ImGui::EndTabItem();
 				}
-				UI::end_table();
-
-
-				ImGui::EndTabItem();
-
+				
 				ImGui::SetNextItemWidth(tab_width);
 				if (ImGui::BeginTabItem("Test")) {
 
@@ -473,6 +490,57 @@ namespace PFF {
 		}
 		ImGui::End();
 	}
+
+
+	void world_viewport_window::process_drop_of_file(const std::filesystem::path path, const bool set_as_selected_entity) {
+
+		std::filesystem::path absolute_path = application::get().get_project_path() / CONTENT_DIR / path;
+		asset_file_header loc_asset_file_header;
+		if (path.extension() == ".pffasset") {
+
+			serializer::binary(absolute_path, "PFF_asset_file", serializer::option::load_from_file)
+				.entry(loc_asset_file_header);
+
+		} else if (path.extension() == ".pffworld") {
+
+			serializer::yaml(absolute_path, "PFF_asset_file", serializer::option::load_from_file)
+				.entry(KEY_VALUE(loc_asset_file_header.file_version))
+				.entry(KEY_VALUE(loc_asset_file_header.type))
+				.entry(KEY_VALUE(loc_asset_file_header.timestamp));
+		}
+
+		switch (loc_asset_file_header.type) {
+
+		case file_type::mesh: {
+
+			LOG(Trace, "Adding static mesh, Name: " << "SM_" + path.filename().replace_extension("").string());
+
+			mesh_component mesh_comp{};
+			mesh_comp.asset_path = path;
+
+			if (m_selected_entitys.main_item != entity()) {
+
+				m_selected_entitys.main_item.add_mesh_component(mesh_comp);
+				break;
+			}
+
+			const auto loc_map = application::get().get_world_layer()->get_map();
+			entity loc_entitiy = loc_map->create_entity("SM_" + path.filename().replace_extension("").string());
+			loc_entitiy.add_mesh_component(mesh_comp);
+
+			if (set_as_selected_entity)
+				m_selected_entitys.main_item = loc_entitiy;
+
+			//mesh_comp.mesh_asset = static_mesh_asset_manager::get_from_path(util::extract_path_from_project_content_folder(path));
+			//mesh_comp.material = GET_RENDERER.get_default_material_pointer();		// get correct shader
+
+		} break;
+
+		default:
+			break;
+		}
+	}
+
 
 	void world_viewport_window::window_main_viewport() {
 
@@ -506,109 +574,24 @@ namespace PFF {
 
 		if (ImGui::BeginDragDropTarget()) {
 
-			if (const ImGuiPayload* payload = ImGui::AcceptDragDropPayload("PROJECT_CONTENT_FILE")) {
+			if (const ImGuiPayload* payload = ImGui::AcceptDragDropPayload(DRAG_DROP_CONTENT_BROWSER_MESH)) {
 
 				const std::filesystem::path file_path = (const char*)payload->Data;
-				asset_file_header loc_asset_file_header;
-				if (file_path.extension() == ".pffasset") {
-
-					serializer::binary(file_path, "PFF_asset_file", serializer::option::load_from_file)
-						.entry(loc_asset_file_header);
-
-				} else if (file_path.extension() == ".pffworld") {
-
-					serializer::yaml(file_path, "PFF_asset_file", serializer::option::load_from_file)
-						.entry(KEY_VALUE(loc_asset_file_header.file_version))
-						.entry(KEY_VALUE(loc_asset_file_header.type))
-						.entry(KEY_VALUE(loc_asset_file_header.timestamp));
-				}
-
-				switch (loc_asset_file_header.type) {
-
-				case file_type::mesh:
-				{
-
-					LOG(Trace, "Adding static mesh, Name: " << "SM_" + file_path.filename().replace_extension("").string());
-
-					mesh_component mesh_comp{};
-					mesh_comp.asset_path = util::extract_path_from_project_content_folder(file_path);
-
-					if (m_selected_entity != entity()) {
-
-						m_selected_entity.add_mesh_component(mesh_comp);
-						break;
-					}
-
-					const auto loc_map = application::get().get_world_layer()->get_map();
-					entity loc_entitiy = loc_map->create_entity("SM_" + file_path.filename().replace_extension("").string());
-
-					loc_entitiy.add_mesh_component(mesh_comp);
-
-					//mesh_comp.mesh_asset = static_mesh_asset_manager::get_from_path(util::extract_path_from_project_content_folder(file_path));
-					//mesh_comp.material = GET_RENDERER.get_default_material_pointer();		// get correct shader
-
-				} break;
-
-				default:
-					break;
-				}
-
+				process_drop_of_file(file_path, true);
+				// m_selected_entitys.main_item = 
 			}
 
-			else if (const ImGuiPayload* payload = ImGui::AcceptDragDropPayload("PROJECT_CONTENT_FILE_MULTI")) {
+			else if (const ImGuiPayload* payload = ImGui::AcceptDragDropPayload(DRAG_DROP_CONTENT_BROWSER_MULTI)) {
 
-				std::set<std::filesystem::path>* file_path = static_cast<std::set<std::filesystem::path>*>(payload->Data);
+				util::selected_items<std::filesystem::path>** received_ptr = static_cast<util::selected_items<std::filesystem::path>**>(payload->Data);
+				util::selected_items<std::filesystem::path>* file_paths = *received_ptr;
+				for (const std::filesystem::path path : (*file_paths).item_set)
+					process_drop_of_file(path, false);
 
-				for (const std::filesystem::path file_path : *file_path) {
-					asset_file_header loc_asset_file_header;
-					if (file_path.extension() == ".pffasset") {
-
-						serializer::binary(file_path, "PFF_asset_file", serializer::option::load_from_file)
-							.entry(loc_asset_file_header);
-
-					} else if (file_path.extension() == ".pffworld") {
-
-						serializer::yaml(file_path, "PFF_asset_file", serializer::option::load_from_file)
-							.entry(KEY_VALUE(loc_asset_file_header.file_version))
-							.entry(KEY_VALUE(loc_asset_file_header.type))
-							.entry(KEY_VALUE(loc_asset_file_header.timestamp));
-					}
-
-					switch (loc_asset_file_header.type) {
-
-					case file_type::mesh:
-					{
-
-						LOG(Trace, "Adding static mesh, Name: " << "SM_" + file_path.filename().replace_extension("").string());
-
-						mesh_component mesh_comp{};
-						mesh_comp.asset_path = util::extract_path_from_project_content_folder(file_path);
-
-						if (m_selected_entity != entity()) {
-
-							m_selected_entity.add_mesh_component(mesh_comp);
-							break;
-						}
-
-						const auto loc_map = application::get().get_world_layer()->get_map();
-						entity loc_entitiy = loc_map->create_entity("SM_" + file_path.filename().replace_extension("").string());
-
-						loc_entitiy.add_mesh_component(mesh_comp);
-
-						//mesh_comp.mesh_asset = static_mesh_asset_manager::get_from_path(util::extract_path_from_project_content_folder(file_path));
-						//mesh_comp.material = GET_RENDERER.get_default_material_pointer();		// get correct shader
-
-					} break;
-
-					default:
-						break;
-					}
-				}
-
+				process_drop_of_file(file_paths->main_item, true);
 			}
 
 			ImGui::EndDragDropTarget();
-
 		}
 
 
@@ -677,7 +660,7 @@ namespace PFF {
 		application::get().get_imgui_layer()->show_renderer_metrik();
 		window_renderer_backgrond_effect();
 
-		if (UI::get_mouse_interation_on_window() == UI::mouse_interation::right_double_click)
+		if (UI::get_mouse_interation_on_window() == UI::mouse_interation::right_double_clicked)
 			ImGui::OpenPopup("viewport additional functionality");
 		if (ImGui::BeginPopup("viewport additional functionality")) {
 
@@ -691,7 +674,7 @@ namespace PFF {
 		}
 
 		// ---------------------------------------- IGuizmo ----------------------------------------
-		if (m_selected_entity) {
+		if (m_selected_entitys.main_item) {
 
 			ImGuizmo::SetDrawlist();
 			ImGuizmo::SetRect(ImGui::GetWindowPos().x, ImGui::GetWindowPos().y, (f32)ImGui::GetWindowWidth(), (f32)ImGui::GetWindowHeight());
@@ -703,7 +686,7 @@ namespace PFF {
 			projection_matrix[2][2] = -projection_matrix[2][2];
 			projection_matrix[3][2] = -projection_matrix[3][2];
 
-			glm::mat4& entity_transform = (glm::mat4&)m_selected_entity.get_component<transform_component>();
+			glm::mat4& entity_transform = (glm::mat4&)m_selected_entitys.main_item.get_component<transform_component>();
 			glm::mat4 buffer_transform = entity_transform;
 
 			if (ImGuizmo::Manipulate(glm::value_ptr(view_matrix), glm::value_ptr(projection_matrix),
@@ -711,13 +694,14 @@ namespace PFF {
 
 				const glm::mat4 root_transform = buffer_transform;
 				buffer_transform = glm::inverse(buffer_transform) * entity_transform;		// trandform delta
-				m_selected_entity.propegate_transform_to_children(root_transform, buffer_transform);
+				m_selected_entitys.main_item.propegate_transform_to_children(root_transform, buffer_transform);
 			}
 		}
 
 
 		ImGui::End();
 	}
+
 
 	void world_viewport_window::window_renderer_backgrond_effect() {
 
@@ -740,31 +724,37 @@ namespace PFF {
 		ImGui::SetNextWindowBgAlpha(0.8f); // Transparent background
 		if (ImGui::Begin("Render Debug", &m_show_renderer_backgrond_effect, window_flags)) {
 
-			render::compute_effect& selected = application::get().get_renderer().get_current_background_effect();
 			int& background_effect_index = application::get().get_renderer().get_current_background_effect_index();
 
 			UI::begin_table("renderer background values", true, ImVec2(300, 0), 0, true, 0.3f);
 
-			UI::table_row_slider<int>("Effects", background_effect_index, 0, application::get().get_renderer().get_number_of_background_effects() - 1.f);
+			UI::table_row_slider<int>("Effects", background_effect_index, 0, 3);
 
-			if (background_effect_index == 0) {}
+			if (background_effect_index < 3) {
 
-			else if (background_effect_index == 1) {
+				render::compute_effect& selected = application::get().get_renderer().get_current_background_effect();
+				if (background_effect_index == 0) {}
 
-				UI::table_row_slider("top color", selected.data.data1);
-				UI::table_row_slider("bottom color", selected.data.data2);
+				else if (background_effect_index == 1) {
 
-			} else if (background_effect_index == 2) {
+					UI::table_row_slider("top color", selected.data.data1);
+					UI::table_row_slider("bottom color", selected.data.data2);
 
-				UI::table_row_slider<glm::vec3>("bottom color", (glm::vec3&)selected.data.data1);
-				UI::table_row_slider<f32>("star amount", selected.data.data1[3]);
+				} else if (background_effect_index == 2) {
 
-			} else {
+					UI::table_row_slider<glm::vec3>("bottom color", (glm::vec3&)selected.data.data1);
+					UI::table_row_slider<f32>("star amount", selected.data.data1[3]);
 
-				UI::table_row_slider("data 1", selected.data.data1);
-				UI::table_row_slider("data 2", selected.data.data2);
-				UI::table_row_slider("data 3", selected.data.data3);
-				UI::table_row_slider("data 4", selected.data.data4);
+				} else {
+
+					UI::table_row_slider("data 1", selected.data.data1);
+					UI::table_row_slider("data 2", selected.data.data2);
+					UI::table_row_slider("data 3", selected.data.data3);
+					UI::table_row_slider("data 4", selected.data.data4);
+				}
+
+			} else if (background_effect_index == 3) {
+				ImGui::Text("settings for the dynamic sky box are in the world settings window");
 			}
 
 			UI::end_table();
@@ -773,17 +763,90 @@ namespace PFF {
 		ImGui::End();
 	}
 
+
 	void world_viewport_window::window_world_settings() {
 
 		if (!m_show_world_settings)
 			return;
 
 		ImGuiWindowFlags window_flags{};
-		if (ImGui::Begin("World Settings", &m_show_world_settings, window_flags)) {}
+		if (ImGui::Begin("World Settings", &m_show_world_settings, window_flags)) {
 
-		ImGui::End();
+			if (ImGui::CollapsingHeader("Lighting", ImGuiTreeNodeFlags_DefaultOpen)) {
+
+				auto& skybox_data = GET_RENDERER.get_scene_data_ref();
+				
+				UI::begin_table("window_world_settings_table", false);
+				UI::table_row_slider("Ambient Color", skybox_data.ambient_color);
+				UI::table_row_slider("Sunlight Direction", skybox_data.sunlight_direction);
+				UI::table_row_slider("Sunlight Color", skybox_data.sunlight_color);
+				UI::end_table();
+			}
+
+			if (ImGui::CollapsingHeader("Dynamic Sky Box", ImGuiTreeNodeFlags_DefaultOpen)) {
+
+				int& background_effect_index = application::get().get_renderer().get_current_background_effect_index();
+
+				if (background_effect_index != 3) {
+
+					ImGui::Text("The following settings will only be used if the background effect is set to the [dynamic sky box]");
+					ImGui::BeginDisabled();
+				}
+
+				auto& skybox_data = application::get().get_world_layer()->get_map()->get_dynamic_skybox_data_ref();
+				// auto& skybox_data = GET_RENDERER.get_skybox_data_ref();
+
+				ImGui::Indent();
+				if (ImGui::CollapsingHeader("Sky Settings", ImGuiTreeNodeFlags_DefaultOpen)) {
+					
+					UI::begin_table("window_world_settings_table", false);				
+					UI::table_row_slider("Middle Sky Color", skybox_data.middle_sky_color);
+					UI::table_row_slider("Horizon Sky Color", skybox_data.horizon_sky_color);
+					UI::end_table();
+				}
+				
+				if (ImGui::CollapsingHeader("Sun Settings", ImGuiTreeNodeFlags_DefaultOpen)) {
+
+					UI::begin_table("window_world_settings_table", false);
+					UI::table_row_slider("Distance", skybox_data.sun_distance, 1.f, 1000000.f);
+					UI::table_row_slider("Radius", skybox_data.sun_radius, 1.f, 10000.f);
+					UI::table_row_slider("Core Falloff", skybox_data.sun_core_falloff, .2f, .99f);
+					UI::table_row_slider("Glow Halo Size", skybox_data.sun_glow_radius_multiplier, 1.f, 50.f);
+					UI::table_row_slider("Glow Intensity", skybox_data.sun_glow_intensity, .0f, 2.f);
+					UI::table_row_slider("Glow Falloff", skybox_data.sun_glow_falloff, .1f, 5.f);
+					UI::end_table();
+				}
+
+				if (ImGui::CollapsingHeader("Cloud Settings", ImGuiTreeNodeFlags_DefaultOpen)) {
+
+					UI::begin_table("window_world_settings_table", false);
+					UI::table_row_slider("Height", skybox_data.cloud_height, 1000.f, 10000.f);
+					UI::table_row_slider("Density", skybox_data.cloud_density, 0.f, 1.f);
+					UI::table_row_slider("Color", skybox_data.cloud_color);
+					UI::table_row_slider("Speed", skybox_data.cloud_speed, -1.f, 1.f);
+					UI::table_row_slider("Scale", skybox_data.cloud_scale, .01f, 10.f);
+					UI::table_row_slider("Coverage", skybox_data.cloud_coverage, 0.f, 1.f);
+					UI::table_row_slider_int("Octaves", (int&)skybox_data.cloud_octaves, 1, 5);
+					UI::table_row_slider("Persistence", skybox_data.cloud_persistence, .3f, .7f);
+					UI::table_row_slider("Detail", skybox_data.cloud_detail, .01f, 5.f);
+
+					// UI::table_row_slider("thickness", skybox_data.cloud_thickness, .1f, .5f);
+					// UI::table_row_slider("floor_height", skybox_data.cloud_floor_height, .1f, .5f);
+					// UI::table_row_slider("ceil_height", skybox_data.cloud_ceil_height, .1f, .5f);
+					// UI::table_row_slider("shape_scale", skybox_data.cloud_shape_scale, .1f, .5f);
+					// UI::table_row_slider("detail_scale", skybox_data.cloud_detail_scale, .1f, .5f);
+					// UI::table_row_slider("height_ramp", skybox_data.cloud_height_ramp, .1f, .5f);
+					// UI::table_row_slider("depth_attenuation", skybox_data.cloud_depth_attenuation, .1f, .5f);
+
+					UI::end_table();
+				}
+				ImGui::Unindent();
+
+				if (background_effect_index != 3)
+					ImGui::EndDisabled();
+			}
+
+		} ImGui::End();
 	}
-
-
 
 }

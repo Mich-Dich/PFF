@@ -14,6 +14,8 @@ namespace PFF {
 		void window() override;
 		virtual void show_possible_sub_window_options() override;
 
+		PFF_DEFAULT_GETTER_REF(transform_operation, gizmo_operation)
+
 	private:
 
 		void serialize(serializer::option option);
@@ -24,22 +26,24 @@ namespace PFF {
 		void window_details();
 		void window_renderer_backgrond_effect();
 
-		void list_all_components(const PFF::entity entity, const f32 position_x);
+		void list_all_components(const PFF::entity entity);
 		void add_show_hide_icon(PFF::entity& entity);
-		void display_entity_children(ref<map> loc_map, entity& entity, u64& index, const f32 pos_x, const ImVec2 size, const f32 position_x);
-		void outliner_entity_popup(const char* name, ref<map> map, PFF::entity entity);
-
+		void display_entity_children(ref<map> loc_map, PFF::entity entity);
+		void process_drop_of_file(const std::filesystem::path path, const bool set_as_selected_entity);
+		
 		bool									m_show_renderer_backgrond_effect = false;
 		bool									m_show_world_settings = false;
 		bool									m_show_general_debugger = true;
+		bool									m_show_log_display = true;
 		bool									m_show_content_browser_0 = true;
 		bool									m_show_content_browser_1 = false;
 		bool									m_show_details = false;
 		bool									m_show_outliner = true;
-		content_browser							m_content_browser;
 
+		content_browser							m_content_browser{};
 		ImGuiTreeNodeFlags						outliner_base_flags = ImGuiTreeNodeFlags_OpenOnArrow | ImGuiTreeNodeFlags_OpenOnDoubleClick | ImGuiTreeNodeFlags_SpanAvailWidth | ImGuiTreeNodeFlags_DefaultOpen;
-		entity									m_selected_entity = entity();
+
+		util::selected_items<entity>			m_selected_entitys{};
 
 		ref<image>								m_transfrom_translation_image;
 		ref<image>								m_transfrom_rotation_image;
@@ -55,6 +59,15 @@ namespace PFF {
 
 		transform_operation						m_gizmo_operation = transform_operation::translate;
 		util::simple_deletion_queue				m_deletion_queue{};
+
+		// Editor only feature			purly for ease of development
+		struct folder_entry {
+
+			std::vector<UUID>				contained_entities;
+			std::vector<folder_entry>		sub_folders;
+		};
+		std::vector<folder_entry>			m_current_world_folders;
+
 	};
 
 }

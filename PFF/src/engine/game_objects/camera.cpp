@@ -169,4 +169,14 @@ namespace PFF {
 		update_perspective_projection();
 	}
 
+	void camera::auto_calc_fov(const glm::vec2 image_size) {
+			
+		const float desired_horizontal_fov_deg = 100.0f;
+		float hfov_rad = glm::radians(desired_horizontal_fov_deg);
+		float aspect_ratio = image_size.x / image_size.y;
+		float vfov_rad = 2.0f * atan(tan(hfov_rad / 2.0f) * (1.0f / aspect_ratio));
+		LOG(Trace, "Recalculated FOV: " << m_perspective_fov_y)
+		m_perspective_fov_y = glm::degrees(vfov_rad);
+	}
+
 }

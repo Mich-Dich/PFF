@@ -37,10 +37,10 @@ namespace PFF::render {
 
 	struct compute_push_constants {
 
-		glm::vec4				data1;
-		glm::vec4				data2;
-		glm::vec4				data3;
-		glm::vec4				data4;
+		glm::vec4				data1{};
+		glm::vec4				data2{};
+		glm::vec4				data3{};
+		glm::vec4				data4{};
 	};
 
 	struct compute_effect {
@@ -55,15 +55,15 @@ namespace PFF::render {
 
 	struct GPU_scene_data {
 
-		glm::mat4			view;
-		glm::mat4			proj;
-		glm::mat4			proj_view;
-		glm::vec4			ambient_color;
-		glm::vec4			sunlight_direction;		// w for sun power
-		glm::vec4			sunlight_color;
+		glm::mat4			view{};
+		glm::mat4			proj{};
+		glm::mat4			proj_view{};
+		glm::vec4			ambient_color{};
+		glm::vec4			sunlight_direction{};		// w for sun power
+		glm::vec4			sunlight_color{};
 	};
-	
-	
+
+
 //	enum class material_pass : u8 {
 //
 //		MainColor,

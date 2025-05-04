@@ -28,7 +28,7 @@ namespace PFF::toolkit::settings {
 			const f32 default_item_width = 250;
 			const f32 first_width = 250.f;
 			static u32 item_current_idx = 0;
-			UI::custom_frame(first_width, [first_width]() mutable {
+			UI::custom_frame_NEW(first_width, false, ImGui::ColorConvertFloat4ToU32(UI::get_default_gray_1_ref()), [first_width]() mutable {
 
 				const char* items[] = { "General_settings", "General_settings 02", "General_settings 03" };
 
@@ -60,8 +60,6 @@ namespace PFF::toolkit::settings {
 					if (ImGui::CollapsingHeader("Swapchain##GraphicsSettings", ImGuiTreeNodeFlags_DefaultOpen)) {
 
 						static int selected = 1;
-
-						//ImGui::ShowDemoWindow();
 
 						UI::begin_table("##graphics_settings_table", false);
 

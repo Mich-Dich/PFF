@@ -4,6 +4,7 @@
 
 #include <PFF.h>							// PFF engine
 
+#include "project_related_defines.h"
 #include "ui/editor_window.h"				// main files
 
 // UI related files

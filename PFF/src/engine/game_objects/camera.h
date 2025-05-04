@@ -18,7 +18,10 @@ namespace PFF {
 
 		FORCEINLINE const glm::mat4& get_projection() const							{ return m_projection_matrix; }
 		FORCEINLINE const glm::mat4& get_view() const								{ return view_matrix; }
-		FORCEINLINE const f32& get_perspective_fov_y() const						{ return m_perspective_fov_y; }
+		// FORCEINLINE const f32& get_perspective_fov_y() const						{ return m_perspective_fov_y; }
+		PFF_DEFAULT_GETTER(f32, 													perspective_fov_y)
+		PFF_DEFAULT_GETTER(f32, 													clipping_near)
+		PFF_DEFAULT_GETTER(f32, 													clipping_far)
 
 		FORCEINLINE void force_set_projection_matrix(const glm::mat4& projection)	{ m_projection_matrix = projection; }
 		FORCEINLINE void force_set_view_matrix(const glm::mat4& view)				{ view_matrix = view; }
@@ -33,6 +36,7 @@ namespace PFF {
 		void set_perspective_projection(const f32 fov_y, const f32 aspect_ratio, const f32 near, const f32 far);
 		void set_aspect_ratio(f32 aspect_ratio);
 		void set_fov_y(f32 fov_y);
+		void auto_calc_fov(const glm::vec2 image_size);
 
 		glm::vec3 m_position{};
 		glm::vec3 m_direction{};
@@ -42,7 +46,7 @@ namespace PFF {
 		FORCEINLINE void update_orthographic_projection()	{ set_orthographic_projection(m_orthographic_left, m_orthographic_right, m_orthographic_up, m_orthographic_down, m_clipping_near, m_clipping_far); }
 		FORCEINLINE void update_perspective_projection()	{ set_perspective_projection(m_perspective_fov_y, m_perspective_aspect_ratio, m_clipping_near, m_clipping_far); }
 		
-		f32 m_perspective_fov_y = 70.f;
+		f32 m_perspective_fov_y = 45.f;
 		f32 m_perspective_aspect_ratio{};
 		f32 m_orthographic_left{};
 		f32 m_orthographic_right{};
@@ -50,7 +54,7 @@ namespace PFF {
 		f32 m_orthographic_down{};
 
 		f32 m_clipping_near = 0.1f;
-		f32 m_clipping_far = 1000.0f;
+		f32 m_clipping_far = 10000.0f;
 
 
 		glm::mat4 m_projection_matrix{ 1.0f };

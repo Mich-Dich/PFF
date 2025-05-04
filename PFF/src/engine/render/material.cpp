@@ -3,22 +3,28 @@
 
 #include "application.h"
 #include "util/system.h"
-#include "vulkan/vk_pipeline.h"
-#include "vulkan/vk_initializers.h"
+#if defined PFF_RENDER_API_VULKAN
+	#include "vulkan/vk_renderer.h"
+	#include "vulkan/vk_descriptor.h"
+	#include "vulkan/vk_pipeline.h"
+	#include "vulkan/vk_initializers.h"
+	#include "vulkan/vk_types.h"
+#endif 
 
 #include "material.h"
 
 namespace PFF {
 
+	// TODO: supply with arbuments that inclunce the pipline creation
 	void material::build_pipelines() {
 
 		VkShaderModule meshFragShader;
 		ASSERT(render::vulkan::util::load_shader_module(PFF::util::get_executable_path() / "../PFF/shaders/mesh.frag.spv", GET_RENDERER.get_device(), &meshFragShader),
-			"Loaded shader: mesh.frag.spv", "Error when building the triangle fragment shader module");
+			"", "Error when building the triangle fragment shader module");
 
 		VkShaderModule meshVertexShader;
 		ASSERT(render::vulkan::util::load_shader_module(PFF::util::get_executable_path() / "../PFF/shaders/mesh.vert.spv", GET_RENDERER.get_device(), &meshVertexShader),
-			"Loaded shader: mesh.vert.spv", "Error when building the triangle vertex shader module");
+			"", "Error when building the triangle vertex shader module");
 
 		VkPushConstantRange matrix_range{};
 		matrix_range.offset = 0;
@@ -68,6 +74,7 @@ namespace PFF {
 
 		vkDestroyShaderModule(GET_RENDERER.get_device(), meshFragShader, nullptr);
 		vkDestroyShaderModule(GET_RENDERER.get_device(), meshVertexShader, nullptr);
+		LOG(Trace, "build pipeline [mesh]");
 	}
 
 	void material::release_resources() {
@@ -80,13 +87,12 @@ namespace PFF {
 		vkDestroyPipeline(device, opaque_pipeline.pipeline, nullptr);
 	}
 
-	// TODO: rename to "create_instance()"
-	material_instance material::create_instance(material_pass pass, const material_resources& resources, render::vulkan::descriptor_allocator_growable& descriptor_allocator) {
+	material_instance material::create_instance(material_pass pass, const material_resources& resources) {
 
 		material_instance loc_mat_inst;
 		loc_mat_inst.pass_type = pass;
 		loc_mat_inst.pipeline = (pass == material_pass::transparent) ? &transparent_pipeline : &opaque_pipeline;
-		loc_mat_inst.material_set = descriptor_allocator.allocate(GET_RENDERER.get_device(), material_layout);
+		loc_mat_inst.material_set = GET_RENDERER.get_global_descriptor_allocator().allocate(GET_RENDERER.get_device(), material_layout);
 
 		writer.clear();
 		writer.write_buffer(0, resources.data_buffer, sizeof(material_constants), resources.data_buffer_offset, VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER);
@@ -97,7 +103,17 @@ namespace PFF {
 		return loc_mat_inst;
 	}
 
+	void material::release_instance(material_instance& inst) {
 
+		// 1 	Return the descriptor set to the allocator
+		// auto allocator = GET_RENDERER.get_global_descriptor_allocator();
+		// allocator.free(GET_RENDERER.get_device(), inst.material_set);
+	
+		// 2	Invalidate the instance so it can't be used again
+		inst.material_set = VK_NULL_HANDLE;
+		inst.pipeline     = nullptr;
+		inst.pass_type    = material_pass::main_color;
+	}
 
 
 
@@ -108,11 +124,11 @@ namespace PFF {
 
 		VkShaderModule meshFragShader;
 		ASSERT(render::vulkan::util::load_shader_module(PFF::util::get_executable_path() / "../PFF/shaders/debug_lines.frag.spv", GET_RENDERER.get_device(), &meshFragShader),
-			"Loaded shader: debug_lines.frag.spv", "Error when building the debug_lines fragment shader module");
+			"", "Error when building the debug_lines fragment shader module");
 
 		VkShaderModule meshVertexShader;
 		ASSERT(render::vulkan::util::load_shader_module(PFF::util::get_executable_path() / "../PFF/shaders/debug_lines.vert.spv", GET_RENDERER.get_device(), &meshVertexShader),
-			"Loaded shader: debug_lines.vert.spv", "Error when building the debug_lines vertex shader module");
+			"", "Error when building the debug_lines vertex shader module");
 
 		VkPushConstantRange matrix_range{};
 		matrix_range.offset = 0;
@@ -162,6 +178,8 @@ namespace PFF {
 
 		vkDestroyShaderModule(GET_RENDERER.get_device(), meshFragShader, nullptr);
 		vkDestroyShaderModule(GET_RENDERER.get_device(), meshVertexShader, nullptr);
+
+		LOG(Trace, "build pipeline [debug lines]");
 	}
 
 #endif // PFF_RENDERER_DEBUG_CAPABILITY

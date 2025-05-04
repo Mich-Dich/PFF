@@ -4,6 +4,7 @@
 #include "render_util.h"
 
 #if defined PFF_RENDER_API_VULKAN
+	// #include "vulkan/vk_renderer.h"
 	#include "vulkan/vk_descriptor.h"
 	#include "vulkan/vk_types.h"
 #endif 
@@ -16,6 +17,23 @@ namespace PFF {
 		transparent,
 		other
 	};
+
+	
+	// ========================== DEV-ONLY ==========================	maybe: move to material and make material a class with inheritence
+	enum class texture_sampler : u8 {
+		linear = 0,
+		nearest,
+	};
+
+	struct material_instance_creation_data {
+	
+		std::filesystem::path				color_texture{};
+		texture_sampler						color_texture_sampler{};
+		std::filesystem::path				metal_rough_texture{};
+		texture_sampler						metal_rough_texture_sampler{};
+	};
+	// ========================== DEV-ONLY ==========================
+	
 
 	struct material_pipeline {
 
@@ -36,7 +54,7 @@ namespace PFF {
 
 
 	struct material {
-
+		
 		material_pipeline					opaque_pipeline{};
 		material_pipeline					transparent_pipeline{};
 
@@ -62,7 +80,8 @@ namespace PFF {
 		void build_pipelines();
 		void release_resources();
 
-		material_instance create_instance(material_pass pass, const material_resources& resources, render::vulkan::descriptor_allocator_growable& descriptor_allocator);
+		material_instance create_instance(material_pass pass, const material_resources& resources);
+		void release_instance(material_instance& inst);
 #endif
 
 	};

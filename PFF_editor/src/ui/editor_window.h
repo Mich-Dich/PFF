@@ -8,8 +8,8 @@ namespace PFF {
 
 		editor_window() {};
 		virtual ~editor_window() {};
-		virtual void window() {};
 
+		virtual void window() {};
 		FORCEINLINE bool should_close() const { return !show_window; }
 		FORCEINLINE virtual void show_possible_sub_window_options() {}
 

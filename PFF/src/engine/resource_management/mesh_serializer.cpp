@@ -21,7 +21,7 @@ namespace PFF {
 
 		if (serializer.get_option() == serializer::option::save_to_file) {					// verify the file content
 
-			ASSERT(asset_header.type == file_type::mesh, "", "Tryed to but provided asset_path is a mesh");
+			ASSERT(asset_header.type == file_type::mesh, "", "Tryed to serialize mesh header, but provided asset type is not a mesh");
 		}
 
 		serializer.entry(asset_header)
@@ -29,13 +29,15 @@ namespace PFF {
 
 		if (serializer.get_option() == serializer::option::load_from_file) {				// verify the file content
 
-			ASSERT(asset_header.type == file_type::mesh, "", "Tryed to but provided asset_path is a mesh");
+			ASSERT(asset_header.type == file_type::mesh, "", "Tryed to deserialize mesh header, but provided asset_path is [" << asset_header_file_type_to_str(asset_header.type) << "] instead of mesh");
+			// ASSERT(asset_header.type == file_type::mesh, "", "Tryed to deserialize mesh header, but provided asset_path is [  ] instead of mesh");
 		}
 	}
 
 	void serialize_static_mesh_header(serializer::binary& serializer, static_mesh_file_header& static_mesh_header) {
 
-		serializer.entry(static_mesh_header.version)
+		serializer.entry(static_mesh_header.name)
+		.entry(static_mesh_header.version)
 		.entry(static_mesh_header.source_file)
 		.entry(static_mesh_header.mesh_index);
 	}

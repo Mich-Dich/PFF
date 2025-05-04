@@ -14,12 +14,16 @@ if platform.system() == "Windows":
     from metadata.windows.setup_vulkan import vulkan_configuration
     from metadata.windows.setup_premake import premake_configuration
     import metadata.windows.register_icon as register_icon
+    import metadata.windows.IDE_selection as IDE_setup
 elif platform.system() == "Linux":
     from metadata.linux.setup_vulkan import vulkan_configuration
     from metadata.linux.setup_premake import premake_configuration
     from metadata.linux.setup_glslc import glslc_configuration
+    import metadata.linux.IDE_selection as IDE_setup
 else:
     raise Exception("Unsupported operating system")
+
+
 
 
 def update_submodule(submodule_path, branch="main"):
@@ -51,6 +55,7 @@ try:
     update_submodule("PFF/vendor/glfw", "master")
     update_submodule("PFF/vendor/imgui", "docking")
     update_submodule("PFF/vendor/ImGuizmo", "master")
+    update_submodule("PFF_editor/vendor/assimp", "master")
 
     utils.print_u("\nCHECKING PYTHON SETUP")
     python_installed = python_requirements.validate()
@@ -72,8 +77,15 @@ try:
             utils.print_u("\nCHECK WORKSPACE SETUP")
             register_icon.register_icon()
 
-            utils.print_u("\nBUILDING PFF (Procedurally Focused Framework) VS 2022 Solution:")
-            premake_result = subprocess.run(['vendor/premake/premake5.exe', 'vs2022'], check=True)
+            selected_ide = IDE_setup.prompt_ide_selection()
+            if selected_ide.startswith("Visual Studio"):
+                vs_year = selected_ide.split()[-1]  # Extract "2022" from "Visual Studio 2022"
+                premake_action = f"vs{vs_year}"
+                utils.print_u(f"\nBUILDING PFF (Procedurally Focused Framework) {selected_ide} Solution:")
+                premake_result = subprocess.run(['vendor/premake/premake5.exe', premake_action], check=True)
+            elif selected_ide == "JetBrains Rider":
+                utils.print_u("\nBUILDING PFF (Procedurally Focused Framework) for JetBrains Rider:")
+                premake_result = subprocess.run(['vendor/premake/premake5.exe', 'rider'], check=True)
 
             if premake_result.returncode != 0:
                 utils.print_c(f"BUILD FAILED! the premake script encountered [{premake_result.returncode}] errors", "red")
@@ -86,8 +98,20 @@ try:
             glslc_installed = glslc_configuration.validate()
             
             utils.print_u("\nCHECK WORKSPACE SETUP")
+<<<<<<< HEAD
             premake_result = subprocess.run(['./premake5', 'gmake2'], text=True)
 
+=======
+            
+            selected_ide = IDE_setup.prompt_ide_selection()
+            premake_action = "gmake"  # Default action
+            if selected_ide == "JetBrains Rider":
+                premake_action = "rider"
+            elif "Makefile" in selected_ide:
+                premake_action = "gmake"
+            
+            premake_result = subprocess.run(['./premake5', premake_action], text=True)
+>>>>>>> dev
             if premake_result.returncode != 0:
                 utils.print_c(f"BUILD FAILED! the premake script encountered [{premake_result.returncode}] errors", "red")
             else:

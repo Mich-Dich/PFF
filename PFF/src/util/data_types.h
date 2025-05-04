@@ -1,134 +1,207 @@
 #pragma once
 
+#include <tuple>    // for std::tie
+
 #include <inttypes.h>
 
-typedef uint8_t  u8;
-typedef uint16_t u16;
-typedef uint32_t u32;
-typedef uint64_t u64;
+// =============================================
+// @brief Primitive type definitions for consistent sizing across platforms
+// =============================================
 
-typedef int8_t  int8;
-typedef int16_t int16;
-typedef int32_t int32;
-typedef int64_t int64;
+typedef uint8_t  u8;    							///< 8-bit unsigned integer
+typedef uint16_t u16;   							///< 16-bit unsigned integer
+typedef uint32_t u32;   							///< 32-bit unsigned integer
+typedef uint64_t u64;   							///< 64-bit unsigned integer
 
-typedef	float f32;
-typedef double f64;
-typedef long double f128;
+typedef int8_t  int8;   							///< 8-bit signed integer
+typedef int16_t int16;  							///< 16-bit signed integer
+typedef int32_t int32;  							///< 32-bit signed integer
+typedef int64_t int64;  							///< 64-bit signed integer
 
-typedef unsigned long long handle;
+typedef float f32;          						///< 32-bit floating point
+typedef double f64;         						///< 64-bit floating point
+typedef long double f128;   						///< 128-bit floating point (platform dependent)
+
+// Platform-specific types				
+typedef unsigned long long handle;  				///< Generic handle type for OS resources
 
 #define PROJECT_PATH				application::get().get_project_path()
 #define PROJECT_NAME				application::get().get_project_data().name
 
-#define PFF_ASSET_EXTENTION			".pffasset"
-#define PFF_PROJECT_EXTENTION		".pffproj"
+// Extension for asset files
+#define PFF_ASSET_EXTENTION      	".pffasset"
 
-#define PFF_PROJECT_TEMP_DLL_PATH	"_build_DLL"
+// Extension for project files
+#define PFF_PROJECT_EXTENTION    	".pffproj"      
 
-#define METADATA_DIR				"metadata"
-#define CONFIG_DIR					"config"
-#define CONTENT_DIR					"content"
-#define SOURCE_DIR					"src"
+// Temporary directory for DLL builds
+#define PFF_PROJECT_TEMP_DLL_PATH 	"_build_DLL"    
 
-#define FILE_EXTENSION_CONFIG		".yml"
-#define FILE_EXTENSION_INI			".ini"
+// Directory structure macros
+#define METADATA_DIR            	"metadata"      ///< Directory for metadata files
+#define CONFIG_DIR              	"config"        ///< Directory for configuration files
+#define CONTENT_DIR             	"content"       ///< Directory for content files
+#define SOURCE_DIR              	"src"           ///< Directory for source code
+
+// Configuration file extensions
+#define FILE_EXTENSION_CONFIG   	".yml"        	///< Extension for YAML config files
+#define FILE_EXTENSION_INI      	".ini"          ///< Extension for INI config files
 
 namespace PFF {
 
+    // =============================================
+    // @brief Type traits and utility templates
+    // =============================================
 
-	template<typename T>
-	struct is_vector : std::false_type {};
+    // @brief Type trait to detect std::vector types
+    template<typename T>
+    struct is_vector : std::false_type {};
 
-	template<typename T, typename Alloc>
-	struct is_vector<std::vector<T, Alloc>> : std::true_type {};
+    template<typename T, typename Alloc>
+    struct is_vector<std::vector<T, Alloc>> : std::true_type {};
 
-	template <size_t N>
-	struct char_array { char data[N]; };
+    // @brief Fixed-size character array type
+    template <size_t N>
+    struct char_array { char data[N]; };
 
-	// ------------------------ smart pointers ------------------------
+    // =============================================
+    // @brief Smart pointer utilities
+    // =============================================
 
-	// @brief [ref] is a smart pointer to a resource [T]
-	template<typename T>
-	using ref = std::shared_ptr<T>;
+    // @brief [ref] is a reference-counted smart pointer similar to std::shared_ptr
+    template<typename T>
+    using ref = std::shared_ptr<T>;
 
-	template<typename T, typename ... args>
-	constexpr ref<T> create_ref(args&& ... arguments) {
+    // @brief Creates a reference-counted object with perfect forwarding
+    template<typename T, typename ... args>
+    constexpr ref<T> create_ref(args&& ... arguments) {
+        return std::make_shared<T>(std::forward<args>(arguments)...);
+    }
 
-		return std::make_shared<T>(std::forward<args>(arguments)...);
-	}
+    // @brief [scope_ref] is an owning smart pointer similar to std::unique_ptr
+    template<typename T>
+    using scope_ref = std::unique_ptr<T>;
 
-	// @brief [scope_ref] is a [ref] for a scope
-	template<typename T>
-	using scope_ref = std::unique_ptr<T>;
-
-	template<typename T, typename ... args>
-	constexpr scope_ref<T> create_scoped_ref(args&& ... arguments) {
-
-		return std::make_unique<T>(std::forward<args>(arguments)...);
-	}
+    // @brief Creates a scoped object with perfect forwarding
+    template<typename T, typename ... args>
+    constexpr scope_ref<T> create_scoped_ref(args&& ... arguments) {
+        return std::make_unique<T>(std::forward<args>(arguments)...);
+    }
 	
 	// ------------------------ smart pointers ------------------------
 
-	typedef struct extent_3D {
-		u32 width;
-		u32 height;
-		u32 depth;
-	} extent_3D;
+    // @brief Represents a 3D extent (width, height, depth)
+    typedef struct extent_3D {
+        u32 width;      		// Width component
+        u32 height;     		// Height component
+        u32 depth;      		// Depth component
+    } extent_3D;
 
+    // @brief Semantic versioning structure
 	struct version {
 
 		version() {}
 		version(u16 major, u16  minor, u16  patch)
 			:major(major), minor(minor), patch(patch) {}
 
-		u16 major{};
-		u16 minor{};
-		u16 patch{};
-	};
+		u16 major{};    		// Major version number (incompatible API changes)
+		u16 minor{};    		// Minor version number (backwards-compatible functionality)
+		u16 patch{};    		// Patch version number (backwards-compatible bug fixes)
 
-	//#pragma pack(1)
+        // @brief Converts version to string in "major:minor:patch" format
+		std::string to_str() const { return std::format("{}:{}:{}", major, minor, patch); }
+        
+        // @brief Implicit conversion to string_view
+		operator std::string_view () { return std::format("{}:{}:{}", major, minor, patch); }
+	};
+	
+    // @brief Stream output operator for version
+	inline std::ostream& operator<<(std::ostream& os, const version& v) { return os << v.to_str(); }
+
+    // @brief System time representation
 	struct system_time {
 
-		u16 year;
-		u8 month;
-		u8 day;
-		u8 day_of_week;
-		u8 hour;
-		u8 minute;
-		u8 secund;
-		u16 millisecend;
+        u16 year;           	// Full year (e.g., 2025)
+        u8 month;           	// Month (1-12)
+        u8 day;             	// Day of month (1-31)
+        u8 day_of_week;     	// Day of week (0-6, where 0=Sunday)
+        u8 hour;            	// Hour (0-23)
+        u8 minute;          	// Minute (0-59)
+        u8 secund;          	// Second (0-59)
+        u16 millisecend;    	// Millisecond (0-999)
+
+    	// “Older than”
+		bool operator<(const system_time& other) const {
+			return std::tie(year, month, day, hour, minute, secund, millisecend)
+				 < std::tie(other.year, other.month, other.day,
+							other.hour, other.minute, other.secund, other.millisecend);
+		}
+	
+		// “Newer than”
+		bool operator>(const system_time& other) const {
+			return other < *this;
+		}
+	
+		// “Not newer than” (i.e. older or equal)
+		bool operator<=(const system_time& other) const {
+			return !(*this > other);
+		}
+	
+		// “Not older than” (i.e. newer or equal)
+		bool operator>=(const system_time& other) const {
+			return !(*this < other);
+		}
+	
+		// Equality / inequality
+		bool operator==(const system_time& other) const {
+			return std::tie(year, month, day, day_of_week, hour, minute, secund, millisecend)
+				 == std::tie(other.year, other.month, other.day, other.day_of_week,
+							other.hour, other.minute, other.secund, other.millisecend);
+		}
+		bool operator!=(const system_time& other) const {
+			return !(*this == other);
+		}
+
+        // @brief Converts system_time to human-readable string
+		std::string to_str() const { return std::format("{}-{:02}-{:02} ({}) {:02}:{:02}:{:02}.{:03}", year, month, day, day_of_week, hour, minute, secund, millisecend); }
 	};
-	//#pragma pack(pop)
 
-	enum class duration_precision : u8 {
-		microseconds,
-		milliseconds,
-		seconds,
-	};
+    // =============================================
+    // @brief Enumerations
+    // =============================================
 
-	enum class error_code : u8 {
-		success = 0,
-		generic_not_found,
-		file_not_found,
-		error_opening_file,
-		system_path_not_free,
-		line_not_found,
-	};
+    // @brief Precision levels for duration measurements
+    enum class duration_precision : u8 {
+        microseconds,    		// Microsecond precision
+        milliseconds,    		// Millisecond precision
+        seconds,         		// Second precision
+    };
 
-	enum class system_state : u8 {
-		active,
-		suspended,
-		inactive,
-	};
+    // @brief System error codes
+    enum class error_code : u8 {
+        success = 0,            // Operation succeeded
+        generic_not_found,      // Generic "not found" error
+        file_not_found,         // File not found
+        error_opening_file,     // Error opening file
+        system_path_not_free,   // System path in use
+        line_not_found,         // Line not found in file
+    };
 
+    // @brief System state enumeration
+    enum class system_state : u8 {
+        active,     			// System is fully operational
+        suspended,  			// System is paused but retains state
+        inactive,   			// System is shut down
+    };
 
-	enum class key_state : u8 {
-		release = 0,
-		press = 1,
-		repeat = 2,
-	};
+    // @brief Key state enumeration (for input handling)
+    enum class key_state : u8 {
+        release = 0,    		// Key was released
+        press = 1,      		// Key was pressed
+        repeat = 2,     		// Key is being held down (repeat)
+    };
 
+    // @brief Key code enumeration (keyboard/mouse input)
 	enum class key_code {
 
 		mouse_bu_1 = 0,

@@ -11,11 +11,12 @@ namespace PFF::code_generator {
 
 	void generate_premake_file(const std::filesystem::path& filepath, const std::string_view project_name) {
 
-		const std::filesystem::path engine_source_dir = std::filesystem::path("C:\\CustomGameEngine\\PFF").make_preferred();
-		const std::filesystem::path engine_build_dir = std::filesystem::path("C:\\CustomGameEngine\\PFF\\bin\\Debug-windows-x86_64").make_preferred();
+		LOG(Trace, "generate_premake_file(filepath = " << filepath << ", project_name = " << project_name << ")")
+
+		const std::filesystem::path engine_install_dir = std::filesystem::path(ENGINE_INSTALL_DIR).make_preferred();
 
 		std::ostringstream stream;
-		stream << "include \"" << (engine_source_dir / "dependencies.lua").generic_string() << "\"\n";
+		stream << "include \"" << (engine_install_dir / "dependencies.lua").generic_string() << "\"\n";
 		stream << "\nworkspace \"" << project_name << "\"\n";
 		stream << R"(architecture "x64"
 	configurations { "Debug", "Release" }
@@ -28,8 +29,8 @@ namespace PFF::code_generator {
 		stream << R"(		location "metadata/project_files"					--Set the location for workspace(solution) files
 		kind "SharedLib"
 		language "C++"
-		cppdialect "C++17"
-		staticruntime "off"
+		cppdialect "C++20"
+		staticruntime "on"
 
 	targetdir("bin/%{prj.name})";
 		stream << PFF_PROJECT_TEMP_DLL_PATH << "\")";
@@ -56,41 +57,43 @@ namespace PFF::code_generator {
 		"src",
 )";
 		stream << 
-			"		\"" << engine_source_dir.generic_string() << "/PFF/src\",\n"
-			"		\"" << engine_source_dir.generic_string() << "/%{vendor_path.entt}\",\n"
-			"		\"" << engine_source_dir.generic_string() << "/%{vendor_path.glm}\",\n"
-			"		\"" << engine_source_dir.generic_string() << "/%{vendor_path.ImGui}\",\n"
-			"		\"C:/VulkanSDK/1.3.250.1/Include\",\n"
+			"		\"" << engine_install_dir.generic_string() << "/PFF/src\",\n"
+			"		\"" << engine_install_dir.generic_string() << "/vendor/entt\",\n"
+			"		\"" << engine_install_dir.generic_string() << "/vendor/glm\",\n"
+			"		\"" << engine_install_dir.generic_string() << "/vendor/imgui\",\n"
+			"		\"%{IncludeDir.Vulkan}\",\n"
 			"	}\n";
 
 		stream << R"(
 	symbolspath '$(OutDir)$(TargetName)-$([System.DateTime]::Now.ToString("HH_mm_ss_fff")).pdb'
 )";
 
-		stream << "\tdebugcommand(\"" << (engine_build_dir / "PFF_editor" / "PFF_editor.exe").generic_string() << "\")\n";
-		stream << "\tdebugdir(\"" << (engine_build_dir / "PFF_editor").generic_string() << "\")\n";
+		stream << "\tdebugcommand(\"" << (engine_install_dir / "PFF_editor" / "PFF_editor.exe").generic_string() << "\")\n";
+		stream << "\tdebugdir(\"" << (engine_install_dir / "PFF_editor").generic_string() << "\")\n";
 		stream << "\t-- for passing arguments to game engine, use:								debugargs { \"arg1\", \"arg2\" }\n";
 		stream << R"(
 	libdirs 
 	{
 )";
 
-		stream << "\t\t\"" << (engine_build_dir / "PFF").generic_string() << "\",\n";
-		stream << "\t\t\"" << (engine_build_dir / "vendor/imgui").generic_string() << "\",\n";
+		stream << "\t\t\"" << (engine_install_dir / "PFF").generic_string() << "\",\n";
+		stream << "\t\t\"" << (engine_install_dir / "vendor/imgui").generic_string() << "\",\n";
+		stream << "\t\t\"" << (engine_install_dir / "vendor/glfw").generic_string() << "\",\n";
 		stream << R"(	}
 
 	links
 	{
 		"PFF",
-		"ImGui"
+		"ImGui",
+		"GLFW"
 	}
 
 	defines "PFF_PROJECT"
 
     prebuildcommands {
 )";
-		stream << "\t\t\"cd " << (engine_build_dir / "PFF").generic_string() << " && \" ..\n";
-		stream << "\t\t\"" << (engine_build_dir / "PFF_helper" / "PFF_helper.exe").generic_string() << " 0 0 0 " << application::get().get_project_path().generic_string() << "\",";
+		stream << "\t\t\"cd " << (engine_install_dir / "PFF").generic_string() << " && \" ..\n";
+		stream << "\t\t\"" << (engine_install_dir / "PFF_helper" / "PFF_helper.exe").generic_string() << " 0 0 0 " << application::get().get_project_path().generic_string() << "\",";
 
 		stream <<R"(
     }

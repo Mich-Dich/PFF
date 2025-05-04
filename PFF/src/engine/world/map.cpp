@@ -55,7 +55,7 @@ namespace PFF {
 
 	map::map() {
 
-		m_path = application::get().get_project_path() / CONTENT_DIR / "worlds" / "test_map.pffasset";
+		m_path = application::get().get_project_path() / CONTENT_DIR / "worlds" / "test_map.pffworld";			// TODO: Change to load the map from the .pffproj file
 		LOG(Trace, "Loading map: " << m_path);
 
 		serialize(serializer::option::load_from_file);
@@ -92,7 +92,7 @@ namespace PFF {
 
 		entity loc_entity = { m_registry.create(), this };
 		loc_entity.add_component<ID_component>(uuid);
-		loc_entity.add_component<tag_component>(name.empty() ? "Entity" : name);
+		loc_entity.add_component<name_component>(name.empty() ? "Entity" : name);
 		loc_entity.add_component<transform_component>();
 
 		m_entity_map[uuid] = loc_entity;
@@ -135,10 +135,10 @@ namespace PFF {
 
 	entity map::find_entity_by_name(std::string_view name) {
 
-		auto view = m_registry.view<tag_component>();
+		auto view = m_registry.view<name_component>();
 		for (auto loc_entity : view) {
-			const tag_component& tc = view.get<tag_component>(loc_entity);
-			if (tc.tag == name)
+			const name_component& name_comp = view.get<name_component>(loc_entity);
+			if (name_comp.name == name)
 				return entity{ loc_entity, this };
 		}
 		return {};
@@ -316,15 +316,47 @@ namespace PFF {
 
 		asset_file_header file_header{};
 		file_header.file_version = version(1, 0, 0);
-		file_header.type = file_type::map;
+		file_header.type = file_type::world;
 		file_header.timestamp = util::get_system_time();
 
 		auto serializer = serializer::yaml(m_path, "map_data", option);
-		serializer.sub_section("file_header", [&](serializer::yaml& header_section) {
+		serializer.sub_section("file_header", [&](serializer::yaml& section) {
 
-			header_section.entry(KEY_VALUE(file_header.file_version))
+			section.entry(KEY_VALUE(file_header.file_version))
 				.entry(KEY_VALUE(file_header.type))
 				.entry(KEY_VALUE(file_header.timestamp));
+
+		}).sub_section("render_meta_data", [&](serializer::yaml& section) {
+
+			int& background_effect_index = application::get().get_renderer().get_current_background_effect_index();
+			section.entry(KEY_VALUE(background_effect_index));
+
+		}).sub_section("lighting", [&](serializer::yaml& section) {
+
+			auto& skybox_data = GET_RENDERER.get_scene_data_ref();
+			section.entry(KEY_VALUE(skybox_data.sunlight_direction))
+				.entry(KEY_VALUE(skybox_data.sunlight_direction))
+				.entry(KEY_VALUE(skybox_data.sunlight_color));
+			
+		}).sub_section("dynamic_skybox_data", [&](serializer::yaml& section) {
+
+			section.entry(KEY_VALUE(m_dynamic_skybox_data.middle_sky_color))
+				.entry(KEY_VALUE(m_dynamic_skybox_data.horizon_sky_color))
+				.entry(KEY_VALUE(m_dynamic_skybox_data.sun_distance))
+				.entry(KEY_VALUE(m_dynamic_skybox_data.sun_radius))
+				.entry(KEY_VALUE(m_dynamic_skybox_data.sun_core_falloff))
+				.entry(KEY_VALUE(m_dynamic_skybox_data.sun_glow_radius_multiplier))
+				.entry(KEY_VALUE(m_dynamic_skybox_data.sun_glow_intensity))
+				.entry(KEY_VALUE(m_dynamic_skybox_data.sun_glow_falloff))
+				.entry(KEY_VALUE(m_dynamic_skybox_data.cloud_height))
+				.entry(KEY_VALUE(m_dynamic_skybox_data.cloud_density))
+				.entry(KEY_VALUE(m_dynamic_skybox_data.cloud_color))
+				.entry(KEY_VALUE(m_dynamic_skybox_data.cloud_speed))
+				.entry(KEY_VALUE(m_dynamic_skybox_data.cloud_scale))
+				.entry(KEY_VALUE(m_dynamic_skybox_data.cloud_coverage))
+				.entry(KEY_VALUE(m_dynamic_skybox_data.cloud_octaves))
+				.entry(KEY_VALUE(m_dynamic_skybox_data.cloud_persistence))
+				.entry(KEY_VALUE(m_dynamic_skybox_data.cloud_detail));
 		});
 	
 		if (option == serializer::option::save_to_file) {
@@ -337,8 +369,8 @@ namespace PFF {
 
 				entity loc_entity = entity(entities[x], this);
 
-				auto& tag_comp = loc_entity.get_component<tag_component>();
-				entity_section.entry(KEY_VALUE(tag_comp.tag));
+				auto& name_comp = loc_entity.get_component<name_component>();
+				entity_section.entry(KEY_VALUE(name_comp.name));
 
 				auto& ID_comp = loc_entity.get_component<ID_component>();
 				entity_section.entry(KEY_VALUE(ID_comp.ID));
@@ -357,7 +389,8 @@ namespace PFF {
 				SERIALIZE_SIMPLE_COMPONENT(mesh,
 					.entry(KEY_VALUE(mesh_comp.asset_path))
 					.entry(KEY_VALUE(mesh_comp.mobility_data))
-					.entry(KEY_VALUE(mesh_comp.shoudl_render));
+					.entry(KEY_VALUE(mesh_comp.shoudl_render))
+					.entry(KEY_VALUE(mesh_comp.material_inst_path));
 				);
 
 
@@ -393,14 +426,14 @@ namespace PFF {
 			serializer.vector("entities", entities, [&](serializer::yaml& entity_section, u64 x) {
 				
 
-				std::string tag{};
-				entity_section.entry(KEY_VALUE(tag));
+				std::string name{};
+				entity_section.entry(KEY_VALUE(name));
 
 				UUID ID{};
 				entity_section.entry(KEY_VALUE(ID));
 
 
-				entity loc_entity = create_entity_with_UUID(ID, tag);
+				entity loc_entity = create_entity_with_UUID(ID, name);
 
 				auto& transform_comp = loc_entity.get_component<transform_component>();
 				entity_section.sub_section("transform_component", [&](serializer::yaml& component_section) {
@@ -420,7 +453,8 @@ namespace PFF {
 					mesh_component mesh_comp{};
 					component_section.entry(KEY_VALUE(mesh_comp.asset_path))
 					.entry(KEY_VALUE(mesh_comp.mobility_data))
-					.entry(KEY_VALUE(mesh_comp.shoudl_render));
+					.entry(KEY_VALUE(mesh_comp.shoudl_render))
+					.entry(KEY_VALUE(mesh_comp.material_inst_path));
 
 					loc_entity.add_mesh_component(mesh_comp);
 				});

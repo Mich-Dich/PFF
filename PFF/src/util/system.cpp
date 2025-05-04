@@ -25,15 +25,86 @@
 
 namespace PFF::util {
 
-    //
-    bool run_program(const std::filesystem::path& path_to_exe, const std::string& cmd_args, bool open_console) { return run_program(path_to_exe, cmd_args.c_str(), open_console); }
+    void open_console(const char* title, const bool enable_anci_codes) {
+    
+#if defined(PFF_PLATFORM_WINDOWS)
+        
+        AllocConsole();
+        FILE* p_file;
+        freopen_s(&p_file, "CONOUT$", "w", stdout);
+        freopen_s(&p_file, "CONOUT$", "w", stderr);
+        freopen_s(&p_file, "CONIN$", "r", stdin);
+
+        std::cout.clear();                                      // Clear the error state for each of the C++ standard stream objects
+        std::cerr.clear();
+        std::cin.clear();
+
+        SetConsoleTitleA(title);
+
+        if (!enable_anci_codes)
+            return;
+
+        // Enable ANSI escape codes for the console
+        HANDLE hOut = GetStdHandle(STD_OUTPUT_HANDLE);
+        if (hOut == INVALID_HANDLE_VALUE)
+            std::cerr << "Error: Could not get handle to console output." << std::endl;
+
+        DWORD dwMode = 0;
+        if (!GetConsoleMode(hOut, &dwMode))
+            std::cerr << "Error: Could not get console mode." << std::endl;
+
+        dwMode |= ENABLE_VIRTUAL_TERMINAL_PROCESSING;
+        if (!SetConsoleMode(hOut, dwMode))
+            std::cerr << "Error: Could not set console mode to enable ANSI escape codes." << std::endl;
+
+#elif defined(PFF_PLATFORM_LINUX)
+
+        // On Linux, the standard streams are typically already connected to the terminal so we don't need to allocate a new console like in Windows
+        std::cout.clear();
+        std::cerr.clear();
+        std::cin.clear();
+        
+        if (isatty(STDOUT_FILENO)) {                                // Set terminal title if we're running in a terminal
+            std::cout << "\033]0;" << title << "\007";
+            std::cout.flush();
+        }
+        
+        // [enable_anci_codes] - ANSI codes are typically enabled by default on Linux terminals so we don't need to do anything special for enable_anci_codes
+#endif
+    }
+
+         
+    std::vector<std::string> parse_arguments(const std::string& cmd) {
+
+        std::vector<std::string> args;
+        std::string arg;
+        bool in_quotes = false;
+        for (char c : cmd) {
+            if (c == '"') {
+                in_quotes = !in_quotes;
+            } else if (std::isspace(c) && !in_quotes) {
+                if (!arg.empty()) {
+                    args.push_back(arg);
+                    arg.clear();
+                }
+            } else {
+                arg += c;
+            }
+        }
+        if (!arg.empty()) {
+            args.push_back(arg);
+        }
+        return args;
+    }
+
 
     //
-    bool run_program(const std::filesystem::path& path_to_exe, const char* cmd_args, bool open_console) {
+    bool run_program(const std::filesystem::path& path_to_exe, const std::string& cmd_args, bool open_console, const bool display_output_on_succees, const bool display_output_on_failure, std::string* output) { return run_program(path_to_exe, cmd_args.c_str(), open_console, display_output_on_succees, display_output_on_failure, output); }
+
+    //
+    bool run_program(const std::filesystem::path& path_to_exe, const char* cmd_args, bool open_console, const bool display_output_on_succees, const bool display_output_on_failure, std::string* output) {
 
         //LOG(Trace, "executing program at [" << path_to_exe.generic_string() << "]");
-
-        bool result = false;
 
 #if defined(PFF_PLATFORM_WINDOWS)
 
@@ -48,7 +119,7 @@ namespace PFF::util {
         auto working_dir = util::get_executable_path().generic_string();
 
         // Start the program
-        result = CreateProcessA(
+        bool result = CreateProcessA(
             NULL,							            // Application Name
             (LPSTR)cmdArguments.c_str(),	            // Command Line Args
             NULL,							            // Process Attributes
@@ -70,52 +141,75 @@ namespace PFF::util {
         } else
             LOG(Error, "Unsuccessfully started process: " << path_to_exe.generic_string());
 
+        return true;
+
 #elif defined(PFF_PLATFORM_LINUX)
-
-    std::string cmdArguments = path_to_exe.generic_string() + " " + cmd_args;                       // Prepare the command line arguments
-    
-    // Split the command line arguments into a vector
-    std::vector<std::string> args;
-    std::istringstream iss(cmdArguments);
-    std::string arg;
-    while (iss >> arg) {
-        args.push_back(arg);
-    }
-
-    // Prepare the argument list for exec
-    std::vector<char*> execArgs;
-    for (auto& a : args) {
-        execArgs.push_back(&a[0]);
-    }
-    execArgs.push_back(nullptr);                                                                    // execv expects a null-terminated array
-
-    pid_t pid = fork();
-    if (pid == -1) {
-        // Fork failed
-        std::cerr << "Failed to fork process." << std::endl;
-        return false;
-    } else if (pid == 0) {
-        // Child process
-        if (open_console) {
-            // If you want to open a new console, you can use a terminal emulator like xterm
-            execlp("xterm", "xterm", "-e", execArgs[0], (char*)nullptr);
-        } else {
-            // Execute the program
-            execv(path_to_exe.c_str(), execArgs.data());
+           
+        // Build the command string and vector of args
+        std::string cmdArguments = path_to_exe.generic_string() + " " + cmd_args;
+        // std::vector<std::string> args = parse_arguments(cmdArguments);
+        std::istringstream iss(cmdArguments);
+        std::vector<std::string> args;
+        std::string arg;
+        while (iss >> arg) {
+            args.push_back(arg);
         }
-        // If execv fails
-        std::cerr << "Failed to execute program: " << path_to_exe.generic_string() << std::endl;
-        exit(EXIT_FAILURE);
-    } else {
-        // Parent process
-        int status;
-        waitpid(pid, &status, 0); // Wait for the child process to finish
-        result = WIFEXITED(status) && (WEXITSTATUS(status) == 0);
-    }
+
+        std::vector<char*> execArgs;
+        for (auto& a : args) {
+            execArgs.push_back(&a[0]);  // Note: &a[0] is safe while a exists.
+        }
+        execArgs.push_back(nullptr);
+
+        // Create a pipe to capture stdout and stderr
+        int pipefd[2];
+        if (pipe(pipefd) == -1) {
+            std::cerr << "Failed to create pipe." << std::endl;
+            return false;
+        }
+
+        pid_t pid = fork();
+        if (pid == -1) {
+            std::cerr << "Failed to fork process." << std::endl;
+            return false;
+
+        } else if (pid == 0) {                                                          // Child process
+
+            close(pipefd[0]);                                                           // Close the read end of the pipe; not needed in the child.
+            dup2(pipefd[1], STDOUT_FILENO);                                             // Redirect stdout and stderr to the pipe's write end.
+            dup2(pipefd[1], STDERR_FILENO);
+            close(pipefd[1]);                                                           // Close after duplicating
+
+            if (open_console)
+                execlp("xterm", "xterm", "-e", execArgs[0], (char*)nullptr);
+            else
+                execv(path_to_exe.c_str(), execArgs.data());
+
+            std::cerr << "Failed to execute program: " << path_to_exe.generic_string() << std::endl;
+            exit(EXIT_FAILURE);
+
+        } else {                                                                        // Parent process
+
+            close(pipefd[1]);                                                           // Close the write end of the pipe.
+
+            // Read output from the pipe
+            constexpr size_t bufferSize = 1024;
+            char buffer[bufferSize];
+            ssize_t count;
+            while ((count = read(pipefd[0], buffer, bufferSize - 1)) > 0) {
+                buffer[count] = '\0';
+                output->append(buffer);
+            }
+            close(pipefd[0]);
+
+            int status;
+            waitpid(pid, &status, 0);
+
+            return WIFEXITED(status) && (WEXITSTATUS(status) == 0);
+        }
 
 #endif
 
-        return result;
     }
 
 
@@ -172,6 +266,58 @@ namespace PFF::util {
         return loc_system_time;
     }
 
+#if defined(PFF_PLATFORM_LINUX)                                     // QT related functions (Linux only)
+
+    namespace {
+        std::unique_ptr<QApplication> qt_app;
+        int qt_argc = 1;
+        char qt_argv0[] = "PFF_editor";  // Permanent storage for argv[0]
+        char* qt_argv[] = {qt_argv0, nullptr};
+    }
+
+    void qt_message_handler(QtMsgType type, const QMessageLogContext& context, const QString& msg) {
+        
+        // Map Qt message type to your severity levels
+        PFF::logger::severity sev = PFF::logger::severity::Debug;
+        switch(type) {
+            case QtDebugMsg:    sev = PFF::logger::severity::Debug; break;
+            case QtInfoMsg:     sev = PFF::logger::severity::Info; break;
+            case QtWarningMsg:  sev = PFF::logger::severity::Warn; break;
+            case QtCriticalMsg: sev = PFF::logger::severity::Error; break;
+            case QtFatalMsg:    sev = PFF::logger::severity::Fatal; break;
+        }
+        
+        // Extract context information
+        const char* file            = context.file ? context.file : "none";
+        const char* function        = context.function ? context.function : "none";
+        int line                    = context.line;
+        std::thread::id threadId    = std::this_thread::get_id();
+        std::string message         = msg.toStdString();
+        PFF::logger::log_msg(sev, file, function, line, threadId, std::move(message));
+    }
+    
+    void init_qt() {
+            
+        LOG(Trace, "Initiating QT");
+    
+        qInstallMessageHandler(qt_message_handler);
+        
+        if (!qt_app) {
+            QApplication::setAttribute(Qt::AA_EnableHighDpiScaling);
+            qt_app = std::make_unique<QApplication>(qt_argc, qt_argv);
+        }
+    }
+    
+    void shutdown_qt() { 
+
+        if (qt_app) {
+            qInstallMessageHandler(nullptr);
+            qt_app->quit();
+            qt_app.reset();
+        }
+    }
+
+#endif
 
     std::filesystem::path file_dialog(const std::string& title, const std::vector<std::pair<std::string, std::string>>& filters) {
 
@@ -209,10 +355,11 @@ namespace PFF::util {
         return std::filesystem::path();
 
     #elif defined(PFF_PLATFORM_LINUX)
-
-        int argc = 0;
-        char **argv = nullptr;
-        QApplication app(argc, argv);                                                                                                   // Create a QApplication instance
+   
+         if (!qt_app) {
+            LOG(Error, "QApplication not initialized!");
+            return {};
+        }
 
         QString filterString;
         for (auto& filter : filters) {                                                                                                  // Prepare the filter string for QFileDialog
@@ -235,6 +382,81 @@ namespace PFF::util {
     #endif
     }
 
+
+    std::vector<std::filesystem::path> file_dialog_multi(const std::string& title, const std::vector<std::pair<std::string, std::string>>& filters) {
+
+#if defined(PFF_PLATFORM_WINDOWS)
+
+        HWND hwndOwner = GetActiveWindow();
+        OPENFILENAMEW ofn;
+        std::vector<std::wstring> filterW;
+        for (auto& f : filters)
+            filterW.push_back(std::wstring(f.first.begin(), f.first.end()) + L'\0' +
+                              std::wstring(f.second.begin(), f.second.end()) + L'\0');
+        // Concatenate filters and double‑null terminate
+        std::wstring filterStr;
+        for (auto& s : filterW) filterStr += s;
+        filterStr += L'\0';
+    
+        wchar_t szFiles[4096] = { 0 };
+        ZeroMemory(&ofn, sizeof(ofn));
+        ofn.lStructSize  = sizeof(ofn);
+        ofn.hwndOwner    = hwndOwner;
+        ofn.lpstrFile    = szFiles;
+        ofn.nMaxFile     = sizeof(szFiles) / sizeof(wchar_t);
+        ofn.lpstrFilter  = filterStr.c_str();
+        ofn.nFilterIndex = 1;
+        ofn.Flags        = OFN_PATHMUSTEXIST | OFN_FILEMUSTEXIST
+                          | OFN_ALLOWMULTISELECT | OFN_EXPLORER;
+        std::wstring wtitle(title.begin(), title.end());
+        ofn.lpstrTitle   = wtitle.c_str();
+    
+        if (GetOpenFileNameW(&ofn)) {
+            std::vector<std::filesystem::path> results;
+            std::wstring dir = szFiles;
+            wchar_t* p = szFiles + dir.size() + 1;
+            if (*p == L'\0') {
+                // Only one file selected
+                results.emplace_back(dir);
+            } else {
+                // Multiple files: parse names after directory
+                while (*p) {
+                    results.emplace_back(std::filesystem::path(dir) / p);
+                    p += wcslen(p) + 1;
+                }
+            }
+            return results;
+        }
+        return {};
+    
+#elif defined(PFF_PLATFORM_LINUX)
+
+         if (!qt_app) {
+            LOG(Error, "QApplication not initialized!");
+            return {};
+        }
+
+        QStringList nameFilters;
+        for (auto& f : filters) {
+            // Replace semicolons in the pattern with spaces
+            std::string pat = f.second;
+            std::replace(pat.begin(), pat.end(), ';', ' ');
+            nameFilters << QString::fromStdString(f.first + " (" + pat + ")");
+        }
+        QStringList files = QFileDialog::getOpenFileNames(
+            nullptr,
+            QString::fromUtf8(title.data()),
+            QString(),
+            nameFilters.join(";;")
+        );
+        std::vector<std::filesystem::path> results;
+        for (const auto& qf : files)
+            results.emplace_back(qf.toStdString());
+        return results;
+
+#endif
+    }
+    
 
     std::filesystem::path get_executable_path() {
 

@@ -4,6 +4,7 @@
 
 #include "util/ui/pannel_collection.h"
 
+#define ENGINE_WIKI_WINDOW_NAME     "Engine Wiki"
 
 namespace PFF::UI {
 
@@ -57,9 +58,11 @@ namespace PFF::UI {
         if (!home_file.path().empty()) {
             std::string filename = home_file.path().filename().replace_extension("").string();
             std::replace(filename.begin(), filename.end(), '_', ' ');
-
-            if (UI::gray_button((indent + filename).c_str()))
+            
+            ImGui::TreeNodeEx((indent + filename).c_str(), ImGuiTreeNodeFlags_Leaf);
+            if (ImGui::IsItemClicked())
                 wiki_text = read_file_to_string(home_file.path());
+            ImGui::TreePop();
         }
 
         // Display sorted directories
@@ -75,8 +78,10 @@ namespace PFF::UI {
             std::string filename = file_entry.path().filename().replace_extension("").string();
             std::replace(filename.begin(), filename.end(), '_', ' ');
 
-            if (UI::gray_button((indent + filename).c_str()))
+            ImGui::TreeNodeEx((indent + filename).c_str(), ImGuiTreeNodeFlags_Leaf);
+            if (ImGui::IsItemClicked())
                 wiki_text = read_file_to_string(file_entry.path());
+            ImGui::TreePop();
         }
 	}
 
@@ -87,13 +92,9 @@ namespace PFF::UI {
 
 		if (wiki_text.empty())
 			wiki_text = read_file_to_string(path_to_wiki / "home.md");
-
-		ImGuiViewport* viewport = ImGui::GetMainViewport();
-		ImGui::SetNextWindowPos(ImGui::GetMainViewport()->GetCenter(), ImGuiCond_Appearing, ImVec2(0.5f, 0.5f));
-		ImGui::SetNextWindowSize(ImVec2(viewport->Size.x - 500, viewport->Size.y - 300), ImGuiCond_Appearing);
-
+        
 		ImGuiWindowFlags flags = 0;
-		if (!ImGui::Begin("Engine Wiki", &show_engine_wiki, flags)) {
+		if (!ImGui::Begin(ENGINE_WIKI_WINDOW_NAME, &show_engine_wiki, flags)) {
 
 			ImGui::End();
 			return;
@@ -115,11 +116,3 @@ namespace PFF::UI {
 	}
 
 }
-//
-//
-//LOG(Trace, "Home is clicked");
-//
-//if (UI::add_gray_button("Home")) {
-//
-//	LOG(Trace, "BUTTON is clicked");
-//}

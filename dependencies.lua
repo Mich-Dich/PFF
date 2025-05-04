@@ -1,7 +1,4 @@
 
-VULKAN_SDK = os.getenv("VULKAN_SDK")
-
-
 ------------------
 vendor_path = {}
 vendor_path["glfw"]              = "PFF/vendor/glfw"
@@ -12,6 +9,7 @@ vendor_path["tinyobjloader"]     = "PFF/vendor/tinyobjloader"
 vendor_path["stb_image"]         = "PFF/vendor/stb_image"
 vendor_path["entt"]              = "PFF/vendor/entt/include"
 vendor_path["ImGuizmo"]          = "PFF/vendor/ImGuizmo"
+vendor_path["assimp"]            = "PFF_editor/vendor/assimp"
 
 
 ------------ include ------------ 
@@ -24,22 +22,32 @@ IncludeDir["tinyobjloader"]     = "%{wks.location}/%{vendor_path.tinyobjloader}"
 IncludeDir["stb_image"]         = "%{wks.location}/%{vendor_path.stb_image}"
 IncludeDir["entt"]              = "%{wks.location}/%{vendor_path.entt}"
 IncludeDir["ImGuizmo"]          = "%{wks.location}/%{vendor_path.ImGuizmo}"
+IncludeDir["assimp"]            = "%{wks.location}/%{vendor_path.assimp}/include"
 
-IncludeDir["VulkanSDK"]         = "%{VULKAN_SDK}/include"
 
 ------------ libs dir ------------ 
 LibraryDir = {}
-LibraryDir["VulkanSDK"]         = "%{VULKAN_SDK}/lib"
 
 ------------ libs ------------ 
 Library = {}
 
+VULKAN = os.getenv("VULKAN_SDK")
+
+if os.istarget("windows") then
+    IncludeDir["Vulkan"]        = "%{VULKAN}/include"
+    LibraryDir["Vulkan"]        = "%{VULKAN}/lib"
+elseif os.istarget("linux") then
+    IncludeDir["Vulkan"]        = "%{VULKAN}/include/vulkan"
+    IncludeDir["VulkanUtils"]   = "%{VULKAN}/include"
+end
+
+
 if os.istarget("windows") then
     glslc = "../PFF/vendor/vulkan-glslc/glslc.exe"
-    Library["Vulkan"]           = "%{LibraryDir.VulkanSDK}/vulkan-1.lib"
-    Library["VulkanUtils"]      = "%{LibraryDir.VulkanSDK}/VkLayer_utils.lib"
+    Library["Vulkan"]           = "%{LibraryDir.Vulkan}/vulkan-1.lib"
+    Library["VulkanUtils"]      = "%{LibraryDir.Vulkan}/VkLayer_utils.lib"
 elseif os.istarget("linux") then
     glslc = "../PFF/vendor/vulkan-glslc/glslc"
-    Library["Vulkan"]           = "%{LibraryDir.VulkanSDK}/libvulkan.so"
-    Library["VulkanUtils"]      = "%{LibraryDir.VulkanSDK}/libVkLayer_utils.so"
+    Library["Vulkan"]           = "%{LibraryDir.Vulkan}/libvulkan.so"
+    Library["VulkanUtils"]      = "%{LibraryDir.Vulkan}/libVkLayer_utils.so"
 end
