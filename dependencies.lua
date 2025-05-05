@@ -9,7 +9,6 @@ vendor_path["tinyobjloader"]     = "PFF/vendor/tinyobjloader"
 vendor_path["stb_image"]         = "PFF/vendor/stb_image"
 vendor_path["entt"]              = "PFF/vendor/entt/include"
 vendor_path["ImGuizmo"]          = "PFF/vendor/ImGuizmo"
-vendor_path["assimp"]            = "PFF_editor/vendor/assimp"
 
 
 ------------ include ------------ 
@@ -22,7 +21,6 @@ IncludeDir["tinyobjloader"]     = "%{wks.location}/%{vendor_path.tinyobjloader}"
 IncludeDir["stb_image"]         = "%{wks.location}/%{vendor_path.stb_image}"
 IncludeDir["entt"]              = "%{wks.location}/%{vendor_path.entt}"
 IncludeDir["ImGuizmo"]          = "%{wks.location}/%{vendor_path.ImGuizmo}"
-IncludeDir["assimp"]            = "%{wks.location}/%{vendor_path.assimp}/include"
 
 
 ------------ libs dir ------------ 

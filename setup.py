@@ -55,7 +55,6 @@ try:
     update_submodule("PFF/vendor/glfw", "master")
     update_submodule("PFF/vendor/imgui", "docking")
     update_submodule("PFF/vendor/ImGuizmo", "master")
-    update_submodule("PFF_editor/vendor/assimp", "master")
 
     utils.print_u("\nCHECKING PYTHON SETUP")
     python_installed = python_requirements.validate()

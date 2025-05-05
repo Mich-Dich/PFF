@@ -43,18 +43,31 @@ namespace PFF {
 	// };
 
 	const std::vector<std::pair<std::string, std::string>> posible_import_tile_types = {
-		{"All supported file types",    "*.gltf;*.glb;*.png;*.jpg;*.jpeg;*.jpe;*.tga;*.bmp;*.psd;*.gif;*.hdr;*.pic;*.ppm;*.pgm"},
-		{"glTF 2.0 files",              "*.gltf;*.glb"},
-		{"Images",                 		"*.png;*.jpg;*.jpeg;*.jpe;*.tga;*.bmp;*.psd;*.gif;*.hdr;*.pic;*.ppm;*.pgm"},					// all images
-		{"JPEG images",                 "*.jpg;*.jpeg;*.jpe"},
-		{"PNG images",                  "*.png"},
-		{"TGA images",                  "*.tga"},
-		{"BMP images",                  "*.bmp"},
-		{"PSD images",                  "*.psd"},
-		{"GIF images",                  "*.gif"},
-		{"HDR (Radiance .hdr)",         "*.hdr"},
-		{"Softimage PIC",               "*.pic"},
-		{"PNM (PPM/PGM)",               "*.ppm;*.pgm"},
+										
+		//									mesh																 image
+		{"All supported file types",    	"*.fbx;*.gltf;*.glb;*.obj;*.stl;*.3mf;*.dae;*.xml;*.ply;*.plyb;*.3ds;*.png;*.jpg;*.jpeg;*.jpe;*.tga;*.bmp;*.psd;*.gif;*.hdr;*.pic;*.ppm;*.pgm"},
+		
+		// Common 3D meshes
+		{"Meshes", 							"*.fbx;*.gltf;*.glb;*.obj;*.stl;*.3mf;*.dae;*.xml;*.ply;*.plyb;*.3ds;"},
+		{"FBX files",         				"*.fbx" },
+		{"glTF 2.0 files",					"*.gltf;*.glb" },
+		{"Wavefront OBJ",					"*.obj" },
+		{"STL (Stereolithography)",			"*.stl" },
+		{"3MF (3D Manufacturing Format)",	"*.3mf" },
+		{"Collada",							"*.dae;*.xml" },
+		{"PLY (Stanford Polygon Library)",	"*.ply;*.plyb" },
+		{"3DS (3D Studio)",					"*.3ds" },
+		
+		{"Images",                 			"*.png;*.jpg;*.jpeg;*.jpe;*.tga;*.bmp;*.psd;*.gif;*.hdr;*.pic;*.ppm;*.pgm"},					// all images
+		{"JPEG images",                 	"*.jpg;*.jpeg;*.jpe"},
+		{"PNG images",                  	"*.png"},
+		{"TGA images",                  	"*.tga"},
+		{"BMP images",                  	"*.bmp"},
+		{"PSD images",                  	"*.psd"},
+		{"GIF images",                  	"*.gif"},
+		{"HDR (Radiance .hdr)",         	"*.hdr"},
+		{"Softimage PIC",               	"*.pic"},
+		{"PNM (PPM/PGM)",               	"*.ppm;*.pgm"},
 	};
 
 	// ================================================ util ================================================
@@ -770,7 +783,17 @@ namespace PFF {
 
 					for (const auto path : source_paths) {
 
-						if (path.extension() == ".gltf" || path.extension() == ".glb") {
+						if (path.extension() == ".fbx" 	||
+							path.extension() == ".gltf" ||
+							path.extension() == ".glb" 	||
+							path.extension() == ".obj" 	||
+							path.extension() == ".stl" 	||
+							path.extension() == ".3mf" 	||
+							path.extension() == ".dae" 	||
+							path.extension() == ".xml" 	||
+							path.extension() == ".ply" 	||
+							path.extension() == ".plyb" ||
+							path.extension() == ".3ds") {
 							
 							LOG(Debug, "TODO: modefy mesh import window to accept multiple paths");
 							PFF_editor::get().get_editor_layer()->add_window<mesh_import_window>(path, m_selected_directory);

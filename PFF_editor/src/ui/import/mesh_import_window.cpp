@@ -24,7 +24,7 @@ namespace PFF {
 
 		if (loc_load_options != loc_prev_load_options) {		// updated, need to check factory
 			
-			asset_alredy_exists = PFF::mesh_factory::check_if_assets_already_exists(source_path, destination_path, loc_load_options, assets_that_already_exist);
+			asset_alredy_exists = PFF::mesh_factory::check_if_assets_already_exist(source_path, destination_path, loc_load_options, assets_that_already_exist);
 			loc_prev_load_options = loc_load_options;
 		}
 

@@ -26,220 +26,208 @@ namespace PFF::mesh_factory {
     // PRIVATE
     ref<PFF::geometry::mesh_asset> load_gltf_mesh(std::filesystem::path filePath);
 
+    std::optional<std::unordered_map<std::string, ref<PFF::geometry::mesh_asset>>> load_assimp_meshes(const std::filesystem::path& file_path) {
+            
+        VALIDATE(std::filesystem::exists(file_path), return {}, "Loading Assimp: " << file_path, "provided file path does not exist");
 
-    std::optional<std::unordered_map<std::string, ref<PFF::geometry::mesh_asset>>> load_gltf_meshes(std::filesystem::path file_path) {
+        Assimp::Importer importer;
 
+        // Post‐processing: triangulate, generate normals, flip UVs, join identical vertices
+        const aiScene* scene = importer.ReadFile(
+            file_path.string(),
+            aiProcess_Triangulate
+            | aiProcess_GenSmoothNormals
+            | aiProcess_FlipUVs
+            | aiProcess_JoinIdenticalVertices
+        );
 
-        
-        // TODO: sort out linker issues
+        VALIDATE(scene && scene->HasMeshes(), return {}, "", "Assimp failed to load model: " << importer.GetErrorString());
+        std::unordered_map<std::string, ref<PFF::geometry::mesh_asset>> meshes;
 
-        // Assimp::Importer importer;
-        // const aiScene* scene = importer.ReadFile(file_path.string(), aiProcess_Triangulate | aiProcess_GenSmoothNormals | aiProcess_FlipUVs | aiProcess_JoinIdenticalVertices);
-        // VALIDATE(scene && !(scene->mFlags & AI_SCENE_FLAGS_INCOMPLETE) && scene->mRootNode, return {}, "", "Assimp: " << importer.GetErrorString());
-
-
-
-
-        VALIDATE(std::filesystem::exists(file_path), return {}, "Loading GLTF: " << file_path, "provided file path does not exist");
-
-        fastgltf::GltfDataBuffer data;
-        data.loadFromFile(file_path);
-
-        constexpr auto gltfOptions = fastgltf::Options::LoadGLBBuffers | fastgltf::Options::LoadExternalBuffers;
-        fastgltf::Parser parser{};
-        auto load = parser.loadGltfBinary(&data, file_path.parent_path(), gltfOptions);
-
-        VALIDATE(load, return {}, "", "Failed to load glTF: [" << fastgltf::getErrorMessage(load.error()) << "]");
-
-        fastgltf::Asset gltf;
-        gltf = std::move(load.get());
-
-        std::unordered_map<std::string, ref<geometry::mesh_asset>> meshes{};
-
-        // use the same vectors for all meshes so that the memory doesnt reallocate as often
-
-        //std::vector<u32> indices;
-        //std::vector<geometry::vertex> vertices;
-        for (fastgltf::Mesh& mesh : gltf.meshes) {
-
-            geometry::mesh_asset loc_mesh{};
-            //loc_mesh.name = mesh.name;
-
-            LOG(Trace, "name of surface: " << mesh.name)
-
-            // clear the mesh arrays each mesh, we dont want to merge them by error
+        for (unsigned int m = 0; m < scene->mNumMeshes; ++m) {
+            const aiMesh* aimesh = scene->mMeshes[m];
+            PFF::geometry::mesh_asset loc_mesh{};
+            loc_mesh.surfaces.clear();
             loc_mesh.indices.clear();
             loc_mesh.vertices.clear();
+            loc_mesh.vertices.reserve(aimesh->mNumVertices);                        // Reserve space
+            loc_mesh.indices.reserve(aimesh->mNumFaces * 3);                        // Each face is a triangle (3 indices)
 
-            for (auto&& p : mesh.primitives) {
-
-                LOG(Trace, "name of surface: " << mesh.name)
-
-                geometry::Geo_surface new_surface;
-                new_surface.startIndex = (u32)loc_mesh.indices.size();
-                new_surface.count = (u32)gltf.accessors[p.indicesAccessor.value()].count;
-                size_t initial_vtx = loc_mesh.vertices.size();
-
-                // load indexes
-                {
-                    fastgltf::Accessor& indexaccessor = gltf.accessors[p.indicesAccessor.value()];
-                    loc_mesh.indices.reserve(loc_mesh.indices.size() + indexaccessor.count);
-
-                    fastgltf::iterateAccessor<u32>(gltf, indexaccessor, [&](u32 idx) {
-                        loc_mesh.indices.push_back(idx + static_cast<u32>(initial_vtx));
-                        });
+            // Extract vertices
+            for (unsigned int i = 0; i < aimesh->mNumVertices; ++i) {
+                glm::vec3 pos{ aimesh->mVertices[i].x,
+                            aimesh->mVertices[i].y,
+                            aimesh->mVertices[i].z };
+                glm::vec3 norm{ 0.f, 0.f, 0.f };
+                if (aimesh->HasNormals()) {
+                    norm = { aimesh->mNormals[i].x,
+                            aimesh->mNormals[i].y,
+                            aimesh->mNormals[i].z };
                 }
-
-                // load vertex positions
-                {
-                    fastgltf::Accessor& posAccessor = gltf.accessors[p.findAttribute("POSITION")->second];
-                    loc_mesh.vertices.resize(loc_mesh.vertices.size() + posAccessor.count);
-
-                    fastgltf::iterateAccessorWithIndex<glm::vec3>(gltf, posAccessor, [&](glm::vec3 v, size_t index) {
-
-                        geometry::vertex new_vertex;
-                        new_vertex.position = v;
-                        new_vertex.normal = { 1, 0, 0 };
-                        new_vertex.color = glm::vec4{ 1.f };
-                        new_vertex.uv_x = 0;
-                        new_vertex.uv_y = 0;
-                        loc_mesh.vertices[initial_vtx + index] = new_vertex;
-                        });
+                glm::vec4 col{ 1.f };
+                if (aimesh->HasVertexColors(0)) {
+                    auto& c = aimesh->mColors[0][i];
+                    col = { c.r, c.g, c.b, c.a };
                 }
-
-                // load vertex normals
-                auto normals = p.findAttribute("NORMAL");
-                if (normals != p.attributes.end()) {
-
-                    fastgltf::iterateAccessorWithIndex<glm::vec3>(gltf, gltf.accessors[(*normals).second], [&](glm::vec3 v, size_t index) {
-                        loc_mesh.vertices[initial_vtx + index].normal = v;
-                        });
+                float u = 0, v = 0;
+                if (aimesh->HasTextureCoords(0)) {
+                    u = aimesh->mTextureCoords[0][i].x;
+                    v = aimesh->mTextureCoords[0][i].y;
                 }
-
-                // load UVs
-                auto uv = p.findAttribute("TEXCOORD_0");
-                if (uv != p.attributes.end()) {
-
-                    fastgltf::iterateAccessorWithIndex<glm::vec2>(gltf, gltf.accessors[(*uv).second], [&](glm::vec2 v, size_t index) {
-                        loc_mesh.vertices[initial_vtx + index].uv_x = v.x;
-                        loc_mesh.vertices[initial_vtx + index].uv_y = v.y;
-                        });
-                }
-
-                // load vertex colors
-                auto colors = p.findAttribute("COLOR_0");
-                if (colors != p.attributes.end()) {
-
-                    fastgltf::iterateAccessorWithIndex<glm::vec4>(gltf, gltf.accessors[(*colors).second], [&](glm::vec4 v, size_t index) {
-                        loc_mesh.vertices[initial_vtx + index].color = v;
-                        });
-                }
-
-                //loop the vertices of this surface, find min/max bounds
-                glm::vec3 minpos = loc_mesh.vertices[initial_vtx].position;
-                glm::vec3 maxpos = loc_mesh.vertices[initial_vtx].position;
-                for (size_t x = initial_vtx; x < loc_mesh.vertices.size(); x++) {
-                    minpos = glm::min(minpos, loc_mesh.vertices[x].position);
-                    maxpos = glm::max(maxpos, loc_mesh.vertices[x].position);
-                }
-                // calculate origin and extents from the min/max, use extent lenght for radius
-                new_surface.bounds_data.origin = (maxpos + minpos) / 2.f;
-                new_surface.bounds_data.extents = (maxpos - minpos) / 2.f;
-                new_surface.bounds_data.sphere_radius = glm::length(new_surface.bounds_data.extents);
-
-                loc_mesh.surfaces.push_back(new_surface);
+                loc_mesh.vertices.emplace_back(pos, norm, col, u, v);
             }
 
-            // display the vertex normals
-            constexpr bool OverrideColors = true;
-            if (OverrideColors) {
-                for (geometry::vertex& vtx : loc_mesh.vertices)
-                    vtx.color = glm::vec4(vtx.normal, 1.f);
+            // Extract indices & build surfaces
+            size_t idxBase = 0;
+            for (unsigned int f = 0; f < aimesh->mNumFaces; ++f) {
+                const aiFace& face = aimesh->mFaces[f];
+                PFF::geometry::Geo_surface surf{};
+                surf.startIndex = static_cast<u32>(loc_mesh.indices.size());
+                surf.count = static_cast<u32>(face.mNumIndices);
+
+                // Append indices
+                for (unsigned int k = 0; k < face.mNumIndices; ++k) {
+                    loc_mesh.indices.push_back(
+                        static_cast<u32>(face.mIndices[k] + idxBase)
+                    );
+                }
+                // Compute bounds for this surface
+                glm::vec3 minp = loc_mesh.vertices[idxBase].position;
+                glm::vec3 maxp = minp;
+                for (size_t vi = idxBase;
+                    vi < loc_mesh.vertices.size();
+                    ++vi) {
+                    minp = glm::min(minp, loc_mesh.vertices[vi].position);
+                    maxp = glm::max(maxp, loc_mesh.vertices[vi].position);
+                }
+                surf.bounds_data.origin = (minp + maxp) * 0.5f;
+                surf.bounds_data.extents = (maxp - minp) * 0.5f;
+                surf.bounds_data.sphere_radius =
+                    glm::length(surf.bounds_data.extents);
+
+                loc_mesh.surfaces.push_back(surf);
+                idxBase += 0; // vertices were all pushed up front
             }
 
-            // calc mesh_asset bounds based on surfaces
-            glm::vec3 minpos = loc_mesh.surfaces[0].bounds_data.origin - loc_mesh.surfaces[0].bounds_data.extents;
-            glm::vec3 maxpos = loc_mesh.surfaces[0].bounds_data.origin + loc_mesh.surfaces[0].bounds_data.extents;
-            for (size_t x = 0; x < loc_mesh.surfaces.size(); x++) {
-                minpos = glm::min(minpos, loc_mesh.surfaces[x].bounds_data.origin - loc_mesh.surfaces[x].bounds_data.extents);
-                maxpos = glm::max(maxpos, loc_mesh.surfaces[x].bounds_data.origin + loc_mesh.surfaces[x].bounds_data.extents);
+            // Compute overall mesh bounds
+            {
+                auto& first = loc_mesh.surfaces.front().bounds_data;
+                glm::vec3 gmin = first.origin - first.extents;
+                glm::vec3 gmax = first.origin + first.extents;
+                for (auto& s : loc_mesh.surfaces) {
+                    gmin = glm::min(gmin, s.bounds_data.origin - s.bounds_data.extents);
+                    gmax = glm::max(gmax, s.bounds_data.origin + s.bounds_data.extents);
+                }
+                loc_mesh.bounds_data.origin = (gmin + gmax) * 0.5f;
+                loc_mesh.bounds_data.extents = (gmax - gmin) * 0.5f;
+                loc_mesh.bounds_data.sphere_radius =
+                    glm::length(loc_mesh.bounds_data.extents);
             }
-            loc_mesh.bounds_data.origin = (maxpos + minpos) / 2.f;
-            loc_mesh.bounds_data.extents = (maxpos - minpos) / 2.f;
-            loc_mesh.bounds_data.sphere_radius = glm::length(loc_mesh.bounds_data.extents);
 
-            // new_mesh.meshBuffers = engine->uploadMesh(indices, vertices);
-            meshes.emplace(mesh.name, create_ref<geometry::mesh_asset>(std::move(loc_mesh)));
+            // Store by name (fallback to index if no name)
+            std::string name = aimesh->mName.C_Str();
+            if (name.empty()) name = "mesh_" + std::to_string(m);
+
+            meshes.emplace(
+                name,
+                create_ref<PFF::geometry::mesh_asset>(std::move(loc_mesh))
+            );
         }
 
         return meshes;
     }
 
 
-    std::optional<std::vector<std::string>> load_gltf_meshes_names(std::filesystem::path file_path) {
+    inline bool validate_mesh_path(const std::filesystem::path& path) {
 
-        VALIDATE(std::filesystem::exists(file_path), return {}, "", "provided file path does not exist");
+        VALIDATE(std::filesystem::exists(path) && std::filesystem::is_regular_file(path), return false, "", "provided source path invalid [" << path << "]");
+        const bool supported_file_type = (path.extension() == ".fbx" ||
+            path.extension() == ".gltf" ||
+            path.extension() == ".glb" 	||
+            path.extension() == ".obj" 	||
+            path.extension() == ".stl" 	||
+            path.extension() == ".3mf" 	||
+            path.extension() == ".dae" 	||
+            path.extension() == ".xml" 	||
+            path.extension() == ".ply" 	||
+            path.extension() == ".plyb" ||
+            path.extension() == ".3ds");
+        VALIDATE(supported_file_type, return false, "", "Tried to import invalid file type [" << path << "]");
+        return true;
+    }
 
-        fastgltf::GltfDataBuffer data;
-        data.loadFromFile(file_path);
+    std::optional<std::vector<std::string>> load_assimp_meshes_names(const std::filesystem::path& file_path) {
 
-        constexpr auto gltfOptions = fastgltf::Options::LoadGLBBuffers | fastgltf::Options::LoadExternalBuffers;
-        fastgltf::Parser parser{};
-        auto load = parser.loadGltfBinary(&data, file_path.parent_path(), gltfOptions);
-        VALIDATE(load, return {}, "", "Failed to load glTF: [" << fastgltf::getErrorMessage(load.error()) << "]");
-
-        fastgltf::Asset gltf;
-        gltf = std::move(load.get());
-
-        std::vector<std::string> mesh_names{};
-        for (fastgltf::Mesh& mesh : gltf.meshes)
-            mesh_names.push_back(std::string(mesh.name.c_str()));           // TODO: rewrite this
-
+        // Validate file exists and is a glTF/glb       (only for now)
+        VALIDATE(validate_mesh_path(file_path), return {}, "", "provided file path does not exist or is not suported");
+    
+        Assimp::Importer importer;
+        const aiScene* scene = importer.ReadFile(file_path.string(), aiProcess_ValidateDataStructure);                  // We don't need full postprocessing for just names, but at least load meshes
+        VALIDATE(scene && scene->HasMeshes(), return {}, "", "Assimp failed to load model: " << importer.GetErrorString());
+    
+        std::vector<std::string> mesh_names;
+        mesh_names.reserve(scene->mNumMeshes);
+        for (unsigned int mi = 0; mi < scene->mNumMeshes; ++mi) {
+            const aiMesh* m = scene->mMeshes[mi];
+            std::string name = m->mName.C_Str();
+            if (name.empty()) {
+                // fallback to indexed name
+                name = "mesh_" + std::to_string(mi);
+            }
+            mesh_names.push_back(name);
+        }
+    
         return mesh_names;
     }
 
-
-    bool check_if_assets_already_exists(const std::filesystem::path source_path, const std::filesystem::path destination_path, const load_options options, std::vector<std::string>& assets_that_already_exist) {
-
-        VALIDATE(std::filesystem::exists(source_path) && (source_path.extension() == ".gltf" || source_path.extension() == ".glb")&& std::filesystem::is_regular_file(source_path), return false, "", "provided source path invalid [" << source_path << "]");
-        LOG(Trace, "Checking if gltf mesh can be imported. source: " << source_path << " destination: " << destination_path);
-
+    
+    bool check_if_assets_already_exist(const std::filesystem::path& source_path, const std::filesystem::path& destination_path, const load_options options, std::vector<std::string>& assets_that_already_exist) {
+        
+        VALIDATE(validate_mesh_path(source_path), return {}, "", "provided file path does not exist or is not suported");
+        LOG(Trace, "Checking if model meshes can be imported. source: " << source_path << " destination: " << destination_path);
         assets_that_already_exist.clear();
-        bool any_assest_already_exists = false;
-
+    
+        // If combining into one asset, just check for single output file
         if (options.combine_meshes) {
-
-            const std::filesystem::path output_path = destination_path / (source_path.filename().replace_extension(PFF_ASSET_EXTENTION));
-            return std::filesystem::exists(output_path);
+            std::filesystem::path out = destination_path / source_path.filename().replace_extension(PFF_ASSET_EXTENTION);
+            return std::filesystem::exists(out);
         }
-
-        std::optional<std::vector<std::string>> loc_mesh_assets = load_gltf_meshes_names(source_path);
-        if (!loc_mesh_assets.has_value())
+    
+        // Otherwise, get each mesh name and check individually
+        auto maybe_names = load_assimp_meshes_names(source_path);
+        if (!maybe_names.has_value()) {
+            // failure in loading mesh names
             return false;
-
-        for (const auto mesh : loc_mesh_assets.value()) {
-
-            std::string name_buffer = (options.include_file_name_in_asset_name) ? source_path.filename().replace_extension("").string() + "_" + mesh : mesh;
-            std::filesystem::path output_path = destination_path / (name_buffer + PFF_ASSET_EXTENTION);
-            if (std::filesystem::exists(output_path)) {
-
-                LOG(Trace, "Mesh with name of [" << name_buffer << "] already exists");
-                any_assest_already_exists = true;
-                assets_that_already_exist.push_back(name_buffer);
+        }
+    
+        bool any_exists = false;
+        for (auto const& mesh_name : *maybe_names) {
+            // prepend filename if requested
+            std::string final_name = mesh_name;
+            if (options.include_file_name_in_asset_name) {
+                std::string base = source_path.filename().stem().string();
+                final_name = base + "_" + mesh_name;
+            }
+            std::filesystem::path out = destination_path / (final_name + PFF_ASSET_EXTENTION);
+    
+            if (std::filesystem::exists(out)) {
+                LOG(Trace, "Mesh asset [" << final_name << "] already exists");
+                any_exists = true;
+                assets_that_already_exist.push_back(final_name);
             }
         }
-
-        return any_assest_already_exists;
+    
+        return any_exists;
     }
 
     
     bool import_gltf_mesh(const std::filesystem::path source_path, const std::filesystem::path destination_path, const load_options options) {
 
-        VALIDATE(std::filesystem::exists(source_path) && (source_path.extension() == ".gltf" || source_path.extension() == ".glb")&& std::filesystem::is_regular_file(source_path), return false, "", "provided source path invalid [" << source_path << "]");
+        VALIDATE(validate_mesh_path(source_path), return {}, "", "provided file path does not exist or is not suported");
         LOG(Trace, "Trying to import gltf mesh. source: " << source_path << " destination: " << destination_path);
 
         // load file from source_path and
-        std::optional<std::unordered_map<std::string, ref<PFF::geometry::mesh_asset>>> loc_mesh_assets = load_gltf_meshes(source_path);
+        std::optional<std::unordered_map<std::string, ref<PFF::geometry::mesh_asset>>> loc_mesh_assets = load_assimp_meshes(source_path);
         VALIDATE(loc_mesh_assets.has_value(), return false, "loaded source file", "Failed to load meshes");
 
         if (options.combine_meshes) {

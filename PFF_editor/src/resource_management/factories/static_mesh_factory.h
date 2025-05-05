@@ -30,7 +30,7 @@ namespace PFF::mesh_factory {
 
     };
 
-    bool check_if_assets_already_exists(const std::filesystem::path source_path, const std::filesystem::path destination_path, const load_options options, std::vector<std::string>& assets_that_already_exist);
+    bool check_if_assets_already_exist(const std::filesystem::path& source_path, const std::filesystem::path& destination_path, const load_options options, std::vector<std::string>& assets_that_already_exist);
 
     // factory loads external assets and convert them into engine-specific-assets in the project/content directory
     bool import_gltf_mesh(const std::filesystem::path source_path, const std::filesystem::path destination_path, const load_options options);
