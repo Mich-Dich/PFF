@@ -25,7 +25,7 @@ namespace PFF::code_generator {
 
 	void generate_init_file_header(const std::vector<PFF_class>& classes, const std::filesystem::path& filepath) {
 
-		//LOG(Trace, " generating init-files for project ");
+		LOG(Trace, " generating init-files for project classes.size: [" << classes.size() << "]");
 
 		std::ostringstream source;
 		source << "#pragma once\n\n";
@@ -135,7 +135,7 @@ namespace PFF::code_generator {
 		outStream.close();
 	}
 
-	void generate_init_file_implemenation(const std::vector<PFF_class>& classes, const std::filesystem::path& filepath) {
+	void generate_init_file_implemenation(const std::vector<PFF_class>& classes, const std::filesystem::path& filepath, const std::filesystem::path& root_path) {
 
 		//LOG(Trace, " generating init-files for project ");
 
@@ -165,6 +165,7 @@ namespace PFF::code_generator {
 		// Generate Init Scripts function
 		{
 			source << "\tvoid init_scripts(entt::registry* registry) {\n\n";
+			source << "\t\tPFF::logger::init(\"[$B$T:$J  $L$X  $I $F:$G$E] $C$Z\", false, \"" << root_path.generic_string() << "/logs\", \"project.log\", true);\n";
 			source << "\t\tLOG(Info, \"PROJECT - initializing scripts\");\n\n";
 			//
 			//			source << R"(
@@ -177,7 +178,7 @@ namespace PFF::code_generator {
 			}
 			source << "\n";
 
-			source << "\t\tImGui::SetCurrentContext(application::get().get_imgui_layer()->get_context());\n";
+			source << "\t\t// ImGui::SetCurrentContext(application::get().get_imgui_layer()->get_context());\n";
 			num_visited = 0;
 			for (auto clazz : classes) {
 				if (!visited_source_file(clazz)) {
@@ -188,7 +189,7 @@ namespace PFF::code_generator {
 					num_visited++;
 				}
 			}
-			source << "\n\t\tLOG(Info, \"PROJECT - successfully initalized scripts\");\n";
+			source << "\n\t\t// LOG(Info, \"PROJECT - successfully initalized scripts\");\n";
 
 			source << "\t}\n\n";
 		}

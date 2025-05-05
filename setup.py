@@ -98,10 +98,6 @@ try:
             glslc_installed = glslc_configuration.validate()
             
             utils.print_u("\nCHECK WORKSPACE SETUP")
-<<<<<<< HEAD
-            premake_result = subprocess.run(['./premake5', 'gmake2'], text=True)
-
-=======
             
             selected_ide = IDE_setup.prompt_ide_selection()
             premake_action = "gmake"  # Default action
@@ -111,7 +107,6 @@ try:
                 premake_action = "gmake"
             
             premake_result = subprocess.run(['./premake5', premake_action], text=True)
->>>>>>> dev
             if premake_result.returncode != 0:
                 utils.print_c(f"BUILD FAILED! the premake script encountered [{premake_result.returncode}] errors", "red")
             else:

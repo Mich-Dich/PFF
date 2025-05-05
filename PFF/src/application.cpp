@@ -343,10 +343,8 @@ namespace PFF {
 		m_imgui_layer = new UI::imgui_layer();
 		m_layerstack->push_overlay(m_imgui_layer);
 
-		script_system::init();
-
 		// TODO: load the map specefied in the project settings as editor_start_world
-		m_world_layer->set_map(create_ref<map>());
+		m_world_layer->set_map(create_ref<map>());												// will automaticly call: script_system::reload()	(this will do same as script_system::init())
 	}
 
 	// ==================================================================== event handling ====================================================================

@@ -37,9 +37,8 @@ namespace PFF {
 
 	void file_watcher_system::start() {
 	
-		LOG(Warn, "file watcher system disabled for now");
-		// LOG(Trace, "starting file watcher system");
-		// m_thread = std::thread(&file_watcher_system::start_thread, this);
+		LOG(Trace, "starting file watcher system");
+		m_thread = std::thread(&file_watcher_system::start_thread, this);
 	}
 
 	static bool should_ignore_file(const std::string filename) {
@@ -212,9 +211,179 @@ namespace PFF {
 
 #elif defined(PFF_PLATFORM_LINUX)
 
-	void file_watcher_system::start_thread() { }
+	void file_watcher_system::start_thread() {
 
-	void file_watcher_system::stop() { }
+		VALIDATE(!path.empty(), return, "", "Provided path is empty");
+		m_inotify_fd = inotify_init1(IN_NONBLOCK);
+		VALIDATE(m_inotify_fd != -1, return, "", "Failed to initialize inotify: " << strerror(errno));
+		VALIDATE(pipe(m_stop_pipe) != -1, return, "", "Failed to create stop pipe: " << strerror(errno));
+
+		// Map to track watch descriptors to their paths
+		std::unordered_map<int, std::filesystem::path> wd_to_path;
+
+		// Lambda to add watches and update map
+		auto add_watch = [&](const std::filesystem::path& dir) {
+			int wd = inotify_add_watch(m_inotify_fd, dir.c_str(), 
+									IN_CREATE | IN_DELETE | IN_MODIFY | IN_MOVED_FROM | IN_MOVED_TO | IN_ATTRIB);
+			if (wd == -1) {
+				LOG(Error, "Failed to add watch for " << dir << ": " << strerror(errno));
+				return -1;
+			}
+			wd_to_path[wd] = dir;
+			return wd;
+		};
+
+		// Add main directory watch
+		if (add_watch(path) == -1) {
+			close(m_stop_pipe[0]);
+			close(m_stop_pipe[1]);
+			close(m_inotify_fd);
+			return;
+		}
+
+		// Add subdirectory watches if needed
+		if (include_sub_directories) {
+			try {
+				for (auto& entry : std::filesystem::recursive_directory_iterator(path)) {
+					if (entry.is_directory()) {
+						add_watch(entry.path());
+					}
+				}
+			} catch (const std::filesystem::filesystem_error& e) {
+				LOG(Error, "Directory iterator error: " << e.what());
+			}
+		}
+
+		is_started = true;
+
+		LOG(Debug, "Compiling project");
+		TRY_CALL_FUNCTION(compile)();
+
+		constexpr size_t BUFFER_SIZE = (sizeof(struct inotify_event) + NAME_MAX + 1) * 100;
+		char buffer[BUFFER_SIZE];
+
+		while (m_enable_raising_events) {
+			fd_set fds;
+			FD_ZERO(&fds);
+			FD_SET(m_inotify_fd, &fds);
+			FD_SET(m_stop_pipe[0], &fds);
+
+			int max_fd = std::max(m_inotify_fd, m_stop_pipe[0]);
+
+			int ready = select(max_fd + 1, &fds, nullptr, nullptr, nullptr);
+			if (ready == -1) {
+				if (errno == EINTR) continue;
+				LOG(Error, "select error: " << strerror(errno));
+				break;
+			}
+
+			if (FD_ISSET(m_stop_pipe[0], &fds)) {
+				char tmp;
+				read(m_stop_pipe[0], &tmp, sizeof(tmp));
+				break;
+			}
+
+			if (FD_ISSET(m_inotify_fd, &fds)) {
+				ssize_t len = read(m_inotify_fd, buffer, BUFFER_SIZE);
+				if (len == -1) {
+					if (errno == EAGAIN) continue;
+					LOG(Error, "read error: " << strerror(errno));
+					break;
+				}
+
+				for (char* ptr = buffer; ptr < buffer + len; ) {
+					struct inotify_event* event = reinterpret_cast<struct inotify_event*>(ptr);
+					ptr += sizeof(struct inotify_event) + event->len;
+
+					auto it = wd_to_path.find(event->wd);
+					if (it == wd_to_path.end()) continue;
+
+					std::filesystem::path dir_path = it->second;
+					std::string filename(event->name);
+					std::filesystem::path full_path = dir_path / filename;
+
+					// Handle directory creation for recursive watching
+					if ((event->mask & IN_ISDIR) && (event->mask & IN_CREATE) && include_sub_directories) {
+						if (add_watch(full_path) != -1) {
+							LOG(Debug, "Added watch for new directory: " << full_path);
+						}
+					}
+
+					if (should_ignore_file(filename))
+						continue;
+
+					// Map inotify events to actions
+					int action = 0;
+					if (event->mask & (IN_CREATE | IN_MOVED_TO)) {
+						action = event->mask & IN_ISDIR ? 0 : FILE_ACTION_ADDED;
+					} else if (event->mask & (IN_DELETE | IN_MOVED_FROM)) {
+						action = event->mask & IN_ISDIR ? 0 : FILE_ACTION_REMOVED;
+					} else if (event->mask & IN_MODIFY) {
+						action = FILE_ACTION_MODIFIED;
+					} else if (event->mask & IN_ATTRIB) {
+						action = FILE_ACTION_ATTRIBUTES_CHANGED;
+					}
+
+					if (action != 0) {
+						process_event(full_path, action);
+					}
+				}
+
+				// Process debounced events
+				std::vector<std::pair<std::filesystem::path, int>> events_to_process;
+				{
+					std::lock_guard<std::mutex> lock(m_mutex);
+					auto now = std::chrono::steady_clock::now();
+
+					for (auto it = m_pending_events.begin(); it != m_pending_events.end();) {
+						if (now - it->second.second >= m_debounce_time) {
+							events_to_process.emplace_back(it->first, it->second.first);
+							it = m_pending_events.erase(it);
+						} else {
+							++it;
+						}
+					}
+				}
+
+				for (const auto& [file, action] : events_to_process) {
+					switch (action) {
+						case FILE_ACTION_ADDED: TRY_CALL_FUNCTION(on_created)(file); break;
+						case FILE_ACTION_REMOVED: TRY_CALL_FUNCTION(on_deleted)(file); break;
+						case FILE_ACTION_MODIFIED: TRY_CALL_FUNCTION(on_changed)(file); break;
+						case FILE_ACTION_RENAMED_NEW_NAME: TRY_CALL_FUNCTION(on_renamed)(file); break;
+					}
+				}
+
+				if (!events_to_process.empty())
+					TRY_CALL_FUNCTION(compile)();
+			}
+		}
+
+		// Cleanup
+		for (auto& [wd, _] : wd_to_path) {
+			inotify_rm_watch(m_inotify_fd, wd);
+		}
+		close(m_inotify_fd);
+		close(m_stop_pipe[0]);
+		close(m_stop_pipe[1]);
+		is_started = false;
+	}
+
+	void file_watcher_system::stop() {
+
+		LOG(Info, "Stopping thread [file_watcher_system]");
+		if (!m_enable_raising_events)
+			return;
+	
+		m_enable_raising_events = false;
+		if (m_stop_pipe[1] != -1) {
+			char dummy = 0;
+			write(m_stop_pipe[1], &dummy, 1);
+		}
+	
+		if (is_started && m_thread.joinable())
+			m_thread.join();
+	}
 
 
 #endif

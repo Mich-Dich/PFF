@@ -25,6 +25,7 @@ std::string operation_to_string(operation selected_operation) {
 
 
 // GUIDE:
+//  PARAM 0: (FIXED)        path                        default arg for path
 //  PARAM 1: (FIXED)        bool                        use_color_in_log
 //  PARAM 2: (FIXED)        enum                        operation
 

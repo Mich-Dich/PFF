@@ -80,6 +80,12 @@ namespace script_processor {
 		std::string generatedHFilename = file.filename().replace_extension("").string() + "-generated" + file.extension().string();
 		const std::filesystem::path generated_file_path = s_root_directory / "generated" / relatice_filepath.parent_path() / generatedHFilename;
 
+		script_scanner fileScanner = script_scanner(file);
+		std::vector<token> fileTokens = fileScanner.scan_tokens();
+		script_parser fileParser = script_parser(fileTokens, file);
+		fileParser.parse();
+		merge_new_classes(fileParser.get_classes(), file);
+		
 		// compate dates
 		if (std::filesystem::exists(generated_file_path)) {
 
@@ -90,12 +96,6 @@ namespace script_processor {
 				"File [" << util::extract_path_from_directory(file, "src").generic_string() << "] already has upto date -generated-file")
 		} else
 			LOG(Trace, "File [" << util::extract_path_from_directory(file, "src").generic_string() << "] has no generated version, creating -generated-file");
-
-		script_scanner fileScanner = script_scanner(file);
-		std::vector<token> fileTokens = fileScanner.scan_tokens();
-		script_parser fileParser = script_parser(fileTokens, file);
-		fileParser.parse();
-		merge_new_classes(fileParser.get_classes(), file);
 
 		io::create_directory(generated_file_path.parent_path());
 		io::write_to_file(fileParser.generate_header_file().c_str(), generated_file_path);
@@ -131,7 +131,7 @@ namespace script_processor {
 
 		generate_initial_class_information(s_root_directory / SOURCE_DIR);
 		code_generator::generate_init_file_header(s_classes, generated_dir / "init.h");
-		code_generator::generate_init_file_implemenation(s_classes, generated_dir / "init.cpp");
+		code_generator::generate_init_file_implemenation(s_classes, generated_dir / "init.cpp", s_root_directory);
 
 		return false;
 	}

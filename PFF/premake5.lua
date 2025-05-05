@@ -163,6 +163,27 @@ project "PFF"
 			'{COPY} "%{wks.location}/PFF/vendor/entt/LICENSE.txt" "%{wks.location}/bin/' .. outputs .. '/vendor/entt"',
 			'{COPYDIR} "%{wks.location}/PFF/vendor/entt/include/entt" "%{wks.location}/bin/' .. outputs .. '/vendor/entt"',
 	
+			'{MKDIR} "%{wks.location}/bin/' .. outputs .. '/vendor/imgui"',
+			'{COPY} "%{wks.location}/PFF/vendor/imgui/bin/' .. outputs .. '/imgui/libimgui.a" "%{wks.location}/bin/' .. outputs .. '/vendor/imgui"',			-- copy the compiled lib
+			'{COPYDIR} "%{wks.location}/PFF/vendor/imgui/misc" "%{wks.location}/bin/' .. outputs .. '/vendor/imgui"',
+			'{COPYDIR} "%{wks.location}/PFF/vendor/imgui/backends" "%{wks.location}/bin/' .. outputs .. '/vendor/imgui"',
+			'{COPY} "%{wks.location}/PFF/vendor/imgui/LICENSE.txt" "%{wks.location}/bin/' .. outputs .. '/vendor/imgui"',
+			'{COPY} "%{wks.location}/PFF/vendor/imgui/imconfig.h" "%{wks.location}/bin/' .. outputs .. '/vendor/imgui"',
+			'{COPY} "%{wks.location}/PFF/vendor/imgui/imgui.cpp" "%{wks.location}/bin/' .. outputs .. '/vendor/imgui"',
+			'{COPY} "%{wks.location}/PFF/vendor/imgui/imgui_demo.cpp" "%{wks.location}/bin/' .. outputs .. '/vendor/imgui"',
+			'{COPY} "%{wks.location}/PFF/vendor/imgui/imgui_draw.cpp" "%{wks.location}/bin/' .. outputs .. '/vendor/imgui"',
+			'{COPY} "%{wks.location}/PFF/vendor/imgui/imgui.h" "%{wks.location}/bin/' .. outputs .. '/vendor/imgui"',
+			'{COPY} "%{wks.location}/PFF/vendor/imgui/imgui_impl_glfw.cpp" "%{wks.location}/bin/' .. outputs .. '/vendor/imgui"',
+			'{COPY} "%{wks.location}/PFF/vendor/imgui/imgui_impl_glfw.h" "%{wks.location}/bin/' .. outputs .. '/vendor/imgui"',
+			'{COPY} "%{wks.location}/PFF/vendor/imgui/imgui_impl_vulkan.cpp" "%{wks.location}/bin/' .. outputs .. '/vendor/imgui"',
+			'{COPY} "%{wks.location}/PFF/vendor/imgui/imgui_impl_vulkan.h" "%{wks.location}/bin/' .. outputs .. '/vendor/imgui"',
+			'{COPY} "%{wks.location}/PFF/vendor/imgui/imgui_internal.h" "%{wks.location}/bin/' .. outputs .. '/vendor/imgui"',
+			'{COPY} "%{wks.location}/PFF/vendor/imgui/imgui_tables.cpp" "%{wks.location}/bin/' .. outputs .. '/vendor/imgui"',
+			'{COPY} "%{wks.location}/PFF/vendor/imgui/imgui_widgets.cpp" "%{wks.location}/bin/' .. outputs .. '/vendor/imgui"',
+			'{COPY} "%{wks.location}/PFF/vendor/imgui/imstb_rectpack.h" "%{wks.location}/bin/' .. outputs .. '/vendor/imgui"',
+			'{COPY} "%{wks.location}/PFF/vendor/imgui/imstb_textedit.h" "%{wks.location}/bin/' .. outputs .. '/vendor/imgui"',
+			'{COPY} "%{wks.location}/PFF/vendor/imgui/imstb_truetype.h" "%{wks.location}/bin/' .. outputs .. '/vendor/imgui"',
+
 			'{MKDIR} "%{wks.location}/bin/' .. outputs .. '/vendor/glm"',
 			'{COPYDIR} "%{wks.location}/PFF/vendor/glm/glm" "%{wks.location}/bin/' .. outputs .. '/vendor/glm/glm"',
 	

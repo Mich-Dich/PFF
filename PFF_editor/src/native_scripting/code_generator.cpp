@@ -18,7 +18,7 @@ namespace PFF::code_generator {
 		std::ostringstream stream;
 		stream << "include \"" << (engine_install_dir / "dependencies.lua").generic_string() << "\"\n";
 		stream << "\nworkspace \"" << project_name << "\"\n";
-		stream << R"(architecture "x64"
+		stream << R"(	architecture "x64"
 	configurations { "Debug", "Release" }
 	flags { "MultiProcessorCompile" }
 )";
@@ -26,8 +26,8 @@ namespace PFF::code_generator {
 		stream << "\tstartproject \"" << project_name << "\"\n\n";
 		stream << "\tproject \"" << project_name << "\"\n";
 
-		stream << R"(		location "metadata/project_files"					--Set the location for workspace(solution) files
-		kind "SharedLib"
+		stream << R"(		location "metadata/project_files"					-- Set the location for for workspace (make files / solution files)
+		kind "SharedLib"									-- for development (needs to be StaticLib in exported game)
 		language "C++"
 		cppdialect "C++20"
 		staticruntime "on"
@@ -41,8 +41,8 @@ namespace PFF::code_generator {
 	--pchheader "pch.h"
 	--pchsource "src/pch.cpp"
 
-	files
-	{
+	files {
+	
 		"generated/**.h",
 		"generated/**.hpp",
 		"generated/**.cpp",
@@ -51,8 +51,8 @@ namespace PFF::code_generator {
 		"src/**.cpp",
 	}
 
-	includedirs
-	{
+	includedirs {
+
 		"content",
 		"src",
 )";
@@ -68,12 +68,11 @@ namespace PFF::code_generator {
 	symbolspath '$(OutDir)$(TargetName)-$([System.DateTime]::Now.ToString("HH_mm_ss_fff")).pdb'
 )";
 
-		stream << "\tdebugcommand(\"" << (engine_install_dir / "PFF_editor" / "PFF_editor.exe").generic_string() << "\")\n";
 		stream << "\tdebugdir(\"" << (engine_install_dir / "PFF_editor").generic_string() << "\")\n";
 		stream << "\t-- for passing arguments to game engine, use:								debugargs { \"arg1\", \"arg2\" }\n";
 		stream << R"(
-	libdirs 
-	{
+	libdirs {
+
 )";
 
 		stream << "\t\t\"" << (engine_install_dir / "PFF").generic_string() << "\",\n";
@@ -81,22 +80,15 @@ namespace PFF::code_generator {
 		stream << "\t\t\"" << (engine_install_dir / "vendor/glfw").generic_string() << "\",\n";
 		stream << R"(	}
 
-	links
-	{
+	links {
+
 		"PFF",
-		"ImGui",
-		"GLFW"
+		"imgui",
+		"glfw3",
+		"vulkan"
 	}
 
 	defines "PFF_PROJECT"
-
-    prebuildcommands {
-)";
-		stream << "\t\t\"cd " << (engine_install_dir / "PFF").generic_string() << " && \" ..\n";
-		stream << "\t\t\"" << (engine_install_dir / "PFF_helper" / "PFF_helper.exe").generic_string() << " 0 0 0 " << application::get().get_project_path().generic_string() << "\",";
-
-		stream <<R"(
-    }
 
 	cleancommands{
 		"{RMDIR} %{cfg.buildtarget.directory}",
@@ -105,18 +97,62 @@ namespace PFF::code_generator {
 		"echo Cleaning completed for %{prj.name}"
 	}
 
-	rebuildcommands{
-		"{RMDIR} %{cfg.buildtarget.directory}",
-		"{RMDIR} %{cfg.objdir}",
-		"premake5 --file=%{wks.location}premake5.lua vs2019",
-		"msbuild /t:rebuild /p:configuration=%{cfg.buildcfg} %{wks.location}%{prj.name}.vcxproj",
-		"echo Rebuild completed for %{prj.name}"
-	}
-
 	filter "system:windows"
 		defines "PFF_PLATFORM_WINDOWS"
 		systemversion "latest"
+
 		buildcommands { "del /S *.pdb" }
+		)";
+		stream << "debugcommand(\"" << (engine_install_dir / "PFF_editor" / "PFF_editor.exe").generic_string() << "\")";
+		stream <<R"(
+		prebuildcommands {
+		)";
+			stream << "\t\"cd " << (engine_install_dir / "PFF").generic_string() << " && \" ..\n";
+			stream << "\t\t\t\"" << (engine_install_dir / "PFF_helper" / "PFF_helper.exe").generic_string() << " 0 0 0 " << application::get().get_project_path().generic_string() << "\",";
+
+			stream <<R"(
+		}
+		rebuildcommands{
+			"{RMDIR} %{cfg.buildtarget.directory}",
+			"{RMDIR} %{cfg.objdir}",
+			"premake5 --file=%{wks.location}premake5.lua vs2019",
+			"msbuild /t:rebuild /p:configuration=%{cfg.buildcfg} %{wks.location}%{prj.name}.vcxproj",
+			"echo Rebuild completed for %{prj.name}"
+		}
+
+	filter "system:linux"
+		defines "PFF_PLATFORM_LINUX"
+		systemversion "latest"
+
+		includedirs {
+			"/usr/include/x86_64-linux-gnu/qt5", 				-- Base Qt include path
+			"/usr/include/x86_64-linux-gnu/qt5/QtCore",
+			"/usr/include/x86_64-linux-gnu/qt5/QtWidgets",
+			"/usr/include/x86_64-linux-gnu/qt5/QtGui",
+			"%{IncludeDir.VulkanUtils}",
+		}
+	
+		libdirs {
+			"/usr/lib/x86_64-linux-gnu",
+			"/usr/lib/x86_64-linux-gnu/qt5",
+		}
+	
+    	buildcommands { "rm -f *.pdb || true" }
+		)";
+		stream << "debugcommand(\"" << (engine_install_dir / "PFF_editor" / "PFF_editor").generic_string() << "\")\n";
+		stream << "\t\tprebuildcommands {\n";
+		stream << "\t\t\t\"cd " << filepath.parent_path().generic_string() << " && \" ..\n";
+		stream << "\t\t\t\"" << (engine_install_dir / "PFF_helper" / "PFF_helper").generic_string() << " 0 0 0 " << application::get().get_project_path().generic_string() << "\",";
+
+		stream <<R"(
+		}
+		rebuildcommands{
+			"{RMDIR} %{cfg.buildtarget.directory}",
+			"{RMDIR} %{cfg.objdir}",
+			"make clean && make -j",
+			"echo Rebuild completed for %{prj.name}"
+		}
+
 
 	filter "configurations:Debug"
 		defines "PROJECT_DEBUG"

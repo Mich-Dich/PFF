@@ -60,14 +60,24 @@ namespace PFF::io {
 		
 			VALIDATE(std::filesystem::exists(full_path_to_file), return false, "", "Source file does not exist: " << full_path_to_file);
 
-			// Check if the target directory exists, if not, create it
-			if (!std::filesystem::exists(target_directory)) {
-				if (io::create_directory(target_directory))
+			if (!std::filesystem::exists(target_directory)) {							// Check if the target directory exists, if not, create it
+			
+				try {
+					io::create_directory(target_directory);
+				} catch (const std::filesystem::filesystem_error& e) {
+					LOG(Error, "Filesystem error: " << e.what())
+					LOG(Error, "Error code: " << e.code())
 					return false;
-			}
+				}
+			}	
 
 			std::filesystem::path target_file_path = target_directory / full_path_to_file.filename();
-			std::filesystem::copy_file(full_path_to_file, target_file_path, std::filesystem::copy_options::overwrite_existing);
+			try {
+				const bool result = std::filesystem::copy_file(full_path_to_file, target_file_path, std::filesystem::copy_options::overwrite_existing);
+			} catch (const std::filesystem::filesystem_error& e) {
+				LOG(Error, "Filesystem error: [" << e.what() << "] Error code: [" << e.code() << "] Source path: [" << e.path1() << "] Target path: [" << e.path2() << "]")
+				return false;
+			}
 			return true;
 
 		} catch (const std::filesystem::filesystem_error& e) {

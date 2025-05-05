@@ -102,7 +102,6 @@ namespace PFF::script_system {
 	typedef void (*display_properties_Fn)(std::string, entity_script*);
 	typedef const char** (*get_scripts_Fn)(u32* count);
 
-
 	static const char*																						could_not_load_scripts[] = { nullptr };
 	static bool																								m_is_loaded = false;
 	static bool																								m_is_initalized = false;
@@ -206,47 +205,53 @@ namespace PFF::script_system {
 	}
 
 
-	void reinit_scripts() {
+	void reinit_scripts() {					// TODO: causes crash => FIX that
 
-		VALIDATE(m_init_scripts, return, "", "COULD NOT reinit_scripts");
-		VALIDATE(GET_MAP, return, "", "COULD NOT reinit_scripts");
+		VALIDATE(m_init_scripts, return, "", "function [init_scripts()] is not available => could not reinit_scripts");
+		VALIDATE(GET_MAP, return, "", "Failed to get map refrence => could not reinit_scripts");
 
-			LOG(Debug, "Type ID of procedural_mesh_component before reinit: " << entt::type_hash<procedural_mesh_component>::value());
-			m_init_scripts(&GET_REGISTRY_OF_MAP);
-			LOG(Debug, "Type ID of procedural_mesh_component after reinit: " << entt::type_hash<procedural_mesh_component>::value());
+		LOG(Debug, "Type ID of procedural_mesh_component before reinit: " << entt::type_hash<procedural_mesh_component>::value());
+		m_init_scripts(&GET_REGISTRY_OF_MAP);
+		LOG(Debug, "Type ID of procedural_mesh_component after reinit: " << entt::type_hash<procedural_mesh_component>::value());
 
-			auto& registry = GET_REGISTRY_OF_MAP;
-			LOG(Info, "Registry address in reinit_scripts: " << &registry);
+		auto& registry = GET_REGISTRY_OF_MAP;
+		LOG(Info, "Registry address in reinit_scripts: " << &registry);
 
 		m_is_initalized = true;
 
 		LOG(Info, "succesfully initalized scripts");
 	}
 
-	void reload(bool delete_script_components) {					// TODO: causes crash => FIX that
+	void reload(bool delete_script_components) {
 
 		LOG(Debug, "called script_system::reload(delete_script_components=" << util::to_string(delete_script_components) << ")");
-		//VALIDATE(free_script_library(delete_script_components), return, "freeed scripting library", "Count not free scripting library");
-		//
-		//	auto& registry = GET_REGISTRY_OF_MAP;
-		//	LOG(Info, "Registry address in reload: " << &registry);
+		VALIDATE(free_script_library(delete_script_components), return, "", "Count not free scripting library");
+		
+		auto& registry = GET_REGISTRY_OF_MAP;
+		LOG(Info, "Registry address in reload: " << &registry);
+	
+		const std::filesystem::path project_dll_path = PROJECT_PATH / "bin" / PROJECT_NAME;
+#if defined(PFF_PLATFORM_WINDOWS)
+		const std::filesystem::path project_temp_dll = PROJECT_PATH / "bin" / (PROJECT_NAME + PFF_PROJECT_TEMP_DLL_PATH) / (PROJECT_NAME + ".dll");
+		const std::filesystem::path project_dll = project_dll_path / (PROJECT_NAME + ".dll");
+#elif defined(PFF_PLATFORM_LINUX)
+		const std::filesystem::path project_temp_dll = PROJECT_PATH / "bin" / (PROJECT_NAME + PFF_PROJECT_TEMP_DLL_PATH) / ("lib" + PROJECT_NAME + ".so");
+		const std::filesystem::path project_dll = project_dll_path / ("lib" + PROJECT_NAME + ".so");
+#endif
 
-		//const std::filesystem::path project_temp_dll = PROJECT_PATH / "bin" / (PROJECT_NAME + PFF_PROJECT_TEMP_DLL_PATH) / (PROJECT_NAME + ".dll");
-		//const std::filesystem::path project_dll_path = PROJECT_PATH / "bin" / PROJECT_NAME;
-		//const std::filesystem::path project_dll = project_dll_path / (PROJECT_NAME + ".dll");
-		//VALIDATE(io::copy_file(project_temp_dll, project_dll_path), return, "COPY SUCCESS", "Failed to copy new DLL after multiple attempts");			// copy the new DLL
-		//VALIDATE(io::is_file(project_dll), return, "", "provided path is not a file [" << project_dll << "]");
-		//VALIDATE(load_library(project_dll), return, "loaded project DLL", "could not load project [" << project_dll << "]");
+		VALIDATE(io::copy_file(project_temp_dll, project_dll_path), return, "copyed project DLL from staging dir", "Failed to copy new project DLL");			// copy the new DLL
+		VALIDATE(io::is_file(project_dll), return, "", "provided path is not a file [" << project_dll << "]");
+		VALIDATE(load_library(project_dll), return, "loaded project DLL", "could not load project [" << project_dll << "]");
 
-		//m_add_component_from_string			= (add_component_Fn)try_load_function("add_component");
-		//m_init_scripts						= (init_scripts_Fn)try_load_function("init_scripts");
-		//m_serialize_script					= (serialize_script_Fn)try_load_function("serialize_script");
-		//m_get_scripts						= (get_scripts_Fn)try_load_function("get_all_scripts");
-		//m_get_procedural_mesh_scripts		= (get_scripts_Fn)try_load_function("get_all_procedural_mesh_scripts");
-		//m_display_properties				= (display_properties_Fn)try_load_function("display_properties");
-		//m_is_loaded = true;
+		m_add_component_from_string			= (add_component_Fn)try_load_function("add_component");
+		m_init_scripts						= (init_scripts_Fn)try_load_function("init_scripts");
+		m_serialize_script					= (serialize_script_Fn)try_load_function("serialize_script");
+		m_get_scripts						= (get_scripts_Fn)try_load_function("get_all_scripts");
+		m_get_procedural_mesh_scripts		= (get_scripts_Fn)try_load_function("get_all_procedural_mesh_scripts");
+		m_display_properties				= (display_properties_Fn)try_load_function("display_properties");
+		m_is_loaded = true;
 
-		//reinit_scripts();
+		reinit_scripts();
 
 		LOG(Info, "---------------------------------------------------- LOADED DLL ----------------------------------------------------");
 	}
@@ -255,7 +260,11 @@ namespace PFF::script_system {
 
 		// TODO: Add way to clear a pool so that we can remove hot reload only script components, while leaving the rest of the scene intact. This might not be possible, so we shal see 
 
-		VALIDATE(m_is_loaded, return true, "", "Scripting Library not loaded yet");
+		if (!m_is_loaded) {
+
+			LOG(Debug, "Scripting Library not loaded yet")
+			return true;
+		}
 
 		serialize_scripts(serializer::option::save_to_file);
 		GET_REGISTRY_OF_MAP.view<procedural_mesh_component>().each([=](auto entity, auto& script_comp) {
@@ -281,6 +290,7 @@ namespace PFF::script_system {
 
 		m_is_loaded = false;
 		m_is_initalized = false;
+		LOG(Debug, "freeed scripting library")
 		return true;
 	}
 

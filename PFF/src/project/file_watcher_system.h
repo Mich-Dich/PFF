@@ -13,6 +13,14 @@ namespace PFF {
 		Security = 256
 	};
 
+	enum file_actions {
+        FILE_ACTION_ADDED = 1,
+        FILE_ACTION_REMOVED = 2,
+        FILE_ACTION_MODIFIED = 3,
+        FILE_ACTION_RENAMED_NEW_NAME = 4,
+        FILE_ACTION_ATTRIBUTES_CHANGED = 5
+    };
+
 
 	class file_watcher_system {
 	public:
@@ -52,6 +60,11 @@ namespace PFF {
 		std::mutex					m_mutex;
 		std::chrono::milliseconds	m_debounce_time{ 100 };
 		std::unordered_map<std::filesystem::path, std::pair<int, std::chrono::steady_clock::time_point>> m_pending_events;
+
+	#ifdef PFF_PLATFORM_LINUX
+		int m_inotify_fd = -1;
+		int m_stop_pipe[2] = {-1, -1};
+	#endif
 
 	};
 
