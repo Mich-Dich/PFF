@@ -19,7 +19,7 @@ elif platform.system() == "Linux":
     from metadata.linux.setup_vulkan import vulkan_configuration
     from metadata.linux.setup_premake import premake_configuration
     from metadata.linux.setup_glslc import glslc_configuration
-    import metadata.linux.IDE_selection as IDE_setup
+    import metadata.linux.IDE_setup as IDE_setup
 else:
     raise Exception("Unsupported operating system")
 
@@ -102,6 +102,8 @@ try:
             premake_action = "gmake"  # Default action
             if selected_ide == "JetBrains Rider":
                 premake_action = "rider"
+            elif "VSCode" in selected_ide:
+                premake_action = "gmake"
             elif "Makefile" in selected_ide:
                 premake_action = "gmake"
             
@@ -110,6 +112,12 @@ try:
                 utils.print_c(f"BUILD FAILED! the premake script encountered [{premake_result.returncode}] errors", "red")
             else:
                 utils.print_c("BUILD SUCCESSFUL!", "green")
+
+
+            if "VSCode" in selected_ide:                                                # generate build/compile tasks
+                premake_action = "gmake"
+                build_config = IDE_setup.prompt_build_config()
+                IDE_setup.setup_vscode_configs(os.getcwd(), build_config)
 
             utils.print_c("\nhelpful hints", "blue")
             print("  Cleanup all generated files:      rm -r bin bin-int && find . -name \"Makefile\" -exec rm -f {} +")

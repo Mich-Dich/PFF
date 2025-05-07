@@ -26,6 +26,7 @@ def detect_visual_studio_versions():
         print(f"Error detecting Visual Studio versions: {e}")
     return []
 
+
 def detect_rider():
     # Check common Rider installation paths
     rider_paths = [
@@ -37,16 +38,39 @@ def detect_rider():
             return True
     return False
 
+
+def detect_vscode():
+    try:
+        subprocess.run(["where", "code"], check=True, capture_output=True)
+        return True
+    except subprocess.CalledProcessError:
+        pass
+
+    # Fallback: check common installation paths
+    paths = [
+        os.path.join(os.environ.get("ProgramFiles", ""), "Microsoft VS Code", "Code.exe"),
+        os.path.join(os.environ.get("LocalAppData", ""), "Programs", "Microsoft VS Code", "Code.exe")
+    ]
+    return any(os.path.exists(p) for p in paths)
+
+
 def prompt_ide_selection():
     ides = []
+
     vs_versions = detect_visual_studio_versions()
     if vs_versions:
         ides.extend([f"Visual Studio {version}" for version in vs_versions])
+
     if detect_rider():
         ides.append("JetBrains Rider")
+
+    if detect_vscode():
+        ides.append("VSCode")
+
     if not ides:
         print("No supported IDEs detected.")
         sys.exit(1)
+
     print("Detected IDEs:")
     for i, ide in enumerate(ides):
         print(f"{i}. {ide}")
@@ -63,6 +87,7 @@ def prompt_ide_selection():
         else:
             print("Invalid selection.")
             sys.exit(1)
+            
     except ValueError:
         print("Invalid input.")
         sys.exit(1)
