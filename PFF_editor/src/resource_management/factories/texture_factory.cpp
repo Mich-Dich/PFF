@@ -12,7 +12,7 @@
 namespace PFF::texture_factory {
 
     // Function to extract metadata using stb_image.
-    bool get_metadata(const std::filesystem::path& source_path, texture_metadata &metadata) {
+    bool get_metadata(const std::filesystem::path& source_path, metadata &metadata) {
         int width = 0, height = 0, channels = 0;
 
         // Use stbi_info to read the header information.

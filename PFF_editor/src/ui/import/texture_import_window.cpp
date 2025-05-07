@@ -10,8 +10,8 @@
 namespace PFF {
 
 	static texture_factory::load_options loc_load_options{};								// should remenber import settings for this session		only one option setting for all sources
-	static std::vector<std::pair<bool, texture_factory::texture_metadata>> all_metadata{};
-	// static std::vector<texture_factory::texture_metadata> all_metadata{};
+	static std::vector<std::pair<bool, texture_factory::metadata>> all_metadata{};
+	// static std::vector<texture_factory::metadata> all_metadata{};
 
 	texture_import_window::texture_import_window(const std::vector<std::filesystem::path>&& source_paths, const std::filesystem::path destination_path)
 		: source_paths(source_paths), destination_path(destination_path) {
@@ -24,7 +24,7 @@ namespace PFF {
 		for (const auto path : source_paths) {
 
 			m_asset_alredy_exists = PFF::texture_factory::check_if_assets_already_exists(path, destination_path, loc_load_options, m_assets_that_already_exist);
-			texture_factory::texture_metadata loc_metadata{};
+			texture_factory::metadata loc_metadata{};
 			bool metadata_available = texture_factory::get_metadata(path, loc_metadata);
 			all_metadata.emplace_back(metadata_available, loc_metadata);
 		}

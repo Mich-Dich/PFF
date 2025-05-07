@@ -11,7 +11,7 @@ namespace PFF::texture_factory {
     //     gray_scale,
     // };
 
-    struct texture_metadata {
+    struct metadata {
         int width;
         int height;
         int channels;
@@ -51,7 +51,7 @@ namespace PFF::texture_factory {
     };
     
     //
-    bool get_metadata(const std::filesystem::path& source_path, texture_metadata &metadata);
+    bool get_metadata(const std::filesystem::path& source_path, metadata &metadata);
 
     //
     bool check_if_assets_already_exists(const std::filesystem::path& source_path, const std::filesystem::path& destination_path, const load_options options, std::vector<std::string>& assets_that_already_exist);

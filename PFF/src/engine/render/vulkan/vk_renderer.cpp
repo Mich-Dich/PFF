@@ -447,7 +447,7 @@ namespace PFF::render::vulkan {
 		// Free resources 
 		{
 			for (auto& func : s_resource_free_queue[(m_frame_number) % FRAME_COUNT]) {
-				LOG(Info, "Executing free QUEUE");
+				// LOG(Info, "Executing free QUEUE");
 				func();
 			}
 			s_resource_free_queue[(m_frame_number) % FRAME_COUNT].clear();

@@ -124,36 +124,35 @@ def setup_vscode_configs(project_root, build_config):
 
     # 1. Create pff_build.sh
     build_script_path = os.path.join(vscode_dir, "pff_build.sh")
-
-    timestamp = datetime.datetime.now().strftime("%Y-%m-%d--%H:%M:%S")
-    stage_name = f"PFF_{build_config}_{timestamp}"
     build_script_content = f"""#!/usr/bin/env bash
 set -e
 
-# staging folder name
-STAGE_DIR="{bin_dir}/{stage_name}"
+build_config="{build_config}"                                               # build_config was baked in at generation-time
+timestamp=$(date '+%Y-%m-%d--%H:%M:%S')                                     # generate timestamp at runtime in format yyyy-mm-dd--hh:mm:ss
+stage_name="PFF_${{build_config}}_${{timestamp}}"                           # staging folder name includes config + dynamic timestamp
+STAGE_DIR="{bin_dir}/${{stage_name}}"
 
-# create it
-mkdir -p "$STAGE_DIR"
+mkdir -p "$STAGE_DIR"                                                       # create staging dir
 
-# move all previous artifacts into staging
-mv "{bin_dir}/PFF"              "$STAGE_DIR/" 2>/dev/null || true
-mv "{bin_dir}/PFF_helper"       "$STAGE_DIR/" 2>/dev/null || true
-mv "{bin_dir}/PFF_editor"       "$STAGE_DIR/" 2>/dev/null || true
-mv "{bin_dir}/vendor"           "$STAGE_DIR/" 2>/dev/null || true
+# move all previous artifacts into staging (ignore missing)
+mv "{bin_dir}/PFF"                          "$STAGE_DIR/" 2>/dev/null || true
+mv "{bin_dir}/PFF_helper"                   "$STAGE_DIR/" 2>/dev/null || true
+mv "{bin_dir}/PFF_editor/assets"            "$STAGE_DIR/" 2>/dev/null || true
+mv "{bin_dir}/PFF_editor/defaults"          "$STAGE_DIR/" 2>/dev/null || true
+mv "{bin_dir}/PFF_editor/empty_project"     "$STAGE_DIR/" 2>/dev/null || true
+mv "{bin_dir}/PFF_editor/shaders"           "$STAGE_DIR/" 2>/dev/null || true
+mv "{bin_dir}/PFF_editor/wiki"              "$STAGE_DIR/" 2>/dev/null || true
+mv "{bin_dir}/vendor"                       "$STAGE_DIR/" 2>/dev/null || true
 
-# now trash the entire staging directory
-gio trash "$STAGE_DIR" --force || true
-
-# back to project root and regenerate
-cd "{project_root}"
+gio trash "$STAGE_DIR" --force || true                                      # trash the entire staging directory in one go
+cd "{project_root}"                                                         # back to project root and regenerate
 find . -name "Makefile" -delete
 ./premake5 gmake
 gmake -j
-    """
+"""
+    # write and chmod as before…
     with open(build_script_path, "w") as f:
         f.write(build_script_content)
-
     os.chmod(build_script_path, os.stat(build_script_path).st_mode | stat.S_IEXEC)
 
     # 2. tasks.json

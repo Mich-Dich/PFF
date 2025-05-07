@@ -775,15 +775,7 @@ namespace PFF {
 							path.extension() == ".pgm")
 								image_source_paths.push_back(path);
 
-						else if (path.extension() == ".gltf" || path.extension() == ".glb")
-							mesh_source_paths.push_back(path);
-					}
-
-					PFF_editor::get().get_editor_layer()->add_window<texture_import_window>(std::move(image_source_paths), m_selected_directory);
-
-					for (const auto path : source_paths) {
-
-						if (path.extension() == ".fbx" 	||
+						else if (path.extension() == ".fbx"	||
 							path.extension() == ".gltf" ||
 							path.extension() == ".glb" 	||
 							path.extension() == ".obj" 	||
@@ -793,15 +785,35 @@ namespace PFF {
 							path.extension() == ".xml" 	||
 							path.extension() == ".ply" 	||
 							path.extension() == ".plyb" ||
-							path.extension() == ".3ds") {
-							
-							LOG(Debug, "TODO: modefy mesh import window to accept multiple paths");
-							PFF_editor::get().get_editor_layer()->add_window<mesh_import_window>(path, m_selected_directory);
-						}
-										
+							path.extension() == ".3ds")
+								mesh_source_paths.push_back(path);
+
 						else
-							LOG(Warn, "Tryed to import unsupported file type")										// TODO: add a notification system to main window
+							LOG(Warn, "Tryed to import unsupported file type [" << path.generic_string() << "]")										// TODO: add a notification system to main window
 					}
+					if (!image_source_paths.empty())
+						PFF_editor::get().get_editor_layer()->add_window<texture_import_window>(std::move(image_source_paths), m_selected_directory);
+					if (!mesh_source_paths.empty())
+						PFF_editor::get().get_editor_layer()->add_window<mesh_import_window>(std::move(mesh_source_paths), m_selected_directory);
+
+					// for (const auto path : source_paths) {
+					//
+					// 	if (path.extension() == ".fbx" 	||
+					// 		path.extension() == ".gltf" ||
+					// 		path.extension() == ".glb" 	||
+					// 		path.extension() == ".obj" 	||
+					// 		path.extension() == ".stl" 	||
+					// 		path.extension() == ".3mf" 	||
+					// 		path.extension() == ".dae" 	||
+					// 		path.extension() == ".xml" 	||
+					// 		path.extension() == ".ply" 	||
+					// 		path.extension() == ".plyb" ||
+					// 		path.extension() == ".3ds") {
+					//
+					// 		LOG(Debug, "TODO: modefy mesh import window to accept multiple paths");
+					// 		PFF_editor::get().get_editor_layer()->add_window<mesh_import_window>(path, m_selected_directory);
+					// 	}
+					// }
 				}
 
 				ImGui::SameLine();
