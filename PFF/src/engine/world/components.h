@@ -206,7 +206,6 @@ namespace PFF {
 		void										(*destroy_script)(procedural_mesh_component*);
 		std::string									script_name = "";		// MAYBE: doesnt need to be saved here, only needed for serialization, maybe export to asset manager or UUID
 
-
 		// --------------------- mesh-part of component --------------------- 
 		mobility									mobility_data = mobility::locked;
 		bool										shoudl_render = true;

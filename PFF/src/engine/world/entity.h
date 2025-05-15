@@ -42,6 +42,12 @@ namespace PFF {
 
 			ASSERT(!this->has_component<T>(), "", "Entity already has component!");
 			T& component = m_map->m_registry.emplace<T>(m_entity_handle, std::forward<Args>(args)...);
+
+			if (std::is_same_v(T, procedural_mesh_component)) {¬
+				
+				LOG(Fatal, "ADDING PROC MESH")
+			}
+
 			// m_map->on_component_added<T>(*this, component);
 			return component;
 		}
@@ -72,7 +78,7 @@ namespace PFF {
 		FORCEINLINE void add_script_component() { add_component<script_component>().bind<T>(); }
 		
 		template<typename T>
-		FORCEINLINE void add_procedural_mesh_component(std::string script_name) { add_component<procedural_mesh_component>().bind<T>(script_name); }
+		FORCEINLINE void add_procedural_mesh_component(std::string script_name) { LOG(Info, "Called to add a component"); add_component<procedural_mesh_component>().bind<T>(script_name); }
 
 		bool is_valid();
 		bool empty() { return m_entity_handle == entt::null; }

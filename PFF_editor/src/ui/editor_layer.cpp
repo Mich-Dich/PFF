@@ -211,7 +211,7 @@ namespace PFF {
 
 	void editor_layer::serialize(serializer::option option) {
 
-		serializer::yaml(config::get_filepath_from_configtype(application::get().get_project_path(), config::file::editor), "windows_to_show", option)
+		serializer::yaml(config::get_filepath_from_configtype(PROJECT_PATH, config::file::editor), "windows_to_show", option)
 			.entry("show_main_menu_bar", m_show_main_menu_bar)
 			.entry("show_options", m_show_options)
 			.entry("show_graphics_engine_settings", m_show_graphics_engine_settings)
@@ -458,7 +458,7 @@ namespace PFF {
 					static ImVec4 backup_color;
 					if (!backup_color_init) {
 
-						serializer::yaml(config::get_filepath_from_configtype(application::get().get_project_path(), config::file::ui), "window_border", serializer::option::load_from_file)
+						serializer::yaml(config::get_filepath_from_configtype(PROJECT_PATH, config::file::ui), "window_border", serializer::option::load_from_file)
 							.entry(KEY_VALUE(window_border));
 						//config::load(config::file::editor, "UI", "window_border", window_border);
 

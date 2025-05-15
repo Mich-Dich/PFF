@@ -29,7 +29,7 @@ namespace PFF {
 
 		asset_file_header asset_header;
 		general_mesh_file_header general_header;
-		auto serializer = serializer::binary(application::get().get_project_path() / CONTENT_DIR / mesh_comp.asset_path, "PFF_asset_file", serializer::option::load_from_file);
+		auto serializer = serializer::binary(PROJECT_PATH / CONTENT_DIR / mesh_comp.asset_path, "PFF_asset_file", serializer::option::load_from_file);
 		serialize_mesh_headers(serializer, asset_header, general_header);
 		ASSERT(asset_header.type == file_type::mesh, "", "Tryed to add mesh_component but provided asset_path is not a mesh");
 
@@ -87,6 +87,7 @@ namespace PFF {
 		return;
 
 	}
+
 	
 	void entity::propegate_transform_to_children(const glm::mat4& root_transform, const glm::mat4& delta_transform) {
 
@@ -109,6 +110,7 @@ namespace PFF {
 		}
 	}
 
+	
 	void entity::accumulate_transform_from_parents(glm::mat4& transform) {
 
 		LOG(Warn, "Not implemented yet");

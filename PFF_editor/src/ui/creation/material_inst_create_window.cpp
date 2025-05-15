@@ -58,7 +58,7 @@ namespace PFF {
 						LOG(Debug, "DROP")
 	
 						const std::filesystem::path file_path = (const char*)payload->Data;
-						// const std::filesystem::path absolute_file_path = application::get().get_project_path() / CONTENT_DIR / (const char*)payload->Data;
+						// const std::filesystem::path absolute_file_path = PROJECT_PATH / CONTENT_DIR / (const char*)payload->Data;
 
 						resource_manager::asset_curruption_source asset_curruption_reason;
 						asset_file_header general_header{};
@@ -112,7 +112,7 @@ namespace PFF {
 					if (const ImGuiPayload* payload = ImGui::AcceptDragDropPayload(DRAG_DROP_CONTENT_BROWSER_TEXTURE)) {
 	
 						const std::filesystem::path file_path = (const char*)payload->Data;
-						// const std::filesystem::path absolute_file_path = application::get().get_project_path() / CONTENT_DIR / (const char*)payload->Data;
+						// const std::filesystem::path absolute_file_path = PROJECT_PATH / CONTENT_DIR / (const char*)payload->Data;
 						resource_manager::asset_curruption_source asset_curruption_reason;
 						asset_file_header general_header{};
 						if (resource_manager::try_to_deserialize_file_header(file_path, true, asset_curruption_reason, general_header)) {

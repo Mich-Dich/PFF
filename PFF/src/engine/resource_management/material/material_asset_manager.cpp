@@ -46,7 +46,7 @@ namespace PFF {
 
 		else {
 
-			std::filesystem::path absolute_path = application::get().get_project_path() / CONTENT_DIR / path;
+			std::filesystem::path absolute_path = PROJECT_PATH / CONTENT_DIR / path;
 			// 1	check for parent material	(disabled for dev, only one master material)
 
 			// 2 	get MI resources from the file

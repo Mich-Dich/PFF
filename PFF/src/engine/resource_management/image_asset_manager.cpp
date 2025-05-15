@@ -30,7 +30,7 @@ namespace PFF {
 
 		VALIDATE(path.extension() == PFF_ASSET_EXTENTION, return nullptr, "", "Provided path is not a PFF-asset, path [" << path.generic_string() << "]");
 
-		std::filesystem::path loc_path = application::get().get_project_path() / CONTENT_DIR / path;
+		std::filesystem::path loc_path = PROJECT_PATH / CONTENT_DIR / path;
 
 		if (s_instance.m_uploaded_image_assets.find(loc_path) != s_instance.m_uploaded_image_assets.end())
 			return s_instance.m_uploaded_image_assets[loc_path];

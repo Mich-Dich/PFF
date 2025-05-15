@@ -7,7 +7,7 @@ class premake_configuration:
     premake_version = "5.0.0-beta4"
     premake_zip_urls = f"https://github.com/premake/premake-core/releases/download/v{premake_version}/premake-{premake_version}-linux.tar.gz"
     premake_license_url = "https://raw.githubusercontent.com/premake/premake-core/master/LICENSE.txt"
-    premake_directory = "./"
+    premake_directory = "./vendor/premake/"
 
     @classmethod
     def validate(cls):

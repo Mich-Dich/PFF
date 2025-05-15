@@ -7,9 +7,12 @@
 #include "shader_processor.h"
 
 namespace shader_processor {
-	
-	static std::set<std::string> posible_shader_extensions{ ".frag", ".vert", ".comp" };
 
+	static bool log_directly_to_std = false;
+	static std::set<std::string> posible_shader_extensions{ ".frag", ".vert", ".comp" };
+	
+	#define INTERNAL_LOG(severity, message)									if (log_directly_to_std)	std::cout << message << std::endl;			\
+																			else LOG(severity, message);
 
 	static bool compile_shader(const std::filesystem::path path) {
 
@@ -23,14 +26,21 @@ namespace shader_processor {
 		system_command = absolute_path.string() + " -o " + compield_file;
 		if (std::filesystem::exists(compield_file)) {
 			if (std::filesystem::last_write_time(absolute_path).time_since_epoch().count() < std::filesystem::last_write_time(compield_file).time_since_epoch().count()) {
-				LOG(Trace, "shader is already compield: [" << EXTRACT_AFTER_PFF(absolute_path.string()) << "]");
+
+				INTERNAL_LOG(Trace, "shader is already compield: [" << EXTRACT_AFTER_PFF(absolute_path.string()) << "]");
 				return false;
 			}
 		}
 
 		std::string output;
 		bool result = PFF::util::run_program(GLSLC_PATH, system_command, false, true, true, &output);
-		VALIDATE(result, , "Sucessfully compiled shader [" << path.generic_string() << "]", "Shader [" << absolute_path.string() << "] could not be compiled [\n" << output << "] ");
+		if (log_directly_to_std)
+			if (result)
+				std::cout << "Sucessfully compiled shader [" << path.generic_string() << "]" << std::endl;
+			else
+				std::cout << "Shader [" << absolute_path.string() << "] could not be compiled [\n" << output << "] " << std::endl;
+		else
+			VALIDATE(result, , "Sucessfully compiled shader [" << path.generic_string() << "]", "Shader [" << absolute_path.string() << "] could not be compiled [\n" << output << "] ");
 		return result;
 	}
 
@@ -49,7 +59,6 @@ namespace shader_processor {
 		return !found_error;
 	}
 
-
 	bool start(int argc, char* argv[]) {
 
 		PFF::logger::use_previous_format();
@@ -61,7 +70,8 @@ namespace shader_processor {
 		int operation_number = std::stoi(argv[3]);
 		shader_operation operation = static_cast<shader_operation>(operation_number);
 		std::filesystem::path path_to_dir = argv[4];
-		LOG(Trace, "called for [" << operation_to_string(operation) << "] project path [" << path_to_dir << "]");
+		log_directly_to_std = argv[6];
+		INTERNAL_LOG(Trace, "called for [" << operation_to_string(operation) << "] project path [" << path_to_dir << "]");
 
 		bool result = false;
 		switch (operation) {

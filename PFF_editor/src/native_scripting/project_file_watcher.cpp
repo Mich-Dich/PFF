@@ -40,6 +40,24 @@ namespace PFF {
 		LOG(Info, "CMD Args: " << cmdArgs.c_str());
 		util::run_program(path_to_build_script, cmdArgs);
 
+// 		LOG(Trace, "project DLL not found, recompiling")
+// #if defined(PFF_PLATFORM_WINDOWS)
+// 		const std::filesystem::path path_to_build_script = util::get_executable_path().parent_path() / "PFF_helper" / "PFF_helper.exe";
+// #elif defined(PFF_PLATFORM_LINUX)
+// 		const std::filesystem::path path_to_build_script = util::get_executable_path().parent_path() / "PFF_helper" / "PFF_helper";
+// #endif
+
+// 		std::string cmdArgs = "1 0 0 " + PROJECT_PATH.generic_string();
+// 		LOG(Info, "CMD Args: " << cmdArgs.c_str());
+// 		VALIDATE(util::run_program(path_to_build_script, cmdArgs), , "project files generated succesfully", "Failed to generate project files")
+
+// 		const auto gmake_command = "python3";
+// 		std::string compile_args = (PROJECT_PATH / "setup.py").generic_string() + " --compile";
+// 		LOG(Fatal, "calling [" << gmake_command << "] with [" << compile_args << "]")
+// 		std::string output;
+// 		const bool compile_result = util::run_program(gmake_command, compile_args, false, false, true, &output);
+// 		VALIDATE(compile_result, , "project files generated succesfully", "Failed to generate project files [" << output << "]")
+		
 #else
 		generate_initial_class_information(s_root_directory / SOURCE_DIR);
 		code_generator::generate_init_file_header(s_classes, generated_dir / "init.h");
@@ -55,7 +73,7 @@ namespace PFF {
 
 	project_file_watcher::project_file_watcher() {
 		
-		s_root_directory = application::get().get_project_path();
+		s_root_directory = PROJECT_PATH;
 		VALIDATE(io::is_directory(s_root_directory), return, "", "[" << s_root_directory.string().c_str() << "] is not a directory. project_file_watcher is not starting.");
 
 		// ================================== TODO: Move to project creation ==================================

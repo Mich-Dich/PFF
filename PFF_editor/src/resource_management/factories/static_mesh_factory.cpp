@@ -4,13 +4,6 @@
 #include <stb_image.h>
 #include <iostream>
 #include <glm/gtx/quaternion.hpp>
-#include <fastgltf/base64.hpp>
-#include <fastgltf/core.hpp>
-#include <fastgltf/types.hpp>
-#include <fastgltf/glm_element_traits.hpp>
-#include <fastgltf/util.hpp>
-#include <fastgltf/tools.hpp>
-
 #include <assimp/Importer.hpp>
 #include <assimp/scene.h>
 #include <assimp/postprocess.h>

@@ -206,6 +206,7 @@ namespace PFF {
 		// add_component function
 		{
 			file << "\tvoid add_component(std::string class_name, PFF::entity entity) {\n\n";
+			file << "\t\tLOG(Trace, \"adding new component [\" << class_name << \"] to entity\")\n";
 			for (size_t x = 0; x < m_classes.size(); x++) {
 
 				file << ((x == 0) ? "\t\tif" : "\t\telse if");

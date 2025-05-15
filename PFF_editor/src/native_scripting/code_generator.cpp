@@ -108,7 +108,7 @@ namespace PFF::code_generator {
 		prebuildcommands {
 		)";
 			stream << "\t\"cd " << (engine_install_dir / "PFF").generic_string() << " && \" ..\n";
-			stream << "\t\t\t\"" << (engine_install_dir / "PFF_helper" / "PFF_helper.exe").generic_string() << " 0 0 0 " << application::get().get_project_path().generic_string() << "\",";
+			stream << "\t\t\t\"" << (engine_install_dir / "PFF_helper" / "PFF_helper.exe").generic_string() << " 0 0 0 " << PROJECT_PATH.generic_string() << "\",";
 
 			stream <<R"(
 		}
@@ -142,7 +142,7 @@ namespace PFF::code_generator {
 		stream << "debugcommand(\"" << (engine_install_dir / "PFF_editor" / "PFF_editor").generic_string() << "\")\n";
 		stream << "\t\tprebuildcommands {\n";
 		stream << "\t\t\t\"cd " << filepath.parent_path().generic_string() << " && \" ..\n";
-		stream << "\t\t\t\"" << (engine_install_dir / "PFF_helper" / "PFF_helper").generic_string() << " 0 0 0 " << application::get().get_project_path().generic_string() << "\",";
+		stream << "\t\t\t\"" << (engine_install_dir / "PFF_helper" / "PFF_helper").generic_string() << " 0 0 0 " << PROJECT_PATH.generic_string() << "\",";
 
 		stream <<R"(
 		}

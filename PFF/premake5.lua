@@ -194,7 +194,8 @@ project "PFF"
 
 			-- copy premake (needed for engine projects)
 			"{MKDIR} %{wks.location}/bin/" .. outputs .. "/vendor/premake",
-			"{COPY} %{wks.location}/premake5 %{wks.location}/bin/" .. outputs .. "/vendor/premake",
+			"{COPY} %{wks.location}/vendor/premake/premake5 %{wks.location}/bin/" .. outputs .. "/vendor/premake",
+			"{COPY} %{wks.location}/vendor/premake/LICENSE.txt %{wks.location}/bin/" .. outputs .. "/vendor/premake",
 		}
 		
 	filter "configurations:Debug"

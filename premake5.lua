@@ -57,7 +57,6 @@ function copy_content_of_dir(outputs, dir_names)
 end
 
 group "dependencies"
-	include "PFF/vendor/fastgltf"
 	include "PFF/vendor/imgui"
 	if os.target() == "windows" then
 		include "PFF/vendor/glfw"

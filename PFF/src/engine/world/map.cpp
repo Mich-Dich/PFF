@@ -55,10 +55,10 @@ namespace PFF {
 
 	map::map() {
 
-		m_path = application::get().get_project_path() / CONTENT_DIR / "worlds" / "test_map.pffworld";			// TODO: Change to load the map from the .pffproj file
+		m_path = PROJECT_PATH / CONTENT_DIR / "worlds" / "test_map.pffworld";			// TODO: Change to load the map from the .pffproj file
 		LOG(Trace, "Loading map: " << m_path);
 
-		serialize(serializer::option::load_from_file);
+		// serialize(serializer::option::load_from_file);
 
 #ifdef DEV_ONLY
 
@@ -80,6 +80,11 @@ namespace PFF {
 				script_comp.destroy_script(&script_comp);
 		});
 
+	}
+
+	void map::create() {
+
+		serialize(serializer::option::load_from_file);							// create entityes and load script functions
 	}
 
 	ref<map> map::copy(ref<map> other) { return ref<map>(); }
@@ -448,7 +453,6 @@ namespace PFF {
 					.entry(KEY_VALUE(scale));
 
 					math::compose_transform((glm::mat4&)transform_comp, translation, rotation, scale);
-
 				});
 
 				entity_section.sub_section("mesh_component", [&](serializer::yaml& component_section) {

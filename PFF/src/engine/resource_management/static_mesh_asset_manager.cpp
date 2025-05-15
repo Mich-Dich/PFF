@@ -31,7 +31,7 @@ namespace PFF {
 		VALIDATE(path.extension() == PFF_ASSET_EXTENTION, return nullptr, "", "Provided path is not a PFF-asset");
 		//return nullptr;		// NOT FINISHED YET
 
-		std::filesystem::path mesh_path = application::get().get_project_path() / CONTENT_DIR / path;
+		std::filesystem::path mesh_path = PROJECT_PATH / CONTENT_DIR / path;
 
 		if (s_instance.m_uploaded_mesh_assets.find(mesh_path) != s_instance.m_uploaded_mesh_assets.end())
 			return s_instance.m_uploaded_mesh_assets[mesh_path];
@@ -66,7 +66,7 @@ namespace PFF {
 
 // MAYBE:
 		// loop over content directory to load a map of all static_mesh_assets	(only the map)
-			//register_all_static_mesh_assets(application::get().get_project_path() / CONTENT_DIR);
+			//register_all_static_mesh_assets(PROJECT_PATH / CONTENT_DIR);
 
 
 

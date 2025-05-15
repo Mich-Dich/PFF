@@ -1,5 +1,5 @@
 
-#include "util/pffpch.h"
+#include <util/pffpch.h>
 
 #include "vk_types.h"
 #include "vk_initializers.h"
@@ -40,7 +40,7 @@ namespace PFF::render::vulkan {
             VALIDATE((vkCreateShaderModule(device, &createInfo, nullptr, &shaderModule) == VK_SUCCESS), return false, "", "Failed to create shader module from file: " << filePath);
 
             *outShaderModule = shaderModule;
-            LOG(Trace, "Successfully loaded and created shader module [" << filePath << "]");
+            LOG(Trace, "Successfully loaded and created shader module [" << PFF::util::extract_path_from_directory(filePath, "PFF") << "]");
             return true;
         }
     }

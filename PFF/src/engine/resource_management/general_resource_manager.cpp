@@ -13,7 +13,7 @@ namespace PFF::resource_manager {
     
 	bool try_to_deserialize_file_header(const std::filesystem::path& file_path, const bool log_messages, asset_curruption_source& asset_curruption_source, asset_file_header& loc_asset_file_header) {
 
-		const std::filesystem::path absolute_file_path = application::get().get_project_path() / CONTENT_DIR / file_path;
+		const std::filesystem::path absolute_file_path = PROJECT_PATH / CONTENT_DIR / file_path;
 
 		bool file_currupted = false;
 		asset_curruption_source = asset_curruption_source::unknown;

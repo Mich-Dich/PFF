@@ -473,7 +473,7 @@ namespace PFF::UI {
 			.entry(KEY_VALUE(action_color_gray_hover))
 			.entry(KEY_VALUE(action_color_gray_active));
 				
-		serializer::yaml(config::get_filepath_from_configtype(application::get().get_project_path(), config::file::ui), "performance_display", option)
+		serializer::yaml(config::get_filepath_from_configtype(PROJECT_PATH, config::file::ui), "performance_display", option)
 			.entry(KEY_VALUE(m_show_FPS_window))
 			.entry(KEY_VALUE(m_show_renderer_metrik))
 			.entry(KEY_VALUE(renderer_metrik_window_location))

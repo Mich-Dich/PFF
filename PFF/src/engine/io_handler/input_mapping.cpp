@@ -46,7 +46,7 @@ namespace PFF {
 
 		PFF_PROFILE_FUNCTION();
 
-		serialize_action(action, force_override, application::get().get_project_path());
+		serialize_action(action, force_override, PROJECT_PATH);
 		m_actions.emplace_back(action);
 	}
 

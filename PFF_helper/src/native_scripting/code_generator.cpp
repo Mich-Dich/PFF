@@ -40,6 +40,7 @@ namespace PFF::code_generator {
 			source << "#include \"" << PFF::util::extract_path_from_directory(clazz.full_filepath, "src").replace_extension().generic_string() + "-generated" + clazz.full_filepath.extension().string() << "\"\n";
 		}
 		source << R"(
+#define ARRAYSIZE(array)          					((int)(sizeof(array) / sizeof(*(array))))
 #define RETURN_CHAR_ARRAY(array_name) 				if (count != nullptr) *count = sizeof(array_name) / sizeof(array_name[0]) - 1;		\
 														return array_name;
 
@@ -66,7 +67,7 @@ namespace PFF::code_generator {
 		// generate	simple getters
 		{
 			source << R"(
-	PROJECT_API void init_scripts(entt::registry* registry);
+	PROJECT_API void init_scripts(entt::registry* registry, ImGuiContext* imgui_context);
 
 	PROJECT_API void add_component(std::string class_name, PFF::entity entity);
 
@@ -74,7 +75,7 @@ namespace PFF::code_generator {
 
 	PROJECT_API void serialize_script(std::string class_name, entity_script* script, serializer::yaml& serializer);
 
-	PROJECT_API const char** get_all_procedural_mesh_scripts(u32* count) { RETURN_CHAR_ARRAY(procedural_mesh_scripts); }
+	PROJECT_API const char** get_all_procedural_mesh_scripts(u32* count) { *count = static_cast<u32>(ARRAYSIZE(procedural_mesh_scripts)); RETURN_CHAR_ARRAY(procedural_mesh_scripts); }
 
 	PROJECT_API const char** get_all_scripts(u32 * count) { RETURN_CHAR_ARRAY(scripts); }
 
@@ -164,8 +165,8 @@ namespace PFF::code_generator {
 
 		// Generate Init Scripts function
 		{
-			source << "\tvoid init_scripts(entt::registry* registry) {\n\n";
-			source << "\t\tPFF::logger::init(\"[$B$T:$J  $L$X  $I $F:$G$E] $C$Z\", false, \"" << root_path.generic_string() << "/logs\", \"project.log\", true);\n";
+			source << "\tvoid init_scripts(entt::registry* registry, ImGuiContext* imgui_context) {\n\n";
+			source << "\t\tPFF::logger::init(\"[$B$T:$J  $L$X  $I $F:$G$E] $C$Z\", false, \"" << root_path.generic_string() << "/logs\", \"project.log\");\n";
 			source << "\t\tLOG(Info, \"PROJECT - initializing scripts\");\n\n";
 			//
 			//			source << R"(
@@ -178,7 +179,7 @@ namespace PFF::code_generator {
 			}
 			source << "\n";
 
-			source << "\t\t// ImGui::SetCurrentContext(application::get().get_imgui_layer()->get_context());\n";
+			source << "\t\tImGui::SetCurrentContext(imgui_context);\n";
 			num_visited = 0;
 			for (auto clazz : classes) {
 				if (!visited_source_file(clazz)) {

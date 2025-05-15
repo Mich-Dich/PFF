@@ -62,6 +62,8 @@ namespace PFF {
 		PFF_DEFAULT_GETTER(entt::registry&, 				registry)
 		PFF_DEFAULT_GETTER_REF(PFF::dynamic_skybox_data, 	dynamic_skybox_data)
 
+		void create();
+
 		// @brief Creates a new entity with an optional name.
 		// @param name The name of the entity (default is an empty string).
 		// @return The created entity.

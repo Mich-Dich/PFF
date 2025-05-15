@@ -19,11 +19,11 @@ namespace PFF {
 	void material::build_pipelines() {
 
 		VkShaderModule meshFragShader;
-		ASSERT(render::vulkan::util::load_shader_module(PFF::util::get_executable_path() / "../PFF/shaders/mesh.frag.spv", GET_RENDERER.get_device(), &meshFragShader),
+		ASSERT(render::vulkan::util::load_shader_module(PFF::util::get_executable_path().parent_path() / "PFF/shaders/mesh.frag.spv", GET_RENDERER.get_device(), &meshFragShader),
 			"", "Error when building the triangle fragment shader module");
 
 		VkShaderModule meshVertexShader;
-		ASSERT(render::vulkan::util::load_shader_module(PFF::util::get_executable_path() / "../PFF/shaders/mesh.vert.spv", GET_RENDERER.get_device(), &meshVertexShader),
+		ASSERT(render::vulkan::util::load_shader_module(PFF::util::get_executable_path().parent_path() / "PFF/shaders/mesh.vert.spv", GET_RENDERER.get_device(), &meshVertexShader),
 			"", "Error when building the triangle vertex shader module");
 
 		VkPushConstantRange matrix_range{};
@@ -123,11 +123,11 @@ namespace PFF {
 	void build_debug_lines_pipelines(material& material) {
 
 		VkShaderModule meshFragShader;
-		ASSERT(render::vulkan::util::load_shader_module(PFF::util::get_executable_path() / "../PFF/shaders/debug_lines.frag.spv", GET_RENDERER.get_device(), &meshFragShader),
+		ASSERT(render::vulkan::util::load_shader_module(PFF::util::get_executable_path().parent_path() / "PFF/shaders/debug_lines.frag.spv", GET_RENDERER.get_device(), &meshFragShader),
 			"", "Error when building the debug_lines fragment shader module");
 
 		VkShaderModule meshVertexShader;
-		ASSERT(render::vulkan::util::load_shader_module(PFF::util::get_executable_path() / "../PFF/shaders/debug_lines.vert.spv", GET_RENDERER.get_device(), &meshVertexShader),
+		ASSERT(render::vulkan::util::load_shader_module(PFF::util::get_executable_path().parent_path() / "PFF/shaders/debug_lines.vert.spv", GET_RENDERER.get_device(), &meshVertexShader),
 			"", "Error when building the debug_lines vertex shader module");
 
 		VkPushConstantRange matrix_range{};

@@ -3,6 +3,7 @@ import os
 import sys
 import subprocess
 import platform
+import socket
 import metadata.utils as utils
 import metadata.organize_engine_wiki as organize_engine_wiki
 
@@ -40,6 +41,13 @@ def update_submodule(submodule_path, branch="main"):
         utils.print_c(f"Failed to update {submodule_path}: {e}", "red")
         sys.exit(1)
 
+
+try:
+    socket.setdefaulttimeout(3)
+    socket.socket(socket.AF_INET, socket.SOCK_STREAM).connect(("8.8.8.8", 53))
+except:
+    utils.print_c("\nNo Internet connection found\n", "red")
+    sys.exit(1)
 
 try:
     utils.print_u("\nCHECK FOR ANY UPDATES")
@@ -107,7 +115,7 @@ try:
             elif "Makefile" in selected_ide:
                 premake_action = "gmake"
             
-            premake_result = subprocess.run(['./premake5', premake_action], text=True)
+            premake_result = subprocess.run(['./vendor/premake/premake5', premake_action], text=True)
             if premake_result.returncode != 0:
                 utils.print_c(f"BUILD FAILED! the premake script encountered [{premake_result.returncode}] errors", "red")
             else:

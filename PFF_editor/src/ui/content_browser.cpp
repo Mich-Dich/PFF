@@ -146,7 +146,7 @@ namespace PFF {
 		// Implement file move logic here
 		LOG(Debug, "dropping file: " << file.generic_string() << " into target dir: " << target_directory.generic_string());
 					
-		const std::filesystem::path absolute_path = application::get().get_project_path() / CONTENT_DIR / file;
+		const std::filesystem::path absolute_path = PROJECT_PATH / CONTENT_DIR / file;
 		std::filesystem::path destination = target_directory / file.filename();
 		try {
 			std::filesystem::rename(absolute_path, destination);										// move the file/directory in one atomic operation

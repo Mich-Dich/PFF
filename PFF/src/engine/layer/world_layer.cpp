@@ -31,7 +31,8 @@ namespace PFF {
 	void world_layer::set_map(const ref<map> map) {
 
 		m_map = map;
-		script_system::reload();		// reregister scripts
+		script_system::reinit_scripts();		// reregister scripts
+		map->create();							// create the entities
 	}
 
 	void world_layer::on_attach() {

@@ -236,7 +236,7 @@ namespace PFF {
 
 	void application::serialize(serializer::option option) {
 
-		serializer::yaml(config::get_filepath_from_configtype(application::get().get_project_path(), config::file::engine), "FPS_control", option)
+		serializer::yaml(config::get_filepath_from_configtype(PROJECT_PATH, config::file::engine), "FPS_control", option)
 			.entry(KEY_VALUE(m_limit_fps))
 			.entry(KEY_VALUE(m_target_fps))
 			.entry(KEY_VALUE(m_nonefocus_fps));
@@ -344,6 +344,8 @@ namespace PFF {
 		m_layerstack->push_overlay(m_imgui_layer);
 
 		// TODO: load the map specefied in the project settings as editor_start_world
+		script_system::init();
+		
 		m_world_layer->set_map(create_ref<map>());												// will automaticly call: script_system::reload()	(this will do same as script_system::init())
 	}
 

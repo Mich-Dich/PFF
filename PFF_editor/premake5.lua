@@ -34,7 +34,6 @@ project "PFF_editor"
 		"%{IncludeDir.glm}",
 		"%{IncludeDir.ImGui}",
 		"%{IncludeDir.ImGui}/backends/",
-		"%{IncludeDir.fastgltf}",
 		"%{IncludeDir.tinyobjloader}",
 		"%{IncludeDir.stb_image}",
 		"%{IncludeDir.ImGuizmo}",
@@ -46,7 +45,6 @@ project "PFF_editor"
 		"PFF",
 		"PFF_helper",
 		"ImGui",
-		"fastgltf",
 		"assimp",
 	}
 
@@ -67,8 +65,8 @@ project "PFF_editor"
 			"%{IncludeDir.Vulkan}/Lib",
 		}
         
-		postbuildcommands
-		{
+		postbuildcommands {
+			
 			"{MKDIR} %{wks.location}/bin/" .. outputs .. "/PFF_editor/wiki",
 			"{COPY} %{wks.location}/.github/wiki %{wks.location}/bin/" .. outputs .. "/PFF_editor/wiki",
 

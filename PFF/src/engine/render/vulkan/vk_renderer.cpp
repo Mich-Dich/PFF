@@ -64,9 +64,8 @@ namespace PFF::render::vulkan {
 
 
 
-
 	vk_renderer vk_renderer::s_instance = vk_renderer{};
-	static std::vector<std::vector<std::function<void()>>> s_resource_free_queue;
+	static std::vector<std::vector<std::function<void()>>> 		s_resource_free_queue;
 	// static std::vector<std::unordered_map<std::function<void()>, u16>> s_resource_free_queue_TEST;		// use u16 as a counter to free resources after all command buffers are free
 
 
@@ -752,7 +751,7 @@ namespace PFF::render::vulkan {
 
 	void vk_renderer::serialize(const PFF::serializer::option option) {
 
-		PFF::serializer::yaml(config::get_filepath_from_configtype(application::get().get_project_path(), config::file::engine), "renderer_background_effect", option)
+		PFF::serializer::yaml(config::get_filepath_from_configtype(PROJECT_PATH, config::file::engine), "renderer_background_effect", option)
 			.entry("current_background_effect", m_current_background_effect)
 			.vector(KEY_VALUE(m_background_effects), [this](serializer::yaml& yaml, const u64 x) {
 				yaml.entry(KEY_VALUE(m_background_effects[x].name))
@@ -913,7 +912,7 @@ namespace PFF::render::vulkan {
 		{
 			descriptor_layout_builder builder;
 			builder.add_binding(0, VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER);
-			m_gpu_scene_data_descriptor_layout = builder.build(m_device, VK_SHADER_STAGE_VERTEX_BIT | VK_SHADER_STAGE_FRAGMENT_BIT);
+			m_gpu_scene_data_descriptor_layout = builder.build(m_device, VK_SHADER_STAGE_VERTEX_BIT | VK_SHADER_STAGE_FRAGMENT_BIT | VK_SHADER_STAGE_COMPUTE_BIT);
 
 			m_deletion_queue.push_pointer(m_gpu_scene_data_descriptor_layout);
 		}
@@ -923,10 +922,10 @@ namespace PFF::render::vulkan {
 	void vk_renderer::init_grid_pipeline() {
 	
 		VkShaderModule gridVertexShader;
-		ASSERT(util::load_shader_module(PFF::util::get_executable_path() / "../PFF/shaders/world_grid.vert.spv", m_device, &gridVertexShader), "Loaded grid vertex shader", "Error loading grid vertex shader");
+		ASSERT(util::load_shader_module(PFF::util::get_executable_path().parent_path() / "PFF/shaders/world_grid.vert.spv", m_device, &gridVertexShader), "", "Error loading grid vertex shader");
 	
 		VkShaderModule gridFragmentShader;
-		ASSERT(util::load_shader_module(PFF::util::get_executable_path() / "../PFF/shaders/world_grid.frag.spv", m_device, &gridFragmentShader), "Loaded grid fragment shader", "Error loading grid fragment shader");
+		ASSERT(util::load_shader_module(PFF::util::get_executable_path().parent_path() / "PFF/shaders/world_grid.frag.spv", m_device, &gridFragmentShader), "", "Error loading grid fragment shader");
 	
 		// Descriptor set layouts
 		VkDescriptorSetLayout layouts[] = {
@@ -1014,7 +1013,7 @@ namespace PFF::render::vulkan {
 		// ====================================================== Add pipeline [grid] ====================================================== 
 
 		VkShaderModule grid_shader;
-		ASSERT(util::load_shader_module(PFF::util::get_executable_path() / "../PFF/shaders/gradient.comp.spv", m_device, &grid_shader), "", "Error when building the compute shader");
+		ASSERT(util::load_shader_module(PFF::util::get_executable_path().parent_path() / "PFF/shaders/gradient.comp.spv", m_device, &grid_shader), "", "Error when building the compute shader");
 		compute_pipeline_CI.stage.module = grid_shader;		//change the shader module only
 
 		render::compute_effect grid{};
@@ -1028,7 +1027,7 @@ namespace PFF::render::vulkan {
 		// ====================================================== Add pipeline [gradient] ====================================================== 		
 
 		VkShaderModule gradient_shader;
-		ASSERT(util::load_shader_module(PFF::util::get_executable_path() / "../PFF/shaders/gradient_color.comp.spv", m_device, &gradient_shader), "", "Error when building the compute shader");
+		ASSERT(util::load_shader_module(PFF::util::get_executable_path().parent_path() / "PFF/shaders/gradient_color.comp.spv", m_device, &gradient_shader), "", "Error when building the compute shader");
 		compute_pipeline_CI.stage.module = gradient_shader;	//change the shader module only
 
 		render::compute_effect gradient{};
@@ -1045,7 +1044,7 @@ namespace PFF::render::vulkan {
 		// ====================================================== Add pipeline [sky] ====================================================== 
 
 		VkShaderModule sky_shader;
-		ASSERT(util::load_shader_module(PFF::util::get_executable_path() / "../PFF/shaders/sky.comp.spv", m_device, &sky_shader), "", "Error when building the compute shader");
+		ASSERT(util::load_shader_module(PFF::util::get_executable_path().parent_path() / "PFF/shaders/sky.comp.spv", m_device, &sky_shader), "", "Error when building the compute shader");
 		compute_pipeline_CI.stage.module = sky_shader;		//change the shader module only
 
 		render::compute_effect sky{};
@@ -1071,16 +1070,16 @@ namespace PFF::render::vulkan {
 		VkPipelineLayoutCreateInfo skybox_compute_lyout_CI{};
 		skybox_compute_lyout_CI.sType = VK_STRUCTURE_TYPE_PIPELINE_LAYOUT_CREATE_INFO;
 		skybox_compute_lyout_CI.pNext = nullptr;
-		skybox_compute_lyout_CI.pSetLayouts            = sets.data();
-		skybox_compute_lyout_CI.setLayoutCount         = static_cast<uint32_t>(sets.size());
-		skybox_compute_lyout_CI.pPushConstantRanges = &skybox_push_const;
-		skybox_compute_lyout_CI.pushConstantRangeCount = 1;
+		skybox_compute_lyout_CI.pSetLayouts            	= sets.data();
+		skybox_compute_lyout_CI.setLayoutCount         	= static_cast<uint32_t>(sets.size());
+		skybox_compute_lyout_CI.pPushConstantRanges 	= &skybox_push_const;
+		skybox_compute_lyout_CI.pushConstantRangeCount 	= 1;
 		VK_CHECK_S(vkCreatePipelineLayout(m_device, &skybox_compute_lyout_CI, nullptr, &m_skybox_pipeline_layout));
 
 		compute_pipeline_CI.layout = m_skybox_pipeline_layout;
 
 		VkShaderModule skybox_shader;
-		ASSERT(util::load_shader_module(PFF::util::get_executable_path() / "../PFF/shaders/dynamic_skybox.comp.spv", m_device, &skybox_shader), "", "Error when building the compute shader [dynamic_skybox]");
+		ASSERT(util::load_shader_module(PFF::util::get_executable_path().parent_path() / "PFF/shaders/dynamic_skybox.comp.spv", m_device, &skybox_shader), "", "Error when building the compute shader [dynamic_skybox]");
 		compute_pipeline_CI.stage.module = skybox_shader;		//change the shader module only
 
 		//change the shader module only
@@ -1096,7 +1095,7 @@ namespace PFF::render::vulkan {
 			vkDestroyPipelineLayout(m_device, m_gradient_pipeline_layout, nullptr);
 			for (u64 x = 0; x < m_background_effects.size(); x++)
 				vkDestroyPipeline(m_device, m_background_effects[x].pipeline, nullptr);
-			});
+		});
 	}
 
 
@@ -1104,10 +1103,10 @@ namespace PFF::render::vulkan {
 	
 #if 1	// Try new initalization with new shader
 		VkShaderModule mesh_frag_shader;
-		ASSERT(util::load_shader_module(PFF::util::get_executable_path() / "../PFF/shaders/tex_image.frag.spv", m_device, &mesh_frag_shader), "", "Error when building the fragment shader");
+		ASSERT(util::load_shader_module(PFF::util::get_executable_path().parent_path() / "PFF/shaders/tex_image.frag.spv", m_device, &mesh_frag_shader), "", "Error when building the fragment shader");
 
 		VkShaderModule mesh_vertex_shader;
-		ASSERT(util::load_shader_module(PFF::util::get_executable_path() / "../PFF/shaders/colored_triangle_mesh.vert.spv", m_device, &mesh_vertex_shader), "", "Error when building the vertex shader");
+		ASSERT(util::load_shader_module(PFF::util::get_executable_path().parent_path() / "PFF/shaders/colored_triangle_mesh.vert.spv", m_device, &mesh_vertex_shader), "", "Error when building the vertex shader");
 
 		VkPushConstantRange bufferRange{};
 		bufferRange.offset = 0;
@@ -1122,10 +1121,10 @@ namespace PFF::render::vulkan {
 		VK_CHECK_S(vkCreatePipelineLayout(m_device, &pipeline_layout_info, nullptr, &m_mesh_pipeline_layout));
 #else
 		VkShaderModule mesh_frag_shader;
-		ASSERT(util::load_shader_module(PFF::util::get_executable_path() / "../PFF/shaders/colored_triangle.frag.spv", m_device, &mesh_frag_shader), "", "Error when building the triangle fragment shader module");
+		ASSERT(util::load_shader_module(PFF::util::get_executable_path().parent_path() / "PFF/shaders/colored_triangle.frag.spv", m_device, &mesh_frag_shader), "", "Error when building the triangle fragment shader module");
 
 		VkShaderModule mesh_vertex_shader;
-		ASSERT(util::load_shader_module(PFF::util::get_executable_path() / "../PFF/shaders/colored_triangle_mesh.vert.spv", m_device, &mesh_vertex_shader), "", "Error when building the triangle vertex shader module");
+		ASSERT(util::load_shader_module(PFF::util::get_executable_path().parent_path() / "PFF/shaders/colored_triangle_mesh.vert.spv", m_device, &mesh_vertex_shader), "", "Error when building the triangle vertex shader module");
 
 		VkPushConstantRange push_constant_range{};
 		push_constant_range.offset = 0;
@@ -1543,6 +1542,8 @@ namespace PFF::render::vulkan {
 		const size_t vertexBufferSize = vertices.size() * sizeof(PFF::geometry::vertex);
 		const size_t indexBufferSize = indices.size() * sizeof(u32);
 		render::GPU_mesh_buffers new_mesh{};
+		LOG(Fatal, "upload_mesh() creats a buffer");
+		std::cout << "upload_mesh() creats a buffer" << std::endl;
 		new_mesh.vertex_buffer = create_buffer(vertexBufferSize, VK_BUFFER_USAGE_STORAGE_BUFFER_BIT | VK_BUFFER_USAGE_TRANSFER_DST_BIT | VK_BUFFER_USAGE_SHADER_DEVICE_ADDRESS_BIT, VMA_MEMORY_USAGE_GPU_ONLY);
 		
 		//find the adress of the vertex buffer
@@ -1591,7 +1592,7 @@ namespace PFF::render::vulkan {
 		if (!mesh.vertex_buffer.buffer || !mesh.index_buffer.buffer ||
 			mesh.vertex_buffer.info.size < vertexBufferSize || mesh.index_buffer.info.size < indexBufferSize) {
 
-			//LOG(Warn, "Mesh not created yet or size changed, calling [upload_mesh()]");
+			LOG(Warn, "Mesh not created yet or size changed, calling [upload_mesh()]");
 			mesh = upload_mesh(indices, vertices);
 			return;
 		}
@@ -1627,10 +1628,11 @@ namespace PFF::render::vulkan {
 		const size_t indexBufferSize = indices.size() * sizeof(u32);
 		const size_t totalSize = vertexBufferSize + indexBufferSize;
 
-		if (!mesh.mesh_buffers.vertex_buffer.buffer || !mesh.mesh_buffers.index_buffer.buffer
-			|| mesh.mesh_buffers.vertex_buffer.info.size < vertexBufferSize || mesh.mesh_buffers.index_buffer.info.size < indexBufferSize) {
+		if (!mesh.mesh_buffers.vertex_buffer.buffer || !mesh.mesh_buffers.index_buffer.buffer || mesh.mesh_buffers.vertex_buffer.info.size < vertexBufferSize || mesh.mesh_buffers.index_buffer.info.size < indexBufferSize) {
 
-			//LOG(Warn, "Mesh not created yet or size changed, calling [upload_mesh()]");
+			std::cout << "indices.size [" << indices.size() << "] vertices.size [" << vertices.size() << "]" << std::endl;
+			std::cout << "indices.size [" << indices.size() << "] vertices.size [" << vertices.size() << "]" << std::endl;
+			std::cout << "indices.size [" << indices.size() << "] vertices.size [" << vertices.size() << "]" << std::endl;
 			mesh.mesh_buffers = upload_mesh(indices, vertices);
 			mesh.indices = indices;
 			mesh.vertices = vertices;
@@ -1751,6 +1753,7 @@ namespace PFF::render::vulkan {
 		m_debug_lines.surfaces[0].count = (u32)m_debug_lines.indices.size();
 		update_mesh(m_debug_lines.mesh_buffers, m_debug_lines.indices, m_debug_lines.vertices);
 	}
+
 
 	void vk_renderer::clear_debug_line() {
 

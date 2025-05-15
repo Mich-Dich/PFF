@@ -96,7 +96,7 @@ namespace PFF::script_system {
 
 	
 	typedef void (*serialize_script_Fn)(std::string, entity_script*, serializer::yaml&);
-	typedef void (*init_scripts_Fn)(entt::registry*);
+	typedef void (*init_scripts_Fn)(entt::registry*, ImGuiContext*);
 	typedef void (*delete_scripts_Fn)();
 	typedef void (*add_component_Fn)(std::string, PFF::entity);
 	typedef void (*display_properties_Fn)(std::string, entity_script*);
@@ -113,9 +113,8 @@ namespace PFF::script_system {
 	static serialize_script_Fn																				m_serialize_script = nullptr;
 
 	static void add_component_stub(std::string, PFF::entity)												{ LOG(Warn, "Adding component from STUB"); }
-	void init()																								{ reload(); }
 	void shutdown()																							{ free_script_library(true); }
-	void add_component_from_string(std::string class_name, PFF::entity entity)								{ TRY_EXECUTE_FUNCTION(m_add_component_from_string)(class_name, entity); }
+	void add_component_from_string(std::string class_name, PFF::entity entity)								{ LOG(Warn, "Trying to load a component from name [" << class_name << "]") TRY_EXECUTE_FUNCTION(m_add_component_from_string)(class_name, entity); }
 	void display_properties(std::string class_name, entity_script* script)									{ TRY_EXECUTE_FUNCTION(m_display_properties)(class_name, script); }
 	void serialize_script(std::string class_name, entity_script* script, serializer::yaml& serializer)		{ TRY_EXECUTE_FUNCTION(m_serialize_script)(class_name, script, serializer); }
 	bool is_ready()																							{ return m_is_loaded && m_is_initalized; }
@@ -211,7 +210,7 @@ namespace PFF::script_system {
 		VALIDATE(GET_MAP, return, "", "Failed to get map refrence => could not reinit_scripts");
 
 		LOG(Debug, "Type ID of procedural_mesh_component before reinit: " << entt::type_hash<procedural_mesh_component>::value());
-		m_init_scripts(&GET_REGISTRY_OF_MAP);
+		m_init_scripts(&GET_REGISTRY_OF_MAP, ImGui::GetCurrentContext());
 		LOG(Debug, "Type ID of procedural_mesh_component after reinit: " << entt::type_hash<procedural_mesh_component>::value());
 
 		auto& registry = GET_REGISTRY_OF_MAP;
@@ -222,13 +221,13 @@ namespace PFF::script_system {
 		LOG(Info, "succesfully initalized scripts");
 	}
 
-	void reload(bool delete_script_components) {
-
-		LOG(Debug, "called script_system::reload(delete_script_components=" << util::to_string(delete_script_components) << ")");
-		VALIDATE(free_script_library(delete_script_components), return, "", "Count not free scripting library");
+	void init() {
 		
-		auto& registry = GET_REGISTRY_OF_MAP;
-		LOG(Info, "Registry address in reload: " << &registry);
+		// LOG(Debug, "called script_system::init(delete_script_components=" << util::to_string(delete_script_components) << ")");
+		// VALIDATE(free_script_library(delete_script_components), return, "", "Count not free scripting library");
+		
+		// auto& registry = GET_REGISTRY_OF_MAP;
+		// LOG(Info, "Registry address in init: " << &registry);
 	
 		const std::filesystem::path project_dll_path = PROJECT_PATH / "bin" / PROJECT_NAME;
 #if defined(PFF_PLATFORM_WINDOWS)
@@ -238,6 +237,27 @@ namespace PFF::script_system {
 		const std::filesystem::path project_temp_dll = PROJECT_PATH / "bin" / (PROJECT_NAME + PFF_PROJECT_TEMP_DLL_PATH) / ("lib" + PROJECT_NAME + ".so");
 		const std::filesystem::path project_dll = project_dll_path / ("lib" + PROJECT_NAME + ".so");
 #endif
+
+// 		if (!std::filesystem::exists(project_temp_dll)) {			// DLL not found => need to recompile
+
+// 			LOG(Trace, "project DLL not found, recompiling")
+// #if defined(PFF_PLATFORM_WINDOWS)
+// 			const std::filesystem::path path_to_build_script = util::get_executable_path().parent_path() / "PFF_helper" / "PFF_helper.exe";
+// #elif defined(PFF_PLATFORM_LINUX)
+// 			const std::filesystem::path path_to_build_script = util::get_executable_path().parent_path() / "PFF_helper" / "PFF_helper";
+// #endif
+
+// 			std::string cmdArgs = "1 0 0 " + PROJECT_PATH.generic_string();
+// 			LOG(Info, "CMD Args: " << cmdArgs.c_str());
+// 			VALIDATE(util::run_program(path_to_build_script, cmdArgs), , "project files generated succesfully", "Failed to generate project files")
+
+// 			const auto gmake_command = "python3";
+// 			std::string compile_args = (PROJECT_PATH / "setup.py").generic_string() + " --compile";
+// 			LOG(Fatal, "calling [" << gmake_command << "] with [" << compile_args << "]")
+// 			std::string output;
+// 			const bool compile_result = util::run_program(gmake_command, compile_args, false, false, true, &output);
+// 			VALIDATE(compile_result, , "project files generated succesfully", "Failed to generate project files [" << output << "]")
+// 		}
 
 		VALIDATE(io::copy_file(project_temp_dll, project_dll_path), return, "copyed project DLL from staging dir", "Failed to copy new project DLL");			// copy the new DLL
 		VALIDATE(io::is_file(project_dll), return, "", "provided path is not a file [" << project_dll << "]");
@@ -250,10 +270,16 @@ namespace PFF::script_system {
 		m_get_procedural_mesh_scripts		= (get_scripts_Fn)try_load_function("get_all_procedural_mesh_scripts");
 		m_display_properties				= (display_properties_Fn)try_load_function("display_properties");
 		m_is_loaded = true;
+	}
 
+	void reload(bool delete_script_components) {
+
+		LOG(Debug, "called script_system::init(delete_script_components=" << util::to_string(delete_script_components) << ")");
+		VALIDATE(free_script_library(delete_script_components), return, "", "Count not free scripting library");	
+		auto& registry = GET_REGISTRY_OF_MAP;
+		LOG(Info, "Registry address in init: " << &registry);
+		init();															// overrides func pointers
 		reinit_scripts();
-
-		LOG(Info, "---------------------------------------------------- LOADED DLL ----------------------------------------------------");
 	}
 
 	bool free_script_library(bool delete_script_components) {

@@ -148,28 +148,35 @@ namespace PFF::UI {
 				ImGui::Text("source");
 
 			}, [&]() {
-
-				u32 count = 0;
-				static const char** items = script_system::get_all_procedural_mesh_scripts(&count);
-				static int item_current_idx = static_cast<std::underlying_type_t<mobility>>(component.mobility_data);
+								
+				u32 raw_count = 0;
+				const char** items = script_system::get_all_procedural_mesh_scripts(&raw_count);
+				u32 count = (raw_count > 0 && items[raw_count - 1] == nullptr) ? raw_count - 1 : raw_count;
+				static int item_current_idx = -1;
+				if (item_current_idx) {						// only once
+					
+					for (u32 i = 0; i < count; ++i) {
+						if (component.script_name == items[i]) {
+							item_current_idx = static_cast<int>(i);
+							break;
+						}
+					}
+				}
+				item_current_idx = std::clamp(item_current_idx, 0, int(count) - 1);
 				const char* combo_preview_value = items[item_current_idx];
-				static ImGuiComboFlags flags = 0;
 				ImGui::SetNextItemWidth(ImGui::GetColumnWidth());
-				if (ImGui::BeginCombo("##details_window_procedural_mesh_component_source", combo_preview_value, flags)) {
+				if (ImGui::BeginCombo("##details_window_procedural_mesh_component_source", combo_preview_value, 0)) {
+					for (u32 n = 0; n < count; n++) {
 
-					for (int n = 0; n < IM_ARRAYSIZE(items); n++) {
-						const bool is_selected = (item_current_idx == n);
+						const bool is_selected = (item_current_idx == int(n));
 						if (ImGui::Selectable(items[n], is_selected)) {
 
-							item_current_idx = n;
-
-							// TODO: remove old script and then add new script
+							item_current_idx = int(n);
+							// TODO: swap scripts...
 						}
-
-						if (is_selected)		// Set the initial focus when opening the combo (scrolling + keyboard navigation focus)
+						if (is_selected)
 							ImGui::SetItemDefaultFocus();
 					}
-
 					ImGui::EndCombo();
 				}
 
@@ -202,9 +209,10 @@ namespace PFF::UI {
 			});
 			UI::table_row("shoudl render", component.shoudl_render);
 
-			UI::end_table();
-
+			UI::end_table();				// end table manually because script creates new collaping_header
+			ImGui::Indent();
 			script_system::display_properties(component.script_name, (PFF::entity_script*)component.instance);
+			ImGui::Unindent();
 
 		}, false);
 

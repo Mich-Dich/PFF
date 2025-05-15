@@ -100,3 +100,5 @@
 #include "util/macros.h"
 #include "util/timing/instrumentor.h"
 #include "util/io/logger.h"
+
+#include "util/data_structures/path_manipulation.h"

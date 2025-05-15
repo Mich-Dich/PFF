@@ -109,7 +109,7 @@ namespace PFF {
 
 	void world_viewport_window::serialize(serializer::option option) {
 
-		serializer::yaml(config::get_filepath_from_configtype(application::get().get_project_path(), config::file::editor), "world_viewport_windows_to_show", option)
+		serializer::yaml(config::get_filepath_from_configtype(PROJECT_PATH, config::file::editor), "world_viewport_windows_to_show", option)
 			.entry("show_renderer_backgrond_effect", m_show_renderer_backgrond_effect)
 			.entry("show_general_debugger", m_show_general_debugger)
 			.entry("show_outliner", m_show_outliner)
@@ -117,7 +117,7 @@ namespace PFF {
 			.entry("show_log_display", m_show_world_settings)
 			.entry("show_world_settings", m_show_log_display);
 
-		serializer::yaml(config::get_filepath_from_configtype(application::get().get_project_path(), config::file::editor), "guizmo_data", option)
+		serializer::yaml(config::get_filepath_from_configtype(PROJECT_PATH, config::file::editor), "guizmo_data", option)
 			.entry("operation", m_gizmo_operation);
 
 
@@ -132,7 +132,7 @@ namespace PFF {
 			LOG(Trace, "Save UUID: " << selected_ID);
 		}
 
-		serializer::yaml(config::get_filepath_from_configtype(application::get().get_project_path(), config::file::editor), "world_vieport_data", option)
+		serializer::yaml(config::get_filepath_from_configtype(PROJECT_PATH, config::file::editor), "world_vieport_data", option)
 			.entry("selected_entity", selected_ID);
 
 		//if (option == serializer::option::load_from_file) {
@@ -494,7 +494,7 @@ namespace PFF {
 
 	void world_viewport_window::process_drop_of_file(const std::filesystem::path path, const bool set_as_selected_entity) {
 
-		std::filesystem::path absolute_path = application::get().get_project_path() / CONTENT_DIR / path;
+		std::filesystem::path absolute_path = PROJECT_PATH / CONTENT_DIR / path;
 		asset_file_header loc_asset_file_header;
 		if (path.extension() == ".pffasset") {
 

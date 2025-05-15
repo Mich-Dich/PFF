@@ -56,7 +56,7 @@ namespace PFF {
 		m_mesh_asset.calc_bounds();						// TODO: change so it can be called for a single surface
 		return m_mesh_asset.surfaces.size() - 1;
 	}
-	//
+	
 	//u64 procedural_mesh_script::boolean_subtract(u64 main_mesh_index, u64 subtractor_mesh_index) {
 
 	//	const auto& main_mesh = m_mesh_asset.surfaces[main_mesh_index];
@@ -279,6 +279,7 @@ namespace PFF {
 		if (recalc_bounds)
 			m_mesh_asset.calc_bounds();
 
+		recalculate_bounds();
 		GET_RENDERER.update_mesh(m_mesh_asset, m_mesh_asset.indices, m_mesh_asset.vertices);
 	}
 

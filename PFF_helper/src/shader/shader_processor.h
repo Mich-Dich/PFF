@@ -24,6 +24,7 @@ namespace shader_processor {
 	//  PARAM 3: (FIXED)        enum							operation
 	//  PARAM 4: (FIXED)        const std::filesystem::path		path_to_dir
 	//  PARAM 5: (OPTIONAL)     const bool						compile_subdirectory  (only needed when compiling a directorty)
+	//  PARAM 6: (OPTIONAL)		bool							print directly to std::out
 	bool start(int argc, char* argv[]);
 
 }

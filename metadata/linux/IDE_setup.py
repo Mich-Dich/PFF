@@ -110,29 +110,27 @@ def prompt_build_config():
 
 
 def setup_vscode_configs(project_root, build_config):
+
     vscode_dir = os.path.join(project_root, ".vscode")
     os.makedirs(vscode_dir, exist_ok=True)
-
-    # Use project_root consistently instead of hardcoding
     arch = "x86_64"
     system = platform.system().lower()  # "linux" or "windows"
     output_dir = f"{build_config}-{system}-{arch}"
     bin_dir = os.path.join(project_root, "bin", output_dir)
-    
-    editor_exe = os.path.join(bin_dir, "PFF_editor", "PFF_editor")
     test_project = os.path.abspath(os.path.join(project_root, "..", "PFF_test_projects", "test_project.pffproj"))
 
-    # 1. Create pff_build.sh
+    # create pff_build.sh
     build_script_path = os.path.join(vscode_dir, "pff_build.sh")
     build_script_content = f"""#!/usr/bin/env bash
 set -e
 
-build_config="{build_config}"                                               # build_config was baked in at generation-time
-timestamp=$(date '+%Y-%m-%d--%H:%M:%S')                                     # generate timestamp at runtime in format yyyy-mm-dd--hh:mm:ss
-stage_name="PFF_${{build_config}}_${{timestamp}}"                           # staging folder name includes config + dynamic timestamp
+build_config="{build_config}"
+timestamp=$(date '+%Y-%m-%d--%H:%M:%S')
+stage_name="PFF_${{build_config}}_${{timestamp}}"
 STAGE_DIR="{bin_dir}/${{stage_name}}"
 
-mkdir -p "$STAGE_DIR"                                                       # create staging dir
+echo "------ Clearing previous artifacts (trash at: $STAGE_DIR) ------"
+mkdir -p "$STAGE_DIR"
 
 # move all previous artifacts into staging (ignore missing)
 mv "{bin_dir}/PFF"                          "$STAGE_DIR/" 2>/dev/null || true
@@ -144,18 +142,26 @@ mv "{bin_dir}/PFF_editor/shaders"           "$STAGE_DIR/" 2>/dev/null || true
 mv "{bin_dir}/PFF_editor/wiki"              "$STAGE_DIR/" 2>/dev/null || true
 mv "{bin_dir}/vendor"                       "$STAGE_DIR/" 2>/dev/null || true
 
-gio trash "$STAGE_DIR" --force || true                                      # trash the entire staging directory in one go
-cd "{project_root}"                                                         # back to project root and regenerate
+# trash the staging directory and Makefiles
+gio trash "$STAGE_DIR" --force || true
+cd "{project_root}"
 find . -name "Makefile" -delete
-./premake5 gmake
+
+echo "------ Regenerating Makefiles and rebuilding ------"
+./vendor/premake/premake5 gmake
 gmake -j
+
+# precompile shaders
+echo "------ Precompiling shaders ------"
+"{bin_dir}/PFF_helper/PFF_helper" 0 1 0 {bin_dir}/PFF/shaders 1 1
+
+echo "------ Done ------"
 """
-    # write and chmod as before…
     with open(build_script_path, "w") as f:
         f.write(build_script_content)
     os.chmod(build_script_path, os.stat(build_script_path).st_mode | stat.S_IEXEC)
 
-    # 2. tasks.json
+    # create tasks.json
     tasks_json_path = os.path.join(vscode_dir, "tasks.json")
     tasks_data = {
         "version": "2.0.0",
@@ -176,7 +182,7 @@ gmake -j
     with open(tasks_json_path, "w") as f:
         json.dump(tasks_data, f, indent=4)
 
-    # 3. launch.json
+    # create launch.json
     launch_json_path = os.path.join(vscode_dir, "launch.json")
     program_path = os.path.join("${workspaceFolder}", "bin", output_dir, "PFF_editor", "PFF_editor")
     cwd_path = os.path.join("${workspaceFolder}", "bin", output_dir)
@@ -210,7 +216,37 @@ gmake -j
     with open(launch_json_path, "w") as f:
         json.dump(launch_data, f, indent=4)
 
+    # c_cpp_properties.json         Always define PFF_PLATFORM_LINUX, plus one based on build_config
+    config_define = {
+        "debug": "PFF_DEBUG",
+        "release_with_debug_info": "PFF_RELEASE_WITH_DEBUG_INFO",
+        "release": "PFF_RELEASE"
+    }.get(build_config.lower(), None)
+    defines = ["PFF_PLATFORM_LINUX"]
+    if config_define:
+        defines.append(config_define)
+
+    cpp_props = {
+        "version": 4,
+        "configurations": [
+            {
+                "name": f"{build_config} ({system}-{arch})",
+                "includePath": [
+                    "${workspaceFolder}/**"
+                ],
+                "defines": defines,
+                "compilerPath": "/usr/bin/gcc",
+                "cStandard": "c11",
+                "cppStandard": "c++17",
+                "intelliSenseMode": "linux-gcc-x64"
+            }
+        ]
+    }
+    cpp_props_path = os.path.join(vscode_dir, "c_cpp_properties.json")
+    with open(cpp_props_path, "w") as f:
+        json.dump(cpp_props, f, indent=4)
+
     print("VSCode integration files generated in .vscode/")
     utils.print_c("\nVSCode usage", "blue")
-    print("  Build the project:           Ctrl+Shift+B (runs 'Clean & Build PFF')")
-    print("  Launch the editor:           F5 (runs the debugger with selected config)")
+    print("  Build the project:                Ctrl+Shift+B (runs 'Clean & Build PFF')")
+    print("  Launch the editor:                F5 (runs the debugger with selected config)")
